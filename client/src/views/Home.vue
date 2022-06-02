@@ -1,28 +1,30 @@
 <template>
 	<div class="container mt-2">
+		<!-- <code>
+			{{ categories }}
+		</code> -->
 		<div class="accordion accordion-flush" id="accordionFlushExample">
 			<div v-for="categorie of categories" :key="categorie.title" class="accordion-item">
-				<h2 class="accordion-header" id="flush-headingOne">
+				<h2 class="accordion-header">
 					<button
 						class="accordion-button collapsed"
 						type="button"
 						data-bs-toggle="collapse"
-						data-bs-target="#flush-collapseOne"
+						:data-bs-target="'#flush-' + categorie.title"
 						aria-expanded="false"
-						aria-controls="flush-collapseOne"
+						:aria-controls="'flush-' + categorie.title"
 					>
 						{{ categorie.title }} / {{ categorie.entitys.length }}
 					</button>
 				</h2>
-				<div
-					id="flush-collapseOne"
-					class="accordion-collapse collapse"
-					aria-labelledby="flush-headingOne"
-					data-bs-parent="#accordionFlushExample"
-				>
+				<div :id="'flush-' + categorie.title" class="accordion-collapse collapse">
 					<div class="accordion-body">
 						<div class="row row-cols-1 row-cols-md-3 g-4">
-							<EntityCard v-for="entity in categorie.entitys" :key="entity.title"></EntityCard>
+							<EntityCard
+								v-for="entity in categorie.entitys"
+								:title="entity.title"
+								:key="entity.title"
+							></EntityCard>
 						</div>
 					</div>
 				</div>
@@ -36,14 +38,25 @@ export default {
 	components: { EntityCard },
 	data() {
 		return {
-			categories: {
-				STO: { title: 'STO', entitys: [{ title: 'Remington Steel', seasons: 5, episodes: 256 }] },
-				Aniworld: {
-					title: 'Aniworld',
-					entitys: [{ title: 'The Irregular at Magic Highshool', seasons: 3, episodes: 50 }],
-				},
-			},
+			categories: {},
 		};
+	},
+	async mounted() {
+		const response = await fetch('http://localhost:3100/index');
+		const json = await response.json();
+
+		json.forEach((i) => {
+			console.log();
+			if (this.categories[i.categorie] == undefined) {
+				console.log(true);
+				this.categories[i.categorie] = {
+					title: i.categorie,
+					entitys: [{ title: i.title, seasons: i.seasons }],
+				};
+			} else {
+				this.categories[i.categorie].entitys.push({ title: i.title, seasons: i.seasons });
+			}
+		});
 	},
 };
 </script>
