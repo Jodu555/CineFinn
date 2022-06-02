@@ -1,32 +1,27 @@
 <template>
-	<div class="container mt-2">
-		<!-- <code>
-			{{ categories }}
-		</code> -->
-		<div class="accordion accordion-flush" id="accordionFlushExample">
-			<div v-for="categorie of categories" :key="categorie.title" class="accordion-item">
-				<h2 class="accordion-header">
-					<button
-						class="accordion-button collapsed"
-						type="button"
-						data-bs-toggle="collapse"
-						:data-bs-target="'#flush-' + categorie.title"
-						aria-expanded="false"
-						:aria-controls="'flush-' + categorie.title"
-					>
-						{{ categorie.title }} / {{ categorie.entitys.length }}
-					</button>
-				</h2>
-				<div :id="'flush-' + categorie.title" class="accordion-collapse collapse">
-					<div class="accordion-body">
-						<div class="row row-cols-1 row-cols-md-3 g-4">
-							<EntityCard
-								v-for="entity in categorie.entitys"
-								:title="entity.title"
-								:seasons="entity.seasons"
-								:key="entity.title"
-							></EntityCard>
-						</div>
+	<div class="accordion accordion-flush" id="accordionFlushExample">
+		<div v-for="categorie of categories" :key="categorie.title" class="accordion-item">
+			<h2 class="accordion-header">
+				<button
+					class="accordion-button collapsed"
+					type="button"
+					data-bs-toggle="collapse"
+					:data-bs-target="'#flush-' + categorie.title"
+					aria-expanded="false"
+					:aria-controls="'flush-' + categorie.title"
+				>
+					{{ categorie.title }} / {{ categorie.entitys.length }}
+				</button>
+			</h2>
+			<div :id="'flush-' + categorie.title" class="accordion-collapse collapse">
+				<div class="accordion-body">
+					<div class="row row-cols-1 row-cols-md-3 g-4">
+						<EntityCard
+							v-for="entity in categorie.entitys"
+							:title="entity.title"
+							:seasons="entity.seasons"
+							:key="entity.title"
+						></EntityCard>
 					</div>
 				</div>
 			</div>
@@ -47,9 +42,7 @@ export default {
 		const json = await response.json();
 
 		json.forEach((i) => {
-			console.log();
 			if (this.categories[i.categorie] == undefined) {
-				console.log(true);
 				this.categories[i.categorie] = {
 					title: i.categorie,
 					entitys: [{ title: i.title, seasons: i.seasons }],
