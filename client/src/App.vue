@@ -7,6 +7,7 @@
 
 <script>
 import Navigation from './components/Navigation.vue';
+import 'bootstrap';
 export default {
 	components: {
 		Navigation,
