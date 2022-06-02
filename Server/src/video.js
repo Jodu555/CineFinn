@@ -1,3 +1,7 @@
+const fs = require('fs');
+const path = require('path');
+
+
 module.exports = (req, res) => {
     // console.log(req.query);
     // Ensure there is a range given for the video
