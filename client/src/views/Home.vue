@@ -23,6 +23,7 @@
 							<EntityCard
 								v-for="entity in categorie.entitys"
 								:title="entity.title"
+								:seasons="entity.seasons"
 								:key="entity.title"
 							></EntityCard>
 						</div>
