@@ -7,8 +7,7 @@ const express = require('express');
 const https = require('https');
 const cors = require('cors');
 const morgan = require('morgan');
-const helmet = require('helmet');
-const { listFiles } = require('./utils.js');
+const { listFiles } = require('../src/utils.js');
 const dotenv = require('dotenv').config();
 
 // const { Database } = require('@jodu555/mysqlapi');
@@ -44,7 +43,11 @@ if (process.env.https) {
 // Your Middleware handlers here
 app.use(express.static(path.join('static')));
 
-app.get("/video", require('./video.js'));
+app.get("/video", require('../src/video.js'));
+
+app.get('/index', (req, res, next) => {
+    res.json(crawlAndIndex());
+});
 
 const crawlAndIndex = () => {
     const { dirs, files } = listFiles(process.env.VIDEO_PATH);
@@ -80,7 +83,7 @@ const crawlAndIndex = () => {
 
     console.log(items);
 
-
+    return items;
 }
 
 class Item {
