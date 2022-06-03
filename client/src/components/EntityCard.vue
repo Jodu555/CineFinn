@@ -8,7 +8,9 @@
 				</p>
 				<a :href="'/watch?id=' + hrefTitle" class="btn btn-outline-primary btn-sm">Go & Watch</a>
 			</div>
-			<div class="card-footer text-muted">{{ seasons.length }} Seasons</div>
+			<div class="card-footer text-muted">
+				{{ seasons.length }} {{ seasons.length > 1 ? 'Seasons' : 'Season' }}
+			</div>
 		</div>
 	</div>
 </template>
