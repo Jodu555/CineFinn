@@ -83,7 +83,19 @@ const crawlAndIndex = () => {
 
     // console.log(items);
 
+    console.log(files.map(e => path.parse(e).base));
+
     return items;
+}
+
+const filenameParser = (filename) => {
+    // Food Wars! Shokugeki no Sōma St#1 Flg#1.mp4
+    const [title, rest] = filename.split('St#')
+    const [season, rest2] = rest.split(' ');
+    const episode = rest2.split('#')[1].split('.')[0];
+    console.log(episode);
+
+    return { title: title.trim(), season: Number(season), episode: Number(episode) }
 }
 
 class Item {
@@ -100,5 +112,9 @@ const PORT = process.env.PORT || 3100;
 server.listen(PORT, () => {
     console.log(`Express App Listening ${process.env.https ? 'with SSL ' : ''}on ${PORT}`);
 
-    crawlAndIndex();
+    // crawlAndIndex();
+    console.log(
+        filenameParser('Food Wars! Shokugeki no Sōma St#1 Flg#1.mp4')
+    );
+
 });
