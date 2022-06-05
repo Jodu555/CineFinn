@@ -89,13 +89,18 @@ const crawlAndIndex = () => {
 }
 
 const filenameParser = (filename) => {
-    // Food Wars! Shokugeki no Sōma St#1 Flg#1.mp4
-    const [title, rest] = filename.split('St#')
-    const [season, rest2] = rest.split(' ');
-    const episode = rest2.split('#')[1].split('.')[0];
-    console.log(episode);
+    if (filename.includes('St#') && filename.includes('Flg#')) {
+        const [title, rest] = filename.split('St#')
+        const [season, rest2] = rest.split(' ');
+        const episode = rest2.split('#')[1].split('.')[0];
+        console.log(episode);
 
-    return { title: title.trim(), season: Number(season), episode: Number(episode) }
+        return { movie: false, title: title.trim(), season: Number(season), episode: Number(episode) };
+    } else {
+        return { movie: true, title: filename }
+    }
+    // Food Wars! Shokugeki no Sōma St#1 Flg#1.mp4
+
 }
 
 class Item {
