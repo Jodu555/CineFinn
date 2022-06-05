@@ -1,4 +1,4 @@
-<template lang="">
+<template>
 	<div>
 		<h1>{{ $router.currentRoute._value.query.id }}</h1>
 		<div style="margin-top: 0.5%" class="video-container paused" data-volume-level="high">
