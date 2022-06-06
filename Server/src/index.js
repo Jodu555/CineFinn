@@ -87,7 +87,8 @@ const crawlAndIndex = () => {
         const base = path.parse(e).base;
         const parsedData = filenameParser(base);
 
-        const item = items.find(x => x.title == parsedDatatitle)[0];
+        const item = items.find(x => x.title == parsedData.title);
+        console.log(item, parsedData.title);
         parsedData.movie ? item.movies.push(e) : item.seasons.push(e);
         // console.log(item.categorie);
     });
@@ -104,7 +105,7 @@ const filenameParser = (filename) => {
         const [title, rest] = filename.split('St#')
         const [season, rest2] = rest.split(' ');
         const episode = rest2.split('#')[1].split('.')[0];
-        console.log(episode);
+        // console.log(episode);
 
         return { movie: false, title: title.trim(), season: Number(season), episode: Number(episode) };
     } else {
