@@ -50,7 +50,9 @@ app.get('/index', (req, res, next) => {
 });
 
 const crawlAndIndex = () => {
-    const { dirs, files } = listFiles(process.env.VIDEO_PATH);
+    let { dirs, files } = listFiles(process.env.VIDEO_PATH);
+
+    files = files.filter(f => path.parse(f).ext == '.mp4');
 
     const overcategories = ['Aniworld', 'STO'];
 
@@ -85,22 +87,26 @@ const crawlAndIndex = () => {
 
     files.forEach(e => {
         const base = path.parse(e).base;
-        const parsedData = filenameParser(base);
+        const parsedData = filenameParser(e, base);
 
-        const item = items.find(x => x.title == parsedData.title);
-        console.log(item, parsedData.title);
-        parsedData.movie ? item.movies.push(e) : item.seasons.push(e);
+        const item = items.find(x => x.title.includes(parsedData.title));
+        try {
+            parsedData.movie ? item.movies.push(e) : item.seasons.push(e);
+        } catch (error) {
+            console.log(item, parsedData, path.parse(e),);
+        }
         // console.log(item.categorie);
     });
 
     // console.log(files.map(e => path.parse(e).base));
 
-    console.log(items);
+    // console.log(items);
+    fs.writeFileSync('out.json', JSON.stringify(items, null, 3));
 
     return items;
 }
 
-const filenameParser = (filename) => {
+const filenameParser = (filepath, filename) => {
     if (filename.includes('St#') && filename.includes('Flg#')) {
         const [title, rest] = filename.split('St#')
         const [season, rest2] = rest.split(' ');
@@ -109,7 +115,8 @@ const filenameParser = (filename) => {
 
         return { movie: false, title: title.trim(), season: Number(season), episode: Number(episode) };
     } else {
-        return { movie: true, title: filename }
+        const title = path.basename(path.dirname(path.dirname(filepath)));
+        return { movie: true, title, movieTitle: filename }
     }
     // Food Wars! Shokugeki no Sōma St#1 Flg#1.mp4
 
