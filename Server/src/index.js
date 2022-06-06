@@ -50,14 +50,15 @@ app.get('/index', (req, res, next) => {
 });
 
 const crawlAndIndex = () => {
-    let { dirs, files } = listFiles(process.env.VIDEO_PATH);
-
-    files = files.filter(f => path.parse(f).ext == '.mp4');
-
     const overcategories = ['Aniworld', 'STO'];
-
     const obj = {};
 
+    let { dirs, files } = listFiles(process.env.VIDEO_PATH);
+
+    //Strip all non mp4 files from the files
+    files = files.filter(f => path.parse(f).ext == '.mp4');
+
+    //Sort dirs into the overcategories into the object
     let sortIdx = -1;
     dirs.forEach(dir => {
         if (overcategories.includes(dir)) {
@@ -67,6 +68,7 @@ const crawlAndIndex = () => {
         }
     });
 
+    // Strip the dirs down and seperate between season or movie dirs or series dirs
     const items = [];
     Object.keys(obj).forEach(categorie => {
         const dirs = obj[categorie]
@@ -76,15 +78,16 @@ const crawlAndIndex = () => {
             const movies = []
             i++;
             while (dirs[i] != undefined && (dirs[i].includes('Season-') || dirs[i].includes('Movies'))) {
-                dirs[i].includes('Season-') ? seasons.push(dirs[i]) : movies.push(dirs[i]);
+                // dirs[i].includes('Season-') ? seasons.push(dirs[i]) : movies.push(dirs[i]);
                 i++;
             }
             items.push(new Item(null, categorie, title, movies, seasons));
         }
     });
 
-    items.forEach(item => { item.seasons = []; item.movies = [] })
+    // items.forEach(item => { item.seasons = []; item.movies = [] })
 
+    // Fill the items array with its corresponding seasons and episodes
     files.forEach(e => {
         const base = path.parse(e).base;
         const parsedData = filenameParser(e, base);
@@ -102,6 +105,8 @@ const crawlAndIndex = () => {
     });
 
     fs.writeFileSync('out.json', JSON.stringify(items, null, 3));
+
+    console.log('Written');
 
     return items;
 }
