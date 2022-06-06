@@ -83,24 +83,24 @@ const crawlAndIndex = () => {
         }
     });
 
-    // console.log(items);
+    items.forEach(item => { item.seasons = []; item.movies = [] })
 
     files.forEach(e => {
         const base = path.parse(e).base;
         const parsedData = filenameParser(e, base);
 
         const item = items.find(x => x.title.includes(parsedData.title));
-        try {
-            parsedData.movie ? item.movies.push(e) : item.seasons.push(e);
-        } catch (error) {
-            console.log(item, parsedData, path.parse(e),);
+        if (parsedData.movie == true) {
+            item.movies.push(e)
+        } else {
+            if (Array.isArray(item.seasons[parsedData.season - 1])) {
+                item.seasons[parsedData.season - 1].push(e);
+            } else {
+                item.seasons[parsedData.season - 1] = [e]
+            }
         }
-        // console.log(item.categorie);
     });
 
-    // console.log(files.map(e => path.parse(e).base));
-
-    // console.log(items);
     fs.writeFileSync('out.json', JSON.stringify(items, null, 3));
 
     return items;
