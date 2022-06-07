@@ -18,9 +18,7 @@
 					<div class="row row-cols-1 row-cols-md-3 g-4">
 						<EntityCard
 							v-for="entity in categorie.entitys"
-							:title="entity.title"
-							:seasons="entity.seasons"
-							:movies="entity.movies"
+							:entity="entity"
 							:key="entity.title"
 						></EntityCard>
 					</div>
