@@ -85,7 +85,6 @@ const crawlAndIndex = () => {
         }
     });
 
-    // items.forEach(item => { item.seasons = []; item.movies = [] })
 
     // Fill the items array with its corresponding seasons and episodes
     files.forEach(e => {
@@ -103,6 +102,8 @@ const crawlAndIndex = () => {
             }
         }
     });
+
+
 
     fs.writeFileSync('out.json', JSON.stringify(items, null, 3));
 
@@ -141,7 +142,23 @@ const PORT = process.env.PORT || 3100;
 server.listen(PORT, () => {
     console.log(`Express App Listening ${process.env.https ? 'with SSL ' : ''}on ${PORT}`);
 
-    crawlAndIndex();
+    const arr = [
+        'hello1',
+        'hello2',
+        'hello3',
+        'hello4',
+        'hello5',
+        'hello6',
+        'hello7',
+        'hello8',
+        'hello9',
+        'hello10',
+        'hello11'
+    ]
+
+    // console.log(arr.sort());
+
+    // crawlAndIndex();
     // console.log(
     //     filenameParser('Food Wars! Shokugeki no Sōma St#1 Flg#1.mp4')
     // );
