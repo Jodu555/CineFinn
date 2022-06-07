@@ -49,7 +49,14 @@ app.get('/index', (req, res, next) => {
     res.json(crawlAndIndex());
 });
 
+const generateID = () => Math.floor(Math.random() * 1000);
+
 const crawlAndIndex = () => {
+
+    if (fs.existsSync('out.json')) {
+        return JSON.parse(fs.readFileSync('out.json', 'utf-8'));
+    }
+
     const overcategories = ['Aniworld', 'STO'];
     const obj = {};
 
@@ -81,7 +88,7 @@ const crawlAndIndex = () => {
                 // dirs[i].includes('Season-') ? seasons.push(dirs[i]) : movies.push(dirs[i]);
                 i++;
             }
-            series.push(new Series(null, categorie, title, movies, seasons));
+            series.push(new Series(generateID(), categorie, title, movies, seasons));
         }
     });
 

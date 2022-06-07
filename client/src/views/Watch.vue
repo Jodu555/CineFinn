@@ -1,6 +1,17 @@
 <template>
 	<div>
-		<h1>{{ $router.currentRoute._value.query.id }}</h1>
+		<h1 v-if="entity != null">
+			{{ entity.title }} -
+			{{
+				(entity.movies.length >= 1
+					? entity.movies.length + ' ' + (entity.movies.length > 1 ? 'Movies' : 'Movie')
+					: '') +
+				(entity.movies.length >= 1 ? ' | ' : '') +
+				entity.seasons.length +
+				' ' +
+				(entity.seasons.length > 1 ? 'Seasons' : 'Season')
+			}}
+		</h1>
 		<div style="margin-top: 0.5%" class="video-container paused" data-volume-level="high">
 			<img class="thumbnail-img" />
 			<div class="video-controls-container">
@@ -102,10 +113,18 @@
 </template>
 <script>
 export default {
-	created() {
-		console.log(this.$router.currentRoute._value.query.id);
+	data() {
+		return {
+			entity: null,
+		};
 	},
-	mounted() {
+	async created() {
+		const response = await fetch('http://localhost:3100/index');
+		const json = await response.json();
+		this.entity = json.find((x) => x.ID == this.$router.currentRoute._value.query.id);
+		console.log(this.entity);
+	},
+	async mounted() {
 		const playPauseBtn = document.querySelector('.play-pause-btn');
 		const theaterBtn = document.querySelector('.theater-btn');
 		const fullScreenBtn = document.querySelector('.full-screen-btn');

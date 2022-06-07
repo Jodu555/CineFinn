@@ -6,7 +6,7 @@
 				<p class="card-text">
 					With supporting text below as a natural lead-in to additional content.
 				</p>
-				<a :href="'/watch?id=' + hrefTitle" class="btn btn-outline-primary btn-sm">Go & Watch</a>
+				<a :href="'/watch?id=' + entity.ID" class="btn btn-outline-primary btn-sm">Go & Watch</a>
 			</div>
 			<div class="card-footer text-muted">
 				{{
@@ -27,9 +27,7 @@
 <script>
 export default {
 	props: ['entity'],
-	created() {
-		this.hrefTitle = this.entity.title.replaceAll(' ', '-');
-	},
+	created() {},
 };
 </script>
 <style lang=""></style>
