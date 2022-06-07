@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<h1 v-if="entity != null">
+		<h1 class="container" v-if="entity != null">
 			{{ entity.title }} -
 			{{
 				(entity.movies.length >= 1
@@ -105,17 +105,20 @@
 					</button>
 				</div>
 			</div>
-			<video src="http://localhost:3100/video">
+			<video :src="'http://localhost:3100/video?id=' + entity.ID">
 				<track kind="captions" srclang="en" src="assets/subtitles.vtt" />
 			</video>
 		</div>
+		<br />
 	</div>
 </template>
 <script>
 export default {
 	data() {
 		return {
-			entity: null,
+			entity: {
+				ID: -1,
+			},
 		};
 	},
 	async created() {

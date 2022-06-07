@@ -3,7 +3,6 @@ const path = require('path');
 
 
 module.exports = (req, res) => {
-    // console.log(req.query);
     // Ensure there is a range given for the video
     const range = req.headers.range;
     if (!range) {
@@ -11,7 +10,14 @@ module.exports = (req, res) => {
         return;
     }
 
-    const videoPath = path.join(path.join(process.env.VIDEO_PATH, 'STO', 'Mia and Me – Abenteuer in Centopia', 'Season-1', 'Mia and Me – Abenteuer in Centopia St#1 Flg#1.mp4'));
+    const series = JSON.parse(fs.readFileSync('out.json', 'utf-8'));
+
+    const serie = series.find(x => x.ID == req.query.id);
+
+    const videoPath = serie.seasons[0][0];
+
+    // const videoPath = path.join(path.join(process.env.VIDEO_PATH, 'STO', 'Mia and Me – Abenteuer in Centopia', 'Season-1', 'Mia and Me – Abenteuer in Centopia St#1 Flg#1.mp4'));
+    // console.log(videoPath);
     const videoSize = fs.statSync(videoPath).size;
 
     const CHUNK_SIZE = 10 ** 6; // 1MB

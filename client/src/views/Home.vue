@@ -1,5 +1,5 @@
 <template>
-	<div class="accordion accordion-flush" id="accordionFlushExample">
+	<div class="container accordion accordion-flush" id="accordionFlushExample">
 		<div v-for="categorie of categories" :key="categorie.title" class="accordion-item">
 			<h2 class="accordion-header">
 				<button
