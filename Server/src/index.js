@@ -69,7 +69,7 @@ const crawlAndIndex = () => {
     });
 
     // Strip the dirs down and seperate between season or movie dirs or series dirs
-    const items = [];
+    const series = [];
     Object.keys(obj).forEach(categorie => {
         const dirs = obj[categorie]
         for (let i = 0; i < dirs.length;) {
@@ -81,17 +81,17 @@ const crawlAndIndex = () => {
                 // dirs[i].includes('Season-') ? seasons.push(dirs[i]) : movies.push(dirs[i]);
                 i++;
             }
-            items.push(new Item(null, categorie, title, movies, seasons));
+            series.push(new Series(null, categorie, title, movies, seasons));
         }
     });
 
 
-    // Fill the items array with its corresponding seasons and episodes
+    // Fill the series array with its corresponding seasons and episodes
     files.forEach(e => {
         const base = path.parse(e).base;
         const parsedData = filenameParser(e, base);
 
-        const item = items.find(x => x.title.includes(parsedData.title));
+        const item = series.find(x => x.title.includes(parsedData.title));
         if (parsedData.movie == true) {
             item.movies.push(e)
         } else {
@@ -109,14 +109,14 @@ const crawlAndIndex = () => {
         const bp = filenameParser(b, path.parse(b).base);
         return ap.episode - bp.episode;
     }
-    items.forEach(e => e.seasons.forEach(x => x.sort(sorterFunction)));
+    series.forEach(e => e.seasons.forEach(x => x.sort(sorterFunction)));
 
 
-    fs.writeFileSync('out.json', JSON.stringify(items, null, 3));
+    fs.writeFileSync('out.json', JSON.stringify(series, null, 3));
 
     console.log('Written');
 
-    return items;
+    return series;
 }
 
 const filenameParser = (filepath, filename) => {
@@ -135,7 +135,7 @@ const filenameParser = (filepath, filename) => {
 
 }
 
-class Item {
+class Series {
     constructor(ID, categorie, title, movies = [], seasons = []) {
         this.ID = ID;
         this.categorie = categorie;
