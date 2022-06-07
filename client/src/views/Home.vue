@@ -20,6 +20,7 @@
 							v-for="entity in categorie.entitys"
 							:title="entity.title"
 							:seasons="entity.seasons"
+							:movies="entity.movies"
 							:key="entity.title"
 						></EntityCard>
 					</div>
@@ -45,10 +46,10 @@ export default {
 			if (this.categories[i.categorie] == undefined) {
 				this.categories[i.categorie] = {
 					title: i.categorie,
-					entitys: [{ title: i.title, seasons: i.seasons }],
+					entitys: [i],
 				};
 			} else {
-				this.categories[i.categorie].entitys.push({ title: i.title, seasons: i.seasons });
+				this.categories[i.categorie].entitys.push(i);
 			}
 		});
 	},

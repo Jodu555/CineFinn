@@ -9,14 +9,19 @@
 				<a :href="'/watch?id=' + hrefTitle" class="btn btn-outline-primary btn-sm">Go & Watch</a>
 			</div>
 			<div class="card-footer text-muted">
-				{{ seasons.length }} {{ seasons.length > 1 ? 'Seasons' : 'Season' }}
+				{{ seasons.length + ' ' + (seasons.length > 1 ? 'Seasons' : 'Season') }}
+				{{
+					movies.length >= 1
+						? ' | ' + movies.length + ' ' + (movies.length > 1 ? 'Movies' : 'Movie')
+						: ''
+				}}
 			</div>
 		</div>
 	</div>
 </template>
 <script>
 export default {
-	props: ['title', 'seasons'],
+	props: ['title', 'seasons', 'movies'],
 	created() {
 		this.hrefTitle = this.title.replaceAll(' ', '-');
 	},
