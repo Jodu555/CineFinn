@@ -6,7 +6,9 @@
 				<p class="card-text">
 					With supporting text below as a natural lead-in to additional content.
 				</p>
-				<a :href="'/watch?id=' + entity.ID" class="btn btn-outline-primary btn-sm">Go & Watch</a>
+				<router-link class="btn btn-outline-primary btn-sm" :to="'/watch?id=' + entity.ID"
+					>Go & Watch</router-link
+				>
 			</div>
 			<div class="card-footer text-muted">
 				{{

@@ -34,24 +34,27 @@ export default {
 	components: { EntityCard },
 	data() {
 		return {
-			categories: {},
+			// categories: {},
 		};
 	},
-	async mounted() {
-		const response = await fetch('http://localhost:3100/index');
-		const json = await response.json();
-
-		json.forEach((i) => {
-			if (this.categories[i.categorie] == undefined) {
-				this.categories[i.categorie] = {
-					title: i.categorie,
-					entitys: [i],
-				};
-			} else {
-				this.categories[i.categorie].entitys.push(i);
-			}
-		});
+	computed: {
+		...mapState(['series']),
+		categories() {
+			const categories = {};
+			this.series.forEach((i) => {
+				if (categories[i.categorie] == undefined) {
+					categories[i.categorie] = {
+						title: i.categorie,
+						entitys: [i],
+					};
+				} else {
+					categories[i.categorie].entitys.push(i);
+				}
+			});
+			return categories;
+		},
 	},
+	async mounted() {},
 };
 </script>
 <style lang=""></style>
