@@ -27,6 +27,7 @@
 						}"
 						v-for="(s, i) in entity.movies"
 						:key="s"
+						@click="changeMovie(i + 1)"
 					>
 						{{ i + 1 }}
 					</button>
@@ -168,9 +169,11 @@
 				</div>
 			</div>
 			<video
-				:src="`http://localhost:3100/video?series=${entity.ID}&season=${
-					currentSeason - 1
-				}&episode=${currentEpisode - 1}`"
+				:src="`http://localhost:3100/video?series=${entity.ID}${
+					currentSeason == -1
+						? `&movie=${currentMovie}`
+						: `&season=${currentSeason - 1}&episode=${currentEpisode - 1}`
+				}`"
 			></video>
 		</div>
 		<br />
@@ -180,7 +183,7 @@
 export default {
 	data() {
 		return {
-			currentMovie: 1,
+			currentMovie: -1,
 			currentSeason: 1,
 			currentEpisode: 1,
 			entity: {
@@ -189,18 +192,22 @@ export default {
 		};
 	},
 	methods: {
+		changeMovie(ID) {
+			this.handleVideoChange(-1, -1, 1);
+		},
 		changeEpisode(ID) {
 			this.handleVideoChange(this.currentSeason, ID);
 		},
 		changeSeason(ID) {
 			this.handleVideoChange(ID, 1);
 		},
-		handleVideoChange(season, episode) {
+		handleVideoChange(season, episode, movie) {
 			const video = document.querySelector('video');
 			video.pause();
 			setTimeout(() => {
 				this.currentSeason = season;
 				this.currentEpisode = episode;
+				this.currentMovie = movie;
 				setTimeout(() => {
 					video.load();
 					video.currentTime = 0;

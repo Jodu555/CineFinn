@@ -3,7 +3,7 @@ const path = require('path');
 
 
 module.exports = (req, res) => {
-    const { series: seriesID, season, episode } = req.query;
+    const { series: seriesID, season, episode, movie } = req.query;
 
     // Ensure there is a range given for the video
     const range = req.headers.range;
@@ -21,7 +21,8 @@ module.exports = (req, res) => {
 
     const serie = series.find(x => x.ID == seriesID);
 
-    const videoPath = serie.seasons[season][episode];
+
+    const videoPath = movie ? serie.movies[movie] : serie.seasons[season][episode];
     if (videoPath == null || videoPath == undefined) {
         res.status(400).send("Season or Episode does not exists");
         return;
