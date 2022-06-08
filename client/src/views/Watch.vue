@@ -17,8 +17,7 @@
 				<h2 class="col-sm-2" style="width: 13.666667%">Seasons:</h2>
 				<h3 class="col">
 					<button
-						v-if="btnStyle == true"
-						style="font-weight: 900; font-size: 1.18rem"
+						style="font-weight: 900; font-size: 1.18rem; padding: 0.3rem 0.6rem"
 						type="button"
 						:class="{
 							btn: true,
@@ -26,30 +25,18 @@
 							'btn-primary': currentEpisode !== i + 1,
 							'btn-info': currentEpisode == i + 1,
 						}"
-						v-for="(s, i) in entity.seasons[0]"
+						v-for="(s, i) in entity.seasons"
 						:key="s"
 					>
 						{{ i + 1 }}
 					</button>
-					<span
-						v-if="btnStyle == false"
-						:class="{
-							badge: true,
-							'bg-info': currentEpisode == i + 1,
-							'bg-primary': currentEpisode !== i + 1,
-						}"
-						v-for="(s, i) in entity.seasons"
-						:key="s"
-						>{{ i + 1 }}</span
-					>
 				</h3>
 			</div>
 			<div class="row justify-content-start">
 				<h2 class="col-sm-2" style="width: 13.666667%">Episodes:</h2>
 				<h3 class="col">
 					<button
-						v-if="btnStyle == true"
-						style="font-weight: 900; font-size: 1.18rem"
+						style="font-weight: 900; font-size: 1.18rem; padding: 0.3rem 0.6rem"
 						type="button"
 						:class="{
 							btn: true,
@@ -63,17 +50,6 @@
 					>
 						{{ i + 1 }}
 					</button>
-					<span
-						v-if="btnStyle == false"
-						:class="{
-							badge: true,
-							'bg-info': currentEpisode == i + 1,
-							'bg-primary': currentEpisode !== i + 1,
-						}"
-						v-for="(s, i) in entity.seasons[0]"
-						:key="s"
-						>{{ i + 1 }}</span
-					>
 				</h3>
 			</div>
 		</div>
@@ -181,7 +157,6 @@
 export default {
 	data() {
 		return {
-			btnStyle: true,
 			currentSeason: 1,
 			currentEpisode: 1,
 			entity: {
@@ -431,11 +406,11 @@ export default {
 span.badge {
 	margin-left: 5px;
 	margin-bottom: 3px;
+	cursor: pointer;
 }
 h3 button {
 	margin-left: 5px;
 	margin-bottom: 3px;
-	font-size: 10px;
 }
 *,
 *::before,
