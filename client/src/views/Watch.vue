@@ -169,16 +169,20 @@ export default {
 	},
 	methods: {
 		changeEpisode(ID) {
+			this.handleVideoChange(this.currentSeason, ID);
+		},
+
+		handleVideoChange(season, episode) {
 			const video = document.querySelector('video');
 			video.pause();
 			setTimeout(() => {
-				this.currentEpisode = ID;
+				this.currentSeason = season;
+				this.currentEpisode = episode;
 				setTimeout(() => {
 					video.load();
 					video.currentTime = 0;
 				}, 100);
 			}, 200);
-			// video.play();
 		},
 	},
 	async created() {
@@ -295,7 +299,6 @@ export default {
 
 		// Duration
 		video.addEventListener('loadeddata', () => {
-			console.log('LOADED');
 			totalTimeElem.textContent = formatDuration(video.duration);
 		});
 
