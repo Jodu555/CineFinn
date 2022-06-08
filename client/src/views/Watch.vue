@@ -53,7 +53,7 @@
 					</button>
 				</h3>
 			</div>
-			<div class="row justify-content-start">
+			<div v-if="currentSeason != -1" class="row justify-content-start">
 				<h2 class="col-sm-2" style="width: 13.666667%">Episodes:</h2>
 				<h3 class="col">
 					<button
@@ -171,7 +171,7 @@
 			<video
 				:src="`http://localhost:3100/video?series=${entity.ID}${
 					currentSeason == -1
-						? `&movie=${currentMovie}`
+						? `&movie=${currentMovie - 1}`
 						: `&season=${currentSeason - 1}&episode=${currentEpisode - 1}`
 				}`"
 			></video>
@@ -193,7 +193,7 @@ export default {
 	},
 	methods: {
 		changeMovie(ID) {
-			this.handleVideoChange(-1, -1, 1);
+			this.handleVideoChange(-1, -1, ID);
 		},
 		changeEpisode(ID) {
 			this.handleVideoChange(this.currentSeason, ID);
