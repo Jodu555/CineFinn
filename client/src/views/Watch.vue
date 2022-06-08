@@ -13,6 +13,25 @@
 					(entity.seasons.length > 1 ? 'Seasons' : 'Season')
 				}}
 			</h1>
+			<div v-if="entity.movies.length >= 1" class="row justify-content-start">
+				<h2 class="col-sm-2" style="width: 13.666667%">Movies:</h2>
+				<h3 class="col">
+					<button
+						style="font-weight: 900; font-size: 1.18rem; padding: 0.3rem 0.6rem"
+						type="button"
+						:class="{
+							btn: true,
+							'text-white': true,
+							'btn-primary': currentMovie !== i + 1,
+							'btn-info': currentMovie == i + 1,
+						}"
+						v-for="(s, i) in entity.movies"
+						:key="s"
+					>
+						{{ i + 1 }}
+					</button>
+				</h3>
+			</div>
 			<div class="row justify-content-start">
 				<h2 class="col-sm-2" style="width: 13.666667%">Seasons:</h2>
 				<h3 class="col">
@@ -22,11 +41,12 @@
 						:class="{
 							btn: true,
 							'text-white': true,
-							'btn-primary': currentEpisode !== i + 1,
-							'btn-info': currentEpisode == i + 1,
+							'btn-primary': currentSeason !== i + 1,
+							'btn-info': currentSeason == i + 1,
 						}"
 						v-for="(s, i) in entity.seasons"
 						:key="s"
+						@click="changeSeason(i + 1)"
 					>
 						{{ i + 1 }}
 					</button>
@@ -45,7 +65,7 @@
 							'btn-primary': currentEpisode !== i + 1,
 							'btn-info': currentEpisode == i + 1,
 						}"
-						v-for="(s, i) in entity.seasons[0]"
+						v-for="(s, i) in entity.seasons[currentSeason - 1]"
 						:key="s"
 						@click="changeEpisode(i + 1)"
 					>
@@ -160,6 +180,7 @@
 export default {
 	data() {
 		return {
+			currentMovie: 1,
 			currentSeason: 1,
 			currentEpisode: 1,
 			entity: {
@@ -171,7 +192,9 @@ export default {
 		changeEpisode(ID) {
 			this.handleVideoChange(this.currentSeason, ID);
 		},
-
+		changeSeason(ID) {
+			this.handleVideoChange(ID, 1);
+		},
 		handleVideoChange(season, episode) {
 			const video = document.querySelector('video');
 			video.pause();
@@ -238,8 +261,11 @@ export default {
 				case 'l':
 					skip(5);
 					break;
-				case 'c':
-					toggleCaptions();
+				case 'arrowup':
+					video.volume += 0.1;
+					break;
+				case 'arrowdown':
+					video.volume -= 0.1;
 					break;
 			}
 		});
