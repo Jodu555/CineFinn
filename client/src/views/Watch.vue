@@ -1,17 +1,82 @@
 <template>
 	<div>
-		<h1 class="container" v-if="entity.ID != -1">
-			{{ entity.title }} -
-			{{
-				(entity.movies.length >= 1
-					? entity.movies.length + ' ' + (entity.movies.length > 1 ? 'Movies' : 'Movie')
-					: '') +
-				(entity.movies.length >= 1 ? ' | ' : '') +
-				entity.seasons.length +
-				' ' +
-				(entity.seasons.length > 1 ? 'Seasons' : 'Season')
-			}}
-		</h1>
+		<div class="container" v-if="entity.ID != -1">
+			<h1>
+				{{ entity.title }} -
+				{{
+					(entity.movies.length >= 1
+						? entity.movies.length + ' ' + (entity.movies.length > 1 ? 'Movies' : 'Movie')
+						: '') +
+					(entity.movies.length >= 1 ? ' | ' : '') +
+					entity.seasons.length +
+					' ' +
+					(entity.seasons.length > 1 ? 'Seasons' : 'Season')
+				}}
+			</h1>
+			<div class="row justify-content-start">
+				<h2 class="col-sm-2" style="width: 13.666667%">Seasons:</h2>
+				<h3 class="col">
+					<button
+						v-if="btnStyle == true"
+						style="font-weight: 900; font-size: 1.18rem"
+						type="button"
+						:class="{
+							btn: true,
+							'text-white': true,
+							'btn-primary': currentEpisode !== i + 1,
+							'btn-info': currentEpisode == i + 1,
+						}"
+						v-for="(s, i) in entity.seasons[0]"
+						:key="s"
+					>
+						{{ i + 1 }}
+					</button>
+					<span
+						v-if="btnStyle == false"
+						:class="{
+							badge: true,
+							'bg-info': currentEpisode == i + 1,
+							'bg-primary': currentEpisode !== i + 1,
+						}"
+						v-for="(s, i) in entity.seasons"
+						:key="s"
+						>{{ i + 1 }}</span
+					>
+				</h3>
+			</div>
+			<div class="row justify-content-start">
+				<h2 class="col-sm-2" style="width: 13.666667%">Episodes:</h2>
+				<h3 class="col">
+					<button
+						v-if="btnStyle == true"
+						style="font-weight: 900; font-size: 1.18rem"
+						type="button"
+						:class="{
+							btn: true,
+							// 'btn-lg': true,
+							'text-white': true,
+							'btn-primary': currentEpisode !== i + 1,
+							'btn-info': currentEpisode == i + 1,
+						}"
+						v-for="(s, i) in entity.seasons[0]"
+						:key="s"
+					>
+						{{ i + 1 }}
+					</button>
+					<span
+						v-if="btnStyle == false"
+						:class="{
+							badge: true,
+							'bg-info': currentEpisode == i + 1,
+							'bg-primary': currentEpisode !== i + 1,
+						}"
+						v-for="(s, i) in entity.seasons[0]"
+						:key="s"
+						>{{ i + 1 }}</span
+					>
+				</h3>
+			</div>
+		</div>
 		<div style="margin-top: 0.5%" class="video-container paused" data-volume-level="high">
 			<img class="thumbnail-img" />
 			<div class="video-controls-container">
@@ -116,6 +181,9 @@
 export default {
 	data() {
 		return {
+			btnStyle: true,
+			currentSeason: 1,
+			currentEpisode: 1,
 			entity: {
 				ID: -1,
 			},
@@ -360,6 +428,15 @@ export default {
 </script>
 
 <style>
+span.badge {
+	margin-left: 5px;
+	margin-bottom: 3px;
+}
+h3 button {
+	margin-left: 5px;
+	margin-bottom: 3px;
+	font-size: 10px;
+}
 *,
 *::before,
 *::after {
