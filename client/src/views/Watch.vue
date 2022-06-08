@@ -47,6 +47,7 @@
 						}"
 						v-for="(s, i) in entity.seasons[0]"
 						:key="s"
+						@click="changeEpisode(i + 1)"
 					>
 						{{ i + 1 }}
 					</button>
@@ -99,14 +100,14 @@
 						/
 						<div class="total-time"></div>
 					</div>
-					<button class="captions-btn">
+					<!-- <button class="captions-btn">
 						<svg viewBox="0 0 24 24">
 							<path
 								fill="currentColor"
 								d="M18,11H16.5V10.5H14.5V13.5H16.5V13H18V14A1,1 0 0,1 17,15H14A1,1 0 0,1 13,14V10A1,1 0 0,1 14,9H17A1,1 0 0,1 18,10M11,11H9.5V10.5H7.5V13.5H9.5V13H11V14A1,1 0 0,1 10,15H7A1,1 0 0,1 6,14V10A1,1 0 0,1 7,9H10A1,1 0 0,1 11,10M19,4H5C3.89,4 3,4.89 3,6V18A2,2 0 0,0 5,20H19A2,2 0 0,0 21,18V6C21,4.89 20.1,4 19,4Z"
 							/>
 						</svg>
-					</button>
+					</button> -->
 					<button class="speed-btn wide-btn">1x</button>
 					<button class="mini-player-btn">
 						<svg viewBox="0 0 24 24">
@@ -146,9 +147,11 @@
 					</button>
 				</div>
 			</div>
-			<video :src="'http://localhost:3100/video?id=' + entity.ID">
-				<track kind="captions" srclang="en" src="assets/subtitles.vtt" />
-			</video>
+			<video
+				:src="`http://localhost:3100/video?series=${entity.ID}&season=${
+					currentSeason - 1
+				}&episode=${currentEpisode - 1}`"
+			></video>
 		</div>
 		<br />
 	</div>
@@ -164,6 +167,20 @@ export default {
 			},
 		};
 	},
+	methods: {
+		changeEpisode(ID) {
+			const video = document.querySelector('video');
+			video.pause();
+			setTimeout(() => {
+				this.currentEpisode = ID;
+				setTimeout(() => {
+					video.load();
+					video.currentTime = 0;
+				}, 100);
+			}, 200);
+			// video.play();
+		},
+	},
 	async created() {
 		const response = await fetch('http://localhost:3100/index');
 		const json = await response.json();
@@ -176,7 +193,6 @@ export default {
 		const fullScreenBtn = document.querySelector('.full-screen-btn');
 		const miniPlayerBtn = document.querySelector('.mini-player-btn');
 		const muteBtn = document.querySelector('.mute-btn');
-		const captionsBtn = document.querySelector('.captions-btn');
 		const speedBtn = document.querySelector('.speed-btn');
 		const currentTimeElem = document.querySelector('.current-time');
 		const totalTimeElem = document.querySelector('.total-time');
@@ -277,20 +293,9 @@ export default {
 			speedBtn.textContent = `${newPlaybackRate}x`;
 		}
 
-		// Captions
-		const captions = video.textTracks[0];
-		captions.mode = 'hidden';
-
-		captionsBtn.addEventListener('click', toggleCaptions);
-
-		function toggleCaptions() {
-			const isHidden = captions.mode === 'hidden';
-			captions.mode = isHidden ? 'showing' : 'hidden';
-			videoContainer.classList.toggle('captions', isHidden);
-		}
-
 		// Duration
 		video.addEventListener('loadeddata', () => {
+			console.log('LOADED');
 			totalTimeElem.textContent = formatDuration(video.duration);
 		});
 
