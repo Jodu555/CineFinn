@@ -3,14 +3,17 @@
 		<Navigation />
 		<router-view class="mt-2" />
 	</div>
+	<Footer />
 </template>
 
 <script>
 import Navigation from './components/Navigation.vue';
+import Footer from './components/Footer.vue';
 import 'bootstrap';
 export default {
 	components: {
 		Navigation,
+		Footer,
 	},
 };
 </script>
@@ -22,5 +25,7 @@ export default {
 #app {
 	// background-color: #1f2d3d;
 	min-height: 100vh;
+	position: relative;
+	padding-bottom: 2.5rem;
 }
 </style>

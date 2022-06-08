@@ -13,6 +13,7 @@
 					(entity.seasons.length > 1 ? 'Seasons' : 'Season')
 				}}
 			</h1>
+			<!-- Movies -->
 			<div v-if="entity.movies.length >= 1" class="row justify-content-start">
 				<h2 class="col-sm-2" style="width: 13.666667%">Movies:</h2>
 				<h3 class="col">
@@ -33,6 +34,7 @@
 					</button>
 				</h3>
 			</div>
+			<!-- Seasons -->
 			<div class="row justify-content-start">
 				<h2 class="col-sm-2" style="width: 13.666667%">Seasons:</h2>
 				<h3 class="col">
@@ -53,6 +55,7 @@
 					</button>
 				</h3>
 			</div>
+			<!-- Episodes -->
 			<div v-if="currentSeason != -1" class="row justify-content-start">
 				<h2 class="col-sm-2" style="width: 13.666667%">Episodes:</h2>
 				<h3 class="col">
@@ -168,7 +171,6 @@
 				}`"
 			></video>
 		</div>
-		<br />
 	</div>
 </template>
 <script>
