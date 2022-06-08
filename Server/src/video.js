@@ -10,6 +10,11 @@ module.exports = (req, res) => {
         return;
     }
 
+    if (req.query.id == -1) {
+        res.status(400).send("No Video!");
+        return;
+    }
+
     const series = JSON.parse(fs.readFileSync('out.json', 'utf-8'));
 
     const serie = series.find(x => x.ID == req.query.id);

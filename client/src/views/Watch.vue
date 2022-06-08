@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<h1 class="container" v-if="entity != null">
+		<h1 class="container" v-if="entity.ID != -1">
 			{{ entity.title }} -
 			{{
 				(entity.movies.length >= 1
