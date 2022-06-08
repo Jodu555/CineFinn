@@ -1,20 +1,22 @@
 <template>
 	<div>
-		<div class="container" v-if="entity.ID != -1">
+		<div class="container" v-if="currentSeries.ID != -1">
 			<h1>
-				{{ entity.title }} -
+				{{ currentSeries.title }} -
 				{{
-					(entity.movies.length >= 1
-						? entity.movies.length + ' ' + (entity.movies.length > 1 ? 'Movies' : 'Movie')
+					(currentSeries.movies.length >= 1
+						? currentSeries.movies.length +
+						  ' ' +
+						  (currentSeries.movies.length > 1 ? 'Movies' : 'Movie')
 						: '') +
-					(entity.movies.length >= 1 ? ' | ' : '') +
-					entity.seasons.length +
+					(currentSeries.movies.length >= 1 ? ' | ' : '') +
+					currentSeries.seasons.length +
 					' ' +
-					(entity.seasons.length > 1 ? 'Seasons' : 'Season')
+					(currentSeries.seasons.length > 1 ? 'Seasons' : 'Season')
 				}}
 			</h1>
 			<!-- Movies -->
-			<div v-if="entity.movies.length >= 1" class="row justify-content-start">
+			<div v-if="currentSeries.movies.length >= 1" class="row justify-content-start">
 				<h2 class="col-sm-2" style="width: 13.666667%">Movies:</h2>
 				<h3 class="col">
 					<button
@@ -26,7 +28,7 @@
 							'btn-primary': currentMovie !== i + 1,
 							'btn-info': currentMovie == i + 1,
 						}"
-						v-for="(s, i) in entity.movies"
+						v-for="(s, i) in currentSeries.movies"
 						:key="s"
 						@click="changeMovie(i + 1)"
 					>
@@ -47,7 +49,7 @@
 							'btn-primary': currentSeason !== i + 1,
 							'btn-info': currentSeason == i + 1,
 						}"
-						v-for="(s, i) in entity.seasons"
+						v-for="(s, i) in currentSeries.seasons"
 						:key="s"
 						@click="changeSeason(i + 1)"
 					>
@@ -69,7 +71,7 @@
 							'btn-primary': currentEpisode !== i + 1,
 							'btn-info': currentEpisode == i + 1,
 						}"
-						v-for="(s, i) in entity.seasons[currentSeason - 1]"
+						v-for="(s, i) in currentSeries.seasons[currentSeason - 1]"
 						:key="s"
 						@click="changeEpisode(i + 1)"
 					>
@@ -164,7 +166,7 @@
 				</div>
 			</div>
 			<video
-				:src="`http://localhost:3100/video?series=${entity.ID}${
+				:src="`http://localhost:3100/video?series=${currentSeries.ID}${
 					currentSeason == -1
 						? `&movie=${currentMovie - 1}`
 						: `&season=${currentSeason - 1}&episode=${currentEpisode - 1}`
@@ -174,16 +176,13 @@
 	</div>
 </template>
 <script>
+import { mapState, mapMutations, mapActions } from 'vuex';
 export default {
 	data() {
-		return {
-			currentMovie: -1,
-			currentSeason: 1,
-			currentEpisode: 1,
-			entity: {
-				ID: -1,
-			},
-		};
+		return {};
+	},
+	computed: {
+		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode']),
 	},
 	methods: {
 		changeMovie(ID) {
@@ -199,21 +198,20 @@ export default {
 			const video = document.querySelector('video');
 			video.pause();
 			setTimeout(() => {
-				this.currentSeason = season;
-				this.currentEpisode = episode;
-				this.currentMovie = movie;
+				this.setCurrentSeason(season);
+				this.setCurrentEpisode(episode);
+				this.setCurrentMovie(movie);
 				setTimeout(() => {
 					video.load();
 					video.currentTime = 0;
 				}, 100);
 			}, 200);
 		},
+		...mapMutations('watch', ['setCurrentMovie', 'setCurrentSeason', 'setCurrentEpisode']),
+		...mapActions('watch', ['loadSeries']),
 	},
 	async created() {
-		const response = await fetch('http://localhost:3100/index');
-		const json = await response.json();
-		this.entity = json.find((x) => x.ID == this.$route.query.id);
-		console.log(this.entity);
+		this.loadSeries(this.$route.query.id);
 	},
 	async mounted() {
 		const playPauseBtn = document.querySelector('.play-pause-btn');
