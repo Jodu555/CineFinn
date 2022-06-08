@@ -20,10 +20,11 @@ export default {
         }
     },
     actions: {
-        async loadSeries({ commit, state }, ID) {
-            const response = await fetch('http://localhost:3100/index');
-            const json = await response.json();
-            const series = json.find((x) => x.ID == ID);
+        async loadSeriesInfo({ commit, state, rootState }, ID) {
+            // console.log(rootState.series);
+            // const response = await fetch('http://localhost:3100/index');
+            // const json = await response.json();
+            const series = rootState.series.find((x) => x.ID == ID);
             commit('setCurrentSeries', series);
         },
     },

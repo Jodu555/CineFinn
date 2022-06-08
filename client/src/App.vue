@@ -7,13 +7,21 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+
+import 'bootstrap';
 import Navigation from './components/Navigation.vue';
 import Footer from './components/Footer.vue';
-import 'bootstrap';
 export default {
 	components: {
 		Navigation,
 		Footer,
+	},
+	created() {
+		this.loadSeries();
+	},
+	methods: {
+		...mapActions(['loadSeries']),
 	},
 };
 </script>

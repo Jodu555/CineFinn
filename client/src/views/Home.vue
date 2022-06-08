@@ -29,6 +29,7 @@
 </template>
 <script>
 import EntityCard from '@/components/EntityCard.vue';
+import { mapState } from 'vuex';
 export default {
 	components: { EntityCard },
 	data() {

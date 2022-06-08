@@ -208,10 +208,10 @@ export default {
 			}, 200);
 		},
 		...mapMutations('watch', ['setCurrentMovie', 'setCurrentSeason', 'setCurrentEpisode']),
-		...mapActions('watch', ['loadSeries']),
+		...mapActions('watch', ['loadSeriesInfo']),
 	},
 	async created() {
-		this.loadSeries(this.$route.query.id);
+		this.loadSeriesInfo(this.$route.query.id);
 	},
 	async mounted() {
 		const playPauseBtn = document.querySelector('.play-pause-btn');
