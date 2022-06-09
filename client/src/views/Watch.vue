@@ -198,7 +198,12 @@ export default {
 		},
 		handleVideoChange(season, episode, movie) {
 			const video = document.querySelector('video');
-			if (video == null) return;
+			if (video == null) {
+				this.setCurrentSeason(season);
+				this.setCurrentEpisode(episode);
+				this.setCurrentMovie(movie);
+				return;
+			}
 			video.pause();
 			setTimeout(() => {
 				this.setCurrentSeason(season);
@@ -214,9 +219,9 @@ export default {
 		...mapActions('watch', ['loadSeriesInfo']),
 	},
 	async created() {
-		console.log('CREATED');
+		console.log('Created');
 		this.loadSeriesInfo(this.$route.query.id);
-		// this.handleVideoChange(0, 0, -1);
+		this.handleVideoChange(-1, -1, -1);
 	},
 	async mounted() {
 		const playPauseBtn = document.querySelector('.play-pause-btn');
