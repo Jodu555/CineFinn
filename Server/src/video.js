@@ -12,7 +12,7 @@ module.exports = (req, res) => {
         return;
     }
 
-    if (seriesID == -1) {
+    if (seriesID == -1 || season == -1 || episode == -1) {
         res.status(400).send("No Video!");
         return;
     }

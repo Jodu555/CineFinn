@@ -165,13 +165,7 @@
 					</button>
 				</div>
 			</div>
-			<video
-				:src="`http://localhost:3100/video?series=${currentSeries.ID}${
-					currentSeason == -1
-						? `&movie=${currentMovie - 1}`
-						: `&season=${currentSeason - 1}&episode=${currentEpisode - 1}`
-				}`"
-			></video>
+			<video :src="videoSrc"></video>
 		</div>
 	</div>
 </template>
@@ -180,6 +174,17 @@ import { mapState, mapMutations, mapActions } from 'vuex';
 export default {
 	computed: {
 		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode']),
+		videoSrc() {
+			let out = `http://localhost:3100/video?series=${this.currentSeries.ID}`;
+			console.log(1337, this.currentSeason, this.currentEpisode, this.currentMovie);
+			if (this.currentSeason == -1) {
+				if (this.currentMovie == -1) return '';
+				out += `&movie=${this.currentMovie - 1}`;
+			} else {
+				out += `&season=${this.currentSeason - 1}&episode=${this.currentEpisode - 1}`;
+			}
+			return out;
+		},
 	},
 	methods: {
 		changeMovie(ID) {
@@ -193,7 +198,8 @@ export default {
 		},
 		handleVideoChange(season, episode, movie) {
 			const video = document.querySelector('video');
-			video?.pause();
+			if (video == null) return;
+			video.pause();
 			setTimeout(() => {
 				this.setCurrentSeason(season);
 				this.setCurrentEpisode(episode);
@@ -208,9 +214,9 @@ export default {
 		...mapActions('watch', ['loadSeriesInfo']),
 	},
 	async created() {
-		// console.log('CREATED');
+		console.log('CREATED');
 		this.loadSeriesInfo(this.$route.query.id);
-		this.handleVideoChange(0, 0, -1);
+		// this.handleVideoChange(0, 0, -1);
 	},
 	async mounted() {
 		const playPauseBtn = document.querySelector('.play-pause-btn');

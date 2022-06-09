@@ -2,8 +2,8 @@ export default {
     state: {
         currentSeries: { ID: -1 },
         currentMovie: -1,
-        currentSeason: 1,
-        currentEpisode: 1,
+        currentSeason: -1,
+        currentEpisode: -1,
     },
     mutations: {
         setCurrentSeries(state, series) {
