@@ -178,9 +178,6 @@
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex';
 export default {
-	data() {
-		return {};
-	},
 	computed: {
 		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode']),
 	},
@@ -196,7 +193,7 @@ export default {
 		},
 		handleVideoChange(season, episode, movie) {
 			const video = document.querySelector('video');
-			video.pause();
+			video?.pause();
 			setTimeout(() => {
 				this.setCurrentSeason(season);
 				this.setCurrentEpisode(episode);
@@ -211,7 +208,9 @@ export default {
 		...mapActions('watch', ['loadSeriesInfo']),
 	},
 	async created() {
+		// console.log('CREATED');
 		this.loadSeriesInfo(this.$route.query.id);
+		this.handleVideoChange(0, 0, -1);
 	},
 	async mounted() {
 		const playPauseBtn = document.querySelector('.play-pause-btn');

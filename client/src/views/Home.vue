@@ -32,11 +32,6 @@ import EntityCard from '@/components/EntityCard.vue';
 import { mapState } from 'vuex';
 export default {
 	components: { EntityCard },
-	data() {
-		return {
-			// categories: {},
-		};
-	},
 	computed: {
 		...mapState(['series']),
 		categories() {
