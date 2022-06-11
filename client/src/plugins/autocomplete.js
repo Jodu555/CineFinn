@@ -28,6 +28,9 @@ export default class Autocomplete {
         field.classList.add('dropdown-toggle');
 
         const dropdown = ce(`<div class="dropdown-menu"></div>`);
+        //This line i added to prevent the popper margin warning 
+        dropdown.style.margin = '0';
+        //End
         if (this.options.dropdownClass)
             dropdown.classList.add(this.options.dropdownClass);
 

@@ -39,31 +39,36 @@
 
 <script>
 import Autocomplete from '@/plugins/autocomplete';
+import { mapState } from 'vuex';
+
 export default {
+	data() {
+		return {
+			ac: null,
+		};
+	},
+	computed: {
+		...mapState(['series']),
+	},
+	watch: {
+		series() {
+			this.ac.setData(
+				this.series.map((x) => {
+					return { label: x.title, value: x.ID };
+				})
+			);
+		},
+	},
 	mounted() {
 		const field = document.getElementById('input');
-		const ac = new Autocomplete(field, {
-			data: [{ label: "I'm a label", value: 42 }],
+		this.ac = new Autocomplete(field, {
+			data: [],
 			maximumItems: 5,
 			threshold: 1,
 			onSelectItem: ({ label, value }) => {
 				console.log('user selected:', label, value);
 			},
 		});
-		ac.setData([
-			{
-				label: 'Test',
-				value: 'test',
-			},
-			{
-				label: 'hello',
-				value: 'hello',
-			},
-			{
-				label: 'other',
-				value: 'other',
-			},
-		]);
 	},
 };
 </script>
