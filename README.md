@@ -4,8 +4,15 @@ This is meant to be a super simple alternative to Plex but of course much simple
 
 ## Code I Joinked
 
-- The Video Player from WDS (WebDevSimplified)
-- The Bootstrap 5 Autocomplete
+### The Full Video Player
+
+- [Web Dev Simplified](https://www.youtube.com/watch?v=ZeNyjnneq_w)
+- [His Repository](https://github.com/WebDevSimplified/youtube-video-player-clone)
+
+### The Bootstrap 5 Autocomplete
+
+- [gch1p](https://github.com/gch1p)
+- [His Repository](https://github.com/gch1p/bootstrap-5-autocomplete)
 
 ## Todo
 
