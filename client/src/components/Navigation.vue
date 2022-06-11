@@ -24,10 +24,15 @@
 						type="text"
 						class="form-control"
 						id="input"
-						placeholder="Start typing..."
+						placeholder="Search for a series..."
 						autocomplete="off"
 					/>
-					<div class="btn-group" role="group" aria-label="Basic outlined example">
+					<div
+						class="btn-group"
+						style="margin-left: 4rem"
+						role="group"
+						aria-label="Basic outlined example"
+					>
 						<button class="btn btn-outline-primary">Profile</button>
 						<button class="btn btn-outline-danger" type="submit">Logout</button>
 					</div>
@@ -66,7 +71,9 @@ export default {
 			maximumItems: 5,
 			threshold: 1,
 			onSelectItem: ({ label, value }) => {
-				console.log('user selected:', label, value);
+				// console.log('user selected:', label, value);
+				field.value = '';
+				this.$router.push({ path: '/watch', query: { id: value } });
 			},
 		});
 	},

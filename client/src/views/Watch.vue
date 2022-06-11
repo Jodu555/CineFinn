@@ -176,7 +176,7 @@ export default {
 		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode']),
 		videoSrc() {
 			let out = `http://localhost:3100/video?series=${this.currentSeries.ID}`;
-			console.log(1337, this.currentSeason, this.currentEpisode, this.currentMovie);
+			// console.log(1337, this.currentSeason, this.currentEpisode, this.currentMovie);
 			if (this.currentSeason == -1) {
 				if (this.currentMovie == -1) return '';
 				out += `&movie=${this.currentMovie - 1}`;
@@ -219,7 +219,6 @@ export default {
 		...mapActions('watch', ['loadSeriesInfo']),
 	},
 	async created() {
-		console.log('Created');
 		this.loadSeriesInfo(this.$route.query.id);
 		this.handleVideoChange(-1, -1, -1);
 	},
