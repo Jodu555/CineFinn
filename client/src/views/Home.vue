@@ -52,19 +52,6 @@ export default {
 			return categories;
 		},
 	},
-	methods: {
-		toastTopEnd() {
-			this.$swal({
-				toast: true,
-				position: 'top-end',
-				showConfirmButton: false,
-				timer: 1000,
-				icon: 'success',
-				title: 'Saved',
-				timerProgressBar: true,
-			});
-		},
-	},
 };
 </script>
 <style lang=""></style>

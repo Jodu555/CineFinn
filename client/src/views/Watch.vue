@@ -270,10 +270,16 @@ export default {
 					skip(5);
 					break;
 				case 'arrowup':
-					video.volume += 0.1;
+					e.preventDefault();
+					try {
+						video.volume += 0.1;
+					} catch (_) {}
 					break;
 				case 'arrowdown':
-					video.volume -= 0.1;
+					e.preventDefault();
+					try {
+						video.volume -= 0.1;
+					} catch (_) {}
 					break;
 			}
 		});
