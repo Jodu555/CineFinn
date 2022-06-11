@@ -169,29 +169,24 @@ const genearteImages = async (series) => {
     console.log(seasons.length);
     // return;
     let i = 0;
-    for (const key of seasons) {
+    for (const season of seasons) {
         i++;
-        const data = filenameParser(s, path.parse(s).base);
+        const data = filenameParser(season, path.parse(season).base);
         const output = path.join(process.env.PREVIEW_IMGS_PATH, 'previmgs', String(serie.ID), `${data.season}-${data.episode}`);
         fs.mkdirSync(output, { recursive: true });
 
-        const command = `ffmpeg -i "${s}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
-        console.log(`Video ${i} / ${seasons.length + 1} - ${path.parse(s).base}`);
+        const command = `ffmpeg -i "${season}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
+        console.log(`Video ${i} / ${seasons.length} - ${path.parse(season).base}`);
         await deepExecPromisify(command);
     }
-
-    // console.log(output);
+    console.log('Finished');
 }
 
 const PORT = process.env.PORT || 3100;
 server.listen(PORT, async () => {
-    const series = crawlAndIndex();
-    await genearteImages(series);
     console.log(`Express App Listening ${process.env.https ? 'with SSL ' : ''}on ${PORT}`);
 
-
-    // console.log(
-    //     filenameParser('Food Wars! Shokugeki no Sōma St#1 Flg#1.mp4')
-    // );
+    const series = crawlAndIndex();
+    await genearteImages(series);
 
 });
