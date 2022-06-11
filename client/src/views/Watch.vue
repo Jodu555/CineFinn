@@ -198,10 +198,14 @@ export default {
 		},
 		handleVideoChange(season, episode, movie) {
 			const video = document.querySelector('video');
+			console.log(video);
 			if (video == null) {
 				this.setCurrentSeason(season);
 				this.setCurrentEpisode(episode);
 				this.setCurrentMovie(movie);
+				this.$nextTick(() => {
+					this.handleVideoChange(season, episode, movie);
+				});
 				return;
 			}
 			video.pause();
