@@ -33,7 +33,14 @@
 						role="group"
 						aria-label="Basic outlined example"
 					>
-						<button class="btn btn-outline-primary">Profile</button>
+						<button
+							class="btn btn-outline-primary"
+							data-bs-toggle="offcanvas"
+							data-bs-target="#offcanvasSettings"
+							aria-controls="offcanvasSettings"
+						>
+							Settings
+						</button>
 						<button class="btn btn-outline-danger" type="submit">Logout</button>
 					</div>
 				</div>

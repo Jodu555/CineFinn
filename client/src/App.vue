@@ -1,6 +1,7 @@
 <template>
 	<div id="app">
 		<Navigation />
+		<settings-drawer />
 		<router-view class="mt-2" :key="$route.query" />
 	</div>
 	<Footer />
@@ -12,10 +13,12 @@ import { mapActions } from 'vuex';
 import 'bootstrap';
 import Navigation from './components/Navigation.vue';
 import Footer from './components/Footer.vue';
+import SettingsDrawer from './components/SettingsDrawer.vue';
 export default {
 	components: {
 		Navigation,
 		Footer,
+		SettingsDrawer,
 	},
 	created() {
 		this.loadSeries();
