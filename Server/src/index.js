@@ -127,6 +127,7 @@ const crawlAndIndex = () => {
 }
 
 const filenameParser = (filepath, filename) => {
+    // filename exp. Food Wars! Shokugeki no Sōma St#1 Flg#1.mp4
     if (filename.includes('St#') && filename.includes('Flg#')) {
         const [title, rest] = filename.split('St#')
         const [season, rest2] = rest.split(' ');
@@ -138,7 +139,6 @@ const filenameParser = (filepath, filename) => {
         const title = path.basename(path.dirname(path.dirname(filepath)));
         return { movie: true, title, movieTitle: filename }
     }
-    // Food Wars! Shokugeki no Sōma St#1 Flg#1.mp4
 
 }
 
