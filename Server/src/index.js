@@ -164,18 +164,21 @@ class Series {
 const genearteImages = async (series) => {
 
     const serie = series[6];
-    const seasons = serie.seasons.flat();
+    const seasons = serie.seasons.flat().splice(0, 7);
 
-    // console.log(seasons);
-    const output = await Promise.all(seasons.map(s => {
+    console.log(seasons.length);
+    // return;
+    let i = 0;
+    for (const key of seasons) {
+        i++;
         const data = filenameParser(s, path.parse(s).base);
         const output = path.join(process.env.PREVIEW_IMGS_PATH, 'previmgs', String(serie.ID), `${data.season}-${data.episode}`);
         fs.mkdirSync(output, { recursive: true });
 
         const command = `ffmpeg -i "${s}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
-        console.log(command);
-        return deepExecPromisify(command);
-    }));
+        console.log(`Video ${i} / ${seasons.length + 1} - ${path.parse(s).base}`);
+        await deepExecPromisify(command);
+    }
 
     // console.log(output);
 }
