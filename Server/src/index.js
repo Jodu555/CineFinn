@@ -10,6 +10,20 @@ const morgan = require('morgan');
 const { listFiles } = require('../src/utils.js');
 const dotenv = require('dotenv').config();
 
+const { exec } = require('child_process');
+
+function execPromise(command) {
+    return new Promise(function (resolve, reject) {
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                reject(error);
+                return;
+            }
+            resolve(stdout.trim());
+        });
+    });
+}
+
 // const { Database } = require('@jodu555/mysqlapi');
 // const database = Database.createDatabase('localhost', 'root', '', 'rt-chat');
 // database.connect();
@@ -152,12 +166,70 @@ class Series {
     }
 }
 
+const genearteImages = async (series) => {
+
+    const serie = series[6];
+    const seasons = serie.seasons.flat();
+
+    const ffmpeg = require('ffmpeg');
+    try {
+
+        const s = 'D:\\Allgemein\\Ich\\Hobbys\\Programmieren\\Web Development\\NodeJS\\AniWorldDownloader\\Downloads\\Aniworld\\Food Wars! Shokugeki no Sōma\\Season-2\\Food Wars! Shokugeki no Sōma St#2 Flg#1.mp4';
+
+        const video = await new ffmpeg(s);
+
+        const data = filenameParser(s, path.parse(s).base);
+        // console.log(data);
+        const output = path.join(process.env.PREVIEW_IMGS_PATH, 'previmgs', String(serie.ID), `${data.season}-${data.episode}`);
+        fs.mkdirSync(output, { recursive: true });
+        const paths = await video.fnExtractFrameToJPG(output,
+            {
+                keep_aspect_ratio: true,
+                keep_pixel_aspect_ratio: true,
+                // size: '120x',
+                frame_rate: 1,
+                every_n_seconds: 10,
+                // file_name: 'preview%d.jpg'
+            }
+        )
+
+        console.log(paths);
+        return;
+    } catch (error) {
+        console.log(error);
+    }
+
+    //     // console.log(seasons);
+    //     const output = await Promise.all(seasons.map(s => {
+
+    //         const data = filenameParser(s, path.parse(s).base);
+    //         const output = path.join(process.env.PREVIEW_IMGS_PATH, 'previmgs', String(serie.ID), `${data.season}-${data.episode}`);
+    //         fs.mkdirSync(output, { recursive: true });
+    //         // const command = [
+    //         //     'ffmpeg',
+    //         //     '-i',
+    //         //     s,
+    //         //     '-vf',
+    //         //     'fps=1/10,scale=120:-1',
+    //         //     path.join(output, 'preview%d.jpg')
+    //         // ]
+    //         // console.log(1337, s.replaceAll(' ', '%20'));
+    //         // return;
+    //         const command = `ffmpeg -i '${s}' -vf fps=1/10,scale=120:-1 '${path.join(output, 'preview%d.jpg')}'`;
+    //         console.log(command);
+    //         return execPromise(command);
+    //     }));
+
+    //     console.log(output);
+}
+
 const PORT = process.env.PORT || 3100;
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
+    const series = crawlAndIndex();
+    await genearteImages(series);
     console.log(`Express App Listening ${process.env.https ? 'with SSL ' : ''}on ${PORT}`);
 
 
-    crawlAndIndex();
     // console.log(
     //     filenameParser('Food Wars! Shokugeki no Sōma St#1 Flg#1.mp4')
     // );
