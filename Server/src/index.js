@@ -52,7 +52,7 @@ if (process.env.https) {
 // Your Middleware handlers here
 app.use(express.static(path.join('static')));
 
-app.get("/video", require('../src/video.js'));
+app.get("/video", require('./routes/video.js'));
 
 app.get('/index', (req, res, next) => {
     res.json(crawlAndIndex());
@@ -186,7 +186,7 @@ const PORT = process.env.PORT || 3100;
 server.listen(PORT, async () => {
     console.log(`Express App Listening ${process.env.https ? 'with SSL ' : ''}on ${PORT}`);
 
-    const series = crawlAndIndex();
-    await genearteImages(series);
+    // const series = crawlAndIndex();
+    // await genearteImages(series);
 
 });
