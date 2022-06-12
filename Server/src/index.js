@@ -1,17 +1,16 @@
 const path = require('path');
 const fs = require('fs');
 
-
 const http = require('http');
 const express = require('express');
 const https = require('https');
 const cors = require('cors');
 const morgan = require('morgan');
-const { listFiles, getSeries } = require('../src/utils.js');
 const dotenv = require('dotenv').config();
-
 const child_process = require('child_process');
-const { Series, filenameParser } = require('./classes/series.js');
+
+const { getSeries } = require('./utils/utils.js');
+const { filenameParser } = require('./classes/series.js');
 
 async function deepExecPromisify(command, cwd) {
     return await new Promise((resolve, reject) => {
@@ -56,7 +55,7 @@ app.use(express.static(path.join('static')));
 app.get("/video", require('./routes/video.js'));
 
 app.get('/index', (req, res, next) => {
-    res.json(crawlAndIndex());
+    res.json(getSeries());
 });
 
 const genearteImages = async (series) => {
