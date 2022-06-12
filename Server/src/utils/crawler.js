@@ -1,3 +1,9 @@
+const path = require('path');
+const { Series, filenameParser } = require("../classes/series");
+const { listFiles } = require("./fileutils");
+
+const generateID = () => Math.floor(Math.random() * 1000);
+
 const crawlAndIndex = () => {
 
     const overcategories = ['Aniworld', 'STO'];

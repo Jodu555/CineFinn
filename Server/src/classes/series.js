@@ -1,3 +1,4 @@
+const path = require('path');
 class Series {
     constructor(ID, categorie, title, movies = [], seasons = []) {
         this.ID = ID;

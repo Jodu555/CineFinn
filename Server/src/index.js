@@ -59,8 +59,6 @@ app.get('/index', (req, res, next) => {
     res.json(crawlAndIndex());
 });
 
-const generateID = () => Math.floor(Math.random() * 1000);
-
 const genearteImages = async (series) => {
 
     const serie = series[6];
