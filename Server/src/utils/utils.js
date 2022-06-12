@@ -6,9 +6,9 @@ let series = null;
 
 
 
-const getSeries = () => {
-    if (!series) {
-        if (fs.existsSync(outputFileName)) {
+const getSeries = (forceLoad = false) => {
+    if (forceLoad || !series) {
+        if (fs.existsSync(outputFileName) && !forceLoad) {
             series = JSON.parse(fs.readFileSync(outputFileName, 'utf8'));
         } else {
             series = crawlAndIndex();

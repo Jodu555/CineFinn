@@ -82,8 +82,8 @@ const genearteImages = async (series) => {
 const PORT = process.env.PORT || 3100;
 server.listen(PORT, async () => {
     console.log(`Express App Listening ${process.env.https ? 'with SSL ' : ''}on ${PORT}`);
-    console.log(getSeries());
-    // const series = crawlAndIndex();
+    console.log(getSeries().length);
+    console.log(getSeries(true).map(x => [...x.seasons, ...x.movies]).flat(5).length);
     // await genearteImages(series);
 
 });

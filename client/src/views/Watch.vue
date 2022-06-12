@@ -80,6 +80,15 @@
 				</h3>
 			</div>
 		</div>
+
+		<div class="container d-flex justify-content-between">
+			<div>
+				<button @click="switchTo(-1)" class="btn btn-outline-warning">&lt; Previous</button>
+			</div>
+			<div>
+				<button @click="switchTo(1)" class="btn btn-outline-success">Next &gt;</button>
+			</div>
+		</div>
 		<div style="margin-top: 0.5%" class="video-container paused" data-volume-level="high">
 			<img class="thumbnail-img" />
 			<div class="video-controls-container">
@@ -187,6 +196,7 @@ export default {
 		},
 	},
 	methods: {
+		switchTo(idx) {},
 		changeMovie(ID) {
 			this.handleVideoChange(-1, -1, ID);
 		},
