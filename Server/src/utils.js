@@ -1,23 +1,22 @@
-const fs = require('fs');
-const path = require('path');
+const { crawlAndIndex } = require("./utils/crawler");
+
+let series = null;
 
 
-const listFiles = (lcPath) => {
-    const files = [];
-    const dirs = [];
-    fs.readdirSync(lcPath).map(e => { return { name: e, path: path.join(lcPath, e) } }).forEach(entity => {
-        if (fs.statSync(entity.path).isDirectory()) {
-            dirs.push(entity.name);
-            const revOutput = listFiles(path.join(entity.path))
-            files.push(...revOutput.files);
-            dirs.push(...revOutput.dirs);
+
+const getSeries = () => {
+    if (!series) {
+        if (fs.existsSync('out.json')) {
+            series = JSON.parse(fs.readFileSync('out.json', 'utf8'));
         } else {
-            files.push(entity.path);
+            series = crawlAndIndex();
+            fs.writeFileSync('out.json', JSON.stringify(series), 'utf8');
         }
-    });
-    return { files, dirs };
-}
+    }
+    return series;
+};
+
 
 module.exports = {
-    listFiles,
+    getSeries
 }
