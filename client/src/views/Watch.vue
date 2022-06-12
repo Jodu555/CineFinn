@@ -209,7 +209,19 @@ export default {
 				const currentBigIndex = this.currentSeries.seasons.flat().findIndex((x) => x == path);
 
 				const output = this.switcher(this.currentSeries.seasons.flat(), currentBigIndex, vel);
-				console.log(output);
+				console.log({ currentBigIndex, idx: output.idx });
+
+				let k = 0;
+				let obj = { i: 0, j: 0 };
+				this.currentSeries.seasons.forEach((a, i) => {
+					a.forEach((_, j) => {
+						k++;
+						console.log(i, j, k, '=', output.idx);
+						if (k == output.idx) obj = { i, j };
+					});
+				});
+
+				console.log(obj);
 			}
 		},
 		switcher(arr, curr, velocity) {

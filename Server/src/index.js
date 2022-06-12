@@ -86,4 +86,31 @@ server.listen(PORT, async () => {
     // console.log(getSeries(true).map(x => [...x.seasons, ...x.movies]).flat(5).length);
     // await genearteImages(series);
 
+
+    const test = [
+        [
+            1,
+            2,
+            3,
+            4
+        ],
+        [
+            5,
+            6,
+            7,
+            8
+        ]
+    ]
+
+    let idx = 6;
+
+    let k = 0;
+    test.forEach((a, i) => {
+        a.forEach((_, j) => {
+            k++;
+            if (idx == k)
+                console.log(i, j);
+        })
+    })
+
 });

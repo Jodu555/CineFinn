@@ -35,7 +35,7 @@ module.exports = (req, res) => {
     const start = Number(range.replace(/\D/g, ""));
     const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
 
-    console.log({ videoSize, start, end });
+    // console.log({ videoSize, start, end });
 
     const contentLength = end - start + 1;
     const headers = {
