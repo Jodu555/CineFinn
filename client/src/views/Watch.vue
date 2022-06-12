@@ -217,11 +217,12 @@ export default {
 					a.forEach((_, j) => {
 						k++;
 						console.log(i, j, k, '=', output.idx);
-						if (k == output.idx) obj = { i, j };
+						if (k == output.idx) obj = { i, j: j + 1 };
 					});
 				});
 
 				console.log(obj);
+				this.handleVideoChange(obj.i + 1, obj.j + 1);
 			}
 		},
 		switcher(arr, curr, velocity) {
