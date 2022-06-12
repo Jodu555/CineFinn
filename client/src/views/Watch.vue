@@ -196,7 +196,30 @@ export default {
 		},
 	},
 	methods: {
-		switchTo(idx) {},
+		switchTo(vel) {
+			if (this.currentSeason == -1) {
+				if (this.currentMovie == -1) {
+					console.log('Error');
+					//TODO: return error swal
+				}
+				//In Movies
+			} else {
+				//In Episodes
+				const path = this.currentSeries.seasons[this.currentSeason - 1][this.currentEpisode - 1];
+				const currentBigIndex = this.currentSeries.seasons.flat().findIndex((x) => x == path);
+
+				const output = this.switcher(this.currentSeries.seasons.flat(), currentBigIndex, vel);
+				console.log(output);
+			}
+		},
+		switcher(arr, curr, velocity) {
+			curr = curr + velocity;
+
+			if (curr >= arr.length) curr = 0;
+			if (curr < 0) curr = arr.length - 1;
+
+			return { element: arr[curr], idx: curr };
+		},
 		changeMovie(ID) {
 			this.handleVideoChange(-1, -1, ID);
 		},

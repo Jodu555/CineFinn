@@ -4,7 +4,6 @@
 
 import { Dropdown } from 'bootstrap';
 
-console.log('RUNSSS');
 
 const DEFAULTS = {
     threshold: 2,
