@@ -28,8 +28,7 @@ module.exports = (req, res) => {
         return;
     }
 
-    // const videoPath = path.join(path.join(process.env.VIDEO_PATH, 'STO', 'Mia and Me – Abenteuer in Centopia', 'Season-1', 'Mia and Me – Abenteuer in Centopia St#1 Flg#1.mp4'));
-    // console.log(videoPath);
+
     const videoSize = fs.statSync(videoPath).size;
 
     const CHUNK_SIZE = 10 ** 6; // 1MB

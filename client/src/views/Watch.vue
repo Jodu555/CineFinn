@@ -226,6 +226,10 @@ export default {
 		this.loadSeriesInfo(this.$route.query.id);
 		this.handleVideoChange(-1, -1, -1);
 	},
+	beforeUnmount() {
+		const video = document.querySelector('video');
+		//TODO: Make here the call to set the latest video position
+	},
 	async mounted() {
 		const playPauseBtn = document.querySelector('.play-pause-btn');
 		const theaterBtn = document.querySelector('.theater-btn');
