@@ -206,24 +206,77 @@ export default {
 			} else {
 				//In Episodes
 				const path = this.currentSeries.seasons[this.currentSeason - 1][this.currentEpisode - 1];
-				const currentBigIndex = this.currentSeries.seasons.flat().findIndex((x) => x == path);
+				const { arrptr, idxptr, value } = this.multiDimSwitcher(
+					this.currentSeries.seasons,
+					this.currentSeason - 1,
+					this.currentEpisode - 1,
+					vel
+				);
+				console.log(arrptr, idxptr, value);
 
-				const output = this.switcher(this.currentSeries.seasons.flat(), currentBigIndex, vel);
-				console.log({ currentBigIndex, idx: output.idx });
+				this.handleVideoChange(arrptr + 1, idxptr + 1);
 
-				let k = 0;
-				let obj = { i: 0, j: 0 };
-				this.currentSeries.seasons.forEach((a, i) => {
-					a.forEach((_, j) => {
-						k++;
-						console.log(i, j, k, '=', output.idx);
-						if (k == output.idx) obj = { i, j: j + 1 };
-					});
-				});
+				// const currentBigIndex = this.currentSeries.seasons.flat().findIndex((x) => x == path);
 
-				console.log(obj);
-				this.handleVideoChange(obj.i + 1, obj.j + 1);
+				// const output = this.switcher(this.currentSeries.seasons.flat(), currentBigIndex, vel);
+				// console.log({ currentBigIndex, idx: output.idx });
+
+				// let k = 0;
+				// let obj = { i: 0, j: 0 };
+				// this.currentSeries.seasons.forEach((a, i) => {
+				// 	a.forEach((_, j) => {
+				// 		k++;
+				// 		console.log(i, j, k, '=', output.idx);
+				// 		if (k == output.idx) obj = { i, j: j + 1 };
+				// 	});
+				// });
+
+				// console.log(obj);
+				// this.handleVideoChange(obj.i + 1, obj.j + 1);
 			}
+		},
+		multiDimSwitcher(dimArr, arrptr, idxptr, velocity) {
+			const debug = true;
+			idxptr += velocity;
+
+			const narr = dimArr[arrptr];
+
+			if (idxptr >= narr.length) {
+				//Switch to next arr or back to start
+				debug && console.log('next', dimArr[arrptr + 1]);
+				if (!dimArr[arrptr + 1]) {
+					if (dimArr.length > 1) {
+						arrptr = 0;
+					}
+					idxptr = 0;
+				} else {
+					debug && console.log('CAME next');
+					arrptr += 1;
+					idxptr = 0;
+				}
+			}
+
+			if (idxptr < 0) {
+				//Switch to prev arr or back to end
+				debug && console.log('prev');
+				if (!dimArr[arrptr - 1]) {
+					if (dimArr.length > 1) {
+						debug && console.log('CAME O prev');
+						arrptr = dimArr.length - 2;
+					}
+					idxptr = narr.length - 1;
+				} else {
+					debug && console.log('CAME prev');
+					arrptr -= 1;
+					idxptr = dimArr[arrptr].length - 1;
+				}
+			}
+
+			return {
+				arrptr,
+				idxptr,
+				value: dimArr[arrptr][idxptr],
+			};
 		},
 		switcher(arr, curr, velocity) {
 			curr = curr + velocity;
