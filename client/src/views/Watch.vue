@@ -185,6 +185,8 @@
 </template>
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex';
+import { singleDimSwitcher, multiDimSwitcher } from '@/plugins/switcher';
+
 export default {
 	computed: {
 		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode']),
@@ -220,7 +222,7 @@ export default {
 					return;
 				}
 				//Switch in Movies
-				const { idxptr, value } = this.singleDimSwitcher(
+				const { idxptr, value } = singleDimSwitcher(
 					this.currentSeries.movies,
 					this.currentMovie - 1,
 					vel
@@ -230,7 +232,7 @@ export default {
 				return;
 			} else {
 				//Switch in Episodes
-				const { arrptr, idxptr, value } = this.multiDimSwitcher(
+				const { arrptr, idxptr, value } = multiDimSwitcher(
 					this.currentSeries.seasons,
 					this.currentSeason - 1,
 					this.currentEpisode - 1,
@@ -240,57 +242,6 @@ export default {
 				this.handleVideoChange(arrptr + 1, idxptr + 1);
 				return;
 			}
-		},
-		multiDimSwitcher(dimArr, arrptr, idxptr, velocity) {
-			const debug = true;
-			idxptr += velocity;
-
-			const narr = dimArr[arrptr];
-
-			if (idxptr >= narr.length) {
-				//Switch to next arr or back to start
-				debug && console.log('next', dimArr[arrptr + 1]);
-				if (!dimArr[arrptr + 1]) {
-					if (dimArr.length > 1) {
-						arrptr = 0;
-					}
-					idxptr = 0;
-				} else {
-					debug && console.log('CAME next');
-					arrptr += 1;
-					idxptr = 0;
-				}
-			}
-
-			if (idxptr < 0) {
-				//Switch to prev arr or back to end
-				debug && console.log('prev');
-				if (!dimArr[arrptr - 1]) {
-					if (dimArr.length > 1) {
-						debug && console.log('CAME O prev');
-						arrptr = dimArr.length - 2;
-					}
-					idxptr = narr.length - 1;
-				} else {
-					debug && console.log('CAME prev');
-					arrptr -= 1;
-					idxptr = dimArr[arrptr].length - 1;
-				}
-			}
-
-			return {
-				arrptr,
-				idxptr,
-				value: dimArr[arrptr][idxptr],
-			};
-		},
-		singleDimswitcher(arr, curr, velocity) {
-			curr = curr + velocity;
-
-			if (curr >= arr.length) curr = 0;
-			if (curr < 0) curr = arr.length - 1;
-
-			return { value: arr[curr], idxptr: curr };
 		},
 		changeMovie(ID) {
 			this.handleVideoChange(-1, -1, ID);
