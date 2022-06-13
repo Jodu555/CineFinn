@@ -82,76 +82,7 @@ const genearteImages = async (series) => {
 const PORT = process.env.PORT || 3100;
 server.listen(PORT, async () => {
     console.log(`Express App Listening ${process.env.https ? 'with SSL ' : ''}on ${PORT}`);
-    // console.log(getSeries().length);
-    // console.log(getSeries(true).map(x => [...x.seasons, ...x.movies]).flat(5).length);
+    console.log(getSeries().length);
+    console.log(getSeries(true).map(x => [...x.seasons, ...x.movies]).flat(5).length);
     // await genearteImages(series);
-
-
-    const test = [
-        [
-            'a',
-            'b',
-            'c',
-            'd'
-        ],
-        [
-            'e',
-            'f',
-            'g',
-            'h'
-        ]
-    ]
-
-    const debug = false;
-
-    let idxptr = 0;
-    let arrptr = 0;
-
-    for (let i = 0; i < 10; i++) {
-        const { arrptr: tmpa, idxptr: tmpi, value } = switcher(test, arrptr, idxptr, -1);
-        arrptr = tmpa;
-        idxptr = tmpi;
-        console.log(value);
-    }
-
-    function switcher(dimArr, arrptr, idxptr, velocity) {
-        idxptr += velocity;
-
-        const narr = dimArr[arrptr];
-
-        if (idxptr >= narr.length) {
-            //Switch to next arr or back to start
-            debug && console.log('next', dimArr[arrptr + 1]);
-            if (!dimArr[arrptr + 1]) {
-                if (dimArr.length > 1) {
-                    arrptr = 0;
-                }
-                idxptr = 0;
-            } else {
-                debug && console.log('CAME next');
-                arrptr += 1;
-                idxptr = 0;
-            }
-        }
-
-        if (idxptr < 0) {
-            //Switch to prev arr or back to end
-            debug && console.log('prev');
-            if (!dimArr[arrptr - 1]) {
-                if (dimArr.length > 1) {
-                    arrptr = dimArr.length - 1;
-                }
-                idxptr = narr.length - 1;
-            } else {
-                debug && console.log('CAME prev');
-                arrptr -= 1;
-                idxptr = dimArr[arrptr].length - 1;
-            }
-        }
-
-        return {
-            arrptr, idxptr, value: dimArr[arrptr][idxptr]
-        }
-    }
-
 });

@@ -17,8 +17,12 @@
 			</div>
 			<div class="offcanvas-body">
 				<div class="d-grid gap-2">
-					<button type="button" @click="toastTopEnd()" class="btn btn-outline-info">
+					<button type="button" @click="rescrapeVideos()" class="btn btn-outline-info">
 						Re-Scrape The Videos
+					</button>
+					<hr />
+					<button type="button" @click="rescrapeVideos()" class="btn btn-outline-info">
+						Generate the preview imgs
 					</button>
 				</div>
 			</div>
@@ -28,7 +32,8 @@
 <script>
 export default {
 	methods: {
-		toastTopEnd() {
+		rescrapeVideos() {
+			//TODO: Logic
 			this.$swal({
 				toast: true,
 				position: 'top-end',

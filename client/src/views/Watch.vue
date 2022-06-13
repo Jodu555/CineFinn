@@ -1,6 +1,10 @@
 <template>
 	<div>
-		<div class="container" v-if="currentSeries.ID != -1">
+		<div v-if="currentSeries == undefined">
+			<h1>No Series with that ID</h1>
+		</div>
+		<div class="container" v-if="currentSeries != undefined && currentSeries.ID != -1">
+			<!-- Title -->
 			<h1>
 				{{ currentSeries.title }} -
 				{{
@@ -79,16 +83,17 @@
 					</button>
 				</h3>
 			</div>
+			<!-- Previous & Next -->
+			<div class="d-flex justify-content-between">
+				<div>
+					<button @click="switchTo(-1)" class="btn btn-outline-warning">&lt; Previous</button>
+				</div>
+				<div>
+					<button @click="switchTo(1)" class="btn btn-outline-success">Next &gt;</button>
+				</div>
+			</div>
 		</div>
 
-		<div class="container d-flex justify-content-between">
-			<div>
-				<button @click="switchTo(-1)" class="btn btn-outline-warning">&lt; Previous</button>
-			</div>
-			<div>
-				<button @click="switchTo(1)" class="btn btn-outline-success">Next &gt;</button>
-			</div>
-		</div>
 		<div style="margin-top: 0.5%" class="video-container paused" data-volume-level="high">
 			<img class="thumbnail-img" />
 			<div class="video-controls-container">
@@ -184,6 +189,7 @@ export default {
 	computed: {
 		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode']),
 		videoSrc() {
+			if (this.currentSeries == undefined) return '';
 			let out = `http://localhost:3100/video?series=${this.currentSeries.ID}`;
 			// console.log(1337, this.currentSeason, this.currentEpisode, this.currentMovie);
 			if (this.currentSeason == -1) {
@@ -297,7 +303,7 @@ export default {
 		},
 		handleVideoChange(season, episode, movie) {
 			const video = document.querySelector('video');
-			console.log(video);
+			// console.log(video);
 			if (video == null) {
 				this.setCurrentSeason(season);
 				this.setCurrentEpisode(episode);
