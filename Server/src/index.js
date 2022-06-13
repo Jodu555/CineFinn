@@ -89,28 +89,76 @@ server.listen(PORT, async () => {
 
     const test = [
         [
-            1,
-            2,
-            3,
-            4
+            'a',
+            'b',
+            'c',
+            'd'
         ],
         [
-            5,
-            6,
-            7,
-            8
+            'e',
+            'f',
+            'g',
+            'h'
         ]
     ]
 
-    let idx = 6;
+    const debug = false;
 
-    let k = 0;
-    test.forEach((a, i) => {
-        a.forEach((_, j) => {
-            k++;
-            if (idx == k)
-                console.log(i, j);
-        })
-    })
+    let idxptr = 0;
+    let arrptr = 0;
+
+    switcher()
+    switcher()
+    switcher()
+    switcher()
+    switcher()
+    switcher()
+    switcher()
+    switcher()
+    switcher()
+    switcher()
+    switcher()
+
+
+
+    function switcher() {
+
+
+        const narr = test[arrptr];
+
+        if (idxptr >= narr.length) {
+            //Switch to next arr or back to start
+            debug && console.log('next', test[arrptr + 1]);
+            if (!test[arrptr + 1]) {
+                if (test.length > 1) {
+                    arrptr = 0;
+                }
+                idxptr = 0;
+            } else {
+                debug && console.log('CAME next');
+                arrptr += 1;
+                idxptr = 0;
+            }
+        }
+
+        if (idxptr < 0) {
+            //Switch to prev arr or back to end
+            debug && console.log('prev');
+            if (!test[arrptr - 1]) {
+                if (test.length > 1) {
+                    arrptr = test.length - 1;
+                }
+                idxptr = narr.length - 1;
+            } else {
+                debug && console.log('CAME prev');
+                arrptr -= 1;
+                idxptr = test[arrptr].length - 1;
+            }
+        }
+
+
+        console.log(arrptr, idxptr, test[arrptr][idxptr]);
+        idxptr--;
+    }
 
 });
