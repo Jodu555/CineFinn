@@ -107,30 +107,23 @@ server.listen(PORT, async () => {
     let idxptr = 0;
     let arrptr = 0;
 
-    switcher()
-    switcher()
-    switcher()
-    switcher()
-    switcher()
-    switcher()
-    switcher()
-    switcher()
-    switcher()
-    switcher()
-    switcher()
+    for (let i = 0; i < 10; i++) {
+        const { arrptr: tmpa, idxptr: tmpi, value } = switcher(test, arrptr, idxptr, -1);
+        arrptr = tmpa;
+        idxptr = tmpi;
+        console.log(value);
+    }
 
+    function switcher(dimArr, arrptr, idxptr, velocity) {
+        idxptr += velocity;
 
-
-    function switcher() {
-
-
-        const narr = test[arrptr];
+        const narr = dimArr[arrptr];
 
         if (idxptr >= narr.length) {
             //Switch to next arr or back to start
-            debug && console.log('next', test[arrptr + 1]);
-            if (!test[arrptr + 1]) {
-                if (test.length > 1) {
+            debug && console.log('next', dimArr[arrptr + 1]);
+            if (!dimArr[arrptr + 1]) {
+                if (dimArr.length > 1) {
                     arrptr = 0;
                 }
                 idxptr = 0;
@@ -144,21 +137,21 @@ server.listen(PORT, async () => {
         if (idxptr < 0) {
             //Switch to prev arr or back to end
             debug && console.log('prev');
-            if (!test[arrptr - 1]) {
-                if (test.length > 1) {
-                    arrptr = test.length - 1;
+            if (!dimArr[arrptr - 1]) {
+                if (dimArr.length > 1) {
+                    arrptr = dimArr.length - 1;
                 }
                 idxptr = narr.length - 1;
             } else {
                 debug && console.log('CAME prev');
                 arrptr -= 1;
-                idxptr = test[arrptr].length - 1;
+                idxptr = dimArr[arrptr].length - 1;
             }
         }
 
-
-        console.log(arrptr, idxptr, test[arrptr][idxptr]);
-        idxptr--;
+        return {
+            arrptr, idxptr, value: dimArr[arrptr][idxptr]
+        }
     }
 
 });
