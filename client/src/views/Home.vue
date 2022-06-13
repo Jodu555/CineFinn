@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<button class="btn btn-outline-success" @click="toastTopEnd">Pop</button>
+		<!-- <button class="btn btn-outline-success" @click="toastTopEnd">Pop</button> -->
 		<div class="container accordion accordion-flush" id="accordionFlushExample">
 			<div v-for="categorie of categories" :key="categorie.title" class="accordion-item">
 				<h2 class="accordion-header">

@@ -200,12 +200,30 @@ export default {
 			if (this.currentSeason == -1) {
 				if (this.currentMovie == -1) {
 					console.log('Error');
-					//TODO: return error swal
+
+					const title = `No entry point for '${vel == 1 ? 'Next' : 'Previous'}'`;
+					this.$swal({
+						toast: true,
+						position: 'top-end',
+						showConfirmButton: false,
+						timer: 1500,
+						icon: 'error',
+						title,
+						timerProgressBar: true,
+					});
+					return;
 				}
-				//In Movies
+				//Switch in Movies
+				const { idxptr, value } = this.singleDimSwitcher(
+					this.currentSeries.movies,
+					this.currentMovie - 1,
+					vel
+				);
+				console.log(idxptr, value);
+				this.handleVideoChange(-1, -1, idxptr + 1);
+				return;
 			} else {
-				//In Episodes
-				const path = this.currentSeries.seasons[this.currentSeason - 1][this.currentEpisode - 1];
+				//Switch in Episodes
 				const { arrptr, idxptr, value } = this.multiDimSwitcher(
 					this.currentSeries.seasons,
 					this.currentSeason - 1,
@@ -213,26 +231,8 @@ export default {
 					vel
 				);
 				console.log(arrptr, idxptr, value);
-
 				this.handleVideoChange(arrptr + 1, idxptr + 1);
-
-				// const currentBigIndex = this.currentSeries.seasons.flat().findIndex((x) => x == path);
-
-				// const output = this.switcher(this.currentSeries.seasons.flat(), currentBigIndex, vel);
-				// console.log({ currentBigIndex, idx: output.idx });
-
-				// let k = 0;
-				// let obj = { i: 0, j: 0 };
-				// this.currentSeries.seasons.forEach((a, i) => {
-				// 	a.forEach((_, j) => {
-				// 		k++;
-				// 		console.log(i, j, k, '=', output.idx);
-				// 		if (k == output.idx) obj = { i, j: j + 1 };
-				// 	});
-				// });
-
-				// console.log(obj);
-				// this.handleVideoChange(obj.i + 1, obj.j + 1);
+				return;
 			}
 		},
 		multiDimSwitcher(dimArr, arrptr, idxptr, velocity) {
@@ -278,13 +278,13 @@ export default {
 				value: dimArr[arrptr][idxptr],
 			};
 		},
-		switcher(arr, curr, velocity) {
+		singleDimswitcher(arr, curr, velocity) {
 			curr = curr + velocity;
 
 			if (curr >= arr.length) curr = 0;
 			if (curr < 0) curr = arr.length - 1;
 
-			return { element: arr[curr], idx: curr };
+			return { value: arr[curr], idxptr: curr };
 		},
 		changeMovie(ID) {
 			this.handleVideoChange(-1, -1, ID);
