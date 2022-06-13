@@ -84,5 +84,5 @@ server.listen(PORT, async () => {
     console.log(`Express App Listening ${process.env.https ? 'with SSL ' : ''}on ${PORT}`);
     console.log(getSeries().length);
     console.log(getSeries(true).map(x => [...x.seasons, ...x.movies]).flat(5).length);
-    // await genearteImages(series);
+    await genearteImages(getSeries());
 });

@@ -287,6 +287,7 @@ export default {
 		//TODO: Make here the call to set the latest video position
 	},
 	async mounted() {
+		const v = this;
 		const playPauseBtn = document.querySelector('.play-pause-btn');
 		const theaterBtn = document.querySelector('.theater-btn');
 		const fullScreenBtn = document.querySelector('.full-screen-btn');
@@ -380,7 +381,11 @@ export default {
 			const rect = timelineContainer.getBoundingClientRect();
 			const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
 			const previewImgNumber = Math.max(1, Math.floor((percent * video.duration) / 10));
-			const previewImgSrc = `assets/previewImgs/preview${previewImgNumber}.jpg`;
+			if (v.currentSeries != undefined && v.currentSeries.ID != -1) {
+				const SRC = `http://localhost:3100/previewImgs/${v.currentSeries.ID}/${v.currentSeason}-${v.currentEpisode}`;
+				console.log(SRC);
+			}
+			const previewImgSrc = `/assets/previewImgs/preview${previewImgNumber}.jpg`;
 			previewImg.src = previewImgSrc;
 			timelineContainer.style.setProperty('--preview-position', percent);
 
