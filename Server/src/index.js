@@ -51,6 +51,7 @@ if (process.env.https) {
 
 // Your Middleware handlers here
 app.use(express.static(path.join('static')));
+app.use('/previewImages', express.static(path.join(process.env.PREVIEW_IMGS_PATH)));
 
 app.get("/video", require('./routes/video.js'));
 
@@ -83,6 +84,6 @@ const PORT = process.env.PORT || 3100;
 server.listen(PORT, async () => {
     console.log(`Express App Listening ${process.env.https ? 'with SSL ' : ''}on ${PORT}`);
     console.log(getSeries().length);
-    console.log(getSeries(true).map(x => [...x.seasons, ...x.movies]).flat(5).length);
-    await genearteImages(getSeries());
+    console.log(getSeries().map(x => [...x.seasons, ...x.movies]).flat(5).length);
+    // await genearteImages(getSeries());
 });

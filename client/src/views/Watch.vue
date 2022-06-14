@@ -19,7 +19,20 @@
 					(currentSeries.seasons.length > 1 ? 'Seasons' : 'Season')
 				}}
 			</h1>
-			<!-- Movies -->
+			<EntityListView
+				v-if="currentSeries.movies.length >= 1"
+				title="Movies:"
+				:array="currentSeries.movies"
+				:current="currentMovie"
+				:chnageFN="changeMovie"
+			/>
+			<EntityListView
+				title="Seasons:"
+				:array="currentSeries.seasons"
+				:current="currentSeason"
+				:chnageFN="changeSeason"
+			/>
+			<!-- Movies
 			<div v-if="currentSeries.movies.length >= 1" class="row justify-content-start">
 				<h2 class="col-sm-2" style="width: 13.666667%">Movies:</h2>
 				<h3 class="col">
@@ -40,7 +53,7 @@
 					</button>
 				</h3>
 			</div>
-			<!-- Seasons -->
+			Seasons
 			<div class="row justify-content-start">
 				<h2 class="col-sm-2" style="width: 13.666667%">Seasons:</h2>
 				<h3 class="col">
@@ -60,7 +73,7 @@
 						{{ i + 1 }}
 					</button>
 				</h3>
-			</div>
+			</div> -->
 			<!-- Episodes -->
 			<div v-if="currentSeason != -1" class="row justify-content-start">
 				<h2 class="col-sm-2" style="width: 13.666667%">Episodes:</h2>
@@ -186,6 +199,7 @@
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex';
 import { singleDimSwitcher, multiDimSwitcher } from '@/plugins/switcher';
+import EntityListView from '@/components/EntityListView.vue';
 
 export default {
 	computed: {
@@ -208,7 +222,6 @@ export default {
 			if (this.currentSeason == -1) {
 				if (this.currentMovie == -1) {
 					console.log('Error');
-
 					const title = `No entry point for '${vel == 1 ? 'Next' : 'Previous'}'`;
 					this.$swal({
 						toast: true,
@@ -302,12 +315,9 @@ export default {
 		const videoContainer = document.querySelector('.video-container');
 		const timelineContainer = document.querySelector('.timeline-container');
 		const video = document.querySelector('video');
-
 		document.addEventListener('keydown', (e) => {
 			const tagName = document.activeElement.tagName.toLowerCase();
-
 			if (tagName === 'input') return;
-
 			switch (e.key.toLowerCase()) {
 				case ' ':
 					if (tagName === 'button') return;
@@ -348,7 +358,6 @@ export default {
 					break;
 			}
 		});
-
 		// Timeline
 		timelineContainer.addEventListener('mousemove', handleTimelineUpdate);
 		timelineContainer.addEventListener('mousedown', toggleScrubbing);
@@ -358,7 +367,6 @@ export default {
 		document.addEventListener('mousemove', (e) => {
 			if (isScrubbing) handleTimelineUpdate(e);
 		});
-
 		let isScrubbing = false;
 		let wasPaused;
 		function toggleScrubbing(e) {
@@ -373,50 +381,43 @@ export default {
 				video.currentTime = percent * video.duration;
 				if (!wasPaused) video.play();
 			}
-
 			handleTimelineUpdate(e);
 		}
-
 		function handleTimelineUpdate(e) {
 			const rect = timelineContainer.getBoundingClientRect();
 			const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
 			const previewImgNumber = Math.max(1, Math.floor((percent * video.duration) / 10));
+			let previewImgSrc = `/assets/previewImgs/preview${previewImgNumber}.jpg`;
 			if (v.currentSeries != undefined && v.currentSeries.ID != -1) {
-				const SRC = `http://localhost:3100/previewImgs/${v.currentSeries.ID}/${v.currentSeason}-${v.currentEpisode}`;
-				console.log(SRC);
+				// 'http://localhost:3100/previewImages/260/1-1/preview2.jpg'
+				previewImgSrc = `http://localhost:3100/previewImages/${v.currentSeries.ID}/${v.currentSeason}-${v.currentEpisode}/preview${previewImgNumber}.jpg`;
+				// console.log(previewImgSrc);
 			}
-			const previewImgSrc = `/assets/previewImgs/preview${previewImgNumber}.jpg`;
 			previewImg.src = previewImgSrc;
 			timelineContainer.style.setProperty('--preview-position', percent);
-
 			if (isScrubbing) {
 				e.preventDefault();
 				thumbnailImg.src = previewImgSrc;
 				timelineContainer.style.setProperty('--progress-position', percent);
 			}
 		}
-
 		// Playback Speed
 		speedBtn.addEventListener('click', changePlaybackSpeed);
-
 		function changePlaybackSpeed() {
 			let newPlaybackRate = video.playbackRate + 0.25;
 			if (newPlaybackRate > 2) newPlaybackRate = 0.25;
 			video.playbackRate = newPlaybackRate;
 			speedBtn.textContent = `${newPlaybackRate}x`;
 		}
-
 		// Duration
 		video.addEventListener('loadeddata', () => {
 			totalTimeElem.textContent = formatDuration(video.duration);
 		});
-
 		video.addEventListener('timeupdate', () => {
 			currentTimeElem.textContent = formatDuration(video.currentTime);
 			const percent = video.currentTime / video.duration;
 			timelineContainer.style.setProperty('--progress-position', percent);
 		});
-
 		const leadingZeroFormatter = new Intl.NumberFormat(undefined, {
 			minimumIntegerDigits: 2,
 		});
@@ -432,22 +433,18 @@ export default {
 				)}`;
 			}
 		}
-
 		function skip(duration) {
 			video.currentTime += duration;
 		}
-
 		// Volume
 		muteBtn.addEventListener('click', toggleMute);
 		volumeSlider.addEventListener('input', (e) => {
 			video.volume = e.target.value;
 			video.muted = e.target.value === 0;
 		});
-
 		function toggleMute() {
 			video.muted = !video.muted;
 		}
-
 		video.addEventListener('volumechange', () => {
 			volumeSlider.value = video.volume;
 			let volumeLevel;
@@ -459,19 +456,15 @@ export default {
 			} else {
 				volumeLevel = 'low';
 			}
-
 			videoContainer.dataset.volumeLevel = volumeLevel;
 		});
-
 		// View Modes
 		theaterBtn.addEventListener('click', toggleTheaterMode);
 		fullScreenBtn.addEventListener('click', toggleFullScreenMode);
 		miniPlayerBtn.addEventListener('click', toggleMiniPlayerMode);
-
 		function toggleTheaterMode() {
 			videoContainer.classList.toggle('theater');
 		}
-
 		function toggleFullScreenMode() {
 			if (document.fullscreenElement == null) {
 				videoContainer.requestFullscreen();
@@ -479,7 +472,6 @@ export default {
 				document.exitFullscreen();
 			}
 		}
-
 		function toggleMiniPlayerMode() {
 			if (videoContainer.classList.contains('mini-player')) {
 				document.exitPictureInPicture();
@@ -487,35 +479,29 @@ export default {
 				video.requestPictureInPicture();
 			}
 		}
-
 		document.addEventListener('fullscreenchange', () => {
 			videoContainer.classList.toggle('full-screen', document.fullscreenElement);
 		});
-
 		video.addEventListener('enterpictureinpicture', () => {
 			videoContainer.classList.add('mini-player');
 		});
-
 		video.addEventListener('leavepictureinpicture', () => {
 			videoContainer.classList.remove('mini-player');
 		});
-
 		// Play/Pause
 		playPauseBtn.addEventListener('click', togglePlay);
 		video.addEventListener('click', togglePlay);
-
 		function togglePlay() {
 			video.paused ? video.play() : video.pause();
 		}
-
 		video.addEventListener('play', () => {
 			videoContainer.classList.remove('paused');
 		});
-
 		video.addEventListener('pause', () => {
 			videoContainer.classList.add('paused');
 		});
 	},
+	components: { EntityListView },
 };
 </script>
 

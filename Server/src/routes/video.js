@@ -13,7 +13,7 @@ module.exports = (req, res) => {
     }
 
     if (seriesID == -1 || season == -1 || episode == -1) {
-        res.status(400).send("No Video!");
+        res.status(404).send("No Video!");
         return;
     }
 
@@ -21,6 +21,10 @@ module.exports = (req, res) => {
 
     const serie = series.find(x => x.ID == seriesID);
 
+    if (serie == undefined) {
+        res.status(404).send("Cant find serie with " + x.ID);
+        return;
+    }
 
     const videoPath = movie ? serie.movies[movie] : serie.seasons[season][episode];
     if (videoPath == null || videoPath == undefined) {
