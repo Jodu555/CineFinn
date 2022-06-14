@@ -4,10 +4,7 @@
 			<h1>No Series with that ID</h1>
 		</div>
 		<div class="container" v-if="currentSeries != undefined && currentSeries.ID != -1">
-			<!-- Title -->
-			<h1>
-				{{ displayTitle }}
-			</h1>
+			<h1>{{ displayTitle }}</h1>
 			<EntityListView
 				v-if="currentSeries.movies.length >= 1"
 				title="Movies:"

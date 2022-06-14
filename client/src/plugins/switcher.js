@@ -1,5 +1,5 @@
 function multiDimSwitcher(dimArr, arrptr, idxptr, velocity) {
-    const debug = true;
+    const debug = false;
     idxptr += velocity;
 
     const narr = dimArr[arrptr];
@@ -24,10 +24,10 @@ function multiDimSwitcher(dimArr, arrptr, idxptr, velocity) {
         debug && console.log('prev');
         if (!dimArr[arrptr - 1]) {
             if (dimArr.length > 1) {
-                debug && console.log('CAME O prev');
-                arrptr = dimArr.length - 2;
+                debug && console.log('CAME O prev', dimArr.length, arrptr);
+                arrptr = dimArr.length - 1;
             }
-            idxptr = narr.length - 1;
+            idxptr = dimArr[arrptr].length - 1;
         } else {
             debug && console.log('CAME prev');
             arrptr -= 1;
