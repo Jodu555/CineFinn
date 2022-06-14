@@ -6,18 +6,7 @@
 		<div class="container" v-if="currentSeries != undefined && currentSeries.ID != -1">
 			<!-- Title -->
 			<h1>
-				{{ currentSeries.title }} -
-				{{
-					(currentSeries.movies.length >= 1
-						? currentSeries.movies.length +
-						  ' ' +
-						  (currentSeries.movies.length > 1 ? 'Movies' : 'Movie')
-						: '') +
-					(currentSeries.movies.length >= 1 ? ' | ' : '') +
-					currentSeries.seasons.length +
-					' ' +
-					(currentSeries.seasons.length > 1 ? 'Seasons' : 'Season')
-				}}
+				{{ displayTitle }}
 			</h1>
 			<EntityListView
 				v-if="currentSeries.movies.length >= 1"
@@ -158,6 +147,21 @@ export default {
 				out += `&season=${this.currentSeason - 1}&episode=${this.currentEpisode - 1}`;
 			}
 			return out;
+		},
+		displayTitle() {
+			let str = `${this.currentSeries.title} - `;
+
+			if (this.currentSeries.movies.length >= 1) {
+				str +=
+					`${this.currentSeries.movies.length} ` +
+					(this.currentSeries.movies.length > 1 ? 'Movies' : 'Movie');
+				str += ' | ';
+			}
+			str +=
+				`${this.currentSeries.seasons.length} ` +
+				(this.currentSeries.seasons.length > 1 ? 'Seasons' : 'Season');
+
+			return str;
 		},
 	},
 	methods: {
