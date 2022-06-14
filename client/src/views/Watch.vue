@@ -32,70 +32,13 @@
 				:current="currentSeason"
 				:chnageFN="changeSeason"
 			/>
-			<!-- Movies
-			<div v-if="currentSeries.movies.length >= 1" class="row justify-content-start">
-				<h2 class="col-sm-2" style="width: 13.666667%">Movies:</h2>
-				<h3 class="col">
-					<button
-						style="font-weight: 900; font-size: 1.18rem; padding: 0.3rem 0.6rem"
-						type="button"
-						:class="{
-							btn: true,
-							'text-white': true,
-							'btn-primary': currentMovie !== i + 1,
-							'btn-info': currentMovie == i + 1,
-						}"
-						v-for="(s, i) in currentSeries.movies"
-						:key="s"
-						@click="changeMovie(i + 1)"
-					>
-						{{ i + 1 }}
-					</button>
-				</h3>
-			</div>
-			Seasons
-			<div class="row justify-content-start">
-				<h2 class="col-sm-2" style="width: 13.666667%">Seasons:</h2>
-				<h3 class="col">
-					<button
-						style="font-weight: 900; font-size: 1.18rem; padding: 0.3rem 0.6rem"
-						type="button"
-						:class="{
-							btn: true,
-							'text-white': true,
-							'btn-primary': currentSeason !== i + 1,
-							'btn-info': currentSeason == i + 1,
-						}"
-						v-for="(s, i) in currentSeries.seasons"
-						:key="s"
-						@click="changeSeason(i + 1)"
-					>
-						{{ i + 1 }}
-					</button>
-				</h3>
-			</div> -->
-			<!-- Episodes -->
-			<div v-if="currentSeason != -1" class="row justify-content-start">
-				<h2 class="col-sm-2" style="width: 13.666667%">Episodes:</h2>
-				<h3 class="col">
-					<button
-						style="font-weight: 900; font-size: 1.18rem; padding: 0.3rem 0.6rem"
-						type="button"
-						:class="{
-							btn: true,
-							// 'btn-lg': true,
-							'text-white': true,
-							'btn-primary': currentEpisode !== i + 1,
-							'btn-info': currentEpisode == i + 1,
-						}"
-						v-for="(s, i) in currentSeries.seasons[currentSeason - 1]"
-						:key="s"
-						@click="changeEpisode(i + 1)"
-					>
-						{{ i + 1 }}
-					</button>
-				</h3>
-			</div>
+			<EntityListView
+				v-if="currentSeason != -1"
+				title="Episodes:"
+				:array="currentSeries.seasons[currentSeason - 1]"
+				:current="currentEpisode"
+				:chnageFN="changeEpisode"
+			/>
 			<!-- Previous & Next -->
 			<div class="d-flex justify-content-between">
 				<div>
