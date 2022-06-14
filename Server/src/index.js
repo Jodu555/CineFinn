@@ -9,6 +9,8 @@ const morgan = require('morgan');
 const dotenv = require('dotenv').config();
 const child_process = require('child_process');
 
+const { getVideoDurationInSeconds } = require('get-video-duration')
+
 const { getSeries } = require('./utils/utils.js');
 const { filenameParser } = require('./classes/series.js');
 
@@ -70,13 +72,43 @@ const genearteImages = async (series) => {
     for (const season of seasons) {
         i++;
         const data = filenameParser(season, path.parse(season).base);
-        const output = path.join(process.env.PREVIEW_IMGS_PATH, 'previmgs', String(serie.ID), `${data.season}-${data.episode}`);
+        const output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), `${data.season}-${data.episode}`);
         fs.mkdirSync(output, { recursive: true });
 
         const command = `ffmpeg -i "${season}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
         console.log(`Video ${i} / ${seasons.length} - ${path.parse(season).base}`);
-        await deepExecPromisify(command);
+        // await deepExecPromisify(command);
     }
+    console.log('Finished');
+}
+
+const checkImages = async (series) => {
+    // const serie = series[6];
+    // const seasons = serie.seasons.flat();
+
+    let totalImgs = 0;
+
+    // return;
+    for (const serie of series) {
+        const seasons = serie.seasons.flat(2);
+        let i = 0;
+        for (const season of seasons) {
+            i++;
+            const data = filenameParser(season, path.parse(season).base);
+            const location = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), `${data.season}-${data.episode}`);
+            const duration = await getVideoDurationInSeconds(season);
+            const imageAmount = Math.ceil(duration / 10)
+            totalImgs += imageAmount;
+            console.log(totalImgs);
+            if (!fs.existsSync(location)) {
+                //Failure
+                continue;
+            }
+            const files = fs.readdirSync(location);
+            console.log(`Check ${i} / ${seasons.length} - ${path.parse(season).base} = ${imageAmount} == ${files.length}`);
+        }
+    }
+
     console.log('Finished');
 }
 
@@ -85,5 +117,5 @@ server.listen(PORT, async () => {
     console.log(`Express App Listening ${process.env.https ? 'with SSL ' : ''}on ${PORT}`);
     console.log(getSeries().length);
     console.log(getSeries().map(x => [...x.seasons, ...x.movies]).flat(5).length);
-    // await genearteImages(getSeries());
+    await checkImages(getSeries());
 });

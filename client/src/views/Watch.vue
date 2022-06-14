@@ -131,6 +131,7 @@ import { singleDimSwitcher, multiDimSwitcher } from '@/plugins/switcher';
 import EntityListView from '@/components/EntityListView.vue';
 
 export default {
+	components: { EntityListView },
 	computed: {
 		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode']),
 		videoSrc() {
@@ -445,7 +446,6 @@ export default {
 			videoContainer.classList.add('paused');
 		});
 	},
-	components: { EntityListView },
 };
 </script>
 
