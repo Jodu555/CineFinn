@@ -1,5 +1,5 @@
 <template>
-	<div id="app">
+	<div v-auto-animate="{ duration: 250 }" id="app">
 		<Navigation />
 		<settings-drawer />
 		<router-view class="mt-2" :key="$route.query" />
