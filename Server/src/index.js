@@ -83,9 +83,6 @@ const genearteImages = async (series) => {
 }
 
 const checkImages = async (series) => {
-    // const serie = series[6];
-    // const seasons = serie.seasons.flat();
-
     let totalImgs = 0;
 
     // return;

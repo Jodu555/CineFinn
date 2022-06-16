@@ -3,6 +3,7 @@ const { crawlAndIndex } = require("./crawler");
 const outputFileName = 'out.json';
 
 let series = null;
+let activeJobs = [];
 
 
 
@@ -20,7 +21,10 @@ const getSeries = (forceLoad = false) => {
     return series;
 };
 
+const getActiveJobs = () => activeJobs;
+
 
 module.exports = {
     getSeries,
+    getActiveJobs
 }
