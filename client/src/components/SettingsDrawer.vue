@@ -25,6 +25,25 @@
 						Generate the preview imgs
 					</button>
 				</div>
+				<hr />
+				<h2>Current Active Jobs:</h2>
+				<ul class="list-group list-group-flush">
+					<li class="list-group-item">
+						Checking for the generated images
+						<!-- <div class="progress">
+							<div
+								class="progress-bar progress-bar-striped progress-bar-animated"
+								role="progressbar"
+								aria-valuenow="75"
+								aria-valuemin="0"
+								aria-valuemax="100"
+								style="width: 75%"
+							></div>
+						</div> -->
+					</li>
+					<li class="list-group-item">Generating Images</li>
+					<li class="list-group-item">Rescraping the archive</li>
+				</ul>
 			</div>
 		</div>
 	</div>
