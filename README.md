@@ -16,13 +16,10 @@ This is meant to be a super simple alternative to Plex but of course much simple
 
 ## Todo
 
-- [ ] Id indexing for videos
+- [x] Id indexing for series
+- [ ] Job listings and displaying
+  - [ ] Job Types: previewImgs-Generation, previewImgs-Check, series-Scrape,
 - [ ] if user get back to video start playing at last position
-- [ ] Pregenerate the previewImgs by using this command:
-
-```console
-      ffmpeg -i input.mp4 -vf fps=1/10,scale=120:-1 previmgs/output/preview%d.jpg
-```
-
+- [ ] Pregenerate the previewImgs
 - [ ] add a store for all user watched episodes
   - [ ] Think of an elegant way to store those kind of information
