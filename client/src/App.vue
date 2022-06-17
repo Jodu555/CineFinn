@@ -11,9 +11,9 @@
 import { mapActions } from 'vuex';
 
 import 'bootstrap';
-import Navigation from './components/Navigation.vue';
-import Footer from './components/Footer.vue';
-import SettingsDrawer from './components/SettingsDrawer.vue';
+import Navigation from '@/components/Layout/Navigation.vue';
+import Footer from '@/components/Layout/Footer.vue';
+import SettingsDrawer from '@/components/Layout/SettingsDrawer.vue';
 export default {
 	components: {
 		Navigation,

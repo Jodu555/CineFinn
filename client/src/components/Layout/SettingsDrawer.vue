@@ -30,7 +30,7 @@
 				<ul class="list-group list-group-flush">
 					<li class="list-group-item">
 						Checking for the generated images
-						<!-- <div class="progress">
+						<div class="progress">
 							<div
 								class="progress-bar progress-bar-striped progress-bar-animated"
 								role="progressbar"
@@ -39,9 +39,13 @@
 								aria-valuemax="100"
 								style="width: 75%"
 							></div>
-						</div> -->
+						</div>
 					</li>
-					<li class="list-group-item">Generating Images</li>
+					<li class="list-group-item">
+						Generating Images
+						<p>Latest: 10.06.2022 10 Uhr</p>
+						<button class="btn btn-outline-info">Start</button>
+					</li>
 					<li class="list-group-item">Rescraping the archive</li>
 				</ul>
 			</div>
