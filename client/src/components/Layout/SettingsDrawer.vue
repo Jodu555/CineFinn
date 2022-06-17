@@ -28,32 +28,22 @@
 				<hr />
 				<h2>Current Active Jobs:</h2>
 				<ul class="list-group list-group-flush">
-					<li class="list-group-item">
-						Checking for the generated images
-						<div class="progress">
-							<div
-								class="progress-bar progress-bar-striped progress-bar-animated"
-								role="progressbar"
-								aria-valuenow="75"
-								aria-valuemin="0"
-								aria-valuemax="100"
-								style="width: 75%"
-							></div>
-						</div>
-					</li>
-					<li class="list-group-item">
-						Generating Images
-						<p>Latest: 10.06.2022 10 Uhr</p>
-						<button class="btn btn-outline-info">Start</button>
-					</li>
-					<li class="list-group-item">Rescraping the archive</li>
+					<JobListView title="Generated Images Validation" :running="true" lastRun="null" />
+					<JobListView title="Generating Images" :running="false" lastRun="10.06.2022 10 Uhr" />
+					<JobListView
+						title="Rescraping the archive"
+						:running="false"
+						lastRun="01.01.2021 20 Uhr"
+					/>
 				</ul>
 			</div>
 		</div>
 	</div>
 </template>
 <script>
+import JobListView from '@/components/JobListView';
 export default {
+	components: { JobListView },
 	methods: {
 		rescrapeVideos() {
 			//TODO: Logic
