@@ -16,17 +16,8 @@
 				></button>
 			</div>
 			<div class="offcanvas-body">
-				<div class="d-grid gap-2">
-					<button type="button" @click="rescrapeVideos()" class="btn btn-outline-info">
-						Re-Scrape The Videos
-					</button>
-					<hr />
-					<button type="button" @click="rescrapeVideos()" class="btn btn-outline-info">
-						Generate the preview imgs
-					</button>
-				</div>
+				<h2>Current available Jobs:</h2>
 				<hr />
-				<h2>Current Active Jobs:</h2>
 				<ul class="list-group list-group-flush">
 					<JobListView title="Generated Images Validation" :running="true" lastRun="null" />
 					<JobListView title="Generating Images" :running="false" lastRun="10.06.2022 10 Uhr" />
