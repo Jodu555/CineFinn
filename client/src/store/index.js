@@ -15,7 +15,7 @@ export default createStore({
   },
   actions: {
     async loadSeries({ commit }) {
-      const response = await fetch('http://localhost:3100/index');
+      const response = await fetch('http://192.168.2.112:3100/index');
       const json = await response.json();
       commit('setSeries', json);
     },

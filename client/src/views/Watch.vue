@@ -140,7 +140,7 @@ export default {
 		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode']),
 		videoSrc() {
 			if (this.currentSeries == undefined) return '';
-			let out = `http://localhost:3100/video?series=${this.currentSeries.ID}`;
+			let out = `http://192.168.2.112:3100/video?series=${this.currentSeries.ID}`;
 			// console.log(1337, this.currentSeason, this.currentEpisode, this.currentMovie);
 			if (this.currentSeason == -1) {
 				if (this.currentMovie == -1) return '';

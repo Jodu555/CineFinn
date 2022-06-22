@@ -31,7 +31,7 @@ export default {
 
 <style lang="scss">
 @import '../node_modules/bootstrap/scss/functions';
-@import '~bootstrap/scss/bootstrap';
+@import '../node_modules/bootstrap/scss/bootstrap';
 
 #app {
 	// background-color: #1f2d3d;
