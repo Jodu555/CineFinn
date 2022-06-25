@@ -52,10 +52,12 @@ if (process.env.https) {
 
 
 // Your Middleware handlers here
-app.use(express.static(path.join('static')));
+app.use(express.static(path.join('dist'))); // The Vue build files
 app.use('/previewImages', express.static(path.join(process.env.PREVIEW_IMGS_PATH)));
 
 app.get("/video", require('./routes/video.js'));
+
+app.use('/managment', require('./routes/managment.js').router)
 
 app.get('/index', (req, res, next) => {
     res.json(getSeries());
