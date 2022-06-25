@@ -14,6 +14,8 @@ const { getVideoDurationInSeconds } = require('get-video-duration')
 const { getSeries } = require('./utils/utils.js');
 const { filenameParser } = require('./classes/series.js');
 
+const { ErrorHelper } = require('@jodu555/express-helpers');
+
 async function deepExecPromisify(command, cwd) {
     return await new Promise((resolve, reject) => {
         child_process.exec(command, { encoding: 'utf8', cwd }, (error, stdout, stderr) => {
@@ -31,6 +33,8 @@ app.use(cors());
 app.use(morgan('dev'));
 // app.use(helmet());
 app.use(express.json());
+
+
 
 app.use((req, res, next) => {
     if (req.path.includes('/assets/previewImgs')) {
@@ -62,6 +66,9 @@ app.use('/managment', require('./routes/managment.js').router)
 app.get('/index', (req, res, next) => {
     res.json(getSeries());
 });
+
+const errorHelper = new ErrorHelper()
+app.use(errorHelper.install());
 
 const genearteImages = async (series) => {
 

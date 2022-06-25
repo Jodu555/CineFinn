@@ -4,12 +4,6 @@ const outputFileName = 'out.json';
 
 let series = null;
 let activeJobs = [
-    {
-        identifier: 'scrape',
-        name: 'Rescraping the archive',
-        startTime: Date.now(),
-        data: {},
-    }
 ];
 
 
