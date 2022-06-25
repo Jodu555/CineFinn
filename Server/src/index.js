@@ -9,9 +9,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const { ErrorHelper } = require('@jodu555/express-helpers');
 
-
 const { getSeries } = require('./utils/utils.js');
-
 
 const app = express();
 app.use(cors());
@@ -54,7 +52,6 @@ app.get('/index', (req, res, next) => {
 
 const errorHelper = new ErrorHelper()
 app.use(errorHelper.install());
-
 
 
 const PORT = process.env.PORT || 3100;

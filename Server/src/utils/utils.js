@@ -23,9 +23,11 @@ const getSeries = (forceLoad = false) => {
 };
 
 const getActiveJobs = () => activeJobs;
+const setActiveJobs = (_activeJobs) => activeJobs = _activeJobs;
 
 
 module.exports = {
     getSeries,
-    getActiveJobs
+    getActiveJobs,
+    setActiveJobs
 }

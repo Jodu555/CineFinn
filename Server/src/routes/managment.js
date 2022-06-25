@@ -1,18 +1,23 @@
 const express = require('express');
-const { getActiveJobs } = require('../utils/utils');
+const { crawlAndIndex } = require('../utils/crawler');
+const { getActiveJobs, setActiveJobs } = require('../utils/utils');
 const router = express.Router();
 
 const LOOKUP = {
-    scrape: 'Rescraping the archive'
+    crawl: 'Recrawl the archive'
 }
 
-router.get('/jobs', (req, res, next) => {
+router.get('/jobs/available', (req, res, next) => {
+    res.json(LOOKUP);
+})
+
+router.get('/jobs/active', (req, res, next) => {
     res.json(getActiveJobs());
 });
 
-router.get('/job/scrape', (req, res, next) => {
-    const id = 'scrape';
-    const job = getActiveJobs().find(x => x.identifier == id);
+router.get('/job/crawl', (req, res, next) => {
+    const id = 'crawl';
+    const job = getActiveJobs().find(x => x.id == id);
     if (job) {
         const error = new Error('Job is already running!')
         next(error);
@@ -23,8 +28,13 @@ router.get('/job/scrape', (req, res, next) => {
             startTime: Date.now(),
             data: {},
         });
+        crawlAndIndex();
+        setTimeout(() => {
+            setActiveJobs(getActiveJobs().filter(x => x.id !== id));
+            console.log('Removed');
+        }, 3600);
+        res.json(getActiveJobs());
     }
-    res.json(getActiveJobs());
 });
 
 module.exports = { router }
