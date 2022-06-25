@@ -13,7 +13,7 @@ const crawlAndIndex = () => {
 
     //Strip all non mp4 files from the files
     files = files.filter(f => path.parse(f).ext == '.mp4');
-    console.log(1);
+
     //Sort dirs into the overcategories into the object
     let sortIdx = -1;
     dirs.forEach(dir => {
@@ -23,7 +23,7 @@ const crawlAndIndex = () => {
             obj[overcategories[sortIdx]] == undefined ? obj[overcategories[sortIdx]] = [dir] : obj[overcategories[sortIdx]].push(dir);
         }
     });
-    console.log(2);
+
     // Strip the dirs down and seperate between season or movie dirs or series dirs
     const series = [];
     Object.keys(obj).forEach(categorie => {
@@ -41,7 +41,7 @@ const crawlAndIndex = () => {
         }
     });
 
-    console.log(3);
+
     // Fill the series array with its corresponding seasons and episodes
     files.forEach(e => {
         const base = path.parse(e).base;
@@ -59,7 +59,7 @@ const crawlAndIndex = () => {
         }
     });
 
-    console.log(4);
+
     // Sorts the episodes in the right order
     const sorterFunction = (a, b) => {
         const ap = filenameParser(a, path.parse(a).base);
@@ -68,7 +68,7 @@ const crawlAndIndex = () => {
     }
     series.forEach(e => e.seasons.forEach(x => x.sort(sorterFunction)));
 
-    console.log(5);
+
 
     return series;
 }
