@@ -3,7 +3,14 @@ const { crawlAndIndex } = require("./crawler");
 const outputFileName = 'out.json';
 
 let series = null;
-let activeJobs = [];
+let activeJobs = [
+    {
+        identifier: 'scrape',
+        name: 'Rescraping the archive',
+        startTime: Date.now(),
+        data: {},
+    }
+];
 
 
 
