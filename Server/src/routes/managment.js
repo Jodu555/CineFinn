@@ -4,7 +4,9 @@ const { getActiveJobs, setActiveJobs } = require('../utils/utils');
 const router = express.Router();
 
 const LOOKUP = {
-    crawl: 'Recrawl the archive'
+    crawl: 'Recrawl the archive',
+    generate: 'Generating Preview-Images',
+    validator: 'Validating Preview-Images',
 }
 
 router.get('/jobs/available', (req, res, next) => {
