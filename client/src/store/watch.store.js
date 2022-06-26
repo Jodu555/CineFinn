@@ -20,7 +20,7 @@ export default {
         }
     },
     actions: {
-        async loadSeriesInfo({ commit, state, rootState }, ID) {
+        async loadSeriesInfo({ commit, rootState }, ID) {
             const series = rootState.series.find((x) => x.ID == ID);
             commit('setCurrentSeries', series);
         },
