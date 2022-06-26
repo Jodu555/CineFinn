@@ -13,4 +13,8 @@ app.use(VueSweetalert2);
 app.use(autoAnimatePlugin);
 app.use(store);
 app.use(router);
+
+store.$app = app;
+store.$networking = app.config.globalProperties.$networking;
+
 app.mount('#app');

@@ -20,11 +20,13 @@ export default {
 		Footer,
 		SettingsDrawer,
 	},
-	created() {
+	async created() {
+		await this.authenticate();
 		this.loadSeries();
 	},
 	methods: {
 		...mapActions(['loadSeries']),
+		...mapActions('auth', ['authenticate']),
 	},
 };
 </script>

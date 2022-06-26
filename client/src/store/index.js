@@ -1,6 +1,7 @@
 import { createStore } from 'vuex'
 
 import watch from '@/store/watch.store';
+import auth from '@/store/auth.store';
 
 export default createStore({
   state: {
@@ -21,6 +22,7 @@ export default createStore({
     },
   },
   modules: {
-    watch
+    watch,
+    auth
   }
 })
