@@ -1,22 +1,23 @@
 <template lang="">
 	<div class="container">
-		<h1 class="text-center">Login Page!</h1>
+		<h1 class="text-center mb-3">Login - CineFinn</h1>
 		<div class="row">
+			<div class="col-1"></div>
 			<div class="col-5">
 				<div class="card">
-					<div class="card-header">Login</div>
+					<div class="card-header">Login - CineFinn</div>
 					<div class="card-body">
-						<h4 class="card-title">Login to the Hoster List</h4>
+						<h4 class="card-title">Login to the Cinema</h4>
 						<hr />
-						<form class="card-text" id="loginForm" data-bitwarden-watching="1">
+						<form @submit.prevent="onLogin()" class="card-text" id="loginForm">
 							<fieldset>
 								<div class="form-group">
 									<label for="username" class="form-label mt-4">Username</label>
 									<input
 										type="text"
+										autocomplete="username"
+										v-model="form.username"
 										class="form-control"
-										id="usernamelogin"
-										name="username"
 										placeholder="Enter Username"
 									/>
 								</div>
@@ -24,26 +25,51 @@
 									<label for="password" class="form-label mt-4">Password</label>
 									<input
 										type="password"
+										autocomplete="current-password"
+										v-model="form.password"
 										class="form-control"
-										name="password"
-										id="passwordlogin"
 										placeholder="Password"
 									/>
 								</div>
-
-								<button type="submit" class="mt-4 btn btn-primary">Submit</button>
+								<button type="submit" class="mt-4 btn btn-primary">Login</button>
 							</fieldset>
 						</form>
 					</div>
 				</div>
 			</div>
-			<div class="col">
-				<p class="text-muted">If you got here by accident i would recommend you go home</p>
+			<div class="col-1"></div>
+			<div class="col-4">
+				<h2 class="text-muted text-center">
+					If you got here by accident I would recommend you to go home! <br />
+					This page is for known users only!
+					<br />
+					Which is why there is only a login and no registration!
+				</h2>
 			</div>
 		</div>
 	</div>
 </template>
 <script>
-export default {};
+import { mapActions } from 'vuex';
+export default {
+	data() {
+		return {
+			form: {
+				username: '',
+				password: '',
+			},
+		};
+	},
+	methods: {
+		...mapActions('auth', ['login']),
+		onLogin() {
+			this.login(this.form);
+			this.form = {
+				username: '',
+				password: '',
+			};
+		},
+	},
+};
 </script>
 <style lang=""></style>

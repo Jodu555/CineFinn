@@ -65,7 +65,7 @@ export default {
 	},
 	watch: {
 		series() {
-			if (loggedIn)
+			this.ac &&
 				this.ac.setData(
 					this.series.map((x) => {
 						return { label: x.title, value: x.ID };
@@ -74,6 +74,7 @@ export default {
 		},
 	},
 	mounted() {
+		if (!this.loggedIn) return;
 		const field = document.getElementById('input');
 		this.ac = new Autocomplete(field, {
 			data: [],
