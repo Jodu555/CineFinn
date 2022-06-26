@@ -1,6 +1,12 @@
 <template lang="">
 	<div class="container">
 		<h1 class="text-center mb-3">Login - CineFinn</h1>
+		<div v-if="error != null" class="alert alert-danger alert-dismissible">
+			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+			<strong
+				>Error: <span>{{ error }}</span></strong
+			>
+		</div>
 		<div class="row">
 			<div class="col-1"></div>
 			<div class="col-5">
@@ -50,7 +56,7 @@
 	</div>
 </template>
 <script>
-import { mapActions } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 export default {
 	data() {
 		return {
@@ -59,6 +65,9 @@ export default {
 				password: '',
 			},
 		};
+	},
+	computed: {
+		...mapState('auth', ['error']),
 	},
 	methods: {
 		...mapActions('auth', ['login']),

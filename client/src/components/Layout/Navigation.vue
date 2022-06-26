@@ -41,7 +41,7 @@
 						>
 							Settings
 						</button>
-						<button class="btn btn-outline-danger" type="submit">Logout</button>
+						<button class="btn btn-outline-danger" @click="logout()">Logout</button>
 					</div>
 				</div>
 			</div>
@@ -51,7 +51,7 @@
 
 <script>
 import Autocomplete from '@/plugins/autocomplete';
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 
 export default {
 	data() {
@@ -62,6 +62,9 @@ export default {
 	computed: {
 		...mapState(['series']),
 		...mapState('auth', ['loggedIn']),
+	},
+	methods: {
+		...mapActions('auth', ['logout']),
 	},
 	watch: {
 		series() {
