@@ -19,7 +19,7 @@
 						<router-link class="nav-link" exact-active-class="active" to="/">Home</router-link>
 					</li>
 				</ul>
-				<div class="d-flex">
+				<div v-if="loggedIn" class="d-flex">
 					<input
 						type="text"
 						class="form-control"
@@ -61,14 +61,16 @@ export default {
 	},
 	computed: {
 		...mapState(['series']),
+		...mapState('auth', ['loggedIn']),
 	},
 	watch: {
 		series() {
-			this.ac.setData(
-				this.series.map((x) => {
-					return { label: x.title, value: x.ID };
-				})
-			);
+			if (loggedIn)
+				this.ac.setData(
+					this.series.map((x) => {
+						return { label: x.title, value: x.ID };
+					})
+				);
 		},
 	},
 	mounted() {

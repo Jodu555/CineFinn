@@ -16,9 +16,11 @@ export default createStore({
   },
   actions: {
     async loadSeries({ commit }) {
-      const response = await fetch('http://192.168.2.112:3100/index');
-      const json = await response.json();
-      commit('setSeries', json);
+      const response = await this.$networking.get('/index');
+      if (response.success) {
+        const json = response.json;
+        commit('setSeries', json);
+      }
     },
   },
   modules: {
