@@ -4,7 +4,7 @@
 		<div v-if="error != null" class="alert alert-danger alert-dismissible">
 			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 			<strong
-				>Error: <span>{{ error }}</span></strong
+				>Error: <span>{{ error.error }}</span></strong
 			>
 		</div>
 		<div class="row">

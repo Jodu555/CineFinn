@@ -7,7 +7,11 @@ const express = require('express');
 const https = require('https');
 const cors = require('cors');
 const morgan = require('morgan');
-const { ErrorHelper } = require('@jodu555/express-helpers');
+const { ErrorHelper, AuthenticationHelper } = require('@jodu555/express-helpers');
+
+const { Database } = require('@jodu555/mysqlapi');
+const database = Database.createDatabase('rooti.jodu555.de', 'cinema', process.env.DB_PASSWORD, 'cinema');
+database.connect();
 
 const { getSeries } = require('./utils/utils.js');
 
@@ -17,7 +21,8 @@ app.use(morgan('dev'));
 // app.use(helmet());
 app.use(express.json());
 
-
+const authHelper = new AuthenticationHelper(app, '/auth', database);
+authHelper.install();
 
 app.use((req, res, next) => {
     if (req.path.includes('/assets/previewImgs')) {
