@@ -56,7 +56,8 @@ export default {
                         username: json.username,
                         email: json.email,
                     });
-                    this.$app.config.globalProperties.$router.push('/users')
+                    commit('setLoggedIn', true);
+                    this.$app.config.globalProperties.$router.push('/')
                 } else {
                     commit('setError', response);
                 }
@@ -71,6 +72,7 @@ export default {
                 deleteCookie('auth-token');
                 if (response.success) {
                     commit('logout');
+                    this.$app.config.globalProperties.$router.push('/login')
                 } else {
                     commit('setError', response);
                 }
