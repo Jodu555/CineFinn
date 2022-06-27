@@ -7,7 +7,7 @@
 			aria-labelledby="offcanvasSettingsLabel"
 		>
 			<div class="offcanvas-header">
-				<h5 class="offcanvas-title" id="offcanvasSettingsLabel">Settings</h5>
+				<h5 class="offcanvas-title" id="offcanvasSettingsLabel">Infos - Settings</h5>
 				<button
 					type="button"
 					class="btn-close"
@@ -16,6 +16,21 @@
 				></button>
 			</div>
 			<div class="offcanvas-body">
+				<h2>User Infos:</h2>
+				<hr />
+				<ul class="list-group list-group-flush">
+					<li class="list-group-item">
+						<h5>
+							<b>Username:</b> <span class="text-muted">{{ userInfo.username }}</span>
+						</h5>
+					</li>
+					<li class="list-group-item">
+						<h5>
+							<b>E-Mail:</b> <span class="text-muted">{{ userInfo.email }}</span>
+						</h5>
+					</li>
+				</ul>
+				<!-- <hr /> -->
 				<h2>Current available Jobs:</h2>
 				<hr />
 				<ul class="list-group list-group-flush">
@@ -32,9 +47,13 @@
 	</div>
 </template>
 <script>
+import { mapState } from 'vuex';
 import JobListView from '@/components/JobListView';
 export default {
 	components: { JobListView },
+	computed: {
+		...mapState('auth', ['userInfo']),
+	},
 	methods: {
 		rescrapeVideos() {
 			//TODO: Logic
