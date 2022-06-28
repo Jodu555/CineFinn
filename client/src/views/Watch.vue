@@ -340,9 +340,8 @@ export default {
 			const previewImgNumber = Math.max(1, Math.floor((percent * video.duration) / 10));
 			let previewImgSrc = `/assets/previewImgs/preview${previewImgNumber}.jpg`;
 			if (v.currentSeries != undefined && v.currentSeries.ID != -1) {
-				// 'http://localhost:3100/previewImages/260/1-1/preview2.jpg'
-				previewImgSrc = `http://localhost:3100/previewImages/${v.currentSeries.ID}/${v.currentSeason}-${v.currentEpisode}/preview${previewImgNumber}.jpg`;
-				// console.log(previewImgSrc);
+				previewImgSrc = `http://localhost:3100/previewImages/${v.currentSeries.ID}/`;
+				previewImgSrc += `${v.currentSeason}-${v.currentEpisode}/preview${previewImgNumber}.jpg?auth-token=${v.authToken}a`;
 			}
 			previewImg.src = previewImgSrc;
 			timelineContainer.style.setProperty('--preview-position', percent);
