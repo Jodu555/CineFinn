@@ -48,24 +48,28 @@ export default {
             }
         },
         async authenticate({ state, commit }) {
-            if (getCookie('auth-token') || state.authToken) {
-                this.$networking.auth_token = getCookie('auth-token') || state.authToken
-                const response = await this.$networking.get('/auth/info');
-                if (response.success) {
-                    const json = response.json;
-                    commit('setUser', {
-                        UUID: json.UUID,
-                        username: json.username,
-                        email: json.email,
-                    });
-                    commit('setLoggedIn', true);
-                    await router.push('/');
+            try {
+                if (getCookie('auth-token') || state.authToken) {
+                    this.$networking.auth_token = getCookie('auth-token') || state.authToken
+                    const response = await this.$networking.get('/auth/info');
+                    if (response.success) {
+                        const json = response.json;
+                        commit('setUser', {
+                            UUID: json.UUID,
+                            username: json.username,
+                            email: json.email,
+                        });
+                        commit('setLoggedIn', true);
+                        await router.push('/');
+                    } else {
+                        commit('setError', response);
+                        deleteCookie('auth-token');
+                    }
                 } else {
-                    commit('setError', response);
-                    deleteCookie('auth-token');
+                    commit('logout');
                 }
-            } else {
-                commit('logout');
+            } catch (error) {
+                deleteCookie('auth-token');
             }
         },
         async logout({ commit }) {

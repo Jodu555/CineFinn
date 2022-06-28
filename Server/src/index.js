@@ -45,11 +45,11 @@ if (process.env.https) {
 
 // Your Middleware handlers here
 app.use(express.static(path.join('dist'))); // The Vue build files
-app.use('/previewImages', express.static(path.join(process.env.PREVIEW_IMGS_PATH)));
+app.use('/previewImages', authHelper.authentication(), express.static(path.join(process.env.PREVIEW_IMGS_PATH)));
 
-app.get("/video", require('./routes/video.js'));
+app.get("/video", authHelper.authentication(), require('./routes/video.js'));
 
-app.use('/managment', require('./routes/managment.js').router)
+app.use('/managment', authHelper.authentication(), require('./routes/managment.js').router)
 
 app.get('/index', authHelper.authentication(), (req, res, next) => {
     res.json(getSeries());
