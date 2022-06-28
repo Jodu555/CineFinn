@@ -23,11 +23,7 @@ export default {
 	computed: {
 		...mapState('auth', ['loggedIn']),
 	},
-	created() {
-		console.log('CReated');
-	},
-	async mounted() {
-		console.log('Mounted');
+	async created() {
 		await this.authenticate();
 		if (this.$route.name !== 'Login') {
 			this.loadSeries();
