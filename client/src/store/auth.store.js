@@ -1,3 +1,5 @@
+import router from '@/router/index'
+
 export default {
     state: {
         loggedIn: false,
@@ -57,7 +59,7 @@ export default {
                         email: json.email,
                     });
                     commit('setLoggedIn', true);
-                    await this.$app.config.globalProperties.$router.push('/');
+                    await router.push('/');
                 } else {
                     commit('setError', response);
                     deleteCookie('auth-token');
@@ -73,7 +75,7 @@ export default {
                 deleteCookie('auth-token');
                 if (response.success) {
                     commit('logout');
-                    this.$app.config.globalProperties.$router.push('/login')
+                    router.push('/login')
                 } else {
                     commit('setError', response);
                 }

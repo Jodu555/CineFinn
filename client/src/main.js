@@ -21,6 +21,5 @@ app.use(networkingPlugin)
 app.use(store);
 app.use(router);
 
-store.$app = app;
 store.$networking = app.config.globalProperties.$networking;
 app.mount('#app');
