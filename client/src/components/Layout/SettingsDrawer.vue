@@ -36,8 +36,8 @@
 				<ul class="list-group list-group-flush">
 					<JobListView
 						v-for="job in jobs"
-						:title="job.value"
-						:key="job.key"
+						:title="job.name"
+						:key="job.id"
 						:running="job.running"
 						:lastRun="job.lastRun"
 					/>
@@ -67,20 +67,16 @@ export default {
 	computed: {
 		...mapState('auth', ['userInfo']),
 	},
-	async mounted() {
-		const response = await this.$networking.get('/managment/jobs/available');
-		if (response.success) {
-			Object.keys(response.json).forEach((key) => {
-				this.jobs.push({
-					key,
-					value: response.json[key],
-					running: false,
-					lastRun: null,
-				});
-			});
-		}
+	mounted() {
+		this.load();
 	},
 	methods: {
+		async load() {
+			const response = await this.$networking.get('/managment/jobs/info');
+			if (response.success) {
+				this.jobs = response.json;
+			}
+		},
 		rescrapeVideos() {
 			//TODO: Logic
 			this.$swal({
