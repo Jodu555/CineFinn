@@ -1,7 +1,7 @@
 <template>
 	<div v-auto-animate="{ duration: 250 }" id="app">
 		<Navigation />
-		<settings-drawer />
+		<settings-drawer v-if="loggedIn" />
 		<router-view class="mt-2" :key="$route.query" />
 	</div>
 	<Footer />
@@ -23,9 +23,9 @@ export default {
 	computed: {
 		...mapState('auth', ['loggedIn']),
 	},
-	async created() {
+	async mounted() {
 		await this.authenticate();
-		if (this.$route.name !== 'Login') {
+		if (this.$route.name != undefined && this.$route.name != 'Login') {
 			this.loadSeries();
 		}
 	},
