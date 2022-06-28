@@ -57,9 +57,11 @@ export default {
                         email: json.email,
                     });
                     commit('setLoggedIn', true);
-                    this.$app.config.globalProperties.$router.push('/')
+                    await this.$app.config.globalProperties.$router.push('/');
+                    // await new Promise((resolve, reject) => { setTimeout(resolve, 500); }) // Cause the router doesnt 
                 } else {
                     commit('setError', response);
+                    deleteCookie('auth-token');
                 }
             } else {
                 commit('logout');

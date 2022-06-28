@@ -78,7 +78,6 @@ export default {
 	},
 	mounted() {
 		if (!this.loggedIn) return;
-		console.log('123');
 		const field = document.getElementById('input');
 		this.ac = new Autocomplete(field, {
 			data: [],

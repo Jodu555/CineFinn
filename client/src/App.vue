@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 
 import 'bootstrap';
 import Navigation from '@/components/Layout/Navigation.vue';
@@ -20,9 +20,18 @@ export default {
 		Footer,
 		SettingsDrawer,
 	},
-	async created() {
+	computed: {
+		...mapState('auth', ['loggedIn']),
+	},
+	created() {
+		console.log('CReated');
+	},
+	async mounted() {
+		console.log('Mounted');
 		await this.authenticate();
-		this.loadSeries();
+		if (this.$route.name !== 'Login') {
+			this.loadSeries();
+		}
 	},
 	methods: {
 		...mapActions(['loadSeries']),

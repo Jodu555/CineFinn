@@ -51,7 +51,7 @@ app.get("/video", require('./routes/video.js'));
 
 app.use('/managment', require('./routes/managment.js').router)
 
-app.get('/index', (req, res, next) => {
+app.get('/index', authHelper.authentication(), (req, res, next) => {
     res.json(getSeries());
 });
 
