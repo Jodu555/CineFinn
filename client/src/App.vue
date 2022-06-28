@@ -22,12 +22,10 @@ export default {
 	},
 	computed: {
 		...mapState('auth', ['loggedIn']),
+		...mapState(['series']),
 	},
-	async mounted() {
+	async created() {
 		await this.authenticate();
-		if (this.$route.name != undefined && this.$route.name != 'Login') {
-			this.loadSeries();
-		}
 	},
 	methods: {
 		...mapActions(['loadSeries']),

@@ -31,9 +31,15 @@
 </template>
 <script>
 import EntityCard from '@/components/EntityCard.vue';
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 export default {
 	components: { EntityCard },
+	created() {
+		this.loadSeries();
+	},
+	methods: {
+		...mapActions(['loadSeries']),
+	},
 	computed: {
 		...mapState(['series']),
 		categories() {

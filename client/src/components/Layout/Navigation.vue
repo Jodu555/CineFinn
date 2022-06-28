@@ -68,32 +68,31 @@ export default {
 	},
 	watch: {
 		series() {
-			this.ac &&
+			if (this.ac == null) {
+				const field = document.getElementById('input');
+				this.ac = new Autocomplete(field, {
+					data: [],
+					maximumItems: 5,
+					threshold: 1,
+					onSelectItem: ({ label, value }) => {
+						// console.log('user selected:', label, value);
+						field.value = '';
+						this.$router.push({ path: '/watch', query: { id: value } });
+					},
+				});
 				this.ac.setData(
 					this.series.map((x) => {
 						return { label: x.title, value: x.ID };
 					})
 				);
+			} else {
+				this.ac.setData(
+					this.series.map((x) => {
+						return { label: x.title, value: x.ID };
+					})
+				);
+			}
 		},
-	},
-	mounted() {
-		if (!this.loggedIn) return;
-		const field = document.getElementById('input');
-		this.ac = new Autocomplete(field, {
-			data: [],
-			maximumItems: 5,
-			threshold: 1,
-			onSelectItem: ({ label, value }) => {
-				// console.log('user selected:', label, value);
-				field.value = '';
-				this.$router.push({ path: '/watch', query: { id: value } });
-			},
-		});
-		this.ac.setData(
-			this.series.map((x) => {
-				return { label: x.title, value: x.ID };
-			})
-		);
 	},
 };
 </script>
