@@ -9,13 +9,17 @@ const LOOKUP = {
     validator: 'Validating Preview-Images',
 }
 
-router.get('/jobs/available', (req, res, next) => {
-    res.json(LOOKUP);
+router.get('/jobs/info', (req, res, next) => {
+    const response = [];
+    Object.keys(LOOKUP).forEach(id => {
+        response.push({
+            id,
+            name: LOOKUP[id],
+            running: Boolean(getActiveJobs().find(x => x.id == id))
+        });
+    });
+    res.json(response);
 })
-
-router.get('/jobs/active', (req, res, next) => {
-    res.json(getActiveJobs());
-});
 
 router.get('/job/crawl', (req, res, next) => {
     const id = 'crawl';
