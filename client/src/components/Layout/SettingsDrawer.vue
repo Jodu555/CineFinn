@@ -34,13 +34,21 @@
 				<h2>Current available Jobs:</h2>
 				<hr />
 				<ul class="list-group list-group-flush">
-					<JobListView title="Generated Images Validation" :running="true" lastRun="null" />
+					<JobListView
+						v-for="job in jobs"
+						:title="job.value"
+						:key="job.key"
+						:running="job.running"
+						:lastRun="job.lastRun"
+					/>
+
+					<!-- <JobListView title="Generated Images Validation" :running="true" lastRun="null" />
 					<JobListView title="Generating Images" :running="false" lastRun="10.06.2022 10 Uhr" />
 					<JobListView
 						title="Rescraping the archive"
 						:running="false"
 						lastRun="01.01.2021 20 Uhr"
-					/>
+					/> -->
 				</ul>
 			</div>
 		</div>
@@ -51,8 +59,26 @@ import { mapState } from 'vuex';
 import JobListView from '@/components/JobListView';
 export default {
 	components: { JobListView },
+	data() {
+		return {
+			jobs: [],
+		};
+	},
 	computed: {
 		...mapState('auth', ['userInfo']),
+	},
+	async mounted() {
+		const response = await this.$networking.get('/managment/jobs/available');
+		if (response.success) {
+			Object.keys(response.json).forEach((key) => {
+				this.jobs.push({
+					key,
+					value: response.json[key],
+					running: false,
+					lastRun: null,
+				});
+			});
+		}
 	},
 	methods: {
 		rescrapeVideos() {
