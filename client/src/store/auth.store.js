@@ -1,7 +1,7 @@
 import router from '@/router/index'
 
-export default {
-    state: {
+const getDefaultState = () => {
+    return {
         loggedIn: false,
         authToken: '',
         error: null,
@@ -10,8 +10,15 @@ export default {
             username: '',
             email: '',
         }
-    },
+    }
+}
+
+export default {
+    state: getDefaultState(),
     mutations: {
+        reset(state) {
+            Object.assign(state, getDefaultState());
+        },
         setUser(state, user) {
             state.userInfo = user;
         },
@@ -73,14 +80,14 @@ export default {
                 deleteCookie('auth-token');
             }
         },
-        async logout({ commit }) {
+        async logout({ commit, dispatch }) {
             if (getCookie('auth-token') || state.authToken) {
                 this.$networking.auth_token = getCookie('auth-token') || state.authToken;
                 const response = await this.$networking.get('/auth/logout');
                 deleteCookie('auth-token');
                 if (response.success) {
                     commit('logout');
-                    commit('resetState', null, { root: true });
+                    dispatch('reset', null, { root: true });
                     await router.push('/login');
                 } else {
                     commit('setError', response);

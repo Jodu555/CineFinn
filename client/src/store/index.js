@@ -15,7 +15,7 @@ export default createStore({
   getters: {
   },
   mutations: {
-    resetState(state) {
+    reset(state) {
       Object.assign(state, getDefaultState());
     },
     setSeries(state, series) {
@@ -23,6 +23,11 @@ export default createStore({
     },
   },
   actions: {
+    clearAll({ commit }) {
+      commit('watch/reset')
+      commit('auth/reset')
+      commit('reset')
+    },
     async loadSeries({ commit }) {
       const response = await this.$networking.get('/index');
       if (response.success) {
