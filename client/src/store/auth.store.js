@@ -67,6 +67,7 @@ export default {
                     }
                 } else {
                     commit('logout');
+                    commit('resetState', null, { root: true })
                 }
             } catch (error) {
                 deleteCookie('auth-token');
@@ -79,7 +80,8 @@ export default {
                 deleteCookie('auth-token');
                 if (response.success) {
                     commit('logout');
-                    router.push('/login')
+                    commit('resetState', null, { root: true });
+                    await router.push('/login');
                 } else {
                     commit('setError', response);
                 }
@@ -87,7 +89,6 @@ export default {
                 state.loggedIn = false;
             }
         }
-
     },
     namespaced: true,
 }

@@ -3,13 +3,21 @@ import { createStore } from 'vuex'
 import watch from '@/store/watch.store';
 import auth from '@/store/auth.store';
 
-export default createStore({
-  state: {
+const getDefaultState = () => {
+  return {
     series: []
-  },
+  }
+}
+
+
+export default createStore({
+  state: getDefaultState(),
   getters: {
   },
   mutations: {
+    resetState(state) {
+      Object.assign(state, getDefaultState());
+    },
     setSeries(state, series) {
       state.series = series;
     },
