@@ -23,7 +23,7 @@ export default createStore({
     },
   },
   actions: {
-    clearAll({ commit }) {
+    reset({ commit }) {
       commit('watch/reset')
       commit('auth/reset')
       commit('reset')

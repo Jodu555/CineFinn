@@ -74,7 +74,7 @@ export default {
                     }
                 } else {
                     commit('logout');
-                    commit('resetState', null, { root: true })
+                    commit('reset', null, { root: true })
                 }
             } catch (error) {
                 deleteCookie('auth-token');
