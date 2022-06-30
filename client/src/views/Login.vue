@@ -27,18 +27,19 @@
 										class="form-control"
 										placeholder="Enter Username"
 									/>
-									<div id="username" class="invalid-feedback">Username cannot be empty</div>
+									<div id="username" class="invalid-feedback"></div>
 								</div>
 								<div class="form-group">
 									<label for="password" class="form-label mt-4">Password</label>
 									<input
-										ref="password"
+										id="password"
 										type="password"
 										autocomplete="current-password"
 										v-model="form.password"
 										class="form-control"
 										placeholder="Password"
 									/>
+									<div id="password" class="invalid-feedback"></div>
 								</div>
 								<button type="submit" class="mt-4 btn btn-primary">Login</button>
 							</fieldset>
@@ -71,6 +72,14 @@ export default {
 	},
 	computed: {
 		...mapState('auth', ['error']),
+	},
+	watch: {
+		form: {
+			handler(newValue, oldValue) {
+				this.validateForm();
+			},
+			deep: true,
+		},
 	},
 	methods: {
 		...mapActions('auth', ['login']),
