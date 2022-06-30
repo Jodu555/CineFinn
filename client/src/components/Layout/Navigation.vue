@@ -21,9 +21,9 @@
 				</ul>
 				<div v-if="loggedIn" class="d-flex">
 					<input
+						ref="autocomplete"
 						type="text"
 						class="form-control"
-						id="input"
 						placeholder="Search for a series..."
 						autocomplete="off"
 					/>
@@ -68,30 +68,21 @@ export default {
 	},
 	watch: {
 		series() {
-			if (this.ac == null) {
-				const field = document.getElementById('input');
-				this.ac = new Autocomplete(field, {
-					data: [],
-					maximumItems: 5,
-					threshold: 1,
-					onSelectItem: ({ label, value }) => {
-						// console.log('user selected:', label, value);
-						field.value = '';
-						this.$router.push({ path: '/watch', query: { id: value } });
-					},
-				});
-				this.ac.setData(
-					this.series.map((x) => {
-						return { label: x.title, value: x.ID };
-					})
-				);
-			} else {
-				this.ac.setData(
-					this.series.map((x) => {
-						return { label: x.title, value: x.ID };
-					})
-				);
-			}
+			this.ac = new Autocomplete(this.$refs.autocomplete, {
+				data: [],
+				maximumItems: 5,
+				threshold: 1,
+				onSelectItem: ({ label, value }) => {
+					// console.log('user selected:', label, value);
+					field.value = '';
+					this.$router.push({ path: '/watch', query: { id: value } });
+				},
+			});
+			this.ac.setData(
+				this.series.map((x) => {
+					return { label: x.title, value: x.ID };
+				})
+			);
 		},
 	},
 };
