@@ -22,14 +22,17 @@
 									<input
 										type="text"
 										autocomplete="username"
+										id="username"
 										v-model="form.username"
 										class="form-control"
 										placeholder="Enter Username"
 									/>
+									<div id="username" class="invalid-feedback">Username cannot be empty</div>
 								</div>
 								<div class="form-group">
 									<label for="password" class="form-label mt-4">Password</label>
 									<input
+										ref="password"
 										type="password"
 										autocomplete="current-password"
 										v-model="form.password"
@@ -71,7 +74,38 @@ export default {
 	},
 	methods: {
 		...mapActions('auth', ['login']),
+		validateForm() {
+			this.deepValidate('username', [
+				(value) => !!value || 'Cannot be empty.',
+				(value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 20',
+			]);
+
+			this.deepValidate('password', [
+				(value) => !!value || 'Cannot be empty.',
+				(value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 100',
+			]);
+		},
+		deepValidate(id, rules) {
+			const input = document.querySelector(`.form-control#${id}`);
+			const valid = document.querySelector(`.invalid-feedback#${id}`);
+			const falsey = [];
+			for (const rule of rules) {
+				if (rule(input.value) != true) {
+					falsey.push(rule(input.value));
+				}
+			}
+			if (falsey.length > 0) {
+				valid.innerHTML = falsey[0];
+				input.classList.remove('is-valid');
+				input.classList.add('is-invalid');
+			} else {
+				input.classList.remove('is-invalid');
+				input.classList.add('is-valid');
+			}
+		},
 		onLogin() {
+			this.validateForm();
+			return;
 			this.login(this.form);
 			this.form = {
 				username: '',
