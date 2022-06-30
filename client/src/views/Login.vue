@@ -18,16 +18,15 @@
 						<form @submit.prevent="onLogin()" class="card-text" id="loginForm">
 							<fieldset>
 								<div class="form-group">
-									<label for="username" class="form-label mt-4">Username</label>
-									<input
-										type="text"
-										autocomplete="username"
-										id="username"
+									<InputValidator
 										v-model="form.username"
-										class="form-control"
+										type="text"
+										id="username"
+										name="Username"
+										autocomplete="username"
 										placeholder="Enter Username"
+										:rules="usernameRules"
 									/>
-									<div id="username" class="invalid-feedback"></div>
 								</div>
 								<div class="form-group">
 									<label for="password" class="form-label mt-4">Password</label>
@@ -42,6 +41,7 @@
 									<div id="password" class="invalid-feedback"></div>
 								</div>
 								<button type="submit" class="mt-4 btn btn-primary">Login</button>
+								<pre>{{ form }}</pre>
 							</fieldset>
 						</form>
 					</div>
@@ -61,12 +61,22 @@
 </template>
 <script>
 import { mapState, mapActions } from 'vuex';
+import InputValidator from '@/components/InputValidator';
 export default {
+	components: {
+		InputValidator,
+	},
 	data() {
 		return {
 			form: {
 				username: '',
 				password: '',
+			},
+			rules: {
+				usernameRules: [
+					(value) => !!value || 'Cannot be empty.',
+					(value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 20',
+				],
 			},
 		};
 	},
@@ -76,6 +86,7 @@ export default {
 	watch: {
 		form: {
 			handler(newValue, oldValue) {
+				console.log(newValue);
 				this.validateForm();
 			},
 			deep: true,
@@ -84,16 +95,16 @@ export default {
 	methods: {
 		...mapActions('auth', ['login']),
 		validateForm() {
-			return (
-				this.deepValidate('username', [
-					(value) => !!value || 'Cannot be empty.',
-					(value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 20',
-				]) &&
-				this.deepValidate('password', [
-					(value) => !!value || 'Cannot be empty.',
-					(value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 100',
-				])
-			);
+			// return (
+			// 	this.deepValidate('username', [
+			// 		(value) => !!value || 'Cannot be empty.',
+			// 		(value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 20',
+			// 	]) &&
+			// 	this.deepValidate('password', [
+			// 		(value) => !!value || 'Cannot be empty.',
+			// 		(value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 100',
+			// 	])
+			// );
 		},
 		deepValidate(id, rules) {
 			const input = document.querySelector(`.form-control#${id}`);
