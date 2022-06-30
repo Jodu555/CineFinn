@@ -49,7 +49,7 @@ export default {
                 commit('setLoggedIn', true);
                 commit('setAuthToken', json.token);
                 setCookie('auth-token', json.token, 30);
-                dispatch('authenticate');
+                await dispatch('authenticate');
             } else {
                 commit('setError', response);
             }
