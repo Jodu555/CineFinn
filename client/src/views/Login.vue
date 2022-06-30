@@ -115,13 +115,13 @@ export default {
 			return falsey.length == 0;
 		},
 		onLogin() {
-			console.log(this.validateForm());
-			return;
-			this.login(this.form);
-			this.form = {
-				username: '',
-				password: '',
-			};
+			if (this.validateForm()) {
+				this.login(this.form);
+				this.form = {
+					username: '',
+					password: '',
+				};
+			}
 		},
 	},
 };
