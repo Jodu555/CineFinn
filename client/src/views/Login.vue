@@ -84,15 +84,16 @@ export default {
 	methods: {
 		...mapActions('auth', ['login']),
 		validateForm() {
-			this.deepValidate('username', [
-				(value) => !!value || 'Cannot be empty.',
-				(value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 20',
-			]);
-
-			this.deepValidate('password', [
-				(value) => !!value || 'Cannot be empty.',
-				(value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 100',
-			]);
+			return (
+				this.deepValidate('username', [
+					(value) => !!value || 'Cannot be empty.',
+					(value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 20',
+				]) &&
+				this.deepValidate('password', [
+					(value) => !!value || 'Cannot be empty.',
+					(value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 100',
+				])
+			);
 		},
 		deepValidate(id, rules) {
 			const input = document.querySelector(`.form-control#${id}`);
@@ -111,9 +112,10 @@ export default {
 				input.classList.remove('is-invalid');
 				input.classList.add('is-valid');
 			}
+			return falsey.length == 0;
 		},
 		onLogin() {
-			this.validateForm();
+			console.log(this.validateForm());
 			return;
 			this.login(this.form);
 			this.form = {
