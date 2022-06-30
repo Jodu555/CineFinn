@@ -20,12 +20,13 @@
 								<div class="form-group">
 									<InputValidator
 										v-model="form.username"
+										v-model:valid="form.usernameValid"
 										type="text"
 										id="username"
 										name="Username"
 										autocomplete="username"
 										placeholder="Enter Username"
-										:rules="usernameRules"
+										:rules="rules.usernameRules"
 									/>
 								</div>
 								<div class="form-group">
@@ -70,6 +71,7 @@ export default {
 		return {
 			form: {
 				username: '',
+				usernameValid: null,
 				password: '',
 			},
 			rules: {
