@@ -33,7 +33,7 @@
 									<InputValidator
 										v-model="form.password"
 										v-model:valid="form.passwordValid"
-										type="text"
+										type="password"
 										id="password"
 										name="Password"
 										autocomplete="current-password"
