@@ -11,7 +11,7 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"@jodu555/express-helpers": "^1.1.5",
+		"@jodu555/express-helpers": "^1.1.6",
 		"@jodu555/mysqlapi": "^4.0.5",
 		"cors": "^2.8.5",
 		"dotenv": "^16.0.1",

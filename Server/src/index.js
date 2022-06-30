@@ -22,6 +22,7 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 const authHelper = new AuthenticationHelper(app, '/auth', database);
+authHelper.options.register = false;
 authHelper.install();
 
 app.use((req, res, next) => {
