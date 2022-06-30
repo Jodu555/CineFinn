@@ -76,9 +76,9 @@ export default {
 		return {
 			form: {
 				username: '',
-				usernameValid: false,
+				usernameValid: null,
 				password: '',
-				passwordValid: false,
+				passwordValid: null,
 			},
 			rules: {
 				usernameRules: [

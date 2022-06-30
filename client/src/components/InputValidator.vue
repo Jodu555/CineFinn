@@ -7,7 +7,11 @@
 			:autocomplete="autocomplete"
 			:value="modelValue"
 			@input="$emit('update:modelValue', $event.target.value)"
-			:class="{ 'form-control': true, 'is-invalid': valid == false, 'is-valid': valid == true }"
+			:class="{
+				'form-control': true,
+				'is-invalid': internalValid == false,
+				'is-valid': internalValid == true,
+			}"
 			:placeholder="placeholder"
 		/>
 		<div :id="id" class="invalid-feedback">
@@ -20,7 +24,7 @@ export default {
 	props: ['type', 'id', 'name', 'autocomplete', 'placeholder', 'rules', 'modelValue', 'valid'],
 	data() {
 		return {
-			valid: null,
+			internalValid: null,
 			input: '',
 			invalidMessage: '',
 		};
@@ -39,13 +43,13 @@ export default {
 				}
 			}
 			if (falsey.length > 0) {
-				this.valid = false;
+				this.internalValid = false;
 				this.invalidMessage = falsey[0];
 			} else {
-				this.valid = true;
+				this.internalValid = true;
 				this.invalidMessage = '';
 			}
-			this.$emit('update:valid', this.valid);
+			this.$emit('update:valid', this.internalValid);
 			return falsey.length == 0;
 		},
 	},
