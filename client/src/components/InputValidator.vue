@@ -45,6 +45,7 @@ export default {
 				this.valid = true;
 				this.invalidMessage = '';
 			}
+			this.$emit('update:valid', this.valid);
 			return falsey.length == 0;
 		},
 	},

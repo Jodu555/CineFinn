@@ -30,19 +30,24 @@
 									/>
 								</div>
 								<div class="form-group">
-									<label for="password" class="form-label mt-4">Password</label>
-									<input
-										id="password"
-										type="password"
-										autocomplete="current-password"
+									<InputValidator
 										v-model="form.password"
-										class="form-control"
-										placeholder="Password"
+										v-model:valid="form.passwordValid"
+										type="text"
+										id="password"
+										name="Password"
+										autocomplete="current-password"
+										placeholder="Enter Password"
+										:rules="rules.passwordRules"
 									/>
-									<div id="password" class="invalid-feedback"></div>
 								</div>
-								<button type="submit" class="mt-4 btn btn-primary">Login</button>
-								<pre>{{ form }}</pre>
+								<button
+									type="submit"
+									:disabled="!(this.form.usernameValid && this.form.passwordValid)"
+									class="mt-4 btn btn-primary"
+								>
+									Login
+								</button>
 							</fieldset>
 						</form>
 					</div>
@@ -71,13 +76,18 @@ export default {
 		return {
 			form: {
 				username: '',
-				usernameValid: null,
+				usernameValid: false,
 				password: '',
+				passwordValid: false,
 			},
 			rules: {
 				usernameRules: [
 					(value) => !!value || 'Cannot be empty.',
 					(value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 20',
+				],
+				passwordRules: [
+					(value) => !!value || 'Cannot be empty.',
+					(value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 100',
 				],
 			},
 		};
@@ -85,50 +95,10 @@ export default {
 	computed: {
 		...mapState('auth', ['error']),
 	},
-	watch: {
-		form: {
-			handler(newValue, oldValue) {
-				console.log(newValue);
-				this.validateForm();
-			},
-			deep: true,
-		},
-	},
 	methods: {
 		...mapActions('auth', ['login']),
-		validateForm() {
-			// return (
-			// 	this.deepValidate('username', [
-			// 		(value) => !!value || 'Cannot be empty.',
-			// 		(value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 20',
-			// 	]) &&
-			// 	this.deepValidate('password', [
-			// 		(value) => !!value || 'Cannot be empty.',
-			// 		(value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 100',
-			// 	])
-			// );
-		},
-		deepValidate(id, rules) {
-			const input = document.querySelector(`.form-control#${id}`);
-			const valid = document.querySelector(`.invalid-feedback#${id}`);
-			const falsey = [];
-			for (const rule of rules) {
-				if (rule(input.value) != true) {
-					falsey.push(rule(input.value));
-				}
-			}
-			if (falsey.length > 0) {
-				valid.innerHTML = falsey[0];
-				input.classList.remove('is-valid');
-				input.classList.add('is-invalid');
-			} else {
-				input.classList.remove('is-invalid');
-				input.classList.add('is-valid');
-			}
-			return falsey.length == 0;
-		},
 		onLogin() {
-			if (this.validateForm()) {
+			if (this.form.usernameValid && this.form.passwordValid) {
 				this.login(this.form);
 				this.form = {
 					username: '',
