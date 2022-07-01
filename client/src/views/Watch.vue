@@ -140,7 +140,6 @@ export default {
 		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode']),
 		...mapState('auth', ['authToken']),
 		videoSrc() {
-			console.log(this.$networking);
 			if (this.currentSeries == undefined) return '';
 			let out = `${this.$networking}/video?auth-token=${this.authToken}&series=${this.currentSeries.ID}`;
 			// console.log(1337, this.currentSeason, this.currentEpisode, this.currentMovie);
