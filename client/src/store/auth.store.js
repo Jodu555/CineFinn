@@ -67,7 +67,6 @@ export default {
                             email: json.email,
                         });
                         await commit('setLoggedIn', true);
-                        console.log('INFO: ', redirectToSlash, state);
                         redirectToSlash && await router.push('/');
                     } else {
                         commit('setError', response);
