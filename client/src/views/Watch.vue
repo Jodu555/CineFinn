@@ -140,8 +140,9 @@ export default {
 		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode']),
 		...mapState('auth', ['authToken']),
 		videoSrc() {
+			console.log(this.$networking);
 			if (this.currentSeries == undefined) return '';
-			let out = `http://192.168.2.112:3100/video?auth-token=${this.authToken}&series=${this.currentSeries.ID}`;
+			let out = `${this.$networking}/video?auth-token=${this.authToken}&series=${this.currentSeries.ID}`;
 			// console.log(1337, this.currentSeason, this.currentEpisode, this.currentMovie);
 			if (this.currentSeason == -1) {
 				if (this.currentMovie == -1) return '';
@@ -340,7 +341,7 @@ export default {
 			const previewImgNumber = Math.max(1, Math.floor((percent * video.duration) / 10));
 			let previewImgSrc = `/assets/previewImgs/preview${previewImgNumber}.jpg`;
 			if (v.currentSeries != undefined && v.currentSeries.ID != -1) {
-				previewImgSrc = `http://localhost:3100/previewImages/${v.currentSeries.ID}/`;
+				previewImgSrc = `${this.$networking}/previewImages/${v.currentSeries.ID}/`;
 				previewImgSrc += `${v.currentSeason}-${v.currentEpisode}/preview${previewImgNumber}.jpg?auth-token=${v.authToken}a`;
 			}
 			previewImg.src = previewImgSrc;
