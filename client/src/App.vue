@@ -22,14 +22,6 @@ export default {
 	},
 	computed: {
 		...mapState('auth', ['loggedIn']),
-		...mapState(['series']),
-	},
-	async created() {
-		await this.authenticate();
-	},
-	methods: {
-		...mapActions(['loadSeries']),
-		...mapActions('auth', ['authenticate']),
 	},
 };
 </script>

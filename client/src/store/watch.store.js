@@ -27,7 +27,11 @@ export default {
         }
     },
     actions: {
-        async loadSeriesInfo({ commit, rootState }, ID) {
+        async loadSeriesInfo({ commit, dispatch, rootState }, ID) {
+            if (rootState.series.length == 0) {
+                //Series array is empty cause the user got direct to the /watch route
+                await dispatch('loadSeries', null, { root: true });
+            }
             const series = rootState.series.find((x) => x.ID == ID);
             commit('setCurrentSeries', series);
         },

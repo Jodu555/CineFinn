@@ -49,12 +49,12 @@ export default {
                 commit('setLoggedIn', true);
                 commit('setAuthToken', json.token);
                 setCookie('auth-token', json.token, 30);
-                await dispatch('authenticate');
+                await dispatch('authenticate', true);
             } else {
                 commit('setError', response);
             }
         },
-        async authenticate({ state, commit }) {
+        async authenticate({ state, commit }, redirectToSlash = false) {
             try {
                 if (getCookie('auth-token') || state.authToken) {
                     this.$networking.auth_token = getCookie('auth-token') || state.authToken
@@ -66,8 +66,9 @@ export default {
                             username: json.username,
                             email: json.email,
                         });
-                        commit('setLoggedIn', true);
-                        await router.push('/');
+                        await commit('setLoggedIn', true);
+                        console.log('INFO: ', redirectToSlash, state);
+                        redirectToSlash && await router.push('/');
                     } else {
                         commit('setError', response);
                         deleteCookie('auth-token');

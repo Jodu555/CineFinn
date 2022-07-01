@@ -28,14 +28,21 @@ const routes = [
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound },
 ]
 
+// console.log(process.env.BASE_URL);
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory('./'),
+  // history: createWebHistory(process.env.BASE_URL),
   routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   if (to.matched.some(record => record.meta.requiresLogin) && store.state.auth.loggedIn == false) {
-    next("/login")
+    await store.dispatch('auth/authenticate');
+    if (store.state.auth.loggedIn == false) {
+      next("/login")
+    } else {
+      next()
+    }
   } else {
     next()
   }
