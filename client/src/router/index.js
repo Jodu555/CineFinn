@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
 import Login from '@/views/Login.vue'
+import NotFound from '@/views/NotFound.vue'
 
 import store from '@/store/index'
 
@@ -23,7 +24,8 @@ const routes = [
       return import(/* webpackChunkName: "about" */ '../views/Watch.vue')
     },
     meta: { requiresLogin: true }
-  }
+  },
+  { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound },
 ]
 
 const router = createRouter({
