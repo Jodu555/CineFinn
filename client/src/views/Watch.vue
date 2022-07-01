@@ -141,7 +141,7 @@ export default {
 		...mapState('auth', ['authToken']),
 		videoSrc() {
 			if (this.currentSeries == undefined) return '';
-			let out = `${this.$networking}/video?auth-token=${this.authToken}&series=${this.currentSeries.ID}`;
+			let out = `${this.$networking.API_URL}/video?auth-token=${this.authToken}&series=${this.currentSeries.ID}`;
 			// console.log(1337, this.currentSeason, this.currentEpisode, this.currentMovie);
 			if (this.currentSeason == -1) {
 				if (this.currentMovie == -1) return '';
@@ -340,7 +340,7 @@ export default {
 			const previewImgNumber = Math.max(1, Math.floor((percent * video.duration) / 10));
 			let previewImgSrc = `/assets/previewImgs/preview${previewImgNumber}.jpg`;
 			if (v.currentSeries != undefined && v.currentSeries.ID != -1) {
-				previewImgSrc = `${this.$networking}/previewImages/${v.currentSeries.ID}/`;
+				previewImgSrc = `${this.$networking.API_URL}/previewImages/${v.currentSeries.ID}/`;
 				previewImgSrc += `${v.currentSeason}-${v.currentEpisode}/preview${previewImgNumber}.jpg?auth-token=${v.authToken}a`;
 			}
 			previewImg.src = previewImgSrc;

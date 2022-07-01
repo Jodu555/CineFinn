@@ -10,7 +10,8 @@ import { autoAnimatePlugin } from '@formkit/auto-animate/vue'
 
 const networkingPlugin = {
     install: (app, options) => {
-        app.config.globalProperties.$networking = new Networking('http://localhost:3100', '');
+        // app.config.globalProperties.$networking = new Networking('http://localhost:3100', '');
+        app.config.globalProperties.$networking = new Networking('http://adad-2003-df-873d-f984-a870-b3cc-c44b-b4ef.ngrok.io', '');
     }
 }
 
