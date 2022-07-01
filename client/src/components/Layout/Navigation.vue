@@ -68,6 +68,7 @@ export default {
 	},
 	watch: {
 		series() {
+			if (!this.$refs.autocomplete) return;
 			this.ac = new Autocomplete(this.$refs.autocomplete, {
 				data: [],
 				maximumItems: 5,

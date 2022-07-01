@@ -28,10 +28,14 @@ const routes = [
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound },
 ]
 
-// console.log(process.env.BASE_URL);
+const rBase = location.hostname == 'localhost' ? process.env.BASE_URL : '/cinema/'
+
+// console.log(process.env.BASE_URL, rBase, location.hostname, 'localhost');
+// history: createWebHistory(process.env.BASE_URL),
+
 const router = createRouter({
-  history: createWebHistory('./'),
-  // history: createWebHistory(process.env.BASE_URL),
+  base: rBase,
+  history: createWebHistory(rBase),
   routes
 })
 
