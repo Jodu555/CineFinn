@@ -340,7 +340,7 @@ export default {
 			const previewImgNumber = Math.max(1, Math.floor((percent * video.duration) / 10));
 			let previewImgSrc = `/assets/previewImgs/preview${previewImgNumber}.jpg`;
 			if (v.currentSeries != undefined && v.currentSeries.ID != -1) {
-				previewImgSrc = `${this.$networking.API_URL}/previewImages/${v.currentSeries.ID}/`;
+				previewImgSrc = `${v.$networking.API_URL}/previewImages/${v.currentSeries.ID}/`;
 				previewImgSrc += `${v.currentSeason}-${v.currentEpisode}/preview${previewImgNumber}.jpg?auth-token=${v.authToken}a`;
 			}
 			previewImg.src = previewImgSrc;
