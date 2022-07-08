@@ -4,7 +4,7 @@
 			<Navigation />
 			<settings-drawer v-if="loggedIn" />
 			<!-- <pre>{{ $router.currentRoute }}</pre> -->
-			<pre>{{ $route.path == '/watch' }}</pre>
+			<!-- <pre>{{ $route.path == '/watch' }}</pre> -->
 			<router-view class="mt-2" :key="$route.query" />
 		</div>
 		<Footer />
