@@ -28,9 +28,10 @@ const routes = [
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound },
 ]
 
-const rBase = location.hostname == 'localhost' ? process.env.BASE_URL : '/cinema/'
-
-// console.log(process.env.BASE_URL, rBase, location.hostname, 'localhost');
+// const rBase = location.hostname == 'localhost' ? process.env.BASE_URL : '/cinema/'
+const rBase = location.hostname == 'localhost' ? './' : '/cinema/'
+// const rBase = './';
+console.log({ rBase, hst: location.hostname });
 // history: createWebHistory(process.env.BASE_URL),
 
 const router = createRouter({
