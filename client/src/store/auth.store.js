@@ -56,8 +56,9 @@ export default {
         },
         async authenticate({ state, commit }, redirectToSlash = false) {
             try {
-                if (getCookie('auth-token') || state.authToken) {
-                    this.$networking.auth_token = getCookie('auth-token') || state.authToken
+                const authtoken = getCookie('auth-token') || state.authToken;
+                if (authtoken) {
+                    this.$networking.auth_token = authtoken;
                     const response = await this.$networking.get('/auth/info');
                     if (response.success) {
                         const json = response.json;
@@ -67,14 +68,19 @@ export default {
                             email: json.email,
                         });
                         await commit('setLoggedIn', true);
+                        await commit('setAuthToken', authtoken);
+                        setCookie('auth-token', authtoken, 30);
                         redirectToSlash && await router.push('/');
                     } else {
-                        commit('setError', response);
+                        await commit('setError', response);
+                        await commit('logout');
+                        await commit('reset', null, { root: true })
                         deleteCookie('auth-token');
                     }
                 } else {
-                    commit('logout');
-                    commit('reset', null, { root: true })
+                    await commit('logout');
+                    await commit('reset', null, { root: true })
+                    deleteCookie('auth-token');
                 }
             } catch (error) {
                 deleteCookie('auth-token');
@@ -86,14 +92,14 @@ export default {
                 const response = await this.$networking.get('/auth/logout');
                 deleteCookie('auth-token');
                 if (response.success) {
-                    commit('logout');
-                    dispatch('reset', null, { root: true });
+                    await commit('logout');
+                    await dispatch('reset', null, { root: true });
                     await router.push('/login');
                 } else {
-                    commit('setError', response);
+                    await commit('setError', response);
                 }
             } else {
-                state.loggedIn = false;
+                await commit('setLoggedIn', false);
             }
         }
     },
