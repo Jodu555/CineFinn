@@ -56,16 +56,19 @@
 </template>
 <script>
 import { mapState } from 'vuex';
+import { io } from 'socket.io-client';
 import JobListView from '@/components/JobListView';
+
 export default {
 	components: { JobListView },
 	data() {
 		return {
 			jobs: [],
+			socket: null,
 		};
 	},
 	computed: {
-		...mapState('auth', ['userInfo']),
+		...mapState('auth', ['userInfo', 'authToken']),
 	},
 	mounted() {
 		this.load();
@@ -76,6 +79,8 @@ export default {
 			if (response.success) {
 				this.jobs = response.json;
 			}
+			this.socket = io('http://localhost:3100');
+			this.socket.emit('auth', this.authToken);
 		},
 		rescrapeVideos() {
 			//TODO: Logic

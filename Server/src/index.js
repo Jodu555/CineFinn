@@ -4,6 +4,7 @@ const fs = require('fs');
 require('dotenv').config();
 const http = require('http');
 const express = require('express');
+const { Server } = require("socket.io");
 const https = require('https');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -13,7 +14,7 @@ const { Database } = require('@jodu555/mysqlapi');
 const database = Database.createDatabase('rooti.jodu555.de', 'cinema', process.env.DB_PASSWORD, 'cinema');
 database.connect();
 
-const { getSeries } = require('./utils/utils.js');
+const { getSeries, setIO, getIO } = require('./utils/utils.js');
 
 const app = express();
 app.use(cors());
@@ -43,6 +44,22 @@ if (process.env.https) {
     server = http.createServer(app);
 }
 
+setIO(
+    new Server(server, {
+        cors: {
+            origin: "*",
+            methods: ["GET", "POST"]
+        }
+    })
+)
+
+const io = getIO();
+
+io.on('connection', (socket) => {
+    console.log('Socket Connection:', socket.id);
+
+});
+
 
 // Your Middleware handlers here
 app.use(express.static(path.join('dist'))); // The Vue build files
@@ -62,7 +79,7 @@ app.use(errorHelper.install());
 
 const PORT = process.env.PORT || 3100;
 server.listen(PORT, async () => {
-    console.log(`Express App Listening ${process.env.https ? 'with SSL ' : ''}on ${PORT}`);
+    console.log(`Express & Socket App Listening ${process.env.https ? 'with SSL ' : ''}on ${PORT}`);
     console.log(getSeries().length);
     console.log(getSeries().map(x => [...x.seasons, ...x.movies]).flat(5).length);
     // await checkImages(getSeries());

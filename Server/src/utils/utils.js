@@ -5,6 +5,7 @@ const outputFileName = 'out.json';
 let series = null;
 let activeJobs = [
 ];
+let io = null;
 
 
 
@@ -25,9 +26,14 @@ const getSeries = (forceLoad = false) => {
 const getActiveJobs = () => activeJobs;
 const setActiveJobs = (_activeJobs) => activeJobs = _activeJobs;
 
+const getIO = () => io;
+const setIO = (_io) => io = _io;
+
 
 module.exports = {
     getSeries,
     getActiveJobs,
-    setActiveJobs
+    setActiveJobs,
+    getIO,
+    setIO
 }
