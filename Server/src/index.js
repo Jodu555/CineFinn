@@ -23,6 +23,7 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 const authHelper = new AuthenticationHelper(app, '/auth', database);
+authHelper.addToken('SECR-DEV', { "UUID": "ad733837-b2cf-47a2-b968-abaa70edbffe", "username": "Jodu", "email": "Jodu505@gmail.com" });
 authHelper.options.register = false;
 authHelper.install();
 
@@ -57,8 +58,28 @@ const io = getIO();
 
 io.on('connection', (socket) => {
     console.log('Socket Connection:', socket.id);
+    socket.on('auth', (authValue) => {
+
+        if (authValue && authHelper.getUser(authValue)) {
+            console.log(`Socket with`);
+            console.log(`   ID: ${socket.id}`);
+            console.log(`   IP: ${socket.address}`);
+            console.log(`  proposed with ${authValue}`);
+            socket.auth = { authValue };
+
+            socket.emit('auth-success');
+        } else {
+            socket.emit('auth-failure');
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Socket DisConnection:', socket.id);
+    })
 
 });
+
+
 
 
 // Your Middleware handlers here

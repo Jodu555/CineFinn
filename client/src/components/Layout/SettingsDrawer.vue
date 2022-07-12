@@ -73,6 +73,9 @@ export default {
 	mounted() {
 		this.load();
 	},
+	async unmounted() {
+		await this.socket.disconnect();
+	},
 	methods: {
 		async load() {
 			const response = await this.$networking.get('/managment/jobs/info');
@@ -80,7 +83,12 @@ export default {
 				this.jobs = response.json;
 			}
 			this.socket = io('http://localhost:3100');
-			this.socket.emit('auth', this.authToken);
+			this.socket.on('connect', () => {
+				this.socket.emit('auth', this.authToken);
+			});
+			this.socket.on('auth-success', () => {
+				console.log('Got Authentication Success!');
+			});
 		},
 		rescrapeVideos() {
 			//TODO: Logic
