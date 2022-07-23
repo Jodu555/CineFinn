@@ -99,10 +99,12 @@ export default {
 		...mapActions('auth', ['login']),
 		async onLogin() {
 			if (this.form.usernameValid && this.form.passwordValid) {
-				await this.login(this.form);
+				await this.login({ username: this.form.username, password: this.form.password });
 				this.form = {
 					username: '',
+					usernameValid: null,
 					password: '',
+					passwordValid: null,
 				};
 			}
 		},
