@@ -11,7 +11,7 @@ const morgan = require('morgan');
 const { ErrorHelper, AuthenticationHelper } = require('@jodu555/express-helpers');
 
 const { Database } = require('@jodu555/mysqlapi');
-const database = Database.createDatabase('rooti.jodu555.de', 'cinema', process.env.DB_PASSWORD, 'cinema');
+const database = Database.createDatabase(process.env.DB_HOST, process.env.DB_USERNAME, process.env.DB_PASSWORD, process.env.DB_DATABASE);
 database.connect();
 
 const { getSeries, setIO, getIO } = require('./utils/utils.js');
