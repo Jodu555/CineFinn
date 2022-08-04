@@ -10,7 +10,7 @@ import { autoAnimatePlugin } from '@formkit/auto-animate/vue'
 
 const networkingPlugin = {
     install: (app, options) => {
-        const aBase = location.hostname == 'localhost' ? 'http://localhost:3100' : 'http://0dba-2003-df-8742-fec9-2996-e4f7-5ceb-629a.ngrok.io'
+        const aBase = location.hostname == 'localhost' ? 'http://localhost:3100' : 'http://cinema-api.jodu555.de'
         app.config.globalProperties.$networking = new Networking(aBase, '');
     }
 }
