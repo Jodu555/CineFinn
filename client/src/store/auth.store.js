@@ -54,7 +54,7 @@ export default {
                 commit('setError', response);
             }
         },
-        async authenticate({ state, commit }, redirectToSlash = false) {
+        async authenticate({ state, commit, dispatch }, redirectToSlash = false) {
             try {
                 const authtoken = getCookie('auth-token') || state.authToken;
                 if (authtoken) {
@@ -70,37 +70,43 @@ export default {
                         await commit('setLoggedIn', true);
                         await commit('setAuthToken', authtoken);
                         setCookie('auth-token', authtoken, 30);
+
+                        this.$socket.auth = { token: authtoken };
+                        await this.$socket.connect();
+
                         redirectToSlash && await router.push('/');
                     } else {
                         await commit('setError', response);
-                        await commit('logout');
-                        await commit('reset', null, { root: true })
-                        deleteCookie('auth-token');
+                        await dispatch('logout');
+                        // await dispatch('reset', null, { root: true })
+                        // deleteCookie('auth-token');
                     }
                 } else {
                     await commit('logout');
-                    await commit('reset', null, { root: true })
+                    await dispatch('reset', null, { root: true })
                     deleteCookie('auth-token');
                 }
             } catch (error) {
                 deleteCookie('auth-token');
+                await dispatch('logout');
             }
         },
         async logout({ state, commit, dispatch }) {
+            await commit('setLoggedIn', false);
             if (getCookie('auth-token') || state.authToken) {
                 this.$networking.auth_token = getCookie('auth-token') || state.authToken;
-                const response = await this.$networking.get('/auth/logout');
                 deleteCookie('auth-token');
-                if (response.success) {
-                    await commit('logout');
-                    await dispatch('reset', null, { root: true });
-                    await router.push('/login');
-                } else {
-                    await commit('setError', response);
-                }
-            } else {
-                await commit('setLoggedIn', false);
+                try {
+                    const response = await this.$networking.get('/auth/logout');
+                    if (response.success) {
+                        await commit('logout');
+                        await dispatch('reset', null, { root: true });
+                    } else {
+                        await commit('setError', response);
+                    }
+                } catch (error) { }
             }
+            await router.push('/login');
         }
     },
     namespaced: true,
