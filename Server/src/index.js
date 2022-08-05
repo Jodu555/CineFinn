@@ -56,21 +56,29 @@ setIO(
 
 const io = getIO();
 
-io.on('connection', (socket) => {
-    console.log('Socket Connection:', socket.id);
-    socket.on('auth', (authValue) => {
-
-        if (authValue && authHelper.getUser(authValue)) {
+io.use((socket, next) => {
+    const authToken = socket.handshake.auth.token;
+    if (authToken && authHelper.getUser(authToken)) {
+        if (authToken) {
             console.log(`Socket with`);
             console.log(`   ID: ${socket.id}`);
-            console.log(`   IP: ${socket.address}`);
-            console.log(`  proposed with ${authValue}`);
-            socket.auth = { authValue };
-
-            socket.emit('auth-success');
+            console.log(`   - proposed with: ${authToken}`);
+            socket.auth = { token: authToken, user: authHelper.getUser(authToken) };
+            return next();
         } else {
-            socket.emit('auth-failure');
+            return next(new Error('Authentication error'));
         }
+    } else {
+        next(new Error('Authentication error'));
+    }
+})
+
+io.on('connection', async (socket) => {
+    console.log('Socket Connection:', socket.id);
+
+    console.log(socket.auth);
+
+    socket.on('x', () => {
     });
 
     socket.on('disconnect', () => {
@@ -78,8 +86,6 @@ io.on('connection', (socket) => {
     })
 
 });
-
-
 
 
 // Your Middleware handlers here
