@@ -103,5 +103,5 @@ server.listen(PORT, async () => {
     console.log(`Express & Socket App Listening ${process.env.https ? 'with SSL ' : ''}on ${PORT}`);
     console.log(getSeries().length);
     console.log(getSeries().map(x => [...x.seasons, ...x.movies]).flat(5).length);
-    // await checkImages(getSeries());
+    // await validateImages(getSeries());
 });

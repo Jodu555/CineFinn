@@ -34,7 +34,7 @@ const genearteImages = async (series) => {
     console.log('Finished');
 }
 
-const checkImages = async (series) => {
+const validateImages = async (series) => {
     let totalImgs = 0;
 
     // return;
@@ -63,5 +63,5 @@ const checkImages = async (series) => {
 
 module.exports = {
     genearteImages,
-    checkImages
+    validateImages
 }
