@@ -1,6 +1,6 @@
 const express = require('express');
 const { crawlAndIndex } = require('../utils/crawler');
-const { genearteImages, validateImages } = require('../utils/images');
+const { generateImages, validateImages } = require('../utils/images');
 const { getActiveJobs, setActiveJobs } = require('../utils/utils');
 const router = express.Router();
 
@@ -35,7 +35,7 @@ router.get('/job/img/generate', (req, res, next) => {
             startTime: Date.now(),
             data: {},
         });
-        genearteImages();
+        generateImages();
         setTimeout(() => {
             setActiveJobs(getActiveJobs().filter(x => x.id !== id));
             console.log('Removed');

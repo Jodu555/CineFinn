@@ -13,7 +13,7 @@ async function deepExecPromisify(command, cwd) {
     })
 }
 
-const genearteImages = async (series) => {
+const generateImages = async (series) => {
 
     const serie = series[6];
     const seasons = serie.seasons.flat().splice(0, 7);
@@ -62,6 +62,6 @@ const validateImages = async (series) => {
 }
 
 module.exports = {
-    genearteImages,
+    generateImages,
     validateImages
 }
