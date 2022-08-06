@@ -17,8 +17,6 @@ async function deepExecPromisify(command, cwd) {
 }
 
 const generateImages = async (series, cleanup = () => { }) => {
-
-    const serie = series[6];
     for (const serie of series) {
         const seasons = serie.seasons.flat();
         console.log(seasons.length);
@@ -34,7 +32,6 @@ const generateImages = async (series, cleanup = () => { }) => {
             // await deepExecPromisify(command);
         }
     }
-
 
     console.log('Finished generateImages()');
     cleanup();

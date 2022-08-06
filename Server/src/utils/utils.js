@@ -16,12 +16,17 @@ const getSeries = (forceLoad = false) => {
             series = JSON.parse(fs.readFileSync(outputFileName, 'utf8'));
         } else {
             console.log('Recrawled the series');
-            series = crawlAndIndex();
+            series = crawlAndIndex(cb);
             fs.writeFileSync(outputFileName, JSON.stringify(series, null, 3), 'utf8');
         }
     }
     return series;
 };
+
+const setSeries = async (_series) => {
+    series = _series;
+    fs.writeFileSync(outputFileName, JSON.stringify(series, null, 3), 'utf8');
+}
 
 const getActiveJobs = () => activeJobs;
 const setActiveJobs = (_activeJobs) => activeJobs = _activeJobs;
@@ -32,6 +37,7 @@ const setIO = (_io) => io = _io;
 
 module.exports = {
     getSeries,
+    setSeries,
     getActiveJobs,
     setActiveJobs,
     getIO,

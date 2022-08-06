@@ -1,7 +1,7 @@
 const express = require('express');
 const { crawlAndIndex } = require('../utils/crawler');
 const { generateImages, validateImages } = require('../utils/images');
-const { getActiveJobs, setActiveJobs, getSeries, getIO } = require('../utils/utils');
+const { getActiveJobs, setActiveJobs, getSeries, getIO, setSeries } = require('../utils/utils');
 const router = express.Router();
 
 const LOOKUP = {
@@ -85,7 +85,7 @@ router.get('/job/crawl', (req, res, next) => {
             startTime: Date.now(),
             data: {},
         });
-        crawlAndIndex();
+        setSeries(crawlAndIndex());
         setTimeout(async () => {
             setActiveJobs(getActiveJobs().filter(x => x.id !== id));
             const sockets = await getIO().fetchSockets();
