@@ -1,4 +1,7 @@
+const fs = require('fs');
+const path = require('path');
 const child_process = require('child_process');
+
 const { filenameParser } = require('../classes/series');
 const { getVideoDurationInSeconds } = require('get-video-duration')
 
@@ -16,22 +19,24 @@ async function deepExecPromisify(command, cwd) {
 const generateImages = async (series, cleanup = () => { }) => {
 
     const serie = series[6];
-    const seasons = serie.seasons.flat().splice(0, 7);
+    for (const serie of series) {
+        const seasons = serie.seasons.flat();
+        console.log(seasons.length);
+        let i = 0;
+        for (const season of seasons) {
+            i++;
+            const data = filenameParser(season, path.parse(season).base);
+            const output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), `${data.season}-${data.episode}`);
+            fs.mkdirSync(output, { recursive: true });
 
-    console.log(seasons.length);
-    // return;
-    let i = 0;
-    for (const season of seasons) {
-        i++;
-        const data = filenameParser(season, path.parse(season).base);
-        const output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), `${data.season}-${data.episode}`);
-        fs.mkdirSync(output, { recursive: true });
-
-        const command = `ffmpeg -i "${season}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
-        console.log(`Video ${i} / ${seasons.length} - ${path.parse(season).base}`);
-        // await deepExecPromisify(command);
+            const command = `ffmpeg -i "${season}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
+            console.log(`Video ${i} / ${seasons.length} - ${path.parse(season).base}`);
+            // await deepExecPromisify(command);
+        }
     }
-    console.log('Finished');
+
+
+    console.log('Finished generateImages()');
     cleanup();
 }
 

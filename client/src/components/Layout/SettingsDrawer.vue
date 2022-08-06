@@ -79,7 +79,7 @@ export default {
 	},
 	async unmounted() {
 		this.jobs.forEach((job) => {
-			console.log('ERR', job, job.callpoint);
+			// console.log('ERR', job, job.callpoint);
 			const socketEvent = `${job.callpoint.replace('/', '').replaceAll('/', '_')}-end`;
 			this.$socket.off(socketEvent);
 		});
