@@ -5,9 +5,9 @@ const { getActiveJobs, setActiveJobs } = require('../utils/utils');
 const router = express.Router();
 
 const LOOKUP = {
-    crawl: 'Recrawl the archive',
-    generate: 'Generating Preview-Images',
-    validator: 'Validating Preview-Images',
+    crawl: { name: 'Recrawl the archive', callpoint: '/job/crawl' },
+    generate: { name: 'Generating Preview-Images', callpoint: '/job/img/generate' },
+    validator: { name: 'Validating Preview-Images', callpoint: '/job/img/validate' },
 }
 
 router.get('/jobs/info', (req, res, next) => {
@@ -15,7 +15,7 @@ router.get('/jobs/info', (req, res, next) => {
     Object.keys(LOOKUP).forEach(id => {
         response.push({
             id,
-            name: LOOKUP[id],
+            ...LOOKUP[id],
             running: Boolean(getActiveJobs().find(x => x.id == id))
         });
     });
@@ -31,7 +31,7 @@ router.get('/job/img/generate', (req, res, next) => {
     } else {
         getActiveJobs().push({
             id,
-            name: LOOKUP[id],
+            name: LOOKUP[id].name,
             startTime: Date.now(),
             data: {},
         });
@@ -53,7 +53,7 @@ router.get('/job/img/validate', (req, res, next) => {
     } else {
         getActiveJobs().push({
             id,
-            name: LOOKUP[id],
+            name: LOOKUP[id].name,
             startTime: Date.now(),
             data: {},
         });
@@ -75,7 +75,7 @@ router.get('/job/crawl', (req, res, next) => {
     } else {
         getActiveJobs().push({
             id,
-            name: LOOKUP[id],
+            name: LOOKUP[id].name,
             startTime: Date.now(),
             data: {},
         });
