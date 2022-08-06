@@ -22,7 +22,7 @@ router.get('/jobs/info', (req, res, next) => {
         });
     });
     res.json(response);
-})
+});
 
 router.get('/job/img/generate', (req, res, next) => {
     const id = 'generate';
@@ -39,7 +39,10 @@ router.get('/job/img/generate', (req, res, next) => {
         });
         generateImages(getSeries(), () => {
             setActiveJobs(getActiveJobs().filter(x => x.id !== id));
-            //TODO: Send here the socket event
+            const sockets = await getIO().fetchSockets();
+            await Promise.all(sockets.map(async socket => {
+                socket.emit(callpointToEvent(LOOKUP[id].callpoint))
+            }));
         });
         res.json(getActiveJobs());
     }
@@ -60,7 +63,10 @@ router.get('/job/img/validate', (req, res, next) => {
         });
         validateImages(getSeries(), () => {
             setActiveJobs(getActiveJobs().filter(x => x.id !== id));
-            //TODO: Send here the socket event
+            const sockets = await getIO().fetchSockets();
+            await Promise.all(sockets.map(async socket => {
+                socket.emit(callpointToEvent(LOOKUP[id].callpoint))
+            }));
         });
         res.json(getActiveJobs());
     }
@@ -82,7 +88,10 @@ router.get('/job/crawl', (req, res, next) => {
         crawlAndIndex();
         setTimeout(() => {
             setActiveJobs(getActiveJobs().filter(x => x.id !== id));
-            //TODO: Send here the socket event
+            const sockets = await getIO().fetchSockets();
+            await Promise.all(sockets.map(async socket => {
+                socket.emit(callpointToEvent(LOOKUP[id].callpoint))
+            }));
         }, 3600);
         res.json(getActiveJobs());
     }
