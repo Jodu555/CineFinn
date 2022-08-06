@@ -1,5 +1,5 @@
 <template>
-	<div id="conta" :style="{ 'padding-bottom': $route.path == '/watch' ? '5rem' : '0' }">
+	<div id="conta" :style="{ 'padding-bottom': $route.path == '/watch' ? '5rem' : '3.5rem' }">
 		<div v-auto-animate="{ duration: 250 }" id="app">
 			<Navigation />
 			<settings-drawer v-if="loggedIn" />
