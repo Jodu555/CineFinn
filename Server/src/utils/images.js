@@ -13,7 +13,7 @@ async function deepExecPromisify(command, cwd) {
     })
 }
 
-const generateImages = async (series) => {
+const generateImages = async (series, cleanup = () => { }) => {
 
     const serie = series[6];
     const seasons = serie.seasons.flat().splice(0, 7);
@@ -32,9 +32,10 @@ const generateImages = async (series) => {
         // await deepExecPromisify(command);
     }
     console.log('Finished');
+    cleanup();
 }
 
-const validateImages = async (series) => {
+const validateImages = async (series, cleanup = () => { }) => {
     let totalImgs = 0;
 
     // return;
@@ -57,8 +58,8 @@ const validateImages = async (series) => {
             console.log(`Check ${i} / ${seasons.length} - ${path.parse(season).base} = ${imageAmount} == ${files.length}`);
         }
     }
-
     console.log('Finished');
+    cleanup();
 }
 
 module.exports = {

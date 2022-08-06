@@ -37,12 +37,13 @@
 					<JobListView
 						v-for="job in jobs"
 						:title="job.name"
+						:callpoint="job.callpoint"
 						:key="job.id"
 						:running="job.running"
 						:lastRun="job.lastRun"
 					/>
 
-					<JobListView title="TEST" :running="false" :lastRun="Date.now()" />
+					<JobListView title="TEST" callpoint="/test/asd" :running="false" :lastRun="Date.now()" />
 
 					<!-- <JobListView title="Generated Images Validation" :running="true" lastRun="null" />
 					<JobListView title="Generating Images" :running="false" lastRun="10.06.2022 10 Uhr" />

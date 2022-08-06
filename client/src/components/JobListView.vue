@@ -25,7 +25,7 @@
 				<p v-if="lastRun">Latest Run: {{ new Date(lastRun).toLocaleString() }}</p>
 				<p v-if="lastDuration">Latest Duration: {{ new Date(lastDuration).toLocaleString() }}</p>
 
-				<button class="btn btn-outline-info">Start</button>
+				<button @click="start" class="btn btn-outline-info">Start</button>
 			</div>
 		</li>
 	</div>
@@ -34,9 +34,21 @@
 export default {
 	props: {
 		title: String,
+		callpoint: String,
 		running: Boolean,
 		lastRun: Number,
 		lastDuration: Number,
+	},
+	created() {
+		const socketEvent = `${this.callpoint.replace('/', '').replaceAll('/', '_')}-end`;
+		console.log(`socketEvent`, socketEvent);
+	},
+	methods: {
+		start() {
+			this.$networking.get(`/managment${this.callpoint}`);
+			this.running = true;
+			this.lastRun = Date.now();
+		},
 	},
 };
 </script>

@@ -1,7 +1,7 @@
 const express = require('express');
 const { crawlAndIndex } = require('../utils/crawler');
 const { generateImages, validateImages } = require('../utils/images');
-const { getActiveJobs, setActiveJobs } = require('../utils/utils');
+const { getActiveJobs, setActiveJobs, getSeries, getIO } = require('../utils/utils');
 const router = express.Router();
 
 const LOOKUP = {
@@ -9,6 +9,8 @@ const LOOKUP = {
     generate: { name: 'Generating Preview-Images', callpoint: '/job/img/generate' },
     validator: { name: 'Validating Preview-Images', callpoint: '/job/img/validate' },
 }
+
+const callpointToEvent = (callpoint) => `${callpoint.replace('/', '').replaceAll('/', '_')}-end`;
 
 router.get('/jobs/info', (req, res, next) => {
     const response = [];
@@ -35,11 +37,10 @@ router.get('/job/img/generate', (req, res, next) => {
             startTime: Date.now(),
             data: {},
         });
-        generateImages();
-        setTimeout(() => {
+        generateImages(getSeries(), () => {
             setActiveJobs(getActiveJobs().filter(x => x.id !== id));
-            console.log('Removed');
-        }, 3600);
+            //TODO: Send here the socket event
+        });
         res.json(getActiveJobs());
     }
 });
@@ -57,11 +58,10 @@ router.get('/job/img/validate', (req, res, next) => {
             startTime: Date.now(),
             data: {},
         });
-        validateImages();
-        setTimeout(() => {
+        validateImages(getSeries(), () => {
             setActiveJobs(getActiveJobs().filter(x => x.id !== id));
-            console.log('Removed');
-        }, 3600);
+            //TODO: Send here the socket event
+        });
         res.json(getActiveJobs());
     }
 });
@@ -82,7 +82,7 @@ router.get('/job/crawl', (req, res, next) => {
         crawlAndIndex();
         setTimeout(() => {
             setActiveJobs(getActiveJobs().filter(x => x.id !== id));
-            console.log('Removed');
+            //TODO: Send here the socket event
         }, 3600);
         res.json(getActiveJobs());
     }
