@@ -36,14 +36,16 @@
 				<ul class="list-group list-group-flush">
 					<JobListView
 						v-for="job in jobs"
+						:id="job.id"
 						:title="job.name"
 						:callpoint="job.callpoint"
 						:key="job.id"
 						:running="job.running"
 						:lastRun="job.lastRun"
+						:click="start"
 					/>
 
-					<JobListView title="TEST" callpoint="/test/asd" :running="false" :lastRun="Date.now()" />
+					<!-- <JobListView title="TEST" callpoint="/test/asd" :running="false" :lastRun="Date.now()" /> -->
 
 					<!-- <JobListView title="Generated Images Validation" :running="true" lastRun="null" />
 					<JobListView title="Generating Images" :running="false" lastRun="10.06.2022 10 Uhr" />
@@ -67,7 +69,6 @@ export default {
 	data() {
 		return {
 			jobs: [],
-			socket: null,
 		};
 	},
 	computed: {
@@ -77,7 +78,11 @@ export default {
 		this.load();
 	},
 	async unmounted() {
-		await this.socket.disconnect();
+		this.jobs.forEach((job) => {
+			console.log('ERR', job, job.callpoint);
+			const socketEvent = `${job.callpoint.replace('/', '').replaceAll('/', '_')}-end`;
+			this.$socket.off(socketEvent);
+		});
 	},
 	methods: {
 		async load() {
@@ -85,13 +90,25 @@ export default {
 			if (response.success) {
 				this.jobs = response.json;
 			}
-			this.socket = io('http://localhost:3100');
-			this.socket.on('connect', () => {
-				this.socket.emit('auth', this.authToken);
+			this.jobs.forEach((job) => {
+				const socketEvent = `${job.callpoint.replace('/', '').replaceAll('/', '_')}-end`;
+				this.$socket.on(socketEvent, () => {
+					console.log('RECIEVED!!!!!!!!!!!!', socketEvent);
+					const newJobs = this.jobs.map((j) => {
+						if (j.id !== job.id) return j;
+						return { ...j, running: false };
+					});
+					this.jobs = newJobs;
+				});
 			});
-			this.socket.on('auth-success', () => {
-				console.log('Got Authentication Success!');
-			});
+		},
+		start(id) {
+			console.log('GOT Click', id);
+			const job = this.jobs.find((j) => j.id == id);
+			console.log(job);
+			job.running = true;
+			job.lastRun = Date.now();
+			this.$networking.get(`/managment${job.callpoint}`);
 		},
 		rescrapeVideos() {
 			//TODO: Logic

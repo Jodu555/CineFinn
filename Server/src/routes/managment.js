@@ -37,7 +37,7 @@ router.get('/job/img/generate', (req, res, next) => {
             startTime: Date.now(),
             data: {},
         });
-        generateImages(getSeries(), () => {
+        generateImages(getSeries(), async () => {
             setActiveJobs(getActiveJobs().filter(x => x.id !== id));
             const sockets = await getIO().fetchSockets();
             await Promise.all(sockets.map(async socket => {
@@ -61,7 +61,7 @@ router.get('/job/img/validate', (req, res, next) => {
             startTime: Date.now(),
             data: {},
         });
-        validateImages(getSeries(), () => {
+        validateImages(getSeries(), async () => {
             setActiveJobs(getActiveJobs().filter(x => x.id !== id));
             const sockets = await getIO().fetchSockets();
             await Promise.all(sockets.map(async socket => {
@@ -86,7 +86,7 @@ router.get('/job/crawl', (req, res, next) => {
             data: {},
         });
         crawlAndIndex();
-        setTimeout(() => {
+        setTimeout(async () => {
             setActiveJobs(getActiveJobs().filter(x => x.id !== id));
             const sockets = await getIO().fetchSockets();
             await Promise.all(sockets.map(async socket => {
