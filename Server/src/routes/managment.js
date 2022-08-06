@@ -42,7 +42,8 @@ router.get('/job/img/generate', (req, res, next) => {
         }, 3600);
         res.json(getActiveJobs());
     }
-})
+});
+
 router.get('/job/img/validate', (req, res, next) => {
     const id = 'validator';
     const job = getActiveJobs().find(x => x.id == id);
@@ -63,7 +64,7 @@ router.get('/job/img/validate', (req, res, next) => {
         }, 3600);
         res.json(getActiveJobs());
     }
-})
+});
 
 router.get('/job/crawl', (req, res, next) => {
     const id = 'crawl';
