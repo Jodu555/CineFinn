@@ -26,7 +26,7 @@ const generateImages = async (series, cleanup = () => { }) => {
             const data = filenameParser(season, path.parse(season).base);
             const output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), `${data.season}-${data.episode}`);
             fs.mkdirSync(output, { recursive: true });
-            if (fs.readdirSync(output).length > 0) {
+            if (fs.readdirSync(output).length == 0) {
                 const command = `ffmpeg -i "${season}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
                 await deepExecPromisify(command);
             }
