@@ -18,7 +18,7 @@ const { getSeries, setIO, getIO } = require('./utils/utils.js');
 
 const app = express();
 app.use(cors());
-app.use(morgan('dev'));
+app.use(morgan('short'));
 // app.use(helmet());
 app.use(express.json());
 
