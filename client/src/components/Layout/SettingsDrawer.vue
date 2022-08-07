@@ -92,11 +92,16 @@ export default {
 			this.jobs.forEach((job) => {
 				const socketEvent = `${job.callpoint.replace('/', '').replaceAll('/', '_')}-end`;
 				this.$socket.on(socketEvent, () => {
-					const newJobs = this.jobs.map((j) => {
-						if (j.id !== job.id) return j;
-						return { ...j, running: false };
+					job.running = false;
+					this.$swal({
+						toast: true,
+						position: 'top-end',
+						showConfirmButton: false,
+						timer: 2500,
+						icon: 'success',
+						title: `${job.name} - Finished`,
+						timerProgressBar: true,
 					});
-					this.jobs = newJobs;
 				});
 			});
 		},
@@ -105,16 +110,13 @@ export default {
 			job.running = true;
 			job.lastRun = Date.now();
 			this.$networking.get(`/managment${job.callpoint}`);
-		},
-		rescrapeVideos() {
-			//TODO: Logic
 			this.$swal({
 				toast: true,
 				position: 'top-end',
 				showConfirmButton: false,
-				timer: 1500,
-				icon: 'success',
-				title: 'Re-Scraped all the videos!',
+				timer: 2500,
+				icon: 'warning',
+				title: `${job.name} - Started!`,
 				timerProgressBar: true,
 			});
 		},
