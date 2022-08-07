@@ -12,10 +12,10 @@ let io = null;
 const getSeries = (forceLoad = false) => {
     if (forceLoad || !series) {
         if (fs.existsSync(outputFileName) && !forceLoad) {
-            console.log('Loaded series from file');
+            console.log('Loaded series from file!');
             series = JSON.parse(fs.readFileSync(outputFileName, 'utf8'));
         } else {
-            console.log('Recrawled the series');
+            console.log('Recrawled the series!');
             series = crawlAndIndex(cb);
             fs.writeFileSync(outputFileName, JSON.stringify(series, null, 3), 'utf8');
         }
@@ -24,6 +24,7 @@ const getSeries = (forceLoad = false) => {
 };
 
 const setSeries = async (_series) => {
+    console.log('Setted new Series!');
     series = _series;
     fs.writeFileSync(outputFileName, JSON.stringify(series, null, 3), 'utf8');
 }

@@ -74,7 +74,6 @@ export default {
 				maximumItems: 5,
 				threshold: 1,
 				onSelectItem: ({ label, value }) => {
-					// console.log('user selected:', label, value);
 					this.$refs.autocomplete.value = '';
 					this.$router.push({ path: '/watch', query: { id: value } });
 				},

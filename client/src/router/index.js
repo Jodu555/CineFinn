@@ -31,7 +31,7 @@ const routes = [
 // const rBase = location.hostname == 'localhost' ? process.env.BASE_URL : '/cinema/'
 const rBase = location.hostname == 'localhost' ? './' : '/cinema/'
 // const rBase = './';
-console.log({ rBase, hst: location.hostname });
+// console.log({ rBase, hst: location.hostname });
 // history: createWebHistory(process.env.BASE_URL),
 
 const router = createRouter({

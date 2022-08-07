@@ -79,7 +79,6 @@ export default {
 	},
 	async unmounted() {
 		this.jobs.forEach((job) => {
-			// console.log('ERR', job, job.callpoint);
 			const socketEvent = `${job.callpoint.replace('/', '').replaceAll('/', '_')}-end`;
 			this.$socket.off(socketEvent);
 		});
@@ -93,7 +92,6 @@ export default {
 			this.jobs.forEach((job) => {
 				const socketEvent = `${job.callpoint.replace('/', '').replaceAll('/', '_')}-end`;
 				this.$socket.on(socketEvent, () => {
-					console.log('RECIEVED!!!!!!!!!!!!', socketEvent);
 					const newJobs = this.jobs.map((j) => {
 						if (j.id !== job.id) return j;
 						return { ...j, running: false };
@@ -103,9 +101,7 @@ export default {
 			});
 		},
 		start(id) {
-			console.log('GOT Click', id);
 			const job = this.jobs.find((j) => j.id == id);
-			console.log(job);
 			job.running = true;
 			job.lastRun = Date.now();
 			this.$networking.get(`/managment${job.callpoint}`);
