@@ -8,9 +8,9 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 
 import { autoAnimatePlugin } from '@formkit/auto-animate/vue'
 
-import { io } from "socket.io-client";
+import { io } from 'socket.io-client';
 
-import "bootstrap"
+import 'bootstrap'
 
 const serverURL = location.hostname == 'localhost' ? 'http://localhost:3100' : 'http://cinema-api.jodu555.de';
 
@@ -33,7 +33,7 @@ app.use(socketPlugin);
 
 const socket = app.config.globalProperties.$socket;
 
-socket.on("connect_error", async (err) => {
+socket.on('connect_error', async (err) => {
     console.log('Socket Connect Error: ', err.message); // prints the message associated with the error
     if (err.message.includes('Authentication'))
         await store.dispatch('auth/authenticate');

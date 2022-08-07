@@ -4,7 +4,7 @@ const fs = require('fs');
 require('dotenv').config();
 const http = require('http');
 const express = require('express');
-const { Server } = require("socket.io");
+const { Server } = require('socket.io');
 const https = require('https');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -23,7 +23,7 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 const authHelper = new AuthenticationHelper(app, '/auth', database);
-authHelper.addToken('SECR-DEV', { "UUID": "ad733837-b2cf-47a2-b968-abaa70edbffe", "username": "Jodu", "email": "Jodu505@gmail.com" });
+authHelper.addToken('SECR-DEV', { 'UUID': 'ad733837-b2cf-47a2-b968-abaa70edbffe', 'username': 'Jodu', 'email': 'Jodu505@gmail.com' });
 authHelper.options.register = false;
 authHelper.install();
 
@@ -48,8 +48,8 @@ if (process.env.https) {
 setIO(
     new Server(server, {
         cors: {
-            origin: "*",
-            methods: ["GET", "POST"]
+            origins: ['localhost:8080', '1b2.jodu555.de', 'cinema.jodu555.de'],
+            methods: ['GET', 'POST']
         }
     })
 )
@@ -92,7 +92,7 @@ io.on('connection', async (socket) => {
 app.use(express.static(path.join('dist'))); // The Vue build files
 app.use('/previewImages', authHelper.authentication(), express.static(path.join(process.env.PREVIEW_IMGS_PATH)));
 
-app.get("/video", authHelper.authentication(), require('./routes/video.js'));
+app.get('/video', authHelper.authentication(), require('./routes/video.js'));
 
 app.use('/managment', authHelper.authentication(), require('./routes/managment.js').router)
 

@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { crawlAndIndex } = require("./crawler");
+const { crawlAndIndex } = require('./crawler');
 const outputFileName = 'out.json';
 
 let series = null;
