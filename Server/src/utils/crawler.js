@@ -2,7 +2,7 @@ const path = require('path');
 const { Series, filenameParser } = require('../classes/series');
 const { listFiles } = require('./fileutils');
 
-const generateID = () => Math.floor(Math.random() * 1000);
+const generateID = () => Math.floor(Math.random() * 100);
 
 const crawlAndIndex = () => {
 
@@ -73,4 +73,29 @@ const crawlAndIndex = () => {
     return series;
 }
 
-module.exports = { crawlAndIndex }
+const mergeSeriesArrays = (before, after) => {
+    const output = [];
+
+    //Compare and overwrite ids
+    before.forEach(beforeSerie => {
+        const afterSerie = after.find(as => as.title == beforeSerie.title && as.categorie == beforeSerie.categorie)
+        if (afterSerie) {
+            // console.log('Found Overlapping', beforeSerie.title, afterSerie.title, beforeSerie.ID, afterSerie.ID);
+            output.push(new Series(beforeSerie.ID, beforeSerie.categorie, beforeSerie.title, afterSerie.movies, afterSerie.seasons));
+        }
+    });
+
+    //Add the non existent series and watch for ID overlaps
+    after.forEach(afterSerie => {
+        const beforeSerie = before.find(bs => afterSerie.title == bs.title)
+        if (!beforeSerie) {
+            const overlapID = before.find(bs => bs.ID == afterSerie.ID)
+            const newID = overlapID ? generateID() : afterSerie.ID
+            output.push(new Series(newID, afterSerie.categorie, afterSerie.title, afterSerie.movies, afterSerie.seasons));
+        }
+    });
+
+    return output;
+}
+
+module.exports = { crawlAndIndex, mergeSeriesArrays }

@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { crawlAndIndex } = require('./crawler');
+const { crawlAndIndex, mergeSeriesArrays } = require('./crawler');
 const outputFileName = 'out.json';
 
 let series = null;
@@ -15,8 +15,8 @@ const getSeries = (forceLoad = false) => {
             console.log('Loaded series from file!');
             series = JSON.parse(fs.readFileSync(outputFileName, 'utf8'));
         } else {
-            console.log('Recrawled the series!');
-            series = crawlAndIndex(cb);
+            console.log('Crawled the series!');
+            series = crawlAndIndex();
             fs.writeFileSync(outputFileName, JSON.stringify(series, null, 3), 'utf8');
         }
     }
@@ -24,8 +24,8 @@ const getSeries = (forceLoad = false) => {
 };
 
 const setSeries = async (_series) => {
-    console.log('Setted new Series!');
-    series = _series;
+    console.log('Setted & merged new Series!');
+    series = mergeSeriesArrays(series, _series);
     fs.writeFileSync(outputFileName, JSON.stringify(series, null, 3), 'utf8');
 }
 

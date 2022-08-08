@@ -27,6 +27,7 @@ database.createTable('jobs', {
 
 const { getSeries, setIO, getIO } = require('./utils/utils.js');
 const { generateImages, validateImages } = require('./utils/images.js');
+const { crawlAndIndex, mergeSeriesArrays } = require('./utils/crawler.js');
 
 const app = express();
 app.use(cors());
