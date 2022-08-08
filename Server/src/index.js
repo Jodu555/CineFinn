@@ -14,6 +14,17 @@ const { Database } = require('@jodu555/mysqlapi');
 const database = Database.createDatabase(process.env.DB_HOST, process.env.DB_USERNAME, process.env.DB_PASSWORD, process.env.DB_DATABASE);
 database.connect();
 
+database.createTable('jobs', {
+    options: {},
+    ID: {
+        type: 'varchar(64)',
+        null: false,
+    },
+    lastRun: {
+        type: 'varchar(64)',
+    },
+})
+
 const { getSeries, setIO, getIO } = require('./utils/utils.js');
 const { generateImages, validateImages } = require('./utils/images.js');
 
