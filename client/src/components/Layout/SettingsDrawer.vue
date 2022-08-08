@@ -86,9 +86,8 @@ export default {
 	methods: {
 		async load() {
 			const response = await this.$networking.get('/managment/jobs/info');
-			if (response.success) {
-				this.jobs = response.json;
-			}
+			if (!response.success) return;
+			this.jobs = response.json;
 			this.jobs.forEach((job) => {
 				const socketEvent = `${job.callpoint.replace('/', '').replaceAll('/', '_')}-end`;
 				this.$socket.on(socketEvent, () => {

@@ -1,3 +1,5 @@
+const { Database } = require('@jodu555/mysqlapi');
+const database = Database.getDatabase();
 const express = require('express');
 const { crawlAndIndex } = require('../utils/crawler');
 const { generateImages, validateImages } = require('../utils/images');
@@ -12,13 +14,35 @@ const LOOKUP = {
 
 const callpointToEvent = (callpoint) => `${callpoint.replace('/', '').replaceAll('/', '_')}-end`;
 
+Promise.all(Object.keys(LOOKUP).map(async id => {
+    const jobDB = await database.get('jobs').getOne({ ID: id });
+    if (jobDB) {
+        const lastRun = jobDB.lastRun ? Number(jobDB.lastRun) : undefined;
+        LOOKUP[id] = { ...LOOKUP[id], lastRun };
+    } else {
+        database.get('jobs').create({ ID: id, lastRun: '' });
+    }
+    return id;
+}));
+
+
+router.use((req, res, next) => {
+    const jobID = Object.keys(LOOKUP).find(v => LOOKUP[v].callpoint == req.path);
+    if (jobID) {
+        const lastRun = Date.now();
+        database.get('jobs').update({ ID: jobID }, { lastRun });
+        LOOKUP[jobID] = { ...LOOKUP[jobID], lastRun };
+    }
+    next();
+});
+
 router.get('/jobs/info', (req, res, next) => {
     const response = [];
     Object.keys(LOOKUP).forEach(id => {
         response.push({
             id,
             ...LOOKUP[id],
-            running: Boolean(getActiveJobs().find(x => x.id == id))
+            running: Boolean(getActiveJobs().find(x => x.id == id)),
         });
     });
     res.json(response);
