@@ -226,7 +226,6 @@ export default {
 		},
 		handleVideoChange(season, episode, movie) {
 			const video = document.querySelector('video');
-			// console.log(video);
 			if (video == null) {
 				this.setCurrentSeason(season);
 				this.setCurrentEpisode(episode);
@@ -236,6 +235,7 @@ export default {
 				});
 				return;
 			}
+			const wasPaused = video.paused;
 			video.pause();
 			setTimeout(() => {
 				this.setCurrentSeason(season);
@@ -244,6 +244,7 @@ export default {
 				setTimeout(() => {
 					video.load();
 					video.currentTime = 0;
+					!wasPaused && video.play();
 				}, 100);
 			}, 200);
 		},
