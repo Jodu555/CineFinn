@@ -340,7 +340,7 @@ export default {
 				let previewImgSrc = `/assets/previewImgs/preview${previewImgNumber}.jpg`;
 				if (v.currentSeries != undefined && v.currentSeries.ID != -1) {
 					previewImgSrc = `${v.$networking.API_URL}/previewImages/${v.currentSeries.ID}/`;
-					previewImgSrc += `${v.currentSeason}-${v.currentEpisode}/preview${previewImgNumber}.jpg?auth-token=${v.authToken}a`;
+					previewImgSrc += `${v.currentSeason}-${v.currentEpisode}/preview${previewImgNumber}.jpg?auth-token=${v.authToken}`;
 				}
 				previewImg.src = previewImgSrc;
 				timelineContainer.style.setProperty('--preview-position', percent);

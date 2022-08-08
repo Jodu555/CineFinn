@@ -15,17 +15,18 @@ const database = Database.createDatabase(process.env.DB_HOST, process.env.DB_USE
 database.connect();
 
 const { getSeries, setIO, getIO } = require('./utils/utils.js');
+const { generateImages, validateImages } = require('./utils/images.js');
 
 const app = express();
 app.use(cors());
-app.use(morgan('short'));
+app.use(morgan('dev'));
 // app.use(helmet());
 app.use(express.json());
 
 const authHelper = new AuthenticationHelper(app, '/auth', database);
-authHelper.addToken('SECR-DEV', { 'UUID': 'ad733837-b2cf-47a2-b968-abaa70edbffe', 'username': 'Jodu', 'email': 'Jodu505@gmail.com' });
 authHelper.options.register = false;
 authHelper.install();
+authHelper.addToken('SECR-DEV', { 'UUID': 'ad733837-b2cf-47a2-b968-abaa70edbffe', 'username': 'Jodu', 'email': 'Jodu505@gmail.com' });
 
 app.use((req, res, next) => {
     if (req.path.includes('/assets/previewImgs')) {
@@ -109,5 +110,6 @@ server.listen(PORT, async () => {
     console.log(`Express & Socket App Listening ${process.env.https ? 'with SSL ' : ''}on ${PORT}`);
     console.log(getSeries().length);
     console.log(getSeries().map(x => [...x.seasons, ...x.movies]).flat(5).length);
+    // generateImages([getSeries()[0]])
     // await validateImages(getSeries());
 });
