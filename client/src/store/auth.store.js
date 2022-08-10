@@ -106,6 +106,7 @@ export default {
                     }
                 } catch (error) { }
             }
+            await this.$socket.disconnect();
             await router.push('/login');
         }
     },
