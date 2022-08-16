@@ -95,7 +95,7 @@ export default {
 					this.$swal({
 						toast: true,
 						position: 'top-end',
-						showConfirmButton: true,
+						showConfirmButton: false,
 						timer: 2500,
 						icon: 'success',
 						title: `${job.name} - Finished`,
@@ -112,7 +112,7 @@ export default {
 			this.$swal({
 				toast: true,
 				position: 'top-end',
-				showConfirmButton: true,
+				showConfirmButton: false,
 				timer: 2500,
 				icon: 'warning',
 				title: `${job.name} - Started!`,
