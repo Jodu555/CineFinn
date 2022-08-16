@@ -35,6 +35,12 @@ export default createStore({
         commit('setSeries', json);
       }
     },
+    async reloadSeries({ commit, rootState }, series) {
+      commit('setSeries', series);
+      if (rootState.watch.currentSeries.ID != -1) {
+        commit('watch/setCurrentSeries', series.find(x => x.ID == rootState.watch.currentSeries.ID));
+      }
+    },
   },
   modules: {
     watch,

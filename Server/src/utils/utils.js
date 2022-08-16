@@ -25,8 +25,16 @@ const getSeries = (forceLoad = false) => {
 
 const setSeries = async (_series) => {
     console.log('Setted & merged new Series!');
+
     series = mergeSeriesArrays(series, _series);
+
     fs.writeFileSync(outputFileName, JSON.stringify(series, null, 3), 'utf8');
+
+    //Broadcast the new series to the clients
+    const sockets = await io.fetchSockets();
+    await sockets.map(socket => {
+        socket.emit('reloadSeries', series);
+    });
 }
 
 const getActiveJobs = () => activeJobs;

@@ -135,7 +135,7 @@
 	</div>
 </template>
 <script>
-import { mapState, mapMutations, mapActions } from 'vuex';
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex';
 import { singleDimSwitcher, multiDimSwitcher } from '@/plugins/switcher';
 import EntityListView from '@/components/EntityListView.vue';
 
@@ -453,7 +453,7 @@ export default {
 		},
 	},
 	async created() {
-		this.loadSeriesInfo(this.$route.query.id);
+		await this.loadSeriesInfo(this.$route.query.id);
 		this.handleVideoChange(-1, -1, -1);
 	},
 	mounted() {

@@ -27,6 +27,17 @@ export default {
 	computed: {
 		...mapState('auth', ['loggedIn']),
 	},
+	methods: {
+		...mapActions(['loadSeries', 'reloadSeries']),
+	},
+	mounted() {
+		this.$socket.on('reloadSeries', (series) => {
+			this.reloadSeries(series);
+		});
+	},
+	async unmounted() {
+		this.$socket.off('reloadSeries');
+	},
 };
 </script>
 

@@ -33,7 +33,7 @@ export default {
                 await dispatch('loadSeries', null, { root: true });
             }
             const series = rootState.series.find((x) => x.ID == ID);
-            commit('setCurrentSeries', series); //TODO: Change to series id
+            commit('setCurrentSeries', series);
         },
     },
     namespaced: true,

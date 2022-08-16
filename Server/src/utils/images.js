@@ -30,7 +30,7 @@ const generateImages = async (series, cleanup = () => { }) => {
             if (fs.readdirSync(output).length == 0) {
                 const command = `ffmpeg -i "${season}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
                 await deepExecPromisify(command);
-                console.log(`Video ${i} / ${seasons.length} - ${path.parse(season).base}`);
+                console.log(`  => Video ${i} / ${seasons.length} - ${path.parse(season).base}`);
             }
         }
     }
