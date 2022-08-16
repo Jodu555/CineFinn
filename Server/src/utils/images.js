@@ -17,9 +17,10 @@ async function deepExecPromisify(command, cwd) {
 }
 
 const generateImages = async (series, cleanup = () => { }) => {
+    console.log('Started generateImages()');
     for (const serie of series) {
         const seasons = serie.seasons.flat();
-        console.log(seasons.length);
+        console.log(`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items`);
         let i = 0;
         for (const season of seasons) {
             i++;
@@ -29,12 +30,10 @@ const generateImages = async (series, cleanup = () => { }) => {
             if (fs.readdirSync(output).length == 0) {
                 const command = `ffmpeg -i "${season}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
                 await deepExecPromisify(command);
+                console.log(`Video ${i} / ${seasons.length} - ${path.parse(season).base}`);
             }
-
-            console.log(`Video ${i} / ${seasons.length} - ${path.parse(season).base}`);
         }
     }
-
     console.log('Finished generateImages()');
     cleanup();
 }
