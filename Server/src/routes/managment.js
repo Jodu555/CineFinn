@@ -115,6 +115,7 @@ router.get('/job/crawl', (req, res, next) => {
             const sockets = await getIO().fetchSockets();
             await Promise.all(sockets.map(async socket => {
                 socket.emit(callpointToEvent(LOOKUP[id].callpoint))
+                socket.emit('reloadSeries', getSeries());
             }));
         }, 3600);
         res.json(getActiveJobs());
