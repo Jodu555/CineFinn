@@ -307,6 +307,12 @@ export default {
 							video.volume -= 0.1;
 						} catch (_) {}
 						break;
+					case 'n':
+						v.switchTo(1);
+						break;
+					case 'p':
+						v.switchTo(-1);
+						break;
 				}
 			});
 			// Timeline
