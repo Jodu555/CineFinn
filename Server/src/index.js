@@ -108,6 +108,7 @@ app.use('/previewImages', authHelper.authentication(), express.static(path.join(
 app.get('/video', authHelper.authentication(), require('./routes/video.js'));
 
 app.use('/managment', authHelper.authentication(), require('./routes/managment.js').router)
+app.use('/watch', authHelper.authentication(), require('./routes/watch').router)
 
 app.get('/index', authHelper.authentication(), (req, res, next) => {
     res.json(getSeries());

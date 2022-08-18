@@ -462,8 +462,10 @@ export default {
 		await this.loadSeriesInfo(this.$route.query.id);
 		this.handleVideoChange(-1, -1, -1);
 	},
-	mounted() {
+	async mounted() {
 		this.initialize();
+		const response = await this.$networking.get('/watch/info');
+		console.log(response);
 	},
 	beforeUnmount() {
 		const video = document.querySelector('video');
