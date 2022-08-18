@@ -36,7 +36,7 @@ module.exports = (req, res) => {
     const videoSize = fs.statSync(videoPath).size;
 
     // const CHUNK_SIZE = 10 ** 6; // 1MB
-    const CHUNK_SIZE = 2000000; //TODO: Maybe put the chunk size into the .env
+    const CHUNK_SIZE = process.env.VIDEO_CHUNK_SIZE;
     const start = Number(range.replace(/\D/g, ''));
     const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
 
