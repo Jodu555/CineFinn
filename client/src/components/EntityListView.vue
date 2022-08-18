@@ -9,8 +9,9 @@
 					:class="{
 						btn: true,
 						'text-white': true,
-						'btn-primary': current !== i + 1,
-						'btn-info': current == i + 1,
+						'btn-secondary': current !== i + 1, //Unselected
+						'btn-info': current == i + 1, // Selected
+						'btn-success': checkWatched(i), // Watched
 					}"
 					v-for="(s, i) in array"
 					:key="s"
@@ -24,7 +25,23 @@
 </template>
 <script>
 export default {
-	props: ['title', 'array', 'current', 'chnageFN'],
+	// props: ['title', 'array', 'current', 'chnageFN', 'watchList'],
+	props: {
+		title: { type: String },
+		array: { type: Array },
+		current: { type: Number },
+		chnageFN: { type: Function },
+		watchList: { type: Array, default: [] },
+	},
+	methods: {
+		checkWatched(ep) {
+			if (this.watchList.length != 0) {
+				return Boolean(this.watchList.find((x) => x.split('.')[1] == ep));
+			} else {
+				return false;
+			}
+		},
+	},
 };
 </script>
 <style lang=""></style>

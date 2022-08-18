@@ -28,6 +28,7 @@
 				:array="currentSeries.seasons[currentSeason - 1]"
 				:current="currentEpisode"
 				:chnageFN="changeEpisode"
+				:watchList="watchList"
 			/>
 			<!-- Previous & Next -->
 			<div class="d-flex justify-content-between">
@@ -141,6 +142,11 @@ import EntityListView from '@/components/EntityListView.vue';
 
 export default {
 	components: { EntityListView },
+	data() {
+		return {
+			watchList: [],
+		};
+	},
 	computed: {
 		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode']),
 		...mapState('auth', ['authToken']),
@@ -465,7 +471,8 @@ export default {
 	async mounted() {
 		this.initialize();
 		const response = await this.$networking.get('/watch/info');
-		console.log(response);
+		// console.log(response);
+		if (response.success) this.watchList = response.json;
 	},
 	beforeUnmount() {
 		const video = document.querySelector('video');
