@@ -5,7 +5,7 @@ const router = express.Router();
 
 
 router.get('/info', (req, res, next) => {
-    console.log(req.query.series);
+    // console.log(req.query.series);
     '879|se-ep'
     res.json([
         '781|1.0',

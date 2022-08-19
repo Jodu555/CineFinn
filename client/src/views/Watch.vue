@@ -8,6 +8,16 @@
 			class="container"
 			v-if="currentSeries != undefined && currentSeries.ID != -1"
 		>
+			<div class="float-end">
+				<button
+					class="btn btn-outline-info"
+					data-bs-toggle="modal"
+					data-bs-target="#informationModal"
+				>
+					i
+				</button>
+			</div>
+			<WatchInformation />
 			<h1>{{ displayTitle }}</h1>
 			<EntityListView
 				v-if="currentSeries.movies.length >= 1"
@@ -131,7 +141,7 @@
 					</button>
 				</div>
 			</div>
-			<video :src="videoSrc"></video>
+			<video preload="auto" :src="videoSrc"></video>
 		</div>
 	</div>
 </template>
@@ -139,9 +149,10 @@
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex';
 import { singleDimSwitcher, multiDimSwitcher } from '@/plugins/switcher';
 import EntityListView from '@/components/EntityListView.vue';
+import WatchInformation from '../components/WatchInformation.vue';
 
 export default {
-	components: { EntityListView },
+	components: { EntityListView, WatchInformation },
 	data() {
 		return {
 			watchList: [],
@@ -375,6 +386,12 @@ export default {
 			video.addEventListener('loadeddata', () => {
 				totalTimeElem.textContent = formatDuration(video.duration);
 			});
+			// video.addEventListener('progress', () => {
+			// 	console.log('progress');
+			// });
+			// video.addEventListener('canplay', () => {
+			// 	console.log('canplay');
+			// });
 			video.addEventListener('timeupdate', () => {
 				currentTimeElem.textContent = formatDuration(video.currentTime);
 				const percent = video.currentTime / video.duration;
