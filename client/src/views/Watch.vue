@@ -482,14 +482,16 @@ export default {
 		},
 	},
 	async created() {
-		await this.loadSeriesInfo(this.$route.query.id);
+		const seriesID = this.$route.query.id;
+
+		await this.loadSeriesInfo(seriesID);
 		this.handleVideoChange(-1, -1, -1);
+
+		const response = await this.$networking.get(`/watch/info?series=${seriesID}`);
+		if (response.success) this.watchList = response.json;
 	},
 	async mounted() {
 		this.initialize();
-		const response = await this.$networking.get('/watch/info');
-		// console.log(response);
-		if (response.success) this.watchList = response.json;
 	},
 	beforeUnmount() {
 		const video = document.querySelector('video');
