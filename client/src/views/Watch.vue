@@ -148,6 +148,7 @@
 <script>
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex';
 import { singleDimSwitcher, multiDimSwitcher } from '@/plugins/switcher';
+import { debounce, throttle } from '@/plugins/debounceAndThrottle';
 import EntityListView from '@/components/EntityListView.vue';
 import WatchInformation from '../components/WatchInformation.vue';
 
@@ -194,6 +195,8 @@ export default {
 		},
 	},
 	methods: {
+		...mapMutations('watch', ['setCurrentMovie', 'setCurrentSeason', 'setCurrentEpisode']),
+		...mapActions('watch', ['loadSeriesInfo']),
 		switchTo(vel) {
 			if (this.currentSeason == -1) {
 				if (this.currentMovie == -1) {
@@ -265,9 +268,11 @@ export default {
 				}, 100);
 			}, 200);
 		},
-		...mapMutations('watch', ['setCurrentMovie', 'setCurrentSeason', 'setCurrentEpisode']),
-		...mapActions('watch', ['loadSeriesInfo']),
+		sendVideoTimeUpdate(time, type) {
+			console.log('sendVideoTimeUpdate', time);
+		},
 		initialize() {
+			const TIME_UPDATE_THROTTLE = 1000;
 			const v = this;
 			const playPauseBtn = document.querySelector('.play-pause-btn');
 			const theaterBtn = document.querySelector('.theater-btn');
@@ -392,7 +397,10 @@ export default {
 			// video.addEventListener('canplay', () => {
 			// 	console.log('canplay');
 			// });
+
+			const timeUpdateThrottle = throttle(v.sendVideoTimeUpdate, TIME_UPDATE_THROTTLE);
 			video.addEventListener('timeupdate', () => {
+				timeUpdateThrottle(video.currentTime);
 				currentTimeElem.textContent = formatDuration(video.currentTime);
 				const percent = video.currentTime / video.duration;
 				timelineContainer.style.setProperty('--progress-position', percent);
