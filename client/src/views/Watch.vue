@@ -270,6 +270,7 @@ export default {
 		},
 		sendVideoTimeUpdate(time, type) {
 			console.log('sendVideoTimeUpdate', time);
+			//TODO: send here the socket time update
 		},
 		initialize() {
 			const TIME_UPDATE_THROTTLE = 1000;
