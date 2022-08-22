@@ -268,8 +268,15 @@ export default {
 				}, 100);
 			}, 200);
 		},
-		sendVideoTimeUpdate(time, type) {
+		sendVideoTimeUpdate(time) {
 			console.log('sendVideoTimeUpdate', time);
+			this.$socket.emit('timeUpdate', {
+				series: this.$route.query.id,
+				movie: this.currentMovie,
+				season: this.currentSeason,
+				episode: this.currentEpisode,
+				time: time,
+			});
 			//TODO: send here the socket time update
 		},
 		initialize() {

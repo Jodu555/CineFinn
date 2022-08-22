@@ -8,6 +8,16 @@ let activeJobs = [
 let io = null;
 
 
+function debounce(cb, delay = 1000) {
+    let timeout
+
+    return (...args) => {
+        clearTimeout(timeout)
+        timeout = setTimeout(() => {
+            cb(...args)
+        }, delay)
+    }
+}
 
 const getSeries = (forceLoad = false) => {
     if (forceLoad || !series) {
@@ -42,5 +52,6 @@ module.exports = {
     getActiveJobs,
     setActiveJobs,
     getIO,
-    setIO
+    setIO,
+    debounce
 }

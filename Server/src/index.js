@@ -82,7 +82,8 @@ io.on('connection', async (socket) => {
 
     console.log(socket.auth);
 
-    socket.on('x', () => {
+    socket.on('timeUpdate', ({ series, movie, season, episode, time }) => {
+        console.log('GOT:', series, movie, season, episode, time);
     });
 
     socket.on('disconnect', () => {
