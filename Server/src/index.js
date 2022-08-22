@@ -16,7 +16,7 @@ database.connect();
 
 require('./utils/database')();
 
-const { getSeries, setIO, getIO } = require('./utils/utils.js');
+const { getSeries, setIO, getIO, debounce } = require('./utils/utils.js');
 const { generateImages, validateImages } = require('./utils/images.js');
 const { crawlAndIndex, mergeSeriesArrays } = require('./utils/crawler.js');
 
@@ -77,6 +77,20 @@ io.use((socket, next) => {
     }
 })
 
+const debounceTimeUpdateWriteThrough = debounce((socket, { series, movie, season, episode, time }) => {
+    console.log('Write Through:', series, movie, season, episode, time);
+
+    //TODO: Make here the database cache update!
+
+    if (movie !== -1 && movie !== undefined) {
+        console.log('Movie Search Update');
+    }
+
+    if (season !== -1 && episode !== -1) {
+        console.log('Other Search Update');
+    }
+}, 3000)
+
 io.on('connection', async (socket) => {
     console.log('Socket Connection:', socket.id);
 
@@ -84,6 +98,7 @@ io.on('connection', async (socket) => {
 
     socket.on('timeUpdate', ({ series, movie, season, episode, time }) => {
         console.log('GOT:', series, movie, season, episode, time);
+        debounceTimeUpdateWriteThrough(socket, { series, movie, season, episode, time })
     });
 
     socket.on('disconnect', () => {
