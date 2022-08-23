@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get('/info', (req, res, next) => {
     console.log(req.query.series);
-    '879|se-ep'
+    // 'ID|se-ep;next'
     res.json([
         '781|1.0',
         '781|1.1',
