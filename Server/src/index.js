@@ -19,6 +19,7 @@ require('./utils/database')();
 const { getSeries, setIO, getIO, debounce } = require('./utils/utils.js');
 const { generateImages, validateImages } = require('./utils/images.js');
 const { crawlAndIndex, mergeSeriesArrays } = require('./utils/crawler.js');
+const { cleanupSeriesBeforeFrontResponse } = require('./classes/series');
 
 const app = express();
 app.use(cors());
@@ -118,17 +119,9 @@ app.use('/managment', authHelper.authentication(), require('./routes/managment.j
 app.use('/watch', authHelper.authentication(), require('./routes/watch').router)
 
 app.get('/index', authHelper.authentication(), (req, res, next) => {
-    const series = getSeries().map(serie => {
-        const newSeasons = serie.seasons.map(season => season.map(p => path.parse(p).base));
-        const newMovies = serie.movies.map(p => path.parse(p).base);
-        return {
-            ...serie,
-            seasons: newSeasons,
-            movies: newMovies,
-        }
-    });
-
+    const series = cleanupSeriesBeforeFrontResponse(getSeries());
     res.json(series);
+    // res.json(getSeries());
 });
 
 const errorHelper = new ErrorHelper()

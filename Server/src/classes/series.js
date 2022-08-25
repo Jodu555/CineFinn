@@ -9,6 +9,18 @@ class Series {
     }
 }
 
+const cleanupSeriesBeforeFrontResponse = (series) => {
+    return series.map(serie => {
+        const newSeasons = serie.seasons.map(season => season.map(p => path.parse(p).base));
+        const newMovies = serie.movies.map(p => path.parse(p).base);
+        return {
+            ...serie,
+            seasons: newSeasons,
+            movies: newMovies,
+        }
+    });
+}
+
 const filenameParser = (filepath, filename) => {
     // filename exp. Food Wars! Shokugeki no Sōma St#1 Flg#1.mp4
     if (filename.includes('St#') && filename.includes('Flg#')) {
@@ -27,5 +39,6 @@ const filenameParser = (filepath, filename) => {
 
 module.exports = {
     Series,
-    filenameParser
+    filenameParser,
+    cleanupSeriesBeforeFrontResponse
 }
