@@ -3,20 +3,25 @@ const generate = () => {
     console.log('FN call');
 }
 
+// 'ID:se-ep.time;repeat'
 const parse = (str) => {
     //TODO: Parse the watch string to the infos
-    const list = str.split(';');
-    // 'ID:se-ep.time;next'
-    // res.json([
-    //     '781|1.0',
-    //     '781|1.1',
-    //     '781|1.2',
-    //     '781|1.3',
-    //     '781|1.5',
-    //     '781|1.6',
-    //     '781|1.9',
-    // ])
+    const list = str.split(';').map(s => {
+        const collenSplit = s.split(':');
+        const dashSplit = collenSplit[1].split('-')
+        const dotSplit = dashSplit[1].split('.')
+        return new Segment(collenSplit[0], dashSplit[0], dotSplit[0], dotSplit[1]);
+    });
     console.log(list);
+}
+
+class Segment {
+    constructor(ID, season, episode, time) {
+        this.ID = ID;
+        this.season = season;
+        this.episode = episode;
+        this.time = time;
+    }
 }
 
 const load = (UUID) => {
