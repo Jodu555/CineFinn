@@ -5,3 +5,5 @@ const generate = () => {
 const parse = (str) => {
     //TODO: Parse the watch string to the infos
 }
+
+generate();
