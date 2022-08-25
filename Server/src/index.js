@@ -118,7 +118,17 @@ app.use('/managment', authHelper.authentication(), require('./routes/managment.j
 app.use('/watch', authHelper.authentication(), require('./routes/watch').router)
 
 app.get('/index', authHelper.authentication(), (req, res, next) => {
-    res.json(getSeries());
+    const series = getSeries().map(serie => {
+        const newSeasons = serie.seasons.map(season => season.map(p => path.parse(p).base));
+        const newMovies = serie.movies.map(p => path.parse(p).base);
+        return {
+            ...serie,
+            seasons: newSeasons,
+            movies: newMovies,
+        }
+    });
+
+    res.json(series);
 });
 
 const errorHelper = new ErrorHelper()

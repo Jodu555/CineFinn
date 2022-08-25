@@ -12,15 +12,16 @@ const parse = (str) => {
         const dotSplit = dashSplit[1].split('.')
         return new Segment(collenSplit[0], dashSplit[0], dotSplit[0], dotSplit[1]);
     });
+    return list;
     console.log(list);
 }
 
 class Segment {
     constructor(ID, season, episode, time) {
-        this.ID = ID;
-        this.season = season;
-        this.episode = episode;
-        this.time = time;
+        this.ID = Number(ID);
+        this.season = Number(season);
+        this.episode = Number(episode);
+        this.time = Number(time);
     }
 }
 
