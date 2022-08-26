@@ -67,18 +67,27 @@ const save = async (UUID, watchString) => {
 
 // const UUID = 'ad733837-b2cf-47a2-b968-abaa70edbffe'
 
-const segList = parse('781:1-1.0;781:1-2.50');
 
 // const watchString load(UUID);
+// const segList = parse('781:1-1.0;781:1-2.50');
 
-console.log(segList);
+// console.log(segList);
 
-const segment = segList.find(seg => seg.ID == 781 && seg.season == 1 && seg.episode == 2);
+// const segment = segList.find(seg => seg.ID == 781 && seg.season == 1 && seg.episode == 2);
 
-segment.time = 10000;
-console.log(segment);
+// segment.time = 10000;
+// console.log(segment);
 
 
-console.log(segList);
+// console.log(segList);
 
 // save(UUID, generateStr(segList));
+
+
+module.exports = {
+    Segment,
+    generateStr,
+    parse,
+    load,
+    save
+}

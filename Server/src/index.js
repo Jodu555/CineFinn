@@ -20,6 +20,7 @@ const { getSeries, setIO, getIO, debounce } = require('./utils/utils.js');
 const { generateImages, validateImages } = require('./utils/images.js');
 const { crawlAndIndex, mergeSeriesArrays } = require('./utils/crawler.js');
 const { cleanupSeriesBeforeFrontResponse } = require('./classes/series');
+const { load, parse, Segment, save, generateStr } = require('./utils/watchString');
 
 const app = express();
 app.use(cors());
@@ -89,6 +90,11 @@ const debounceTimeUpdateWriteThrough = debounce((socket, { series, movie, season
 
     if (season !== -1 && episode !== -1) {
         console.log('Other Watch & Time Update');
+        const segmentList = parse(load(socket.auth.user.UUID));
+        const segment = segmentList.find(segment => segment.ID == series && segment.season == season && segment.episode) || new Segment(series, season, episode, movie, 0);
+        segment.time = time;
+        save(UUID, generateStr(segList));
+
     }
 }, 3000)
 
