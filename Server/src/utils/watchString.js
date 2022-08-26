@@ -53,7 +53,7 @@ const load = async (UUID) => {
         data = { account_UUID: UUID, watch_string: '' };
         database.get('watch_strings').create(data);
     }
-    return data;
+    return data.watch_string;
 }
 
 /**
@@ -63,6 +63,19 @@ const load = async (UUID) => {
 const save = async (UUID, watchString) => {
     const database = Database.getDatabase();
     let data = await database.get('watch_strings').update({ account_UUID: UUID }, { watch_string: watchString });
+}
+
+const updateSegment = async (UUID, searchCriteria, segmentUpdateFunction) => {
+    const watchString = await load(UUID);
+    console.log('watchString', watchString);
+    const segmentList = parse(watchString);
+    let segment = segmentList.find(segment => segment.ID == searchCriteria.series && segment.season == searchCriteria.season && segment.episode == searchCriteria.episode);
+    if (!segment) {
+        segment = new Segment(series, season, episode, movie, 0);
+        segmentList.push(segment)
+    };
+    segmentUpdateFunction(segment);
+    save(socket.auth.user.UUID, generateStr(segmentList));
 }
 
 // const UUID = 'ad733837-b2cf-47a2-b968-abaa70edbffe'
@@ -89,5 +102,6 @@ module.exports = {
     generateStr,
     parse,
     load,
-    save
+    save,
+    updateSegment
 }
