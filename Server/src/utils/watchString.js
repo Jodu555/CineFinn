@@ -1,6 +1,5 @@
-const generate = () => {
-    //TODO: Generate the watch string by input
-    console.log('FN call');
+const generate = (segmentList) => {
+    //TODO: Generate the watch string by the segmentList input
 }
 
 // 'ID:se-ep.time;repeat'
@@ -13,7 +12,6 @@ const parse = (str) => {
         return new Segment(collenSplit[0], dashSplit[0], dotSplit[0], dotSplit[1]);
     });
     return list;
-    console.log(list);
 }
 
 class Segment {
@@ -29,4 +27,6 @@ const load = (UUID) => {
     //TODO: Returns the current watch string
 }
 
-parse('781:1-1.0;781:1-2.50');
+const segList = parse('781:1-1.0;781:1-2.50');
+
+generate(segList);

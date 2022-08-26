@@ -136,6 +136,7 @@ export default class Autocomplete {
                 this.field.value = dataLabel;
 
                 if (this.options.onSelectItem) {
+                    this.dropdown.hide();
                     this.options.onSelectItem({
                         value: dataValue,
                         label: dataLabel

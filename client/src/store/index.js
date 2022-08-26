@@ -32,8 +32,7 @@ export default createStore({
       const response = await this.$networking.get('/index');
       if (response.success) {
         const json = response.json;
-        console.log(json);
-
+        // console.log(json);
         commit('setSeries', json);
       }
     },

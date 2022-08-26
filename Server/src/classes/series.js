@@ -10,6 +10,8 @@ class Series {
 }
 
 const cleanupSeriesBeforeFrontResponse = (series) => {
+    //To Ensure that every deep object linking is removed
+    series = JSON.parse(JSON.stringify(series));
     return series.map(serie => {
         const newSeasons = serie.seasons.map(season => season.map(p => path.parse(p).base));
         const newMovies = serie.movies.map(p => path.parse(p).base);
