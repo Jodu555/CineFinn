@@ -1,3 +1,5 @@
+const { Database } = require('@jodu555/mysqlapi');
+
 /**
  * @param  {[Segment]} segmentList
  * @returns {String}
@@ -38,11 +40,29 @@ class Segment {
         this.time = Number(time);
     }
 }
-
-const load = (UUID) => {
+/**
+ * @param  {String} UUID account UUID
+ * @returns {String} watch String
+ */
+const load = async (UUID) => {
     //TODO: Returns the current watch string
+
+    const database = Database.getDatabase();
+    let data = await database.get('watch_strings').getOne({ account_UUID: UUID });
+    if (data == null || data == undefined) {
+        data = { account_UUID: UUID, watch_string: '' };
+        database.get('watch_strings').create(data);
+    }
+    return data;
+}
+
+
+const store = async (UUID) => {
+
 }
 
 const segList = parse('781:1-1.0;781:1-2.50');
+
+load('ad733837-b2cf-47a2-b968-abaa70edbffe');
 
 console.log(parse(generateStr(segList)));
