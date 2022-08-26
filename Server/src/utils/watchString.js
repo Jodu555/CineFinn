@@ -11,7 +11,6 @@ const generateStr = (segmentList) => {
         console.log(segment);
         str += `${segment.ID}:${segment.season}-${segment.episode}.${segment.time};`;
     });
-    console.log(str);
     return str;
 }
 
@@ -56,13 +55,29 @@ const load = async (UUID) => {
     return data;
 }
 
-
-const store = async (UUID) => {
-
+/**
+ * @param  {String} UUID
+ * @param  {String} watchString
+ */
+const save = async (UUID, watchString) => {
+    const database = Database.getDatabase();
+    let data = await database.get('watch_strings').update({ account_UUID: UUID }, { watch_string: watchString });
 }
 
-const segList = parse('781:1-1.0;781:1-2.50');
+// const UUID = 'ad733837-b2cf-47a2-b968-abaa70edbffe'
 
-load('ad733837-b2cf-47a2-b968-abaa70edbffe');
+// const segList = parse('781:1-1.0;781:1-2.50');
 
-console.log(parse(generateStr(segList)));
+// const watchString load(UUID);
+
+// console.log(segList);
+
+// const segment = segList.find(seg => seg.ID == 781 && seg.season == 1 && seg.episode == 2);
+
+// segment.time = 10000;
+// console.log(segment);
+
+
+// console.log(segList);
+
+// save(UUID, generateStr(segList));
