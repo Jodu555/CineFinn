@@ -66,18 +66,14 @@ const save = async (UUID, watchString) => {
 }
 
 const updateSegment = async (UUID, searchCriteria, segmentUpdateFunction) => {
-    console.log(UUID);
     const watchString = await load(UUID);
-    console.log('watchString', watchString);
     const segmentList = parse(watchString);
     let segment = segmentList.find(segment => segment.ID == searchCriteria.series && segment.season == searchCriteria.season && segment.episode == searchCriteria.episode);
     if (!segment) {
         segment = new Segment(searchCriteria.series, searchCriteria.season, searchCriteria.episode, searchCriteria.movie, 0);
         segmentList.push(segment);
     };
-    console.log(segment);
     segmentUpdateFunction(segment);
-    console.log(segment);
     save(UUID, generateStr(segmentList));
 }
 

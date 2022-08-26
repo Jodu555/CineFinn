@@ -91,7 +91,7 @@ const debounceTimeUpdateWriteThrough = debounce(async (socket, { series, movie, 
     if (season !== -1 && episode !== -1) {
         console.log('Other Watch & Time Update');
         updateSegment(socket.auth.user.UUID, { series, movie, season, episode }, (seg) => {
-            seg.time = time;
+            seg.time = Math.ceil(time);
         });
 
     }
