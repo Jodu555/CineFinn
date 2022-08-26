@@ -13,4 +13,20 @@ module.exports = () => {
             type: 'varchar(64)',
         },
     });
+
+    database.createTable('watch_strings', {
+        options: {
+            PK: 'account_UUID',
+            FK: {
+                account_UUID: 'accounts/UUID',
+            },
+        },
+        account_UUID: {
+            type: 'varchar(64)',
+            null: false,
+        },
+        watch_string: {
+            type: 'LONGTEXT',
+        },
+    });
 }
