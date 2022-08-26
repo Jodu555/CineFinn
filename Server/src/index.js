@@ -84,11 +84,11 @@ const debounceTimeUpdateWriteThrough = debounce((socket, { series, movie, season
     //TODO: Make here the database cache update!
 
     if (movie !== -1 && movie !== undefined) {
-        console.log('Movie Search Update');
+        console.log('Movie Watch & Time Update');
     }
 
     if (season !== -1 && episode !== -1) {
-        console.log('Other Search Update');
+        console.log('Other Watch & Time Update');
     }
 }, 3000)
 

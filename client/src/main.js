@@ -36,7 +36,7 @@ const socket = app.config.globalProperties.$socket;
 socket.on('connect_error', async (err) => {
     console.log('Socket Connect Error: ', err.message); // prints the message associated with the error
     if (err.message.includes('Authentication'))
-        await store.dispatch('auth/authenticate');
+        await store.dispatch('auth/authenticate', true);
 });
 
 socket.on('connect', () => {
