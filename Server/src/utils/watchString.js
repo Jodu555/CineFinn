@@ -25,8 +25,16 @@ const parse = (str) => {
         if (!(s.length > 0)) return null;
         const collenSplit = s.split(':');
         const dashSplit = collenSplit[1].split('-')
-        const dotSplit = dashSplit[1].split('.')
-        return new Segment(collenSplit[0], dashSplit[0], dotSplit[0], -1, dotSplit[1]);
+        const isMovie = dashSplit.length == 1
+
+        const dotSplit = isMovie ? dashSplit[0].split('.') : dashSplit[1].split('.');
+
+
+        if (isMovie) {
+            return new Segment(collenSplit[0], -1, -1, dotSplit[0], dotSplit[1]);
+        } else {
+            return new Segment(collenSplit[0], dashSplit[0], dotSplit[0], -1, dotSplit[1]);
+        }
     }).filter(s => s != null);
     return list;
 }
@@ -81,9 +89,9 @@ const updateSegment = async (UUID, searchCriteria, segmentUpdateFunction) => {
 
 
 // const watchString load(UUID);
-// const segList = parse('781:1-1.0;781:1-2.50');
+const segList = parse('781:1-1.0;781:1-2.50;781:1.0');
 
-// console.log(segList);
+console.log(segList);
 
 // const segment = segList.find(seg => seg.ID == 781 && seg.season == 1 && seg.episode == 2);
 

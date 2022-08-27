@@ -1,5 +1,3 @@
-const { Database } = require('@jodu555/mysqlapi');
-const database = Database.getDatabase();
 const express = require('express');
 const router = express.Router();
 
