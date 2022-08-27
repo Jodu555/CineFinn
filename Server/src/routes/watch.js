@@ -1,19 +1,13 @@
 const express = require('express');
+const { load, parse } = require('../utils/watchString');
 const router = express.Router();
 
 
-router.get('/info', (req, res, next) => {
-    console.log(req.query.series);
+router.get('/info', async (req, res, next) => {
+    console.log('GOT Watch Route', req.credentials, req.query.series);
     // 'ID|se-ep;next'
-    res.json([
-        '781|1.0',
-        '781|1.1',
-        '781|1.2',
-        '781|1.3',
-        '781|1.5',
-        '781|1.6',
-        '781|1.9',
-    ])
+    const segList = parse(await load(req.credentials.user.UUID));
+    res.json(segList.filter(seg => seg.ID == req.query.series));
 });
 
 module.exports = { router }

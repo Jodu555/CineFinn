@@ -24,7 +24,15 @@ const { load, parse, Segment, save, generateStr, updateSegment } = require('./ut
 
 const app = express();
 app.use(cors());
-app.use(morgan('dev'));
+app.use(morgan('dev', {
+    skip: (req, res) => {
+        if (req.url.includes('/previewImages') || req.url.includes('/video')) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}));
 // app.use(helmet());
 app.use(express.json());
 
