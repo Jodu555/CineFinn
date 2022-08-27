@@ -8,9 +8,12 @@ const generateStr = (segmentList) => {
     //TODO: Generate the watch string by the segmentList input
     let str = '';
     segmentList.forEach(segment => {
-        if (segment.movie == -1) {
+        console.log(segment);
+        if (segment.movie == -1 || isNaN(segment.movie)) {
+            console.log(1, 'Normal');
             str += `${segment.ID}:${segment.season}-${segment.episode}.${segment.time};`;
         } else {
+            console.log(2, 'Movie');
             str += `${segment.ID}:${segment.movie}.${segment.time};`;
         }
     });

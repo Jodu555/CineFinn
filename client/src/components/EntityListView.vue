@@ -35,6 +35,7 @@ export default {
 	},
 	methods: {
 		checkWatched(ep) {
+			return false;
 			if (this.watchList.length != 0) {
 				return Boolean(this.watchList.find((x) => x.split('.')[1] == ep));
 			} else {
