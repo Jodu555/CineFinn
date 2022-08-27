@@ -37,6 +37,7 @@
 				title="Episodes:"
 				:array="currentSeries.seasons[currentSeason - 1]"
 				:current="currentEpisode"
+				:currentSeason="currentSeason"
 				:chnageFN="changeEpisode"
 				:watchList="watchList"
 			/>
@@ -496,6 +497,7 @@ export default {
 				videoContainer.classList.add('paused');
 			});
 		},
+		terminate() {},
 	},
 	async created() {
 		const seriesID = this.$route.query.id;

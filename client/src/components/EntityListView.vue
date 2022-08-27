@@ -31,13 +31,15 @@ export default {
 		array: { type: Array },
 		current: { type: Number },
 		chnageFN: { type: Function },
+		currentSeason: { type: Number, default: -1 },
 		watchList: { type: Array, default: [] },
 	},
 	methods: {
 		checkWatched(ep) {
-			return false;
 			if (this.watchList.length != 0) {
-				return Boolean(this.watchList.find((x) => x.split('.')[1] == ep));
+				return Boolean(
+					this.watchList.find((segment) => segment.season == currentSeason && segment.episode == ep)
+				);
 			} else {
 				return false;
 			}
