@@ -8,8 +8,11 @@ const generateStr = (segmentList) => {
     //TODO: Generate the watch string by the segmentList input
     let str = '';
     segmentList.forEach(segment => {
-        console.log(segment);
-        str += `${segment.ID}:${segment.season}-${segment.episode}.${segment.time};`;
+        if (segment.movie == -1) {
+            str += `${segment.ID}:${segment.season}-${segment.episode}.${segment.time};`;
+        } else {
+            str += `${segment.ID}:${segment.movie}.${segment.time};`;
+        }
     });
     return str;
 }
@@ -26,10 +29,7 @@ const parse = (str) => {
         const collenSplit = s.split(':');
         const dashSplit = collenSplit[1].split('-')
         const isMovie = dashSplit.length == 1
-
         const dotSplit = isMovie ? dashSplit[0].split('.') : dashSplit[1].split('.');
-
-
         if (isMovie) {
             return new Segment(collenSplit[0], -1, -1, dotSplit[0], dotSplit[1]);
         } else {
@@ -89,9 +89,15 @@ const updateSegment = async (UUID, searchCriteria, segmentUpdateFunction) => {
 
 
 // const watchString load(UUID);
-const segList = parse('781:1-1.0;781:1-2.50;781:1.0');
+// const STR = '781:1-1.0;781:1-2.50;781:1.0'
+// const segList = parse(STR);
 
-console.log(segList);
+// console.log(segList);
+
+// console.log(STR);
+// console.log();
+// generateStr(segList)
+// console.log(STR == generateStr(segList));
 
 // const segment = segList.find(seg => seg.ID == 781 && seg.season == 1 && seg.episode == 2);
 
