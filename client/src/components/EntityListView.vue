@@ -38,7 +38,9 @@ export default {
 		checkWatched(ep) {
 			if (this.watchList.length != 0) {
 				return Boolean(
-					this.watchList.find((segment) => segment.season == currentSeason && segment.episode == ep)
+					this.watchList.find(
+						(segment) => segment.season == this.currentSeason && segment.episode == ep
+					)
 				);
 			} else {
 				return false;

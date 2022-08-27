@@ -69,15 +69,17 @@ export default {
 	watch: {
 		series() {
 			if (!this.$refs.autocomplete) return;
-			this.ac = new Autocomplete(this.$refs.autocomplete, {
-				data: [],
-				maximumItems: 5,
-				threshold: 1,
-				onSelectItem: ({ label, value }) => {
-					this.$refs.autocomplete.value = '';
-					this.$router.push({ path: '/watch', query: { id: value } });
-				},
-			});
+
+			!this.ac &&
+				(this.ac = new Autocomplete(this.$refs.autocomplete, {
+					data: [],
+					maximumItems: 5,
+					threshold: 1,
+					onSelectItem: ({ label, value }) => {
+						this.$refs.autocomplete.value = '';
+						this.$router.push({ path: '/watch', query: { id: value } });
+					},
+				}));
 			this.ac.setData(
 				this.series.map((x) => {
 					return { label: x.title, value: x.ID };
