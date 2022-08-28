@@ -298,8 +298,15 @@ export default {
 			const videoContainer = document.querySelector('.video-container');
 			const timelineContainer = document.querySelector('.timeline-container');
 			const video = document.querySelector('video');
-			document.addEventListener('keydown', keydown);
-			function keydown(e) {
+
+			//All Document Listeners (which needed to be cleaned up)
+			document.addEventListener('keydown', documentKeyDown);
+			document.addEventListener('mouseup', documentMouseUp);
+			document.addEventListener('mousemove', documentMouseMove);
+			document.addEventListener('fullscreenchange', documentFullScreenChange);
+
+			//Key Controls
+			function documentKeyDown(e) {
 				const tagName = document.activeElement.tagName.toLowerCase();
 				if (tagName === 'input') return;
 				switch (e.key.toLowerCase()) {
@@ -348,15 +355,24 @@ export default {
 						break;
 				}
 			}
+
 			// Timeline
+			function documentMouseUp(e) {
+				if (isScrubbing) toggleScrubbing(e);
+			}
+			function documentMouseMove(e) {
+				if (isScrubbing) handleTimelineUpdate(e);
+			}
+
+			// Fullscreen
+			function documentFullScreenChange() {
+				videoContainer.classList.toggle('full-screen', document.fullscreenElement);
+			}
+
+			//Timeline
 			timelineContainer.addEventListener('mousemove', handleTimelineUpdate);
 			timelineContainer.addEventListener('mousedown', toggleScrubbing);
-			document.addEventListener('mouseup', (e) => {
-				if (isScrubbing) toggleScrubbing(e);
-			});
-			document.addEventListener('mousemove', (e) => {
-				if (isScrubbing) handleTimelineUpdate(e);
-			});
+
 			let isScrubbing = false;
 			let wasPaused;
 			function toggleScrubbing(e) {
@@ -476,9 +492,6 @@ export default {
 					video.requestPictureInPicture();
 				}
 			}
-			document.addEventListener('fullscreenchange', () => {
-				videoContainer.classList.toggle('full-screen', document.fullscreenElement);
-			});
 			video.addEventListener('enterpictureinpicture', () => {
 				videoContainer.classList.add('mini-player');
 			});
@@ -499,10 +512,12 @@ export default {
 			});
 
 			return () => {
-				document.removeEventListener('keydown', keydown);
+				document.removeEventListener('keydown', documentKeyDown);
+				document.removeEventListener('mouseup', documentMouseUp);
+				document.removeEventListener('mousemove', documentMouseMove);
+				document.removeEventListener('fullscreenchange', documentFullScreenChange);
 			};
 		},
-		terminate() {},
 	},
 	async created() {
 		const seriesID = this.$route.query.id;
