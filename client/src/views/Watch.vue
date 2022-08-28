@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="innerdoc">
 		<div v-if="currentSeries == undefined">
 			<h1>No Series with that ID</h1>
 		</div>
@@ -158,6 +158,7 @@ export default {
 	data() {
 		return {
 			watchList: [],
+			cleanupFN: null,
 		};
 	},
 	computed: {
@@ -297,7 +298,8 @@ export default {
 			const videoContainer = document.querySelector('.video-container');
 			const timelineContainer = document.querySelector('.timeline-container');
 			const video = document.querySelector('video');
-			document.addEventListener('keydown', (e) => {
+			document.addEventListener('keydown', keydown);
+			function keydown(e) {
 				const tagName = document.activeElement.tagName.toLowerCase();
 				if (tagName === 'input') return;
 				switch (e.key.toLowerCase()) {
@@ -345,7 +347,7 @@ export default {
 						v.switchTo(-1);
 						break;
 				}
-			});
+			}
 			// Timeline
 			timelineContainer.addEventListener('mousemove', handleTimelineUpdate);
 			timelineContainer.addEventListener('mousedown', toggleScrubbing);
@@ -406,7 +408,6 @@ export default {
 			// video.addEventListener('canplay', () => {
 			// 	console.log('canplay');
 			// });
-
 			const timeUpdateThrottle = throttle(v.sendVideoTimeUpdate, TIME_UPDATE_THROTTLE);
 			video.addEventListener('timeupdate', () => {
 				timeUpdateThrottle(video.currentTime);
@@ -496,6 +497,10 @@ export default {
 			video.addEventListener('pause', () => {
 				videoContainer.classList.add('paused');
 			});
+
+			return () => {
+				document.removeEventListener('keydown', keydown);
+			};
 		},
 		terminate() {},
 	},
@@ -509,11 +514,10 @@ export default {
 		if (response.success) this.watchList = response.json;
 	},
 	async mounted() {
-		this.initialize();
+		this.cleanupFN = this.initialize();
 	},
 	beforeUnmount() {
-		const video = document.querySelector('video');
-		//TODO: Make here the call to set the latest video position
+		this.cleanupFN();
 	},
 };
 </script>
