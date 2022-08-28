@@ -299,6 +299,9 @@ export default {
 			const timelineContainer = document.querySelector('.timeline-container');
 			const video = document.querySelector('video');
 
+			let isScrubbing = false;
+			let wasPaused;
+
 			//All Document Listeners (which needed to be cleaned up)
 			document.addEventListener('keydown', documentKeyDown);
 			document.addEventListener('mouseup', documentMouseUp);
@@ -373,8 +376,6 @@ export default {
 			timelineContainer.addEventListener('mousemove', handleTimelineUpdate);
 			timelineContainer.addEventListener('mousedown', toggleScrubbing);
 
-			let isScrubbing = false;
-			let wasPaused;
 			function toggleScrubbing(e) {
 				const rect = timelineContainer.getBoundingClientRect();
 				const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
