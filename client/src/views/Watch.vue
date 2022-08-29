@@ -258,6 +258,8 @@ export default {
 				return;
 			}
 			const wasPaused = video.paused;
+			console.log('GOT handleVideoChange()');
+			this.sendVideoTimeUpdate(video.currentTime, true);
 			video.pause();
 			setTimeout(() => {
 				this.setCurrentSeason(season);
@@ -270,14 +272,15 @@ export default {
 				}, 100);
 			}, 200);
 		},
-		sendVideoTimeUpdate(time) {
-			console.log('sendVideoTimeUpdate', time);
+		sendVideoTimeUpdate(time, force = false) {
+			console.log('sendVideoTimeUpdate', time, force);
 			this.$socket.emit('timeUpdate', {
 				series: this.$route.query.id,
 				movie: this.currentMovie,
 				season: this.currentSeason,
 				episode: this.currentEpisode,
 				time: time,
+				force,
 			});
 			//TODO: send here the socket time update
 		},
@@ -533,6 +536,8 @@ export default {
 		this.cleanupFN = this.initialize();
 	},
 	beforeUnmount() {
+		const video = document.querySelector('video');
+		this.sendVideoTimeUpdate(video.currentTime, true);
 		this.cleanupFN();
 	},
 };

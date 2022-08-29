@@ -19,11 +19,10 @@
 export default {
 	data() {
 		return {
-			sort: true,
+			sort: false,
 			news: [
-				{ time: 1661756485430, message: 'Added Interspective Reviewers' },
+				{ time: 1661762099299, message: 'Added Interspecies Reviewers' },
 				{ time: 1661675558678, message: 'Added Season 3 & 4 of Food Wars' },
-				{ time: 1661756485430, message: 'Added Interspective Reviewers' },
 			],
 		};
 	},

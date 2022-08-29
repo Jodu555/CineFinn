@@ -87,14 +87,24 @@ io.use((socket, next) => {
     }
 })
 
-const debounceTimeUpdateWriteThrough = debounce(async (socket, { series, movie = -1, season, episode, time }) => {
-    console.log('Write Through:', series, movie, season, episode, time);
+const debounceTimeUpdateWriteThrough = debounce(writeWatchInfoToDatabase, 4000)
+async function writeWatchInfoToDatabase(socket, obj) {
+    console.log('Write Through:', obj);
+
+    const { movie = -1, season, episode, time } = obj;
+
+    const searchOBJ = {
+        series: obj.series,
+        movie: obj.movie || -1,
+        season: obj.season,
+        episode: obj.episode,
+    }
 
     let update = false;
     let updatedSegmentList;
     if (movie !== -1 && movie !== undefined) {
         console.log('Movie Watch & Time Update');
-        updatedSegmentList = await updateSegment(socket.auth.user.UUID, { series, movie, season, episode }, (seg) => {
+        updatedSegmentList = await updateSegment(socket.auth.user.UUID, searchOBJ, (seg) => {
             seg.time = Math.ceil(time);
         });
         update = true;
@@ -102,7 +112,7 @@ const debounceTimeUpdateWriteThrough = debounce(async (socket, { series, movie =
 
     if (season !== -1 && episode !== -1) {
         console.log('Season / Episode Watch & Time Update');
-        updatedSegmentList = await updateSegment(socket.auth.user.UUID, { series, movie, season, episode }, (seg) => {
+        updatedSegmentList = await updateSegment(socket.auth.user.UUID, searchOBJ, (seg) => {
             seg.time = Math.ceil(time);
         });
         update = true;
@@ -111,16 +121,18 @@ const debounceTimeUpdateWriteThrough = debounce(async (socket, { series, movie =
     if (update) {
         //TODO: Maybe broadcast the updated segment list to the client via socket (updatedSegmentList)
     }
-}, 4000)
+}
 
 io.on('connection', async (socket) => {
     console.log('Socket Connection:', socket.id);
-
     // console.log(socket.auth);
-
-    socket.on('timeUpdate', ({ series, movie, season, episode, time }) => {
-        console.log('GOT:', series, movie, season, episode, time);
-        debounceTimeUpdateWriteThrough(socket, { series, movie, season, episode, time })
+    socket.on('timeUpdate', (obj) => {
+        console.log('GOT:', obj);
+        if (obj.force) {
+            writeWatchInfoToDatabase(socket, obj)
+        } else {
+            debounceTimeUpdateWriteThrough(socket, obj)
+        }
     });
 
     socket.on('disconnect', () => {
