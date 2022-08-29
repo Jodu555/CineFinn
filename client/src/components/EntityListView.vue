@@ -9,9 +9,10 @@
 					:class="{
 						btn: true,
 						'text-white': true,
-						'btn-secondary': current !== i + 1, //Unselected
+						'btn-secondary': current !== i + 1 && !checkWatched(i), //Unselected
 						'btn-info': current == i + 1, // Selected
 						'btn-success': checkWatched(i), // Watched
+						'crazy-green': checkWatched(i), // Watched
 					}"
 					v-for="(s, i) in array"
 					:key="s"
@@ -50,4 +51,8 @@ export default {
 	},
 };
 </script>
-<style lang=""></style>
+<style lang="scss">
+.crazy-green {
+	background-color: #00ff40;
+}
+</style>

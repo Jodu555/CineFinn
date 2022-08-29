@@ -121,7 +121,7 @@ async function writeWatchInfoToDatabase(socket, obj) {
     if (update) {
         //TODO: Maybe broadcast the updated segment list to the client via socket (updatedSegmentList)
         const sockets = await io.fetchSockets();
-        socket.forEach(bcsocket => {
+        sockets.forEach(bcsocket => {
             //This Ensures even if the user is logged in on multiple pages everything reflects
             if (bcsocket.auth.user.UUID == socket.auth.user.UUID) {
                 bcsocket.emit('watchListChange', updatedSegmentList);

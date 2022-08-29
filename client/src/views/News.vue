@@ -8,9 +8,14 @@
 		</div>
 		<div v-for="(obj, i) in news">
 			<hr v-if="i == 0" />
-			<h4 class="text-center">{{ obj.content }}</h4>
-			<p class="text-muted float-end">- {{ new Date(obj.time).toLocaleString() }}</p>
-			<br />
+			<figure class="text-center">
+				<blockquote class="blockquote">
+					<p>{{ obj.content }}</p>
+				</blockquote>
+				<figcaption class="blockquote-footer">
+					{{ new Date(obj.time).toLocaleString() }}
+				</figcaption>
+			</figure>
 			<hr />
 		</div>
 	</div>
