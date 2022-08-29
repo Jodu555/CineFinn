@@ -29,4 +29,14 @@ module.exports = () => {
             type: 'LONGTEXT',
         },
     });
+
+    database.createTable('news', {
+        time: {
+            type: 'varchar(64)',
+            null: false,
+        },
+        content: {
+            type: 'TEXT'
+        }
+    })
 }

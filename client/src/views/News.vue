@@ -3,12 +3,12 @@
 		<div>
 			<h1 class="text-center">News</h1>
 			<div class="text-end">
-				<button class="btn btn-outline-info" @click="toggleSort">Sort</button>
+				<button class="btn btn-outline-info" @click="toggleSort">Sort {{ buttonInfo }}</button>
 			</div>
 		</div>
 		<div v-for="(obj, i) in news">
 			<hr v-if="i == 0" />
-			<h4 class="text-center">{{ obj.message }}</h4>
+			<h4 class="text-center">{{ obj.content }}</h4>
 			<p class="text-muted float-end">- {{ new Date(obj.time).toLocaleString() }}</p>
 			<br />
 			<hr />
@@ -20,11 +20,13 @@ export default {
 	data() {
 		return {
 			sort: false,
-			news: [
-				{ time: 1661762099299, message: 'Added Interspecies Reviewers' },
-				{ time: 1661675558678, message: 'Added Season 3 & 4 of Food Wars' },
-			],
+			news: [],
 		};
+	},
+	computed: {
+		buttonInfo() {
+			return this.sort ? '↓' : '↑';
+		},
 	},
 	methods: {
 		changeSort() {
@@ -37,7 +39,11 @@ export default {
 			this.changeSort();
 		},
 	},
-	created() {
+	async created() {
+		const response = await this.$networking.get('/news');
+		if (response.success) {
+			this.news = response.json;
+		}
 		this.changeSort();
 	},
 };
