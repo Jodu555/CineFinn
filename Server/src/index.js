@@ -90,20 +90,28 @@ io.use((socket, next) => {
 const debounceTimeUpdateWriteThrough = debounce(async (socket, { series, movie = -1, season, episode, time }) => {
     console.log('Write Through:', series, movie, season, episode, time);
 
+    let update = false;
+    let updatedSegmentList;
     if (movie !== -1 && movie !== undefined) {
         console.log('Movie Watch & Time Update');
-        updateSegment(socket.auth.user.UUID, { series, movie, season, episode }, (seg) => {
+        updatedSegmentList = await updateSegment(socket.auth.user.UUID, { series, movie, season, episode }, (seg) => {
             seg.time = Math.ceil(time);
         });
+        update = true;
     }
 
     if (season !== -1 && episode !== -1) {
         console.log('Season / Episode Watch & Time Update');
-        updateSegment(socket.auth.user.UUID, { series, movie, season, episode }, (seg) => {
+        updatedSegmentList = await updateSegment(socket.auth.user.UUID, { series, movie, season, episode }, (seg) => {
             seg.time = Math.ceil(time);
         });
+        update = true;
     }
-}, 3000)
+
+    if (update) {
+        //TODO: Maybe broadcast the updated segment list to the client via socket (updatedSegmentList)
+    }
+}, 4000)
 
 io.on('connection', async (socket) => {
     console.log('Socket Connection:', socket.id);

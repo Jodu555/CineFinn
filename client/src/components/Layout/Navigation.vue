@@ -18,6 +18,9 @@
 					<li class="nav-item">
 						<router-link class="nav-link" exact-active-class="active" to="/">Home</router-link>
 					</li>
+					<li class="nav-item">
+						<router-link class="nav-link" exact-active-class="active" to="/news">News</router-link>
+					</li>
 				</ul>
 				<div v-if="loggedIn" class="d-flex">
 					<input

@@ -25,6 +25,14 @@ const routes = [
     },
     meta: { requiresLogin: true }
   },
+  {
+    path: '/news',
+    name: 'News',
+    component: function () {
+      return import(/* webpackChunkName: "about" */ '../views/News.vue')
+    },
+    meta: { requiresLogin: true }
+  },
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound },
 ]
 

@@ -75,7 +75,12 @@ const save = async (UUID, watchString) => {
     const database = Database.getDatabase();
     let data = await database.get('watch_strings').update({ account_UUID: UUID }, { watch_string: watchString });
 }
-
+/**
+ * @param  {String} UUID
+ * @param  {Object} searchCriteria
+ * @param  {Function} segmentUpdateFunction
+ * @returns {[Segment]}
+ */
 const updateSegment = async (UUID, searchCriteria, segmentUpdateFunction) => {
     const watchString = await load(UUID);
     const segmentList = parse(watchString);
@@ -85,7 +90,8 @@ const updateSegment = async (UUID, searchCriteria, segmentUpdateFunction) => {
         segmentList.push(segment);
     };
     segmentUpdateFunction(segment);
-    save(UUID, generateStr(segmentList));
+    await save(UUID, generateStr(segmentList));
+    return segmentList;
 }
 
 // const UUID = 'ad733837-b2cf-47a2-b968-abaa70edbffe'
