@@ -4,6 +4,7 @@ const getDefaultState = () => {
         currentMovie: -1,
         currentSeason: -1,
         currentEpisode: -1,
+        watchList: [],
     }
 }
 
