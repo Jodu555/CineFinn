@@ -39,6 +39,12 @@ export default {
             const series = rootState.series.find((x) => x.ID == ID);
             commit('setCurrentSeries', series);
         },
+
+        async loadWatchList({ commit, dispatch, rootState }, ID) {
+            const response = await this.$networking.get(`/watch/info?series=${seriesID}`);
+            if (response.success) commit('setWatchList', response.json);
+
+        }
     },
     namespaced: true,
 }

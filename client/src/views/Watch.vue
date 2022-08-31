@@ -19,6 +19,9 @@
 			</div>
 			<WatchInformation />
 			<h1>{{ displayTitle }}</h1>
+			<div v-auto-animate v-if="showLatestWatchButton" class="text-center">
+				<button class="btn btn-outline-info">Jump to Latest watch position!</button>
+			</div>
 			<EntityListView
 				v-if="currentSeries.movies.length >= 1"
 				title="Movies:"
@@ -158,6 +161,8 @@ export default {
 	data() {
 		return {
 			cleanupFN: null,
+			buttonTimer: null,
+			forceHideButton: false,
 		};
 	},
 	computed: {
@@ -169,6 +174,23 @@ export default {
 			'watchList',
 		]),
 		...mapState('auth', ['authToken']),
+		showLatestWatchButton() {
+			if (forceHideButton) return forceHideButton;
+			const info = Boolean(
+				this.currentMovie !== -1 || this.currentSeason !== -1 || this.currentEpisode !== -1
+			);
+			if (info) {
+				const segment = this.watchList.find(
+					(segment) =>
+						segment.season == this.currentSeason && segment.episode == this.currentEpisode
+				);
+				if (segment == undefined) return false;
+
+				if (segment.time > 100) return true;
+			} else {
+				return false;
+			}
+		},
 		showVideo() {
 			return this.currentMovie !== -1 || this.currentSeason !== -1 || this.currentEpisode !== -1;
 		},
@@ -208,7 +230,7 @@ export default {
 			'setCurrentEpisode',
 			'setWatchList',
 		]),
-		...mapActions('watch', ['loadSeriesInfo']),
+		...mapActions('watch', ['loadSeriesInfo', 'loadWatchList']),
 		switchTo(vel) {
 			if (this.currentSeason == -1) {
 				if (this.currentMovie == -1) {
@@ -271,6 +293,12 @@ export default {
 			console.log('GOT handleVideoChange()');
 			this.sendVideoTimeUpdate(video.currentTime, true);
 			video.pause();
+			// this.buttonTimer != null && clearTimeout(this.buttonTimer);
+			// this.forceHideButton = false;
+			// this.buttonTimer = setTimeout(() => {
+			// 	this.forceHideButton = true;
+			// }, 15000);
+
 			setTimeout(() => {
 				this.setCurrentSeason(season);
 				this.setCurrentEpisode(episode);
@@ -283,6 +311,7 @@ export default {
 			}, 200);
 		},
 		sendVideoTimeUpdate(time, force = false) {
+			console.log('sendVideoTimeUpdate()', time, force);
 			this.$socket.emit('timeUpdate', {
 				series: this.$route.query.id,
 				movie: this.currentMovie,
@@ -537,9 +566,7 @@ export default {
 
 		await this.loadSeriesInfo(seriesID);
 		this.handleVideoChange(-1, -1, -1);
-
-		const response = await this.$networking.get(`/watch/info?series=${seriesID}`);
-		if (response.success) this.setWatchList(response.json);
+		await this.loadWatchList();
 	},
 	async mounted() {
 		this.cleanupFN = this.initialize();
