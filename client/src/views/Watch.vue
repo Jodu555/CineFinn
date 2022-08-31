@@ -22,6 +22,7 @@
 			<div v-auto-animate v-if="showLatestWatchButton" class="text-center">
 				<button class="btn btn-outline-info">Jump to Latest watch position!</button>
 			</div>
+
 			<EntityListView
 				v-if="currentSeries.movies.length >= 1"
 				title="Movies:"
@@ -175,7 +176,7 @@ export default {
 		]),
 		...mapState('auth', ['authToken']),
 		showLatestWatchButton() {
-			if (forceHideButton) return forceHideButton;
+			if (this.forceHideButton) return false;
 			const info = Boolean(
 				this.currentMovie !== -1 || this.currentSeason !== -1 || this.currentEpisode !== -1
 			);
@@ -185,7 +186,6 @@ export default {
 						segment.season == this.currentSeason && segment.episode == this.currentEpisode
 				);
 				if (segment == undefined) return false;
-
 				if (segment.time > 100) return true;
 			} else {
 				return false;
@@ -293,11 +293,11 @@ export default {
 			console.log('GOT handleVideoChange()');
 			this.sendVideoTimeUpdate(video.currentTime, true);
 			video.pause();
-			// this.buttonTimer != null && clearTimeout(this.buttonTimer);
-			// this.forceHideButton = false;
-			// this.buttonTimer = setTimeout(() => {
-			// 	this.forceHideButton = true;
-			// }, 15000);
+			this.buttonTimer != null && clearTimeout(this.buttonTimer);
+			this.forceHideButton = false;
+			this.buttonTimer = setTimeout(() => {
+				this.forceHideButton = true;
+			}, 10000);
 
 			setTimeout(() => {
 				this.setCurrentSeason(season);
@@ -566,7 +566,7 @@ export default {
 
 		await this.loadSeriesInfo(seriesID);
 		this.handleVideoChange(-1, -1, -1);
-		await this.loadWatchList();
+		await this.loadWatchList(seriesID);
 	},
 	async mounted() {
 		this.cleanupFN = this.initialize();

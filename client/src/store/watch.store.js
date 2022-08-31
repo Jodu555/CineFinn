@@ -41,7 +41,7 @@ export default {
         },
 
         async loadWatchList({ commit, dispatch, rootState }, ID) {
-            const response = await this.$networking.get(`/watch/info?series=${seriesID}`);
+            const response = await this.$networking.get(`/watch/info?series=${ID}`);
             if (response.success) commit('setWatchList', response.json);
 
         }
