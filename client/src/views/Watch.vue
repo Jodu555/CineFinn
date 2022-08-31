@@ -157,12 +157,17 @@ export default {
 	components: { EntityListView, WatchInformation },
 	data() {
 		return {
-			watchList: [],
 			cleanupFN: null,
 		};
 	},
 	computed: {
-		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode']),
+		...mapState('watch', [
+			'currentSeries',
+			'currentMovie',
+			'currentSeason',
+			'currentEpisode',
+			'watchList',
+		]),
 		...mapState('auth', ['authToken']),
 		showVideo() {
 			return this.currentMovie !== -1 || this.currentSeason !== -1 || this.currentEpisode !== -1;
@@ -197,7 +202,12 @@ export default {
 		},
 	},
 	methods: {
-		...mapMutations('watch', ['setCurrentMovie', 'setCurrentSeason', 'setCurrentEpisode']),
+		...mapMutations('watch', [
+			'setCurrentMovie',
+			'setCurrentSeason',
+			'setCurrentEpisode',
+			'setWatchList',
+		]),
 		...mapActions('watch', ['loadSeriesInfo']),
 		switchTo(vel) {
 			if (this.currentSeason == -1) {
@@ -273,7 +283,6 @@ export default {
 			}, 200);
 		},
 		sendVideoTimeUpdate(time, force = false) {
-			console.log('sendVideoTimeUpdate', time, force);
 			this.$socket.emit('timeUpdate', {
 				series: this.$route.query.id,
 				movie: this.currentMovie,
@@ -530,10 +539,16 @@ export default {
 		this.handleVideoChange(-1, -1, -1);
 
 		const response = await this.$networking.get(`/watch/info?series=${seriesID}`);
-		if (response.success) this.watchList = response.json;
+		if (response.success) this.setWatchList(response.json);
 	},
 	async mounted() {
 		this.cleanupFN = this.initialize();
+		this.$socket.on('watchListChange', (watchList) => {
+			this.setWatchList(watchList);
+		});
+	},
+	unmounted() {
+		this.$socket.off('watchListChange');
 	},
 	beforeUnmount() {
 		const video = document.querySelector('video');

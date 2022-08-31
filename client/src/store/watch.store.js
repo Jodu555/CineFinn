@@ -25,6 +25,9 @@ export default {
         },
         setCurrentEpisode(state, episode) {
             state.currentEpisode = episode;
+        },
+        setWatchList(state, watchList) {
+            state.watchList = watchList;
         }
     },
     actions: {

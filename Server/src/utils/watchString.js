@@ -49,7 +49,7 @@ class Segment {
         this.episode = Number(episode);
         this.movie = Number(movie);
         this.time = Number(time);
-        this.watched = this.time > 600;
+        this.watched = this.time > 300;
     }
 }
 /**

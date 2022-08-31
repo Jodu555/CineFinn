@@ -89,9 +89,11 @@ io.use((socket, next) => {
 
 const debounceTimeUpdateWriteThrough = debounce(writeWatchInfoToDatabase, 4000)
 async function writeWatchInfoToDatabase(socket, obj) {
-    console.log('Write Through:', obj);
+    console.log('Write Through:', socket.auth.user.username, obj);
 
     const { movie = -1, season, episode, time } = obj;
+
+    const parsedTime = Math.ceil(time);
 
     const searchOBJ = {
         series: obj.series,
@@ -102,24 +104,26 @@ async function writeWatchInfoToDatabase(socket, obj) {
 
     let update = false;
     let updatedSegmentList;
+
+    const updateFunction = seg => {
+        if (seg.time < parsedTime) {
+            update = true;
+            seg.time = parsedTime;
+        }
+    }
+
     if (movie !== -1 && movie !== undefined) {
-        console.log('Movie Watch & Time Update');
-        updatedSegmentList = await updateSegment(socket.auth.user.UUID, searchOBJ, (seg) => {
-            seg.time = Math.ceil(time);
-        });
-        update = true;
+        updatedSegmentList = await updateSegment(socket.auth.user.UUID, searchOBJ, updateFunction);
     }
 
     if (season !== -1 && episode !== -1) {
-        console.log('Season / Episode Watch & Time Update');
-        updatedSegmentList = await updateSegment(socket.auth.user.UUID, searchOBJ, (seg) => {
-            seg.time = Math.ceil(time);
-        });
-        update = true;
+        updatedSegmentList = await updateSegment(socket.auth.user.UUID, searchOBJ, updateFunction);
     }
 
     if (update) {
-        //TODO: Maybe broadcast the updated segment list to the client via socket (updatedSegmentList)
+
+        console.log('  => Updated');
+
         const sockets = await io.fetchSockets();
         sockets.forEach(bcsocket => {
             //This Ensures even if the user is logged in on multiple pages everything reflects
@@ -134,7 +138,7 @@ io.on('connection', async (socket) => {
     console.log('Socket Connection:', socket.id);
     // console.log(socket.auth);
     socket.on('timeUpdate', (obj) => {
-        console.log('GOT:', obj);
+        console.log('Time Update:', socket.auth.user.username, obj);
         if (obj.force) {
             writeWatchInfoToDatabase(socket, obj)
         } else {

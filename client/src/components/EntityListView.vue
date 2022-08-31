@@ -9,10 +9,10 @@
 					:class="{
 						btn: true,
 						'text-white': true,
-						'btn-secondary': current !== i + 1 && !checkWatched(i), //Unselected
+						'btn-secondary': current !== i + 1 && !checkWatched(i), //Unselected && Not Watched
 						'btn-info': current == i + 1, // Selected
-						'btn-success': checkWatched(i), // Watched
-						'crazy-green': checkWatched(i), // Watched
+						'btn-success': checkWatched(i) && current !== i + 1, // Watched && Not Selected
+						'crazy-green': checkWatched(i) && current !== i + 1, // Watched && Not Selected
 					}"
 					v-for="(s, i) in array"
 					:key="s"
