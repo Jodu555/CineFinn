@@ -93,8 +93,6 @@ async function writeWatchInfoToDatabase(socket, obj) {
 
     const { movie = -1, season, episode, time } = obj;
 
-    const parsedTime = Math.ceil(time);
-
     const searchOBJ = {
         series: obj.series,
         movie: obj.movie || -1,
@@ -106,9 +104,9 @@ async function writeWatchInfoToDatabase(socket, obj) {
     let updatedSegmentList;
 
     const updateFunction = seg => {
-        if (seg.time < parsedTime) {
+        if (seg.time < time) {
             update = true;
-            seg.time = parsedTime;
+            seg.time = time;
         }
     }
 
@@ -138,6 +136,7 @@ io.on('connection', async (socket) => {
     console.log('Socket Connection:', socket.id);
     // console.log(socket.auth);
     socket.on('timeUpdate', (obj) => {
+        obj.time = Math.ceil(obj.time);
         console.log('Time Update:', socket.auth.user.username, obj);
         if (obj.force) {
             writeWatchInfoToDatabase(socket, obj)
