@@ -148,7 +148,7 @@
 					</button>
 				</div>
 			</div>
-			<video preload="auto" :src="videoSrc"></video>
+			<video preload="auto" oncontextmenu="return false" :src="videoSrc"></video>
 		</div>
 	</div>
 </template>

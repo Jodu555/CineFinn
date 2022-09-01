@@ -17,9 +17,9 @@ This is meant to be a super simple alternative to Plex but of course much simple
 ## Todo
 
 - [x] Id indexing for series
-- [ ] Job listings and displaying
-  - [ ] Job Types: previewImgs-Generation, previewImgs-Check, series-Scrape,
-- [ ] if user get back to video start playing at last position
-- [ ] Pregenerate the previewImgs
-- [ ] add a store for all user watched episodes
-  - [ ] Think of an elegant way to store those kind of information
+- [x] Job listings and displaying
+  - [x] Job Types: previewImgs-Generation, previewImgs-Check, series-Scrape,
+- [x] if user get back to video start playing at last position
+- [x] Pregenerate the previewImgs
+- [x] add a store for all user watched episodes
+  - [x] Think of an elegant way to store those kind of information
