@@ -137,7 +137,7 @@ io.on('connection', async (socket) => {
     // console.log(socket.auth);
     socket.on('timeUpdate', (obj) => {
         obj.time = Math.ceil(obj.time);
-        console.log('Time Update:', socket.auth.user.username, obj);
+        console.log('TUpd:', socket.auth.user.username, obj);
         if (obj.force) {
             writeWatchInfoToDatabase(socket, obj)
         } else {

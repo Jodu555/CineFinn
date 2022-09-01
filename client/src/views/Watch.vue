@@ -581,6 +581,7 @@ export default {
 	async mounted() {
 		this.cleanupFN = this.initialize();
 		this.$socket.on('watchListChange', (watchList) => {
+			console.log('GOT watchListChange');
 			this.setWatchList(watchList);
 		});
 	},
