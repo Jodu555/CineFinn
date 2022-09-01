@@ -20,7 +20,9 @@
 			<WatchInformation />
 			<h1>{{ displayTitle }}</h1>
 			<div v-auto-animate v-if="showLatestWatchButton" class="text-center">
-				<button class="btn btn-outline-info">Jump to Latest watch position!</button>
+				<button @click="skipToLatestTime" class="btn btn-outline-info">
+					Jump to Latest watch position!
+				</button>
 			</div>
 
 			<EntityListView
@@ -231,6 +233,14 @@ export default {
 			'setWatchList',
 		]),
 		...mapActions('watch', ['loadSeriesInfo', 'loadWatchList']),
+		skipToLatestTime() {
+			const segment = this.watchList.find(
+				(segment) => segment.season == this.currentSeason && segment.episode == this.currentEpisode
+			);
+			const video = document.querySelector('video');
+			video.currentTime = segment.time;
+			this.forceHideButton = true;
+		},
 		switchTo(vel) {
 			if (this.currentSeason == -1) {
 				if (this.currentMovie == -1) {
