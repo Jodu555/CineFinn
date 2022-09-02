@@ -75,7 +75,7 @@ io.use((socket, next) => {
         if (authToken) {
             console.log(`Socket with`);
             console.log(`   ID: ${socket.id}`);
-            console.log(`   - proposed with: ${authToken}`);
+            console.log(`   - proposed with: ${authToken} - ${authHelper.getUser(authToken).username}`);
             socket.auth = { token: authToken, user: authHelper.getUser(authToken) };
             return next();
         } else {
@@ -136,8 +136,7 @@ async function writeWatchInfoToDatabase(socket, obj) {
 }
 
 io.on('connection', async (socket) => {
-    console.log('Socket Connection:', socket.id);
-    // console.log(socket.auth);
+    console.log('Socket Connection:', socket.auth.user.username, socket.id);
     socket.on('timeUpdate', (obj) => {
         obj.time = Math.ceil(obj.time);
         console.log('TUpd:', socket.auth.user.username, obj);
@@ -149,7 +148,7 @@ io.on('connection', async (socket) => {
     });
 
     socket.on('disconnect', () => {
-        console.log('Socket DisConnection:', socket.id);
+        console.log('Socket DisConnection:', socket.auth.user.username, socket.id);
     })
 
 });
