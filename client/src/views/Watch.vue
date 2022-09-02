@@ -330,7 +330,6 @@ export default {
 				time: time,
 				force,
 			});
-			//TODO: send here the socket time update
 		},
 		initialize() {
 			const TIME_UPDATE_THROTTLE = 1000;

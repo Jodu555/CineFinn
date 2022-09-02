@@ -51,6 +51,9 @@ class Segment {
         this.time = Number(time);
         this.watched = this.time > 300;
     }
+    calc() {
+        this.watched = this.time > 300;
+    }
 }
 /**
  * @param  {String} UUID account UUID
@@ -91,6 +94,7 @@ const updateSegment = async (UUID, searchCriteria, segmentUpdateFunction) => {
         segmentList.push(segment);
     };
     segmentUpdateFunction(segment);
+    segment.calc();
     await save(UUID, generateStr(segmentList));
     return segmentList;
 }

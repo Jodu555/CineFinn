@@ -17,9 +17,9 @@ module.exports = () => {
     database.createTable('watch_strings', {
         options: {
             PK: 'account_UUID',
-            FK: {
-                account_UUID: 'accounts/UUID',
-            },
+            // FK: {
+            //     account_UUID: 'accounts/UUID',
+            // },
         },
         account_UUID: {
             type: 'varchar(64)',

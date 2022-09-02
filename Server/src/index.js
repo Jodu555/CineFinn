@@ -8,12 +8,11 @@ const { Server } = require('socket.io');
 const https = require('https');
 const cors = require('cors');
 const morgan = require('morgan');
-const { ErrorHelper, AuthenticationHelper } = require('@jodu555/express-helpers');
-
 const { Database } = require('@jodu555/mysqlapi');
 const database = Database.createDatabase(process.env.DB_HOST, process.env.DB_USERNAME, process.env.DB_PASSWORD, process.env.DB_DATABASE);
 database.connect();
 
+const { ErrorHelper, AuthenticationHelper } = require('@jodu555/express-helpers');
 require('./utils/database')();
 
 const { getSeries, setIO, getIO, debounce } = require('./utils/utils.js');
@@ -108,6 +107,10 @@ async function writeWatchInfoToDatabase(socket, obj) {
             update = true;
             seg.time = time;
         }
+    }
+
+    if (!searchOBJ.series || isNaN(searchOBJ.series) || searchOBJ.series == null || searchOBJ.series == -1) {
+        return;
     }
 
     if (movie !== -1 && movie !== undefined) {
