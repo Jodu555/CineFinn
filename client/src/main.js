@@ -17,7 +17,7 @@ const serverURL = location.hostname == 'localhost' ? 'http://localhost:3100' : '
 
 const socketPlugin = {
     install: (app, options) => {
-        app.config.globalProperties.$socket = io(serverURL);
+        app.config.globalProperties.$socket = io(serverURL, { autoConnect: false });
     }
 }
 

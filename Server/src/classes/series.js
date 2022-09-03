@@ -4,6 +4,7 @@ class Series {
         this.ID = ID;
         this.categorie = categorie;
         this.title = title;
+        // this.externalStreamURL = '';
         this.seasons = seasons;
         this.movies = movies;
     }
