@@ -300,7 +300,7 @@ export default {
 				return;
 			}
 			const wasPaused = video.paused;
-			console.log('GOT handleVideoChange()');
+			console.log('GOT handleVideoChange()', season, episode, movie);
 			this.sendVideoTimeUpdate(video.currentTime, true);
 			video.pause();
 			this.buttonTimer != null && clearTimeout(this.buttonTimer);
@@ -308,6 +308,16 @@ export default {
 			this.buttonTimer = setTimeout(() => {
 				this.forceHideButton = true;
 			}, 10000);
+
+			localStorage.setItem(
+				'data',
+				JSON.stringify({
+					ID: this.$route.query.id,
+					season,
+					episode,
+					movie,
+				})
+			);
 
 			setTimeout(() => {
 				this.setCurrentSeason(season);
@@ -572,13 +582,19 @@ export default {
 	},
 	async created() {
 		const seriesID = this.$route.query.id;
-
 		await this.loadSeriesInfo(seriesID);
-		this.handleVideoChange(-1, -1, -1);
+		const data = JSON.parse(localStorage.getItem('data'));
+		if (data && data.ID == seriesID) {
+			this.handleVideoChange(data.season || -1, data.episode || -1, data.movie || -1);
+		} else {
+			localStorage.removeItem('data');
+			this.handleVideoChange(-1, -1, -1);
+		}
 		await this.loadWatchList(seriesID);
 	},
 	async mounted() {
 		this.cleanupFN = this.initialize();
+
 		this.$socket.on('watchListChange', (watchList) => {
 			console.log('GOT watchListChange');
 			this.setWatchList(watchList);
@@ -590,6 +606,7 @@ export default {
 	beforeUnmount() {
 		const video = document.querySelector('video');
 		this.sendVideoTimeUpdate(video.currentTime, true);
+		localStorage.removeItem('data');
 		this.cleanupFN();
 	},
 };
