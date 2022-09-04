@@ -37,6 +37,7 @@ export default {
 	},
 	methods: {
 		checkWatched(ep) {
+			//TODO: add ID restrictions
 			if (this.watchList.length != 0) {
 				return Boolean(
 					this.watchList.find(
