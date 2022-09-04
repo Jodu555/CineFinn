@@ -185,7 +185,9 @@ export default {
 			if (info) {
 				const segment = this.watchList.find(
 					(segment) =>
-						segment.season == this.currentSeason && segment.episode == this.currentEpisode
+						segment.ID == this.$route.query.id &&
+						segment.season == this.currentSeason &&
+						segment.episode == this.currentEpisode
 				);
 				if (segment == undefined) return false;
 				if (segment.time > 100) return true;
