@@ -37,12 +37,14 @@ export default {
 	},
 	methods: {
 		checkWatched(ep) {
-			//TODO: add ID restrictions
 			if (this.watchList.length != 0) {
 				return Boolean(
 					this.watchList.find(
 						(segment) =>
-							segment.season == this.currentSeason && segment.episode == ep + 1 && segment.watched
+							segment.ID == this.$route.query.id &&
+							segment.season == this.currentSeason &&
+							segment.episode == ep + 1 &&
+							segment.watched
 					)
 				);
 			} else {
