@@ -3,6 +3,7 @@
 		<div v-if="currentSeries == undefined">
 			<h1>No Series with that ID</h1>
 		</div>
+		>
 		<div
 			v-auto-animate
 			class="container"
@@ -52,6 +53,9 @@
 				<div>
 					<button @click="switchTo(-1)" class="btn btn-outline-warning">&lt; Previous</button>
 				</div>
+				<h3 v-auto-animate v-if="currentMovie != -1">
+					{{ currentSeries.movies[currentMovie - 1]?.replace('.mp4', '') }}
+				</h3>
 				<div>
 					<button @click="switchTo(1)" class="btn btn-outline-success">Next &gt;</button>
 				</div>
