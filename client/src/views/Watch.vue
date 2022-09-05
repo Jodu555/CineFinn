@@ -14,15 +14,23 @@
 					class="btn btn-outline-info"
 					data-bs-toggle="modal"
 					data-bs-target="#seriesInformationModal"
+					disabled
 				>
 					i
 				</button>
-				<button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#controlsModal">
+				<button
+					class="btn btn-outline-info"
+					data-bs-toggle="modal"
+					data-bs-target="#controlsModal"
+					disabled
+				>
 					<kbd>CTRL</kbd>
 				</button>
 			</div>
 			<SeriesInformation />
-			<h1>{{ displayTitle }}</h1>
+			<h1 class="text-truncate" data-bs-toggle="tooltip" :data-bs-title="displayTitle">
+				{{ displayTitle }}
+			</h1>
 			<div v-auto-animate v-if="showLatestWatchButton" class="text-center">
 				<button @click="skipToLatestTime" class="btn btn-outline-info">
 					Jump to Latest watch position!
@@ -56,7 +64,7 @@
 				<div>
 					<button @click="switchTo(-1)" class="btn btn-outline-warning">&lt; Previous</button>
 				</div>
-				<h3 v-auto-animate v-if="currentMovie != -1">
+				<h3 v-auto-animate v-if="currentMovie != -1" class="text-muted text-truncate">
 					{{ currentSeries.movies[currentMovie - 1]?.replace('.mp4', '') }}
 				</h3>
 				<div>
