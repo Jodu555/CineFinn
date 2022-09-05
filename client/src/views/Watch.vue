@@ -9,16 +9,19 @@
 			class="container"
 			v-if="currentSeries != undefined && currentSeries.ID != -1"
 		>
-			<div class="float-end">
+			<div class="float-end btn-group">
 				<button
 					class="btn btn-outline-info"
 					data-bs-toggle="modal"
-					data-bs-target="#informationModal"
+					data-bs-target="#seriesInformationModal"
 				>
 					i
 				</button>
+				<button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#controlsModal">
+					<kbd>CTRL</kbd>
+				</button>
 			</div>
-			<WatchInformation />
+			<SeriesInformation />
 			<h1>{{ displayTitle }}</h1>
 			<div v-auto-animate v-if="showLatestWatchButton" class="text-center">
 				<button @click="skipToLatestTime" class="btn btn-outline-info">
@@ -161,10 +164,10 @@ import { mapState, mapMutations, mapActions, mapGetters } from 'vuex';
 import { singleDimSwitcher, multiDimSwitcher } from '@/plugins/switcher';
 import { debounce, throttle } from '@/plugins/debounceAndThrottle';
 import EntityListView from '@/components/EntityListView.vue';
-import WatchInformation from '../components/WatchInformation.vue';
+import SeriesInformation from '../components/SeriesInformation.vue';
 
 export default {
-	components: { EntityListView, WatchInformation },
+	components: { EntityListView, SeriesInformation },
 	data() {
 		return {
 			cleanupFN: null,

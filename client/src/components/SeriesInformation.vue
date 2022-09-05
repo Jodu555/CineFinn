@@ -1,17 +1,15 @@
 <template lang="">
 	<div
 		class="modal fade"
-		id="informationModal"
+		id="seriesInformationModal"
 		tabindex="-1"
-		aria-labelledby="informationModalLabel"
+		aria-labelledby="seriesInformationModal"
 		aria-hidden="true"
 	>
 		<div class="modal-dialog modal-lg">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title" id="informationModalLabel">
-						Some Control Informations about the Video
-					</h5>
+					<h5 class="modal-title" id="seriesInformationModalLabel">Series Informations</h5>
 					<button
 						type="button"
 						class="btn-close"
