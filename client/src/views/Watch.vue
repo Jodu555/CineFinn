@@ -3,7 +3,6 @@
 		<div v-if="currentSeries == undefined">
 			<h1>No Series with that ID</h1>
 		</div>
-		>
 		<div
 			v-auto-animate
 			class="container"

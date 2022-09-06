@@ -20,7 +20,8 @@ const generateImages = async (series, cleanup = () => { }) => {
     console.log('Started generateImages()');
     for (const serie of series) {
         const seasons = serie.seasons.flat();
-        console.log(`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items`);
+        const items = seasons.length + serie.movies.length
+        console.log(`Checked: ${serie.title} with ${items} Items`);
         let i = 0;
         for (const season of seasons) {
             i++;
@@ -30,10 +31,22 @@ const generateImages = async (series, cleanup = () => { }) => {
             if (fs.readdirSync(output).length == 0) {
                 const command = `ffmpeg -i "${season}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
                 await deepExecPromisify(command);
-                console.log(`  => Video ${i} / ${seasons.length} - ${path.parse(season).base}`);
+                console.log(`  => Video (SE-EP) ${i} / ${items} - ${path.parse(season).base}`);
+            }
+        }
+        for (const movie of serie.movies) {
+            i++;
+            const data = filenameParser(movie, path.parse(movie).base);
+            const output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), 'Movies', `${data.movieTitle}`);
+            fs.mkdirSync(output, { recursive: true });
+            if (fs.readdirSync(output).length == 0) {
+                const command = `ffmpeg -i "${movie}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
+                await deepExecPromisify(command);
+                console.log(`  => Video (Movie) ${i} / ${items} - ${path.parse(movie).base}`);
             }
         }
     }
+
     console.log('Finished generateImages()');
     cleanup();
 }

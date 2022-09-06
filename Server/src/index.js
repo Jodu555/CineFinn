@@ -181,9 +181,12 @@ app.use(errorHelper.install());
 const PORT = process.env.PORT || 3100;
 server.listen(PORT, async () => {
     console.log(`Express & Socket App Listening ${process.env.https ? 'with SSL ' : ''}on ${PORT}`);
-    console.log(getSeries().length);
-    console.log(getSeries().map(x => [...x.seasons, ...x.movies]).flat(5).length);
+    // console.log(getSeries().length);
+    // console.log(getSeries().map(x => [...x.seasons, ...x.movies]).flat(5).length);
 
+    // console.log();
+
+    // generateImages([getSeries()[13]]);
     // const merge = mergeSeriesArrays(crawlAndIndex(), crawlAndIndex())
     // console.log(merge);
     // generateImages([getSeries()[0]])
