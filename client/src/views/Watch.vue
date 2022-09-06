@@ -474,7 +474,7 @@ export default {
 				let previewImgSrc = `/assets/previewImgs/preview${previewImgNumber}.jpg`;
 				if (v.currentSeries != undefined && v.currentSeries.ID != -1) {
 					previewImgSrc = `${v.$networking.API_URL}/previewImages/${v.currentSeries.ID}/`;
-					if (v.currentMovie != -1) {
+					if (v.currentMovie != -1 && v.currentMovie != undefined) {
 						previewImgSrc += `Movies/${
 							v.currentSeries.movies[v.currentMovie - 1]
 						}/preview${previewImgNumber}.jpg?auth-token=${v.authToken}`;
