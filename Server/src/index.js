@@ -86,7 +86,6 @@ io.use((socket, next) => {
     }
 })
 
-const debounceTimeUpdateWriteThrough = debounce(writeWatchInfoToDatabase, 4000)
 async function writeWatchInfoToDatabase(socket, obj) {
     console.log('Write Through:', socket.auth.user.username, obj);
 
@@ -135,15 +134,19 @@ async function writeWatchInfoToDatabase(socket, obj) {
     }
 }
 
+// const debounceTimeUpdateWriteThrough = debounce(writeWatchInfoToDatabase, 4000);
+
 io.on('connection', async (socket) => {
     console.log('Socket Connection:', socket.auth.user.username, socket.id);
     socket.on('timeUpdate', (obj) => {
         obj.time = Math.ceil(obj.time);
         console.log('TUpd:', socket.auth.user.username, obj);
         if (obj.force) {
-            writeWatchInfoToDatabase(socket, obj)
+            writeWatchInfoToDatabase(socket, obj);
         } else {
-            debounceTimeUpdateWriteThrough(socket, obj)
+            if (!socket.auth.debounce) socket.auth.debounce = debounce(writeWatchInfoToDatabase, 4000);
+
+            socket.auth.debounce(socket, obj);
         }
     });
 
