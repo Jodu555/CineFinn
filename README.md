@@ -23,6 +23,6 @@ This is meant to be a super simple alternative to Plex but of course much simple
 - [x] Pregenerate the previewImgs
 - [x] add a store for all user watched episodes
   - [x] Think of an elegant way to store those kind of information
-- [ ] make the debounce server side optimal for multiple clients
+- [x] make the debounce server side optimal for multiple clients
 - [x] display the title of the movies somewhere
-- [ ] Add generate Images and parse images also for movies
+- [x] Add generate Images and parse images also for movies
