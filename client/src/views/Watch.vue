@@ -42,6 +42,7 @@
 				:array="currentSeries.movies"
 				:current="currentMovie"
 				:chnageFN="changeMovie"
+				:watchList="watchList"
 			/>
 			<EntityListView
 				title="Seasons:"

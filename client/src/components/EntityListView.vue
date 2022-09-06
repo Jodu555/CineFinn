@@ -37,15 +37,19 @@ export default {
 	},
 	methods: {
 		checkWatched(ep) {
+			// console.log(`ep`, ep);
 			if (this.watchList.length != 0) {
+				console.log(this.watchList);
 				return Boolean(
-					this.watchList.find(
-						(segment) =>
+					this.watchList.find((segment) => {
+						// console.log(`segment`, segment);
+						return (
 							segment.ID == this.$route.query.id &&
-							segment.season == this.currentSeason &&
-							segment.episode == ep + 1 &&
-							segment.watched
-					)
+							segment.watched &&
+							((segment.season == this.currentSeason && segment.episode == ep + 1) ||
+								segment.movie == ep + 1)
+						);
+					})
 				);
 			} else {
 				return false;
