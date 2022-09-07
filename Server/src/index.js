@@ -20,6 +20,7 @@ const { generateImages, validateImages } = require('./utils/images.js');
 const { crawlAndIndex, mergeSeriesArrays } = require('./utils/crawler.js');
 const { cleanupSeriesBeforeFrontResponse } = require('./classes/series');
 const { load, parse, Segment, save, generateStr, updateSegment } = require('./utils/watchString');
+const { writeWatchInfoToDatabase } = require('./utils/watchManager');
 
 const app = express();
 app.use(cors());
@@ -85,56 +86,6 @@ io.use((socket, next) => {
         next(new Error('Authentication error'));
     }
 })
-
-async function writeWatchInfoToDatabase(socket, obj) {
-    console.log('Write Through:', socket.auth.user.username, obj);
-
-    const { movie = -1, season, episode, time } = obj;
-
-    const searchOBJ = {
-        series: obj.series,
-        movie: obj.movie || -1,
-        season: obj.season,
-        episode: obj.episode,
-    }
-
-    let update = false;
-    let updatedSegmentList;
-
-    const updateFunction = seg => {
-        if (seg.time < time) {
-            update = true;
-            seg.time = time;
-        }
-    }
-
-    if (!searchOBJ.series || isNaN(searchOBJ.series) || searchOBJ.series == null || searchOBJ.series == -1) {
-        return;
-    }
-
-    if (movie !== -1 && movie !== undefined) {
-        updatedSegmentList = await updateSegment(socket.auth.user.UUID, searchOBJ, updateFunction);
-    }
-
-    if (season !== -1 && episode !== -1) {
-        updatedSegmentList = await updateSegment(socket.auth.user.UUID, searchOBJ, updateFunction);
-    }
-
-    if (update) {
-
-        console.log('  => Updated');
-
-        const sockets = await io.fetchSockets();
-        sockets.forEach(bcsocket => {
-            //This Ensures even if the user is logged in on multiple pages everything reflects
-            if (bcsocket.auth.user.UUID == socket.auth.user.UUID) {
-                bcsocket.emit('watchListChange', updatedSegmentList);
-            }
-        })
-    }
-}
-
-// const debounceTimeUpdateWriteThrough = debounce(writeWatchInfoToDatabase, 4000);
 
 io.on('connection', async (socket) => {
     console.log('Socket Connection:', socket.auth.user.username, socket.id);
