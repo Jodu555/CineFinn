@@ -26,3 +26,7 @@ This is meant to be a super simple alternative to Plex but of course much simple
 - [x] make the debounce server side optimal for multiple clients
 - [x] display the title of the movies somewhere
 - [x] Add generate Images and parse images also for movies
+- [ ] Add the control information modal
+- [ ] Add the series information modal
+- [ ] Add the full series watched information modal
+- [ ] Implement a method to un watch a specific series or season

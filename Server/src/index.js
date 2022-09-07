@@ -19,7 +19,6 @@ const { getSeries, setIO, getIO, debounce } = require('./utils/utils.js');
 const { generateImages, validateImages } = require('./utils/images.js');
 const { crawlAndIndex, mergeSeriesArrays } = require('./utils/crawler.js');
 const { cleanupSeriesBeforeFrontResponse } = require('./classes/series');
-const { load, parse, Segment, save, generateStr, updateSegment } = require('./utils/watchString');
 const { writeWatchInfoToDatabase } = require('./utils/watchManager');
 
 const app = express();
