@@ -1,5 +1,10 @@
 <template>
 	<div>
+		<div v-auto-animate>
+			<a v-auto-animate v-if="backToTop" class="btn btn-primary btn-lg back-to-top" role="button"
+				>^</a
+			>
+		</div>
 		<div v-auto-animate class="container accordion accordion-flush" id="accordionFlushExample">
 			<div v-for="categorie of categories" :key="categorie.title" class="accordion-item">
 				<h2 class="accordion-header">
@@ -34,11 +39,31 @@ import EntityCard from '@/components/EntityCard.vue';
 import { mapState, mapActions } from 'vuex';
 export default {
 	components: { EntityCard },
+	data() {
+		return {
+			backToTop: false,
+		};
+	},
 	created() {
 		this.loadSeries();
+		window.addEventListener('scroll', this.handleScroll);
+	},
+	beforeUnmount() {
+		window.removeEventListener('scroll', this.handleScroll);
 	},
 	methods: {
 		...mapActions(['loadSeries']),
+		handleScroll(e) {
+			const map = (value, x1, y1, x2, y2) => ((value - x1) * (y2 - x2)) / (y1 - x1) + x2;
+
+			const height = document.documentElement.offsetHeight;
+			console.log('SCROLL', height, document.documentElement.scrollTop);
+			if (document.documentElement.scrollTop > 200) {
+				this.backToTop = true;
+			} else {
+				this.backToTop = false;
+			}
+		},
 	},
 	computed: {
 		...mapState(['series']),
@@ -59,4 +84,11 @@ export default {
 	},
 };
 </script>
-<style lang=""></style>
+<style lang="css">
+.back-to-top {
+	position: fixed;
+	bottom: 64px;
+	right: 25px;
+	/* display: none; */
+}
+</style>
