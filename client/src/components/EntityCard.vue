@@ -1,6 +1,16 @@
 <template>
 	<div class="col">
 		<div class="card h-100">
+			<!-- <img
+				src="https://aniworld.to/public/img/cover/akashic-records-of-bastard-magical-instructor-stream-cover-VyCC27ePiixKPIVArGWdlGZZ7hCu23iD_150x225.jpg"
+				class="card-img-top"
+				alt="..."
+			/> -->
+			<img
+				src="https://aniworld.to/public/img/cover/akashic-records-of-bastard-magical-instructor-stream-cover-VyCC27ePiixKPIVArGWdlGZZ7hCu23iD_220x330.jpg"
+				class="card-img-top"
+				alt="..."
+			/>
 			<div class="card-body">
 				<h4 class="card-title">{{ entity.title }}</h4>
 				<p class="card-text">
