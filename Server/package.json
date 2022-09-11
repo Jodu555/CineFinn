@@ -14,6 +14,7 @@
 	"dependencies": {
 		"@jodu555/express-helpers": "^1.1.6",
 		"@jodu555/mysqlapi": "^4.0.5",
+		"axios": "^0.27.2",
 		"cors": "^2.8.5",
 		"dotenv": "^16.0.2",
 		"express": "^4.18.1",

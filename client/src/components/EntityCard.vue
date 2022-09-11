@@ -6,15 +6,21 @@
 				class="card-img-top"
 				alt="..."
 			/> -->
-			<img
+			<!-- <img
 				src="https://aniworld.to/public/img/cover/akashic-records-of-bastard-magical-instructor-stream-cover-VyCC27ePiixKPIVArGWdlGZZ7hCu23iD_220x330.jpg"
 				class="card-img-top"
 				alt="..."
-			/>
+			/> -->
+			<img v-if="entity.infos.image" :src="entity.infos.image" class="card-img-top" alt="..." />
 			<div class="card-body">
 				<h4 class="card-title">{{ entity.title }}</h4>
 				<p class="card-text">
-					With supporting text below as a natural lead-in to additional content.
+					{{ entity.infos.description }}
+					<br />
+					<small class="text-muted"
+						>{{ entity.infos.startDate }} - {{ entity.infos.endDate }}</small
+					>
+					<!-- <pre>{{entity.infos}}</pre> -->
 				</p>
 				<router-link class="btn btn-outline-primary btn-sm" :to="'/watch?id=' + entity.ID"
 					>Go & Watch</router-link

@@ -7,6 +7,7 @@ const express = require('express');
 const { Server } = require('socket.io');
 const https = require('https');
 const cors = require('cors');
+const axios = require('axios');
 const morgan = require('morgan');
 const { Database } = require('@jodu555/mysqlapi');
 const database = Database.createDatabase(process.env.DB_HOST, process.env.DB_USERNAME, process.env.DB_PASSWORD, process.env.DB_DATABASE);
@@ -116,9 +117,13 @@ app.get('/video', authHelper.authentication(), require('./routes/video.js'));
 app.use('/managment', authHelper.authentication(), require('./routes/managment.js').router)
 app.use('/watch', authHelper.authentication(), require('./routes/watch').router)
 
-app.get('/index', authHelper.authentication(), (req, res, next) => {
+app.get('/index', authHelper.authentication(), async (req, res, next) => {
     const series = cleanupSeriesBeforeFrontResponse(getSeries());
-    res.json(series);
+
+    const response = await axios.post('http://localhost:4895', series);
+    // console.log(response.data);
+    res.json(response.data);
+    // res.json(series);
     // res.json(getSeries());
 });
 
