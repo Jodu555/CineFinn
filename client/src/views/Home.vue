@@ -1,7 +1,13 @@
 <template>
 	<div>
 		<div v-auto-animate>
-			<a v-auto-animate v-if="backToTop" class="btn btn-primary btn-lg back-to-top" role="button"
+			<a
+				v-auto-animate
+				v-if="backToTop"
+				@click="scrollToTop()"
+				id="backToTop"
+				class="btn btn-primary btn-lg back-to-top"
+				role="button"
 				>^</a
 			>
 		</div>
@@ -54,15 +60,39 @@ export default {
 	methods: {
 		...mapActions(['loadSeries']),
 		handleScroll(e) {
-			const map = (value, x1, y1, x2, y2) => ((value - x1) * (y2 - x2)) / (y1 - x1) + x2;
-
 			const height = document.documentElement.offsetHeight;
-			console.log('SCROLL', height, document.documentElement.scrollTop);
-			if (document.documentElement.scrollTop > 200) {
+
+			const mapping = this.map(
+				document.documentElement.scrollTop,
+				[0, height],
+				[
+					0,
+					window.innerHeight -
+						document.querySelector('.footer').getBoundingClientRect().height -
+						25,
+				]
+			);
+
+			// console.log('SCROLL', height, document.documentElement.scrollTop);
+			// console.log('MAPPING', Math.ceil(mapping));
+
+			if (document.documentElement.scrollTop > 100) {
 				this.backToTop = true;
+				if (document.querySelector('#backToTop'))
+					document.querySelector('#backToTop').style.top = `${Math.ceil(mapping)}px`;
 			} else {
 				this.backToTop = false;
 			}
+		},
+		map(value, oldRange, newRange) {
+			// console.log(value, oldRange, newRange);
+			var newValue =
+				((value - oldRange[0]) * (newRange[1] - newRange[0])) / (oldRange[1] - oldRange[0]) +
+				newRange[0];
+			return Math.min(Math.max(newValue, newRange[0]), newRange[1]);
+		},
+		scrollToTop() {
+			window.scrollTo({ top: 0, behavior: 'smooth' });
 		},
 	},
 	computed: {
@@ -87,7 +117,7 @@ export default {
 <style lang="css">
 .back-to-top {
 	position: fixed;
-	bottom: 64px;
+	/* bottom: 64px; */
 	right: 25px;
 	/* display: none; */
 }
