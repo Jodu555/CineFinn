@@ -23,10 +23,11 @@ const getSeries = (forceLoad = false) => {
     if (forceLoad || !series) {
         if (fs.existsSync(outputFileName) && !forceLoad) {
             console.log('Loaded series from file!');
-            series = JSON.parse(fs.readFileSync(outputFileName, 'utf8'));
+            setSeries(JSON.parse(fs.readFileSync(outputFileName, 'utf8')));
         } else {
             console.log('Crawled the series!');
-            series = crawlAndIndex();
+            setSeries(crawlAndIndex());
+
             fs.writeFileSync(outputFileName, JSON.stringify(series, null, 3), 'utf8');
         }
     }
@@ -34,8 +35,14 @@ const getSeries = (forceLoad = false) => {
 };
 
 const setSeries = async (_series) => {
-    console.log('Setted & merged new Series!');
-    series = mergeSeriesArrays(series, _series);
+    console.log('Loaded or Setted & merged new Series!');
+    if (series != null) {
+        series = mergeSeriesArrays(series, _series);
+    } else {
+        series = _series;
+    }
+    //TODO: Series have changed OR loaded
+    // Check if there are new init images to be loaded or other stuff
     fs.writeFileSync(outputFileName, JSON.stringify(series, null, 3), 'utf8');
 }
 
