@@ -51,14 +51,12 @@ export default {
 		};
 	},
 	created() {
-		this.loadSeries();
 		window.addEventListener('scroll', this.handleScroll);
 	},
 	beforeUnmount() {
 		window.removeEventListener('scroll', this.handleScroll);
 	},
 	methods: {
-		...mapActions(['loadSeries']),
 		handleScroll(e) {
 			const height = document.documentElement.offsetHeight;
 

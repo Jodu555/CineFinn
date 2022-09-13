@@ -30,6 +30,9 @@ export default {
 	methods: {
 		...mapActions(['loadSeries', 'reloadSeries']),
 	},
+	created() {
+		this.loadSeries();
+	},
 	mounted() {
 		this.$socket.on('reloadSeries', (series) => {
 			this.reloadSeries(series);
