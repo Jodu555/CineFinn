@@ -30,8 +30,11 @@ export default {
 	methods: {
 		...mapActions(['loadSeries', 'reloadSeries']),
 	},
-	created() {
-		this.loadSeries();
+	created() {},
+	watch: {
+		loggedIn(newV) {
+			newV && this.loadSeries();
+		},
 	},
 	mounted() {
 		this.$socket.on('reloadSeries', (series) => {
