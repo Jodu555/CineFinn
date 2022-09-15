@@ -4,7 +4,7 @@ This is meant to be a super simple alternative to Plex but of course much simple
 
 ## Code I Joinked
 
-### The Full Video Player
+### The Full Video Player (Highly changed and customized by myself + integrated into the Vue Eco System)
 
 - [Web Dev Simplified](https://www.youtube.com/watch?v=ZeNyjnneq_w)
 - [His Repository](https://github.com/WebDevSimplified/youtube-video-player-clone)
@@ -33,7 +33,7 @@ This is meant to be a super simple alternative to Plex but of course much simple
 - [ ] Show the current time while scrubbing through the video
 - [x] Show a back to top Button on the List page (or maybe make the navbar sticky)
 - [ ] Anime Preview (10 - 15 sec.)
-- [ ] Implement the command manager and some basic command (session = to list current sockets, info = to show series infos and space infos)
+- [ ] Implement the command manager and some basic command (session = to list current sockets, info = to show series infos and space infos, reload = to reload the series from their file)
 - [ ] Implement a job-cli system to run a pre specified job with the cli
   - [ ] Change ID Job : A Job for which i can change an ID instant wihout any problems
   - [ ] Obtain Side-Infos : To Obtain the series image and infos as well as start & end date
