@@ -31,8 +31,8 @@ app.use(cors());
 app.use(morgan('dev', {
     skip: (req, res) => {
         if (
-            req.originalUrl.includes('/previewImages')
-            // req.originalUrl.includes('/video')
+            req.originalUrl.includes('/previewImages') ||
+            req.originalUrl.includes('/video')
         ) {
             return true;
         } else {

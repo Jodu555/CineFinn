@@ -36,7 +36,7 @@ npm run job -- --name jobname
 - [ ] Add the series information modal
 - [ ] Add the full series watched information modal
 - [ ] Implement a method to un watch a specific series or season
-- [ ] Show the current time while scrubbing through the video
+- [x] Show the current time while scrubbing through the video
 - [x] Show a back to top Button on the List page (or maybe make the navbar sticky)
 - [ ] Anime Preview (10 - 15 sec.)
 - [ ] Implement the command manager and some basic command (session = to list current sockets, info = to show series infos and space infos, reload = to reload the series from their file)

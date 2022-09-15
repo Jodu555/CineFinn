@@ -471,6 +471,9 @@ export default {
 			function handleTimelineUpdate(e) {
 				const rect = timelineContainer.getBoundingClientRect();
 				const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+				document.querySelector('.time-info-timeline-indicator').innerText = formatDuration(
+					percent * video.duration
+				);
 				const previewImgNumber = Math.max(1, Math.floor((percent * video.duration) / 10));
 				let previewImgSrc = `/assets/previewImgs/preview${previewImgNumber}.jpg`;
 				if (v.currentSeries != undefined && v.currentSeries.ID != -1) {
@@ -864,7 +867,7 @@ video {
 	position: absolute;
 	height: 80px;
 	aspect-ratio: 16 / 9;
-	top: -1rem;
+	top: -1.5rem;
 	transform: translate(-50%, -100%);
 	left: calc(var(--preview-position) * 100%);
 	border-radius: 0.25rem;
@@ -874,7 +877,7 @@ video {
 
 .timeline .time-info-timeline-indicator {
 	position: absolute;
-	height: 5px;
+	height: 10px;
 	top: -1rem;
 	transform: translate(-50%, -100%);
 	left: calc(var(--preview-position) * 100%);
@@ -893,6 +896,11 @@ video {
 }
 
 .video-container.scrubbing .thumbnail-img {
+	display: block;
+}
+
+.video-container.scrubbing .preview-img,
+.timeline-container:hover .time-info-timeline-indicator {
 	display: block;
 }
 
