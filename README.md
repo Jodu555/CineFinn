@@ -2,6 +2,12 @@
 
 This is meant to be a super simple alternative to Plex but of course much simpler and mainly to get Hands on with Video Processing Vue and other cool stuff
 
+## To Run Certain Jobs
+
+```bash
+npm run job -- --name jobname
+```
+
 ## Code I Joinked
 
 ### The Full Video Player (Highly changed and customized by myself + integrated into the Vue Eco System)
