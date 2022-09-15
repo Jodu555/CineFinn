@@ -12,7 +12,10 @@ const morgan = require('morgan');
 const { Database } = require('@jodu555/mysqlapi');
 const database = Database.createDatabase(process.env.DB_HOST, process.env.DB_USERNAME, process.env.DB_PASSWORD, process.env.DB_DATABASE);
 database.connect();
-
+const { CommandManager } = require('@jodu555/commandmanager');
+CommandManager.createCommandManager(process.stdin, process.stdout);
+const { registerCommands } = require('./utils/commands');
+registerCommands();
 const { ErrorHelper, AuthenticationHelper } = require('@jodu555/express-helpers');
 require('./utils/database')();
 
@@ -21,6 +24,7 @@ const { generateImages, validateImages } = require('./utils/images.js');
 const { crawlAndIndex, mergeSeriesArrays } = require('./utils/crawler.js');
 const { cleanupSeriesBeforeFrontResponse } = require('./classes/series');
 const { writeWatchInfoToDatabase } = require('./utils/watchManager');
+
 
 const app = express();
 app.use(cors());

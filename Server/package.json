@@ -8,10 +8,16 @@
 		"dev": "nodemon src/index.js",
 		"dev:test": "nodemon src/test.js"
 	},
+	"nodemonConfig": {
+		"ignore": [
+			"*.json"
+		]
+	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@jodu555/commandmanager": "^1.5.3",
 		"@jodu555/express-helpers": "^1.1.6",
 		"@jodu555/mysqlapi": "^4.0.5",
 		"axios": "^0.27.2",
@@ -21,6 +27,6 @@
 		"ffmpeg": "^0.0.4",
 		"get-video-duration": "^4.1.0",
 		"morgan": "^1.10.0",
-		"socket.io": "^4.5.1"
+		"socket.io": "^4.5.2"
 	}
 }
