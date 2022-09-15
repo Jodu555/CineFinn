@@ -85,6 +85,7 @@
 					<div class="timeline">
 						<img class="preview-img" />
 						<div class="thumb-indicator"></div>
+						<p class="time-info-timeline-indicator">12:55</p>
 					</div>
 				</div>
 				<div class="controls">
@@ -868,6 +869,15 @@ video {
 	left: calc(var(--preview-position) * 100%);
 	border-radius: 0.25rem;
 	border: 2px solid white;
+	display: none;
+}
+
+.timeline .time-info-timeline-indicator {
+	position: absolute;
+	height: 5px;
+	top: -1rem;
+	transform: translate(-50%, -100%);
+	left: calc(var(--preview-position) * 100%);
 	display: none;
 }
 

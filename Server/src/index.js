@@ -30,7 +30,10 @@ const app = express();
 app.use(cors());
 app.use(morgan('dev', {
     skip: (req, res) => {
-        if (req.originalUrl.includes('/previewImages') || req.originalUrl.includes('/video')) {
+        if (
+            req.originalUrl.includes('/previewImages')
+            // req.originalUrl.includes('/video')
+        ) {
             return true;
         } else {
             return false;
