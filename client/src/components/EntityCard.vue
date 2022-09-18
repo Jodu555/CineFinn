@@ -14,7 +14,7 @@
 			<img v-if="entity?.infos?.image" :src="entity.infos.image" class="card-img-top" alt="..." />
 			<div class="card-body">
 				<h4 class="card-title">{{ entity.title }}</h4>
-				<p v-if="entity.infos != {}" class="card-text">
+				<p v-if="entity.infos && entity.infos.description" class="card-text">
 					{{ entity.infos.description }}
 					<br />
 					<!-- <pre>{{ entity.infos}}</pre> -->
@@ -23,7 +23,10 @@
 					>
 				</p>
 				<p v-else class="card-text">
-					With supporting text below as a natural lead-in to additional content.
+					Here will later be provided some description an image and the start + end Date
+					<br />
+					<br />
+					<small class="text-mute">- Get Ready for it</small>
 				</p>
 				<router-link class="btn btn-outline-primary btn-sm" :to="'/watch?id=' + entity.ID"
 					>Go & Watch</router-link
