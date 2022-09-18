@@ -1,22 +1,22 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import router from './router'
-import store from './store'
+import { createApp } from 'vue';
+import App from './App.vue';
+import router from './router';
+import store from './store';
 
 /* import the fontawesome core */
-import { library } from '@fortawesome/fontawesome-svg-core'
+import { library } from '@fortawesome/fontawesome-svg-core';
 
 /* import font awesome icon component */
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
-import { autoAnimatePlugin } from '@formkit/auto-animate/vue'
+import { autoAnimatePlugin } from '@formkit/auto-animate/vue';
 
 import { io } from 'socket.io-client';
 
-import 'bootstrap'
+import 'bootstrap';
 
 const serverURL = location.hostname == 'localhost' ? 'http://localhost:3100' : 'http://cinema-api.jodu555.de';
 
@@ -50,15 +50,17 @@ socket.on('connect', () => {
 })
 
 
-import { faUpLong } from '@fortawesome/free-solid-svg-icons'
+import { faUpLong, faInfo } from '@fortawesome/free-solid-svg-icons';
+import { faKeyboard } from '@fortawesome/free-regular-svg-icons';
 
-library.add(faUpLong)
+library.add(faUpLong, faInfo); // solid
+library.add(faKeyboard); // regular
 
-app.component('font-awesome-icon', FontAwesomeIcon)
+app.component('font-awesome-icon', FontAwesomeIcon);
 
 app.use(VueSweetalert2);
 app.use(autoAnimatePlugin);
-app.use(networkingPlugin)
+app.use(networkingPlugin);
 app.use(store);
 app.use(router);
 

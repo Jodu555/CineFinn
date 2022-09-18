@@ -15,7 +15,7 @@
 					data-bs-target="#seriesInformationModal"
 					disabled
 				>
-					i
+					<font-awesome-icon icon="fa-solid fa-info" />
 				</button>
 				<button
 					class="btn btn-outline-info"
@@ -23,7 +23,7 @@
 					data-bs-target="#controlsModal"
 					disabled
 				>
-					<kbd>CTRL</kbd>
+					<font-awesome-icon icon="fa-regular fa-keyboard" />
 				</button>
 			</div>
 			<SeriesInformation />
@@ -85,7 +85,7 @@
 					<div class="timeline">
 						<img class="preview-img" />
 						<div class="thumb-indicator"></div>
-						<p class="time-info-timeline-indicator">12:55</p>
+						<p class="time-info-timeline-indicator">55:55</p>
 					</div>
 				</div>
 				<div class="controls">
