@@ -5,6 +5,7 @@
 			<settings-drawer v-if="loggedIn" />
 			<!-- <pre>{{ $router.currentRoute }}</pre> -->
 			<!-- <pre>{{ $route.path == '/watch' }}</pre> -->
+			<!-- <font-awesome-icon icon="fa-solid fa-user-secret" /> -->
 			<router-view class="mt-2" :key="$route.query" />
 		</div>
 		<Footer />

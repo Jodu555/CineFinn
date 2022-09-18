@@ -3,6 +3,12 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
+/* import the fontawesome core */
+import { library } from '@fortawesome/fontawesome-svg-core'
+
+/* import font awesome icon component */
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
 import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
@@ -42,6 +48,13 @@ socket.on('connect_error', async (err) => {
 socket.on('connect', () => {
     console.log('Socket Connect Success');
 })
+
+
+import { faUpLong } from '@fortawesome/free-solid-svg-icons'
+
+library.add(faUpLong)
+
+app.component('font-awesome-icon', FontAwesomeIcon)
 
 app.use(VueSweetalert2);
 app.use(autoAnimatePlugin);

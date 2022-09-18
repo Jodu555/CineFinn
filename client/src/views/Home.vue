@@ -8,8 +8,8 @@
 				id="backToTop"
 				class="btn btn-primary btn-lg back-to-top"
 				role="button"
-				>^</a
-			>
+				><font-awesome-icon icon="fa-solid fa-up-long" size="xl"
+			/></a>
 		</div>
 		<div v-auto-animate class="container accordion accordion-flush" id="accordionFlushExample">
 			<div v-for="categorie of categories" :key="categorie.title" class="accordion-item">
