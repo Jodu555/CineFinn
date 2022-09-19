@@ -20,7 +20,22 @@ process.argv.forEach(args => {
 
 //Info: if there are -- then a value is expected if there is only one it is a bool value
 
-require(`./job_${options.name}.js`).run(options);
+const data = require(`./job_${options.name}.js`)
+
+let valid = true;
+data.help.options.forEach(opt => {
+    if (!options[opt]) {
+        valid = false;
+    }
+});
+
+if (valid) {
+    data.run(options);
+
+} else {
+    console.log('Missing arguments!', data.help.options);
+}
+
 
 
 
