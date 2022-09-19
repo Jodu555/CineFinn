@@ -1,5 +1,6 @@
 const fs = require('fs');
 const { crawlAndIndex, mergeSeriesArrays } = require('./crawler');
+//TODO: move this value into .env
 const outputFileName = 'out.json';
 
 let series = null;

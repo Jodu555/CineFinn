@@ -8,6 +8,13 @@ This is meant to be a super simple alternative to Plex but of course much simple
 npm run job -- --name jobname
 ```
 
+## Defaults for jobs
+
+```bash
+# For the propsToSeries concatenation job
+npm run job -- --name propsToSeries --model model.json --input in.json --output out.json
+```
+
 ## Code I Joinked
 
 ### The Full Video Player (Highly changed and customized by myself + integrated into the Vue Eco System)
@@ -41,6 +48,6 @@ npm run job -- --name jobname
 - [ ] Extract the Video stuff into own component
 - [ ] Anime Preview (10 - 15 sec.)
 - [ ] Implement the command manager and some basic command (session = to list current sockets, info = to show series infos and space infos, reload = to reload the series from their file)
-- [ ] Implement a job-cli system to run a pre specified job with the cli
+- [x] Implement a job-cli system to run a pre specified job with the cli
   - [ ] Change ID Job : A Job for which i can change an ID instant wihout any problems
   - [ ] Obtain Side-Infos : To Obtain the series image and infos as well as start & end date

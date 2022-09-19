@@ -1,9 +1,18 @@
-const commandLineArgs = require('command-line-args');
-const optionDefinitions = [
-    { name: 'name', alias: 'n', type: String },
-    { name: 'from', alias: 'f', type: Number },
-    { name: 'to', alias: 't', type: Number },
-];
-const options = commandLineArgs(optionDefinitions);
+const fs = require('fs');
 
-console.log(options);
+
+module.exports = {
+    //This job i wrote cause aproximately it happens over and over that i tweak the series object definition
+    help: {
+        description: 'This job changes the seriesID from x to y',
+        options: ['from', 'to']
+    },
+    run: (options) => {
+
+        console.log(process.env.PREVIEW_IMGS_PATH);
+
+        //Change in the config
+        //Change the preview images folder
+
+    }
+}

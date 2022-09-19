@@ -1,4 +1,4 @@
-
+require('dotenv').config();
 const options = {};
 let waitFor = null;
 process.argv.forEach(args => {
