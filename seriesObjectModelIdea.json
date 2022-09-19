@@ -27,8 +27,8 @@
 		"description": "A Meaning ful description",
 		"image": "https://host/image.png"
 	},
-	"refurls": {
+	"referenceUrls": {
 		"aniworld": "the link to the anime on aniworld",
-		"anisearch": ["the link to the ", "different seasons on anisearch"]
+		"anisearch": ["the link to the ", "different seasons on anisearch", "if there are"]
 	}
 }
