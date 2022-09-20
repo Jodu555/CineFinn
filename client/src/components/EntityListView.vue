@@ -34,22 +34,30 @@ export default {
 		chnageFN: { type: Function },
 		currentSeason: { type: Number, default: -1 },
 		watchList: { type: Array, default: [] },
+		season: { type: Boolean, default: false },
 	},
 	methods: {
-		checkWatched(ep) {
-			if (this.watchList.length != 0) {
-				return Boolean(
-					this.watchList.find((segment) => {
-						return (
-							segment.ID == this.$route.query.id &&
-							segment.watched &&
-							((segment.season == this.currentSeason && segment.episode == ep + 1) ||
-								segment.movie == ep + 1)
-						);
-					})
+		checkWatched(index) {
+			if (this.season) {
+				const filteredList = this.watchList.filter(
+					(seg) => seg.ID == this.$route.query.id && seg.watched && seg.season == index + 1
 				);
+				return this.array[index].length == filteredList.length;
 			} else {
-				return false;
+				if (this.watchList.length != 0) {
+					return Boolean(
+						this.watchList.find((segment) => {
+							return (
+								segment.ID == this.$route.query.id &&
+								segment.watched &&
+								((segment.season == this.currentSeason && segment.episode == index + 1) ||
+									segment.movie == index + 1)
+							);
+						})
+					);
+				} else {
+					return false;
+				}
 			}
 		},
 	},

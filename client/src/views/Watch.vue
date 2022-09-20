@@ -49,6 +49,8 @@
 				:array="currentSeries.seasons"
 				:current="currentSeason"
 				:chnageFN="changeSeason"
+				:season="true"
+				:watchList="watchList"
 			/>
 			<EntityListView
 				v-if="currentSeason != -1"
@@ -304,9 +306,10 @@ export default {
 			this.handleVideoChange(this.currentSeason, ID);
 		},
 		changeSeason(ID) {
-			this.handleVideoChange(ID, 1);
+			if (this.currentSeason == ID) return this.handleVideoChange();
+			return this.handleVideoChange(ID, 1);
 		},
-		handleVideoChange(season, episode, movie) {
+		handleVideoChange(season = -1, episode = -1, movie = -1) {
 			const video = document.querySelector('video');
 			if (video == null) {
 				this.setCurrentSeason(season);
