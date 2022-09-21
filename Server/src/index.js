@@ -98,6 +98,8 @@ io.on('connection', async (socket) => {
     console.log('Socket Connection:', socket.auth.user.username, socket.id);
     socket.on('timeUpdate', (obj) => {
         obj.time = Math.ceil(obj.time);
+        if (obj.movie == -1 && obj.season == -1 && obj.episode == -1)
+            return;
         console.log('TUpd:', socket.auth.user.username, obj);
         if (obj.force) {
             writeWatchInfoToDatabase(socket, obj);
