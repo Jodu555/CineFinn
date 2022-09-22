@@ -28,6 +28,7 @@
 						type="text"
 						class="form-control"
 						placeholder="Search for a series..."
+						style="width: 18rem"
 						autocomplete="off"
 					/>
 					<div

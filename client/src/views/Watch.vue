@@ -65,18 +65,16 @@
 			<div class="d-flex justify-content-between">
 				<div>
 					<button @click="switchTo(-1)" class="btn btn-outline-warning">
-						<font-awesome-icon icon="fa-solid fa-backward-step" /> Previous
+						<font-awesome-icon icon="fa-solid fa-backward-step" size="lg" /> Previous
 					</button>
-					<!-- <button @click="switchTo(-1)" class="btn btn-outline-warning">&lt; Previous</button> -->
 				</div>
 				<h3 v-auto-animate v-if="currentMovie != -1" class="text-muted text-truncate">
 					{{ currentSeries.movies[currentMovie - 1]?.replace('.mp4', '') }}
 				</h3>
 				<div>
 					<button @click="switchTo(1)" class="btn btn-outline-success">
-						Next <font-awesome-icon icon="fa-solid fa-forward-step" />
+						Next <font-awesome-icon icon="fa-solid fa-forward-step" size="lg" />
 					</button>
-					<!-- <button @click="switchTo(1)" class="btn btn-outline-success">Next &gt;</button> -->
 				</div>
 			</div>
 		</div>
