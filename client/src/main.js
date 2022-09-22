@@ -50,10 +50,10 @@ socket.on('connect', () => {
 })
 
 
-import { faUpLong, faInfo } from '@fortawesome/free-solid-svg-icons';
-import { faKeyboard } from '@fortawesome/free-regular-svg-icons';
+import { faUpLong, faInfo, faForwardStep, faBackwardStep } from '@fortawesome/free-solid-svg-icons';
+import { faKeyboard, } from '@fortawesome/free-regular-svg-icons';
 
-library.add(faUpLong, faInfo); // solid
+library.add(faUpLong, faInfo, faForwardStep, faBackwardStep); // solid
 library.add(faKeyboard); // regular
 
 app.component('font-awesome-icon', FontAwesomeIcon);
