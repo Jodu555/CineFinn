@@ -51,3 +51,8 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [x] Implement a job-cli system to run a pre specified job with the cli
   - [ ] Change ID Job : A Job for which i can change an ID instant wihout any problems
   - [ ] Obtain Side-Infos : To Obtain the series image and infos as well as start & end date
+- [ ] ReThink the current series store
+
+## Stretch
+
+- [ ] implement a cron job which automatically checks all downloaded series for updates and writes them to a list
