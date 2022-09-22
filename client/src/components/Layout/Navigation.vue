@@ -32,7 +32,7 @@
 					/>
 					<div
 						class="btn-group"
-						style="margin-left: 4rem"
+						style="margin-left: 2rem"
 						role="group"
 						aria-label="Basic outlined example"
 					>
@@ -42,9 +42,11 @@
 							data-bs-target="#offcanvasSettings"
 							aria-controls="offcanvasSettings"
 						>
-							Settings
+							<font-awesome-icon icon="fa-solid fa-gears" />
 						</button>
-						<button class="btn btn-outline-danger" @click="logout()">Logout</button>
+						<button class="btn btn-outline-danger" @click="logout()">
+							<font-awesome-icon icon="fa-solid fa-right-from-bracket" />
+						</button>
 					</div>
 				</div>
 			</div>
