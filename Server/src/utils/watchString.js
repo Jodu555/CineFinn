@@ -26,7 +26,34 @@ const generateStr = (segmentList) => {
  * @returns {[Segment]}
  */
 const parse = (str) => {
-    //TODO: Parse the watch string to the infos
+
+    // const re = /(\d+):(?:(\d+)-(\d+)|(\d+))\.(\d+);/gmi;
+
+    // const str = '2491:1-1.570;2491:1-2.5555;2491:1.0;';
+    // var outp;
+    // while ((outp = re.exec(str)) !== null) {
+    //     // console.log(outp);
+    //     let isMovie = false;
+    //     const [
+    //         og,
+    //         ID,
+    //         se,
+    //         ep,
+    //         movie,
+    //         time
+    //     ] = outp;
+
+    //     console.log({
+    //         ID,
+    //         isMovie: movie != undefined,
+    //         se,
+    //         ep,
+    //         movie,
+    //         time
+    //     });
+
+    // }
+
     const list = str.split(';').map(s => {
         if (!(s.length > 0)) return null;
         const collenSplit = s.split(':');

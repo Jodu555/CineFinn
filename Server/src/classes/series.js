@@ -46,7 +46,7 @@ const filenameParser = (filepath, filename) => {
             title,
             season,
             episode,
-        ] = match
+        ] = match;
         return { movie: false, title: title.trim(), season: Number(season), episode: Number(episode) };
     } else {
         const title = path.basename(path.dirname(path.dirname(filepath)));
