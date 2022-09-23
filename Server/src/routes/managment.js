@@ -1,6 +1,7 @@
 const { Database } = require('@jodu555/mysqlapi');
 const database = Database.getDatabase();
 const express = require('express');
+const { cleanupSeriesBeforeFrontResponse } = require('../classes/series');
 const { crawlAndIndex } = require('../utils/crawler');
 const { generateImages, validateImages } = require('../utils/images');
 const { getActiveJobs, setActiveJobs, getSeries, getIO, setSeries } = require('../utils/utils');
@@ -115,7 +116,7 @@ router.get('/job/crawl', (req, res, next) => {
             const sockets = await getIO().fetchSockets();
             await Promise.all(sockets.map(async socket => {
                 socket.emit(callpointToEvent(LOOKUP[id].callpoint))
-                socket.emit('reloadSeries', getSeries());
+                socket.emit('reloadSeries', cleanupSeriesBeforeFrontResponse(getSeries()));
             }));
         }, 3600);
         res.json(getActiveJobs());
