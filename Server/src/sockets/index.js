@@ -25,10 +25,7 @@ const initialize = () => {
     io.on('connection', async (socket) => {
         const auth = socket.auth;
 
-
-        console.log('Socket Connection:', auth.type.toUpperCase(), auth.user.username, socket.id);
-
-        if (type == 'client')
+        if (auth.type == 'client')
             socketInitClient(socket);
 
     });

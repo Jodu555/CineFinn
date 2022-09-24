@@ -3,6 +3,8 @@ const { debounce } = require('../utils/utils');
 const { writeWatchInfoToDatabase } = require('../utils/watchManager');
 
 const initialize = (socket) => {
+    const auth = socket.auth;
+    console.log('Socket Connection:', auth.type.toUpperCase(), auth.user.username, socket.id);
 
     socket.on('timeUpdate', (obj) => {
         obj.time = Math.ceil(obj.time);
@@ -19,7 +21,7 @@ const initialize = (socket) => {
     });
 
     socket.on('disconnect', () => {
-        console.log('Socket DisConnection:', auth.user.username, socket.id);
+        console.log('Socket DisConnection:', auth.type.toUpperCase(), auth.user.username, socket.id);
     })
 }
 
