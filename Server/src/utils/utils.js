@@ -7,6 +7,7 @@ let series = null;
 let activeJobs = [
 ];
 let io = null;
+let authHelper = null;
 
 
 function debounce(cb, delay = 1000) {
@@ -50,6 +51,9 @@ const setSeries = async (_series) => {
 const getActiveJobs = () => activeJobs;
 const setActiveJobs = (_activeJobs) => activeJobs = _activeJobs;
 
+const getAuthHelper = () => authHelper;
+const setAuthHelper = (_authHelper) => authHelper = _authHelper;
+
 const getIO = () => io;
 const setIO = (_io) => io = _io;
 
@@ -59,6 +63,8 @@ module.exports = {
     setSeries,
     getActiveJobs,
     setActiveJobs,
+    getAuthHelper,
+    setAuthHelper,
     getIO,
     setIO,
     debounce

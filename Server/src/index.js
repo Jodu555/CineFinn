@@ -19,7 +19,9 @@ registerCommands();
 const { ErrorHelper, AuthenticationHelper } = require('@jodu555/express-helpers');
 require('./utils/database')();
 
-const { getSeries, setIO, getIO, debounce } = require('./utils/utils.js');
+const { initialize: socket_initialize } = require('./sockets');
+
+const { getSeries, setIO, getIO, debounce, setAuthHelper } = require('./utils/utils.js');
 const { generateImages, validateImages } = require('./utils/images.js');
 const { crawlAndIndex, mergeSeriesArrays } = require('./utils/crawler.js');
 const { cleanupSeriesBeforeFrontResponse } = require('./classes/series');
@@ -48,6 +50,8 @@ authHelper.options.register = false;
 authHelper.install();
 authHelper.addToken('SECR-DEV', { 'UUID': 'ad733837-b2cf-47a2-b968-abaa70edbffe', 'username': 'Jodu', 'email': 'Jodu505@gmail.com' });
 
+setAuthHelper(authHelper);
+
 app.use((req, res, next) => {
     if (req.path.includes('/assets/previewImgs')) {
         res.set('Cache-control', `public, max-age=${60 * 5}`)
@@ -75,46 +79,7 @@ setIO(
     })
 )
 
-const io = getIO();
-
-io.use((socket, next) => {
-    const authToken = socket.handshake.auth.token;
-    if (authToken && authHelper.getUser(authToken)) {
-        if (authToken) {
-            console.log(`Socket with`);
-            console.log(`   ID: ${socket.id}`);
-            console.log(`   - proposed with: ${authToken} - ${authHelper.getUser(authToken).username}`);
-            socket.auth = { token: authToken, user: authHelper.getUser(authToken) };
-            return next();
-        } else {
-            return next(new Error('Authentication error'));
-        }
-    } else {
-        next(new Error('Authentication error'));
-    }
-})
-
-io.on('connection', async (socket) => {
-    console.log('Socket Connection:', socket.auth.user.username, socket.id);
-    socket.on('timeUpdate', (obj) => {
-        obj.time = Math.ceil(obj.time);
-        if (obj.movie == -1 && obj.season == -1 && obj.episode == -1)
-            return;
-        console.log('TUpd:', socket.auth.user.username, obj);
-        if (obj.force) {
-            writeWatchInfoToDatabase(socket, obj);
-        } else {
-            if (!socket.auth.debounce) socket.auth.debounce = debounce(writeWatchInfoToDatabase, 4000);
-
-            socket.auth.debounce(socket, obj);
-        }
-    });
-
-    socket.on('disconnect', () => {
-        console.log('Socket DisConnection:', socket.auth.user.username, socket.id);
-    })
-
-});
+socket_initialize();
 
 
 // Your Middleware handlers here
