@@ -1,5 +1,5 @@
 const { updateSegment } = require("./watchString");
-const { getIO } = require("./utils");
+const { toAllSockets } = require("./utils");
 
 async function writeWatchInfoToDatabase(socket, obj) {
     console.log('Write Through:', socket.auth.user.username, obj);
@@ -38,14 +38,10 @@ async function writeWatchInfoToDatabase(socket, obj) {
     if (update) {
 
         console.log('  => Updated');
-
-        const sockets = await getIO().fetchSockets();
-        sockets.forEach(bcsocket => {
-            //This Ensures even if the user is logged in on multiple pages everything reflects
-            if (bcsocket.auth.user.UUID == socket.auth.user.UUID) {
-                bcsocket.emit('watchListChange', updatedSegmentList);
-            }
-        })
+        toAllSockets(
+            (s) => { s.emit('watchListChange', updatedSegmentList) },
+            (s) => (s.auth.type == 'client' && s.auth.user.UUID == socket.auth.user.UUID)
+        );
     }
 }
 

@@ -1,5 +1,5 @@
-const { getIO, getAuthHelper, debounce } = require("../utils/utils");
-const { writeWatchInfoToDatabase } = require('../utils/watchManager');
+const { getIO, getAuthHelper } = require("../utils/utils");
+const { initialize: socketInitClient } = require('./client.socket.js');
 
 const initialize = () => {
     const io = getIO();
@@ -25,24 +25,11 @@ const initialize = () => {
     io.on('connection', async (socket) => {
         const auth = socket.auth;
 
+
         console.log('Socket Connection:', auth.type.toUpperCase(), auth.user.username, socket.id);
-        socket.on('timeUpdate', (obj) => {
-            obj.time = Math.ceil(obj.time);
-            if (obj.movie == -1 && obj.season == -1 && obj.episode == -1)
-                return;
-            console.log('TUpd:', auth.user.username, obj);
-            if (obj.force) {
-                writeWatchInfoToDatabase(socket, obj);
-            } else {
-                if (!auth.debounce) auth.debounce = debounce(writeWatchInfoToDatabase, 4000);
 
-                auth.debounce(socket, obj);
-            }
-        });
-
-        socket.on('disconnect', () => {
-            console.log('Socket DisConnection:', auth.user.username, socket.id);
-        })
+        if (type == 'client')
+            socketInitClient(socket);
 
     });
 

@@ -57,6 +57,11 @@ const setAuthHelper = (_authHelper) => authHelper = _authHelper;
 const getIO = () => io;
 const setIO = (_io) => io = _io;
 
+const toAllSockets = async (cb, filter = () => { }) => {
+    const sockets = await getIO().fetchSockets();
+    sockets.filter(filter).forEach(cb);
+}
+
 
 module.exports = {
     getSeries,
@@ -67,5 +72,6 @@ module.exports = {
     setAuthHelper,
     getIO,
     setIO,
-    debounce
+    debounce,
+    toAllSockets
 }

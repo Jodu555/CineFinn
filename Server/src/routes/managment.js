@@ -4,7 +4,7 @@ const express = require('express');
 const { cleanupSeriesBeforeFrontResponse } = require('../classes/series');
 const { crawlAndIndex } = require('../utils/crawler');
 const { generateImages, validateImages } = require('../utils/images');
-const { getActiveJobs, setActiveJobs, getSeries, getIO, setSeries } = require('../utils/utils');
+const { getActiveJobs, setActiveJobs, getSeries, setSeries, toAllSockets } = require('../utils/utils');
 const router = express.Router();
 
 const LOOKUP = {
@@ -64,10 +64,7 @@ router.get('/job/img/generate', (req, res, next) => {
         });
         generateImages(getSeries(), async () => {
             setActiveJobs(getActiveJobs().filter(x => x.id !== id));
-            const sockets = await getIO().fetchSockets();
-            await Promise.all(sockets.map(async socket => {
-                socket.emit(callpointToEvent(LOOKUP[id].callpoint))
-            }));
+            toAllSockets(s => { s.emit(callpointToEvent(LOOKUP[id].callpoint)) }, s => s.auth.type == 'client');
         });
         res.json(getActiveJobs());
     }
@@ -88,10 +85,7 @@ router.get('/job/img/validate', (req, res, next) => {
         });
         validateImages(getSeries(), async () => {
             setActiveJobs(getActiveJobs().filter(x => x.id !== id));
-            const sockets = await getIO().fetchSockets();
-            await Promise.all(sockets.map(async socket => {
-                socket.emit(callpointToEvent(LOOKUP[id].callpoint))
-            }));
+            toAllSockets(s => { s.emit(callpointToEvent(LOOKUP[id].callpoint)) }, s => s.auth.type == 'client');
         });
         res.json(getActiveJobs());
     }
@@ -113,11 +107,10 @@ router.get('/job/crawl', (req, res, next) => {
         setSeries(crawlAndIndex());
         setTimeout(async () => {
             setActiveJobs(getActiveJobs().filter(x => x.id !== id));
-            const sockets = await getIO().fetchSockets();
-            await Promise.all(sockets.map(async socket => {
-                socket.emit(callpointToEvent(LOOKUP[id].callpoint))
-                socket.emit('reloadSeries', cleanupSeriesBeforeFrontResponse(getSeries()));
-            }));
+            toAllSockets(s => {
+                s.emit(callpointToEvent(LOOKUP[id].callpoint))
+                s.emit('reloadSeries', cleanupSeriesBeforeFrontResponse(getSeries()));
+            }, s => s.auth.type == 'client');
         }, 3600);
         res.json(getActiveJobs());
     }

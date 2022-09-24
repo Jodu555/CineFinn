@@ -21,11 +21,10 @@ require('./utils/database')();
 
 const { initialize: socket_initialize } = require('./sockets');
 
-const { getSeries, setIO, getIO, debounce, setAuthHelper } = require('./utils/utils.js');
+const { getSeries, setIO, getIO, setAuthHelper } = require('./utils/utils.js');
 const { generateImages, validateImages } = require('./utils/images.js');
 const { crawlAndIndex, mergeSeriesArrays } = require('./utils/crawler.js');
 const { cleanupSeriesBeforeFrontResponse } = require('./classes/series');
-const { writeWatchInfoToDatabase } = require('./utils/watchManager');
 
 
 const app = express();
