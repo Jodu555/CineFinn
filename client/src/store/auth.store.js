@@ -71,7 +71,7 @@ export default {
                         await commit('setAuthToken', authtoken);
                         setCookie('auth-token', authtoken, 30);
 
-                        this.$socket.auth = { token: authtoken };
+                        this.$socket.auth = { token: authtoken, type: 'client' };
                         await this.$socket.connect();
 
                         redirectToSlash && await router.push('/');
