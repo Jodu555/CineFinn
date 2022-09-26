@@ -56,3 +56,4 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 ## Stretch
 
 - [ ] implement a cron job which automatically checks all downloaded series for updates and writes them to a list
+- [ ] Add the downloader and scraping service into ext. services
