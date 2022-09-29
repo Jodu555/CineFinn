@@ -26,6 +26,8 @@
 				"path": "/media/ms1/Videos/Aniworld/Series-Name St#1 Flg#1.mp4",
 				"primaryName": "German Title",
 				"secondaryName": "English title",
+				"season": 1,
+				"episode": 1,
 				"langs": ["GerDub", "GerSub"]
 			},
 			"Series-Name St#1 Flg#1.mp4",
