@@ -1,5 +1,5 @@
 const path = require('path');
-const { Series, filenameParser } = require('../classes/series');
+const { Series, filenameParser, Episode } = require('../classes/series');
 const { listFiles } = require('./fileutils');
 
 const generateID = () => Math.floor(Math.random() * 10000);
@@ -26,6 +26,8 @@ const crawlAndIndex = () => {
 
     // Strip the dirs down and seperate between season or movie dirs or series dirs
     const series = [];
+
+
     Object.keys(obj).forEach(categorie => {
         const dirs = obj[categorie]
         for (let i = 0; i < dirs.length;) {
@@ -41,8 +43,6 @@ const crawlAndIndex = () => {
         }
     });
 
-
-    // Fill the series array with its corresponding seasons and episodes
     files.forEach(e => {
         const base = path.parse(e).base;
         const parsedData = filenameParser(e, base);
@@ -51,22 +51,50 @@ const crawlAndIndex = () => {
         if (parsedData.movie == true) {
             item.movies.push(e)
         } else {
+            const episode = new Episode(e, parsedData.title, '', parsedData.season, parsedData.episode, ['GerDub']);
             if (Array.isArray(item.seasons[parsedData.season - 1])) {
-                item.seasons[parsedData.season - 1].push(e);
+                item.seasons[parsedData.season - 1].push(episode);
             } else {
-                item.seasons[parsedData.season - 1] = [e]
+                item.seasons[parsedData.season - 1] = [episode];
             }
         }
     });
 
-
-    // Sorts the episodes in the right order
     const sorterFunction = (a, b) => {
-        const ap = filenameParser(a, path.parse(a).base);
-        const bp = filenameParser(b, path.parse(b).base);
-        return ap.episode - bp.episode;
+        // const ap = filenameParser(a, path.parse(a).base);
+        // const bp = filenameParser(b, path.parse(b).base);
+        return a.episode - b.episode;
     }
+
     series.forEach(e => e.seasons.forEach(x => x.sort(sorterFunction)));
+
+    return series;
+
+    // Fill the series array with its corresponding seasons and episodes
+    // files.forEach(e => {
+    //     const base = path.parse(e).base;
+    //     const parsedData = filenameParser(e, base);
+
+    //     const item = series.find(x => x.title.includes(parsedData.title));
+    //     if (parsedData.movie == true) {
+    //         item.movies.push(e)
+    //     } else {
+    //         if (Array.isArray(item.seasons[parsedData.season - 1])) {
+    //             item.seasons[parsedData.season - 1].push(e);
+    //         } else {
+    //             item.seasons[parsedData.season - 1] = [e]
+    //         }
+    //     }
+    // });
+
+
+    // // Sorts the episodes in the right order
+    // const sorterFunction = (a, b) => {
+    //     const ap = filenameParser(a, path.parse(a).base);
+    //     const bp = filenameParser(b, path.parse(b).base);
+    //     return ap.episode - bp.episode;
+    // }
+    // series.forEach(e => e.seasons.forEach(x => x.sort(sorterFunction)));
 
 
 
@@ -74,6 +102,7 @@ const crawlAndIndex = () => {
 }
 
 const mergeSeriesArrays = (before, after) => {
+    return before;
     const output = [];
 
     //Compare and overwrite ids

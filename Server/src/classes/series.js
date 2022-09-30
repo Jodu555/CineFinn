@@ -10,11 +10,22 @@ class Series {
     }
 }
 
+class Episode {
+    constructor(filePath, primaryName, secondaryName, season, episode, langs) {
+        this.filePath = filePath;
+        this.primaryName = primaryName;
+        this.secondaryName = secondaryName;
+        this.season = season;
+        this.episode = episode;
+        this.langs = langs;
+    }
+}
+
 const cleanupSeriesBeforeFrontResponse = (series) => {
     //To Ensure that every deep object linking is removed
     series = JSON.parse(JSON.stringify(series));
     return series.map(serie => {
-        const newSeasons = serie.seasons.map(season => season.map(p => path.parse(p).base));
+        const newSeasons = serie.seasons.map(season => season.map(p => { return { filePath: path.parse(p.filePath).base, ...p } }));
         const newMovies = serie.movies.map(p => path.parse(p).base);
         return {
             ...serie,
@@ -57,6 +68,7 @@ const filenameParser = (filepath, filename) => {
 
 module.exports = {
     Series,
+    Episode,
     filenameParser,
     cleanupSeriesBeforeFrontResponse
 }

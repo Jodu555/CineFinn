@@ -9,16 +9,21 @@
 					:class="{
 						btn: true,
 						'text-white': true,
-						'btn-secondary': current !== i + 1 && !checkWatched(i), //Unselected && Not Watched
-						'btn-info': current == i + 1, // Selected
-						'btn-success': checkWatched(i) && current !== i + 1, // Watched && Not Selected
-						'crazy-green': checkWatched(i) && current !== i + 1, // Watched && Not Selected
+						'btn-secondary': current !== getIdx(s) && !checkWatched(getIdx(s) - 1), //Unselected && Not Watched
+						'btn-info': current == getIdx(s), // Selected
+						'btn-success': checkWatched(getIdx(s) - 1) && current !== getIdx(s), // Watched && Not Selected
+						'crazy-green': checkWatched(getIdx(s) - 1) && current !== getIdx(s), // Watched && Not Selected
+						// 'btn-secondary': current !== i + 1 && !checkWatched(i), //Unselected && Not Watched
+						// 'btn-info': current == i + 1, // Selected
+						// 'btn-success': checkWatched(i) && current !== i + 1, // Watched && Not Selected
+						// 'crazy-green': checkWatched(i) && current !== i + 1, // Watched && Not Selected
 					}"
 					v-for="(s, i) in array"
 					:key="s"
 					@click="chnageFN(i + 1)"
 				>
-					{{ i + 1 }}
+					{{ getIdx(s) }}
+					<!-- {{ i + 1 }} -->
 				</button>
 			</h3>
 		</div>
@@ -37,6 +42,9 @@ export default {
 		season: { type: Boolean, default: false },
 	},
 	methods: {
+		getIdx(s) {
+			return this.season == true ? s[0].season : s.episode;
+		},
 		checkWatched(index) {
 			if (this.season) {
 				const filteredList = this.watchList.filter(
