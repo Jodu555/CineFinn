@@ -1,7 +1,7 @@
 const fs = require('fs');
 const { crawlAndIndex, mergeSeriesArrays } = require('./crawler');
 //TODO: move this value into .env
-const outputFileName = 'out.json';
+const outputFileName = process.env.LOCAL_DB_FILE;
 
 let series = null;
 let activeJobs = [
