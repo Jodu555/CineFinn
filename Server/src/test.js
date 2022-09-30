@@ -17,6 +17,7 @@ const filenameParser = (filepath, filename) => {
 
     const parsers = [
         {
+            //v1 Episode Parser
             re: /^(.*)St#(\d+) Flg#(\d+).mp4/ig,
             parse: (match) => {
                 console.log('456');
@@ -30,6 +31,7 @@ const filenameParser = (filepath, filename) => {
             }
         },
         {
+            //v2 Episode Parser
             re: /^(.*)St#(\d+) Flg#(\d+)_(GerSub|GerDub).mp4/ig,
             parse: (match) => {
                 const [
@@ -41,14 +43,40 @@ const filenameParser = (filepath, filename) => {
                 ] = match;
                 return { movie: false, title: title.trim(), season: Number(season), episode: Number(episode), language };
             }
-        }
+        },
+        {
+            //v2 Movie Parser
+            re: /^(.*)_(GerSub|GerDub)\.mp4/ig,
+            parse: (match) => {
+                console.log(`match`, match);
+                const [
+                    original,
+                    movieTitle,
+                    language,
+                ] = match;
+                const title = path.basename(path.dirname(path.dirname(filepath)));
+                return { movie: true, title, movieTitle, language };
+            }
+        },
+        {
+            //v1 Movie Parser
+            re: /^(.*)\.mp4/ig,
+            parse: (match) => {
+                const [
+                    original,
+                    movieTitle,
+                ] = match;
+                const title = path.basename(path.dirname(path.dirname(filepath)));
+                return { movie: true, title, movieTitle };
+            }
+        },
     ]
 
     let found = false;
     let output = {};
     for (const parser of parsers) {
         const match = parser.re.exec(filename);
-        console.log(parser.re, match);
+        // console.log(parser.re, match);
         if (match != null) {
             found = true;
             output = parser.parse(match);
@@ -64,7 +92,9 @@ const filenameParser = (filepath, filename) => {
 }
 
 // console.log(filenameParser('', 'Food Wars! Shokugeki no Sōma St#1 Flg#1.mp4'));
-console.log(filenameParser('', 'Food Wars! Shokugeki no Sōma St#1 Flg#1_GerDub.mp4'));
+// console.log(filenameParser('', 'Food Wars! Shokugeki no Sōma St#1 Flg#1_GerDub.mp4'));
+// console.log(filenameParser('', 'Games und Rivalen.mp4'));
+// console.log(filenameParser('', 'Games und Rivalen_GerDub.mp4'));
 
 // const series = JSON.parse(fs.readFileSync(process.env.LOCAL_DB_FILE, 'utf8'));
 
