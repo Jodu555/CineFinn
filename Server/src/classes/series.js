@@ -25,7 +25,7 @@ const cleanupSeriesBeforeFrontResponse = (series) => {
     //To Ensure that every deep object linking is removed
     series = JSON.parse(JSON.stringify(series));
     return series.map(serie => {
-        const newSeasons = serie.seasons.map(season => season.map(p => { return { filePath: path.parse(p.filePath).base, ...p } }));
+        const newSeasons = serie.seasons.map(season => season.map(p => { return { ...p, filePath: path.parse(p.filePath).base } }));
         const newMovies = serie.movies.map(p => path.parse(p).base);
         return {
             ...serie,
