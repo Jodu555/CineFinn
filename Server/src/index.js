@@ -46,6 +46,7 @@ app.use(express.json());
 
 const authHelper = new AuthenticationHelper(app, '/auth', database);
 authHelper.options.register = false;
+authHelper.options.allowMultipleSessions = true;
 authHelper.install();
 authHelper.addToken('SECR-DEV', { 'UUID': 'ad733837-b2cf-47a2-b968-abaa70edbffe', 'username': 'Jodu', 'email': 'Jodu505@gmail.com' });
 
