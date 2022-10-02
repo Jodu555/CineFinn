@@ -624,7 +624,7 @@ export default {
 			localStorage.removeItem('data');
 			this.handleVideoChange(-1, -1, -1);
 		}
-		//Change here the title according to the series info
+		document.title = `Cinema | ${this.currentSeries.title}`;
 		await this.loadWatchList(seriesID);
 	},
 	async mounted() {

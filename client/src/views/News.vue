@@ -50,6 +50,7 @@ export default {
 			this.news = response.json;
 		}
 		this.changeSort();
+		document.title = `Cinema | News`;
 	},
 };
 </script>
