@@ -6,7 +6,7 @@ const { getSeries } = require('../utils/utils');
 module.exports = (req, res) => {
     const { series: seriesID, season, episode, movie } = req.query;
 
-    const debug = true;
+    const debug = false;
 
     // Ensure there is a range given for the video
     const range = req.headers.range;
