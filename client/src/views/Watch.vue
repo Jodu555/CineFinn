@@ -35,6 +35,13 @@
 					Jump to Latest watch position!
 				</button>
 			</div>
+			<pre>
+				{{ entityObject }}
+				{{ currentMovie }}
+				{{ currentSeason }}
+				{{ currentEpisode }}
+			</pre
+			>
 
 			<EntityListView
 				v-if="currentSeries.movies.length >= 1"
@@ -247,6 +254,23 @@ export default {
 				(this.currentSeries.seasons.length > 1 ? 'Seasons' : 'Season');
 
 			return str;
+		},
+		entityObject() {
+			// console.log(
+			// 	'currentSeries',
+			// 	this.currentSeries,
+			// 	'currentMovie',
+			// 	this.currentMovie,
+			// 	'movies',
+			// 	this.currentSeries.movies,
+			// 	'seasons',
+			// 	this.currentSeries.seasons
+			// );
+			if (this.currentMovie != -1) {
+				return this.currentSeries?.movies?.[this.currentMovie - 1];
+			} else {
+				return this.currentSeries.seasons?.[this.currentSeason - 1]?.[this.currentEpisode - 1];
+			}
 		},
 	},
 	methods: {
