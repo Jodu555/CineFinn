@@ -1,11 +1,12 @@
 const fs = require('fs');
 const path = require('path');
+const { getSeries } = require('../utils/utils');
 
 
 module.exports = (req, res) => {
     const { series: seriesID, season, episode, movie } = req.query;
 
-    const debug = false;
+    const debug = true;
 
     // Ensure there is a range given for the video
     const range = req.headers.range;
@@ -21,9 +22,7 @@ module.exports = (req, res) => {
     }
 
     debug && console.log('Got Video');
-
-    const series = JSON.parse(fs.readFileSync('out.json', 'utf-8'));
-    const serie = series.find(x => x.ID == seriesID);
+    const serie = getSeries().find(x => x.ID == seriesID);
 
     debug && console.log('Tried to find serie');
 
@@ -35,16 +34,16 @@ module.exports = (req, res) => {
 
     debug && console.log('Got Serie', serie.ID);
 
-    const videoPath = movie ? serie.movies[movie] : serie.seasons[season][episode];
-    if (videoPath == null || videoPath == undefined) {
+    const videoEntity = movie ? serie.movies[movie] : serie.seasons[season][episode];
+    if (videoEntity == null || videoEntity == undefined) {
         res.status(400).send('Season or Episode does not exists');
         return;
     }
 
 
-    debug && console.log('Got Video Path', videoPath);
+    debug && console.log('Got Video Entitiy', videoEntity);
 
-    const videoSize = fs.statSync(videoPath).size;
+    const videoSize = fs.statSync(videoEntity.filePath).size;
 
     // const CHUNK_SIZE = 10 ** 6; // 1MB
     const CHUNK_SIZE = process.env.VIDEO_CHUNK_SIZE;
@@ -62,8 +61,10 @@ module.exports = (req, res) => {
         'Content-Type': 'video/mp4',
     };
 
+    debug && console.log('Generated headers', headers);
 
     res.writeHead(206, headers);
-    const videoStream = fs.createReadStream(videoPath, { start, end });
+    const videoStream = fs.createReadStream(videoEntity.filePath, { start, end });
+    debug && console.log('Created read stream', headers);
     videoStream.pipe(res);
 };

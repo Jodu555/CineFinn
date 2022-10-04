@@ -43,21 +43,19 @@ const filenameParser = (filepath, filename) => {
             //v1 Episode Parser
             re: /^(.*)St#(\d+) Flg#(\d+).mp4/ig,
             parse: (match) => {
-                console.log('v1 Episode Parser');
                 const [
                     original,
                     title,
                     season,
                     episode,
                 ] = match;
-                return { movie: false, title: title.trim(), season: Number(season), episode: Number(episode) };
+                return { movie: false, title: title.trim(), season: Number(season), episode: Number(episode), language: ['GerDub'] };
             }
         },
         {
             //v2 Episode Parser
             re: /^(.*)St#(\d+) Flg#(\d+)_(GerSub|GerDub).mp4/ig,
             parse: (match) => {
-                console.log('v2 Episode Parser');
                 const [
                     original,
                     title,

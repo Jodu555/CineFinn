@@ -37,9 +37,6 @@
 			</div>
 			<pre>
 				{{ entityObject }}
-				{{ currentMovie }}
-				{{ currentSeason }}
-				{{ currentEpisode }}
 			</pre
 			>
 

@@ -51,7 +51,9 @@ const crawlAndIndex = () => {
         if (parsedData.movie == true) {
             item.movies.push(e)
         } else {
-            const episode = new Episode(e, parsedData.title, '', parsedData.season, parsedData.episode, ['GerDub']);
+            //TODO: Manage here multiple files with different languages
+            const episode = new Episode(e, parsedData.title, '', parsedData.season, parsedData.episode, [parsedData.language]);
+            // const episode = new Episode(e, parsedData.title, '', parsedData.season, parsedData.episode, ['GerDub']);
             if (Array.isArray(item.seasons[parsedData.season - 1])) {
                 item.seasons[parsedData.season - 1].push(episode);
             } else {
