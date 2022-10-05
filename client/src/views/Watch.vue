@@ -254,7 +254,7 @@ export default {
 		},
 		entityObject() {
 			if (this.currentMovie != -1) {
-				return this.currentSeries?.movies?.[this.currentMovie - 1];
+				return this.currentSeries?.movies?.[this.currentMovie];
 			} else {
 				return this.currentSeries.seasons?.[this.currentSeason - 1]?.[this.currentEpisode - 1];
 			}
