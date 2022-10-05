@@ -34,7 +34,9 @@ module.exports = (req, res) => {
 
     debug && console.log('Got Serie', serie.ID);
 
-    const videoEntity = movie ? serie.movies[movie] : serie.seasons[season][episode];
+    const isMovie = Boolean(movie);
+
+    let videoEntity = isMovie ? serie.movies[movie] : serie.seasons[season][episode];
     if (videoEntity == null || videoEntity == undefined) {
         res.status(400).send('Season or Episode does not exists');
         return;
@@ -42,6 +44,8 @@ module.exports = (req, res) => {
 
 
     debug && console.log('Got Video Entitiy', videoEntity);
+
+    if (isMovie) videoEntity = { filePath: videoEntity };
 
     const videoSize = fs.statSync(videoEntity.filePath).size;
 
