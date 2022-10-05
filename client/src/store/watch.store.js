@@ -40,7 +40,7 @@ export default {
                 if (state.currentMovie == -1) return '';
                 out += `&movie=${state.currentMovie + 1}`;
             } else {
-                out += `&season=${state.currentSeason + 1}&episode=${state.currentEpisode + 1}`;
+                out += `&season=${state.currentSeason}&episode=${state.currentEpisode}`;
             }
             return out;
         }

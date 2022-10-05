@@ -635,11 +635,11 @@ export default {
 		console.log(3);
 	},
 	async mounted() {
-		// this.cleanupFN = this.initialize();
+		this.cleanupFN = this.initialize();
 		console.log(4);
 		this.$socket.on('watchListChange', (watchList) => {
 			console.log('GOT watchListChange');
-			this.setWatchList(watchList);
+			this.setWatchList(watchList.filter((e) => e.ID == this.$route.query.id));
 		});
 	},
 	unmounted() {
@@ -649,7 +649,7 @@ export default {
 		const video = document.querySelector('video');
 		this.sendVideoTimeUpdate(video.currentTime, true);
 		localStorage.removeItem('data');
-		// this.cleanupFN();
+		this.cleanupFN();
 	},
 	errorCaptured(err, vm, info) {
 		console.log('ERROR:', err, vm, info);
