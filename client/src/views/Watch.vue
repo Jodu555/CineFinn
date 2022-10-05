@@ -230,7 +230,7 @@ export default {
 			// console.log(1337, this.currentSeason, this.currentEpisode, this.currentMovie);
 			if (this.currentSeason == -1) {
 				if (this.currentMovie == -1) return '';
-				out += `&movie=${this.currentMovie - 1}`;
+				out += `&movie=${this.currentMovie}`;
 			} else {
 				out += `&season=${this.currentSeason - 1}&episode=${this.currentEpisode - 1}`;
 			}
