@@ -21,9 +21,9 @@
 					}"
 					v-for="(s, i) in array"
 					:key="s"
-					@click="chnageFN(getNumber(s))"
+					@click="chnageFN(getNumber(s, i))"
 				>
-					{{ getNumber(s) }}
+					{{ getNumber(s, i + 1) }}
 					<!-- {{ i + 1 }} -->
 				</button>
 			</h3>
@@ -42,9 +42,18 @@ export default {
 		watchList: { type: Array, default: [] },
 		season: { type: Boolean, default: false },
 	},
+	computed: {
+		isMovie() {
+			return this.currentSeason == -1 && this.season == false;
+		},
+	},
 	methods: {
-		getNumber(s) {
-			return this.season == true ? s[0].season : s.episode;
+		getNumber(s, i) {
+			if (this.isMovie) {
+				return i;
+			} else {
+				return this.season == true ? s[0].season : s.episode;
+			}
 		},
 		checkWatched(index) {
 			if (this.season) {

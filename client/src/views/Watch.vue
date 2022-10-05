@@ -253,16 +253,6 @@ export default {
 			return str;
 		},
 		entityObject() {
-			// console.log(
-			// 	'currentSeries',
-			// 	this.currentSeries,
-			// 	'currentMovie',
-			// 	this.currentMovie,
-			// 	'movies',
-			// 	this.currentSeries.movies,
-			// 	'seasons',
-			// 	this.currentSeries.seasons
-			// );
 			if (this.currentMovie != -1) {
 				return this.currentSeries?.movies?.[this.currentMovie - 1];
 			} else {
