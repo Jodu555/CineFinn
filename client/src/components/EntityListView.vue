@@ -10,10 +10,10 @@
 					:class="{
 						btn: true,
 						'text-white': true,
-						'btn-secondary': current !== getNumber(s, i) && !checkWatched(getNumber(s, i) - 1), //Unselected && Not Watched
-						'btn-info': current == getNumber(s, i), // Selected
-						'btn-success': checkWatched(getNumber(s, i) - 1) && current !== getNumber(s, i), // Watched && Not Selected
-						'crazy-green': checkWatched(getNumber(s, i) - 1) && current !== getNumber(s, i), // Watched && Not Selected
+						'btn-secondary': current !== getNumber(s) && !checkWatched(getNumber(s) - 1), //Unselected && Not Watched
+						'btn-info': current == getNumber(s), // Selected
+						'btn-success': checkWatched(getNumber(s) - 1) && current !== getNumber(s), // Watched && Not Selected
+						'crazy-green': checkWatched(getNumber(s) - 1) && current !== getNumber(s), // Watched && Not Selected
 						// 'btn-secondary': current !== i + 1 && !checkWatched(i), //Unselected && Not Watched
 						// 'btn-info': current == i + 1, // Selected
 						// 'btn-success': checkWatched(i) && current !== i + 1, // Watched && Not Selected
@@ -21,9 +21,9 @@
 					}"
 					v-for="(s, i) in array"
 					:key="s"
-					@click="chnageFN(getNumber(s, i))"
+					@click="chnageFN(getNumber(s))"
 				>
-					{{ getNumber(s, i + 1) }}
+					{{ getNumber(s) }}
 					<!-- {{ i + 1 }} -->
 				</button>
 			</h3>
@@ -42,18 +42,9 @@ export default {
 		watchList: { type: Array, default: [] },
 		season: { type: Boolean, default: false },
 	},
-	computed: {
-		isMovie() {
-			return this.currentSeason == -1 && this.season == false;
-		},
-	},
 	methods: {
-		getNumber(s, i) {
-			if (this.isMovie) {
-				return i;
-			} else {
-				return this.season == true ? s[0].season : s.episode;
-			}
+		getNumber(s) {
+			return this.season == true ? s[0].season : s.episode;
 		},
 		checkWatched(index) {
 			if (this.season) {

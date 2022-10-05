@@ -73,7 +73,7 @@
 					</button>
 				</div>
 				<h3 v-auto-animate v-if="currentMovie != -1" class="text-muted text-truncate">
-					{{ currentSeries.movies[currentMovie]?.replace('.mp4', '') }}
+					{{ currentSeries.movies[currentMovie - 1]?.replace('.mp4', '') }}
 				</h3>
 				<div>
 					<button @click="switchTo(1)" class="btn btn-outline-success">
@@ -253,8 +253,18 @@ export default {
 			return str;
 		},
 		entityObject() {
+			// console.log(
+			// 	'currentSeries',
+			// 	this.currentSeries,
+			// 	'currentMovie',
+			// 	this.currentMovie,
+			// 	'movies',
+			// 	this.currentSeries.movies,
+			// 	'seasons',
+			// 	this.currentSeries.seasons
+			// );
 			if (this.currentMovie != -1) {
-				return this.currentSeries?.movies?.[this.currentMovie];
+				return this.currentSeries?.movies?.[this.currentMovie - 1];
 			} else {
 				return this.currentSeries.seasons?.[this.currentSeason - 1]?.[this.currentEpisode - 1];
 			}
