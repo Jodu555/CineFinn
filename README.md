@@ -52,6 +52,8 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
   - [ ] Change ID Job : A Job for which i can change an ID instant wihout any problems
   - [ ] Obtain Side-Infos : To Obtain the series image and infos as well as start & end date
 - [ ] ReThink the current series store
+- [ ] Rework the whole watch page and use code splitting smart indexing and much more
+  - [ ] Basically rewirte the whole watch page
 
 ## Stretch
 
