@@ -30,13 +30,17 @@
 			<h1 class="text-truncate" data-bs-toggle="tooltip" :data-bs-title="displayTitle">
 				{{ displayTitle }}
 			</h1>
-			<div v-auto-animate v-if="showLatestWatchButton" class="text-center">
+			<!-- <div v-auto-animate v-if="showLatestWatchButton" class="text-center">
 				<button @click="skipToLatestTime" class="btn btn-outline-info">
 					Jump to Latest watch position!
 				</button>
-			</div>
+			</div> -->
 			<pre>
-				{{ entityObject }}
+				currentMovie: {{ currentMovie }}
+				currentSeason: {{ currentSeason }}
+				currentEpisode: {{ currentEpisode }}
+				videoSrc: {{ videoSrc }}
+				entityObject: {{ entityObject }}
 			</pre
 			>
 
@@ -59,7 +63,7 @@
 			<EntityListView
 				v-if="currentSeason != -1"
 				title="Episodes:"
-				:array="currentSeries.seasons[currentSeason - 1]"
+				:array="currentSeries.seasons[currentSeason]"
 				:current="currentEpisode"
 				:currentSeason="currentSeason"
 				:chnageFN="changeEpisode"
@@ -72,9 +76,9 @@
 						<font-awesome-icon icon="fa-solid fa-backward-step" size="lg" /> Previous
 					</button>
 				</div>
-				<h3 v-auto-animate v-if="currentMovie != -1" class="text-muted text-truncate">
+				<!-- <h3 v-auto-animate v-if="currentMovie != -1" class="text-muted text-truncate">
 					{{ currentSeries.movies[currentMovie - 1]?.replace('.mp4', '') }}
-				</h3>
+				</h3> -->
 				<div>
 					<button @click="switchTo(1)" class="btn btn-outline-success">
 						Next <font-awesome-icon icon="fa-solid fa-forward-step" size="lg" />
@@ -203,6 +207,7 @@ export default {
 			'watchList',
 		]),
 		...mapState('auth', ['authToken']),
+		...mapGetters('watch', ['videoSrc']),
 		showLatestWatchButton() {
 			if (this.forceHideButton) return false;
 			const info = Boolean(
@@ -224,19 +229,6 @@ export default {
 		showVideo() {
 			return this.currentMovie !== -1 || this.currentSeason !== -1 || this.currentEpisode !== -1;
 		},
-		videoSrc() {
-			if (this.currentSeries == undefined) return '';
-			let out = `${this.$networking.API_URL}/video?auth-token=${this.authToken}&series=${this.currentSeries.ID}`;
-			// console.log(1337, this.currentSeason, this.currentEpisode, this.currentMovie);
-			if (this.currentSeason == -1) {
-				if (this.currentMovie == -1) return '';
-				out += `&movie=${this.currentMovie}`;
-			} else {
-				out += `&season=${this.currentSeason - 1}&episode=${this.currentEpisode - 1}`;
-			}
-
-			return out;
-		},
 		displayTitle() {
 			let str = `${this.currentSeries.title} - `;
 
@@ -256,7 +248,7 @@ export default {
 			if (this.currentMovie != -1) {
 				return this.currentSeries?.movies?.[this.currentMovie];
 			} else {
-				return this.currentSeries.seasons?.[this.currentSeason - 1]?.[this.currentEpisode - 1];
+				return this.currentSeries.seasons?.[this.currentSeason]?.[this.currentEpisode];
 			}
 		},
 	},
@@ -322,7 +314,7 @@ export default {
 		},
 		changeSeason(ID) {
 			if (this.currentSeason == ID) return this.handleVideoChange();
-			return this.handleVideoChange(ID, 1);
+			return this.handleVideoChange(ID, 0);
 		},
 		handleVideoChange(season = -1, episode = -1, movie = -1) {
 			const video = document.querySelector('video');
@@ -629,18 +621,22 @@ export default {
 		const seriesID = this.$route.query.id;
 		await this.loadSeriesInfo(seriesID);
 		const data = JSON.parse(localStorage.getItem('data'));
+		console.log(1);
 		if (data && data.ID == seriesID) {
 			this.handleVideoChange(data.season || -1, data.episode || -1, data.movie || -1);
 		} else {
 			localStorage.removeItem('data');
 			this.handleVideoChange(-1, -1, -1);
 		}
+
+		console.log(2, seriesID);
 		document.title = `Cinema | ${this.currentSeries.title}`;
 		await this.loadWatchList(seriesID);
+		console.log(3);
 	},
 	async mounted() {
-		this.cleanupFN = this.initialize();
-
+		// this.cleanupFN = this.initialize();
+		console.log(4);
 		this.$socket.on('watchListChange', (watchList) => {
 			console.log('GOT watchListChange');
 			this.setWatchList(watchList);
@@ -653,7 +649,10 @@ export default {
 		const video = document.querySelector('video');
 		this.sendVideoTimeUpdate(video.currentTime, true);
 		localStorage.removeItem('data');
-		this.cleanupFN();
+		// this.cleanupFN();
+	},
+	errorCaptured(err, vm, info) {
+		console.log('ERROR:', err, vm, info);
 	},
 };
 </script>

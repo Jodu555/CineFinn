@@ -1,3 +1,5 @@
+import store from "./index"
+
 const getDefaultState = () => {
     return {
         currentSeries: { ID: -1 },
@@ -28,6 +30,19 @@ export default {
         },
         setWatchList(state, watchList) {
             state.watchList = watchList;
+        }
+    },
+    getters: {
+        videoSrc(state) {
+            if (state.currentSeries == undefined) return '';
+            let out = `${store.$networking.API_URL}/video?auth-token=${store.$networking.auth_token}&series=${state.currentSeries.ID}`;
+            if (state.currentSeason == -1) {
+                if (state.currentMovie == -1) return '';
+                out += `&movie=${state.currentMovie + 1}`;
+            } else {
+                out += `&season=${state.currentSeason + 1}&episode=${state.currentEpisode + 1}`;
+            }
+            return out;
         }
     },
     actions: {
