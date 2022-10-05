@@ -26,6 +26,14 @@ const routes = [
     meta: { requiresLogin: true }
   },
   {
+    path: '/watch-v2',
+    name: 'Watch-v2',
+    component: function () {
+      return import(/* webpackChunkName: "about" */ '../views/Watchv2.vue')
+    },
+    meta: { requiresLogin: true }
+  },
+  {
     path: '/news',
     name: 'News',
     component: function () {
