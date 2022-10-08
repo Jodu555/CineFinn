@@ -37,6 +37,7 @@ module.exports = (req, res) => {
     const isMovie = Boolean(movie);
 
     let videoEntity = isMovie ? serie.movies[movie] : serie.seasons[season][episode];
+    //TODO: Change this from array index to season number and episode number
     if (videoEntity == null || videoEntity == undefined) {
         res.status(400).send('Season or Episode does not exists');
         return;
