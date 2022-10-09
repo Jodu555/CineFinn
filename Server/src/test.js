@@ -91,12 +91,30 @@ const filenameParser = (filepath, filename) => {
 
 }
 
+
+
+
 // console.log(filenameParser('', 'Food Wars! Shokugeki no Sōma St#1 Flg#1.mp4'));
 // console.log(filenameParser('', 'Food Wars! Shokugeki no Sōma St#1 Flg#1_GerDub.mp4'));
 // console.log(filenameParser('', 'Games und Rivalen.mp4'));
 // console.log(filenameParser('', 'Games und Rivalen_GerDub.mp4'));
 
-// const series = JSON.parse(fs.readFileSync(process.env.LOCAL_DB_FILE, 'utf8'));
+const series = JSON.parse(fs.readFileSync(process.env.LOCAL_DB_FILE, 'utf8'));
+
+const seriesID = 1811;
+
+getVideoEntity(seriesID, 1, 5);
+
+function getVideoEntity(seriesID, season, episode) {
+    const serie = series.find(x => x.ID == seriesID);
+
+    console.log(serie);
+
+    const entity = serie.seasons.flat().find(x => x.season == season && x.episode == episode);
+
+    console.log(entity);
+
+};
 
 // series[0].seasons[0].forEach(obj => {
 //     // console.log(obj);
