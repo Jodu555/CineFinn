@@ -110,7 +110,10 @@ function getVideoEntity(seriesID, season, episode) {
 
     console.log(serie);
 
-    const entity = serie.seasons.flat().find(x => x.season == season && x.episode == episode);
+    // Long (Especially when there are 50 seasons with 100 episodes each)
+    // const entity = serie.seasons.flat().find(x => x.season == season && x.episode == episode);
+
+    // if (serie.seasons[season - 1][0].season == season)
 
     console.log(entity);
 
