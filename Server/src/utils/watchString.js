@@ -72,8 +72,8 @@ const parse = (str) => {
 class Segment {
     constructor(ID, season, episode, movie, time) {
         this.ID = Number(ID);
-        this.season = Number(season);
-        this.episode = Number(episode);
+        this.season = Number(season); // 1 based (number)
+        this.episode = Number(episode); // 1 based (number)
         this.movie = Number(movie);
         this.time = Number(time);
         this.watched = this.time > 300;
