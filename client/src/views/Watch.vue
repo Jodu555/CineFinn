@@ -244,37 +244,6 @@ export default {
 
 			return str;
 		},
-		// entityObject() {
-		// 	try {
-		// 		if (this.currentMovie != -1) {
-		// 			return this.currentSeries?.movies?.[this.currentMovie];
-		// 		} else if (this.currentSeason != -1 && this.currentEpisode != -1) {
-		// 			// Long (Especially when there are 50 seasons with 100 episodes each)
-		// 			// const entity = serie.seasons.flat().find(x => x.season == season && x.episode == episode);
-
-		// 			let entity;
-		// 			let seasonIndex = -1;
-		// 			entity = this.currentSeries.seasons[this.currentSeason - 1][0];
-		// 			if (entity && entity.season == this.currentSeason) {
-		// 				seasonIndex = this.currentSeason - 1;
-		// 			} else {
-		// 				seasonIndex = this.currentSeries.seasons.findIndex(
-		// 					(x) => x[0].season == this.currentSeason
-		// 				);
-		// 			}
-
-		// 			entity = this.currentSeries.seasons[seasonIndex].find(
-		// 				(x) => x.episode == this.currentEpisode
-		// 			);
-
-		// 			return entity;
-		// 		}
-		// 	} catch (error) {
-		// 		console.error(error);
-		// 	}
-
-		// 	return null;
-		// },
 	},
 	methods: {
 		...mapMutations('watch', [

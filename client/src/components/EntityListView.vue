@@ -10,8 +10,8 @@
 					:class="{
 						btn: true,
 						'text-white': true,
-						'btn-secondary': current !== i && !checkWatched(getNumber(s) - 1), //Unselected && Not Watched
-						'btn-info': current == i, // Selected
+						'btn-secondary': current !== i + 1 && !checkWatched(getNumber(s) - 1), //Unselected && Not Watched
+						'btn-info': current == i + 1, // Selected
 						'btn-success': checkWatched(getNumber(s) - 1) && current !== getNumber(s), // Watched && Not Selected
 						'crazy-green': checkWatched(getNumber(s) - 1) && current !== getNumber(s), // Watched && Not Selected
 						// 'btn-secondary': current !== i + 1 && !checkWatched(i), //Unselected && Not Watched
