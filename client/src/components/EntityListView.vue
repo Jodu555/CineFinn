@@ -21,7 +21,7 @@
 					}"
 					v-for="(s, i) in array"
 					:key="s"
-					@click="chnageFN(i)"
+					@click="chnageFN(i + 1)"
 				>
 					{{ getNumber(s, i + 1) }}
 					<!-- {{ i + 1 }} -->

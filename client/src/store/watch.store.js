@@ -33,17 +33,50 @@ export default {
         }
     },
     getters: {
-        videoSrc(state) {
+        videoSrc(state, o) {
+            console.log(o.entityObject);
             if (state.currentSeries == undefined) return '';
             let out = `${store.$networking.API_URL}/video?auth-token=${store.$networking.auth_token}&series=${state.currentSeries.ID}`;
             if (state.currentSeason == -1) {
                 if (state.currentMovie == -1) return '';
                 out += `&movie=${state.currentMovie + 1}`;
             } else {
-                out += `&season=${state.currentSeason}&episode=${state.currentEpisode}`;
+                out += `&season=${o.entityObject.season}&episode=${o.entityObject.episode}`;
+                // out += `&season=${state.currentSeason}&episode=${state.currentEpisode}`;
             }
             return out;
-        }
+        },
+        entityObject(state) {
+            try {
+                if (state.currentMovie != -1) {
+                    return state.currentSeries?.movies?.[state.currentMovie];
+                } else if (state.currentSeason != -1 && state.currentEpisode != -1) {
+                    // Long (Especially when there are 50 seasons with 100 episodes each)
+                    // const entity = serie.seasons.flat().find(x => x.season == season && x.episode == episode);
+
+                    let entity;
+                    let seasonIndex = -1;
+                    entity = state.currentSeries.seasons[state.currentSeason - 1][0];
+                    if (entity && entity.season == state.currentSeason) {
+                        seasonIndex = state.currentSeason - 1;
+                    } else {
+                        seasonIndex = state.currentSeries.seasons.findIndex(
+                            (x) => x[0].season == state.currentSeason
+                        );
+                    }
+
+                    entity = state.currentSeries.seasons[seasonIndex].find(
+                        (x) => x.episode == state.currentEpisode
+                    );
+
+                    return entity;
+                }
+            } catch (error) {
+                console.error(error);
+            }
+
+            return null;
+        },
     },
     actions: {
         async loadSeriesInfo({ commit, dispatch, rootState }, ID) {

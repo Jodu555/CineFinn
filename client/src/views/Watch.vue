@@ -63,7 +63,7 @@
 			<EntityListView
 				v-if="currentSeason != -1"
 				title="Episodes:"
-				:array="currentSeries.seasons[currentSeason]"
+				:array="currentSeries.seasons[currentSeason - 1]"
 				:current="currentEpisode"
 				:currentSeason="currentSeason"
 				:chnageFN="changeEpisode"
@@ -207,7 +207,7 @@ export default {
 			'watchList',
 		]),
 		...mapState('auth', ['authToken']),
-		...mapGetters('watch', ['videoSrc']),
+		...mapGetters('watch', ['videoSrc', 'entityObject']),
 		showLatestWatchButton() {
 			if (this.forceHideButton) return false;
 			const info = Boolean(
@@ -244,13 +244,37 @@ export default {
 
 			return str;
 		},
-		entityObject() {
-			if (this.currentMovie != -1) {
-				return this.currentSeries?.movies?.[this.currentMovie];
-			} else {
-				return this.currentSeries.seasons?.[this.currentSeason]?.[this.currentEpisode];
-			}
-		},
+		// entityObject() {
+		// 	try {
+		// 		if (this.currentMovie != -1) {
+		// 			return this.currentSeries?.movies?.[this.currentMovie];
+		// 		} else if (this.currentSeason != -1 && this.currentEpisode != -1) {
+		// 			// Long (Especially when there are 50 seasons with 100 episodes each)
+		// 			// const entity = serie.seasons.flat().find(x => x.season == season && x.episode == episode);
+
+		// 			let entity;
+		// 			let seasonIndex = -1;
+		// 			entity = this.currentSeries.seasons[this.currentSeason - 1][0];
+		// 			if (entity && entity.season == this.currentSeason) {
+		// 				seasonIndex = this.currentSeason - 1;
+		// 			} else {
+		// 				seasonIndex = this.currentSeries.seasons.findIndex(
+		// 					(x) => x[0].season == this.currentSeason
+		// 				);
+		// 			}
+
+		// 			entity = this.currentSeries.seasons[seasonIndex].find(
+		// 				(x) => x.episode == this.currentEpisode
+		// 			);
+
+		// 			return entity;
+		// 		}
+		// 	} catch (error) {
+		// 		console.error(error);
+		// 	}
+
+		// 	return null;
+		// },
 	},
 	methods: {
 		...mapMutations('watch', [
@@ -314,7 +338,7 @@ export default {
 		},
 		changeSeason(ID) {
 			if (this.currentSeason == ID) return this.handleVideoChange();
-			return this.handleVideoChange(ID, 0);
+			return this.handleVideoChange(ID, 1);
 		},
 		handleVideoChange(season = -1, episode = -1, movie = -1) {
 			const video = document.querySelector('video');
