@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { getVideoEntity } = require('../classes/series');
 const { getSeries } = require('../utils/utils');
 
 
@@ -36,7 +37,8 @@ module.exports = (req, res) => {
 
     const isMovie = Boolean(movie);
 
-    let videoEntity = isMovie ? serie.movies[movie] : serie.seasons[season][episode];
+    // let videoEntity = isMovie ? serie.movies[movie] : serie.seasons[season][episode];
+    let videoEntity = getVideoEntity(serie.ID, season, episode);
     //TODO: Change this from array index to season number and episode number
     if (videoEntity == null || videoEntity == undefined) {
         res.status(400).send('Season or Episode does not exists');

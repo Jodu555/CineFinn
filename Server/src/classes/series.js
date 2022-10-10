@@ -113,6 +113,35 @@ const filenameParser = (filepath, filename) => {
 
 }
 
+
+/**
+ * @param  {String} seriesID the seriesID
+ * @param  {Number} season the season 1 based
+ * @param  {Number} episode the episode also 1 based
+ * @returns {Episode}
+ */
+function getVideoEntity(seriesID, season, episode) {
+    const serie = series.find(x => x.ID == seriesID);
+
+    console.log(serie);
+
+    // Long (Especially when there are 50 seasons with 100 episodes each)
+    // const entity = serie.seasons.flat().find(x => x.season == season && x.episode == episode);
+
+    let entity;
+    let seasonIndex = -1;
+    entity = serie.seasons[season - 1][0];
+    if (entity && entity.season == season) {
+        seasonIndex = season - 1;
+    } else {
+        seasonIndex = serie.seasons.findIndex(x => x[0].season == season);
+    }
+
+    entity = serie.seasons[seasonIndex].find(x => x.episode == episode);
+
+    return entity;
+}
+
 // const filenameParser = (filepath, filename) => {
 //     // filename exp. Food Wars! Shokugeki no Sōma St#1 Flg#1.mp4
 //     // if (filename.includes('St#') && filename.includes('Flg#')) {
@@ -148,5 +177,6 @@ module.exports = {
     Series,
     Episode,
     filenameParser,
-    cleanupSeriesBeforeFrontResponse
+    cleanupSeriesBeforeFrontResponse,
+    getVideoEntity
 }
