@@ -1,4 +1,5 @@
 const path = require('path');
+const { getSeries } = require('../utils/utils');
 class Series {
     constructor(ID, categorie, title, movies = [], seasons = []) {
         this.ID = ID;
@@ -121,7 +122,7 @@ const filenameParser = (filepath, filename) => {
  * @returns {Episode}
  */
 function getVideoEntity(seriesID, season, episode) {
-    const serie = series.find(x => x.ID == seriesID);
+    const serie = getSeries().find(x => x.ID == seriesID);
 
     console.log(serie);
 

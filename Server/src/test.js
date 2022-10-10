@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const { getVideoEntity } = require('./classes/series');
 require('dotenv').config();
+const { getVideoEntity } = require('./classes/series');
 
 // const { Database } = require('@jodu555/mysqlapi');
 // const database = Database.createDatabase(process.env.DB_HOST, process.env.DB_USERNAME, process.env.DB_PASSWORD, process.env.DB_DATABASE);

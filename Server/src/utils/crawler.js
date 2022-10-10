@@ -1,10 +1,10 @@
 const path = require('path');
-const { Series, filenameParser, Episode } = require('../classes/series');
 const { listFiles } = require('./fileutils');
 
 const generateID = () => Math.floor(Math.random() * 10000);
 
 const crawlAndIndex = () => {
+    const { Series, filenameParser, Episode } = require('../classes/series');
 
     const overcategories = ['Aniworld', 'STO'];
     const obj = {};
@@ -39,6 +39,7 @@ const crawlAndIndex = () => {
                 // dirs[i].includes('Season-') ? seasons.push(dirs[i]) : movies.push(dirs[i]);
                 i++;
             }
+            console.log(`Series`, Series);
             series.push(new Series(generateID(), categorie, title, movies, seasons));
         }
     });
@@ -69,36 +70,6 @@ const crawlAndIndex = () => {
     }
 
     series.forEach(e => e.seasons.forEach(x => x.sort(sorterFunction)));
-
-    return series;
-
-    // Fill the series array with its corresponding seasons and episodes
-    // files.forEach(e => {
-    //     const base = path.parse(e).base;
-    //     const parsedData = filenameParser(e, base);
-
-    //     const item = series.find(x => x.title.includes(parsedData.title));
-    //     if (parsedData.movie == true) {
-    //         item.movies.push(e)
-    //     } else {
-    //         if (Array.isArray(item.seasons[parsedData.season - 1])) {
-    //             item.seasons[parsedData.season - 1].push(e);
-    //         } else {
-    //             item.seasons[parsedData.season - 1] = [e]
-    //         }
-    //     }
-    // });
-
-
-    // // Sorts the episodes in the right order
-    // const sorterFunction = (a, b) => {
-    //     const ap = filenameParser(a, path.parse(a).base);
-    //     const bp = filenameParser(b, path.parse(b).base);
-    //     return ap.episode - bp.episode;
-    // }
-    // series.forEach(e => e.seasons.forEach(x => x.sort(sorterFunction)));
-
-
 
     return series;
 }
