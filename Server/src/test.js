@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { default: getVideoDurationInSeconds } = require('get-video-duration');
 const path = require('path');
 require('dotenv').config();
 const { getVideoEntity } = require('./classes/series');
@@ -126,17 +127,39 @@ function new_parse(str) {
     return list;
 }
 
-console.log(parse(watchStr));
+// console.log(parse(watchStr));
 
-console.log(new_parse(watchStr));
-
-
-console.log(JSON.stringify(parse(watchStr)) == JSON.stringify(new_parse(watchStr)));
+// console.log(new_parse(watchStr));
 
 
-const series = JSON.parse(fs.readFileSync(process.env.LOCAL_DB_FILE, 'utf8'));
+// console.log(JSON.stringify(parse(watchStr)) == JSON.stringify(new_parse(watchStr)));
 
-const seriesID = 1811;
+
+const series = JSON.parse(fs.readFileSync(process.env.LOCAL_DB_FILE, 'utf8')).filter(s => s.ID <= 900);
+
+
+(async () => {
+    // return;
+    const newSeries = await Promise.all(series.map(serie => {
+        return new Promise(async (resolve, _) => {
+            const newSeasons = await Promise.all(serie.seasons.map(async season => {
+                return await Promise.all(season.map(e => {
+                    return new Promise(async (resolve, _) => {
+                        const duration = await getVideoDurationInSeconds(e.filePath);
+                        console.log('got', e.primaryName, duration);
+                        resolve({ ...e, duration })
+                    })
+                }));
+            }));
+            resolve({ ...serie, seasons: newSeasons });
+        })
+
+    }));
+
+    console.log(JSON.stringify(newSeries, null, 3));
+
+})();
+
 
 // getVideoEntity(seriesID, 2, 5);
 
