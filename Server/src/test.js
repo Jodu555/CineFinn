@@ -135,7 +135,7 @@ function new_parse(str) {
 // console.log(JSON.stringify(parse(watchStr)) == JSON.stringify(new_parse(watchStr)));
 
 
-const series = JSON.parse(fs.readFileSync(process.env.LOCAL_DB_FILE, 'utf8')).filter(s => s.ID <= 900);
+const series = JSON.parse(fs.readFileSync(process.env.LOCAL_DB_FILE, 'utf8'));
 
 
 (async () => {
@@ -153,10 +153,10 @@ const series = JSON.parse(fs.readFileSync(process.env.LOCAL_DB_FILE, 'utf8')).fi
             }));
             resolve({ ...serie, seasons: newSeasons });
         })
-
     }));
+    fs.writeFileSync('new-time.json', JSON.stringify(newSeries, null, 3))
 
-    console.log(JSON.stringify(newSeries, null, 3));
+    // console.log(JSON.stringify(newSeries, null, 3));
 
 })();
 
