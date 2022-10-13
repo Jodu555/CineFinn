@@ -30,11 +30,11 @@
 			<h1 class="text-truncate" data-bs-toggle="tooltip" :data-bs-title="displayTitle">
 				{{ displayTitle }}
 			</h1>
-			<!-- <div v-auto-animate v-if="showLatestWatchButton" class="text-center">
+			<div v-auto-animate v-if="showLatestWatchButton" class="text-center">
 				<button @click="skipToLatestTime" class="btn btn-outline-info">
 					Jump to Latest watch position!
 				</button>
-			</div> -->
+			</div>
 			<pre>
 				currentMovie: {{ currentMovie }}
 				currentSeason: {{ currentSeason }}
