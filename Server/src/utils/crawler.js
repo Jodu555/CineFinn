@@ -39,7 +39,6 @@ const crawlAndIndex = () => {
                 // dirs[i].includes('Season-') ? seasons.push(dirs[i]) : movies.push(dirs[i]);
                 i++;
             }
-            console.log(`Series`, Series);
             series.push(new Series(generateID(), categorie, title, movies, seasons));
         }
     });

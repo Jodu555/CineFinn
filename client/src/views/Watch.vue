@@ -614,7 +614,7 @@ export default {
 		const seriesID = this.$route.query.id;
 		await this.loadSeriesInfo(seriesID);
 		const data = JSON.parse(localStorage.getItem('data'));
-		console.log(1);
+
 		if (data && data.ID == seriesID) {
 			this.handleVideoChange(data.season || -1, data.episode || -1, data.movie || -1);
 		} else {
@@ -622,10 +622,8 @@ export default {
 			this.handleVideoChange(-1, -1, -1);
 		}
 
-		console.log(2, seriesID);
 		document.title = `Cinema | ${this.currentSeries.title}`;
 		await this.loadWatchList(seriesID);
-		console.log(3);
 	},
 	async mounted() {
 		this.cleanupFN = this.initialize();

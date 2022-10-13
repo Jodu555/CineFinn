@@ -124,8 +124,6 @@ const filenameParser = (filepath, filename) => {
 function getVideoEntity(seriesID, season, episode) {
     const serie = getSeries().find(x => x.ID == seriesID);
 
-    console.log(serie);
-
     // Long (Especially when there are 50 seasons with 100 episodes each)
     // const entity = serie.seasons.flat().find(x => x.season == season && x.episode == episode);
 

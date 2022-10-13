@@ -34,7 +34,6 @@ export default {
     },
     getters: {
         videoSrc(state, o) {
-            console.log(o.entityObject);
             if (state.currentSeries == undefined) return '';
             let out = `${store.$networking.API_URL}/video?auth-token=${store.$networking.auth_token}&series=${state.currentSeries.ID}`;
             if (state.currentSeason == -1) {
