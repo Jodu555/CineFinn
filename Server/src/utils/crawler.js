@@ -25,6 +25,9 @@ const crawlAndIndex = () => {
     });
 
     // Strip the dirs down and seperate between season or movie dirs or series dirs
+    /**
+     * @type Series[]
+     */
     const series = [];
 
 
@@ -51,13 +54,19 @@ const crawlAndIndex = () => {
         if (parsedData.movie == true) {
             item.movies.push(e)
         } else {
-            //TODO: Manage here multiple files with different languages
-            const episode = new Episode(e, parsedData.title, '', parsedData.season, parsedData.episode, [parsedData.language]);
-            // const episode = new Episode(e, parsedData.title, '', parsedData.season, parsedData.episode, ['GerDub']);
-            if (Array.isArray(item.seasons[parsedData.season - 1])) {
-                item.seasons[parsedData.season - 1].push(episode);
+            const currentArr = item.seasons[parsedData.season - 1]
+
+            const episode = new Episode(e, parsedData.title, '', parsedData.season, parsedData.episode, parsedData.language);
+
+            if (Array.isArray(currentArr)) {
+                const existEpisode = currentArr.find(eps => eps.season == parsedData.season && eps.episode == parsedData.episode);
+                if (existEpisode) {
+                    existEpisode.langs.push(parsedData.language);
+                } else {
+                    currentArr.push(episode);
+                }
             } else {
-                item.seasons[parsedData.season - 1] = [episode];
+                item.seasons[parsedData.season - 1] = [episode]
             }
         }
     });
@@ -74,7 +83,7 @@ const crawlAndIndex = () => {
 }
 
 const mergeSeriesArrays = (before, after) => {
-    return before;
+    return after;
     const output = [];
 
     //Compare and overwrite ids
