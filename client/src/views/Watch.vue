@@ -76,9 +76,20 @@
 						<font-awesome-icon icon="fa-solid fa-backward-step" size="lg" /> Previous
 					</button>
 				</div>
-				<!-- <h3 v-auto-animate v-if="currentMovie != -1" class="text-muted text-truncate">
-					{{ currentSeries.movies[currentMovie - 1]?.replace('.mp4', '') }}
-				</h3> -->
+				<h3 v-auto-animate v-if="entityObject" class="text-muted text-truncate">
+					{{ entityObject.primaryName }}
+					<br />
+					<div class="text-center">
+						<img
+							v-for="lang in entityObject.langs"
+							:key="lang"
+							class="flag"
+							:src="`./flag-langs/${lang.toLowerCase()}.svg`"
+							alt="Deutsche Sprache, Flagge"
+							title="Deutsch/German"
+						/>
+					</div>
+				</h3>
 				<div>
 					<button @click="switchTo(1)" class="btn btn-outline-success">
 						Next <font-awesome-icon icon="fa-solid fa-forward-step" size="lg" />
@@ -649,6 +660,11 @@ export default {
 </script>
 
 <style>
+.flag {
+	margin-left: 16px;
+	width: 50px;
+}
+
 span.badge {
 	margin-left: 5px;
 	margin-bottom: 3px;
