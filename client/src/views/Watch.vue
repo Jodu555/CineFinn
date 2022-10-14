@@ -77,14 +77,21 @@
 						<font-awesome-icon icon="fa-solid fa-backward-step" size="lg" /> Previous
 					</button>
 				</div>
-				<h3 v-auto-animate v-if="entityObject" class="text-muted text-truncate">
+				<h3
+					v-auto-animate
+					v-if="entityObject"
+					class="text-muted text-truncate"
+					style="margin-bottom: 0px"
+				>
 					{{ entityObject.primaryName }}
 					<br />
-					<div class="text-center">
+					<div v-auto-animate class="text-center">
 						<img
 							v-for="lang in entityObject.langs"
 							:key="lang"
-							class="flag"
+							@click="changeLanguage(lang)"
+							class="flag shadow mb-4 bg-body"
+							:class="{ active: this.currentLanguage == lang }"
 							:src="`./flag-langs/${lang.toLowerCase()}.svg`"
 							alt="Deutsche Sprache, Flagge"
 							title="Deutsch/German"
@@ -323,6 +330,10 @@ export default {
 			if (this.currentSeason == ID) return this.handleVideoChange();
 			return this.handleVideoChange(ID, 1);
 		},
+		changeLanguage(lang) {
+			console.log('changeLanguage', lang);
+			this.setCurrentLanguage(lang);
+		},
 		handleVideoChange(season = -1, episode = -1, movie = -1) {
 			const video = document.querySelector('video');
 			if (video == null) {
@@ -358,7 +369,10 @@ export default {
 				this.setCurrentSeason(season);
 				this.setCurrentEpisode(episode);
 				this.setCurrentMovie(movie);
-				this.setCurrentLanguage(this.entityObject.langs[0]);
+				if (this.entityObject) {
+					//TODO: Maybe add here default language from user prefered settings
+					this.setCurrentLanguage(this.entityObject.langs[0]);
+				}
 				setTimeout(() => {
 					video.load();
 					video.currentTime = 0;
@@ -667,6 +681,11 @@ export default {
 .flag {
 	margin-left: 16px;
 	width: 50px;
+	cursor: pointer;
+}
+.flag.active {
+	-webkit-box-shadow: 0px 17px 15px 0px #65abf3 !important;
+	box-shadow: 0px 17px 15px 0px #65abf3 !important;
 }
 
 span.badge {
