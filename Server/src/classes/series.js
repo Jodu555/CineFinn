@@ -50,7 +50,7 @@ const filenameParser = (filepath, filename) => {
                     season,
                     episode,
                 ] = match;
-                return { movie: false, title: title.trim(), season: Number(season), episode: Number(episode), language: ['GerDub'] };
+                return { movie: false, title: title.trim(), season: Number(season), episode: Number(episode), language: 'GerDub' };
             }
         },
         {

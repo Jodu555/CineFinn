@@ -56,12 +56,13 @@ const crawlAndIndex = () => {
         } else {
             const currentArr = item.seasons[parsedData.season - 1]
 
-            const episode = new Episode(e, parsedData.title, '', parsedData.season, parsedData.episode, parsedData.language);
+            const episode = new Episode(e, parsedData.title, '', parsedData.season, parsedData.episode, [parsedData.language]);
 
             if (Array.isArray(currentArr)) {
                 const existEpisode = currentArr.find(eps => eps.season == parsedData.season && eps.episode == parsedData.episode);
                 if (existEpisode) {
                     existEpisode.langs.push(parsedData.language);
+                    return;
                 } else {
                     currentArr.push(episode);
                 }
