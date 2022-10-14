@@ -39,6 +39,7 @@
 				currentMovie: {{ currentMovie }}
 				currentSeason: {{ currentSeason }}
 				currentEpisode: {{ currentEpisode }}
+				currentLanguage: {{ currentLanguage }}
 				videoSrc: {{ videoSrc }}
 				entityObject: {{ entityObject }}
 			</pre
@@ -215,6 +216,7 @@ export default {
 			'currentMovie',
 			'currentSeason',
 			'currentEpisode',
+			'currentLanguage',
 			'watchList',
 		]),
 		...mapState('auth', ['authToken']),
@@ -261,6 +263,7 @@ export default {
 			'setCurrentMovie',
 			'setCurrentSeason',
 			'setCurrentEpisode',
+			'setCurrentLanguage',
 			'setWatchList',
 		]),
 		...mapActions('watch', ['loadSeriesInfo', 'loadWatchList']),
@@ -355,6 +358,7 @@ export default {
 				this.setCurrentSeason(season);
 				this.setCurrentEpisode(episode);
 				this.setCurrentMovie(movie);
+				this.setCurrentLanguage(this.entityObject.langs[0]);
 				setTimeout(() => {
 					video.load();
 					video.currentTime = 0;

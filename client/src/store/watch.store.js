@@ -6,6 +6,7 @@ const getDefaultState = () => {
         currentMovie: -1,
         currentSeason: -1,
         currentEpisode: -1,
+        currentLanguage: '',
         watchList: [],
     }
 }
@@ -27,6 +28,9 @@ export default {
         },
         setCurrentEpisode(state, episode) {
             state.currentEpisode = episode;
+        },
+        setCurrentLanguage(state, language) {
+            state.currentLanguage = language;
         },
         setWatchList(state, watchList) {
             state.watchList = watchList;
