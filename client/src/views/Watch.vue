@@ -331,22 +331,34 @@ export default {
 			return this.handleVideoChange(ID, 1);
 		},
 		changeLanguage(lang) {
-			console.log('changeLanguage', lang);
-			this.setCurrentLanguage(lang);
-		},
-		handleVideoChange(season = -1, episode = -1, movie = -1) {
 			const video = document.querySelector('video');
+			console.log('changeLanguage', lang);
+			this.handleVideoChange(
+				this.currentSeason,
+				this.currentEpisode,
+				this.currentMovie,
+				true,
+				lang
+			);
+		},
+		handleVideoChange(season = -1, episode = -1, movie = -1, langchange = false, lang) {
+			const video = document.querySelector('video');
+			//TODO: Maybe add here default language from user prefered settings
+			const defaultLanguage = 'GerDub';
 			if (video == null) {
 				this.setCurrentSeason(season);
 				this.setCurrentEpisode(episode);
 				this.setCurrentMovie(movie);
+				this.setCurrentLanguage(langchange ? lang : defaultLanguage);
 				this.$nextTick(() => {
 					this.handleVideoChange(season, episode, movie);
 				});
 				return;
 			}
 			const wasPaused = video.paused;
-			console.log('GOT handleVideoChange()', season, episode, movie);
+			const prevTime = video.currentTime;
+
+			console.log('GOT handleVideoChange()', { season, episode, movie, langchange, lang });
 			this.sendVideoTimeUpdate(video.currentTime, true);
 			video.pause();
 			this.buttonTimer != null && clearTimeout(this.buttonTimer);
@@ -369,13 +381,10 @@ export default {
 				this.setCurrentSeason(season);
 				this.setCurrentEpisode(episode);
 				this.setCurrentMovie(movie);
-				if (this.entityObject) {
-					//TODO: Maybe add here default language from user prefered settings
-					this.setCurrentLanguage(this.entityObject.langs[0]);
-				}
+				this.setCurrentLanguage(langchange ? lang : defaultLanguage);
 				setTimeout(() => {
 					video.load();
-					video.currentTime = 0;
+					langchange ? (video.currentTime = prevTime) : (video.currentTime = 0);
 					!wasPaused && video.play();
 				}, 100);
 			}, 200);
