@@ -1,4 +1,4 @@
-<template lang="">
+<template>
 	<div>
 		<div
 			class="offcanvas offcanvas-end"
@@ -30,7 +30,6 @@
 						</h5>
 					</li>
 				</ul>
-				<!-- <hr /> -->
 				<h2>Current available Jobs:</h2>
 				<hr />
 				<ul class="list-group list-group-flush">

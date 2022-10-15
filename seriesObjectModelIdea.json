@@ -2,47 +2,26 @@
 	"ID": 49646464,
 	"categorie": "Categoire",
 	"title": "Series-Name",
-	"__seasons": [
-		[
-			"Series-Name St#1 Flg#1.mp4",
-			"Series-Name St#1 Flg#1.mp4",
-			"Series-Name St#1 Flg#2.mp4",
-			"Series-Name St#1 Flg#3.mp4",
-			"Series-Name St#1 Flg#4.mp4"
-		],
-		[
-			"Series-Name St#2 Flg#1.mp4",
-			"Series-Name St#2 Flg#2.mp4",
-			"Series-Name St#2 Flg#3.mp4",
-			"Series-Name St#2 Flg#4.mp4",
-			"Series-Name St#2 Flg#5.mp4",
-			"Series-Name St#2 Flg#6.mp4",
-			"Series-Name St#2 Flg#7.mp4"
-		]
-	],
 	"seasons": [
 		[
 			{
-				"path": "/media/ms1/Videos/Aniworld/Series-Name St#1 Flg#1.mp4",
+				"path": "/media/ms1/Videos/Aniworld/Series-Name St#1 Flg#1_GerDub.mp4",
 				"primaryName": "German Title",
 				"secondaryName": "English title",
 				"season": 1,
 				"episode": 1,
 				"langs": ["GerDub", "GerSub"]
-			},
-			"Series-Name St#1 Flg#1.mp4",
-			"Series-Name St#1 Flg#2.mp4",
-			"Series-Name St#1 Flg#3.mp4",
-			"Series-Name St#1 Flg#4.mp4"
+			}
 		],
 		[
-			"Series-Name St#2 Flg#1.mp4",
-			"Series-Name St#2 Flg#2.mp4",
-			"Series-Name St#2 Flg#3.mp4",
-			"Series-Name St#2 Flg#4.mp4",
-			"Series-Name St#2 Flg#5.mp4",
-			"Series-Name St#2 Flg#6.mp4",
-			"Series-Name St#2 Flg#7.mp4"
+			{
+				"path": "/media/ms1/Videos/Aniworld/Series-Name St#2 Flg#1_GerDub.mp4",
+				"primaryName": "German Title",
+				"secondaryName": "English title",
+				"season": 2,
+				"episode": 1,
+				"langs": ["GerDub", "GerSub"]
+			}
 		]
 	],
 	"movies": [],

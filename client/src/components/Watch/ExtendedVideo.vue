@@ -1,6 +1,7 @@
 <template>
 	<div style="margin-top: 0.5%" class="video-container paused" data-volume-level="high">
 		<img class="thumbnail-img" />
+		<!-- TODO: Maybe show this only if the users prefered settings match -->
 		<div v-if="entityObject" class="video-title-container">
 			<p>
 				{{ entityObject.primaryName }} - {{ String(entityObject.season).padStart(2, '0') }}x{{
