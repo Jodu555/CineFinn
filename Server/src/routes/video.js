@@ -5,7 +5,7 @@ const { getSeries } = require('../utils/utils');
 
 
 module.exports = (req, res) => {
-    const { series: seriesID, season, episode, movie } = req.query;
+    const { series: seriesID, season, episode, movie, language } = req.query;
 
     const debug = false;
 
@@ -48,9 +48,19 @@ module.exports = (req, res) => {
 
     debug && console.log('Got Video Entitiy', videoEntity);
 
-    if (isMovie) videoEntity = { filePath: videoEntity };
+    let filePath = isMovie ? videoEntity : videoEntity.filePath;
 
-    const videoSize = fs.statSync(videoEntity.filePath).size;
+    const { dir, name, ext } = path.parse(filePath)
+
+    if (videoEntity.langs.length > 1) {
+        if (language) {
+            if (language == 'GerSub' || language == 'GerDub') {
+                filePath = path.join(dir, `${name.split('_')[0]}_${language}${ext}`);
+            }
+        }
+    }
+
+    const videoSize = fs.statSync(filePath).size;
 
     // const CHUNK_SIZE = 10 ** 6; // 1MB
     const CHUNK_SIZE = process.env.VIDEO_CHUNK_SIZE;
@@ -71,7 +81,7 @@ module.exports = (req, res) => {
     debug && console.log('Generated headers', headers);
 
     res.writeHead(206, headers);
-    const videoStream = fs.createReadStream(videoEntity.filePath, { start, end });
+    const videoStream = fs.createReadStream(filePath, { start, end });
     debug && console.log('Created read stream', headers);
     videoStream.pipe(res);
 };
