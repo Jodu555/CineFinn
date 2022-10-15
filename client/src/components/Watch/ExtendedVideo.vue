@@ -1,6 +1,13 @@
-<template lang="">
+<template>
 	<div style="margin-top: 0.5%" class="video-container paused" data-volume-level="high">
 		<img class="thumbnail-img" />
+		<div v-if="entityObject" class="video-title-container">
+			<p>
+				{{ entityObject.primaryName }} - {{ String(entityObject.season).padStart(2, '0') }}x{{
+					String(entityObject.episode).padStart(2, '0')
+				}}
+			</p>
+		</div>
 		<div class="video-controls-container">
 			<div class="timeline-container">
 				<div class="timeline">
@@ -102,6 +109,15 @@ export default {
 		};
 	},
 	computed: {
+		...mapState('watch', [
+			'currentSeries',
+			'currentMovie',
+			'currentSeason',
+			'currentEpisode',
+			'currentLanguage',
+			'watchList',
+		]),
+		...mapState('auth', ['authToken']),
 		...mapGetters('watch', ['videoSrc', 'entityObject']),
 	},
 	async mounted() {
@@ -200,6 +216,7 @@ export default {
 			// Fullscreen
 			function documentFullScreenChange() {
 				videoContainer.classList.toggle('full-screen', document.fullscreenElement);
+				videoContainer.scrollIntoView();
 			}
 
 			//Timeline
@@ -227,7 +244,8 @@ export default {
 					percent * video.duration
 				);
 				const previewImgNumber = Math.max(1, Math.floor((percent * video.duration) / 10));
-				let previewImgSrc = `/assets/previewImgs/preview${previewImgNumber}.jpg`;
+				// let previewImgSrc = `/assets/previewImgs/preview${previewImgNumber}.jpg`;
+				let previewImgSrc = ``;
 				if (v.currentSeries != undefined && v.currentSeries.ID != -1) {
 					previewImgSrc = `${v.$networking.API_URL}/previewImages/${v.currentSeries.ID}/`;
 					if (v.currentMovie != -1 && v.currentMovie != undefined) {
@@ -362,6 +380,26 @@ export default {
 };
 </script>
 <style scoped>
+.video-title-container {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	color: white;
+	z-index: 100;
+	margin: 0.5rem;
+	font-size: 27px;
+
+	opacity: 0;
+	transition: opacity 150ms ease-in-out;
+}
+
+.video-container:hover .video-title-container,
+.video-container:focus-within .video-title-container,
+.video-container.paused .video-title-container {
+	opacity: 0.8;
+}
+
 *,
 *::before,
 *::after {
