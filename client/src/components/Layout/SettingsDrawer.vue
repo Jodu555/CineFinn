@@ -30,9 +30,18 @@
 						</h5>
 					</li>
 				</ul>
-				<h2>Current available Jobs:</h2>
+				<h2 @click="showJobs = !showJobs">
+					<p class="d-flex justify-content-between" style="align-items: center">
+						Jobs:
+						<font-awesome-icon
+							style="margin-left: 0.5rem"
+							size="xs"
+							:icon="['fa-solid', showJobs ? 'chevron-up' : 'chevron-down']"
+						/>
+					</p>
+				</h2>
 				<hr />
-				<ul class="list-group list-group-flush">
+				<ul v-show="showJobs" class="list-group list-group-flush">
 					<JobListView
 						v-for="job in jobs"
 						:id="job.id"
@@ -44,6 +53,17 @@
 						:click="start"
 					/>
 				</ul>
+				<h2>
+					<p class="d-flex justify-content-between" style="align-items: center">
+						Settings:
+						<font-awesome-icon
+							style="margin-left: 0.5rem"
+							size="xs"
+							:icon="['fa-solid', showJobs ? 'chevron-up' : 'chevron-down']"
+						/>
+					</p>
+				</h2>
+				<hr />
 			</div>
 		</div>
 	</div>
@@ -57,6 +77,7 @@ export default {
 	data() {
 		return {
 			jobs: [],
+			showJobs: false,
 		};
 	},
 	computed: {
