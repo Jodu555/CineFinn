@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const child_process = require('child_process');
 
-const { filenameParser } = require('../classes/series');
+const { filenameParser, Series } = require('../classes/series');
 const { getVideoDurationInSeconds } = require('get-video-duration')
 
 async function deepExecPromisify(command, cwd) {
@@ -15,7 +15,10 @@ async function deepExecPromisify(command, cwd) {
         });
     })
 }
-
+/**
+ * @param  {[Series]} series
+ * @param  {function} cleanup
+ */
 const generateImages = async (series, cleanup = () => { }) => {
     console.log('Started generateImages()');
     for (const serie of series) {
@@ -23,15 +26,16 @@ const generateImages = async (series, cleanup = () => { }) => {
         const items = seasons.length + serie.movies.length
         console.log(`Checked: ${serie.title} with ${items} Items`);
         let i = 0;
-        for (const season of seasons) {
+        for (const episode of seasons) {
             i++;
-            const data = filenameParser(season, path.parse(season).base);
+            const data = filenameParser(episode, path.parse(episode).base);
+            //TODO: change here the stuff to the new oop variant
             const output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), `${data.season}-${data.episode}`);
             fs.mkdirSync(output, { recursive: true });
             if (fs.readdirSync(output).length == 0) {
-                const command = `ffmpeg -i "${season}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
+                const command = `ffmpeg -i "${episode}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
                 await deepExecPromisify(command);
-                console.log(`  => Video (SE-EP) ${i} / ${items} - ${path.parse(season).base}`);
+                console.log(`  => Video (SE-EP) ${i} / ${items} - ${path.parse(episode).base}`);
             }
         }
         for (const movie of serie.movies) {

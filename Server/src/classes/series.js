@@ -1,6 +1,13 @@
 const path = require('path');
 const { getSeries } = require('../utils/utils');
 class Series {
+    /**
+     * @param  {String} ID
+     * @param  {String} categorie
+     * @param  {String} title
+     * @param  {[String]} movies=[]
+     * @param  {[[Episode]]} seasons=[]
+     */
     constructor(ID, categorie, title, movies = [], seasons = []) {
         this.ID = ID;
         this.categorie = categorie;
@@ -12,6 +19,14 @@ class Series {
 }
 
 class Episode {
+    /**
+     * @param  {String} filePath
+     * @param  {String} primaryName
+     * @param  {String} secondaryName
+     * @param  {Number} season
+     * @param  {Number} episode
+     * @param  {[String]} langs
+     */
     constructor(filePath, primaryName, secondaryName, season, episode, langs) {
         this.filePath = filePath;
         this.primaryName = primaryName;

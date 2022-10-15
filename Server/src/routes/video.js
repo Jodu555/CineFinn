@@ -50,11 +50,11 @@ module.exports = (req, res) => {
 
     let filePath = isMovie ? videoEntity : videoEntity.filePath;
 
-    const { dir, name, ext } = path.parse(filePath)
 
     if (videoEntity.langs.length > 1) {
         if (language) {
             if (language == 'GerSub' || language == 'GerDub') {
+                const { dir, name, ext } = path.parse(filePath)
                 filePath = path.join(dir, `${name.split('_')[0]}_${language}${ext}`);
             }
         }
