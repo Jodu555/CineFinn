@@ -41,7 +41,7 @@
 	</div>
 </template>
 <script>
-import EntityCard from '@/components/EntityCard.vue';
+import EntityCard from '@/components/Home/EntityCard.vue';
 import { mapState, mapActions } from 'vuex';
 export default {
 	components: { EntityCard },

@@ -116,7 +116,7 @@
 <script>
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex';
 import { singleDimSwitcher, multiDimSwitcher } from '@/plugins/switcher';
-import EntityListView from '@/components/EntityListView.vue';
+import EntityListView from '@/components/Watch/EntityListView.vue';
 import SeriesInformation from '../components/SeriesInformation.vue';
 import ExtendedVideo from '@/components/Watch/ExtendedVideo.vue';
 

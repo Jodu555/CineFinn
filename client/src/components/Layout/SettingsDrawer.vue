@@ -44,16 +44,6 @@
 						:lastRun="job.lastRun"
 						:click="start"
 					/>
-
-					<!-- <JobListView title="TEST" callpoint="/test/asd" :running="false" :lastRun="Date.now()" /> -->
-
-					<!-- <JobListView title="Generated Images Validation" :running="true" lastRun="null" />
-					<JobListView title="Generating Images" :running="false" lastRun="10.06.2022 10 Uhr" />
-					<JobListView
-						title="Rescraping the archive"
-						:running="false"
-						lastRun="01.01.2021 20 Uhr"
-					/> -->
 				</ul>
 			</div>
 		</div>
@@ -61,8 +51,7 @@
 </template>
 <script>
 import { mapState } from 'vuex';
-import { io } from 'socket.io-client';
-import JobListView from '@/components/JobListView';
+import JobListView from '@/components/Layout/JobListView';
 
 export default {
 	components: { JobListView },
