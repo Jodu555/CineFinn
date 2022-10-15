@@ -1,4 +1,4 @@
-<template lang="">
+<template >
 	<div class="container">
 		<h1 class="text-center mb-3">Login - CineFinn</h1>
 		<div v-if="error != null" class="alert alert-danger alert-dismissible">
@@ -111,4 +111,4 @@ export default {
 	},
 };
 </script>
-<style lang=""></style>
+<style ></style>

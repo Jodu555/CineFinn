@@ -1,4 +1,4 @@
-<template lang="">
+<template>
 	<div>
 		<div class="row justify-content-start">
 			<h2 class="col-sm-2" style="width: 13.666667%">{{ title }}</h2>

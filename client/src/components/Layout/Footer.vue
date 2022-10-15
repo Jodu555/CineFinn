@@ -1,4 +1,4 @@
-<template lang="">
+<template>
 	<div>
 		<footer class="footer">
 			<p class="text-center text-muted footer-text">

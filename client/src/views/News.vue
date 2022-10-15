@@ -1,4 +1,4 @@
-<template lang="">
+<template>
 	<div class="container">
 		<div>
 			<h1 class="text-center">News</h1>
@@ -54,4 +54,4 @@ export default {
 	},
 };
 </script>
-<style lang=""></style>
+<style></style>

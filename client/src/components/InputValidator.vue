@@ -1,4 +1,4 @@
-<template lang="">
+<template>
 	<div>
 		<label :for="id" class="form-label mt-4">{{ name }}</label>
 		<input
@@ -55,4 +55,4 @@ export default {
 	},
 };
 </script>
-<style lang=""></style>
+<style></style>

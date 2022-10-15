@@ -1,4 +1,4 @@
-<template lang="">
+<template>
 	<div
 		class="modal fade"
 		id="controlsModal"
@@ -25,4 +25,4 @@
 <script>
 export default {};
 </script>
-<style lang=""></style>
+<style></style>

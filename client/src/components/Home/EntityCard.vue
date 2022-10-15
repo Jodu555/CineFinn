@@ -54,4 +54,4 @@ export default {
 	created() {},
 };
 </script>
-<style lang=""></style>
+<style></style>

@@ -1,4 +1,4 @@
-<template lang="">
+<template>
 	<div class="container">
 		<div class="row" style="overflow-y: hidden">
 			<div class="col text-center">
@@ -22,4 +22,4 @@
 <script>
 export default {};
 </script>
-<style lang=""></style>
+<style></style>

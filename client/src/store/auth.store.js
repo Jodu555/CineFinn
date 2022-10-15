@@ -9,6 +9,11 @@ const getDefaultState = () => {
             UUID: '',
             username: '',
             email: '',
+        },
+        settings: {
+            preferredLanguage: 'GerDub',
+            showVideoTitleContainer: true,
+            showLatestWatchButton: true,
         }
     }
 }
@@ -30,6 +35,9 @@ export default {
         },
         setError(state, error) {
             state.error = error;
+        },
+        setSettings(state, settings) {
+            state.settings = settings;
         },
         logout(state) {
             state.loggedIn = false;

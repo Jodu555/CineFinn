@@ -1,4 +1,4 @@
-<template lang="">
+<template>
 	<div>
 		<li class="list-group-item">
 			<h5>{{ title }}</h5>
@@ -33,4 +33,4 @@ export default {
 	methods: {},
 };
 </script>
-<style lang=""></style>
+<style></style>
