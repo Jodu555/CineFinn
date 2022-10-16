@@ -52,7 +52,6 @@ const crawlAndIndex = () => {
 
         const item = series.find(x => x.title.includes(parsedData.title));
         if (parsedData.movie == true) {
-            //TODO: Add here the movie oop code
             const movie = new Movie(e, parsedData.movieTitle, '', [parsedData.language]);
             item.movies.push(movie)
         } else {

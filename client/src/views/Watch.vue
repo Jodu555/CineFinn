@@ -81,10 +81,11 @@
 					v-auto-animate
 					v-if="entityObject"
 					class="text-muted text-truncate"
-					style="margin-bottom: 0px"
+					style="margin-bottom: 0"
 				>
-					{{ entityObject.primaryName }}
-					<br />
+					<p style="margin-bottom: 0.6rem">
+						{{ entityObject.primaryName }}
+					</p>
 					<div v-auto-animate class="text-center">
 						<img
 							v-for="lang in entityObject.langs"
@@ -254,30 +255,26 @@ export default {
 		handleVideoChange(season = -1, episode = -1, movie = -1, langchange = false, lang) {
 			if (langchange && this.currentLanguage == lang) return;
 			const video = document.querySelector('video');
+
 			//TODO: Maybe add here default language from user prefered settings
-			const defaultLanguage = 'GerDub';
-			if (video == null) {
-				this.setCurrentSeason(season);
-				this.setCurrentEpisode(episode);
-				this.setCurrentMovie(movie);
-				this.setCurrentLanguage(langchange ? lang : defaultLanguage);
-				this.$nextTick(() => {
-					this.handleVideoChange(season, episode, movie);
-				});
-				return;
-			}
+			let defaultLanguage = 'GerDub';
+
 			const wasPaused = video.paused;
 			const prevTime = video.currentTime;
 
 			console.log('GOT handleVideoChange()', { season, episode, movie, langchange, lang });
 			this.sendVideoTimeUpdate(video.currentTime, true);
+
 			video.pause();
+
+			//Handle the skip to latest watch postion button
 			this.buttonTimer != null && clearTimeout(this.buttonTimer);
 			this.forceHideButton = false;
 			this.buttonTimer = setTimeout(() => {
 				this.forceHideButton = true;
 			}, 10000);
 
+			//Save The Current infos in localstorage
 			localStorage.setItem(
 				'data',
 				JSON.stringify({
@@ -292,6 +289,16 @@ export default {
 				this.setCurrentSeason(season);
 				this.setCurrentEpisode(episode);
 				this.setCurrentMovie(movie);
+
+				//Ensure that the selected language exists on the entity
+				if (
+					this.entityObject &&
+					!this.entityObject.langs.includes(defaultLanguage) &&
+					!langchange
+				) {
+					defaultLanguage = this.entityObject.langs[0];
+				}
+
 				this.setCurrentLanguage(langchange ? lang : defaultLanguage);
 				setTimeout(() => {
 					video.load();

@@ -38,7 +38,7 @@ export default {
     },
     getters: {
         videoSrc(state, o) {
-            if (state.currentSeries == undefined) return '';
+            if (state.currentSeries == undefined && o.entityObject) return '';
             const url = new URL(store.$networking.API_URL + '/video');
             url.searchParams.append('auth-token', store.$networking.auth_token)
             url.searchParams.append('series', state.currentSeries.ID)
@@ -49,7 +49,7 @@ export default {
                 if (state.currentMovie == -1) return '';
                 out += `&movie=${state.currentMovie + 1}`;
 
-                url.searchParams.append('movie', state.currentMovie + 1)
+                url.searchParams.append('movie', state.currentMovie)
             } else {
                 out += `&season=${o.entityObject.season}&episode=${o.entityObject.episode}`;
                 url.searchParams.append('season', o.entityObject.season)

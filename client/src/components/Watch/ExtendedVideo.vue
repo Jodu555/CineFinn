@@ -9,7 +9,7 @@
 				}}
 			</p>
 			<p v-if="currentMovie !== -1">
-				{{ entityObject }}
+				{{ entityObject.primaryName }}
 			</p>
 		</div>
 		<div class="video-controls-container">
