@@ -39,22 +39,26 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [x] make the debounce server side optimal for multiple clients
 - [x] display the title of the movies somewhere
 - [x] Add generate Images and parse images also for movies
+- [x] Show the current time while scrubbing through the video
+- [x] Show a back to top Button on the List page (or maybe make the navbar sticky)
+- [x] Extract the Video stuff into own component
 - [ ] Add the control information modal
 - [ ] Add the series information modal
 - [ ] Add the full series watched information modal
 - [ ] Implement a method to un watch a specific series or season
-- [x] Show the current time while scrubbing through the video
-- [x] Show a back to top Button on the List page (or maybe make the navbar sticky)
-- [ ] Extract the Video stuff into own component
 - [ ] Anime Preview (10 - 15 sec.)
 - [ ] Implement the command manager and some basic command (session = to list current sockets, info = to show series infos and space infos, reload = to reload the series from their file)
 - [x] Implement a job-cli system to run a pre specified job with the cli
   - [ ] Change ID Job : A Job for which i can change an ID instant wihout any problems
   - [ ] Obtain Side-Infos : To Obtain the series image and infos as well as start & end date
   - [ ] Write a job to re calculate the watch list to the episode and season numbers (1 based)
-- [ ] ReThink the current series store
-- [ ] Rework the whole watch page and use code splitting smart indexing and much more
-  - [ ] Basically rewirte the whole watch page
+- [x] ReThink the current series store
+- [x] Rework the whole watch page and use code splitting smart indexing and much more
+  - [x] Basically rewirte the whole watch page
+- [ ] Implement User Settings to toggle specific infos
+- [ ] Add an Primy like sidebar with the characters
+- [ ] Add Playlists for users e.g. (Watchlist)
+  - [ ] Let the user create its own playlists with names
 
 ## Stretch
 
