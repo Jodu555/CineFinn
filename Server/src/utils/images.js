@@ -28,14 +28,21 @@ const generateImages = async (series, cleanup = () => { }) => {
         let i = 0;
         for (const episode of seasons) {
             i++;
-            const data = filenameParser(episode, path.parse(episode).base);
-            //TODO: change here the stuff to the new oop variant
-            const output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), `${data.season}-${data.episode}`);
+            // const data = filenameParser(episode, path.parse(episode).base);
+            // //TODO: change here the stuff to the new oop variant
+            // const output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), `${data.season}-${data.episode}`);
+            // fs.mkdirSync(output, { recursive: true });
+            // if (fs.readdirSync(output).length == 0) {
+            //     const command = `ffmpeg -i "${episode}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
+            //     await deepExecPromisify(command);
+            //     console.log(`  => Video (SE-EP) ${i} / ${items} - ${path.parse(episode).base}`);
+            // }
+            const output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), `${episode.season}-${episode.episode}`);
             fs.mkdirSync(output, { recursive: true });
             if (fs.readdirSync(output).length == 0) {
-                const command = `ffmpeg -i "${episode}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
+                const command = `ffmpeg -i "${episode.filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
                 await deepExecPromisify(command);
-                console.log(`  => Video (SE-EP) ${i} / ${items} - ${path.parse(episode).base}`);
+                console.log(`  => Video (SE-EP) ${i} / ${items} - ${path.parse(episode.filePath).base}`);
             }
         }
         for (const movie of serie.movies) {
