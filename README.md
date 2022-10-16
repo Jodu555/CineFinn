@@ -59,6 +59,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [ ] Add an Primy like sidebar with the characters
 - [ ] Add Playlists for users e.g. (Watchlist)
   - [ ] Let the user create its own playlists with names
+- [ ] Think about a way on how to make it work to add an intro skip button
 
 ## Stretch
 

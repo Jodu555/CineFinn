@@ -5,7 +5,6 @@ const { Database } = require('@jodu555/mysqlapi');
  * @returns {String}
  */
 const generateStr = (segmentList) => {
-    //TODO: Generate the watch string by the segmentList input
     let str = '';
     segmentList.forEach(segment => {
         // console.log(segment);
@@ -87,8 +86,6 @@ class Segment {
  * @returns {String} watch String
  */
 const load = async (UUID) => {
-    //TODO: Returns the current watch string
-
     const database = Database.getDatabase();
     let data = await database.get('watch_strings').getOne({ account_UUID: UUID });
     if (data == null || data == undefined) {
