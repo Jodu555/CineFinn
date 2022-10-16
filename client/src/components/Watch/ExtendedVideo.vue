@@ -392,7 +392,7 @@ export default {
 	font-size: 27px;
 
 	opacity: 0;
-	transition: opacity 150ms ease-in-out;
+	transition: opacity 300ms ease-in-out;
 }
 
 .video-container:hover .video-title-container,

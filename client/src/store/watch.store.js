@@ -63,7 +63,7 @@ export default {
         entityObject(state) {
             try {
                 if (state.currentMovie != -1) {
-                    return state.currentSeries?.movies?.[state.currentMovie];
+                    return state.currentSeries?.movies?.[state.currentMovie - 1];
                 } else if (state.currentSeason != -1 && state.currentEpisode != -1) {
                     // Long (Especially when there are 50 seasons with 100 episodes each)
                     // const entity = serie.seasons.flat().find(x => x.season == season && x.episode == episode);

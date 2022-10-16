@@ -52,6 +52,7 @@ const crawlAndIndex = () => {
 
         const item = series.find(x => x.title.includes(parsedData.title));
         if (parsedData.movie == true) {
+            //TODO: Add here the movie oop code
             item.movies.push(e)
         } else {
             const currentArr = item.seasons[parsedData.season - 1]
