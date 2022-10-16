@@ -19,7 +19,10 @@ function debounce(cb, delay = 1000) {
         }, delay)
     }
 }
-
+/**
+ * @param  {Boolen} forceLoad=false
+ * @returns {[import('../classes/series').Series]}
+ */
 const getSeries = (forceLoad = false) => {
     if (forceLoad || !series) {
         if (fs.existsSync(outputFileName) && !forceLoad) {

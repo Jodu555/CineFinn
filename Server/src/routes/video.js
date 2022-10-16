@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { getVideoEntity } = require('../classes/series');
+const { getVideoEntity, getVideoMovie } = require('../classes/series');
 const { getSeries } = require('../utils/utils');
 
 
@@ -39,7 +39,12 @@ module.exports = (req, res) => {
     const isMovie = Boolean(movie);
 
     // let videoEntity = isMovie ? serie.movies[movie] : serie.seasons[season][episode];
-    let videoEntity = getVideoEntity(serie.ID, season, episode);
+    let videoEntity = null
+    if (isMovie) {
+        videoEntity = getVideoMovie(serie.ID, movie);
+    } else {
+        videoEntity = getVideoEntity(serie.ID, season, episode);
+    }
     if (videoEntity == null || videoEntity == undefined) {
         res.status(400).send('Season or Episode does not exists');
         return;
@@ -48,7 +53,7 @@ module.exports = (req, res) => {
 
     debug && console.log('Got Video Entitiy', videoEntity);
 
-    let filePath = isMovie ? videoEntity : videoEntity.filePath;
+    const filePath = videoEntity.filePath;
 
 
     if (videoEntity.langs.length > 1) {

@@ -171,11 +171,23 @@ function getVideoEntity(seriesID, season, episode) {
     return entity;
 }
 
+/**
+ * @param  {String} seriesID the seriesID
+ * @param  {Number} season the season 1 based
+ * @param  {Number} episode the episode also 1 based
+ * @returns {Movie}
+ */
+function getVideoMovie(seriesID, movie) {
+    const serie = getSeries().find(x => x.ID == seriesID);
+    return serie.movies[movie - 1];
+}
+
 module.exports = {
     Series,
     Episode,
     Movie,
     filenameParser,
     cleanupSeriesBeforeFrontResponse,
-    getVideoEntity
+    getVideoEntity,
+    getVideoMovie
 }
