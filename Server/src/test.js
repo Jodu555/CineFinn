@@ -4,6 +4,7 @@ const path = require('path');
 require('dotenv').config();
 const { getVideoEntity } = require('./classes/series');
 const { generateImages } = require('./utils/images');
+const { promiseAllLimit } = require('./utils/utils');
 
 // const { Database } = require('@jodu555/mysqlapi');
 // const database = Database.createDatabase(process.env.DB_HOST, process.env.DB_USERNAME, process.env.DB_PASSWORD, process.env.DB_DATABASE);
@@ -140,33 +141,27 @@ const series = JSON.parse(fs.readFileSync(process.env.LOCAL_DB_FILE, 'utf8'));
 
 const wait = ms => new Promise((rs, _) => setTimeout(_ => { console.log('Run'); rs(); }, ms));
 
-const promiseAllLimit = (...args) => {
-    return new Promise((resolve, _) => {
-        import('p-limit').then(pMLimit => {
-            resolve(pMLimit.default(...args));
-        });
-    })
-};
-
 
 (async () => {
 
-    const limit = await promiseAllLimit(10);
+    // const limit = await promiseAllLimit(5);
 
-    // const limit = pLimit(10);
-    const arr = Array.from({
-        length: 100
-    }, () => {
-        return limit(() => wait(5000));
-    });
+    // // const limit = pLimit(10);
+    // const arr = Array.from({
+    //     length: 100
+    // }, () => {
+    //     return limit(() => wait(5000));
+    // });
 
-    await Promise.all(arr);
+    // await Promise.all(arr);
 
     // console.log(`arr`, arr);
 
-    // const serie = series.find(s => s.title == 'The Irregular at Magic High School');
+    const serie = series.find(s => s.title == 'The Irregular at Magic High School');
 
-    // generateImages([serie]);
+    console.log(serie);
+
+    generateImages([serie]);
 
     return;
     const newSeries = await Promise.all(series.map(serie => {

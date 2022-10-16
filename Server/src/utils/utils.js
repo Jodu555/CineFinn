@@ -64,6 +64,13 @@ const toAllSockets = async (cb, filter = () => { }) => {
     sockets.filter(filter).forEach(cb);
 }
 
+const promiseAllLimit = (...args) => {
+    return new Promise((resolve, _) => {
+        import('p-limit').then(pMLimit => {
+            resolve(pMLimit.default(...args));
+        });
+    })
+};
 
 module.exports = {
     getSeries,
@@ -75,5 +82,6 @@ module.exports = {
     getIO,
     setIO,
     debounce,
-    toAllSockets
+    toAllSockets,
+    promiseAllLimit
 }
