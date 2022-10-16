@@ -3,10 +3,13 @@
 		<img class="thumbnail-img" />
 		<!-- TODO: Maybe show this only if the users prefered settings match -->
 		<div v-if="entityObject" class="video-title-container">
-			<p>
+			<p v-if="currentMovie == -1">
 				{{ entityObject.primaryName }} - {{ String(entityObject.season).padStart(2, '0') }}x{{
 					String(entityObject.episode).padStart(2, '0')
 				}}
+			</p>
+			<p v-if="currentMovie !== -1">
+				{{ entityObject }}
 			</p>
 		</div>
 		<div class="video-controls-container">

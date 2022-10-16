@@ -4,7 +4,7 @@ const { listFiles } = require('./fileutils');
 const generateID = () => Math.floor(Math.random() * 10000);
 
 const crawlAndIndex = () => {
-    const { Series, filenameParser, Episode } = require('../classes/series');
+    const { Series, filenameParser, Episode, Movie } = require('../classes/series');
 
     const overcategories = ['Aniworld', 'STO'];
     const obj = {};
@@ -53,7 +53,8 @@ const crawlAndIndex = () => {
         const item = series.find(x => x.title.includes(parsedData.title));
         if (parsedData.movie == true) {
             //TODO: Add here the movie oop code
-            item.movies.push(e)
+            const movie = new Movie(e, parsedData.movieTitle, '', [parsedData.language]);
+            item.movies.push(movie)
         } else {
             const currentArr = item.seasons[parsedData.season - 1]
 
