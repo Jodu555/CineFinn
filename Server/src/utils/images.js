@@ -23,7 +23,7 @@ async function deepExecPromisify(command, cwd) {
 const generateImages = async (series, cleanup = () => { }) => {
     console.log('Started generateImages()');
 
-    const limit = await promiseAllLimit(10);
+    const limit = await promiseAllLimit(Number(process.env.IMG_CONCURRENT_LIMIT_GENERATION || 5));
 
     for (const serie of series) {
         const seasons = serie.seasons.flat();

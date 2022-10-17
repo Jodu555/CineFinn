@@ -84,5 +84,5 @@ export default createStore({
     watch,
     auth
   },
-  plugins: [logger]
+  // plugins: [logger]
 })
