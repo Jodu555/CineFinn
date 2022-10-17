@@ -26,7 +26,6 @@ async function writeWatchInfoToDatabase(socket, obj) {
     if (!searchOBJ.series || searchOBJ.series == null || searchOBJ.series == -1) {
         return;
     }
-
     if (movie !== -1 && movie !== undefined) {
         updatedSegmentList = await updateSegment(socket.auth.user.UUID, searchOBJ, updateFunction);
     }
@@ -36,9 +35,8 @@ async function writeWatchInfoToDatabase(socket, obj) {
     }
 
     if (update) {
-
         console.log('  => Updated');
-        toAllSockets(
+        await toAllSockets(
             (s) => { s.emit('watchListChange', updatedSegmentList) },
             (s) => (s.auth.type == 'client' && s.auth.user.UUID == socket.auth.user.UUID)
         );
