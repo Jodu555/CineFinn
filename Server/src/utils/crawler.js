@@ -1,7 +1,11 @@
 const path = require('path');
 const { listFiles } = require('./fileutils');
+const { v4: uuidv4 } = require('uuid');
 
-const generateID = () => Math.floor(Math.random() * 10000);
+const generateID = () => {
+    return uuidv4().split('-')[0];
+    // return Math.floor(Math.random() * 10000);
+};
 
 const crawlAndIndex = () => {
     const { Series, filenameParser, Episode, Movie } = require('../classes/series');
