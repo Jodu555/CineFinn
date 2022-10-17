@@ -70,7 +70,7 @@ const parse = (str) => {
 
 class Segment {
     constructor(ID, season, episode, movie, time) {
-        this.ID = Number(ID);
+        this.ID = ID;
         this.season = Number(season); // 1 based (number)
         this.episode = Number(episode); // 1 based (number)
         this.movie = Number(movie);
@@ -121,7 +121,7 @@ const updateSegment = async (UUID, searchCriteria, segmentUpdateFunction) => {
     if (!segment) {
         segment = new Segment(searchCriteria.series, searchCriteria.season, searchCriteria.episode, searchCriteria.movie, 0);
         segmentList.push(segment);
-    };
+    }
     segmentUpdateFunction(segment);
     segment.calc();
     await save(UUID, generateStr(segmentList));

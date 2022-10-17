@@ -23,7 +23,7 @@ async function writeWatchInfoToDatabase(socket, obj) {
         }
     }
 
-    if (!searchOBJ.series || isNaN(searchOBJ.series) || searchOBJ.series == null || searchOBJ.series == -1) {
+    if (!searchOBJ.series || searchOBJ.series == null || searchOBJ.series == -1) {
         return;
     }
 
