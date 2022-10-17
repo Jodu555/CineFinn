@@ -38,16 +38,14 @@ const generateImages = async (series, cleanup = () => { }) => {
         const seasons = serie.seasons.flat();
         const items = seasons.length + serie.movies.length
         console.log(`Checked: ${serie.title} with ${items} Items`);
-        let i = 0;
-        const episodeImageGeneratingPromises = seasons.map(episode => {
+        const episodeImageGeneratingPromises = seasons.map((episode, i) => {
             return limit(() => new Promise(async (resolve, _) => {
-                i++;
                 const output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), `${episode.season}-${episode.episode}`);
                 fs.mkdirSync(output, { recursive: true });
                 if (fs.readdirSync(output).length == 0) {
                     const command = `ffmpeg -i "${episode.filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
                     await deepExecPromisify(command);
-                    console.log(`  => Video (SE-EP) ${i} / ${items} - ${path.parse(episode.filePath).base}`);
+                    console.log(`  => Video (SE-EP) ${i + 1} / ${items} - ${path.parse(episode.filePath).base}`);
                 }
                 resolve();
             }))

@@ -1,5 +1,5 @@
 const { CommandManager, Command } = require('@jodu555/commandmanager');
-const { getSeries } = require('./utils');
+const { getSeries, getAuthHelper } = require('./utils');
 
 const commandManager = CommandManager.getCommandManager();
 
@@ -12,6 +12,24 @@ function registerCommands() {
             (command, [...args], scope) => {
                 getSeries(true);
                 return 'Reloaded the series config successfully';
+            }
+        )
+    );
+    commandManager.registerCommand(
+        new Command(
+            'authsession',
+            'authsession [list]',
+            'Lists the current authenticated session',
+            (command, [...args], scope) => {
+                if (args[1] == 'list') {
+                    const output = ['Current authsessions:']
+                    for (const [token, obj] of getAuthHelper().tokens) {
+                        output.push(` - ${token} => ${obj.username}`);
+                    }
+                    output.push('', '------------------------------------');
+                    return output;
+                }
+                return '';
             }
         )
     );
