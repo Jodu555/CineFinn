@@ -25,34 +25,25 @@ const generateImages = async (series, cleanup = () => { }) => {
 
     const limit = await promiseAllLimit(10);
 
-    // const limit = pLimit(10);
-    // const arr = Array.from({
-    //     length: 100
-    // }, () => {
-    //     return limit(() => wait(5000));
-    // });
-
-    // await Promise.all(arr);
-
     for (const serie of series) {
         const seasons = serie.seasons.flat();
         console.log(`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items`);
 
-        // const episodeImageGeneratingPromises = seasons.map((episode, i) => {
-        //     return limit(() => new Promise(async (resolve, _) => {
-        //         const output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), `${episode.season}-${episode.episode}`);
-        //         fs.mkdirSync(output, { recursive: true });
-        //         if (fs.readdirSync(output).length == 0) {
-        //             const command = `ffmpeg -i "${episode.filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
-        //             await deepExecPromisify(command);
-        //             console.log(`  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(episode.filePath).base}`);
-        //         }
-        //         resolve();
-        //     }))
-        // });
+        const episodeImageGeneratingPromises = seasons.map((episode, i) => {
+            return limit(() => new Promise(async (resolve, _) => {
+                const output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), `${episode.season}-${episode.episode}`);
+                fs.mkdirSync(output, { recursive: true });
+                if (fs.readdirSync(output).length == 0) {
+                    const command = `ffmpeg -i "${episode.filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
+                    await deepExecPromisify(command);
+                    console.log(`  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(episode.filePath).base}`);
+                }
+                resolve();
+            }))
+        });
 
+        await Promise.all(episodeImageGeneratingPromises);
 
-        // await Promise.all(episodeImageGeneratingPromises);
 
         const movieImageGeneratingPromises = serie.movies.map((movie, i) => {
             return limit(() => new Promise(async (resolve, _) => {
@@ -68,6 +59,8 @@ const generateImages = async (series, cleanup = () => { }) => {
         });
 
         await Promise.all(movieImageGeneratingPromises);
+
+
     }
 
     console.log('Finished generateImages()');
