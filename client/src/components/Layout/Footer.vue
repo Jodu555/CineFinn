@@ -4,7 +4,7 @@
 			<p class="text-center text-muted footer-text">
 				© Copyright
 				{{ new Date().getFullYear() }}
-				2022 by <a href="https://Jodu555.de">Jodu555</a> /
+				by <a href="https://Jodu555.de">Jodu555</a> /
 				<a href="https://jodu555.de/imprint">Impressum</a> /
 				<a href="https://jodu555.de/privacy">Privacy Policy</a>
 			</p>

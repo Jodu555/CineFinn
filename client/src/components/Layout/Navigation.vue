@@ -81,9 +81,21 @@ export default {
 					data: [],
 					maximumItems: 5,
 					threshold: 1,
-					onSelectItem: ({ label, value }) => {
+					onSelectItem: ({ event, label, value }) => {
 						this.$refs.autocomplete.value = '';
-						this.$router.push({ path: '/watch', query: { id: value } });
+						console.log(`event`, event);
+						const { ctrlKey, shiftKey } = event;
+						if (ctrlKey || shiftKey) {
+							//Open in new tab
+							let routeData = this.$router.resolve({
+								path: '/watch',
+								query: { id: value },
+							});
+							console.log(routeData.href);
+							window.open(routeData.href);
+						} else {
+							this.$router.push({ path: '/watch', query: { id: value } });
+						}
 					},
 				}));
 			this.ac.setData(
