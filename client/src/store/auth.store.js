@@ -14,6 +14,7 @@ const getDefaultState = () => {
             preferredLanguage: 'GerDub',
             showVideoTitleContainer: true,
             showLatestWatchButton: true,
+            developerMode: false,
         }
     }
 }
@@ -38,6 +39,9 @@ export default {
         },
         setSettings(state, settings) {
             state.settings = settings;
+        },
+        updateSettings(state, settings) {
+            state.settings = { ...state.settings, ...settings };
         },
         logout(state) {
             state.loggedIn = false;

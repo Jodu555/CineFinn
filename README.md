@@ -60,7 +60,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [ ] Add Playlists for users e.g. (Watchlist)
   - [ ] Let the user create its own playlists with names
 - [ ] Think about a way on how to make it work to add an intro skip button
-- [ ] Change in the Navigation search (if you hold CTRL + Enter then open the selected series in a new tab)
+- [x] Change in the Navigation search (if you hold CTRL + Enter then open the selected series in a new tab)
 - [ ] Implement a native (so called todo list) to see wich series are still not ripped and maybe also with sorting
 
 ## Stretch

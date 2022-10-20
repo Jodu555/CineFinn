@@ -35,7 +35,7 @@
 					Jump to Latest watch position!
 				</button>
 			</div>
-			<pre>
+			<pre v-if="settings.developerMode">
 				currentMovie: {{ currentMovie }}
 				currentSeason: {{ currentSeason }}
 				currentEpisode: {{ currentEpisode }}
@@ -139,7 +139,7 @@ export default {
 			'currentLanguage',
 			'watchList',
 		]),
-		...mapState('auth', ['authToken']),
+		...mapState('auth', ['authToken', 'settings']),
 		...mapGetters('watch', ['videoSrc', 'entityObject']),
 		showLatestWatchButton() {
 			if (this.forceHideButton) return false;

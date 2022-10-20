@@ -53,23 +53,35 @@
 						:click="start"
 					/>
 				</ul>
-				<h2>
+				<h2 @click="showSettings = !showSettings">
 					<p class="d-flex justify-content-between" style="align-items: center">
 						Settings:
 						<font-awesome-icon
 							style="margin-left: 0.5rem"
 							size="xs"
-							:icon="['fa-solid', showJobs ? 'chevron-up' : 'chevron-down']"
+							:icon="['fa-solid', showSettings ? 'chevron-up' : 'chevron-down']"
 						/>
 					</p>
 				</h2>
 				<hr />
+				<div v-if="showSettings">
+					<div class="mb-3 form-check">
+						<input
+							type="checkbox"
+							v-model="settings.developerMode"
+							@change="toggleDevMode"
+							class="form-check-input"
+							id="devmode"
+						/>
+						<label class="form-check-label" for="devmode">Developer Mode</label>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
 </template>
 <script>
-import { mapState } from 'vuex';
+import { mapMutations, mapState } from 'vuex';
 import JobListView from '@/components/Layout/JobListView';
 
 export default {
@@ -78,10 +90,11 @@ export default {
 		return {
 			jobs: [],
 			showJobs: false,
+			showSettings: false,
 		};
 	},
 	computed: {
-		...mapState('auth', ['userInfo', 'authToken']),
+		...mapState('auth', ['userInfo', 'authToken', 'settings']),
 	},
 	mounted() {
 		this.load();
@@ -93,6 +106,10 @@ export default {
 		});
 	},
 	methods: {
+		...mapMutations('auth', ['updateSettings']),
+		toggleDevMode(e) {
+			this.updateSettings({ developerMode: e.target.checked });
+		},
 		async load() {
 			const response = await this.$networking.get('/managment/jobs/info');
 			if (!response.success) return;

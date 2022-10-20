@@ -134,7 +134,6 @@ export default class Autocomplete {
                 let dataValue = e.target.getAttribute('data-value');
 
                 this.field.value = dataLabel;
-                //TODO: Make here some stuff to make the (ctrl new tab todo working)
                 if (this.options.onSelectItem) {
                     this.dropdown.hide();
                     this.options.onSelectItem({

@@ -12,6 +12,16 @@
 				{{ entityObject.primaryName }}
 			</p>
 		</div>
+		<div class="video-actor-container">
+			<div class="actress-container row">
+				<img
+					class="actress-image col"
+					src="https://cdn.anisearch.de/images/character/cover/full/42/42593.webp"
+					alt=""
+				/>
+				<p class="col">Miyuki Shiba</p>
+			</div>
+		</div>
 		<div class="video-controls-container">
 			<div class="timeline-container">
 				<div class="timeline">
@@ -131,6 +141,20 @@ export default {
 		this.cleanupFN();
 	},
 	methods: {
+		generatePreviewImageURL(previewImgNumber) {
+			let previewImgSrc = '';
+			if (this.currentSeries != undefined && this.currentSeries.ID != -1) {
+				previewImgSrc = `${this.$networking.API_URL}/previewImages/${this.currentSeries.ID}/`;
+				if (this.currentMovie != -1 && this.currentMovie != undefined) {
+					previewImgSrc += `Movies/${
+						this.currentSeries.movies[this.currentMovie - 1]
+					}/preview${previewImgNumber}.jpg?auth-token=${this.authToken}`;
+				} else {
+					previewImgSrc += `${this.entityObject.season}-${this.entityObject.episode}/preview${previewImgNumber}.jpg?auth-token=${this.authToken}`;
+				}
+			}
+			return previewImgSrc;
+		},
 		initialize() {
 			const TIME_UPDATE_THROTTLE = 1000;
 			const v = this;
@@ -249,17 +273,7 @@ export default {
 				);
 				const previewImgNumber = Math.max(1, Math.floor((percent * video.duration) / 10));
 				// let previewImgSrc = `/assets/previewImgs/preview${previewImgNumber}.jpg`;
-				let previewImgSrc = ``;
-				if (v.currentSeries != undefined && v.currentSeries.ID != -1) {
-					previewImgSrc = `${v.$networking.API_URL}/previewImages/${v.currentSeries.ID}/`;
-					if (v.currentMovie != -1 && v.currentMovie != undefined) {
-						previewImgSrc += `Movies/${
-							v.currentSeries.movies[v.currentMovie - 1]
-						}/preview${previewImgNumber}.jpg?auth-token=${v.authToken}`;
-					} else {
-						previewImgSrc += `${v.currentSeason}-${v.currentEpisode}/preview${previewImgNumber}.jpg?auth-token=${v.authToken}`;
-					}
-				}
+				const previewImgSrc = v.generatePreviewImageURL(previewImgNumber);
 				previewImg.src = previewImgSrc;
 				timelineContainer.style.setProperty('--preview-position', percent);
 				if (isScrubbing) {
@@ -384,6 +398,47 @@ export default {
 };
 </script>
 <style scoped>
+.actress-container:hover,
+.actress-container:focus-within {
+	outline-color: #f2f4f6;
+	outline-style: groove;
+	/* outline: 1px solid #f2f4f6; */
+}
+.actress-container {
+	transition: outline-color 0.3ms ease-in-out;
+	background-color: rgba(0, 0, 0, 0.4);
+	outline-color: transparent;
+}
+.actress-image {
+	max-width: 8rem;
+	max-height: 9rem;
+}
+.video-actor-container {
+	position: absolute;
+	top: 4rem;
+	left: 0.5rem;
+	right: 0;
+	color: white;
+	z-index: 100;
+	margin: 0.5rem;
+	font-size: 27px;
+
+	max-width: 20rem;
+	height: 25rem;
+	max-height: 25rem;
+
+	/* background-color: red; */
+
+	opacity: 0;
+	transition: opacity 300ms ease-in-out;
+}
+
+.video-container:hover .video-actor-container,
+.video-container:focus-within .video-actor-container,
+.video-container.paused .video-actor-container {
+	opacity: 0.9;
+}
+
 .video-title-container {
 	position: absolute;
 	top: 0;
