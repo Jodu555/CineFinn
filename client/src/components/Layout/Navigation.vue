@@ -63,14 +63,30 @@ export default {
 	data() {
 		return {
 			ac: null,
+			pressedKeys: [],
 		};
 	},
 	computed: {
 		...mapState(['series']),
 		...mapState('auth', ['loggedIn']),
 	},
+	created() {
+		console.log(`Event call`);
+		window.addEventListener('keyup', this.handleKeyUp);
+		window.addEventListener('keydown', this.handleKeyDown);
+	},
+	beforeUnmount() {
+		window.removeEventListener('keyup', this.handleKeyUp);
+		window.removeEventListener('keydown', this.handleKeyDown);
+	},
 	methods: {
 		...mapActions('auth', ['logout']),
+		handleKeyUp(e) {
+			if (this.pressedKeys[e.key] != true) this.pressedKeys[e.key] = false;
+		},
+		handleKeyDown(e) {
+			if (this.pressedKeys[e.key] != false) this.pressedKeys[e.key] = true;
+		},
 	},
 	watch: {
 		series() {
@@ -83,9 +99,7 @@ export default {
 					threshold: 1,
 					onSelectItem: ({ event, label, value }) => {
 						this.$refs.autocomplete.value = '';
-						console.log(`event`, event);
-						const { ctrlKey, shiftKey } = event;
-						if (ctrlKey || shiftKey) {
+						if (event.ctrlKey || this.pressedKeys['j']) {
 							//Open in new tab
 							let routeData = this.$router.resolve({
 								path: '/watch',

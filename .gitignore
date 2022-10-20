@@ -3,6 +3,8 @@ new.json
 old-new.json
 new-time.json
 
+ChromeAnalyze/
+
 # Logs
 logs
 *.log
