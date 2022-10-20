@@ -13,13 +13,35 @@
 			</p>
 		</div>
 		<div class="video-actor-container">
-			<div class="actress-container row">
-				<img
-					class="actress-image col"
-					src="https://cdn.anisearch.de/images/character/cover/full/42/42593.webp"
-					alt=""
-				/>
-				<p class="col">Miyuki Shiba</p>
+			<div class="actress-container">
+				<div class="row">
+					<img
+						class="actress-image col"
+						src="https://cdn.anisearch.de/images/character/cover/full/42/42593.webp"
+						alt=""
+					/>
+					<div class="col align-middle" style="margin-top: 2%">
+						<p style="margin-bottom: 0.1rem">Miyuki Shiba</p>
+						<p class="actress-speaker">
+							<img
+								class="actress-speaker-flag"
+								src="/flag-langs/gersub.svg"
+								alt="Deutsche Sprache, Flagge"
+								title="Deutsch/German"
+							/>
+							Saori HAYAMI
+						</p>
+						<p class="actress-speaker">
+							<img
+								class="actress-speaker-flag"
+								src="/flag-langs/gerdub.svg"
+								alt="Deutsche Sprache, Flagge"
+								title="Deutsch/German"
+							/>
+							Mia Diekow
+						</p>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="video-controls-container">
@@ -398,20 +420,27 @@ export default {
 };
 </script>
 <style scoped>
-.actress-container:hover,
-.actress-container:focus-within {
-	outline-color: #f2f4f6;
-	outline-style: groove;
-	/* outline: 1px solid #f2f4f6; */
+.actress-speaker {
+	font-size: 1rem;
+	margin-bottom: 0.2rem;
+}
+.actress-speaker-flag {
+	width: 25px;
+	margin-left: 10px;
 }
 .actress-container {
-	transition: outline-color 0.3ms ease-in-out;
 	background-color: rgba(0, 0, 0, 0.4);
-	outline-color: transparent;
+	/* box-shadow: 0 0 0 1px #f2f4f6; */
+	transition: box-shadow 0.5s ease-in-out;
 }
+.actress-container:hover {
+	box-shadow: 0 0 0 2px #f2f4f6;
+}
+
 .actress-image {
-	max-width: 8rem;
-	max-height: 9rem;
+	max-width: 6rem;
+	max-height: 7rem;
+	margin: 0.6rem;
 }
 .video-actor-container {
 	position: absolute;
@@ -426,8 +455,6 @@ export default {
 	max-width: 20rem;
 	height: 25rem;
 	max-height: 25rem;
-
-	/* background-color: red; */
 
 	opacity: 0;
 	transition: opacity 300ms ease-in-out;

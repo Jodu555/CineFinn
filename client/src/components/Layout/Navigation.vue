@@ -71,7 +71,6 @@ export default {
 		...mapState('auth', ['loggedIn']),
 	},
 	created() {
-		console.log(`Event call`);
 		window.addEventListener('keyup', this.handleKeyUp);
 		window.addEventListener('keydown', this.handleKeyDown);
 	},
@@ -100,6 +99,8 @@ export default {
 					onSelectItem: ({ event, label, value }) => {
 						this.$refs.autocomplete.value = '';
 						if (event.ctrlKey || this.pressedKeys['j']) {
+							console.log({ ctrl: event.ctrlKey, j: this.pressedKeys['j'] });
+							this.pressedKeys['j'] && (this.pressedKeys['j'] = false);
 							//Open in new tab
 							let routeData = this.$router.resolve({
 								path: '/watch',
