@@ -12,128 +12,7 @@
 				{{ entityObject.primaryName }}
 			</p>
 		</div>
-		<div class="video-actor-container">
-			<div class="actress-container">
-				<div class="row">
-					<img
-						class="actress-image col"
-						src="https://cdn.anisearch.de/images/character/cover/full/42/42593.webp"
-						alt=""
-					/>
-					<div class="col align-middle" style="margin-top: 2%">
-						<p style="margin-bottom: 0.1rem">Miyuki Shiba</p>
-						<p class="actress-speaker">
-							<img
-								class="actress-speaker-flag"
-								src="/flag-langs/gersub.svg"
-								alt="Deutsche Sprache, Flagge"
-								title="Deutsch/German"
-							/>
-							Saori HAYAMI
-						</p>
-						<p class="actress-speaker">
-							<img
-								class="actress-speaker-flag"
-								src="/flag-langs/gerdub.svg"
-								alt="Deutsche Sprache, Flagge"
-								title="Deutsch/German"
-							/>
-							Mia Diekow
-						</p>
-					</div>
-				</div>
-			</div>
-			<div class="actress-container">
-				<div class="row">
-					<img
-						class="actress-image col"
-						src="https://cdn.anisearch.de/images/character/cover/full/42/42593.webp"
-						alt=""
-					/>
-					<div class="col align-middle" style="margin-top: 2%">
-						<p style="margin-bottom: 0.1rem">Miyuki Shiba</p>
-						<p class="actress-speaker">
-							<img
-								class="actress-speaker-flag"
-								src="/flag-langs/gersub.svg"
-								alt="Deutsche Sprache, Flagge"
-								title="Deutsch/German"
-							/>
-							Saori HAYAMI
-						</p>
-						<p class="actress-speaker">
-							<img
-								class="actress-speaker-flag"
-								src="/flag-langs/gerdub.svg"
-								alt="Deutsche Sprache, Flagge"
-								title="Deutsch/German"
-							/>
-							Mia Diekow
-						</p>
-					</div>
-				</div>
-			</div>
-			<div class="actress-container">
-				<div class="row">
-					<img
-						class="actress-image col"
-						src="https://cdn.anisearch.de/images/character/cover/full/42/42593.webp"
-						alt=""
-					/>
-					<div class="col align-middle" style="margin-top: 2%">
-						<p style="margin-bottom: 0.1rem">Miyuki Shiba</p>
-						<p class="actress-speaker">
-							<img
-								class="actress-speaker-flag"
-								src="/flag-langs/gersub.svg"
-								alt="Deutsche Sprache, Flagge"
-								title="Deutsch/German"
-							/>
-							Saori HAYAMI
-						</p>
-						<p class="actress-speaker">
-							<img
-								class="actress-speaker-flag"
-								src="/flag-langs/gerdub.svg"
-								alt="Deutsche Sprache, Flagge"
-								title="Deutsch/German"
-							/>
-							Mia Diekow
-						</p>
-					</div>
-				</div>
-			</div>
-			<div class="actress-container">
-				<div class="row">
-					<img
-						class="actress-image col"
-						src="https://cdn.anisearch.de/images/character/cover/full/42/42593.webp"
-						alt=""
-					/>
-					<div class="col align-middle" style="margin-top: 2%">
-						<p style="margin-bottom: 0.1rem">Miyuki Shiba</p>
-						<p class="actress-speaker">
-							<img
-								class="actress-speaker-flag"
-								src="/flag-langs/gersub.svg"
-								alt="Deutsche Sprache, Flagge"
-								title="Deutsch/German"
-							/>
-							Saori HAYAMI
-						</p>
-						<p class="actress-speaker">
-							<img
-								class="actress-speaker-flag"
-								src="/flag-langs/gerdub.svg"
-								alt="Deutsche Sprache, Flagge"
-								title="Deutsch/German"
-							/>
-							Mia Diekow
-						</p>
-					</div>
-				</div>
-			</div>
-		</div>
+		<ActorContainer v-if="false" />
 		<div class="video-controls-container">
 			<div class="timeline-container">
 				<div class="timeline">
@@ -222,8 +101,9 @@
 	</div>
 </template>
 <script>
-import { mapState, mapMutations, mapActions, mapGetters } from 'vuex';
-import { debounce, throttle } from '@/plugins/debounceAndThrottle';
+import { mapState, mapGetters } from 'vuex';
+import { throttle } from '@/plugins/debounceAndThrottle';
+import ActorContainer from './ActorContainer.vue';
 export default {
 	props: {
 		switchTo: { type: Function },
@@ -284,16 +164,13 @@ export default {
 			const videoContainer = document.querySelector('.video-container');
 			const timelineContainer = document.querySelector('.timeline-container');
 			const video = document.querySelector('video');
-
 			let isScrubbing = false;
 			let wasPaused;
-
 			//All Document Listeners (which needed to be cleaned up)
 			document.addEventListener('keydown', documentKeyDown);
 			document.addEventListener('mouseup', documentMouseUp);
 			document.addEventListener('mousemove', documentMouseMove);
 			document.addEventListener('fullscreenchange', documentFullScreenChange);
-
 			//Key Controls
 			function documentKeyDown(e) {
 				const tagName = document.activeElement.tagName.toLowerCase();
@@ -344,7 +221,6 @@ export default {
 						break;
 				}
 			}
-
 			// Timeline
 			function documentMouseUp(e) {
 				if (isScrubbing) toggleScrubbing(e);
@@ -352,17 +228,14 @@ export default {
 			function documentMouseMove(e) {
 				if (isScrubbing) handleTimelineUpdate(e);
 			}
-
 			// Fullscreen
 			function documentFullScreenChange() {
 				videoContainer.classList.toggle('full-screen', document.fullscreenElement);
 				videoContainer.scrollIntoView();
 			}
-
 			//Timeline
 			timelineContainer.addEventListener('mousemove', handleTimelineUpdate);
 			timelineContainer.addEventListener('mousedown', toggleScrubbing);
-
 			function toggleScrubbing(e) {
 				const rect = timelineContainer.getBoundingClientRect();
 				const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
@@ -498,7 +371,6 @@ export default {
 			video.addEventListener('pause', () => {
 				videoContainer.classList.add('paused');
 			});
-
 			return () => {
 				document.removeEventListener('keydown', documentKeyDown);
 				document.removeEventListener('mouseup', documentMouseUp);
@@ -507,75 +379,10 @@ export default {
 			};
 		},
 	},
+	components: { ActorContainer },
 };
 </script>
 <style scoped>
-.actress-speaker {
-	font-size: 1rem;
-	margin-bottom: 0.2rem;
-}
-.actress-speaker-flag {
-	width: 25px;
-	margin-left: 10px;
-}
-.actress-container {
-	max-width: 97%;
-	background-color: rgba(0, 0, 0, 0.4);
-	transition: box-shadow 0.5s ease-in-out;
-	margin-bottom: 0.6rem;
-}
-.actress-container:hover {
-	box-shadow: inset 0 0 0 2px #e2e4e5;
-}
-
-.actress-image {
-	max-width: 6rem;
-	max-height: 7rem;
-	margin: 0.6rem;
-}
-.video-actor-container {
-	pointer-events: auto;
-	position: absolute;
-	top: 4rem;
-	left: 0.5rem;
-	right: 0;
-	color: white;
-	z-index: 100;
-	margin: 0.5rem;
-	font-size: 27px;
-
-	max-width: 20rem;
-	max-height: 25rem;
-
-	overflow-y: hidden;
-	overflow-x: hidden;
-
-	opacity: 0;
-	transition: opacity 300ms ease-in-out;
-}
-
-.video-actor-container:hover {
-	overflow-y: auto;
-}
-
-.video-actor-container::-webkit-scrollbar {
-	width: 6px;
-}
-.video-actor-container::-webkit-scrollbar-thumb {
-	background: #fcfdffba;
-	border-radius: 10px;
-}
-.video-actor-container::-webkit-scrollbar-track {
-	background: rgba(0, 0, 0, 0.7);
-	box-shadow: inset 0 0 8px #666666;
-}
-
-.video-container:hover .video-actor-container,
-.video-container:focus-within .video-actor-container,
-.video-container.paused .video-actor-container {
-	opacity: 0.9;
-}
-
 .video-title-container {
 	pointer-events: none;
 	position: absolute;

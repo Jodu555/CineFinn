@@ -349,9 +349,6 @@ export default {
 		this.sendVideoTimeUpdate(video.currentTime, true);
 		localStorage.removeItem('data');
 	},
-	errorCaptured(err, vm, info) {
-		console.log('ERROR:', err, vm, info);
-	},
 };
 </script>
 
