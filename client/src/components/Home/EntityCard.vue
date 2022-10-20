@@ -6,14 +6,11 @@
 				<h4 class="card-title">{{ entity.title }}</h4>
 				<p v-if="entity.infos && entity.infos.description" class="card-text">
 					{{
-						etendedView[entity.ID] == undefined || etendedView[entity.ID] != true
-							? entity.infos.description.slice(0, 200) + '...'
-							: entity.infos.description
+						showDescription
+							? entity.infos.description
+							: entity.infos.description.slice(0, 150) + '...'
 					}}
-					<small
-						v-if="etendedView[entity.ID] == undefined || etendedView[entity.ID] != true"
-						class="read-more"
-						@click="etendedView[entity.ID] = true"
+					<small v-if="!showDescription" class="read-more" @click="showDescription = true"
 						>More</small
 					>
 					<br />
@@ -53,7 +50,7 @@ export default {
 	props: ['entity'],
 	data() {
 		return {
-			etendedView: {},
+			showDescription: false,
 		};
 	},
 	created() {},
@@ -63,5 +60,6 @@ export default {
 .read-more {
 	color: var(--bs-link-color);
 	text-decoration: underline;
+	cursor: pointer;
 }
 </style>
