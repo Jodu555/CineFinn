@@ -94,12 +94,11 @@ app.use('/watch', authHelper.authentication(), require('./routes/watch').router)
 app.get('/index', authHelper.authentication(), async (req, res, next) => {
     const series = cleanupSeriesBeforeFrontResponse(getSeries());
 
-    // const response = await axios.post('http://localhost:4895', series);
-    // // console.log(response.data);
-    // res.json(response.data);
+    const response = await axios.post('http://localhost:4895', series);
+    // console.log(response.data);
+    res.json(response.data);
 
-    res.json(series);
-    // res.json(getSeries());
+    // res.json(series);
 });
 
 app.get('/news', authHelper.authentication(), async (req, res, next) => {

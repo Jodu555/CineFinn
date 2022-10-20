@@ -53,7 +53,7 @@ module.exports = (req, res) => {
 
     debug && console.log('Got Video Entitiy', videoEntity);
 
-    const filePath = videoEntity.filePath;
+    let filePath = videoEntity.filePath;
 
 
     if (videoEntity.langs.length > 1) {

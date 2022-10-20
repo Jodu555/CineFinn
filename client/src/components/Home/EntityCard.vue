@@ -1,21 +1,21 @@
 <template>
 	<div class="col">
-		<div class="card h-100">
-			<!-- <img
-				src="https://aniworld.to/public/img/cover/akashic-records-of-bastard-magical-instructor-stream-cover-VyCC27ePiixKPIVArGWdlGZZ7hCu23iD_150x225.jpg"
-				class="card-img-top"
-				alt="..."
-			/> -->
-			<!-- <img
-				src="https://aniworld.to/public/img/cover/akashic-records-of-bastard-magical-instructor-stream-cover-VyCC27ePiixKPIVArGWdlGZZ7hCu23iD_220x330.jpg"
-				class="card-img-top"
-				alt="..."
-			/> -->
+		<div class="card">
 			<img v-if="entity?.infos?.image" :src="entity.infos.image" class="card-img-top" alt="..." />
 			<div class="card-body">
 				<h4 class="card-title">{{ entity.title }}</h4>
 				<p v-if="entity.infos && entity.infos.description" class="card-text">
-					{{ entity.infos.description }}
+					{{
+						etendedView[entity.ID] == undefined || etendedView[entity.ID] != true
+							? entity.infos.description.slice(0, 200) + '...'
+							: entity.infos.description
+					}}
+					<small
+						v-if="etendedView[entity.ID] == undefined || etendedView[entity.ID] != true"
+						class="read-more"
+						@click="etendedView[entity.ID] = true"
+						>More</small
+					>
 					<br />
 					<!-- <pre>{{ entity.infos}}</pre> -->
 					<small class="text-muted"
@@ -51,7 +51,17 @@
 <script>
 export default {
 	props: ['entity'],
+	data() {
+		return {
+			etendedView: {},
+		};
+	},
 	created() {},
 };
 </script>
-<style></style>
+<style scoped>
+.read-more {
+	color: var(--bs-link-color);
+	text-decoration: underline;
+}
+</style>
