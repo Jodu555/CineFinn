@@ -43,6 +43,96 @@
 					</div>
 				</div>
 			</div>
+			<div class="actress-container">
+				<div class="row">
+					<img
+						class="actress-image col"
+						src="https://cdn.anisearch.de/images/character/cover/full/42/42593.webp"
+						alt=""
+					/>
+					<div class="col align-middle" style="margin-top: 2%">
+						<p style="margin-bottom: 0.1rem">Miyuki Shiba</p>
+						<p class="actress-speaker">
+							<img
+								class="actress-speaker-flag"
+								src="/flag-langs/gersub.svg"
+								alt="Deutsche Sprache, Flagge"
+								title="Deutsch/German"
+							/>
+							Saori HAYAMI
+						</p>
+						<p class="actress-speaker">
+							<img
+								class="actress-speaker-flag"
+								src="/flag-langs/gerdub.svg"
+								alt="Deutsche Sprache, Flagge"
+								title="Deutsch/German"
+							/>
+							Mia Diekow
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="actress-container">
+				<div class="row">
+					<img
+						class="actress-image col"
+						src="https://cdn.anisearch.de/images/character/cover/full/42/42593.webp"
+						alt=""
+					/>
+					<div class="col align-middle" style="margin-top: 2%">
+						<p style="margin-bottom: 0.1rem">Miyuki Shiba</p>
+						<p class="actress-speaker">
+							<img
+								class="actress-speaker-flag"
+								src="/flag-langs/gersub.svg"
+								alt="Deutsche Sprache, Flagge"
+								title="Deutsch/German"
+							/>
+							Saori HAYAMI
+						</p>
+						<p class="actress-speaker">
+							<img
+								class="actress-speaker-flag"
+								src="/flag-langs/gerdub.svg"
+								alt="Deutsche Sprache, Flagge"
+								title="Deutsch/German"
+							/>
+							Mia Diekow
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="actress-container">
+				<div class="row">
+					<img
+						class="actress-image col"
+						src="https://cdn.anisearch.de/images/character/cover/full/42/42593.webp"
+						alt=""
+					/>
+					<div class="col align-middle" style="margin-top: 2%">
+						<p style="margin-bottom: 0.1rem">Miyuki Shiba</p>
+						<p class="actress-speaker">
+							<img
+								class="actress-speaker-flag"
+								src="/flag-langs/gersub.svg"
+								alt="Deutsche Sprache, Flagge"
+								title="Deutsch/German"
+							/>
+							Saori HAYAMI
+						</p>
+						<p class="actress-speaker">
+							<img
+								class="actress-speaker-flag"
+								src="/flag-langs/gerdub.svg"
+								alt="Deutsche Sprache, Flagge"
+								title="Deutsch/German"
+							/>
+							Mia Diekow
+						</p>
+					</div>
+				</div>
+			</div>
 		</div>
 		<div class="video-controls-container">
 			<div class="timeline-container">
@@ -429,12 +519,13 @@ export default {
 	margin-left: 10px;
 }
 .actress-container {
+	max-width: 97%;
 	background-color: rgba(0, 0, 0, 0.4);
-	/* box-shadow: 0 0 0 1px #f2f4f6; */
 	transition: box-shadow 0.5s ease-in-out;
+	margin-bottom: 0.6rem;
 }
 .actress-container:hover {
-	box-shadow: 0 0 0 2px #f2f4f6;
+	box-shadow: inset 0 0 0 2px #e2e4e5;
 }
 
 .actress-image {
@@ -443,6 +534,7 @@ export default {
 	margin: 0.6rem;
 }
 .video-actor-container {
+	pointer-events: auto;
 	position: absolute;
 	top: 4rem;
 	left: 0.5rem;
@@ -453,11 +545,29 @@ export default {
 	font-size: 27px;
 
 	max-width: 20rem;
-	height: 25rem;
 	max-height: 25rem;
+
+	overflow-y: hidden;
+	overflow-x: hidden;
 
 	opacity: 0;
 	transition: opacity 300ms ease-in-out;
+}
+
+.video-actor-container:hover {
+	overflow-y: auto;
+}
+
+.video-actor-container::-webkit-scrollbar {
+	width: 6px;
+}
+.video-actor-container::-webkit-scrollbar-thumb {
+	background: #fcfdffba;
+	border-radius: 10px;
+}
+.video-actor-container::-webkit-scrollbar-track {
+	background: rgba(0, 0, 0, 0.7);
+	box-shadow: inset 0 0 8px #666666;
 }
 
 .video-container:hover .video-actor-container,
@@ -467,6 +577,7 @@ export default {
 }
 
 .video-title-container {
+	pointer-events: none;
 	position: absolute;
 	top: 0;
 	left: 0;
