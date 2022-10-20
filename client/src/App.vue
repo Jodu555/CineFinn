@@ -41,9 +41,13 @@ export default {
 		this.$socket.on('reloadSeries', (series) => {
 			this.reloadSeries(series);
 		});
+		this.$socket.on('reload', () => {
+			window.location.reload();
+		});
 	},
 	async unmounted() {
 		this.$socket.off('reloadSeries');
+		this.$socket.off('reload');
 	},
 };
 </script>
