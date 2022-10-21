@@ -48,6 +48,7 @@ const authHelper = new AuthenticationHelper(app, '/auth', database);
 authHelper.options.register = false;
 authHelper.options.allowMultipleSessions = true;
 authHelper.install();
+//TODO: add here an development environment exclusion
 authHelper.addToken('SECR-DEV', { 'UUID': 'ad733837-b2cf-47a2-b968-abaa70edbffe', 'username': 'Jodu', 'email': 'Jodu505@gmail.com' });
 
 setAuthHelper(authHelper);
