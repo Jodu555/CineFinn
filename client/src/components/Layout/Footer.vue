@@ -18,7 +18,7 @@ export default {};
 <style>
 .footer {
 	position: absolute;
-	background-color: #f8f9fa;
+	background-color: --bs-body-color;
 	height: 3.5rem;
 	bottom: 0;
 	width: 100%;
