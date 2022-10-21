@@ -55,17 +55,19 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [x] ReThink the current series store
 - [x] Rework the whole watch page and use code splitting smart indexing and much more
   - [x] Basically rewirte the whole watch page
-- [ ] Implement User Settings to toggle specific infos
 - [ ] Add an Primy like sidebar with the characters
 - [ ] Add Playlists for users e.g. (Watchlist)
   - [ ] Let the user create its own playlists with names
 - [ ] Think about a way on how to make it work to add an intro skip button
 - [x] Change in the Navigation search (if you hold CTRL + Enter then open the selected series in a new tab)
-- [ ] Implement a native (so called todo list) to see wich series are still not ripped and maybe also with sorting
-- [ ] Save the audio volume number in state, and maybe also in account
+- [ ] Implement a native (so called todo list) to see wich series are still not ripped/downloaded/uploaded and maybe also with sorting
+- [ ] Account/Authentication System Update
+  - [ ] Restrict accounts so they cannot trigger certain jobs
+  - [ ] Save the audio volume number in state, and maybe also in account
+  - [ ] Implement User Settings to toggle specific infos
 
 ## Stretch
 
 - [ ] implement a cron job which automatically checks all downloaded series for updates and writes them to a list
 - [ ] Add the downloader and scraping service into ext. services
-- [ ] Implement a way to sync watch animes
+- [ ] Implement a way to sync watch animes smth. like SyncTube for YT or Watchtogether
