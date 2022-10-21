@@ -6,7 +6,11 @@ const getChangesMap = (from, to) => {
     const changes = new Map();
     from.forEach(se => {
         const cse = to.find(s => se.title == s.title);
-        changes.set(se.ID, cse.ID);
+        if (cse == undefined) {
+            changes.set(se.ID, se.ID);
+        } else {
+            changes.set(se.ID, cse.ID);
+        }
     });
     return changes
 }
@@ -23,6 +27,8 @@ module.exports = {
         database.connect();
         require('../utils/database')();
 
+        console.log(`options`, options);
+
         const from = JSON.parse(fs.readFileSync(options.from));
         const to = JSON.parse(fs.readFileSync(options.to));
 
@@ -30,8 +36,8 @@ module.exports = {
 
         console.log(changes);
 
-        const watchString = load(/** user_account */);
-        const watchSegmentList = parse(watchString);
+        // const watchString = load(/** user_account */);
+        // const watchSegmentList = parse(watchString);
 
 
 
