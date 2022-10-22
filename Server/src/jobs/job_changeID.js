@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { load, parse } = require('../utils/watchString');
+const { load, parse, save, generateStr } = require('../utils/watchString');
 
 
 const getChangesMap = (from, to) => {
@@ -7,21 +7,21 @@ const getChangesMap = (from, to) => {
     from.forEach(se => {
         const cse = to.find(s => se.title == s.title);
         if (cse == undefined) {
-            changes.set(se.ID, se.ID);
+            changes.set(String(se.ID), String(se.ID));
         } else {
-            changes.set(se.ID, cse.ID);
+            changes.set(String(se.ID), String(cse.ID));
         }
     });
     return changes
 }
 
 module.exports = {
-    //This job i wrote cause aproximately it happens over and over that i tweak the series object definition
+    //This job i wrote cause aproximately it happens over and over that i want to change the indexing
     help: {
         description: 'This job changes the seriesID from x to y',
         options: ['from', 'to']
     },
-    run: (options) => {
+    run: async (options) => {
         const { Database } = require('@jodu555/mysqlapi');
         const database = Database.createDatabase(process.env.DB_HOST, process.env.DB_USERNAME, process.env.DB_PASSWORD, process.env.DB_DATABASE);
         database.connect();
@@ -36,13 +36,25 @@ module.exports = {
 
         console.log(changes);
 
-        // const watchString = load(/** user_account */);
-        // const watchSegmentList = parse(watchString);
+        //Change the watchlist
+        const watchStrings = await database.get('watch_strings').get({});
+        for (const { account_UUID, watch_string: watchString } of watchStrings) {
+
+            let watchSegmentList = parse(watchString);
+            watchSegmentList = watchSegmentList.map(seg => {
+                return {
+                    ...seg,
+                    ID: changes.get(seg.ID)
+                }
+            });
+            // save(account_UUID, generateStr(watchSegmentList));
+        }
+
 
 
 
         //Change the preview images folder
-        //Change the watchlist
+
 
     }
 }

@@ -106,8 +106,8 @@ export default {
 								path: '/watch',
 								query: { id: value },
 							});
-							console.log(routeData.href);
-							window.open(routeData.href);
+							console.log(routeData);
+							window.open(routeData.href, '_blank');
 						} else {
 							this.$router.push({ path: '/watch', query: { id: value } });
 						}
