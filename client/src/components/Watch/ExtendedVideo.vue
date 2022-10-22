@@ -1,8 +1,7 @@
 <template>
 	<div style="margin-top: 0.5%" class="video-container paused" data-volume-level="high">
 		<img class="thumbnail-img" />
-		<!-- TODO: Maybe show this only if the users prefered settings match -->
-		<div v-if="entityObject" class="video-title-container">
+		<div v-if="entityObject && settings.showVideoTitleContainer" class="video-title-container">
 			<p v-if="currentMovie == -1">
 				{{ entityObject.primaryName }} - {{ String(entityObject.season).padStart(2, '0') }}x{{
 					String(entityObject.episode).padStart(2, '0')
@@ -123,7 +122,7 @@ export default {
 			'currentLanguage',
 			'watchList',
 		]),
-		...mapState('auth', ['authToken']),
+		...mapState('auth', ['authToken', 'settings']),
 		...mapGetters('watch', ['videoSrc', 'entityObject']),
 	},
 	async mounted() {

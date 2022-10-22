@@ -75,6 +75,18 @@
 						/>
 						<label class="form-check-label" for="devmode">Developer Mode</label>
 					</div>
+					<div class="mb-3 form-check">
+						<input
+							type="checkbox"
+							v-model="settings.showVideoTitleContainer"
+							@change="toggleTitleContainer"
+							class="form-check-input"
+							id="vidtitlecontainer"
+						/>
+						<label class="form-check-label" for="vidtitlecontainer"
+							>Show Video Title Container</label
+						>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -109,6 +121,9 @@ export default {
 		...mapMutations('auth', ['updateSettings']),
 		toggleDevMode(e) {
 			this.updateSettings({ developerMode: e.target.checked });
+		},
+		toggleTitleContainer(e) {
+			this.updateSettings({ showVideoTitleContainer: e.target.checked });
 		},
 		async load() {
 			const response = await this.$networking.get('/managment/jobs/info');

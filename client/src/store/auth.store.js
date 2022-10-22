@@ -39,9 +39,11 @@ export default {
         },
         setSettings(state, settings) {
             state.settings = settings;
+            setCookie('account_settings', JSON.stringify(settings));
         },
         updateSettings(state, settings) {
             state.settings = { ...state.settings, ...settings };
+            setCookie('account_settings', JSON.stringify({ ...state.settings, ...settings }));
         },
         logout(state) {
             state.loggedIn = false;
@@ -67,6 +69,8 @@ export default {
             }
         },
         async authenticate({ state, commit, dispatch }, redirectToSlash = false) {
+            if (getCookie('account_settings'))
+                commit('setSettings', JSON.parse(getCookie('account_settings')))
             try {
                 const authtoken = getCookie('auth-token') || state.authToken;
                 if (authtoken) {
