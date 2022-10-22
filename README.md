@@ -66,6 +66,16 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
   - [ ] Save the audio volume number in state, and maybe also in account
   - [ ] Implement User Settings to toggle specific infos
 
+## v2
+
+The language Devision version
+This Version introduces and overwrited filename parser system
+and an Language Integration system
+
+## v3
+
+This Version introduces the playlist idea and the account information/settings idea
+
 ## Stretch
 
 - [ ] implement a cron job which automatically checks all downloaded series for updates and writes them to a list
