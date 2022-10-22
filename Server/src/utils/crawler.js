@@ -8,7 +8,7 @@ const generateID = () => {
 };
 
 const crawlAndIndex = () => {
-    const { Series, filenameParser, Episode, Movie } = require('../classes/series');
+    const { Series, filenameParser, Episode, Movie, } = require('../classes/series');
 
     const overcategories = ['Aniworld', 'STO'];
     const obj = {};
@@ -87,9 +87,12 @@ const crawlAndIndex = () => {
 
     return series;
 }
-
+/**
+ * @param  {Series[]} before
+ * @param  {Series[]} after
+ */
 const mergeSeriesArrays = (before, after) => {
-    return after;
+    const { Series } = require('../classes/series');
     const output = [];
 
     //Compare and overwrite ids
