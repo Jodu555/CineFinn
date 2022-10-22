@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const { load, parse, save, generateStr } = require('../utils/watchString');
 
 
@@ -42,19 +43,24 @@ module.exports = {
 
             let watchSegmentList = parse(watchString);
             watchSegmentList = watchSegmentList.map(seg => {
+                if (changes.has(seg.ID))
+                    console.log('Watch String Change');
                 return {
                     ...seg,
                     ID: changes.get(seg.ID)
                 }
             });
-            // save(account_UUID, generateStr(watchSegmentList));
+            save(account_UUID, generateStr(watchSegmentList));
         }
 
+        const dir = fs.readdirSync(process.env.PREVIEW_IMGS_PATH);
 
+        dir.forEach(preID => {
+            if (changes.has(preID)) {
 
-
-        //Change the preview images folder
-
+                fs.renameSync(path.join(process.env.PREVIEW_IMGS_PATH, preID), path.join(process.env.PREVIEW_IMGS_PATH, changes.get(preID)));
+            }
+        });
 
     }
 }
