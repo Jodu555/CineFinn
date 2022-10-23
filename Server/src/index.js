@@ -9,13 +9,16 @@ const https = require('https');
 const cors = require('cors');
 const axios = require('axios');
 const morgan = require('morgan');
+
 const { Database } = require('@jodu555/mysqlapi');
 const database = Database.createDatabase(process.env.DB_HOST, process.env.DB_USERNAME, process.env.DB_PASSWORD, process.env.DB_DATABASE);
 database.connect();
+
 const { CommandManager } = require('@jodu555/commandmanager');
 CommandManager.createCommandManager(process.stdin, process.stdout);
 const { registerCommands } = require('./utils/commands');
 registerCommands();
+
 const { ErrorHelper, AuthenticationHelper } = require('@jodu555/express-helpers');
 require('./utils/database')();
 
@@ -47,7 +50,7 @@ authHelper.options.register = false;
 authHelper.options.allowMultipleSessions = true;
 authHelper.install();
 //TODO: add here an development environment exclusion
-authHelper.addToken('SECR-DEV', { 'UUID': 'ad733837-b2cf-47a2-b968-abaa70edbffe', 'username': 'Jodu', 'email': 'Jodu505@gmail.com' });
+// authHelper.addToken('SECR-DEV', { 'UUID': 'ad733837-b2cf-47a2-b968-abaa70edbffe', 'username': 'Jodu', 'email': 'Jodu505@gmail.com' });
 
 setAuthHelper(authHelper);
 
@@ -80,17 +83,18 @@ setIO(
 
 socket_initialize();
 
-const { router: managment_router } = require('./routes/managment.js')
-const { router: watch_router } = require('./routes/watch')
+const { router: managment_router } = require('./routes/managment.js');
+const { router: watch_router } = require('./routes/watch');
+const video = require('./routes/video.js');
 
 // Your Middleware handlers here
 app.use(express.static(path.join('dist'))); // The Vue build files
 app.use('/previewImages', authHelper.authentication(), express.static(path.join(process.env.PREVIEW_IMGS_PATH)));
 
-app.get('/video', authHelper.authentication(), require('./routes/video.js'));
+app.get('/video', authHelper.authentication(), video);
 
-app.use('/managment', authHelper.authentication(), managment_router)
-app.use('/watch', authHelper.authentication(), watch_router)
+app.use('/managment', authHelper.authentication(), managment_router);
+app.use('/watch', authHelper.authentication(), watch_router);
 
 app.get('/index', authHelper.authentication(), async (req, res, next) => {
     const series = cleanupSeriesBeforeFrontResponse(getSeries());
