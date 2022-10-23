@@ -26,45 +26,25 @@ const generateStr = (segmentList) => {
  */
 const parse = (str) => {
 
-    // const re = /(\d+):(?:(\d+)-(\d+)|(\d+))\.(\d+);/gmi;
+    const re = /(\w+):(?:(\d+)-(\d+)|(\d+))\.(\d+);/gmi;
+
+    const list = [];
 
     // const str = '2491:1-1.570;2491:1-2.5555;2491:1.0;';
-    // var outp;
-    // while ((outp = re.exec(str)) !== null) {
-    //     // console.log(outp);
-    //     let isMovie = false;
-    //     const [
-    //         og,
-    //         ID,
-    //         se,
-    //         ep,
-    //         movie,
-    //         time
-    //     ] = outp;
-
-    //     console.log({
-    //         ID,
-    //         isMovie: movie != undefined,
-    //         se,
-    //         ep,
-    //         movie,
-    //         time
-    //     });
-
-    // }
-
-    const list = str.split(';').map(s => {
-        if (!(s.length > 0)) return null;
-        const collenSplit = s.split(':');
-        const dashSplit = collenSplit[1].split('-')
-        const isMovie = dashSplit.length == 1
-        const dotSplit = isMovie ? dashSplit[0].split('.') : dashSplit[1].split('.');
-        if (isMovie) {
-            return new Segment(collenSplit[0], -1, -1, dotSplit[0], dotSplit[1]);
-        } else {
-            return new Segment(collenSplit[0], dashSplit[0], dotSplit[0], -1, dotSplit[1]);
-        }
-    }).filter(s => s != null);
+    var outp;
+    while ((outp = re.exec(str)) !== null) {
+        // console.log(outp);
+        let isMovie = false;
+        const [
+            og,
+            ID,
+            se = -1,
+            ep = -1,
+            movie = -1,
+            time
+        ] = outp;
+        list.push(new Segment(ID, se, ep, movie, time));
+    }
     return list;
 }
 
@@ -127,30 +107,6 @@ const updateSegment = async (UUID, searchCriteria, segmentUpdateFunction) => {
     await save(UUID, generateStr(segmentList));
     return segmentList;
 }
-
-// const UUID = 'ad733837-b2cf-47a2-b968-abaa70edbffe'
-
-
-// const watchString load(UUID);
-// const STR = '781:1-1.0;781:1-2.50;781:1.0'
-// const segList = parse(STR);
-
-// console.log(segList);
-
-// console.log(STR);
-// console.log();
-// generateStr(segList)
-// console.log(STR == generateStr(segList));
-
-// const segment = segList.find(seg => seg.ID == 781 && seg.season == 1 && seg.episode == 2);
-
-// segment.time = 10000;
-// console.log(segment);
-
-
-// console.log(segList);
-
-// save(UUID, generateStr(segList));
 
 
 module.exports = {
