@@ -324,6 +324,8 @@ export default {
 		await this.loadSeriesInfo(seriesID);
 		const data = JSON.parse(localStorage.getItem('data'));
 
+		this.loadWatchList(seriesID);
+
 		if (data && data.ID == seriesID) {
 			this.handleVideoChange(data.season || -1, data.episode || -1, data.movie || -1);
 		} else {
@@ -332,7 +334,6 @@ export default {
 		}
 
 		document.title = `Cinema | ${this.currentSeries.title}`;
-		this.loadWatchList(seriesID);
 	},
 	async mounted() {
 		console.log(4);

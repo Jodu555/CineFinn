@@ -54,13 +54,6 @@ authHelper.install();
 
 setAuthHelper(authHelper);
 
-app.use((req, res, next) => {
-    if (req.path.includes('/assets/previewImgs')) {
-        res.set('Cache-control', `public, max-age=${60 * 5}`)
-    }
-    next();
-})
-
 let server;
 if (process.env.https) {
     const sslProperties = {
@@ -88,13 +81,14 @@ const { router: watch_router } = require('./routes/watch');
 const video = require('./routes/video.js');
 
 // Your Middleware handlers here
-app.use(express.static(path.join('dist'))); // The Vue build files
 app.use('/previewImages', authHelper.authentication(), express.static(path.join(process.env.PREVIEW_IMGS_PATH)));
 
-app.get('/video', authHelper.authentication(), video);
-
 app.use('/managment', authHelper.authentication(), managment_router);
-app.use('/watch', authHelper.authentication(), watch_router);
+app.use('/watch', (req, res, next) => { console.log('Came /watch'); next(); }, authHelper.authentication(), watch_router);
+
+
+//Your direct routing stuff here
+app.get('/video', authHelper.authentication(), video);
 
 app.get('/index', authHelper.authentication(), async (req, res, next) => {
     const series = cleanupSeriesBeforeFrontResponse(getSeries());
