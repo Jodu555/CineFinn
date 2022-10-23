@@ -23,7 +23,7 @@ const serverURL = location.hostname == 'localhost' ? 'http://localhost:3100' : '
 
 const socketPlugin = {
     install: (app, options) => {
-        app.config.globalProperties.$socket = io(serverURL, { autoConnect: false, transports: ['websocket', 'polling'], });
+        app.config.globalProperties.$socket = io(serverURL, { autoConnect: false });
     }
 }
 

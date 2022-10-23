@@ -67,7 +67,6 @@ if (process.env.https) {
 
 setIO(
     new Server(server, {
-        transports: ['websocket', 'polling'],
         cors: {
             origins: ['localhost:8080', '1b2.jodu555.de', 'cinema.jodu555.de'],
             methods: ['GET', 'POST']
