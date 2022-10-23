@@ -340,7 +340,7 @@ export default {
 			console.log('GOT watchListChange');
 			this.setWatchList(watchList.filter((e) => e.ID == this.$route.query.id));
 		});
-		this.$socket.emit('getWatchList');
+		this.$socket.emit('getWatchList', { ID: this.$route.query.id });
 	},
 	unmounted() {
 		this.$socket.off('watchListChange');

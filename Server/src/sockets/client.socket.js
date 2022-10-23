@@ -21,10 +21,10 @@ const initialize = (socket) => {
         }
     });
 
-    socket.on('getWatchList', () => {
+    socket.on('getWatchList', ({ ID }) => {
         new Promise(async (resolve, _) => {
             const segList = parse(await load(req.credentials.user.UUID));
-            socket.emit('watchListChange', segList.filter(seg => seg.ID == req.query.series))
+            socket.emit('watchListChange', segList.filter(seg => seg.ID == ID))
             resolve();
         })
     });
