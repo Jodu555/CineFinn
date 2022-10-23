@@ -332,7 +332,7 @@ export default {
 		}
 
 		document.title = `Cinema | ${this.currentSeries.title}`;
-		await this.loadWatchList(seriesID);
+		this.loadWatchList(seriesID);
 	},
 	async mounted() {
 		console.log(4);
