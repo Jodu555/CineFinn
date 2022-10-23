@@ -1,6 +1,7 @@
 
 const { debounce } = require('../utils/utils');
 const { writeWatchInfoToDatabase } = require('../utils/watchManager');
+const { parse, load } = require('../utils/watchString');
 
 const initialize = (socket) => {
     const auth = socket.auth;
