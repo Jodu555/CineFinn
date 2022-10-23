@@ -336,11 +336,11 @@ export default {
 		document.title = `Cinema | ${this.currentSeries.title}`;
 	},
 	async mounted() {
-		console.log(4);
 		this.$socket.on('watchListChange', (watchList) => {
 			console.log('GOT watchListChange');
 			this.setWatchList(watchList.filter((e) => e.ID == this.$route.query.id));
 		});
+		this.$socket.emit('getWatchList');
 	},
 	unmounted() {
 		this.$socket.off('watchListChange');

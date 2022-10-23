@@ -20,6 +20,14 @@ const initialize = (socket) => {
         }
     });
 
+    socket.on('getWatchList', () => {
+        new Promise(async (resolve, _) => {
+            const segList = parse(await load(req.credentials.user.UUID));
+            socket.emit('watchListChange', segList.filter(seg => seg.ID == req.query.series))
+            resolve();
+        })
+    });
+
     socket.on('disconnect', () => {
         console.log('Socket DisConnection:', auth.type.toUpperCase(), auth.user.username, socket.id);
     })
