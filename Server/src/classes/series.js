@@ -153,21 +153,11 @@ const filenameParser = (filepath, filename) => {
  */
 function getVideoEntity(seriesID, season, episode) {
     const serie = getSeries().find(x => x.ID == seriesID);
-
     // Long (Especially when there are 50 seasons with 100 episodes each)
     // const entity = serie.seasons.flat().find(x => x.season == season && x.episode == episode);
-
     let entity;
-    let seasonIndex = -1;
-    entity = serie.seasons[season - 1][0];
-    if (entity && entity.season == season) {
-        seasonIndex = season - 1;
-    } else {
-        seasonIndex = serie.seasons.findIndex(x => x[0].season == season);
-    }
-
+    const seasonIndex = serie.seasons.findIndex(x => x[0].season == season);
     entity = serie.seasons[seasonIndex].find(x => x.episode == episode);
-
     return entity;
 }
 
