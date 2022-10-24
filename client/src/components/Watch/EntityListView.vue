@@ -11,7 +11,7 @@
 						btn: true,
 						'text-white': true,
 						'btn-secondary': current !== i + 1 && !checkWatched(getNumber(s) - 1), //Unselected && Not Watched
-						'btn-info': current == i + 1, // Selected
+						'btn-info': current == getNumber(s, i), //i + 1, // Selected
 						'btn-success': checkWatched(getNumber(s) - 1) && current !== getNumber(s), // Watched && Not Selected
 						'crazy-green': checkWatched(getNumber(s) - 1) && current !== getNumber(s), // Watched && Not Selected
 						// 'btn-secondary': current !== i + 1 && !checkWatched(i), //Unselected && Not Watched
@@ -21,7 +21,7 @@
 					}"
 					v-for="(s, i) in array"
 					:key="s"
-					@click="chnageFN(i + 1)"
+					@click="chnageFN(getNumber(s, i + 1))"
 				>
 					{{ getNumber(s, i + 1) }}
 					<!-- {{ i + 1 }} -->
@@ -60,7 +60,12 @@ export default {
 				const filteredList = this.watchList.filter(
 					(seg) => seg.ID == this.$route.query.id && seg.watched && seg.season == index + 1
 				);
-				return this.array[index].length == filteredList.length;
+				// console.log({ arr: this.array, index, filteredList });
+				if (this.array[index]) {
+					return this.array[index].length == filteredList.length;
+				} else {
+					return false;
+				}
 			} else {
 				if (this.watchList.length != 0) {
 					return Boolean(

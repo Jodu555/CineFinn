@@ -38,11 +38,12 @@ export default {
     },
     getters: {
         videoSrc(state, o) {
-            if (state.currentSeries == undefined && o.entityObject) return '';
+            if (state.currentSeries == undefined || !o.entityObject || o.entityObject == undefined || o.entityObject == null) return '';
             const url = new URL(store.$networking.API_URL + '/video');
             url.searchParams.append('auth-token', store.$networking.auth_token)
             url.searchParams.append('series', state.currentSeries.ID)
             url.searchParams.append('language', state.currentLanguage)
+
 
             let out = `${store.$networking.API_URL}/video?auth-token=${store.$networking.auth_token}&series=${state.currentSeries.ID}&language=${state.currentLanguage}`;
             if (state.currentSeason == -1) {
@@ -56,7 +57,6 @@ export default {
                 url.searchParams.append('episode', o.entityObject.episode)
                 // out += `&season=${state.currentSeason}&episode=${state.currentEpisode}`;
             }
-            console.log(url.href);
             return url.href;
             return out;
         },
@@ -66,27 +66,33 @@ export default {
                     return state.currentSeries?.movies?.[state.currentMovie - 1];
                 } else if (state.currentSeason != -1 && state.currentEpisode != -1) {
                     // Long (Especially when there are 50 seasons with 100 episodes each)
-                    // const entity = serie.seasons.flat().find(x => x.season == season && x.episode == episode);
 
-                    let entity;
-                    let seasonIndex = -1;
-                    entity = state.currentSeries.seasons[state.currentSeason - 1][0];
-                    if (entity && entity.season == state.currentSeason) {
-                        seasonIndex = state.currentSeason - 1;
-                    } else {
-                        seasonIndex = state.currentSeries.seasons.findIndex(
-                            (x) => x[0].season == state.currentSeason
-                        );
-                    }
+                    // console.log(state.currentSeries);
+                    // console.log(state.currentSeason, state.currentEpisode);
 
-                    entity = state.currentSeries.seasons[seasonIndex].find(
-                        (x) => x.episode == state.currentEpisode
-                    );
+                    const entity = state.currentSeries.seasons.flat().find(x => x.season == state.currentSeason && x.episode == state.currentEpisode);
+
+                    // console.log(entity);
+                    // let entity;
+                    // let seasonIndex = -1;
+                    // entity = state.currentSeries.seasons[state.currentSeason - 1][0];
+
+                    // if (entity && entity.season == state.currentSeason) {
+                    //     seasonIndex = state.currentSeason - 1;
+                    // } else {
+                    //     seasonIndex = state.currentSeries.seasons.findIndex(
+                    //         (x) => x[0].season == state.currentSeason
+                    //     );
+                    // }
+
+                    // entity = state.currentSeries.seasons[seasonIndex].find(
+                    //     (x) => x.episode == state.currentEpisode
+                    // );
 
                     return entity;
                 }
             } catch (error) {
-                console.error(error);
+                console.error('watch.store.js', error);
             }
 
             return null;

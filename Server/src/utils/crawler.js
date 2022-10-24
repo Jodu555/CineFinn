@@ -86,10 +86,11 @@ const crawlAndIndex = () => {
     series = JSON.parse(JSON.stringify(series));
 
     series = series.map(e => {
-        const newSeasons = e.seasons.map(x => {
-            x == null && console.log('innner', e, x, 'out', x == null ? [] : x);
+        const newSeasons = e.seasons.filter(x => {
+            // x == null && console.log('innner', e, x, 'out', x == null ? [] : x);
 
-            return x == null ? [] : x;
+            // return x == null ? [] : x;
+            return x != null;
         }).map(x => x.sort(sorterFunction));
 
         return {

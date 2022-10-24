@@ -64,7 +64,7 @@
 			<EntityListView
 				v-if="currentSeason != -1"
 				title="Episodes:"
-				:array="currentSeries.seasons[currentSeason - 1]"
+				:array="currentSeries.seasons.find((x) => x[0].season == entityObject.season)"
 				:current="currentEpisode"
 				:currentSeason="currentSeason"
 				:chnageFN="changeEpisode"
@@ -222,14 +222,32 @@ export default {
 				return;
 			} else {
 				//Switch in Episodes
+				// const { arrptr, idxptr, value } = multiDimSwitcher(
+				// 	this.currentSeries.seasons,
+				// 	this.currentSeason - 1,
+				// 	this.currentEpisode - 1,
+				// 	vel
+				// );
+				const seasonIdx = this.currentSeries.seasons.findIndex(
+					(x) => x[0].season == this.entityObject.season
+				);
+				const episodeIdx = this.currentSeries.seasons[seasonIdx].findIndex(
+					(x) => x.episode == this.entityObject.episode
+				);
+
+				console.log({ dimArr: this.currentSeries.seasons, seasonIdx, episodeIdx });
+
 				const { arrptr, idxptr, value } = multiDimSwitcher(
 					this.currentSeries.seasons,
-					this.currentSeason - 1,
-					this.currentEpisode - 1,
+					seasonIdx,
+					episodeIdx,
 					vel
 				);
 				console.log(arrptr, idxptr, value);
-				this.handleVideoChange(arrptr + 1, idxptr + 1);
+
+				const entity = this.currentSeries.seasons[arrptr][idxptr];
+
+				this.handleVideoChange(entity.season, entity.episode);
 				return;
 			}
 		},
