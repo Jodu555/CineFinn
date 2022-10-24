@@ -37,7 +37,7 @@ async function writeWatchInfoToDatabase(socket, obj) {
     if (update) {
         console.log('  => Updated');
         await toAllSockets(
-            (s) => { s.emit('watchListChange', updatedSegmentList) },
+            (s) => { s.emit('watchListChange', updatedSegmentList.filter(x => x.ID == searchOBJ.series)) },
             (s) => (s.auth.type == 'client' && s.auth.user.UUID == socket.auth.user.UUID)
         );
     }
