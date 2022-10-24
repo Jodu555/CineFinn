@@ -7,6 +7,8 @@ out-remote.json
 
 ChromeAnalyze/
 
+Season-*/
+
 # Logs
 logs
 *.log

@@ -32,7 +32,7 @@ const crawlAndIndex = () => {
     /**
      * @type Series[]
      */
-    const series = [];
+    let series = [];
 
 
     Object.keys(obj).forEach(categorie => {
@@ -78,12 +78,26 @@ const crawlAndIndex = () => {
     });
 
     const sorterFunction = (a, b) => {
-        // const ap = filenameParser(a, path.parse(a).base);
-        // const bp = filenameParser(b, path.parse(b).base);
         return a.episode - b.episode;
     }
 
-    series.forEach(e => e.seasons.forEach(x => x.sort(sorterFunction)));
+
+    //Strinify in Json and then parse to deal with the empty array items the they are null
+    series = JSON.parse(JSON.stringify(series));
+
+    series = series.map(e => {
+        const newSeasons = e.seasons.map(x => {
+            x == null && console.log('innner', e, x, 'out', x == null ? [] : x);
+
+            return x == null ? [] : x;
+        }).map(x => x.sort(sorterFunction));
+
+        return {
+            ...e,
+            seasons: newSeasons
+        };
+
+    });
 
     return series;
 }
