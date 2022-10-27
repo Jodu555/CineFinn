@@ -3,17 +3,17 @@
 		<div class="row justify-content-start">
 			<h2 class="col-sm-2" style="width: 13.666667%">{{ title }}</h2>
 			<!-- <pre>{{ array }}</pre> -->
-			<h3 class="col">
+			<!-- <h3 class="col">
 				<button
 					style="font-weight: 900; font-size: 1.18rem; padding: 0.3rem 0.6rem"
 					type="button"
 					:class="{
 						btn: true,
 						'text-white': true,
-						'btn-secondary': current !== i + 1 && !checkWatched(getNumber(s) - 1), //Unselected && Not Watched
+						'btn-secondary': current !== i + 1 && !checkWatched(getNumber(s, i) - 1), //Unselected && Not Watched
 						'btn-info': current == getNumber(s, i), //i + 1, // Selected
-						'btn-success': checkWatched(getNumber(s) - 1) && current !== getNumber(s), // Watched && Not Selected
-						'crazy-green': checkWatched(getNumber(s) - 1) && current !== getNumber(s), // Watched && Not Selected
+						'btn-success': checkWatched(getNumber(s, i) - 1) && current !== getNumber(s, i), // Watched && Not Selected
+						'crazy-green': checkWatched(getNumber(s, i) - 1) && current !== getNumber(s, i), // Watched && Not Selected
 						// 'btn-secondary': current !== i + 1 && !checkWatched(i), //Unselected && Not Watched
 						// 'btn-info': current == i + 1, // Selected
 						// 'btn-success': checkWatched(i) && current !== i + 1, // Watched && Not Selected
@@ -21,10 +21,28 @@
 					}"
 					v-for="(s, i) in array"
 					:key="s"
-					@click="chnageFN(getNumber(s, i + 1))"
+					@click="chnageFN(getNumber(s, i))"
 				>
 					{{ getNumber(s, i + 1) }}
-					<!-- {{ i + 1 }} -->
+				</button>
+			</h3> -->
+			<h3 class="col">
+				<button
+					style="font-weight: 900; font-size: 1.18rem; padding: 0.3rem 0.6rem"
+					type="button"
+					:class="{
+						btn: true,
+						'text-white': true,
+						'btn-secondary': true, //Unselected && Not Watched
+						'btn-info': false, //i + 1, // Selected
+						'btn-success': false, // Watched && Not Selected
+						'crazy-green': false, // Watched && Not Selected
+					}"
+					v-for="(s, i) in array"
+					:key="s"
+					@click="chnageFN(-1)"
+				>
+					{{ isMovie ? i + 1 : season ? s[0].season : s.episode }}
 				</button>
 			</h3>
 		</div>
@@ -48,41 +66,42 @@ export default {
 		},
 	},
 	methods: {
-		getNumber(s, i) {
-			if (this.isMovie) {
-				return i;
-			} else {
-				return this.season == true ? s[0].season : s.episode;
-			}
-		},
-		checkWatched(index) {
-			if (this.season) {
-				const filteredList = this.watchList.filter(
-					(seg) => seg.ID == this.$route.query.id && seg.watched && seg.season == index + 1
-				);
-				// console.log({ arr: this.array, index, filteredList });
-				if (this.array[index]) {
-					return this.array[index].length == filteredList.length;
-				} else {
-					return false;
-				}
-			} else {
-				if (this.watchList.length != 0) {
-					return Boolean(
-						this.watchList.find((segment) => {
-							return (
-								segment.ID == this.$route.query.id &&
-								segment.watched &&
-								((segment.season == this.currentSeason && segment.episode == index + 1) ||
-									segment.movie == index + 1)
-							);
-						})
-					);
-				} else {
-					return false;
-				}
-			}
-		},
+		// getNumber(s, i) {
+		// 	if (this.isMovie) {
+		// 		return i;
+		// 	} else {
+		// 		return this.season == true ? s[0].season : s.episode;
+		// 	}
+		// },
+		// checkWatched(index) {
+		// 	console.log(index, this.season);
+		// 	if (this.season) {
+		// 		const filteredList = this.watchList.filter(
+		// 			(seg) => seg.ID == this.$route.query.id && seg.watched && seg.season == index + 1
+		// 		);
+		// 		// console.log({ arr: this.array, index, filteredList });
+		// 		if (this.array[index]) {
+		// 			return this.array[index].length == filteredList.length;
+		// 		} else {
+		// 			return false;
+		// 		}
+		// 	} else {
+		// 		if (this.watchList.length != 0) {
+		// 			return Boolean(
+		// 				this.watchList.find((segment) => {
+		// 					return (
+		// 						segment.ID == this.$route.query.id &&
+		// 						segment.watched &&
+		// 						((segment.season == this.currentSeason && segment.episode == index + 1) ||
+		// 							segment.movie == index + 1)
+		// 					);
+		// 				})
+		// 			);
+		// 		} else {
+		// 			return false;
+		// 		}
+		// 	}
+		// },
 	},
 };
 </script>
