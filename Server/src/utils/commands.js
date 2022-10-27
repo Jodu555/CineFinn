@@ -1,5 +1,5 @@
 const { CommandManager, Command } = require('@jodu555/commandmanager');
-const { getSeries, getAuthHelper, toAllSockets } = require('./utils');
+const { getSeries, getAuthHelper, toAllSockets, getIO } = require('./utils');
 
 const commandManager = CommandManager.getCommandManager();
 
@@ -31,6 +31,23 @@ function registerCommands() {
                 } else {
                     return 'You need to specify an argument!';
                 }
+            }
+        )
+    );
+
+    commandManager.registerCommand(
+        new Command(
+            ['socketsessions', 'ss'],
+            'socketsessions',
+            'Lists the current active socket sessions',
+            async (command, [...args], scope) => {
+                const output = ['Current socket sessions:']
+                const sockets = await getIO().fetchSockets();
+                for (const socket of sockets) {
+                    output.push(` - ${socket.auth.type.toUpperCase()} => ${socket.auth.user.username}`);
+                }
+                output.push('', '------------------------------------');
+                return output;
             }
         )
     );
