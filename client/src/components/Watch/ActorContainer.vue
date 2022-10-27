@@ -1,6 +1,32 @@
 <template>
 	<div class="video-actor-container">
-		<div class="actress-container">
+		<div v-for="char in characters" :key="char.name" class="actress-container">
+			<div class="row">
+				<img class="actress-image col" :src="char.imageURL" alt="" />
+				<div class="col align-middle" style="margin-top: 2%">
+					<p style="margin-bottom: 0.1rem">{{ char.name }}</p>
+					<p class="actress-speaker">
+						<img
+							class="actress-speaker-flag"
+							src="/flag-langs/gersub.svg"
+							alt="Deutsche Sprache, Flagge"
+							title="Deutsch/German"
+						/>
+						Saori HAYAMI
+					</p>
+					<p class="actress-speaker">
+						<img
+							class="actress-speaker-flag"
+							src="/flag-langs/gerdub.svg"
+							alt="Deutsche Sprache, Flagge"
+							title="Deutsch/German"
+						/>
+						Mia Diekow
+					</p>
+				</div>
+			</div>
+		</div>
+		<!-- <div class="actress-container">
 			<div class="row">
 				<img
 					class="actress-image col"
@@ -29,101 +55,27 @@
 					</p>
 				</div>
 			</div>
-		</div>
-		<div class="actress-container">
-			<div class="row">
-				<img
-					class="actress-image col"
-					src="https://cdn.anisearch.de/images/character/cover/full/42/42593.webp"
-					alt=""
-				/>
-				<div class="col align-middle" style="margin-top: 2%">
-					<p style="margin-bottom: 0.1rem">Miyuki Shiba</p>
-					<p class="actress-speaker">
-						<img
-							class="actress-speaker-flag"
-							src="/flag-langs/gersub.svg"
-							alt="Deutsche Sprache, Flagge"
-							title="Deutsch/German"
-						/>
-						Saori HAYAMI
-					</p>
-					<p class="actress-speaker">
-						<img
-							class="actress-speaker-flag"
-							src="/flag-langs/gerdub.svg"
-							alt="Deutsche Sprache, Flagge"
-							title="Deutsch/German"
-						/>
-						Mia Diekow
-					</p>
-				</div>
-			</div>
-		</div>
-		<div class="actress-container">
-			<div class="row">
-				<img
-					class="actress-image col"
-					src="https://cdn.anisearch.de/images/character/cover/full/42/42593.webp"
-					alt=""
-				/>
-				<div class="col align-middle" style="margin-top: 2%">
-					<p style="margin-bottom: 0.1rem">Miyuki Shiba</p>
-					<p class="actress-speaker">
-						<img
-							class="actress-speaker-flag"
-							src="/flag-langs/gersub.svg"
-							alt="Deutsche Sprache, Flagge"
-							title="Deutsch/German"
-						/>
-						Saori HAYAMI
-					</p>
-					<p class="actress-speaker">
-						<img
-							class="actress-speaker-flag"
-							src="/flag-langs/gerdub.svg"
-							alt="Deutsche Sprache, Flagge"
-							title="Deutsch/German"
-						/>
-						Mia Diekow
-					</p>
-				</div>
-			</div>
-		</div>
-		<div class="actress-container">
-			<div class="row">
-				<img
-					class="actress-image col"
-					src="https://cdn.anisearch.de/images/character/cover/full/42/42593.webp"
-					alt=""
-				/>
-				<div class="col align-middle" style="margin-top: 2%">
-					<p style="margin-bottom: 0.1rem">Miyuki Shiba</p>
-					<p class="actress-speaker">
-						<img
-							class="actress-speaker-flag"
-							src="/flag-langs/gersub.svg"
-							alt="Deutsche Sprache, Flagge"
-							title="Deutsch/German"
-						/>
-						Saori HAYAMI
-					</p>
-					<p class="actress-speaker">
-						<img
-							class="actress-speaker-flag"
-							src="/flag-langs/gerdub.svg"
-							alt="Deutsche Sprache, Flagge"
-							title="Deutsch/German"
-						/>
-						Mia Diekow
-					</p>
-				</div>
-			</div>
-		</div>
+		</div> -->
 	</div>
 </template>
 <script>
-export default {};
+export default {
+	data() {
+		return {
+			characters: [],
+		};
+	},
+	async created() {
+		const response = await fetch('http://localhost:4896/chars');
+		const json = await response.json();
+		this.characters = [];
+		console.log(json);
+		Object.keys(json).forEach((key) => {
+			this.characters.push(...json[key]);
+		});
+		console.log(this.characters);
+	},
+};
 </script>
 <style scoped>
 .actress-speaker {

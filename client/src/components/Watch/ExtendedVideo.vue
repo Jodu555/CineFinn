@@ -11,7 +11,7 @@
 				{{ entityObject.primaryName }}
 			</p>
 		</div>
-		<ActorContainer v-if="false" />
+		<ActorContainer v-if="true" />
 		<div class="video-controls-container">
 			<div class="timeline-container">
 				<div class="timeline">

@@ -44,7 +44,7 @@
 				entityObject: {{ entityObject }}
 			</pre
 			>
-
+			<!-- Movies -->
 			<EntityListView
 				v-if="currentSeries.movies.length >= 1"
 				title="Movies:"
@@ -53,6 +53,7 @@
 				:chnageFN="changeMovie"
 				:watchList="watchList"
 			/>
+			<!-- Seasons -->
 			<EntityListView
 				title="Seasons:"
 				:array="currentSeries.seasons"
@@ -61,6 +62,7 @@
 				:season="true"
 				:watchList="watchList"
 			/>
+			<!-- Episodes -->
 			<EntityListView
 				v-if="currentSeason != -1"
 				title="Episodes:"
