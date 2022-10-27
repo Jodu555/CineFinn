@@ -123,12 +123,6 @@ const wait = ms => new Promise((rs, _) => setTimeout(_ => { console.log('Run'); 
     // await Promise.all(arr);
 
     // console.log(`arr`, arr);
-    return;
-    const serie = series.find(s => s.title == 'The Irregular at Magic High School');
-
-    console.log(serie);
-
-    generateImages([serie]);
 
     return;
     const newSeries = await Promise.all(series.map(serie => {
