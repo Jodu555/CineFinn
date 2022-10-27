@@ -217,17 +217,11 @@ export default {
 					this.currentMovie - 1,
 					vel
 				);
-				console.log(idxptr, value);
+				// console.log(idxptr, value);
 				this.handleVideoChange(-1, -1, idxptr + 1);
 				return;
 			} else {
 				//Switch in Episodes
-				// const { arrptr, idxptr, value } = multiDimSwitcher(
-				// 	this.currentSeries.seasons,
-				// 	this.currentSeason - 1,
-				// 	this.currentEpisode - 1,
-				// 	vel
-				// );
 				const seasonIdx = this.currentSeries.seasons.findIndex(
 					(x) => x[0].season == this.entityObject.season
 				);
@@ -235,7 +229,7 @@ export default {
 					(x) => x.episode == this.entityObject.episode
 				);
 
-				console.log({ dimArr: this.currentSeries.seasons, seasonIdx, episodeIdx });
+				// console.log({ dimArr: this.currentSeries.seasons, seasonIdx, episodeIdx });
 
 				const { arrptr, idxptr, value } = multiDimSwitcher(
 					this.currentSeries.seasons,
@@ -252,6 +246,7 @@ export default {
 			}
 		},
 		changeMovie(ID) {
+			if (this.currentMovie == ID) return this.handleVideoChange();
 			this.handleVideoChange(-1, -1, ID);
 		},
 		changeEpisode(ID) {
