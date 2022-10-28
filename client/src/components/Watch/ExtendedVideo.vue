@@ -373,61 +373,69 @@ export default {
 
 			//Mobile Accessibillity
 			let tapedTwice = false;
+			let twiceTimer;
 			video.addEventListener('touchstart', (event) => {
+				const isIntersecting = () => {
+					const { top, left } = video.getBoundingClientRect();
+
+					const localX = event.touches[0].clientX - left;
+					const localY = event.touches[0].clientY - top;
+
+					console.log(top, left);
+					console.log(localX, localY);
+
+					let value = false;
+					let velocity = 0;
+
+					if (top == 0 && left == 0) {
+						if (localX > 0 && localX < window.innerWidth / 2) {
+							value = true;
+							velocity = -5;
+						}
+						if (localX > window.innerWidth / 2 && localX < window.innerWidth) {
+							value = true;
+							velocity = 5;
+						}
+					} else {
+						if (localX > 0 && localX < 500) {
+							value = true;
+							velocity = -5;
+							console.log('Intersection left');
+						}
+						if (localX > 500 && localX < 1000) {
+							value = true;
+							velocity = 5;
+							console.log('Intersection right');
+						}
+					}
+
+					return { value, velocity };
+					// return (localX > 0 && localX < 500) || (localX > 500 && localX < 1000);
+				};
+
+				if (!isIntersecting().value) return;
+
 				if (!tapedTwice) {
 					tapedTwice = true;
-					setTimeout(() => {
+					twiceTimer = setTimeout(() => {
 						tapedTwice = false;
 					}, 300);
 					return false;
 				}
 
-				//action on double tap goes below
-				const { top, left, width, height } = video.getBoundingClientRect();
-
-				const leftRect = { top, left, width: width / 2, height };
-
-				const rightRect = { top, left: left + width / 2, width: width / 2, height };
-
-				console.log('leftRect', leftRect);
-				console.log('rightRect', rightRect);
-				console.log(event.touches[0]);
-				const localX = event.touches[0].clientX - left;
-				const localY = event.touches[0].clientY - top;
-				console.log(event.touches[0].clientX, event.touches[0].clientY);
-				console.log(localX, localY);
-
 				console.log('You tapped me Twice !!!');
 
-				// case 'arrowleft':
-				// 	case 'j':
-				//		 skip(-5);
-				// 		break;
-				// 	case 'arrowright':
-				// 	case 'l':
-				// 		skip(5);
-				// 		break;
+				const out = isIntersecting();
+				if (out.value) skip(out.velocity);
 
-				if (
-					leftRect.left < localX &&
-					leftRect.width > localX &&
-					leftRect.top < localY &&
-					leftRect.height > localY
-				) {
-					event.preventDefault();
-					console.log('Intersection with left');
-					skip(-5);
-				}
-				if (
-					rightRect.left < localX &&
-					rightRect.width > localX &&
-					rightRect.top < localY &&
-					rightRect.height > localY
-				) {
-					event.preventDefault();
-					console.log('Intersection with right');
-					skip(5);
-				}
+				// if (localX > 0 && localX < 500) {
+				// 	console.log('Intersection with left');
+				// 	skip(-5);
+				// }
+				// if (localX > 500 && localX < 1000) {
+				// 	console.log('Intersection with right');
+				// 	skip(5);
+				// }
 			});
 			return () => {
 				document.removeEventListener('keydown', documentKeyDown);
