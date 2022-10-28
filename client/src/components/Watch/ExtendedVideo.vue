@@ -11,7 +11,7 @@
 				{{ entityObject.primaryName }}
 			</p>
 		</div>
-		<ActorContainer v-if="true" />
+		<ActorContainer v-if="false" />
 		<div class="video-controls-container">
 			<div class="timeline-container">
 				<div class="timeline">
@@ -369,6 +369,65 @@ export default {
 			});
 			video.addEventListener('pause', () => {
 				videoContainer.classList.add('paused');
+			});
+
+			//Mobile Accessibillity
+			let tapedTwice = false;
+			video.addEventListener('touchstart', (event) => {
+				if (!tapedTwice) {
+					tapedTwice = true;
+					setTimeout(() => {
+						tapedTwice = false;
+					}, 300);
+					return false;
+				}
+
+				//action on double tap goes below
+				const { top, left, width, height } = video.getBoundingClientRect();
+
+				const leftRect = { top, left, width: width / 2, height };
+
+				const rightRect = { top, left: left + width / 2, width: width / 2, height };
+
+				console.log('leftRect', leftRect);
+				console.log('rightRect', rightRect);
+				console.log(event.touches[0]);
+				const localX = event.touches[0].clientX - left;
+				const localY = event.touches[0].clientY - top;
+				console.log(event.touches[0].clientX, event.touches[0].clientY);
+				console.log(localX, localY);
+
+				console.log('You tapped me Twice !!!');
+
+				// case 'arrowleft':
+				// 	case 'j':
+				//		 skip(-5);
+				// 		break;
+				// 	case 'arrowright':
+				// 	case 'l':
+				// 		skip(5);
+				// 		break;
+
+				if (
+					leftRect.left < localX &&
+					leftRect.width > localX &&
+					leftRect.top < localY &&
+					leftRect.height > localY
+				) {
+					event.preventDefault();
+					console.log('Intersection with left');
+					skip(-5);
+				}
+				if (
+					rightRect.left < localX &&
+					rightRect.width > localX &&
+					rightRect.top < localY &&
+					rightRect.height > localY
+				) {
+					event.preventDefault();
+					console.log('Intersection with right');
+					skip(5);
+				}
 			});
 			return () => {
 				document.removeEventListener('keydown', documentKeyDown);
