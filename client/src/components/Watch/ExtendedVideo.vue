@@ -381,32 +381,24 @@ export default {
 					const localX = event.touches[0].clientX - left;
 					const localY = event.touches[0].clientY - top;
 
+					const middle = top == 0 && left == 0 ? window.innerWidth / 2 : 500;
+					const max = top == 0 && left == 0 ? window.innerWidth : 1000;
+
 					console.log(top, left);
 					console.log(localX, localY);
 
 					let value = false;
 					let velocity = 0;
 
-					if (top == 0 && left == 0) {
-						if (localX > 0 && localX < window.innerWidth / 2) {
-							value = true;
-							velocity = -5;
-						}
-						if (localX > window.innerWidth / 2 && localX < window.innerWidth) {
-							value = true;
-							velocity = 5;
-						}
-					} else {
-						if (localX > 0 && localX < 500) {
-							value = true;
-							velocity = -5;
-							console.log('Intersection left');
-						}
-						if (localX > 500 && localX < 1000) {
-							value = true;
-							velocity = 5;
-							console.log('Intersection right');
-						}
+					if (localX > 0 && localX < middle) {
+						value = true;
+						velocity = -5;
+						console.log('Intersection left');
+					}
+					if (localX > middle && localX < max) {
+						value = true;
+						velocity = 5;
+						console.log('Intersection right');
 					}
 
 					return { value, velocity };
