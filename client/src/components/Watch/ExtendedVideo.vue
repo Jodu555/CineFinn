@@ -373,53 +373,55 @@ export default {
 
 			//Mobile Accessibillity
 			let tapedTwice = false;
-			let twiceTimer;
-			video.addEventListener('touchstart', (event) => {
-				const isIntersecting = () => {
-					const { top, left, width } = video.getBoundingClientRect();
+			video.addEventListener(
+				'touchstart',
+				(event) => {
+					const isIntersecting = () => {
+						const { top, left, width } = video.getBoundingClientRect();
 
-					const localX = event.touches[0].clientX - left;
-					const localY = event.touches[0].clientY - top;
+						const localX = event.touches[0].clientX - left;
+						// const localY = event.touches[0].clientY - top;
 
-					const middle = top == 0 && left == 0 ? window.innerWidth / 2 : width / 2;
-					const max = top == 0 && left == 0 ? window.innerWidth : width;
+						const middle = top == 0 && left == 0 ? window.innerWidth / 2 : width / 2;
+						const max = top == 0 && left == 0 ? window.innerWidth : width;
 
-					// console.log(top, left);
-					// console.log(localX, localY);
+						// console.log(top, left);
+						// console.log(localX, localY);
 
-					let value = false;
-					let velocity = 0;
+						let value = false;
+						let velocity = 0;
 
-					if (localX > 0 && localX < middle) {
-						value = true;
-						velocity = -5;
-						console.log('Intersection left');
+						if (localX > 0 && localX < middle) {
+							value = true;
+							velocity = -5;
+							// console.log('Intersection left');
+						}
+						if (localX > middle && localX < max) {
+							value = true;
+							velocity = 5;
+							// console.log('Intersection right');
+						}
+
+						return { value, velocity };
+					};
+
+					if (!isIntersecting().value) return;
+
+					if (!tapedTwice) {
+						tapedTwice = true;
+						setTimeout(() => {
+							tapedTwice = false;
+						}, 300);
+						return false;
 					}
-					if (localX > middle && localX < max) {
-						value = true;
-						velocity = 5;
-						console.log('Intersection right');
-					}
 
-					return { value, velocity };
-					// return (localX > 0 && localX < 500) || (localX > 500 && localX < 1000);
-				};
+					// console.log('You tapped me Twice !!!');
 
-				if (!isIntersecting().value) return;
-
-				if (!tapedTwice) {
-					tapedTwice = true;
-					twiceTimer = setTimeout(() => {
-						tapedTwice = false;
-					}, 300);
-					return false;
-				}
-
-				console.log('You tapped me Twice !!!');
-
-				const out = isIntersecting();
-				if (out.value) skip(out.velocity);
-			});
+					const out = isIntersecting();
+					if (out.value) skip(out.velocity);
+				},
+				{ passive: true }
+			);
 			return () => {
 				document.removeEventListener('keydown', documentKeyDown);
 				document.removeEventListener('mouseup', documentMouseUp);
