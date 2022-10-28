@@ -1,61 +1,35 @@
 <template>
 	<div class="video-actor-container">
-		<div v-for="char in characters" :key="char.name" class="actress-container">
-			<div class="row">
-				<img class="actress-image col" :src="char.imageURL" alt="" />
-				<div class="col align-middle" style="margin-top: 2%">
-					<p style="margin-bottom: 0.1rem">{{ char.name }}</p>
-					<p class="actress-speaker">
-						<img
-							class="actress-speaker-flag"
-							src="/flag-langs/gersub.svg"
-							alt="Deutsche Sprache, Flagge"
-							title="Deutsch/German"
-						/>
-						Saori HAYAMI
-					</p>
-					<p class="actress-speaker">
-						<img
-							class="actress-speaker-flag"
-							src="/flag-langs/gerdub.svg"
-							alt="Deutsche Sprache, Flagge"
-							title="Deutsch/German"
-						/>
-						Mia Diekow
-					</p>
+		<div v-for="group in characters" :key="group">
+			<h2>{{ group[-1] }}</h2>
+			<div v-for="char in group" :key="char.name" class="actress-container">
+				<div class="row">
+					<img class="actress-image col" :src="char.imageURL" alt="" />
+					<div class="col align-middle" style="margin-top: 2%">
+						<p style="margin-bottom: 0.1rem">{{ char.name }}</p>
+						<p class="actress-speaker">
+							<img
+								class="actress-speaker-flag"
+								src="/flag-langs/gersub.svg"
+								alt="Deutsche Sprache, Flagge"
+								title="Deutsch/German"
+							/>
+							Saori HAYAMI
+						</p>
+						<p class="actress-speaker">
+							<img
+								class="actress-speaker-flag"
+								src="/flag-langs/gerdub.svg"
+								alt="Deutsche Sprache, Flagge"
+								title="Deutsch/German"
+							/>
+							Mia Diekow
+						</p>
+					</div>
 				</div>
 			</div>
+			<hr style="width: 90%" />
 		</div>
-		<!-- <div class="actress-container">
-			<div class="row">
-				<img
-					class="actress-image col"
-					src="https://cdn.anisearch.de/images/character/cover/full/42/42593.webp"
-					alt=""
-				/>
-				<div class="col align-middle" style="margin-top: 2%">
-					<p style="margin-bottom: 0.1rem">Miyuki Shiba</p>
-					<p class="actress-speaker">
-						<img
-							class="actress-speaker-flag"
-							src="/flag-langs/gersub.svg"
-							alt="Deutsche Sprache, Flagge"
-							title="Deutsch/German"
-						/>
-						Saori HAYAMI
-					</p>
-					<p class="actress-speaker">
-						<img
-							class="actress-speaker-flag"
-							src="/flag-langs/gerdub.svg"
-							alt="Deutsche Sprache, Flagge"
-							title="Deutsch/German"
-						/>
-						Mia Diekow
-					</p>
-				</div>
-			</div>
-		</div> -->
 	</div>
 </template>
 <script>
@@ -71,7 +45,9 @@ export default {
 		this.characters = [];
 		console.log(json);
 		Object.keys(json).forEach((key) => {
-			this.characters.push(...json[key]);
+			const data = json[key];
+			data[-1] = key;
+			this.characters.push(data);
 		});
 		console.log(this.characters);
 	},
@@ -110,10 +86,11 @@ export default {
 	color: white;
 	z-index: 100;
 	margin: 0.5rem;
-	font-size: 27px;
+	font-size: 22px;
 
-	max-width: 20rem;
-	max-height: 25rem;
+	/* max-width: 20rem; */
+	max-width: 30%;
+	max-height: 77%;
 
 	overflow-y: hidden;
 	overflow-x: hidden;
