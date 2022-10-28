@@ -138,7 +138,7 @@ export default {
 				previewImgSrc = `${this.$networking.API_URL}/previewImages/${this.currentSeries.ID}/`;
 				if (this.currentMovie != -1 && this.currentMovie != undefined) {
 					previewImgSrc += `Movies/${
-						this.currentSeries.movies[this.currentMovie - 1]
+						this.currentSeries.movies[this.currentMovie - 1].primaryName
 					}/preview${previewImgNumber}.jpg?auth-token=${this.authToken}`;
 				} else {
 					previewImgSrc += `${this.entityObject.season}-${this.entityObject.episode}/preview${previewImgNumber}.jpg?auth-token=${this.authToken}`;

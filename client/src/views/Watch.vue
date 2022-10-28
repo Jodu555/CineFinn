@@ -85,7 +85,7 @@
 					class="text-muted text-truncate"
 					style="margin-bottom: 0"
 				>
-					<p style="margin-bottom: 0.6rem">
+					<p class="text-truncate" style="margin-bottom: 0.6rem">
 						{{ entityObject.primaryName }}
 					</p>
 					<div v-auto-animate class="text-center">

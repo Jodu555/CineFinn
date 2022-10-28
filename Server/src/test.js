@@ -106,10 +106,17 @@ const filenameParser = (filepath, filename) => {
 
 const series = JSON.parse(fs.readFileSync(process.env.LOCAL_DB_FILE, 'utf8'));
 
+const serie = series.find(x => x.ID == 'cc3a933b');
+console.log(serie);
+
+
 const wait = ms => new Promise((rs, _) => setTimeout(_ => { console.log('Run'); rs(); }, ms));
 
 
 (async () => {
+
+    await generateImages([serie]);
+    console.log('Came');
 
     // const limit = await promiseAllLimit(5);
 
