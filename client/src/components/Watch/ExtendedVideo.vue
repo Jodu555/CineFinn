@@ -376,16 +376,16 @@ export default {
 			let twiceTimer;
 			video.addEventListener('touchstart', (event) => {
 				const isIntersecting = () => {
-					const { top, left } = video.getBoundingClientRect();
+					const { top, left, width } = video.getBoundingClientRect();
 
 					const localX = event.touches[0].clientX - left;
 					const localY = event.touches[0].clientY - top;
 
-					const middle = top == 0 && left == 0 ? window.innerWidth / 2 : 500;
-					const max = top == 0 && left == 0 ? window.innerWidth : 1000;
+					const middle = top == 0 && left == 0 ? window.innerWidth / 2 : width / 2;
+					const max = top == 0 && left == 0 ? window.innerWidth : width;
 
-					console.log(top, left);
-					console.log(localX, localY);
+					// console.log(top, left);
+					// console.log(localX, localY);
 
 					let value = false;
 					let velocity = 0;
@@ -419,15 +419,6 @@ export default {
 
 				const out = isIntersecting();
 				if (out.value) skip(out.velocity);
-
-				// if (localX > 0 && localX < 500) {
-				// 	console.log('Intersection with left');
-				// 	skip(-5);
-				// }
-				// if (localX > 500 && localX < 1000) {
-				// 	console.log('Intersection with right');
-				// 	skip(5);
-				// }
 			});
 			return () => {
 				document.removeEventListener('keydown', documentKeyDown);

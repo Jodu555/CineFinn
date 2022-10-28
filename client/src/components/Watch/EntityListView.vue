@@ -1,7 +1,7 @@
 <template>
 	<div>
-		<div class="row justify-content-start">
-			<h2 class="col-sm-2" style="width: 13.666667%">{{ title }}</h2>
+		<div class="d-flex row justify-content-start">
+			<h2 class="col-sm-1 col-3" style="margin-right: 3.5%">{{ title }}</h2>
 			<h3 class="col">
 				<button
 					style="font-weight: 900; font-size: 1.18rem; padding: 0.3rem 0.6rem"
