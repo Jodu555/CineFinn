@@ -61,10 +61,13 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [ ] Think about a way on how to make it work to add an intro skip button
 - [x] Change in the Navigation search (if you hold CTRL + Enter then open the selected series in a new tab)
 - [ ] Implement a native (so called todo list) to see wich series are still not ripped/downloaded/uploaded and maybe also with sorting
+- [x] Make the website more mobile accessibill
 - [ ] Account/Authentication System Update
   - [ ] Restrict accounts so they cannot trigger certain jobs
   - [ ] Save the audio volume number in state, and maybe also in account
   - [ ] Implement User Settings to toggle specific infos
+    - [ ] the stuff thats always hardcoded in the state
+      - [ ] Bring it also to the Settings Drawer
 
 ## v2
 
