@@ -62,6 +62,9 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [x] Change in the Navigation search (if you hold CTRL + Enter then open the selected series in a new tab)
 - [ ] Implement a native (so called todo list) to see wich series are still not ripped/downloaded/uploaded and maybe also with sorting
 - [x] Make the website more mobile accessibill
+- [ ] Add some more controls
+  - [ ] 0 - 9 for video percentage skip
+  - [ ] . & , for 1 frame more and less
 - [ ] Account/Authentication System Update
   - [ ] Restrict accounts so they cannot trigger certain jobs / Only Show the jobs an account is permitted to execute
   - [ ] Save the audio volume number in state, and maybe also in account
