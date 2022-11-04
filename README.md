@@ -64,7 +64,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [x] Make the website more mobile accessibill
 - [ ] Add some more controls
   - [ ] 0 - 9 for video percentage skip
-  - [ ] . & , for 1 frame more and less
+  - [x] . & , for 1 frame more and less
 - [ ] Account/Authentication System Update
   - [ ] Restrict accounts so they cannot trigger certain jobs / Only Show the jobs an account is permitted to execute
   - [ ] Save the audio volume number in state, and maybe also in account

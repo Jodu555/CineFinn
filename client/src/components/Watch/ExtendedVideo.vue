@@ -200,6 +200,12 @@ export default {
 					case 'l':
 						skip(5);
 						break;
+					case '.':
+						skip(0.333333333);
+						break;
+					case ',':
+						skip(-0.333333333);
+						break;
 					case 'arrowup':
 						e.preventDefault();
 						try {
