@@ -76,7 +76,8 @@
 			<div class="d-flex justify-content-between">
 				<div>
 					<button @click="switchTo(-1)" class="btn btn-outline-warning">
-						<font-awesome-icon icon="fa-solid fa-backward-step" size="lg" /> Previous
+						<font-awesome-icon icon="fa-solid fa-backward-step" size="lg" />
+						{{ showNextPrevTxt ? 'Previous' : '' }}
 					</button>
 				</div>
 				<h3
@@ -85,7 +86,7 @@
 					class="text-muted text-truncate"
 					style="margin-bottom: 0"
 				>
-					<p class="text-truncate" style="margin-bottom: 0.6rem">
+					<p class="text-center text-wrap" style="margin-bottom: 0.6rem">
 						{{ entityObject.primaryName }}
 					</p>
 					<div v-auto-animate class="text-center">
@@ -103,7 +104,8 @@
 				</h3>
 				<div>
 					<button @click="switchTo(1)" class="btn btn-outline-success">
-						Next <font-awesome-icon icon="fa-solid fa-forward-step" size="lg" />
+						{{ showNextPrevTxt ? 'Next' : '' }}
+						<font-awesome-icon icon="fa-solid fa-forward-step" size="lg" />
 					</button>
 				</div>
 			</div>
@@ -130,6 +132,7 @@ export default {
 			cleanupFN: null,
 			buttonTimer: null,
 			forceHideButton: false,
+			showNextPrevTxt: false,
 		};
 	},
 	computed: {
