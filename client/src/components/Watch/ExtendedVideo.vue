@@ -12,6 +12,8 @@
 			</p>
 		</div>
 		<ActorContainer v-if="false" />
+		<font-awesome-icon class="skip skip-left" size="2xl" icon="fa-solid fa-backward" />
+		<font-awesome-icon class="skip skip-right" size="2xl" icon="fa-solid fa-forward" />
 		<div class="video-controls-container">
 			<div class="timeline-container">
 				<div class="timeline">
@@ -162,6 +164,8 @@ export default {
 			const volumeSlider = document.querySelector('.volume-slider');
 			const videoContainer = document.querySelector('.video-container');
 			const timelineContainer = document.querySelector('.timeline-container');
+			const skipLeft = document.querySelector('.skip-left');
+			const skipRight = document.querySelector('.skip-right');
 			const video = document.querySelector('video');
 			let isScrubbing = false;
 			let wasPaused;
@@ -313,7 +317,37 @@ export default {
 				}
 			}
 			function skip(duration) {
+				const animationDuration = 400;
+				const doIconAnimation = Math.abs(duration) > 1;
+				let pref = '';
+				let sel;
+				if (duration > 0) {
+					sel = skipRight;
+				} else {
+					pref = '-';
+					sel = skipLeft;
+				}
+
+				if (doIconAnimation) {
+					videoContainer.classList.add('skipping');
+					sel.animate(
+						[
+							{ transform: 'translateX(0px)', opacity: '1' },
+							{ transform: `translateX(${pref}60px)` },
+						],
+						{
+							duration: animationDuration,
+							iterations: 1,
+						}
+					);
+				}
+
 				video.currentTime += duration;
+
+				if (doIconAnimation)
+					setTimeout(() => {
+						videoContainer.classList.remove('skipping');
+					}, animationDuration - 100);
 			}
 			// Volume
 			muteBtn.addEventListener('click', toggleMute);
@@ -440,6 +474,43 @@ export default {
 };
 </script>
 <style scoped>
+.skip {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	color: white;
+	opacity: 0;
+}
+
+@keyframes skip {
+	50% {
+		transform: rotate(0deg);
+		opacity: 1;
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+.skip.show {
+	opacity: 1;
+}
+
+.skip-left {
+	left: 20%;
+}
+.skip-right {
+	left: 80%;
+}
+
+.video-container.skipping video {
+	opacity: 0.6;
+}
+
+.video-container.skipping video {
+	transition: opacity 400ms ease-in-out;
+}
+
 .video-title-container {
 	pointer-events: none;
 	position: absolute;
