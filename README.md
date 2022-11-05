@@ -66,6 +66,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
   - [ ] 0 - 9 for video percentage skip
     - [ ] Add a nice skip animation
   - [x] . & , for 1 frame more and less
+- [ ] Move "Previous & Title & Languages & Next" to its own Componen, maybe called entity infoControls cause the ent is one single video and it displays informations and controls
 - [ ] Account/Authentication System Update
   - [ ] Restrict accounts so they cannot trigger certain jobs / Only Show the jobs an account is permitted to execute
   - [ ] Save the audio volume number in state, and maybe also in account
