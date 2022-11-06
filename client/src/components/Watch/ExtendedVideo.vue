@@ -228,6 +228,18 @@ export default {
 					case 'p':
 						v.switchTo(-1);
 						break;
+					case '1':
+					case '2':
+					case '3':
+					case '4':
+					case '5':
+					case '6':
+					case '7':
+					case '8':
+					case '9':
+					case '0':
+						skipPercent(Number(e.key.toLowerCase()));
+						break;
 				}
 			}
 			// Timeline
@@ -316,12 +328,18 @@ export default {
 					)}`;
 				}
 			}
-			function skip(duration) {
+			function skipPercent(percent) {
+				percent = percent * 10;
+				const max = video.duration;
+				const duration = (max / 100) * percent;
+				skip(duration, true);
+			}
+			function skip(duration, set = false) {
 				const animationDuration = 400;
-				const doIconAnimation = Math.abs(duration) > 1;
+				const doIconAnimation = Math.abs(duration) > 1 || Math.abs(duration) == 0;
 				let pref = '';
 				let sel;
-				if (duration > 0) {
+				if ((!set && duration >= 0) || duration > video.currentTime) {
 					sel = skipRight;
 				} else {
 					pref = '-';
@@ -341,8 +359,11 @@ export default {
 						}
 					);
 				}
-
-				video.currentTime += duration;
+				if (set) {
+					video.currentTime = duration;
+				} else {
+					video.currentTime += duration;
+				}
 
 				if (doIconAnimation)
 					setTimeout(() => {
