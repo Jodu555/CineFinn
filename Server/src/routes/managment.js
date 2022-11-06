@@ -3,14 +3,14 @@ const database = Database.getDatabase();
 const express = require('express');
 const { cleanupSeriesBeforeFrontResponse } = require('../classes/series');
 const { crawlAndIndex } = require('../utils/crawler');
-const { generateImages, validateImages } = require('../utils/images');
+const { generateImages } = require('../utils/images');
 const { getActiveJobs, setActiveJobs, getSeries, setSeries, toAllSockets } = require('../utils/utils');
 const router = express.Router();
 
 const LOOKUP = {
     crawl: { name: 'Recrawl the archive', callpoint: '/job/crawl' },
     generate: { name: 'Generating Preview-Images', callpoint: '/job/img/generate' },
-    validator: { name: 'Validating Preview-Images', callpoint: '/job/img/validate' },
+    // validator: { name: 'Validating Preview-Images', callpoint: '/job/img/validate' },
 }
 
 const callpointToEvent = (callpoint) => `${callpoint.replace('/', '').replaceAll('/', '_')}-end`;
@@ -70,26 +70,26 @@ router.get('/job/img/generate', (req, res, next) => {
     }
 });
 
-router.get('/job/img/validate', (req, res, next) => {
-    const id = 'validator';
-    const job = getActiveJobs().find(x => x.id == id);
-    if (job) {
-        const error = new Error('Job is already running!')
-        next(error);
-    } else {
-        getActiveJobs().push({
-            id,
-            name: LOOKUP[id].name,
-            startTime: Date.now(),
-            data: {},
-        });
-        validateImages(getSeries(), async () => {
-            setActiveJobs(getActiveJobs().filter(x => x.id !== id));
-            toAllSockets(s => { s.emit(callpointToEvent(LOOKUP[id].callpoint)) }, s => s.auth.type == 'client');
-        });
-        res.json(getActiveJobs());
-    }
-});
+// router.get('/job/img/validate', (req, res, next) => {
+//     const id = 'validator';
+//     const job = getActiveJobs().find(x => x.id == id);
+//     if (job) {
+//         const error = new Error('Job is already running!')
+//         next(error);
+//     } else {
+//         getActiveJobs().push({
+//             id,
+//             name: LOOKUP[id].name,
+//             startTime: Date.now(),
+//             data: {},
+//         });
+//         validateImages(getSeries(), async () => {
+//             setActiveJobs(getActiveJobs().filter(x => x.id !== id));
+//             toAllSockets(s => { s.emit(callpointToEvent(LOOKUP[id].callpoint)) }, s => s.auth.type == 'client');
+//         });
+//         res.json(getActiveJobs());
+//     }
+// });
 
 router.get('/job/crawl', (req, res, next) => {
     const id = 'crawl';

@@ -124,5 +124,4 @@ server.listen(PORT, async () => {
     // const merge = mergeSeriesArrays(crawlAndIndex(), crawlAndIndex())
     // console.log(merge);
     // generateImages([getSeries()[0]])
-    // await validateImages(getSeries());
 });

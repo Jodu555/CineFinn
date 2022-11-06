@@ -96,5 +96,5 @@ const validateImages = async (series, cleanup = () => { }) => {
 
 module.exports = {
     generateImages,
-    validateImages
+    // validateImages
 }
