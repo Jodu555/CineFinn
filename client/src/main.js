@@ -20,7 +20,6 @@ import 'bootstrap';
 
 const serverURL = location.hostname == 'localhost' ? 'http://localhost:3100' : 'http://cinema-api.jodu555.de';
 
-
 const socketPlugin = {
     install: (app, options) => {
         app.config.globalProperties.$socket = io(serverURL, { autoConnect: false });
@@ -47,6 +46,7 @@ socket.on('connect_error', async (err) => {
 
 socket.on('connect', () => {
     console.log('Socket Connect Success');
+    store.dispatch('auth/authenticate');
 })
 
 
