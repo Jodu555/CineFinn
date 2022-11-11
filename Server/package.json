@@ -20,7 +20,7 @@
 	"license": "ISC",
 	"dependencies": {
 		"@jodu555/commandmanager": "^1.5.3",
-		"@jodu555/express-helpers": "^1.2.0",
+		"@jodu555/express-helpers": "^1.2.4",
 		"@jodu555/mysqlapi": "^4.0.5",
 		"axios": "^1.1.3",
 		"cors": "^2.8.5",

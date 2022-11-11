@@ -78,6 +78,7 @@ export default {
                     const response = await this.$networking.get('/auth/info');
                     if (response.success) {
                         const json = response.json;
+                        console.log('SETTINGS', json, JSON.parse(json.settings));
                         commit('setUser', {
                             UUID: json.UUID,
                             username: json.username,
@@ -100,10 +101,10 @@ export default {
                 } else {
                     await commit('logout');
                     await dispatch('reset', null, { root: true })
-                    deleteCookie('auth-token');
+                    // deleteCookie('auth-token');
                 }
             } catch (error) {
-                deleteCookie('auth-token');
+                // deleteCookie('auth-token');
                 await dispatch('logout');
             }
         },
@@ -111,7 +112,7 @@ export default {
             await commit('setLoggedIn', false);
             if (getCookie('auth-token') || state.authToken) {
                 this.$networking.auth_token = getCookie('auth-token') || state.authToken;
-                deleteCookie('auth-token');
+                // deleteCookie('auth-token');
                 try {
                     const response = await this.$networking.get('/auth/logout');
                     if (response.success) {

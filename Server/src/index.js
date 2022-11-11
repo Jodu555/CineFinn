@@ -45,13 +45,29 @@ app.use(morgan('dev', {
 // app.use(helmet());
 app.use(express.json());
 
-const authHelper = new AuthenticationHelper(app, '/auth', database);
+const authHelper = new AuthenticationHelper(app, '/auth', database, false, {
+    settings: 'TEXT',
+});
 authHelper.options.register = false;
 authHelper.options.allowMultipleSessions = true;
-authHelper.install();
-//TODO: add here an development environment exclusion
+authHelper.options.authTokenStoreDatabase = true;
+authHelper.install(undefined, async (userobj) => {
+    await database.get('accounts').update(
+        {
+            UUID: userobj.UUID,
+        },
+        {
+            settings: JSON.stringify({
+                preferredLanguage: 'GerDub',
+                showVideoTitleContainer: true,
+                showLatestWatchButton: true,
+                developerMode: false,
+            })
+        }
+    );
+});
 if (process.env.NODE_ENV == 'development') {
-    authHelper.addToken('SECR-DEV', { 'UUID': 'ad733837-b2cf-47a2-b968-abaa70edbffe', 'username': 'Jodu', 'email': 'Jodu505@gmail.com' });
+    // authHelper.addToken('SECR-DEV', { 'UUID': 'ad733837-b2cf-47a2-b968-abaa70edbffe', 'username': 'Jodu', 'email': 'Jodu505@gmail.com' });
 }
 
 setAuthHelper(authHelper);

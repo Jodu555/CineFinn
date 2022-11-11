@@ -6,15 +6,15 @@ const initialize = () => {
 
     const authHelper = getAuthHelper();
 
-    io.use((socket, next) => {
+    io.use(async (socket, next) => {
         const type = socket.handshake.auth.type;
         if (type == 'client') {
             const authToken = socket.handshake.auth.token;
-            if (authToken && authHelper.getUser(authToken)) {
+            if (authToken && await authHelper.getUser(authToken)) {
                 console.log(`Socket with`);
                 console.log(`   ID: ${socket.id} - ${type.toUpperCase()}`);
-                console.log(`   - proposed with: ${authToken} - ${authHelper.getUser(authToken).username}`);
-                socket.auth = { token: authToken, user: authHelper.getUser(authToken), type };
+                console.log(`   - proposed with: ${authToken} - ${await authHelper.getUser(authToken).username}`);
+                socket.auth = { token: authToken, user: await authHelper.getUser(authToken), type };
                 return next();
             } else {
                 next(new Error('Authentication error'));

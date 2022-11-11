@@ -70,7 +70,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [ ] Account/Authentication System Update
   - [ ] Restrict accounts so they cannot trigger certain jobs / Only Show the jobs an account is permitted to execute
   - [ ] Save the audio volume number in state, and maybe also in account
-  - [ ] Implement User Settings to toggle specific infos
+  - [x] Implement User Settings to toggle specific infos
     - [ ] the stuff thats always hardcoded in the state
       - [ ] Bring it also to the Settings Drawer
 
