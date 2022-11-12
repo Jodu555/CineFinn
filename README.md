@@ -62,6 +62,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [x] Change in the Navigation search (if you hold CTRL + Enter then open the selected series in a new tab)
 - [ ] Implement a native (so called todo list) to see wich series are still not ripped/downloaded/uploaded and maybe also with sorting
 - [x] Make the website more mobile accessibill
+- [ ] Think about maybe a clean entity switch even if the video is finished playing
 - [x] Add some more controls
   - [x] 0 - 9 for video percentage skip
     - [x] Add a nice skip animation

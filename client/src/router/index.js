@@ -49,10 +49,7 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-	if (
-		to.matched.some((record) => record.meta.requiresLogin) &&
-		store.state.auth.loggedIn == false
-	) {
+	if (to.matched.some((record) => record.meta.requiresLogin) && store.state.auth.loggedIn == false) {
 		await store.dispatch('auth/authenticate');
 		if (store.state.auth.loggedIn == false) {
 			next('/login');

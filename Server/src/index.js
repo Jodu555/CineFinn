@@ -11,12 +11,7 @@ const axios = require('axios');
 const morgan = require('morgan');
 
 const { Database } = require('@jodu555/mysqlapi');
-const database = Database.createDatabase(
-	process.env.DB_HOST,
-	process.env.DB_USERNAME,
-	process.env.DB_PASSWORD,
-	process.env.DB_DATABASE
-);
+const database = Database.createDatabase(process.env.DB_HOST, process.env.DB_USERNAME, process.env.DB_PASSWORD, process.env.DB_DATABASE);
 database.connect();
 
 const { CommandManager } = require('@jodu555/commandmanager');
@@ -55,6 +50,7 @@ authHelper.options.register = false;
 authHelper.options.allowMultipleSessions = true;
 authHelper.options.authTokenStoreDatabase = true;
 authHelper.install(undefined, async (userobj) => {
+	//OnRegister
 	await database.get('accounts').update(
 		{
 			UUID: userobj.UUID,
@@ -102,22 +98,10 @@ const { router: watch_router } = require('./routes/watch');
 const video = require('./routes/video.js');
 
 // Your Middleware handlers here
-app.use(
-	'/previewImages',
-	authHelper.authentication(),
-	express.static(path.join(process.env.PREVIEW_IMGS_PATH))
-);
+app.use('/previewImages', authHelper.authentication(), express.static(path.join(process.env.PREVIEW_IMGS_PATH)));
 
 app.use('/managment', authHelper.authentication(), managment_router);
-app.use(
-	'/watch',
-	(req, res, next) => {
-		console.log('Came /watch');
-		next();
-	},
-	authHelper.authentication(),
-	watch_router
-);
+app.use('/watch', authHelper.authentication(), watch_router);
 
 //Your direct routing stuff here
 app.get('/video', authHelper.authentication(), video);
