@@ -18,6 +18,9 @@ class Series {
 		this.movies = movies;
 		this.references = references;
 	}
+	test() {
+		console.log('TEST in Series', this.ID, this.references);
+	}
 }
 
 class Episode {

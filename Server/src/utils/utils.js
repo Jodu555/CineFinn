@@ -24,8 +24,14 @@ function debounce(cb, delay = 1000) {
 const getSeries = (forceLoad = false) => {
 	if (forceLoad || !series) {
 		if (fs.existsSync(outputFileName) && !forceLoad) {
+			const { Series } = require('../classes/series');
 			console.log('Loaded series from file!');
-			setSeries(JSON.parse(fs.readFileSync(outputFileName, 'utf8')));
+			const fileObject = JSON.parse(fs.readFileSync(outputFileName, 'utf8'));
+			setSeries(fileObject.map((e) => Object.assign(Series.prototype, e)));
+
+			const ser = fileObject.map((e) => new Series(...Object.values(e)))[0];
+			console.log(ser instanceof Series);
+			ser.test();
 		} else {
 			console.log('Crawled the series!');
 			setSeries(crawlAndIndex());

@@ -1,5 +1,4 @@
 const { updateSegment } = require('./watchString');
-const { sendWatchListChange } = require('../sockets/client.socket');
 
 async function writeWatchInfoToDatabase(socket, obj) {
 	console.log('Write Through:', socket.auth.user.username, obj);
@@ -35,6 +34,7 @@ async function writeWatchInfoToDatabase(socket, obj) {
 	}
 
 	if (update) {
+		const { sendWatchListChange } = require('../sockets/client.socket');
 		sendWatchListChange(updatedSegmentList, socket);
 		console.log('  => Updated');
 	}

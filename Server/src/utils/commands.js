@@ -1,3 +1,4 @@
+const fs = require('fs');
 const { CommandManager, Command } = require('@jodu555/commandmanager');
 const { sendSiteReload } = require('../sockets/client.socket');
 const { getSeries, getAuthHelper, getIO } = require('./utils');
@@ -41,6 +42,13 @@ function registerCommands() {
 	commandManager.registerCommand(
 		new Command(['reloadClient', 'rlc'], 'reloadClient', 'Reloads the page for all current connected sockets', (command, [...args], scope) => {
 			sendSiteReload();
+			return '';
+		})
+	);
+
+	commandManager.registerCommand(
+		new Command(['save'], 'save', 'Saves the current series data to the file', (command, [...args], scope) => {
+			fs.writeFileSync(process.env.LOCAL_DB_FILE, JSON.stringify(getSeries(), null, 3), 'utf8');
 			return '';
 		})
 	);
