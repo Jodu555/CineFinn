@@ -18,8 +18,8 @@ class Series {
 		this.movies = movies;
 		this.references = references;
 	}
-	test() {
-		console.log('TEST in Series', this.ID, this.references);
+	static fromObject(o) {
+		return new Series(o.ID, o.categorie, o.title, o.movies, o.seasons, o.references);
 	}
 }
 

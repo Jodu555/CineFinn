@@ -27,11 +27,7 @@ const getSeries = (forceLoad = false) => {
 			const { Series } = require('../classes/series');
 			console.log('Loaded series from file!');
 			const fileObject = JSON.parse(fs.readFileSync(outputFileName, 'utf8'));
-			setSeries(fileObject.map((e) => Object.assign(Series.prototype, e)));
-
-			const ser = fileObject.map((e) => new Series(...Object.values(e)))[0];
-			console.log(ser instanceof Series);
-			ser.test();
+			setSeries(fileObject.map((e) => Series.fromObject(e)));
 		} else {
 			console.log('Crawled the series!');
 			setSeries(crawlAndIndex());
