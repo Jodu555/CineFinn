@@ -18,8 +18,22 @@ class Series {
 		this.movies = movies;
 		this.references = references;
 	}
+	/**
+	 * @typedef {Object} oS
+	 * @property {String} ID
+	 * @property {String} categorie
+	 * @property {String} title
+	 * @property {[Movie]} movies=[]
+	 * @property {[[Episode]]} seasons=[]
+	 * @property {Object} references = {}
+	 */
+	/**
+	 * @param {oS} o
+	 */
 	static fromObject(o) {
-		return new Series(o.ID, o.categorie, o.title, o.movies, o.seasons, o.references);
+		const mappedSeasons = o.seasons.map((v) => v.map((e) => Episode.fromObject(e)));
+		const mappedMovies = o.movies.map((v) => Movie.fromObject(o));
+		return new Series(o.ID, o.categorie, o.title, o.movies, mappedSeasons, o.references);
 	}
 }
 
@@ -40,6 +54,21 @@ class Episode {
 		this.episode = episode;
 		this.langs = langs;
 	}
+	/**
+	 * @typedef {Object} oE
+	 * @property  {String} filePath
+	 * @property  {String} primaryName
+	 * @property  {String} secondaryName
+	 * @property  {Number} season
+	 * @property  {Number} episode
+	 * @property  {[String]} langs
+	 */
+	/**
+	 * @param {oE} o
+	 */
+	static fromObject(o) {
+		return new Episode(o.filePath, o.primaryName, o.secondaryName, o.season, o.episode, o.langs);
+	}
 }
 
 class Movie {
@@ -54,6 +83,19 @@ class Movie {
 		this.primaryName = primaryName;
 		this.secondaryName = secondaryName;
 		this.langs = langs;
+	}
+	/**
+	 * @typedef {Object} oM
+	 * @property  {String} filePath
+	 * @property  {String} primaryName
+	 * @property  {String} secondaryName
+	 * @property  {[String]} langs
+	 */
+	/**
+	 * @param {oM} o
+	 */
+	static fromObject(o) {
+		return new Movie(o.filePath, o.primaryName, o.secondaryName, o.langs);
 	}
 }
 /**
