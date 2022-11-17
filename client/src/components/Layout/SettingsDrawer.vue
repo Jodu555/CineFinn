@@ -66,12 +66,12 @@
 						<label class="form-check-label" for="shownewsaddform">Show News Add Form</label>
 					</div>
 				</div>
-				<!-- <div v-for="(setting, key) of sett" :key="key" class="mb-3 form-check">
+				<div v-for="(setting, key) of sett" :key="key" class="mb-3 form-check">
 					<template v-if="setting.type === 'checkbox'">
 						<input type="checkbox" @change="(e) => (setting.value = e.target.checked)" v-model="setting.value" class="form-check-input" :id="key" />
 						<label class="form-check-label" :for="key">{{ setting.title }}</label>
 					</template>
-				</div> -->
+				</div>
 			</div>
 		</div>
 	</div>
@@ -87,12 +87,12 @@ export default {
 			jobs: [],
 			showJobs: false,
 			showSettings: false,
-			// sett: {
-			// 	preferredLanguage: { title: 'Your Preffered Language', value: 'GerDub' },
-			// 	showVideoTitleContainer: { title: 'Show the Video Title Container?', type: 'checkbox', value: true },
-			// 	showLatestWatchButton: { title: 'Show the latest watch button?', type: 'checkbox', value: true },
-			// 	developerMode: { title: 'Show the developer Infos?', type: 'checkbox', value: false },
-			// },
+			sett: {
+				preferredLanguage: { title: 'Your Preffered Language', value: 'GerDub' },
+				showVideoTitleContainer: { title: 'Show the Video Title Container?', type: 'checkbox', value: true },
+				showLatestWatchButton: { title: 'Show the latest watch button?', type: 'checkbox', value: true },
+				developerMode: { title: 'Show the developer Infos?', type: 'checkbox', value: false },
+			},
 		};
 	},
 	computed: {

@@ -88,6 +88,9 @@ export default {
 		await this.loadData();
 		document.title = `Cinema | News`;
 	},
+	beforeUnmount() {
+		document.title = `Cinema | Jodu555`;
+	},
 };
 </script>
 <style></style>

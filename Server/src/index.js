@@ -71,9 +71,9 @@ if (process.env.NODE_ENV == 'development') {
 
 const settings = {
 	preferredLanguage: { title: 'Your Preffered Language', value: 'GerDub' },
-	showVideoTitleContainer: { title: 'Show the Video Title Container?', value: true },
-	showLatestWatchButton: { title: 'Show the latest watch button?', value: true },
-	developerMode: { title: 'Show the developer Infos?', value: false },
+	showVideoTitleContainer: { title: 'Show the Video Title Container?', type: 'checkbox', value: true },
+	showLatestWatchButton: { title: 'Show the latest watch button?', type: 'checkbox', value: true },
+	developerMode: { title: 'Show the developer Infos?', type: 'checkbox', value: false },
 };
 
 setAuthHelper(authHelper);
