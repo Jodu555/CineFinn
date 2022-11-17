@@ -95,6 +95,7 @@ socket_initialize();
 
 const { router: managment_router } = require('./routes/managment.js');
 const { router: watch_router } = require('./routes/watch');
+const { router: news_router } = require('./routes/news');
 const video = require('./routes/video.js');
 
 // Your Middleware handlers here
@@ -102,6 +103,7 @@ app.use('/previewImages', authHelper.authentication(), express.static(path.join(
 
 app.use('/managment', authHelper.authentication(), managment_router);
 app.use('/watch', authHelper.authentication(), watch_router);
+app.use('/news', authHelper.authentication(), news_router);
 
 //Your direct routing stuff here
 app.get('/video', authHelper.authentication(), video);
@@ -116,10 +118,10 @@ app.get('/index', authHelper.authentication(), async (req, res, next) => {
 	}
 });
 
-app.get('/news', authHelper.authentication(), async (req, res, next) => {
-	const response = (await database.get('news').get()).map((o) => ({ ...o, time: Number(o.time) }));
-	res.json(response);
-});
+// app.get('/news', authHelper.authentication(), async (req, res, next) => {
+// 	const response = (await database.get('news').get()).map((o) => ({ ...o, time: Number(o.time) }));
+// 	res.json(response);
+// });
 
 const errorHelper = new ErrorHelper();
 app.use(errorHelper.install());
