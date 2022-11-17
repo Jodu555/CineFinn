@@ -69,6 +69,13 @@ if (process.env.NODE_ENV == 'development') {
 	// authHelper.addToken('SECR-DEV', { 'UUID': 'ad733837-b2cf-47a2-b968-abaa70edbffe', 'username': 'Jodu', 'email': 'Jodu505@gmail.com' });
 }
 
+const settings = {
+	preferredLanguage: { title: 'Your Preffered Language', value: 'GerDub' },
+	showVideoTitleContainer: { title: 'Show the Video Title Container?', value: true },
+	showLatestWatchButton: { title: 'Show the latest watch button?', value: true },
+	developerMode: { title: 'Show the developer Infos?', value: false },
+};
+
 setAuthHelper(authHelper);
 
 let server;
