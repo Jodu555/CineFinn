@@ -3,9 +3,9 @@
 		<div>
 			<h1 class="text-center">News</h1>
 			<div v-if="settings.showNewsAddForm">
-				<form class="text-center mb-3 hstack gap-4">
-					<input type="text" class="form-control" placeholder="News" />
-					<button type="button" class="btn btn-outline-primary">Submit</button>
+				<form @submit.prevent="onAddNews" class="text-center mb-3 hstack gap-4">
+					<input type="text" v-model="newsInput" class="form-control" placeholder="News" />
+					<button type="submit" :disabled="!(newsInput.trim().length > 5)" class="btn btn-outline-primary">Submit</button>
 				</form>
 			</div>
 			<div class="text-end">
@@ -32,6 +32,7 @@ import { mapState } from 'vuex';
 export default {
 	data() {
 		return {
+			newsInput: '',
 			sort: false,
 			news: [],
 		};
@@ -52,13 +53,39 @@ export default {
 			this.sort = !this.sort;
 			this.changeSort();
 		},
+		async onAddNews() {
+			const response = await this.$networking.post(
+				'/news',
+				JSON.stringify({
+					content: this.newsInput,
+				})
+			);
+
+			if (response.success) {
+				await this.loadData();
+			} else {
+				console.log(`response`, response);
+				this.$swal({
+					toast: true,
+					position: 'top-end',
+					showConfirmButton: false,
+					timer: 3000,
+					icon: 'danger',
+					title: `${response.error}`,
+					timerProgressBar: true,
+				});
+			}
+		},
+		async loadData() {
+			const response = await this.$networking.get('/news');
+			if (response.success) {
+				this.news = response.json;
+			}
+			this.changeSort();
+		},
 	},
 	async created() {
-		const response = await this.$networking.get('/news');
-		if (response.success) {
-			this.news = response.json;
-		}
-		this.changeSort();
+		await this.loadData();
 		document.title = `Cinema | News`;
 	},
 };

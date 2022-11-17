@@ -19,7 +19,8 @@ router.post('/', async (req, res, next) => {
 			time: jobDB.lastRun,
 			content: req.body.content,
 		};
-		console.log(newsObject);
+		await database.get('news').create(newsObject);
+		res.json({ success: true });
 	} else {
 		next(new Error('Parsing Error: news must be a string and should be longer than 5 chars'));
 	}

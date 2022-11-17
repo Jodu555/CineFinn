@@ -118,11 +118,6 @@ app.get('/index', authHelper.authentication(), async (req, res, next) => {
 	}
 });
 
-// app.get('/news', authHelper.authentication(), async (req, res, next) => {
-// 	const response = (await database.get('news').get()).map((o) => ({ ...o, time: Number(o.time) }));
-// 	res.json(response);
-// });
-
 const errorHelper = new ErrorHelper();
 app.use(errorHelper.install());
 

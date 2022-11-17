@@ -84,7 +84,7 @@ export default {
 							email: json.email,
 						});
 
-						commit('setSettings', JSON.parse(json.settings));
+						commit('updateSettings', JSON.parse(json.settings));
 						await commit('setLoggedIn', true);
 						await commit('setAuthToken', authtoken);
 						setCookie('auth-token', authtoken, 30);
