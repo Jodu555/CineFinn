@@ -1,19 +1,9 @@
 <template>
 	<div>
-		<div
-			class="offcanvas offcanvas-end"
-			tabindex="-1"
-			id="offcanvasSettings"
-			aria-labelledby="offcanvasSettingsLabel"
-		>
+		<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasSettings" aria-labelledby="offcanvasSettingsLabel">
 			<div class="offcanvas-header">
 				<h5 class="offcanvas-title" id="offcanvasSettingsLabel">Infos - Settings</h5>
-				<button
-					type="button"
-					class="btn-close"
-					data-bs-dismiss="offcanvas"
-					aria-label="Close"
-				></button>
+				<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
 			</div>
 			<div class="offcanvas-body">
 				<h2>User Infos:</h2>
@@ -33,11 +23,7 @@
 				<h2 @click="showJobs = !showJobs">
 					<p class="d-flex justify-content-between" style="align-items: center">
 						Jobs:
-						<font-awesome-icon
-							style="margin-left: 0.5rem"
-							size="xs"
-							:icon="['fa-solid', showJobs ? 'chevron-up' : 'chevron-down']"
-						/>
+						<font-awesome-icon style="margin-left: 0.5rem" size="xs" :icon="['fa-solid', showJobs ? 'chevron-up' : 'chevron-down']" />
 					</p>
 				</h2>
 				<hr />
@@ -56,23 +42,13 @@
 				<h2 @click="showSettings = !showSettings">
 					<p class="d-flex justify-content-between" style="align-items: center">
 						Settings:
-						<font-awesome-icon
-							style="margin-left: 0.5rem"
-							size="xs"
-							:icon="['fa-solid', showSettings ? 'chevron-up' : 'chevron-down']"
-						/>
+						<font-awesome-icon style="margin-left: 0.5rem" size="xs" :icon="['fa-solid', showSettings ? 'chevron-up' : 'chevron-down']" />
 					</p>
 				</h2>
 				<hr />
 				<div v-if="showSettings">
 					<div class="mb-3 form-check">
-						<input
-							type="checkbox"
-							v-model="settings.developerMode"
-							@change="toggleDevMode"
-							class="form-check-input"
-							id="devmode"
-						/>
+						<input type="checkbox" v-model="settings.developerMode" @change="toggleDevMode" class="form-check-input" id="devmode" />
 						<label class="form-check-label" for="devmode">Developer Mode</label>
 					</div>
 					<div class="mb-3 form-check">
@@ -83,9 +59,11 @@
 							class="form-check-input"
 							id="vidtitlecontainer"
 						/>
-						<label class="form-check-label" for="vidtitlecontainer"
-							>Show Video Title Container</label
-						>
+						<label class="form-check-label" for="vidtitlecontainer">Show Video Title Container</label>
+					</div>
+					<div class="mb-3 form-check">
+						<input type="checkbox" v-model="settings.showNewsAddForm" @change="toggleshowNewsAddForm" class="form-check-input" id="shownewsaddform" />
+						<label class="form-check-label" for="shownewsaddform">Show News Add Form</label>
 					</div>
 				</div>
 			</div>
@@ -124,6 +102,9 @@ export default {
 		},
 		toggleTitleContainer(e) {
 			this.updateSettings({ showVideoTitleContainer: e.target.checked });
+		},
+		toggleshowNewsAddForm(e) {
+			this.updateSettings({ showNewsAddForm: e.target.checked });
 		},
 		async load() {
 			const response = await this.$networking.get('/managment/jobs/info');

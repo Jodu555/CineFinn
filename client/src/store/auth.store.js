@@ -15,6 +15,7 @@ const getDefaultState = () => {
 			showVideoTitleContainer: true,
 			showLatestWatchButton: true,
 			developerMode: false,
+			showNewsAddForm: false,
 		},
 	};
 };

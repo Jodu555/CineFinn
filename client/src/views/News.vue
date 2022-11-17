@@ -2,11 +2,17 @@
 	<div class="container">
 		<div>
 			<h1 class="text-center">News</h1>
+			<div v-if="settings.showNewsAddForm">
+				<form class="text-center mb-3 hstack gap-4">
+					<input type="text" class="form-control" placeholder="News" />
+					<button type="button" class="btn btn-outline-primary">Submit</button>
+				</form>
+			</div>
 			<div class="text-end">
 				<button class="btn btn-outline-info" @click="toggleSort">Sort {{ buttonInfo }}</button>
 			</div>
 		</div>
-		<div v-for="(obj, i) in news">
+		<div v-for="(obj, i) in news" :key="i">
 			<hr v-if="i == 0" />
 			<figure class="text-center">
 				<blockquote class="blockquote">
@@ -21,6 +27,8 @@
 	</div>
 </template>
 <script>
+import { mapState } from 'vuex';
+
 export default {
 	data() {
 		return {
@@ -29,6 +37,7 @@ export default {
 		};
 	},
 	computed: {
+		...mapState('auth', ['settings']),
 		buttonInfo() {
 			return this.sort ? '↓' : '↑';
 		},

@@ -3,26 +3,12 @@
 		<div v-if="currentSeries == undefined">
 			<h1>No Series with that ID</h1>
 		</div>
-		<div
-			v-auto-animate
-			class="container"
-			v-if="currentSeries != undefined && currentSeries.ID != -1"
-		>
+		<div v-auto-animate class="container" v-if="currentSeries != undefined && currentSeries.ID != -1">
 			<div class="float-end btn-group">
-				<button
-					class="btn btn-outline-info"
-					data-bs-toggle="modal"
-					data-bs-target="#seriesInformationModal"
-					disabled
-				>
+				<button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#seriesInformationModal" disabled>
 					<font-awesome-icon icon="fa-solid fa-info" />
 				</button>
-				<button
-					class="btn btn-outline-info"
-					data-bs-toggle="modal"
-					data-bs-target="#controlsModal"
-					disabled
-				>
+				<button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#controlsModal" disabled>
 					<font-awesome-icon icon="fa-regular fa-keyboard" />
 				</button>
 			</div>
@@ -31,9 +17,7 @@
 				{{ displayTitle }}
 			</h1>
 			<div v-auto-animate v-if="showLatestWatchButton" class="text-center">
-				<button @click="skipToLatestTime" class="btn btn-outline-info">
-					Jump to Latest watch position!
-				</button>
+				<button @click="skipToLatestTime" class="btn btn-outline-info">Jump to Latest watch position!</button>
 			</div>
 			<pre v-if="settings.developerMode">
 				currentMovie: {{ currentMovie }}
@@ -80,12 +64,7 @@
 						{{ showNextPrevTxt ? 'Previous' : '' }}
 					</button>
 				</div>
-				<h3
-					v-auto-animate
-					v-if="entityObject"
-					class="text-muted text-truncate"
-					style="margin-bottom: 0"
-				>
+				<h3 v-auto-animate v-if="entityObject" class="text-muted text-truncate" style="margin-bottom: 0">
 					<p class="text-center text-wrap" style="margin-bottom: 0.6rem">
 						{{ entityObject.primaryName }}
 					</p>
@@ -111,11 +90,7 @@
 			</div>
 		</div>
 
-		<ExtendedVideo
-			v-show="showVideo"
-			:switchTo="switchTo"
-			:sendVideoTimeUpdate="sendVideoTimeUpdate"
-		/>
+		<ExtendedVideo v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="sendVideoTimeUpdate" />
 	</div>
 </template>
 <script>
@@ -136,27 +111,15 @@ export default {
 		};
 	},
 	computed: {
-		...mapState('watch', [
-			'currentSeries',
-			'currentMovie',
-			'currentSeason',
-			'currentEpisode',
-			'currentLanguage',
-			'watchList',
-		]),
+		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode', 'currentLanguage', 'watchList']),
 		...mapState('auth', ['authToken', 'settings']),
 		...mapGetters('watch', ['videoSrc', 'entityObject']),
 		showLatestWatchButton() {
 			if (this.forceHideButton) return false;
-			const info = Boolean(
-				this.currentMovie !== -1 || this.currentSeason !== -1 || this.currentEpisode !== -1
-			);
+			const info = Boolean(this.currentMovie !== -1 || this.currentSeason !== -1 || this.currentEpisode !== -1);
 			if (info) {
 				const segment = this.watchList.find(
-					(segment) =>
-						segment.ID == this.$route.query.id &&
-						segment.season == this.currentSeason &&
-						segment.episode == this.currentEpisode
+					(segment) => segment.ID == this.$route.query.id && segment.season == this.currentSeason && segment.episode == this.currentEpisode
 				);
 				if (segment == undefined) return false;
 				if (segment.time > 100) return true;
@@ -171,31 +134,19 @@ export default {
 			let str = `${this.currentSeries.title} - `;
 
 			if (this.currentSeries.movies.length >= 1) {
-				str +=
-					`${this.currentSeries.movies.length} ` +
-					(this.currentSeries.movies.length > 1 ? 'Movies' : 'Movie');
+				str += `${this.currentSeries.movies.length} ` + (this.currentSeries.movies.length > 1 ? 'Movies' : 'Movie');
 				str += ' | ';
 			}
-			str +=
-				`${this.currentSeries.seasons.length} ` +
-				(this.currentSeries.seasons.length > 1 ? 'Seasons' : 'Season');
+			str += `${this.currentSeries.seasons.length} ` + (this.currentSeries.seasons.length > 1 ? 'Seasons' : 'Season');
 
 			return str;
 		},
 	},
 	methods: {
-		...mapMutations('watch', [
-			'setCurrentMovie',
-			'setCurrentSeason',
-			'setCurrentEpisode',
-			'setCurrentLanguage',
-			'setWatchList',
-		]),
+		...mapMutations('watch', ['setCurrentMovie', 'setCurrentSeason', 'setCurrentEpisode', 'setCurrentLanguage', 'setWatchList']),
 		...mapActions('watch', ['loadSeriesInfo', 'loadWatchList']),
 		skipToLatestTime() {
-			const segment = this.watchList.find(
-				(segment) => segment.season == this.currentSeason && segment.episode == this.currentEpisode
-			);
+			const segment = this.watchList.find((segment) => segment.season == this.currentSeason && segment.episode == this.currentEpisode);
 			const video = document.querySelector('video');
 			video.currentTime = segment.time;
 			this.forceHideButton = true;
@@ -217,31 +168,18 @@ export default {
 					return;
 				}
 				//Switch in Movies
-				const { idxptr, value } = singleDimSwitcher(
-					this.currentSeries.movies,
-					this.currentMovie - 1,
-					vel
-				);
+				const { idxptr, value } = singleDimSwitcher(this.currentSeries.movies, this.currentMovie - 1, vel);
 				// console.log(idxptr, value);
 				this.handleVideoChange(-1, -1, idxptr + 1);
 				return;
 			} else {
 				//Switch in Episodes
-				const seasonIdx = this.currentSeries.seasons.findIndex(
-					(x) => x[0].season == this.entityObject.season
-				);
-				const episodeIdx = this.currentSeries.seasons[seasonIdx].findIndex(
-					(x) => x.episode == this.entityObject.episode
-				);
+				const seasonIdx = this.currentSeries.seasons.findIndex((x) => x[0].season == this.entityObject.season);
+				const episodeIdx = this.currentSeries.seasons[seasonIdx].findIndex((x) => x.episode == this.entityObject.episode);
 
 				// console.log({ dimArr: this.currentSeries.seasons, seasonIdx, episodeIdx });
 
-				const { arrptr, idxptr, value } = multiDimSwitcher(
-					this.currentSeries.seasons,
-					seasonIdx,
-					episodeIdx,
-					vel
-				);
+				const { arrptr, idxptr, value } = multiDimSwitcher(this.currentSeries.seasons, seasonIdx, episodeIdx, vel);
 				console.log(arrptr, idxptr, value);
 
 				const entity = this.currentSeries.seasons[arrptr][idxptr];
@@ -262,13 +200,7 @@ export default {
 			return this.handleVideoChange(ID, 1);
 		},
 		changeLanguage(lang) {
-			this.handleVideoChange(
-				this.currentSeason,
-				this.currentEpisode,
-				this.currentMovie,
-				true,
-				lang
-			);
+			this.handleVideoChange(this.currentSeason, this.currentEpisode, this.currentMovie, true, lang);
 		},
 		handleVideoChange(season = -1, episode = -1, movie = -1, langchange = false, lang) {
 			if (langchange && this.currentLanguage == lang) return;
@@ -309,11 +241,7 @@ export default {
 				this.setCurrentMovie(movie);
 
 				//Ensure that the selected language exists on the entity
-				if (
-					this.entityObject &&
-					!this.entityObject.langs.includes(defaultLanguage) &&
-					!langchange
-				) {
+				if (this.entityObject && !this.entityObject.langs.includes(defaultLanguage) && !langchange) {
 					defaultLanguage = this.entityObject.langs[0];
 				}
 
@@ -367,6 +295,7 @@ export default {
 		const video = document.querySelector('video');
 		this.sendVideoTimeUpdate(video.currentTime, true);
 		localStorage.removeItem('data');
+		document.title = `Cinema | Jodu555`;
 	},
 };
 </script>
