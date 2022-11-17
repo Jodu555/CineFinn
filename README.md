@@ -15,6 +15,11 @@ npm run job -- --name jobname
 npm run job -- --name propsToSeries --model model.json --input in.json --output out.json
 ```
 
+## Tech Stack
+
+- Front-end: Vue.js + Vuex + Vue-Router + Bootstrap + Vue-SweetAlert-2 + Socket.io + Fontawesome
+- Back-end: MySql + Node.js + Express + Socket.io + ffmpeg(for Video encoding)
+
 ## Code I Joinked
 
 ### The Full Video Player (Highly changed and customized by myself + integrated into the Vue Eco System)
