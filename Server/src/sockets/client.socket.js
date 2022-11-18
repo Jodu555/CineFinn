@@ -44,15 +44,19 @@ async function sendSiteReload() {
 }
 
 async function sendWatchListChange(updatedSegmentList, socket) {
-	await toAllSockets(
-		(s) => {
-			s.emit(
-				'watchListChange',
-				updatedSegmentList.filter((x) => x.ID == searchOBJ.series)
-			);
-		},
-		(s) => s.auth.type == 'client' && s.auth.user.UUID == socket.auth.user.UUID
+	socket.emit(
+		'watchListChange',
+		updatedSegmentList.filter((x) => x.ID == searchOBJ.series)
 	);
+	// await toAllSockets(
+	// 	(s) => {
+	// 		s.emit(
+	// 			'watchListChange',
+	// 			updatedSegmentList.filter((x) => x.ID == searchOBJ.series)
+	// 		);
+	// 	},
+	// 	(s) => s.auth.type == 'client' && s.auth.user.UUID == socket.auth.user.UUID
+	// );
 }
 
 module.exports = {
