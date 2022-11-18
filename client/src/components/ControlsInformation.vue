@@ -1,35 +1,32 @@
 <template>
-	<div
-		class="modal show fade"
-		style="display: block"
-		aria-modal="true"
-		id="controlsModal"
-		tabindex="-1"
-		aria-labelledby="controlsModal"
-		aria-hidden="false"
-	>
+	<div class="modal fade" aria-modal="true" id="controlsModal" tabindex="-1" aria-labelledby="controlsModal" aria-hidden="true">
 		<div class="modal-dialog modal-lg">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title" id="controlsModalLabel">Series Informations</h5>
+					<h5 class="modal-title" id="controlsModalLabel">Controls Informations</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<div class="modal-body">
 					<div class="row h-100">
 						<div class="col border-left-vr">
 							<div class="vstack gap-3">
-								<span v-for="control in controls.slice(0, half)" :key="control.key">
-									{{ Array.isArray(control.key) ? control.key.join(', ') : control.key }} = {{ control.desc }}
+								<div v-for="control in controls.slice(0, half)" :key="control.key">
+									<div class="hstack">
+										<span class="h6 me-auto">{{ control.desc }}</span>
+										<span class="h7">
+											{{ Array.isArray(control.key) ? control.key.join(', ') : control.key }}
+										</span>
+									</div>
 									<hr />
-								</span>
+								</div>
 							</div>
 						</div>
 						<div class="col">
 							<div class="vstack gap-3">
-								<div v-for="control in controls.slice(half)" class="" :key="control.key">
+								<div v-for="control in controls.slice(half)" :key="control.key">
 									<div class="hstack">
-										<span class="me-auto">{{ control.desc }}</span>
-										<span class="text-muted">
+										<span class="h6 me-auto">{{ control.desc }}</span>
+										<span class="h7">
 											{{ Array.isArray(control.key) ? control.key.join(', ') : control.key }}
 										</span>
 									</div>
