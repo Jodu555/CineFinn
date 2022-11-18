@@ -8,7 +8,7 @@
 				</div>
 				<div class="modal-body">
 					<div class="row h-100">
-						<div v-for="(arr, i) in multiDimArray" :key="i" class="col" :class="{ 'border-left-vr': i == 0 }">
+						<div v-for="(arr, i) in multiDimControlsArray" :key="i" class="col" :class="{ 'border-left-vr': i == 0 }">
 							<div class="vstack gap-1">
 								<div v-for="control in arr" :key="control.key">
 									<div class="hstack">
@@ -30,7 +30,7 @@
 <script setup>
 import { ref } from 'vue';
 
-const controls = ref([
+const controls = [
 	{ key: 'k', desc: 'Play/Pause Toggle' },
 	{ key: 'f', desc: 'Vollbild Toggle' },
 	{ key: 't', desc: 'Theater Mode Toggle' },
@@ -45,14 +45,11 @@ const controls = ref([
 	{ key: '.', desc: 'Skip 1 Frame zurück' },
 	{ key: ',', desc: 'Skip 1 Frame vorwärts' },
 	{ key: '0..9', desc: 'Skippt zu dem jeweiligen Prozentualen video Fortschritt' },
-	{ key: 'j', desc: 'wenn bei der such leiste mit der tastatur navigiert wird, kann j gedrück werde, um die serie im neuen tab zu öffnen' },
-]);
+	{ key: 'j', desc: 'Wenn bei der such leiste mit der tastatur navigiert wird, kann j gedrück werde, um die serie im neuen tab zu öffnen' },
+];
 
-const half = Math.ceil(controls.value.length / 2);
-
-// const firstHalf = list.slice(0, half);
-// const secondHalf = list.slice(half);
-const multiDimArray = [controls.value.slice(0, half), controls.value.slice(half)];
+const half = Math.ceil(controls.length / 2);
+const multiDimControlsArray = ref([controls.slice(0, half), controls.slice(half)]);
 </script>
 <style scoped>
 .border-left-vr {

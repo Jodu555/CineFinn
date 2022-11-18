@@ -12,7 +12,7 @@
 					<font-awesome-icon icon="fa-regular fa-keyboard" />
 				</button>
 			</div>
-			<SeriesInformation />
+			<!-- <SeriesInformation /> -->
 			<ControlsInformation />
 			<h1 class="text-truncate" data-bs-toggle="tooltip" :data-bs-title="displayTitle">
 				{{ displayTitle }}
@@ -98,12 +98,11 @@
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex';
 import { singleDimSwitcher, multiDimSwitcher } from '@/plugins/switcher';
 import EntityListView from '@/components/Watch/EntityListView.vue';
-import SeriesInformation from '../components/SeriesInformation.vue';
 import ExtendedVideo from '@/components/Watch/ExtendedVideo.vue';
 import ControlsInformation from '@/components/ControlsInformation.vue';
 
 export default {
-	components: { EntityListView, SeriesInformation, ExtendedVideo, ControlsInformation },
+	components: { EntityListView, ExtendedVideo, ControlsInformation },
 	data() {
 		return {
 			cleanupFN: null,
