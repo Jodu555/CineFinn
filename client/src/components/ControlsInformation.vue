@@ -8,22 +8,9 @@
 				</div>
 				<div class="modal-body">
 					<div class="row h-100">
-						<div class="col border-left-vr">
-							<div class="vstack gap-3">
-								<div v-for="control in controls.slice(0, half)" :key="control.key">
-									<div class="hstack">
-										<span class="h6 me-auto">{{ control.desc }}</span>
-										<span class="h7">
-											{{ Array.isArray(control.key) ? control.key.join(', ') : control.key }}
-										</span>
-									</div>
-									<hr />
-								</div>
-							</div>
-						</div>
-						<div class="col">
-							<div class="vstack gap-3">
-								<div v-for="control in controls.slice(half)" :key="control.key">
+						<div v-for="(arr, i) in multiDimArray" :key="i" class="col" :class="{ 'border-left-vr': i == 0 }">
+							<div class="vstack gap-1">
+								<div v-for="control in arr" :key="control.key">
 									<div class="hstack">
 										<span class="h6 me-auto">{{ control.desc }}</span>
 										<span class="h7">
@@ -65,6 +52,7 @@ const half = Math.ceil(controls.value.length / 2);
 
 // const firstHalf = list.slice(0, half);
 // const secondHalf = list.slice(half);
+const multiDimArray = [controls.value.slice(0, half), controls.value.slice(half)];
 </script>
 <style scoped>
 .border-left-vr {
