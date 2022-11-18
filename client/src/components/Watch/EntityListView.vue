@@ -48,9 +48,7 @@ export default {
 		},
 		checkWatched(index) {
 			if (this.season) {
-				const filteredList = this.watchList.filter(
-					(seg) => seg.ID == this.$route.query.id && seg.watched && seg.season == index
-				);
+				const filteredList = this.watchList.filter((seg) => seg.ID == this.$route.query.id && seg.watched && seg.season == index);
 				const idx = this.array.findIndex((s) => s[0].season == index);
 				return this.array[idx].length == filteredList.length;
 			} else {
@@ -60,8 +58,7 @@ export default {
 							return (
 								segment.ID == this.$route.query.id &&
 								segment.watched &&
-								((segment.season == this.currentSeason && segment.episode == index) ||
-									segment.movie == index + 1)
+								((segment.season == this.currentSeason && segment.episode == index) || segment.movie == index + 1)
 							);
 						})
 					);
@@ -71,8 +68,13 @@ export default {
 	},
 };
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .crazy-green {
 	background-color: #00ff40;
+}
+
+h3 button {
+	margin-left: 5px;
+	margin-bottom: 3px;
 }
 </style>

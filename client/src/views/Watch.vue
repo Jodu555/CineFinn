@@ -8,11 +8,12 @@
 				<button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#seriesInformationModal" disabled>
 					<font-awesome-icon icon="fa-solid fa-info" />
 				</button>
-				<button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#controlsModal" disabled>
+				<button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#controlsModal">
 					<font-awesome-icon icon="fa-regular fa-keyboard" />
 				</button>
 			</div>
 			<SeriesInformation />
+			<ControlsInformation />
 			<h1 class="text-truncate" data-bs-toggle="tooltip" :data-bs-title="displayTitle">
 				{{ displayTitle }}
 			</h1>
@@ -99,9 +100,10 @@ import { singleDimSwitcher, multiDimSwitcher } from '@/plugins/switcher';
 import EntityListView from '@/components/Watch/EntityListView.vue';
 import SeriesInformation from '../components/SeriesInformation.vue';
 import ExtendedVideo from '@/components/Watch/ExtendedVideo.vue';
+import ControlsInformation from '@/components/ControlsInformation.vue';
 
 export default {
-	components: { EntityListView, SeriesInformation, ExtendedVideo },
+	components: { EntityListView, SeriesInformation, ExtendedVideo, ControlsInformation },
 	data() {
 		return {
 			cleanupFN: null,
@@ -300,7 +302,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .flag {
 	margin-left: 16px;
 	width: 50px;
@@ -309,16 +311,5 @@ export default {
 .flag.active {
 	-webkit-box-shadow: 0px 17px 15px 0px #65abf3 !important;
 	box-shadow: 0px 17px 15px 0px #65abf3 !important;
-}
-
-span.badge {
-	margin-left: 5px;
-	margin-bottom: 3px;
-	cursor: pointer;
-}
-
-h3 button {
-	margin-left: 5px;
-	margin-bottom: 3px;
 }
 </style>
