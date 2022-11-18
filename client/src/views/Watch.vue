@@ -99,7 +99,7 @@ import { mapState, mapMutations, mapActions, mapGetters } from 'vuex';
 import { singleDimSwitcher, multiDimSwitcher } from '@/plugins/switcher';
 import EntityListView from '@/components/Watch/EntityListView.vue';
 import ExtendedVideo from '@/components/Watch/ExtendedVideo.vue';
-import ControlsInformation from '@/components/ControlsInformation.vue';
+import ControlsInformation from '@/components/Watch/ControlsInformation.vue';
 
 export default {
 	components: { EntityListView, ExtendedVideo, ControlsInformation },
