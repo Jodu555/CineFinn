@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapMutations, mapState } from 'vuex';
 
 import 'bootstrap';
 import Navigation from '@/components/Layout/Navigation.vue';
@@ -30,6 +30,7 @@ export default {
 	},
 	methods: {
 		...mapActions(['loadSeries', 'reloadSeries']),
+		...mapMutations('auth', ['setSettings']),
 	},
 	created() {},
 	watch: {
@@ -41,12 +42,16 @@ export default {
 		this.$socket.on('reloadSeries', (series) => {
 			this.reloadSeries(series);
 		});
+		this.$socket.on('updateSettings', (settings) => {
+			this.setSettings(settings);
+		});
 		this.$socket.on('reload', () => {
 			window.location.reload();
 		});
 	},
 	async unmounted() {
 		this.$socket.off('reloadSeries');
+		this.$socket.off('updateSettings');
 		this.$socket.off('reload');
 	},
 };

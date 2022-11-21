@@ -36,6 +36,7 @@ const initialize = (socket) => {
 	socket.on('updateSettings', (settings) => {
 		const outSettings = compareSettings(settings);
 		database.get('accounts').update({ UUID: auth.user.UUID }, { settings: JSON.stringify(outSettings) });
+		socket.emit('updateSettings', outSettings);
 	});
 
 	socket.on('disconnect', () => {
