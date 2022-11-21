@@ -24,7 +24,7 @@ require('./utils/database')();
 
 const { initialize: socket_initialize } = require('./sockets');
 
-const { getSeries, setIO, setAuthHelper } = require('./utils/utils.js');
+const { getSeries, setIO, setAuthHelper, defaultSettings } = require('./utils/utils.js');
 const { cleanupSeriesBeforeFrontResponse } = require('./classes/series');
 
 const app = express();
@@ -56,22 +56,10 @@ authHelper.install(undefined, async (userobj) => {
 			UUID: userobj.UUID,
 		},
 		{
-			settings: JSON.stringify({
-				preferredLanguage: 'GerDub',
-				showVideoTitleContainer: true,
-				showLatestWatchButton: true,
-				developerMode: false,
-			}),
+			settings: JSON.stringify(defaultSettings),
 		}
 	);
 });
-
-const settings = {
-	preferredLanguage: { title: 'Your Preffered Language', value: 'GerDub' },
-	showVideoTitleContainer: { title: 'Show the Video Title Container?', type: 'checkbox', value: true },
-	showLatestWatchButton: { title: 'Show the latest watch button?', type: 'checkbox', value: true },
-	developerMode: { title: 'Show the developer Infos?', type: 'checkbox', value: false },
-};
 
 setAuthHelper(authHelper);
 

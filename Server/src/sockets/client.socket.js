@@ -1,6 +1,9 @@
+const { Database } = require('@jodu555/mysqlapi');
 const { debounce, toAllSockets } = require('../utils/utils');
 const { writeWatchInfoToDatabase } = require('../utils/watchManager');
 const { parse, load } = require('../utils/watchString');
+
+const database = Database.getDatabase();
 
 const initialize = (socket) => {
 	const auth = socket.auth;
@@ -27,6 +30,11 @@ const initialize = (socket) => {
 			);
 			resolve();
 		});
+	});
+
+	socket.on('updateSettings', (settings) => {
+		console.log('GOT updateSettings', settings);
+		database.get('accounts').update({ UUID: auth.user.UUID }, { settings: JSON.stringify(settings) });
 	});
 
 	socket.on('disconnect', () => {

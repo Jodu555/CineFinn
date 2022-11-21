@@ -1,11 +1,9 @@
 <template>
 	<div style="margin-top: 0.5%" class="video-container paused" data-volume-level="high">
 		<img class="thumbnail-img" />
-		<div v-if="entityObject && settings.showVideoTitleContainer" class="video-title-container">
+		<div v-if="entityObject && settings.showVideoTitleContainer.value" class="video-title-container">
 			<p v-if="currentMovie == -1">
-				{{ entityObject.primaryName }} - {{ String(entityObject.season).padStart(2, '0') }}x{{
-					String(entityObject.episode).padStart(2, '0')
-				}}
+				{{ entityObject.primaryName }} - {{ String(entityObject.season).padStart(2, '0') }}x{{ String(entityObject.episode).padStart(2, '0') }}
 			</p>
 			<p v-if="currentMovie !== -1">
 				{{ entityObject.primaryName }}
@@ -40,10 +38,7 @@
 							/>
 						</svg>
 						<svg class="volume-low-icon" viewBox="0 0 24 24">
-							<path
-								fill="currentColor"
-								d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z"
-							/>
+							<path fill="currentColor" d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
 						</svg>
 						<svg class="volume-muted-icon" viewBox="0 0 24 24">
 							<path
@@ -70,30 +65,18 @@
 				</button>
 				<button class="theater-btn">
 					<svg class="tall" viewBox="0 0 24 24">
-						<path
-							fill="currentColor"
-							d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z"
-						/>
+						<path fill="currentColor" d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z" />
 					</svg>
 					<svg class="wide" viewBox="0 0 24 24">
-						<path
-							fill="currentColor"
-							d="M19 7H5c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 8H5V9h14v6z"
-						/>
+						<path fill="currentColor" d="M19 7H5c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 8H5V9h14v6z" />
 					</svg>
 				</button>
 				<button class="full-screen-btn">
 					<svg class="open" viewBox="0 0 24 24">
-						<path
-							fill="currentColor"
-							d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"
-						/>
+						<path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
 					</svg>
 					<svg class="close" viewBox="0 0 24 24">
-						<path
-							fill="currentColor"
-							d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"
-						/>
+						<path fill="currentColor" d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
 					</svg>
 				</button>
 			</div>
@@ -116,14 +99,7 @@ export default {
 		};
 	},
 	computed: {
-		...mapState('watch', [
-			'currentSeries',
-			'currentMovie',
-			'currentSeason',
-			'currentEpisode',
-			'currentLanguage',
-			'watchList',
-		]),
+		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode', 'currentLanguage', 'watchList']),
 		...mapState('auth', ['authToken', 'settings']),
 		...mapGetters('watch', ['videoSrc', 'entityObject']),
 	},
@@ -139,9 +115,9 @@ export default {
 			if (this.currentSeries != undefined && this.currentSeries.ID != -1) {
 				previewImgSrc = `${this.$networking.API_URL}/previewImages/${this.currentSeries.ID}/`;
 				if (this.currentMovie != -1 && this.currentMovie != undefined) {
-					previewImgSrc += `Movies/${
-						this.currentSeries.movies[this.currentMovie - 1].primaryName
-					}/preview${previewImgNumber}.jpg?auth-token=${this.authToken}`;
+					previewImgSrc += `Movies/${this.currentSeries.movies[this.currentMovie - 1].primaryName}/preview${previewImgNumber}.jpg?auth-token=${
+						this.authToken
+					}`;
 				} else {
 					previewImgSrc += `${this.entityObject.season}-${this.entityObject.episode}/preview${previewImgNumber}.jpg?auth-token=${this.authToken}`;
 				}
@@ -274,9 +250,7 @@ export default {
 			function handleTimelineUpdate(e) {
 				const rect = timelineContainer.getBoundingClientRect();
 				const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
-				document.querySelector('.time-info-timeline-indicator').innerText = formatDuration(
-					percent * video.duration
-				);
+				document.querySelector('.time-info-timeline-indicator').innerText = formatDuration(percent * video.duration);
 				const previewImgNumber = Math.max(1, Math.floor((percent * video.duration) / 10));
 				// let previewImgSrc = `/assets/previewImgs/preview${previewImgNumber}.jpg`;
 				const previewImgSrc = v.generatePreviewImageURL(previewImgNumber);
@@ -323,9 +297,7 @@ export default {
 				if (hours === 0) {
 					return `${minutes}:${leadingZeroFormatter.format(seconds)}`;
 				} else {
-					return `${hours}:${leadingZeroFormatter.format(minutes)}:${leadingZeroFormatter.format(
-						seconds
-					)}`;
+					return `${hours}:${leadingZeroFormatter.format(minutes)}:${leadingZeroFormatter.format(seconds)}`;
 				}
 			}
 			function skipPercent(percent) {
@@ -348,16 +320,10 @@ export default {
 
 				if (doIconAnimation) {
 					videoContainer.classList.add('skipping');
-					sel.animate(
-						[
-							{ transform: 'translateX(0px)', opacity: '1' },
-							{ transform: `translateX(${pref}60px)` },
-						],
-						{
-							duration: animationDuration,
-							iterations: 1,
-						}
-					);
+					sel.animate([{ transform: 'translateX(0px)', opacity: '1' }, { transform: `translateX(${pref}60px)` }], {
+						duration: animationDuration,
+						iterations: 1,
+					});
 				}
 				if (set) {
 					video.currentTime = duration;

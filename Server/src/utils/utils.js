@@ -72,6 +72,15 @@ const promiseAllLimit = (...args) => {
 	});
 };
 
+const defaultSettings = {
+	preferredLanguage: { title: 'Your Preffered Language', value: 'GerDub' },
+	showVideoTitleContainer: { title: 'Show the Video Title Container?', type: 'checkbox', value: true },
+	showLatestWatchButton: { title: 'Show the latest watch button?', type: 'checkbox', value: true },
+	developerMode: { title: 'Show the developer Infos?', type: 'checkbox', value: false },
+	showNewsAddForm: { title: 'Show the Add News Form', type: 'checkbox', value: true },
+}
+
+
 module.exports = {
 	getSeries,
 	setSeries,
@@ -84,4 +93,5 @@ module.exports = {
 	debounce,
 	toAllSockets,
 	promiseAllLimit,
+	defaultSettings
 };

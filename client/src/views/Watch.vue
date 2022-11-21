@@ -20,7 +20,7 @@
 			<div v-auto-animate v-if="showLatestWatchButton" class="text-center">
 				<button @click="skipToLatestTime" class="btn btn-outline-info">Jump to Latest watch position!</button>
 			</div>
-			<pre v-if="settings.developerMode">
+			<pre v-if="settings.developerMode.value">
 				currentMovie: {{ currentMovie }}
 				currentSeason: {{ currentSeason }}
 				currentEpisode: {{ currentEpisode }}

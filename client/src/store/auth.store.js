@@ -10,18 +10,12 @@ const getDefaultState = () => {
 			username: '',
 			email: '',
 		},
-		// settings: {
-		// 	preferredLanguage: 'GerDub',
-		// 	showVideoTitleContainer: true,
-		// 	showLatestWatchButton: true,
-		// 	developerMode: false,
-		// 	showNewsAddForm: false,
-		// },
 		settings: {
 			preferredLanguage: { title: 'Your Preffered Language', value: 'GerDub' },
 			showVideoTitleContainer: { title: 'Show the Video Title Container?', type: 'checkbox', value: true },
 			showLatestWatchButton: { title: 'Show the latest watch button?', type: 'checkbox', value: true },
 			developerMode: { title: 'Show the developer Infos?', type: 'checkbox', value: false },
+			showNewsAddForm: { title: 'Show the Add News Form', type: 'checkbox', value: true },
 		},
 	};
 };
@@ -59,8 +53,9 @@ export default {
 		},
 	},
 	actions: {
-		async updateSetttings({ commit, state, dispatch }) {
+		async updateSettings({ commit, state, dispatch }) {
 			console.log('Settings Update', state.settings);
+			this.$socket.emit('updateSettings', state.settings);
 			//Decide if either make an api call or an socket event
 		},
 		async login({ commit, state, dispatch }, credentials) {
@@ -91,7 +86,7 @@ export default {
 							email: json.email,
 						});
 
-						// commit('updateSettings', JSON.parse(json.settings));
+						// commit('setSettings', JSON.parse(json.settings));
 						await commit('setLoggedIn', true);
 						await commit('setAuthToken', authtoken);
 						setCookie('auth-token', authtoken, 30);

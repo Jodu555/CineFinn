@@ -54,7 +54,7 @@
 								@change="
 									(e) => {
 										setting.value = e.target.checked;
-										updateSettting();
+										updateSettings();
 									}
 								"
 								v-model="setting.value"
@@ -113,7 +113,7 @@ export default {
 		});
 	},
 	methods: {
-		...mapActions('auth', ['updateSetttings']),
+		...mapActions('auth', ['updateSettings']),
 		async load() {
 			const response = await this.$networking.get('/managment/jobs/info');
 			if (!response.success) return;
