@@ -10,12 +10,18 @@ const getDefaultState = () => {
 			username: '',
 			email: '',
 		},
+		// settings: {
+		// 	preferredLanguage: 'GerDub',
+		// 	showVideoTitleContainer: true,
+		// 	showLatestWatchButton: true,
+		// 	developerMode: false,
+		// 	showNewsAddForm: false,
+		// },
 		settings: {
-			preferredLanguage: 'GerDub',
-			showVideoTitleContainer: true,
-			showLatestWatchButton: true,
-			developerMode: false,
-			showNewsAddForm: false,
+			preferredLanguage: { title: 'Your Preffered Language', value: 'GerDub' },
+			showVideoTitleContainer: { title: 'Show the Video Title Container?', type: 'checkbox', value: true },
+			showLatestWatchButton: { title: 'Show the latest watch button?', type: 'checkbox', value: true },
+			developerMode: { title: 'Show the developer Infos?', type: 'checkbox', value: false },
 		},
 	};
 };
@@ -42,10 +48,6 @@ export default {
 			state.settings = settings;
 			setCookie('account_settings', JSON.stringify(settings));
 		},
-		updateSettings(state, settings) {
-			state.settings = { ...state.settings, ...settings };
-			setCookie('account_settings', JSON.stringify({ ...state.settings, ...settings }));
-		},
 		logout(state) {
 			state.loggedIn = false;
 			state.authToken = '';
@@ -57,6 +59,10 @@ export default {
 		},
 	},
 	actions: {
+		async updateSetttings({ commit, state, dispatch }) {
+			console.log('Settings Update', state.settings);
+			//Decide if either make an api call or an socket event
+		},
 		async login({ commit, state, dispatch }, credentials) {
 			const response = await this.$networking.post('/auth/login', JSON.stringify(credentials));
 			if (response.success) {
@@ -70,7 +76,8 @@ export default {
 			}
 		},
 		async authenticate({ state, commit, dispatch }, redirectToSlash = false) {
-			if (getCookie('account_settings')) commit('setSettings', JSON.parse(getCookie('account_settings')));
+			// This can be removed when the settings are stored in the db
+			// if (getCookie('account_settings')) commit('setSettings', JSON.parse(getCookie('account_settings')));
 			try {
 				const authtoken = getCookie('auth-token') || state.authToken;
 				if (authtoken) {
@@ -84,7 +91,7 @@ export default {
 							email: json.email,
 						});
 
-						commit('updateSettings', JSON.parse(json.settings));
+						// commit('updateSettings', JSON.parse(json.settings));
 						await commit('setLoggedIn', true);
 						await commit('setAuthToken', authtoken);
 						setCookie('auth-token', authtoken, 30);

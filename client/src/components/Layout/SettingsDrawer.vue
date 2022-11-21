@@ -47,7 +47,24 @@
 				</h2>
 				<hr />
 				<div v-if="showSettings">
-					<div class="mb-3 form-check">
+					<div v-for="(setting, key) of settings" :key="key" class="mb-3 form-check">
+						<template v-if="setting.type === 'checkbox'">
+							<input
+								type="checkbox"
+								@change="
+									(e) => {
+										setting.value = e.target.checked;
+										updateSettting();
+									}
+								"
+								v-model="setting.value"
+								class="form-check-input"
+								:id="key"
+							/>
+							<label class="form-check-label" :for="key">{{ setting.title }}</label>
+						</template>
+					</div>
+					<!-- <div class="mb-3 form-check">
 						<input type="checkbox" v-model="settings.developerMode" @change="toggleDevMode" class="form-check-input" id="devmode" />
 						<label class="form-check-label" for="devmode">Developer Mode</label>
 					</div>
@@ -64,20 +81,14 @@
 					<div class="mb-3 form-check">
 						<input type="checkbox" v-model="settings.showNewsAddForm" @change="toggleshowNewsAddForm" class="form-check-input" id="shownewsaddform" />
 						<label class="form-check-label" for="shownewsaddform">Show News Add Form</label>
-					</div>
-				</div>
-				<div v-for="(setting, key) of sett" :key="key" class="mb-3 form-check">
-					<template v-if="setting.type === 'checkbox'">
-						<input type="checkbox" @change="(e) => (setting.value = e.target.checked)" v-model="setting.value" class="form-check-input" :id="key" />
-						<label class="form-check-label" :for="key">{{ setting.title }}</label>
-					</template>
+					</div> -->
 				</div>
 			</div>
 		</div>
 	</div>
 </template>
 <script>
-import { mapMutations, mapState } from 'vuex';
+import { mapActions, mapMutations, mapState } from 'vuex';
 import JobListView from '@/components/Layout/JobListView';
 
 export default {
@@ -87,12 +98,6 @@ export default {
 			jobs: [],
 			showJobs: false,
 			showSettings: false,
-			sett: {
-				preferredLanguage: { title: 'Your Preffered Language', value: 'GerDub' },
-				showVideoTitleContainer: { title: 'Show the Video Title Container?', type: 'checkbox', value: true },
-				showLatestWatchButton: { title: 'Show the latest watch button?', type: 'checkbox', value: true },
-				developerMode: { title: 'Show the developer Infos?', type: 'checkbox', value: false },
-			},
 		};
 	},
 	computed: {
@@ -108,16 +113,7 @@ export default {
 		});
 	},
 	methods: {
-		...mapMutations('auth', ['updateSettings']),
-		toggleDevMode(e) {
-			this.updateSettings({ developerMode: e.target.checked });
-		},
-		toggleTitleContainer(e) {
-			this.updateSettings({ showVideoTitleContainer: e.target.checked });
-		},
-		toggleshowNewsAddForm(e) {
-			this.updateSettings({ showNewsAddForm: e.target.checked });
-		},
+		...mapActions('auth', ['updateSetttings']),
 		async load() {
 			const response = await this.$networking.get('/managment/jobs/info');
 			if (!response.success) return;
