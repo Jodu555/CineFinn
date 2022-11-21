@@ -1,4 +1,5 @@
 const { Database } = require('@jodu555/mysqlapi');
+const { compareSettings } = require('../utils/settings');
 const { debounce, toAllSockets } = require('../utils/utils');
 const { writeWatchInfoToDatabase } = require('../utils/watchManager');
 const { parse, load } = require('../utils/watchString');
@@ -33,8 +34,8 @@ const initialize = (socket) => {
 	});
 
 	socket.on('updateSettings', (settings) => {
-		console.log('GOT updateSettings', settings);
-		database.get('accounts').update({ UUID: auth.user.UUID }, { settings: JSON.stringify(settings) });
+		const outSettings = compareSettings(settings);
+		database.get('accounts').update({ UUID: auth.user.UUID }, { settings: JSON.stringify(outSettings) });
 	});
 
 	socket.on('disconnect', () => {

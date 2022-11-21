@@ -24,7 +24,8 @@ require('./utils/database')();
 
 const { initialize: socket_initialize } = require('./sockets');
 
-const { getSeries, setIO, setAuthHelper, defaultSettings } = require('./utils/utils.js');
+const { getSeries, setIO, setAuthHelper } = require('./utils/utils.js');
+const { defaultSettings } = require('./utils/settings.js');
 const { cleanupSeriesBeforeFrontResponse } = require('./classes/series');
 
 const app = express();
@@ -49,17 +50,23 @@ const authHelper = new AuthenticationHelper(app, '/auth', database, false, {
 authHelper.options.register = false;
 authHelper.options.allowMultipleSessions = true;
 authHelper.options.authTokenStoreDatabase = true;
-authHelper.install(undefined, async (userobj) => {
-	//OnRegister
-	await database.get('accounts').update(
-		{
-			UUID: userobj.UUID,
-		},
-		{
-			settings: JSON.stringify(defaultSettings),
-		}
-	);
-});
+authHelper.install(
+	async (token, userobj) => {
+		const outSettings = compareSettings(userobj.settings);
+		await database.get('accounts').update({ UUID: userobj.UUID }, { settings: JSON.stringify(outSettings) });
+	},
+	async (userobj) => {
+		//OnRegister
+		await database.get('accounts').update(
+			{
+				UUID: userobj.UUID,
+			},
+			{
+				settings: JSON.stringify(defaultSettings),
+			}
+		);
+	}
+);
 
 setAuthHelper(authHelper);
 
