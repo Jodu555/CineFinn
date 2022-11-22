@@ -27,7 +27,7 @@
 					</p>
 				</h2>
 				<hr />
-				<ul v-if="showJobs" class="list-group list-group-flush">
+				<ul v-if="showJobs" class="list-group list-group-flush mb-3">
 					<JobListView
 						v-for="job in jobs"
 						:id="job.id"

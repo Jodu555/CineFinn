@@ -5,19 +5,11 @@
 			<div class="card-body">
 				<h4 class="card-title">{{ entity.title }}</h4>
 				<p v-if="entity.infos && entity.infos.description" class="card-text">
-					{{
-						showDescription
-							? entity.infos.description
-							: entity.infos.description.slice(0, 150) + '...'
-					}}
-					<small v-if="!showDescription" class="read-more" @click="showDescription = true"
-						>More</small
-					>
+					{{ showDescription ? entity.infos.description : entity.infos.description.slice(0, 150) + '...' }}
+					<small v-if="!showDescription" class="read-more" @click="showDescription = true">More</small>
 					<br />
 					<!-- <pre>{{ entity.infos}}</pre> -->
-					<small class="text-muted"
-						>{{ entity.infos.startDate }} - {{ entity.infos.endDate }}</small
-					>
+					<small class="text-muted">{{ entity.infos.startDate }} - {{ entity.infos.endDate }}</small>
 				</p>
 				<p v-else class="card-text">
 					Here will later be provided some description an image and the start + end Date
@@ -25,22 +17,11 @@
 					<br />
 					<small class="text-mute">- Get Ready for it</small>
 				</p>
-				<router-link class="btn btn-outline-primary btn-sm" :to="'/watch?id=' + entity.ID"
-					>Go & Watch</router-link
-				>
+				<router-link class="btn btn-outline-primary btn-sm" :to="'/watch?id=' + entity.ID">Go & Watch</router-link>
 			</div>
 			<div class="card-footer text-muted">
-				{{
-					entity.movies.length >= 1
-						? entity.movies.length + ' ' + (entity.movies.length > 1 ? 'Movies' : 'Movie')
-						: ''
-				}}
-				{{
-					(entity.movies.length >= 1 ? ' | ' : '') +
-					entity.seasons.length +
-					' ' +
-					(entity.seasons.length > 1 ? 'Seasons' : 'Season')
-				}}
+				{{ entity.movies.length >= 1 ? entity.movies.length + ' ' + (entity.movies.length > 1 ? 'Movies' : 'Movie') : '' }}
+				{{ (entity.movies.length >= 1 ? ' | ' : '') + entity.seasons.length + ' ' + (entity.seasons.length > 1 ? 'Seasons' : 'Season') }}
 			</div>
 		</div>
 	</div>
