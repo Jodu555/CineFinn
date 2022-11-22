@@ -48,6 +48,15 @@
 				<hr />
 				<div v-if="showSettings">
 					<div v-for="(setting, key) of settings" :key="key" class="mb-3 form-check">
+						<!-- <template v-if="key === 'preferredLanguage'">
+							<div class="mb-3">
+								<label for="preflang" class="form-label">Prefered Language:</label>
+								<select class="form-select" id="preflang">
+									<option value="GerDub" selected>GerDub</option>
+									<option value="GerSub">GerSub</option>
+								</select>
+							</div>
+						</template> -->
 						<template v-if="setting.type === 'checkbox'">
 							<input
 								type="checkbox"
