@@ -13,7 +13,7 @@ const initialize = () => {
 			if (authToken && (await authHelper.getUser(authToken))) {
 				console.log(`Socket with`);
 				console.log(`   ID: ${socket.id} - ${type.toUpperCase()}`);
-				console.log(`   - proposed with: ${authToken} - ${await authHelper.getUser(authToken).username}`);
+				console.log(`   - proposed with: ${authToken} - ${(await authHelper.getUser(authToken)).username}`);
 				socket.auth = { token: authToken, user: await authHelper.getUser(authToken), type };
 				return next();
 			} else {
