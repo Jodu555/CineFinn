@@ -45,7 +45,7 @@ const controls = [
 	{ key: '.', desc: 'Skip 1 Frame zurück' },
 	{ key: ',', desc: 'Skip 1 Frame vorwärts' },
 	{ key: '0..9', desc: 'Skippt zu dem jeweiligen Prozentualen video Fortschritt' },
-	{ key: 'j', desc: 'Wenn bei der such leiste mit der tastatur navigiert wird, kann j gedrück werde, um die serie im neuen tab zu öffnen' },
+	{ key: 'j', desc: 'Kann in der Suchleiste gedrück werde, um die serie im neuen tab zu öffnen' },
 ];
 
 const half = Math.ceil(controls.length / 2);
