@@ -85,7 +85,7 @@
 	</div>
 </template>
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import { throttle } from '@/plugins/debounceAndThrottle';
 import ActorContainer from './ActorContainer.vue';
 export default {
@@ -110,6 +110,7 @@ export default {
 		this.cleanupFN();
 	},
 	methods: {
+		...mapActions('auth', ['updateSettings']),
 		generatePreviewImageURL(previewImgNumber) {
 			let previewImgSrc = '';
 			if (this.currentSeries != undefined && this.currentSeries.ID != -1) {
@@ -280,6 +281,9 @@ export default {
 			// video.addEventListener('canplay', () => {
 			// 	console.log('canplay');
 			// });
+
+			video.volume = v.settings.volume.value;
+
 			const timeUpdateThrottle = throttle(v.sendVideoTimeUpdate, TIME_UPDATE_THROTTLE);
 			video.addEventListener('timeupdate', () => {
 				timeUpdateThrottle(video.currentTime);
@@ -356,6 +360,8 @@ export default {
 				} else {
 					volumeLevel = 'low';
 				}
+				v.settings.volume.value = video.volume;
+				v.updateSettings();
 				videoContainer.dataset.volumeLevel = volumeLevel;
 			});
 			// View Modes
