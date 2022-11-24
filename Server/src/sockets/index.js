@@ -8,13 +8,23 @@ const initialize = () => {
 
 	io.use(async (socket, next) => {
 		const type = socket.handshake.auth.type;
-		if (type == 'client') {
+		console.log('GOT', type, socket.handshake.auth);
+		if (type === 'client') {
 			const authToken = socket.handshake.auth.token;
 			if (authToken && (await authHelper.getUser(authToken))) {
 				console.log(`Socket with`);
 				console.log(`   ID: ${socket.id} - ${type.toUpperCase()}`);
 				console.log(`   - proposed with: ${authToken} - ${(await authHelper.getUser(authToken)).username}`);
 				socket.auth = { token: authToken, user: await authHelper.getUser(authToken), type };
+				return next();
+			} else {
+				next(new Error('Authentication error'));
+			}
+		}
+		if (type === 'scraper') {
+			const authToken = socket.handshake.auth.token;
+			if (authToken && authToken === process.env.SCRAPER_AUTH_TOKEN) {
+				socket.auth = { token: authToken, type };
 				return next();
 			} else {
 				next(new Error('Authentication error'));
