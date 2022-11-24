@@ -1,5 +1,7 @@
-class AniSearch {
-	constructor() {}
+class Anisearch {
+	constructor(id) {
+		this.id = id;
+	}
 }
 
-module.exports = AniSearch;
+module.exports = Anisearch;
