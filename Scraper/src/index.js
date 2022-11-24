@@ -6,7 +6,7 @@ const socket = io(process.env.CORE_URL, { auth: { type: 'scraper', token: proces
 
 socket.on('connect_error', (error) => {
 	console.log('Socket Connect Error: ', error.message); // prints the message associated with the error
-	if (err.message.includes('Authentication')) {
+	if (error.message.includes('Authentication')) {
 		console.log('Wrong Auth-token');
 	}
 });
@@ -17,8 +17,8 @@ socket.on('connect', () => {
 	console.log('Socket Connection: Connected');
 });
 
-(async () => {
-	const anime = new Aniworld('https://aniworld.to/anime/stream/more-than-a-married-couple-but-not-lovers/');
-	// const informations = await anime.parseInformations();
-	// console.log(`informations`, informations);
-})();
+socket.on('getAniworldData', async ({ url }) => {
+	const anime = new Aniworld(url);
+	const informations = await anime.parseInformations();
+	socket.emit('returnAniworldData', informations);
+});

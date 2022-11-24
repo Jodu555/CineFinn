@@ -1,5 +1,6 @@
 const { getIO, getAuthHelper } = require('../utils/utils');
 const { initialize: socketInitClient } = require('./client.socket.js');
+const { initialize: socketInitScraper } = require('./scraper.socket.js');
 
 const initialize = () => {
 	const io = getIO();
@@ -36,6 +37,7 @@ const initialize = () => {
 		const auth = socket.auth;
 
 		if (auth.type == 'client') socketInitClient(socket);
+		if (auth.type == 'scraper') socketInitScraper(socket);
 	});
 };
 
