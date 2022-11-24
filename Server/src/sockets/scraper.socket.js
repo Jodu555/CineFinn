@@ -13,7 +13,7 @@ const initialize = async (socket) => {
 	console.log('Socket Connection:', auth.type.toUpperCase());
 	$socket = socket;
 
-	const infos = await getAniworldInfos({ url: '' });
+	const infos = await getAniworldInfos({ url: 'PUT URL HERE FOR TEST' });
 	console.log(infos);
 };
 

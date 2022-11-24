@@ -17,8 +17,15 @@ socket.on('connect', () => {
 	console.log('Socket Connection: Connected');
 });
 
-socket.on('getAniworldData', async ({ url }) => {
+function buildFunction(method, cb) {
+	socket.on(`get${method}`, async (data) => {
+		const returnValue = await cb(data);
+		socket.emit(`return${method}`, returnValue);
+	});
+}
+
+buildFunction('AniworldData', async ({ url }) => {
 	const anime = new Aniworld(url);
 	const informations = await anime.parseInformations();
-	socket.emit('returnAniworldData', informations);
+	return { informations };
 });
