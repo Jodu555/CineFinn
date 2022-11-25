@@ -9,7 +9,6 @@ const initialize = () => {
 
 	io.use(async (socket, next) => {
 		const type = socket.handshake.auth.type;
-		console.log('GOT', type, socket.handshake.auth);
 		if (type === 'client') {
 			const authToken = socket.handshake.auth.token;
 			if (authToken && (await authHelper.getUser(authToken))) {
