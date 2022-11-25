@@ -12,9 +12,6 @@ const initialize = async (socket) => {
 	const auth = socket.auth;
 	console.log('Socket Connection:', auth.type.toUpperCase());
 	$socket = socket;
-
-	const infos = await getAniworldInfos({ url: 'PUT URL HERE FOR TEST' });
-	console.log(infos);
 };
 
 const getAniworldInfos = buildAwaitSocketReturn('AniworldData');
@@ -34,4 +31,5 @@ function buildAwaitSocketReturn(method) {
 
 module.exports = {
 	initialize,
+	getAniworldInfos,
 };

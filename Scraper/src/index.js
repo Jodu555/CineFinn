@@ -13,8 +13,12 @@ socket.on('connect_error', (error) => {
 socket.on('disconnect', () => {
 	console.log('Socket Connection: Disconnected');
 });
-socket.on('connect', () => {
+socket.on('connect', async () => {
 	console.log('Socket Connection: Connected');
+
+	// const anime = new Aniworld('');
+	// const informations = await anime.parseInformations();
+	// console.log(informations);
 });
 
 function buildFunction(method, cb) {

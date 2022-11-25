@@ -4,20 +4,19 @@ const jsdom = require('jsdom');
 class Aniworld {
 	constructor(url) {
 		this.url = url;
+		this.imageSRCPrefix = 'https://aniworld.to';
 	}
 
 	async parseInformations() {
 		const response = await axios.get(this.url, {
 			headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36' },
 		});
-		const { document } = new jsdom.JSDOM(response.data).window;
-		const seasonsUl = [...document.querySelectorAll('span')].find((e) => e.textContent.includes('Staffeln:')).parentElement.parentElement;
-		const seasonsTab = [...seasonsUl.querySelectorAll('li')].map((e) => e.querySelector('a')?.title).filter((e) => e != undefined);
 
-		const numberOfSeasons = seasonsTab.filter((e) => e.includes('Staffel')).length;
-		const hasMovies = seasonsTab.find((e) => e.includes('Film')) != null;
+		const additional = this.parseAdditionalInformations(response.data);
 
-		const output = { url: this.url, hasMovies, seasons: new Array(numberOfSeasons) };
+		const { numberOfSeasons, hasMovies } = this.parseEntityInformations(response.data);
+
+		const output = { url: this.url, informations: additional, hasMovies, seasons: new Array(numberOfSeasons) };
 
 		console.log('Parsed: ');
 		console.log(' ' + this.url);
@@ -37,6 +36,38 @@ class Aniworld {
 			console.log(`    => Got Season ${i} with ${output.seasons[i].length} Episodes`);
 		}
 		return output;
+	}
+
+	parseEntityInformations(data) {
+		const { document } = new jsdom.JSDOM(data).window;
+		const seasonsUl = [...document.querySelectorAll('span')].find((e) => e.textContent.includes('Staffeln:')).parentElement.parentElement;
+		const seasonsTab = [...seasonsUl.querySelectorAll('li')].map((e) => e.querySelector('a')?.title).filter((e) => e != undefined);
+
+		const numberOfSeasons = seasonsTab.filter((e) => e.includes('Staffel')).length;
+		const hasMovies = seasonsTab.find((e) => e.includes('Film')) != null;
+
+		return {
+			numberOfSeasons,
+			hasMovies,
+		};
+	}
+
+	parseAdditionalInformations(data) {
+		const $ = cheerio.load(data);
+		const infos = $('h1[itemprop="name"] > span').text();
+		const description = $('p.seri_des').text();
+
+		const startDate = $('span[itemprop="startDate"]').text();
+		const endDate = $('span[itemprop="endDate"]').text();
+
+		const image = $('img[itemprop="image"]');
+		const imageSRC = image.attr('data-src');
+
+		if (infos == '') {
+			console.log('Not Found!!!!!!', url, this.imageSRCPrefix);
+		}
+
+		return { infos, startDate, endDate, description, image: `${this.imageSRCPrefix}${imageSRC}` };
 	}
 
 	getListInformations(data) {
