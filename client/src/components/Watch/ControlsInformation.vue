@@ -44,7 +44,7 @@ const controls = [
 	{ key: 'p', desc: 'vorherige episode' },
 	{ key: '.', desc: 'Skip 1 Frame zurück' },
 	{ key: ',', desc: 'Skip 1 Frame vorwärts' },
-	{ key: '0..9', desc: 'Skippt zu dem jeweiligen Prozentualen video Fortschritt' },
+	{ key: '0..9', desc: 'Skippt zu dem jeweilig Prozentualen Video Fortschritt' },
 	{ key: 'j', desc: 'Kann in der Suchleiste gedrück werde, um die serie im neuen tab zu öffnen' },
 ];
 
