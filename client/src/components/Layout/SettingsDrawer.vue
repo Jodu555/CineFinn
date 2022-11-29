@@ -1,19 +1,9 @@
-<template lang="">
+<template>
 	<div>
-		<div
-			class="offcanvas offcanvas-end"
-			tabindex="-1"
-			id="offcanvasSettings"
-			aria-labelledby="offcanvasSettingsLabel"
-		>
+		<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasSettings" aria-labelledby="offcanvasSettingsLabel">
 			<div class="offcanvas-header">
 				<h5 class="offcanvas-title" id="offcanvasSettingsLabel">Infos - Settings</h5>
-				<button
-					type="button"
-					class="btn-close"
-					data-bs-dismiss="offcanvas"
-					aria-label="Close"
-				></button>
+				<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
 			</div>
 			<div class="offcanvas-body">
 				<h2>User Infos:</h2>
@@ -30,10 +20,14 @@
 						</h5>
 					</li>
 				</ul>
-				<!-- <hr /> -->
-				<h2>Current available Jobs:</h2>
+				<h2 @click="showJobs = !showJobs">
+					<p class="d-flex justify-content-between" style="align-items: center">
+						Jobs:
+						<font-awesome-icon style="margin-left: 0.5rem" size="xs" :icon="['fa-solid', showJobs ? 'chevron-up' : 'chevron-down']" />
+					</p>
+				</h2>
 				<hr />
-				<ul class="list-group list-group-flush">
+				<ul v-if="showJobs" class="list-group list-group-flush mb-3">
 					<JobListView
 						v-for="job in jobs"
 						:id="job.id"
@@ -44,35 +38,79 @@
 						:lastRun="job.lastRun"
 						:click="start"
 					/>
-
-					<!-- <JobListView title="TEST" callpoint="/test/asd" :running="false" :lastRun="Date.now()" /> -->
-
-					<!-- <JobListView title="Generated Images Validation" :running="true" lastRun="null" />
-					<JobListView title="Generating Images" :running="false" lastRun="10.06.2022 10 Uhr" />
-					<JobListView
-						title="Rescraping the archive"
-						:running="false"
-						lastRun="01.01.2021 20 Uhr"
-					/> -->
 				</ul>
+				<h2 @click="showSettings = !showSettings">
+					<p class="d-flex justify-content-between" style="align-items: center">
+						Settings:
+						<font-awesome-icon style="margin-left: 0.5rem" size="xs" :icon="['fa-solid', showSettings ? 'chevron-up' : 'chevron-down']" />
+					</p>
+				</h2>
+				<hr />
+				<div v-if="showSettings">
+					<div v-for="(setting, key) of settings" :key="key" class="mb-3 form-check">
+						<!-- <template v-if="key === 'preferredLanguage'">
+							<div class="mb-3">
+								<label for="preflang" class="form-label">Prefered Language:</label>
+								<select class="form-select" id="preflang">
+									<option value="GerDub" selected>GerDub</option>
+									<option value="GerSub">GerSub</option>
+								</select>
+							</div>
+						</template> -->
+						<template v-if="setting.type === 'checkbox'">
+							<input
+								type="checkbox"
+								@change="
+									(e) => {
+										setting.value = e.target.checked;
+										updateSettings();
+									}
+								"
+								v-model="setting.value"
+								class="form-check-input"
+								:id="key"
+							/>
+							<label class="form-check-label" :for="key">{{ setting.title }}</label>
+						</template>
+					</div>
+					<!-- <div class="mb-3 form-check">
+						<input type="checkbox" v-model="settings.developerMode" @change="toggleDevMode" class="form-check-input" id="devmode" />
+						<label class="form-check-label" for="devmode">Developer Mode</label>
+					</div>
+					<div class="mb-3 form-check">
+						<input
+							type="checkbox"
+							v-model="settings.showVideoTitleContainer"
+							@change="toggleTitleContainer"
+							class="form-check-input"
+							id="vidtitlecontainer"
+						/>
+						<label class="form-check-label" for="vidtitlecontainer">Show Video Title Container</label>
+					</div>
+					<div class="mb-3 form-check">
+						<input type="checkbox" v-model="settings.showNewsAddForm" @change="toggleshowNewsAddForm" class="form-check-input" id="shownewsaddform" />
+						<label class="form-check-label" for="shownewsaddform">Show News Add Form</label>
+					</div> -->
+				</div>
 			</div>
 		</div>
 	</div>
 </template>
 <script>
-import { mapState } from 'vuex';
-import { io } from 'socket.io-client';
-import JobListView from '@/components/JobListView';
+import { mapActions, mapMutations, mapState } from 'vuex';
+import JobListView from '@/components/Layout/JobListView';
 
 export default {
 	components: { JobListView },
 	data() {
 		return {
 			jobs: [],
+			showJobs: false,
+			showSettings: false,
 		};
 	},
 	computed: {
-		...mapState('auth', ['userInfo', 'authToken']),
+		...mapState('auth', ['userInfo', 'authToken', 'settings']),
 	},
 	mounted() {
 		this.load();
@@ -84,6 +122,7 @@ export default {
 		});
 	},
 	methods: {
+		...mapActions('auth', ['updateSettings']),
 		async load() {
 			const response = await this.$networking.get('/managment/jobs/info');
 			if (!response.success) return;
@@ -122,4 +161,4 @@ export default {
 	},
 };
 </script>
-<style lang=""></style>
+<style></style>

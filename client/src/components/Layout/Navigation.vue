@@ -63,14 +63,29 @@ export default {
 	data() {
 		return {
 			ac: null,
+			pressedKeys: [],
 		};
 	},
 	computed: {
 		...mapState(['series']),
 		...mapState('auth', ['loggedIn']),
 	},
+	created() {
+		window.addEventListener('keyup', this.handleKeyUp);
+		window.addEventListener('keydown', this.handleKeyDown);
+	},
+	beforeUnmount() {
+		window.removeEventListener('keyup', this.handleKeyUp);
+		window.removeEventListener('keydown', this.handleKeyDown);
+	},
 	methods: {
 		...mapActions('auth', ['logout']),
+		handleKeyUp(e) {
+			if (this.pressedKeys[e.key] != true) this.pressedKeys[e.key] = false;
+		},
+		handleKeyDown(e) {
+			if (this.pressedKeys[e.key] != false) this.pressedKeys[e.key] = true;
+		},
 	},
 	watch: {
 		series() {
@@ -81,9 +96,21 @@ export default {
 					data: [],
 					maximumItems: 5,
 					threshold: 1,
-					onSelectItem: ({ label, value }) => {
+					onSelectItem: ({ event, label, value }) => {
 						this.$refs.autocomplete.value = '';
-						this.$router.push({ path: '/watch', query: { id: value } });
+						if (event.ctrlKey || this.pressedKeys['j']) {
+							console.log({ ctrl: event.ctrlKey, j: this.pressedKeys['j'] });
+							this.pressedKeys['j'] && (this.pressedKeys['j'] = false);
+							//Open in new tab
+							let routeData = this.$router.resolve({
+								path: '/watch',
+								query: { id: value },
+							});
+							console.log(routeData);
+							window.open(routeData.href, '_blank');
+						} else {
+							this.$router.push({ path: '/watch', query: { id: value } });
+						}
 					},
 				}));
 			this.ac.setData(

@@ -1,4 +1,4 @@
-<template lang="">
+<template>
 	<div class="container">
 		<h1 class="text-center mb-3">Login - CineFinn</h1>
 		<div v-if="error != null" class="alert alert-danger alert-dismissible">
@@ -41,13 +41,7 @@
 										:rules="rules.passwordRules"
 									/>
 								</div>
-								<button
-									type="submit"
-									:disabled="!(this.form.usernameValid && this.form.passwordValid)"
-									class="mt-4 btn btn-primary"
-								>
-									Login
-								</button>
+								<button type="submit" :disabled="!(this.form.usernameValid && this.form.passwordValid)" class="mt-4 btn btn-primary">Login</button>
 							</fieldset>
 						</form>
 					</div>
@@ -81,10 +75,7 @@ export default {
 				passwordValid: null,
 			},
 			rules: {
-				usernameRules: [
-					(value) => !!value || 'Cannot be empty.',
-					(value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 20',
-				],
+				usernameRules: [(value) => !!value || 'Cannot be empty.', (value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 20'],
 				passwordRules: [
 					(value) => !!value || 'Cannot be empty.',
 					(value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 100',
@@ -111,4 +102,4 @@ export default {
 	},
 };
 </script>
-<style lang=""></style>
+<style></style>

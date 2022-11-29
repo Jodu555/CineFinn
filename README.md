@@ -15,6 +15,11 @@ npm run job -- --name jobname
 npm run job -- --name propsToSeries --model model.json --input in.json --output out.json
 ```
 
+## Tech Stack
+
+- Front-end: Vue.js + Vuex + Vue-Router + Bootstrap + Vue-SweetAlert-2 + Socket.io + Fontawesome
+- Back-end: MySql + Node.js + Express + Socket.io + ffmpeg(for Video encoding)
+
 ## Code I Joinked
 
 ### The Full Video Player (Highly changed and customized by myself + integrated into the Vue Eco System)
@@ -39,21 +44,54 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [x] make the debounce server side optimal for multiple clients
 - [x] display the title of the movies somewhere
 - [x] Add generate Images and parse images also for movies
+- [x] Show the current time while scrubbing through the video
+- [x] Show a back to top Button on the List page (or maybe make the navbar sticky)
+- [x] Extract the Video stuff into own component
 - [ ] Add the control information modal
 - [ ] Add the series information modal
 - [ ] Add the full series watched information modal
 - [ ] Implement a method to un watch a specific series or season
-- [x] Show the current time while scrubbing through the video
-- [x] Show a back to top Button on the List page (or maybe make the navbar sticky)
-- [ ] Extract the Video stuff into own component
 - [ ] Anime Preview (10 - 15 sec.)
 - [ ] Implement the command manager and some basic command (session = to list current sockets, info = to show series infos and space infos, reload = to reload the series from their file)
 - [x] Implement a job-cli system to run a pre specified job with the cli
   - [ ] Change ID Job : A Job for which i can change an ID instant wihout any problems
   - [ ] Obtain Side-Infos : To Obtain the series image and infos as well as start & end date
-- [ ] ReThink the current series store
+  - [ ] Write a job to re calculate the watch list to the episode and season numbers (1 based)
+- [x] ReThink the current series store
+- [x] Rework the whole watch page and use code splitting smart indexing and much more
+  - [x] Basically rewirte the whole watch page
+- [ ] Add an Primy like sidebar with the characters
+- [ ] Add Playlists for users e.g. (Watchlist)
+  - [ ] Let the user create its own playlists with names
+- [ ] Think about a way on how to make it work to add an intro skip button
+- [x] Change in the Navigation search (if you hold CTRL + Enter then open the selected series in a new tab)
+- [ ] Implement a native (so called todo list) to see wich series are still not ripped/downloaded/uploaded and maybe also with sorting
+- [x] Make the website more mobile accessibill
+- [ ] Think about maybe a clean entity switch even if the video is finished playing
+- [x] Add some more controls
+  - [x] 0 - 9 for video percentage skip
+    - [x] Add a nice skip animation
+  - [x] . & , for 1 frame more and less
+- [ ] Move "Previous & Title & Languages & Next" to its own Componen, maybe called entity infoControls cause the ent is one single video and it displays informations and controls
+- [ ] Account/Authentication System Update
+  - [ ] Restrict accounts so they cannot trigger certain jobs / Only Show the jobs an account is permitted to execute
+  - [x] Save the audio volume number in state, and maybe also in account
+  - [x] Implement User Settings to toggle specific infos
+    - [x] the stuff thats always hardcoded in the state
+      - [x] Bring it also to the Settings Drawer
+
+## v2
+
+The language Devision version
+This Version introduces and overwrited filename parser system
+and an Language Integration system
+
+## v3
+
+This Version introduces the playlist idea and the account information/settings idea
 
 ## Stretch
 
 - [ ] implement a cron job which automatically checks all downloaded series for updates and writes them to a list
 - [ ] Add the downloader and scraping service into ext. services
+- [ ] Implement a way to sync watch animes smth. like SyncTube for YT or Watchtogether

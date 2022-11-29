@@ -134,10 +134,10 @@ export default class Autocomplete {
                 let dataValue = e.target.getAttribute('data-value');
 
                 this.field.value = dataLabel;
-
                 if (this.options.onSelectItem) {
                     this.dropdown.hide();
                     this.options.onSelectItem({
+                        event: e,
                         value: dataValue,
                         label: dataLabel
                     });

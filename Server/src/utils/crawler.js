@@ -1,10 +1,14 @@
 const path = require('path');
-const { Series, filenameParser } = require('../classes/series');
 const { listFiles } = require('./fileutils');
+const { v4: uuidv4 } = require('uuid');
 
-const generateID = () => Math.floor(Math.random() * 10000);
+const generateID = () => {
+    return uuidv4().split('-')[0];
+    // return Math.floor(Math.random() * 10000);
+};
 
 const crawlAndIndex = () => {
+    const { Series, filenameParser, Episode, Movie, } = require('../classes/series');
 
     const overcategories = ['Aniworld', 'STO'];
     const obj = {};
@@ -25,7 +29,12 @@ const crawlAndIndex = () => {
     });
 
     // Strip the dirs down and seperate between season or movie dirs or series dirs
-    const series = [];
+    /**
+     * @type Series[]
+     */
+    let series = [];
+
+
     Object.keys(obj).forEach(categorie => {
         const dirs = obj[categorie]
         for (let i = 0; i < dirs.length;) {
@@ -41,39 +50,64 @@ const crawlAndIndex = () => {
         }
     });
 
-
-    // Fill the series array with its corresponding seasons and episodes
     files.forEach(e => {
         const base = path.parse(e).base;
         const parsedData = filenameParser(e, base);
 
         const item = series.find(x => x.title.includes(parsedData.title));
         if (parsedData.movie == true) {
-            item.movies.push(e)
+            const movie = new Movie(e, parsedData.movieTitle, '', [parsedData.language]);
+            item.movies.push(movie)
         } else {
-            if (Array.isArray(item.seasons[parsedData.season - 1])) {
-                item.seasons[parsedData.season - 1].push(e);
+            const currentArr = item.seasons[parsedData.season - 1]
+
+            const episode = new Episode(e, parsedData.title, '', parsedData.season, parsedData.episode, [parsedData.language]);
+
+            if (Array.isArray(currentArr)) {
+                const existEpisode = currentArr.find(eps => eps.season == parsedData.season && eps.episode == parsedData.episode);
+                if (existEpisode) {
+                    existEpisode.langs.push(parsedData.language);
+                    return;
+                } else {
+                    currentArr.push(episode);
+                }
             } else {
-                item.seasons[parsedData.season - 1] = [e]
+                item.seasons[parsedData.season - 1] = [episode]
             }
         }
     });
 
-
-    // Sorts the episodes in the right order
     const sorterFunction = (a, b) => {
-        const ap = filenameParser(a, path.parse(a).base);
-        const bp = filenameParser(b, path.parse(b).base);
-        return ap.episode - bp.episode;
+        return a.episode - b.episode;
     }
-    series.forEach(e => e.seasons.forEach(x => x.sort(sorterFunction)));
 
 
+    //Strinify in Json and then parse to deal with the empty array items the they are null
+    series = JSON.parse(JSON.stringify(series));
+
+    series = series.map(e => {
+        const newSeasons = e.seasons.filter(x => {
+            // x == null && console.log('innner', e, x, 'out', x == null ? [] : x);
+
+            // return x == null ? [] : x;
+            return x != null;
+        }).map(x => x.sort(sorterFunction));
+
+        return {
+            ...e,
+            seasons: newSeasons
+        };
+
+    });
 
     return series;
 }
-
+/**
+ * @param  {Series[]} before
+ * @param  {Series[]} after
+ */
 const mergeSeriesArrays = (before, after) => {
+    const { Series } = require('../classes/series');
     const output = [];
 
     //Compare and overwrite ids

@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<div v-auto-animate>
+		<div v-auto-animate style="z-index: 100">
 			<a
 				v-auto-animate
 				v-if="backToTop"
@@ -27,7 +27,7 @@
 				</h2>
 				<div :id="'flush-' + categorie.title" class="accordion-collapse collapse">
 					<div class="accordion-body">
-						<div class="row row-cols-1 row-cols-md-3 g-4">
+						<div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 row-cols-xxl-5 g-4">
 							<EntityCard
 								v-for="entity in categorie.entitys"
 								:entity="entity"
@@ -41,7 +41,7 @@
 	</div>
 </template>
 <script>
-import EntityCard from '@/components/EntityCard.vue';
+import EntityCard from '@/components/Home/EntityCard.vue';
 import { mapState, mapActions } from 'vuex';
 export default {
 	components: { EntityCard },
