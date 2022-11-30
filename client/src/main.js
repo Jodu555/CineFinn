@@ -18,9 +18,7 @@ import { io } from 'socket.io-client';
 
 import 'bootstrap';
 
-
-const serverURL = 'http://cinema-api.jodu555.de';
-// const serverURL = location.hostname == 'localhost' ? 'http://localhost:3100' : 'http://cinema-api.jodu555.de';
+const serverURL = location.hostname == 'localhost' ? 'http://localhost:3100' : 'http://cinema-api.jodu555.de';
 
 const socketPlugin = {
 	install: (app, options) => {

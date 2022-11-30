@@ -109,12 +109,22 @@ app.get('/video', authHelper.authentication(), video);
 
 app.get('/index', authHelper.authentication(), async (req, res, next) => {
 	const series = cleanupSeriesBeforeFrontResponse(getSeries());
-	try {
-		const response = await axios.post('http://localhost:4895', series);
-		res.json(response.data);
-	} catch (error) {
-		res.json(series);
-	}
+	res.json(
+		series.map((x) => {
+			const y = JSON.parse(JSON.stringify(x));
+			y.numSeasons = y.seasons.length;
+			y.numMovies = y.movies.length;
+			delete y.seasons;
+			delete y.movies;
+			return y;
+		})
+	);
+	// try {
+	// 	const response = await axios.post('http://localhost:4895', series);
+	// 	res.json(response.data);
+	// } catch (error) {
+	// 	res.json(series);
+	// }
 });
 
 const errorHelper = new ErrorHelper();
