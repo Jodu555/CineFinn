@@ -112,10 +112,10 @@ app.get('/index', authHelper.authentication(), async (req, res, next) => {
 	res.json(
 		series.map((x) => {
 			const y = JSON.parse(JSON.stringify(x));
-			y.numSeasons = y.seasons.length;
-			y.numMovies = y.movies.length;
-			delete y.seasons;
-			delete y.movies;
+			y.seasons = new Array(y.seasons.length).fill(-1);
+			y.movies = new Array(y.movies.length).fill(-1);
+			// delete y.seasons;
+			// delete y.movies;
 			return y;
 		})
 	);
@@ -125,6 +125,12 @@ app.get('/index', authHelper.authentication(), async (req, res, next) => {
 	// } catch (error) {
 	// 	res.json(series);
 	// }
+});
+
+app.get('/index/:ID', authHelper.authentication(), async (req, res, next) => {
+	const series = cleanupSeriesBeforeFrontResponse(getSeries());
+	const serie = series.find((x) => x.ID === req.params.ID);
+	res.json(serie);
 });
 
 const errorHelper = new ErrorHelper();
