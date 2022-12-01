@@ -7,7 +7,6 @@ const express = require('express');
 const { Server } = require('socket.io');
 const https = require('https');
 const cors = require('cors');
-const axios = require('axios');
 const morgan = require('morgan');
 
 const { Database } = require('@jodu555/mysqlapi');
@@ -26,7 +25,6 @@ const { initialize: socket_initialize } = require('./sockets');
 
 const { getSeries, setIO, setAuthHelper } = require('./utils/utils.js');
 const { defaultSettings } = require('./utils/settings.js');
-const { cleanupSeriesBeforeFrontResponse } = require('./classes/series');
 
 const app = express();
 app.use(cors());
@@ -95,6 +93,7 @@ socket_initialize();
 const { router: managment_router } = require('./routes/managment.js');
 const { router: watch_router } = require('./routes/watch');
 const { router: news_router } = require('./routes/news');
+const { router: index_router } = require('./routes/index');
 const video = require('./routes/video.js');
 
 // Your Middleware handlers here
@@ -103,33 +102,10 @@ app.use('/previewImages', authHelper.authentication(), express.static(path.join(
 app.use('/managment', authHelper.authentication(), managment_router);
 app.use('/watch', authHelper.authentication(), watch_router);
 app.use('/news', authHelper.authentication(), news_router);
+app.use('/index', authHelper.authentication(), index_router);
 
 //Your direct routing stuff here
 app.get('/video', authHelper.authentication(), video);
-
-app.get('/index', authHelper.authentication(), async (req, res, next) => {
-	const series = cleanupSeriesBeforeFrontResponse(getSeries());
-	res.json(
-		series.map((x) => {
-			const y = JSON.parse(JSON.stringify(x));
-			y.seasons = new Array(y.seasons.length).fill(-1);
-			y.movies = new Array(y.movies.length).fill(-1);
-			return y;
-		})
-	);
-	// try {
-	// 	const response = await axios.post('http://localhost:4895', series);
-	// 	res.json(response.data);
-	// } catch (error) {
-	// 	res.json(series);
-	// }
-});
-
-app.get('/index/:ID', authHelper.authentication(), async (req, res, next) => {
-	const series = cleanupSeriesBeforeFrontResponse(getSeries());
-	const serie = series.find((x) => x.ID === req.params.ID);
-	res.json(serie);
-});
 
 const errorHelper = new ErrorHelper();
 app.use(errorHelper.install());
