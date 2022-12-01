@@ -146,7 +146,7 @@ const filenameParser = (filepath, filename) => {
 			//v2 Movie Parser
 			re: /^(.*)_(GerSub|GerDub)\.mp4/gi,
 			parse: (match) => {
-				console.log(`match`, match);
+				// console.log(`match`, match);
 				const [original, movieTitle, language] = match;
 				const title = path.basename(path.dirname(path.dirname(filepath)));
 				return { movie: true, title, movieTitle, language };

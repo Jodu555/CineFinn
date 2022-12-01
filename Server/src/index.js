@@ -114,8 +114,6 @@ app.get('/index', authHelper.authentication(), async (req, res, next) => {
 			const y = JSON.parse(JSON.stringify(x));
 			y.seasons = new Array(y.seasons.length).fill(-1);
 			y.movies = new Array(y.movies.length).fill(-1);
-			// delete y.seasons;
-			// delete y.movies;
 			return y;
 		})
 	);
