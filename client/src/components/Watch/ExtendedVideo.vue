@@ -54,6 +54,16 @@
 					/
 					<div class="total-time"></div>
 				</div>
+				<button class="video-skip-btn">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="Hawkins-Icon Hawkins-Icon-Standard">
+						<path
+							fill-rule="evenodd"
+							clip-rule="evenodd"
+							d="M22 3H20V21H22V3ZM4.28615 3.61729C3.28674 3.00228 2 3.7213 2 4.89478V19.1052C2 20.2787 3.28674 20.9977 4.28615 20.3827L15.8321 13.2775C16.7839 12.6918 16.7839 11.3082 15.8321 10.7225L4.28615 3.61729ZM4 18.2104V5.78956L14.092 12L4 18.2104Z"
+							fill="currentColor"
+						></path>
+					</svg>
+				</button>
 				<button class="speed-btn wide-btn">1x</button>
 				<button class="mini-player-btn">
 					<svg viewBox="0 0 24 24">
@@ -133,6 +143,7 @@ export default {
 			const fullScreenBtn = document.querySelector('.full-screen-btn');
 			const miniPlayerBtn = document.querySelector('.mini-player-btn');
 			const muteBtn = document.querySelector('.mute-btn');
+			const skipBtn = document.querySelector('.video-skip-btn');
 			const speedBtn = document.querySelector('.speed-btn');
 			const currentTimeElem = document.querySelector('.current-time');
 			const totalTimeElem = document.querySelector('.total-time');
@@ -402,6 +413,11 @@ export default {
 			});
 			video.addEventListener('pause', () => {
 				videoContainer.classList.add('paused');
+			});
+
+			//Skip in Video Button
+			skipBtn.addEventListener('click', () => {
+				v.switchTo(1);
 			});
 
 			//Mobile Accessibillity
