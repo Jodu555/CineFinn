@@ -24,7 +24,7 @@ require('./utils/database')();
 const { initialize: socket_initialize } = require('./sockets');
 
 const { getSeries, setIO, setAuthHelper } = require('./utils/utils.js');
-const { defaultSettings } = require('./utils/settings.js');
+const { defaultSettings, compareSettings } = require('./utils/settings.js');
 
 const app = express();
 app.use(cors());
