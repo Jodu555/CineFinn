@@ -54,7 +54,7 @@
 					/
 					<div class="total-time"></div>
 				</div>
-				<button class="video-skip-btn">
+				<button @click="switchTo(1)" class="video-skip-btn">
 					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="Hawkins-Icon Hawkins-Icon-Standard">
 						<path
 							fill-rule="evenodd"
@@ -143,7 +143,6 @@ export default {
 			const fullScreenBtn = document.querySelector('.full-screen-btn');
 			const miniPlayerBtn = document.querySelector('.mini-player-btn');
 			const muteBtn = document.querySelector('.mute-btn');
-			const skipBtn = document.querySelector('.video-skip-btn');
 			const speedBtn = document.querySelector('.speed-btn');
 			const currentTimeElem = document.querySelector('.current-time');
 			const totalTimeElem = document.querySelector('.total-time');
@@ -413,11 +412,6 @@ export default {
 			});
 			video.addEventListener('pause', () => {
 				videoContainer.classList.add('paused');
-			});
-
-			//Skip in Video Button
-			skipBtn.addEventListener('click', () => {
-				v.switchTo(1);
 			});
 
 			//Mobile Accessibillity
