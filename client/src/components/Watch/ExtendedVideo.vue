@@ -54,7 +54,7 @@
 					/
 					<div class="total-time"></div>
 				</div>
-				<button @click="switchTo(1)" class="video-skip-btn">
+				<button @click="switchTo(1)">
 					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="Hawkins-Icon Hawkins-Icon-Standard">
 						<path
 							fill-rule="evenodd"
