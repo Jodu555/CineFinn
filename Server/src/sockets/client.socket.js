@@ -53,11 +53,15 @@ async function sendSiteReload() {
 	);
 }
 
-async function sendWatchListChange(updatedSegmentList, socket) {
-	socket.emit(
-		'watchListChange',
-		updatedSegmentList.filter((x) => x.ID == searchOBJ.series)
-	);
+async function sendWatchListChange(updatedSegmentList, socket, searchOBJ) {
+	if (searchOBJ) {
+		socket.emit(
+			'watchListChange',
+			updatedSegmentList.filter((x) => x.ID == searchOBJ.series)
+		);
+	} else {
+		socket.emit('watchListChange', updatedSegmentList);
+	}
 	// await toAllSockets(
 	// 	(s) => {
 	// 		s.emit(

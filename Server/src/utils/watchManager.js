@@ -35,7 +35,7 @@ async function writeWatchInfoToDatabase(socket, obj) {
 
 	if (update) {
 		const { sendWatchListChange } = require('../sockets/client.socket');
-		sendWatchListChange(updatedSegmentList, socket);
+		sendWatchListChange(updatedSegmentList, socket, searchOBJ);
 		console.log('  => Updated');
 	}
 }
