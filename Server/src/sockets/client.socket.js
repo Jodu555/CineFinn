@@ -33,10 +33,15 @@ const initialize = (socket) => {
 		});
 	});
 
-	socket.on('updateSettings', (settings) => {
+	socket.on('updateSettings', async (settings) => {
 		const outSettings = compareSettings(settings);
-		database.get('accounts').update({ UUID: auth.user.UUID }, { settings: JSON.stringify(outSettings) });
-		socket.emit('updateSettings', outSettings);
+		await database.get('accounts').update({ UUID: auth.user.UUID }, { settings: JSON.stringify(outSettings) });
+		await toAllSockets(
+			(s) => {
+				s.emit('updateSettings', outSettings);
+			},
+			(s) => s.auth.type == 'client' && s.auth.user.UUID == auth.user.UUID
+		);
 	});
 
 	socket.on('disconnect', () => {
