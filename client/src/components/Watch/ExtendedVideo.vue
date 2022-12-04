@@ -129,6 +129,12 @@ export default {
 	beforeUnmount() {
 		this.cleanupFN();
 	},
+	watch: {
+		'settings.volume.value'(newValue) {
+			const video = document.querySelector('video');
+			video.volume = newValue;
+		},
+	},
 	methods: {
 		...mapActions('auth', ['updateSettings']),
 		generatePreviewImageURL(previewImgNumber) {
