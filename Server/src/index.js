@@ -97,7 +97,7 @@ const { router: index_router } = require('./routes/index');
 const video = require('./routes/video.js');
 
 // Your Middleware handlers here
-app.use('/previewImages', authHelper.authentication(), express.static(path.join(process.env.PREVIEW_IMGS_PATH)));
+app.use('/images', authHelper.authentication(), express.static(path.join(process.env.PREVIEW_IMGS_PATH)));
 
 app.use('/managment', authHelper.authentication(), managment_router);
 app.use('/watch', authHelper.authentication(), watch_router);

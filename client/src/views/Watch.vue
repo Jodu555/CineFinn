@@ -129,7 +129,11 @@ export default {
 			}
 		},
 		showVideo() {
-			return this.currentMovie !== -1 || this.currentSeason !== -1 || this.currentEpisode !== -1;
+			return (
+				this.currentSeries != undefined &&
+				this.currentSeries.ID != -1 &&
+				(this.currentMovie !== -1 || this.currentSeason !== -1 || this.currentEpisode !== -1)
+			);
 		},
 		displayTitle() {
 			let str = `${this.currentSeries.title} - `;
@@ -267,20 +271,25 @@ export default {
 		},
 	},
 	async created() {
-		const seriesID = this.$route.query.id;
-		await this.loadSeriesInfo(seriesID);
-		const data = JSON.parse(localStorage.getItem('data'));
+		try {
+			const seriesID = this.$route.query.id;
+			await this.loadSeriesInfo(seriesID);
+			if (this.currentSeries == undefined || this.currentSeries.ID == -1) return;
+			const data = JSON.parse(localStorage.getItem('data'));
 
-		this.loadWatchList(seriesID);
+			this.loadWatchList(seriesID);
 
-		if (data && data.ID == seriesID) {
-			this.handleVideoChange(data.season || -1, data.episode || -1, data.movie || -1);
-		} else {
-			localStorage.removeItem('data');
-			this.handleVideoChange(-1, -1, -1);
+			if (data && data.ID == seriesID) {
+				this.handleVideoChange(data.season || -1, data.episode || -1, data.movie || -1);
+			} else {
+				localStorage.removeItem('data');
+				this.handleVideoChange(-1, -1, -1);
+			}
+
+			document.title = `Cinema | ${this.currentSeries.title}`;
+		} catch (error) {
+			console.error(error);
 		}
-
-		document.title = `Cinema | ${this.currentSeries.title}`;
 	},
 	async mounted() {
 		this.$socket.on('watchListChange', (watchList) => {

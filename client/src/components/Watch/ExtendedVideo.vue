@@ -140,7 +140,7 @@ export default {
 		generatePreviewImageURL(previewImgNumber) {
 			let previewImgSrc = '';
 			if (this.currentSeries != undefined && this.currentSeries.ID != -1) {
-				previewImgSrc = `${this.$networking.API_URL}/previewImages/${this.currentSeries.ID}/`;
+				previewImgSrc = `${this.$networking.API_URL}/images/${this.currentSeries.ID}/`;
 				if (this.currentMovie != -1 && this.currentMovie != undefined) {
 					previewImgSrc += `Movies/${this.currentSeries.movies[this.currentMovie - 1].primaryName}/preview${previewImgNumber}.jpg?auth-token=${
 						this.authToken

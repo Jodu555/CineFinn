@@ -25,7 +25,11 @@ router.get('/', async (req, res, next) => {
 router.get('/:ID', async (req, res, next) => {
 	const series = cleanupSeriesBeforeFrontResponse(getSeries());
 	const serie = series.find((x) => x.ID === req.params.ID);
-	res.json(serie);
+	if (serie) {
+		res.json(serie);
+	} else {
+		next(new Error('Serie no found!'));
+	}
 });
 
 module.exports = { router };
