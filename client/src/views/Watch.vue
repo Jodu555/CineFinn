@@ -59,7 +59,7 @@
 			/>
 			<!-- Previous & Title & Languages & Next -->
 			<div class="d-flex justify-content-between">
-				<div>
+				<div v-auto-animate v-if="entityObject">
 					<button @click="switchTo(-1)" class="btn btn-outline-warning">
 						<font-awesome-icon icon="fa-solid fa-backward-step" size="lg" />
 						{{ showNextPrevTxt ? 'Previous' : '' }}
@@ -82,7 +82,7 @@
 						/>
 					</div>
 				</h3>
-				<div>
+				<div v-auto-animate v-if="entityObject">
 					<button @click="switchTo(1)" class="btn btn-outline-success">
 						{{ showNextPrevTxt ? 'Next' : '' }}
 						<font-awesome-icon icon="fa-solid fa-forward-step" size="lg" />
