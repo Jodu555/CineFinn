@@ -107,7 +107,6 @@ export default {
 			//Load the Series Details
 			const response = await this.$networking.get('/index/' + ID);
 			if (response.success) {
-				console.log(response);
 				const json = response.json;
 				const data = rootState.series.map((s) => {
 					if (s.ID === ID) {

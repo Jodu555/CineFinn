@@ -288,7 +288,7 @@ export default {
 
 			document.title = `Cinema | ${this.currentSeries.title}`;
 		} catch (error) {
-			console.error(error);
+			console.error('Error in Watch.vue Created Hook', error);
 		}
 	},
 	async mounted() {

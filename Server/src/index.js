@@ -31,7 +31,8 @@ app.use(cors());
 app.use(
 	morgan('dev', {
 		skip: (req, res) => {
-			if (req.originalUrl.includes('/previewImages') || req.originalUrl.includes('/video')) {
+			//TODO: Add the images back in
+			if (req.originalUrl.includes('/TODO:') || req.originalUrl.includes('/video')) {
 				return true;
 			} else {
 				return false;
@@ -95,6 +96,7 @@ const { router: watch_router } = require('./routes/watch');
 const { router: news_router } = require('./routes/news');
 const { router: index_router } = require('./routes/index');
 const video = require('./routes/video.js');
+const { generateImages } = require('./utils/images');
 
 // Your Middleware handlers here
 app.use('/images', authHelper.authentication(), express.static(path.join(process.env.PREVIEW_IMGS_PATH)));
