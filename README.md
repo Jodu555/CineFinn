@@ -69,6 +69,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [ ] Think about maybe on GET /index to not send so mch data over the wire
 - [x] Make the website more mobile accessibill
 - [ ] Think about maybe a clean entity switch even if the video is finished playing
+- [ ] Rework the image directory structure
 - [x] Add some more controls
   - [x] 0 - 9 for video percentage skip
     - [x] Add a nice skip animation
