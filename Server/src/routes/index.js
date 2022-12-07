@@ -5,21 +5,18 @@ const { getSeries } = require('../utils/utils');
 const axios = require('axios');
 
 router.get('/', async (req, res, next) => {
-	const series = cleanupSeriesBeforeFrontResponse(getSeries());
-	res.json(
-		series.map((x) => {
-			const y = JSON.parse(JSON.stringify(x));
-			y.seasons = new Array(y.seasons.length).fill(-1);
-			y.movies = new Array(y.movies.length).fill(-1);
-			return y;
-		})
-	);
-	// try {
-	// 	const response = await axios.post('http://localhost:4895', series);
-	// 	res.json(response.data);
-	// } catch (error) {
-	// 	res.json(series);
-	// }
+	const series = cleanupSeriesBeforeFrontResponse(getSeries()).map((x) => {
+		const y = JSON.parse(JSON.stringify(x));
+		y.seasons = new Array(y.seasons.length).fill(-1);
+		y.movies = new Array(y.movies.length).fill(-1);
+		return y;
+	});
+	try {
+		const response = await axios.post('http://localhost:4895', series);
+		res.json(response.data);
+	} catch (error) {
+		res.json(series);
+	}
 });
 
 router.get('/:ID', async (req, res, next) => {
