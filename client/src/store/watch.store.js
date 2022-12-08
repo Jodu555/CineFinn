@@ -43,21 +43,14 @@ export default {
 			url.searchParams.append('auth-token', store.$networking.auth_token);
 			url.searchParams.append('series', state.currentSeries.ID);
 			url.searchParams.append('language', state.currentLanguage);
-
-			let out = `${store.$networking.API_URL}/video?auth-token=${store.$networking.auth_token}&series=${state.currentSeries.ID}&language=${state.currentLanguage}`;
 			if (state.currentSeason == -1) {
 				if (state.currentMovie == -1) return '';
-				out += `&movie=${state.currentMovie + 1}`;
-
 				url.searchParams.append('movie', state.currentMovie);
 			} else {
-				out += `&season=${o.entityObject.season}&episode=${o.entityObject.episode}`;
 				url.searchParams.append('season', o.entityObject.season);
 				url.searchParams.append('episode', o.entityObject.episode);
-				// out += `&season=${state.currentSeason}&episode=${state.currentEpisode}`;
 			}
 			return url.href;
-			return out;
 		},
 		entityObject(state) {
 			try {

@@ -1,5 +1,14 @@
 const path = require('path');
 const { getSeries } = require('../utils/utils');
+
+/**
+ * @typedef {Object} SeriesInformation
+ * @property {String} infos
+ * @property {String} description
+ * @property {String} startDate
+ * @property {String} image
+ */
+
 class Series {
 	/**
 	 * @param  {String} ID
@@ -8,15 +17,16 @@ class Series {
 	 * @param  {[Movie]} movies=[]
 	 * @param  {[[Episode]]} seasons=[]
 	 * @param {Object} references = {}
+	 * @param {SeriesInformation} infos = {}
 	 */
-	constructor(ID, categorie, title, movies = [], seasons = [], references = {}) {
+	constructor(ID, categorie, title, movies = [], seasons = [], references = {}, infos = {}) {
 		this.ID = ID;
 		this.categorie = categorie;
 		this.title = title;
-		// this.externalStreamURL = '';
 		this.seasons = seasons;
 		this.movies = movies;
 		this.references = references;
+		this.infos = infos;
 	}
 	/**
 	 * @typedef {Object} oS
@@ -33,7 +43,7 @@ class Series {
 	static fromObject(o) {
 		const mappedSeasons = o.seasons.map((v) => v.map((e) => Episode.fromObject(e)));
 		const mappedMovies = o.movies.map((v) => Movie.fromObject(o));
-		return new Series(o.ID, o.categorie, o.title, o.movies, mappedSeasons, o.references);
+		return new Series(o.ID, o.categorie, o.title, o.movies, mappedSeasons, o.references, o.infos);
 	}
 }
 
