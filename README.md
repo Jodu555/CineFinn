@@ -60,20 +60,20 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [x] ReThink the current series store
 - [x] Rework the whole watch page and use code splitting smart indexing and much more
   - [x] Basically rewirte the whole watch page
-- [ ] Add an Primy like sidebar with the characters
-- [ ] Add Playlists for users e.g. (Watchlist)
-  - [ ] Let the user create its own playlists with names
-- [ ] Think about a way on how to make it work to add an intro skip button
-- [x] Change in the Navigation search (if you hold CTRL + Enter then open the selected series in a new tab)
-- [ ] Implement a native (so called todo list) to see wich series are still not ripped/downloaded/uploaded and maybe also with sorting
-- [ ] Think about maybe on GET /index to not send so mch data over the wire
+- [x] Think about maybe on GET /index to not send so mch data over the wire
 - [x] Make the website more mobile accessibill
-- [ ] Think about maybe a clean entity switch even if the video is finished playing
-- [ ] Rework the image directory structure
+- [x] Rework the image directory structure
+- [x] Change in the Navigation search (if you hold CTRL + Enter then open the selected series in a new tab)
 - [x] Add some more controls
   - [x] 0 - 9 for video percentage skip
     - [x] Add a nice skip animation
   - [x] . & , for 1 frame more and less
+- [ ] Add an Primy like sidebar with the characters
+- [ ] Add Playlists for users e.g. (Watchlist)
+  - [ ] Let the user create its own playlists with names
+- [ ] Think about a way on how to make it work to add an intro skip button
+- [ ] Implement a native (so called todo list) to see wich series are still not ripped/downloaded/uploaded and maybe also with sorting
+- [ ] Think about maybe a clean entity switch even if the video is finished playing
 - [ ] Move "Previous & Title & Languages & Next" to its own Componen, maybe called entity infoControls cause the ent is one single video and it displays informations and controls
 - [ ] Account/Authentication System Update
   - [ ] Restrict accounts so they cannot trigger certain jobs / Only Show the jobs an account is permitted to execute

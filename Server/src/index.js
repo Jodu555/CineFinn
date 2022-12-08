@@ -119,9 +119,9 @@ server.listen(PORT, async () => {
 
 	// console.log(getSeries().map(x => [...x.seasons, ...x.movies]).flat(5).length);
 
-	// console.log();
+	// console.log([getSeries()[14]]);
 
-	// generateImages([getSeries()[13]]);
+	// generateImages([getSeries()[14]]);
 	// const merge = mergeSeriesArrays(crawlAndIndex(), crawlAndIndex())
 	// console.log(merge);
 	// generateImages([getSeries()[0]])
