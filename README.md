@@ -47,7 +47,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [x] Show the current time while scrubbing through the video
 - [x] Show a back to top Button on the List page (or maybe make the navbar sticky)
 - [x] Extract the Video stuff into own component
-- [ ] Add the control information modal
+- [x] Add the control information modal
 - [ ] Add the series information modal
 - [ ] Add the full series watched information modal
 - [ ] Implement a method to un watch a specific series or season
