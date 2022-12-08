@@ -1,7 +1,7 @@
 <template>
 	<div class="col">
 		<div class="card">
-			<img v-if="entity?.infos?.image" :src="entity.infos.image" class="card-img-top" alt="..." />
+			<img v-if="entity?.infos?.image" :src="buildCoverURL(entity)" class="card-img-top" alt="..." />
 			<div class="card-body">
 				<h4 class="card-title">{{ entity.title }}</h4>
 				<p v-if="entity.infos && entity.infos.description" class="card-text">
@@ -35,6 +35,13 @@ export default {
 		};
 	},
 	created() {},
+	methods: {
+		buildCoverURL(entity) {
+			const url = new URL(this.$networking.API_URL + `/images/${entity.ID}/cover.jpg`);
+			url.searchParams.append('auth-token', this.$networking.auth_token);
+			return url.href;
+		},
+	},
 };
 </script>
 <style scoped>
