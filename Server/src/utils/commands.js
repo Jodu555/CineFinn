@@ -1,6 +1,7 @@
 const fs = require('fs');
 const { CommandManager, Command } = require('@jodu555/commandmanager');
 const { sendSiteReload } = require('../sockets/client.socket');
+const { getAniworldInfos } = require('../sockets/scraper.socket');
 const { getSeries, getAuthHelper, getIO } = require('./utils');
 
 const commandManager = CommandManager.getCommandManager();
@@ -59,6 +60,14 @@ function registerCommands() {
 				console.log('Started to fetch all Series Informations!');
 			} else {
 				console.log(`Started to fetch the Informations for ${args[1]}!`);
+				const serie = getSeries().find((x) => x.ID == args[1]);
+				if (serie == undefined) {
+					return 'Cant find series with that ID';
+				}
+				if (serie.reference.aniworld == undefined) {
+					return 'The Series has no reference point for aniworld';
+				}
+				getAniworldInfos(serie.references.aniworld);
 			}
 			return '';
 		})
