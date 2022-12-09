@@ -52,6 +52,17 @@ function registerCommands() {
 			return '';
 		})
 	);
+
+	commandManager.registerCommand(
+		new Command(['fetchInfos', 'fi'], 'fetchInfos [all/seriesID]', 'Fetches the informations for a secified series', (command, [...args], scope) => {
+			if (args[1] == 'all') {
+				console.log('Started to fetch all Series Informations!');
+			} else {
+				console.log(`Started to fetch the Informations for ${args[1]}!`);
+			}
+			return '';
+		})
+	);
 }
 
 module.exports = {
