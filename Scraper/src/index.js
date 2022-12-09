@@ -22,7 +22,7 @@ socket.on('connect', async () => {
 });
 
 function buildFunction(method, cb) {
-	socket.on(`get${method}`, async (data) => {
+	socket.on(`call${method}`, async (data) => {
 		const returnValue = await cb(data);
 		socket.emit(`return${method}`, returnValue);
 	});

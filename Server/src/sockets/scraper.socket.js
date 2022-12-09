@@ -26,7 +26,7 @@ function buildAwaitSocketReturn(method) {
 				resolve(data);
 				clearTimeout(timeout);
 			});
-			$socket.emit(`get${method}`, input);
+			$socket.emit(`call${method}`, input);
 		});
 	};
 }
