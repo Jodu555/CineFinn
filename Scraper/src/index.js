@@ -33,3 +33,35 @@ buildFunction('AniworldData', async ({ url }) => {
 	const informations = await anime.parseInformations();
 	return { informations };
 });
+
+buildFunction('manageTitle', async ({ title, aniworld }) => {
+	function doStuff(input, aniworld = true) {
+		input = input
+			.replaceAll('!', '')
+			.replaceAll('+', '')
+			.replaceAll('’', '')
+			.replaceAll(',', '')
+			.replaceAll('ō', '')
+			.replaceAll('ä', '')
+			.replaceAll('ö', '')
+			.replaceAll('ü', '')
+			.replaceAll('?', '')
+			.replaceAll('ß', '')
+			.replaceAll(' - ', '-')
+			.replaceAll(' – ', '-')
+			.replaceAll(' & ', '-')
+			.replaceAll('&', '')
+			.replaceAll(':', '');
+
+		if (aniworld) {
+			input = input.replaceAll("'", '');
+		} else {
+			input = input.replaceAll("'", '-');
+		}
+
+		input = input.replace(/  +/g, '-');
+		input = input.replaceAll(' ', '-');
+		return input.toLowerCase();
+	}
+	return { url: doStuff(title, aniworld) };
+});

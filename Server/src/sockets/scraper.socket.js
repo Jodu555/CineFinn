@@ -16,6 +16,8 @@ const initialize = async (socket) => {
 
 const getAniworldInfos = buildAwaitSocketReturn('AniworldData');
 
+const manageTitle = buildAwaitSocketReturn('manageTitle');
+
 function buildAwaitSocketReturn(method) {
 	return (input) => {
 		return new Promise((resolve, reject) => {
@@ -32,4 +34,5 @@ function buildAwaitSocketReturn(method) {
 module.exports = {
 	initialize,
 	getAniworldInfos,
+	manageTitle,
 };
