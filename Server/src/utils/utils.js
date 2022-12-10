@@ -18,12 +18,15 @@ function debounce(cb, delay = 1000) {
 	};
 }
 /**
- * @param  {Boolen} forceLoad=false
+ * @param  {Boolen} forceLoad=false If the dir should be crawled
+ * @param  {Boolen} forceFile=false If system should forcefully load data from file in ram
  * @returns {[import('../classes/series').Series]}
  */
-const getSeries = (forceLoad = false) => {
-	if (forceLoad || !series) {
-		if (fs.existsSync(outputFileName) && !forceLoad) {
+const getSeries = (forceLoad = false, forceFile = false) => {
+	console.log(forceLoad, Boolean(!series), forceLoad || !series);
+	if (forceLoad || !series || forceFile) {
+		if (fs.existsSync(outputFileName) && !forceLoad && forceFile) {
+			console.log('Came');
 			const { Series } = require('../classes/series');
 			console.log('Loaded series from file!');
 			const fileObject = JSON.parse(fs.readFileSync(outputFileName, 'utf8'));

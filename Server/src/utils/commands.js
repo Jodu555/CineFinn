@@ -9,7 +9,8 @@ const commandManager = CommandManager.getCommandManager();
 function registerCommands() {
 	commandManager.registerCommand(
 		new Command(['reload', 'rl'], 'reload', 'Reloads the infos from current out.json file wihout before saving them', (command, [...args], scope) => {
-			getSeries(true);
+			getSeries(false, true);
+			//TODO: Broadcast the update to the clients for conveniets and maybe add a argument to not always broadcast them
 			return 'Reloaded the series config successfully';
 		})
 	);

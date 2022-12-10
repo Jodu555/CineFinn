@@ -114,7 +114,17 @@ const mergeSeriesArrays = (before, after) => {
 		const afterSerie = after.find((as) => as.title == beforeSerie.title && as.categorie == beforeSerie.categorie);
 		if (afterSerie) {
 			// console.log('Found Overlapping', beforeSerie.title, afterSerie.title, beforeSerie.ID, afterSerie.ID);
-			output.push(new Series(beforeSerie.ID, beforeSerie.categorie, beforeSerie.title, afterSerie.movies, afterSerie.seasons));
+			output.push(
+				new Series(
+					beforeSerie.ID,
+					beforeSerie.categorie,
+					beforeSerie.title,
+					afterSerie.movies,
+					afterSerie.seasons,
+					afterSerie.references,
+					afterSerie.infos
+				)
+			);
 		}
 	});
 
@@ -124,7 +134,9 @@ const mergeSeriesArrays = (before, after) => {
 		if (!beforeSerie) {
 			const overlapID = before.find((bs) => bs.ID == afterSerie.ID);
 			const newID = overlapID ? generateID() : afterSerie.ID;
-			output.push(new Series(newID, afterSerie.categorie, afterSerie.title, afterSerie.movies, afterSerie.seasons));
+			output.push(
+				new Series(newID, afterSerie.categorie, afterSerie.title, afterSerie.movies, afterSerie.seasons, afterSerie.references, afterSerie.infos)
+			);
 		}
 	});
 
