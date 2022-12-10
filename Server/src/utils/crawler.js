@@ -121,8 +121,8 @@ const mergeSeriesArrays = (before, after) => {
 					beforeSerie.title,
 					afterSerie.movies,
 					afterSerie.seasons,
-					afterSerie.references,
-					afterSerie.infos
+					beforeSerie.references,
+					beforeSerie.infos
 				)
 			);
 		}
