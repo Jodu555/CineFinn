@@ -18,8 +18,8 @@
 					class="flag shadow mb-4 bg-body"
 					:class="{ active: this.currentLanguage == lang }"
 					:src="`./flag-langs/${lang.toLowerCase()}.svg`"
-					:alt="langDetails[lang.toLowerCase()].alt"
-					:title="langDetails[lang.toLowerCase()].title"
+					:alt="langDetails[lang.toLowerCase()]?.alt || 'None Alt'"
+					:title="langDetails[lang.toLowerCase()]?.title || 'None Title'"
 				/>
 			</div>
 		</h3>
@@ -50,6 +50,10 @@ export default {
 				gersub: {
 					title: 'Mit deutschen Untertiteln',
 					alt: 'Deutsche Flagge, Untertitel, Flagge',
+				},
+				engdub: {
+					title: 'Englisch/English',
+					alt: 'Englische Flagge, Flagge',
 				},
 			},
 		};

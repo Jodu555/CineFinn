@@ -146,7 +146,7 @@ const filenameParser = (filepath, filename) => {
 		},
 		{
 			//v2 Episode Parser
-			re: /^(.*)St#(\d+) Flg#(\d+)_(GerSub|GerDub).mp4/gi,
+			re: /^(.*)St#(\d+) Flg#(\d+)_(GerSub|GerDub|EngDub).mp4/gi,
 			parse: (match) => {
 				const [original, title, season, episode, language] = match;
 				return { movie: false, title: title.trim(), season: Number(season), episode: Number(episode), language };
