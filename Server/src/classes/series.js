@@ -42,7 +42,7 @@ class Series {
 	 */
 	static fromObject(o) {
 		const mappedSeasons = o.seasons.map((v) => v.map((e) => Episode.fromObject(e)));
-		const mappedMovies = o.movies.map((v) => Movie.fromObject(o));
+		const mappedMovies = o.movies.map((v) => Movie.fromObject(v));
 		return new Series(o.ID, o.categorie, o.title, mappedMovies, mappedSeasons, o.references, o.infos);
 	}
 }
@@ -120,9 +120,7 @@ const cleanupSeriesBeforeFrontResponse = (series) => {
 				return { ...p, filePath: path.parse(p.filePath).base };
 			})
 		);
-		console.log(serie.movies);
 		const newMovies = serie.movies.map((p) => {
-			console.log(p, p.filePath);
 			return { ...p, filePath: path.parse(p.filePath).base };
 		});
 		delete serie.references;
