@@ -1,17 +1,11 @@
 <template>
 	<div>
 		<div v-auto-animate style="z-index: 100">
-			<a
-				v-auto-animate
-				v-if="backToTop"
-				@click="scrollToTop()"
-				id="backToTop"
-				class="btn btn-primary btn-lg back-to-top"
-				role="button"
+			<a v-auto-animate v-if="backToTop" @click="scrollToTop()" id="backToTop" class="btn btn-primary btn-lg back-to-top" role="button"
 				><font-awesome-icon icon="fa-solid fa-up-long" size="xl"
 			/></a>
 		</div>
-		<div v-auto-animate class="container accordion accordion-flush" id="accordionFlushExample">
+		<div class="container accordion accordion-flush" id="accordionFlushExample">
 			<div v-for="categorie of categories" :key="categorie.title" class="accordion-item">
 				<h2 class="accordion-header">
 					<button
@@ -28,11 +22,7 @@
 				<div :id="'flush-' + categorie.title" class="accordion-collapse collapse">
 					<div class="accordion-body">
 						<div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 row-cols-xxl-5 g-4">
-							<EntityCard
-								v-for="entity in categorie.entitys"
-								:entity="entity"
-								:key="entity.title"
-							></EntityCard>
+							<EntityCard v-for="entity in categorie.entitys" :entity="entity" :key="entity.title" />
 						</div>
 					</div>
 				</div>
@@ -63,12 +53,7 @@ export default {
 			const mapping = this.map(
 				document.documentElement.scrollTop,
 				[0, height],
-				[
-					0,
-					window.innerHeight -
-						document.querySelector('.footer').getBoundingClientRect().height -
-						25,
-				]
+				[0, window.innerHeight - document.querySelector('.footer').getBoundingClientRect().height - 25]
 			);
 
 			// console.log('SCROLL', height, document.documentElement.scrollTop);
@@ -76,17 +61,14 @@ export default {
 
 			if (document.documentElement.scrollTop > 100) {
 				this.backToTop = true;
-				if (document.querySelector('#backToTop'))
-					document.querySelector('#backToTop').style.top = `${Math.ceil(mapping)}px`;
+				if (document.querySelector('#backToTop')) document.querySelector('#backToTop').style.top = `${Math.ceil(mapping)}px`;
 			} else {
 				this.backToTop = false;
 			}
 		},
 		map(value, oldRange, newRange) {
 			// console.log(value, oldRange, newRange);
-			var newValue =
-				((value - oldRange[0]) * (newRange[1] - newRange[0])) / (oldRange[1] - oldRange[0]) +
-				newRange[0];
+			var newValue = ((value - oldRange[0]) * (newRange[1] - newRange[0])) / (oldRange[1] - oldRange[0]) + newRange[0];
 			return Math.min(Math.max(newValue, newRange[0]), newRange[1]);
 		},
 		scrollToTop() {
