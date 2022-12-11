@@ -23,7 +23,6 @@ function debounce(cb, delay = 1000) {
  * @returns {[import('../classes/series').Series]}
  */
 const getSeries = (forceLoad = false, forceFile = false) => {
-	console.log(forceLoad, Boolean(!series), forceLoad || !series);
 	if (forceLoad || !series || forceFile) {
 		if (fs.existsSync(outputFileName) && !forceLoad && forceFile) {
 			console.log('Came');

@@ -71,13 +71,10 @@ export default createStore({
 				commit('setSeries', json);
 			}
 		},
-		async reloadSeries({ commit, rootState }, series) {
+		async reloadSeries({ commit, dispatch, rootState }, series) {
 			commit('setSeries', series);
 			if (rootState.watch.currentSeries.ID != -1) {
-				commit(
-					'watch/setCurrentSeries',
-					series.find((x) => x.ID == rootState.watch.currentSeries.ID)
-				);
+				dispatch('watch/loadSeriesInfo', series.find((x) => x.ID == rootState.watch.currentSeries.ID).ID);
 			}
 		},
 	},
