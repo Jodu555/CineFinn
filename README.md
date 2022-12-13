@@ -74,6 +74,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [ ] Think about a way on how to make it work to add an intro skip button
 - [ ] Implement a native (so called todo list) to see wich series are still not ripped/downloaded/uploaded and maybe also with sorting
 - [ ] Think about maybe a clean entity switch even if the video is finished playing
+- [ ] Update the Client Navigation Search to use native vue for better data updates
 - [x] Move "Previous & Title & Languages & Next" to its own Componen, maybe called entity infoControls cause the ent is one single video and it displays informations and controls
 - [ ] Account/Authentication System Update
   - [ ] Restrict accounts so they cannot trigger certain jobs / Only Show the jobs an account is permitted to execute
