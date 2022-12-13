@@ -23,21 +23,10 @@
 					</li>
 				</ul>
 				<div v-if="loggedIn" class="d-flex">
-					<input
-						ref="autocomplete"
-						type="text"
-						class="form-control"
-						placeholder="Search for a series..."
-						style="width: 18rem"
-						autocomplete="off"
-					/>
-					<div
-						class="btn-group"
-						style="margin-left: 2rem"
-						role="group"
-						aria-label="Basic outlined example"
-					>
+					<input ref="autocomplete" type="text" class="form-control" placeholder="Search for a series..." style="width: 18rem" autocomplete="off" />
+					<div class="btn-group" style="margin-left: 2rem" role="group" aria-label="Basic outlined example">
 						<button
+							title="Settings"
 							class="btn btn-outline-primary"
 							data-bs-toggle="offcanvas"
 							data-bs-target="#offcanvasSettings"
@@ -45,7 +34,7 @@
 						>
 							<font-awesome-icon icon="fa-solid fa-gears" />
 						</button>
-						<button class="btn btn-outline-danger" @click="logout()">
+						<button class="btn btn-outline-danger" title="Logout" @click="logout()">
 							<font-awesome-icon icon="fa-solid fa-right-from-bracket" />
 						</button>
 					</div>

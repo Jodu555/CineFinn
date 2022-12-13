@@ -5,10 +5,10 @@
 		</div>
 		<div v-auto-animate class="container" v-if="currentSeries != undefined && currentSeries.ID != -1">
 			<div class="float-end btn-group">
-				<button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#seriesInformationModal" disabled>
+				<button class="btn btn-outline-info" title="Series Information" data-bs-toggle="modal" data-bs-target="#seriesInformationModal" disabled>
 					<font-awesome-icon icon="fa-solid fa-info" />
 				</button>
-				<button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#controlsModal">
+				<button class="btn btn-outline-info" title="Keyboard Controls" data-bs-toggle="modal" data-bs-target="#controlsModal">
 					<font-awesome-icon icon="fa-regular fa-keyboard" />
 				</button>
 			</div>
