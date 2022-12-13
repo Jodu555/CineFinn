@@ -31,8 +31,10 @@ app.use(cors());
 app.use(
 	morgan('dev', {
 		skip: (req, res) => {
-			//TODO: Add the images back in
-			if (req.originalUrl.includes('/TODO:') || req.originalUrl.includes('/video')) {
+			if (process.env.NODE_ENV || 'production' == 'development') {
+				return false;
+			}
+			if (req.originalUrl.includes('/images') || req.originalUrl.includes('/video')) {
 				return true;
 			} else {
 				return false;
