@@ -58,7 +58,7 @@ export default {
 							return (
 								segment.ID == this.$route.query.id &&
 								segment.watched &&
-								((segment.season == this.currentSeason && segment.episode == index) || segment.movie == index + 1)
+								((segment.season == this.currentSeason && segment.episode == index) || segment.movie == index)
 							);
 						})
 					);
