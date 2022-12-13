@@ -1,7 +1,7 @@
 <template>
 	<div v-if="entityObject" class="d-flex justify-content-between">
 		<div v-auto-animate>
-			<button @click="switchTo(-1)" class="btn btn-outline-warning">
+			<button @click="switchTo(-1)" title="Previous Episode" class="btn btn-outline-warning">
 				<font-awesome-icon icon="fa-solid fa-backward-step" size="lg" />
 				{{ showNextPrevTxt ? 'Previous' : '' }}
 			</button>
@@ -24,7 +24,7 @@
 			</div>
 		</h3>
 		<div v-auto-animate>
-			<button @click="switchTo(1)" class="btn btn-outline-success">
+			<button @click="switchTo(1)" title="Next Episode" class="btn btn-outline-success">
 				{{ showNextPrevTxt ? 'Next' : '' }}
 				<font-awesome-icon icon="fa-solid fa-forward-step" size="lg" />
 			</button>
