@@ -1,6 +1,7 @@
 const { Database } = require('@jodu555/mysqlapi');
+const { cleanupSeriesBeforeFrontResponse } = require('../classes/series');
 const { compareSettings } = require('../utils/settings');
-const { debounce, toAllSockets } = require('../utils/utils');
+const { debounce, toAllSockets, getSeries } = require('../utils/utils');
 const { writeWatchInfoToDatabase } = require('../utils/watchManager');
 const { parse, load } = require('../utils/watchString');
 
@@ -47,12 +48,24 @@ const initialize = (socket) => {
 	socket.on('disconnect', () => {
 		console.log('Socket DisConnection:', auth.type.toUpperCase(), auth.user.username, socket.id);
 	});
+
+	socket.emit('reloadSeries', cleanupSeriesBeforeFrontResponse(getSeries()));
 };
 
 async function sendSiteReload() {
 	await toAllSockets(
 		(s) => {
 			s.emit('reload');
+		},
+		(s) => s.auth.type == 'client'
+	);
+}
+
+async function sendSeriesReloadToAll(cb) {
+	toAllSockets(
+		(s) => {
+			if (typeof cb === 'function') cb(s);
+			s.emit('reloadSeries', cleanupSeriesBeforeFrontResponse(getSeries()));
 		},
 		(s) => s.auth.type == 'client'
 	);
@@ -82,4 +95,5 @@ module.exports = {
 	initialize,
 	sendSiteReload,
 	sendWatchListChange,
+	sendSeriesReloadToAll,
 };

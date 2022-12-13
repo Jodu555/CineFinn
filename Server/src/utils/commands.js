@@ -1,6 +1,6 @@
 const fs = require('fs');
 const { CommandManager, Command } = require('@jodu555/commandmanager');
-const { sendSiteReload } = require('../sockets/client.socket');
+const { sendSiteReload, sendSeriesReloadToAll } = require('../sockets/client.socket');
 const { getAniworldInfos } = require('../sockets/scraper.socket');
 const { getSeries, getAuthHelper, getIO, toAllSockets } = require('./utils');
 const { cleanupSeriesBeforeFrontResponse } = require('../classes/series');
@@ -9,17 +9,17 @@ const commandManager = CommandManager.getCommandManager();
 
 function registerCommands() {
 	commandManager.registerCommand(
-		new Command(['reload', 'rl'], 'reload', 'Reloads the infos from current out.json file wihout before saving them', (command, [...args], scope) => {
-			getSeries(false, true);
-			toAllSockets(
-				(s) => {
-					s.emit('reloadSeries', cleanupSeriesBeforeFrontResponse(getSeries()));
-				},
-				(s) => s.auth.type == 'client'
-			);
+		new Command(
+			['reload', 'rl'],
+			'reload',
+			'Reloads the infos from current out.json file wihout before saving them',
+			async (command, [...args], scope) => {
+				getSeries(false, true);
+				await sendSeriesReloadToAll();
 
-			return 'Reloaded the series config successfully';
-		})
+				return 'Reloaded the series config successfully';
+			}
+		)
 	);
 	commandManager.registerCommand(
 		new Command(['authsession', 'as'], 'authsession [list]', 'Lists the current authenticated session', (command, [...args], scope) => {
