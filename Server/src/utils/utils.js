@@ -24,8 +24,7 @@ function debounce(cb, delay = 1000) {
  */
 const getSeries = (forceLoad = false, forceFile = false) => {
 	if (forceLoad || !series || forceFile) {
-		if (fs.existsSync(outputFileName) && !forceLoad && forceFile) {
-			console.log('Came');
+		if ((fs.existsSync(outputFileName) && !forceLoad) || forceFile) {
 			const { Series } = require('../classes/series');
 			console.log('Loaded series from file!');
 			const fileObject = JSON.parse(fs.readFileSync(outputFileName, 'utf8'));
