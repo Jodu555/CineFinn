@@ -74,7 +74,8 @@ export default createStore({
 		async reloadSeries({ commit, dispatch, rootState }, series) {
 			commit('setSeries', series);
 			if (rootState.watch.currentSeries.ID != -1) {
-				dispatch('watch/loadSeriesInfo', series.find((x) => x.ID == rootState.watch.currentSeries.ID).ID);
+				// dispatch('watch/loadSeriesInfo', series.find((x) => x.ID == rootState.watch.currentSeries.ID).ID);
+				dispatch('watch/loadSeriesInfo', rootState.watch.currentSeries.ID);
 			}
 		},
 	},
