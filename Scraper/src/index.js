@@ -1,6 +1,8 @@
 require('dotenv').config();
+const axios = require('axios');
 const io = require('socket.io-client');
 const Aniworld = require('./class/AniWorld');
+const { compareForNewReleases } = require('./utils/compare');
 
 const socket = io(process.env.CORE_URL, { auth: { type: 'scraper', token: process.env.AUTH_TOKEN } });
 
@@ -15,10 +17,8 @@ socket.on('disconnect', () => {
 });
 socket.on('connect', async () => {
 	console.log('Socket Connection: Connected');
-
-	// const anime = new Aniworld('');
-	// const informations = await anime.parseInformations();
-	// console.log(informations);
+	const res = await axios.get('http://localhost:3100/index/all?auth-token=SECR-DEV');
+	compareForNewReleases(res.data);
 });
 
 function buildFunction(method, cb) {
