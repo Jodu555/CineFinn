@@ -17,7 +17,7 @@ socket.on('disconnect', () => {
 });
 socket.on('connect', async () => {
 	console.log('Socket Connection: Connected');
-	const res = await axios.get('http://localhost:3100/index/all?auth-token=SECR-DEV');
+	const res = await axios.get('http://localhost:4895/index/all?auth-token=SECR-DEV');
 	compareForNewReleases(res.data);
 });
 
