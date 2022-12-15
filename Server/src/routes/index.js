@@ -19,6 +19,11 @@ router.get('/', async (req, res, next) => {
 	}
 });
 
+router.get('/all', async (req, res, next) => {
+	const series = getSeries();
+	res.json(series);
+});
+
 router.get('/:ID', async (req, res, next) => {
 	const series = cleanupSeriesBeforeFrontResponse(getSeries());
 	const serie = series.find((x) => x.ID === req.params.ID);
