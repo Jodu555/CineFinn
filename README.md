@@ -81,6 +81,22 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
   - [ ] New Form POST and GET
   - [ ] Watch route
 - [x] Move "Previous & Title & Languages & Next" to its own Componen, maybe called entity infoControls cause the ent is one single video and it displays informations and controls
+- [ ] Show an Image in the search bar with
+
+```html
+<input
+	type="text"
+	class="form-control dropdown-toggle show"
+	placeholder="Search for a series..."
+	autocomplete="off"
+	style="width: 20rem;"
+	data-bs-toggle="dropdown"
+	aria-expanded="true"
+/>
+<img src="cover.jpg" style="width: 15%; height: auto; margin-right: 0.5rem;" />
+```
+
+- [ ] Add a Setting to toggle the card images (for lower bandwidth)
 - [ ] Account/Authentication System Update
   - [ ] Restrict accounts so they cannot trigger certain jobs / Only Show the jobs an account is permitted to execute
   - [x] Save the audio volume number in state, and maybe also in account
