@@ -97,6 +97,7 @@ and an Language Integration system
 ## v3
 
 This Version introduces the playlist idea and the account information/settings idea
+although the general permission system and therefore the account restrictions
 
 ## Stretch
 
