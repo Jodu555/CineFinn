@@ -60,6 +60,7 @@ export default {
 					content: this.newsInput,
 				})
 			);
+			this.newsInput = '';
 
 			if (response.success) {
 				await this.loadData();
