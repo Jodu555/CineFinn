@@ -33,6 +33,9 @@
 				<!-- <p v-else class="card-text">
 				</p> -->
 				<router-link class="btn btn-outline-primary btn-sm" :to="'/watch?id=' + entity.ID">Go & Watch</router-link>
+				<div class="d-flex">
+					<p class="ms-auto text-muted" style="margin-bottom: 0.1rem">ID: {{ entity.ID }}</p>
+				</div>
 			</div>
 			<div class="card-footer text-muted">
 				{{ entity.movies.length >= 1 ? entity.movies.length + ' ' + (entity.movies.length > 1 ? 'Movies' : 'Movie') : '' }}

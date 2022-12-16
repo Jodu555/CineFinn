@@ -55,6 +55,10 @@ export default {
 					title: 'Englisch/English',
 					alt: 'Englische Flagge, Flagge',
 				},
+				engsub: {
+					title: 'mit englischen Untertiteln',
+					alt: 'Englische Flagge, Flagge, Untertitel, Flag',
+				},
 			},
 		};
 	},
