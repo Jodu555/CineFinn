@@ -49,7 +49,7 @@ const initialize = (socket) => {
 		console.log('Socket DisConnection:', auth.type.toUpperCase(), auth.user.username, socket.id);
 	});
 
-	socket.emit('reloadSeries', cleanupSeriesBeforeFrontResponse(getSeries()));
+	// socket.emit('reloadSeries', cleanupSeriesBeforeFrontResponse(getSeries()));
 };
 
 async function sendSiteReload() {
