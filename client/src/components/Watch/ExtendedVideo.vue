@@ -304,9 +304,12 @@ export default {
 			// video.addEventListener('progress', () => {
 			// 	console.log('progress');
 			// });
-			// video.addEventListener('canplay', () => {
-			// 	console.log('canplay');
-			// });
+			video.addEventListener('loadstart', () => {
+				console.log('loading started...');
+			});
+			video.addEventListener('canplay', () => {
+				console.log('loading finished...');
+			});
 
 			video.volume = v.settings.volume.value;
 
