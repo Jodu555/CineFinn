@@ -2,6 +2,7 @@ import store from './index';
 
 const getDefaultState = () => {
 	return {
+		loading: false,
 		currentSeries: { ID: -1 },
 		currentMovie: -1,
 		currentSeason: -1,

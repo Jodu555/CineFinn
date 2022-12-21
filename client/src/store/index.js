@@ -6,6 +6,7 @@ import auth from '@/store/auth.store';
 const getDefaultState = () => {
 	return {
 		series: [],
+		loading: false,
 	};
 };
 
@@ -56,6 +57,9 @@ export default createStore({
 		setSeries(state, series) {
 			state.series = series;
 		},
+		setLoading(state, loading) {
+			state.loading = loading;
+		},
 	},
 	actions: {
 		reset({ commit }) {
@@ -64,10 +68,12 @@ export default createStore({
 			commit('reset');
 		},
 		async loadSeries({ commit }) {
+			commit('setLoading', true);
 			const response = await this.$networking.get('/index');
 			if (response.success) {
 				const json = response.json;
 				// console.log(json);
+				commit('setLoading', false);
 				commit('setSeries', json);
 			}
 		},

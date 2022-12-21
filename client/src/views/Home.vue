@@ -5,6 +5,11 @@
 				><font-awesome-icon icon="fa-solid fa-up-long" size="xl"
 			/></a>
 		</div>
+		<div v-if="loading" class="d-flex justify-content-center">
+			<div class="spinner-border" role="status">
+				<span class="visually-hidden">Loading...</span>
+			</div>
+		</div>
 		<div class="container accordion accordion-flush" id="accordionFlushExample">
 			<div v-for="categorie of categories" :key="categorie.title" class="accordion-item">
 				<h2 class="accordion-header">
@@ -76,7 +81,7 @@ export default {
 		},
 	},
 	computed: {
-		...mapState(['series']),
+		...mapState(['series', 'loading']),
 		categories() {
 			const categories = {};
 			this.series.forEach((i) => {
