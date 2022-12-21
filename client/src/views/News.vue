@@ -12,6 +12,11 @@
 				<button class="btn btn-outline-info" @click="toggleSort">Sort {{ buttonInfo }}</button>
 			</div>
 		</div>
+		<div v-if="loading" class="d-flex justify-content-center">
+			<div class="spinner-border" role="status">
+				<span class="visually-hidden">Loading...</span>
+			</div>
+		</div>
 		<div v-for="(obj, i) in news" :key="i">
 			<hr v-if="i == 0" />
 			<figure class="text-center">
@@ -32,6 +37,7 @@ import { mapState } from 'vuex';
 export default {
 	data() {
 		return {
+			loading: true,
 			newsInput: '',
 			sort: false,
 			news: [],
@@ -54,6 +60,7 @@ export default {
 			this.changeSort();
 		},
 		async onAddNews() {
+			this.loading = true;
 			const response = await this.$networking.post(
 				'/news',
 				JSON.stringify({
@@ -76,13 +83,16 @@ export default {
 					timerProgressBar: true,
 				});
 			}
+			this.loading = false;
 		},
 		async loadData() {
+			this.loading = true;
 			const response = await this.$networking.get('/news');
 			if (response.success) {
 				this.news = response.json;
 			}
 			this.changeSort();
+			this.loading = false;
 		},
 	},
 	async created() {
