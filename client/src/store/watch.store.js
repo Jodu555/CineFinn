@@ -36,6 +36,9 @@ export default {
 		setWatchList(state, watchList) {
 			state.watchList = watchList;
 		},
+		setLoading(state, loading) {
+			state.loading = loading;
+		},
 	},
 	getters: {
 		videoSrc(state, o) {
@@ -93,6 +96,7 @@ export default {
 	},
 	actions: {
 		async loadSeriesInfo({ commit, dispatch, rootState }, ID) {
+			commit('setLoading', true);
 			//Series array is empty cause the user got direct to the /watch route
 			if (rootState.series.length == 0) {
 				await dispatch('loadSeries', null, { root: true });
@@ -115,6 +119,7 @@ export default {
 			//Update The Series
 			const series = rootState.series.find((x) => x.ID == ID);
 			commit('setCurrentSeries', series);
+			commit('setLoading', false);
 		},
 		async loadWatchList({ commit, dispatch, rootState }, ID) {
 			const response = await this.$networking.get(`/watch/info?series=${ID}`);

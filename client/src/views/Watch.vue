@@ -3,6 +3,11 @@
 		<div v-if="currentSeries == undefined">
 			<h1>No Series with that ID</h1>
 		</div>
+		<div v-if="loading" class="d-flex justify-content-center">
+			<div class="spinner-border" role="status">
+				<span class="visually-hidden">Loading...</span>
+			</div>
+		</div>
 		<div v-auto-animate class="container" v-if="currentSeries != undefined && currentSeries.ID != -1">
 			<div class="float-end btn-group">
 				<button class="btn btn-outline-info" title="Series Information" data-bs-toggle="modal" data-bs-target="#seriesInformationModal" disabled>
@@ -82,7 +87,7 @@ export default {
 		};
 	},
 	computed: {
-		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode', 'currentLanguage', 'watchList']),
+		...mapState('watch', ['loading', 'currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode', 'currentLanguage', 'watchList']),
 		...mapState('auth', ['authToken', 'settings']),
 		...mapGetters('watch', ['videoSrc', 'entityObject']),
 		showLatestWatchButton() {
