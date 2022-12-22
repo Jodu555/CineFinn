@@ -337,8 +337,16 @@ export default {
 			video.volume = v.settings.volume.value;
 
 			function updateBuffer() {
+				console.log(video.buffered.length);
+				let max = -Infinity;
+				for (let i = 0; i < video.buffered.length; i++) {
+					const time = video.buffered.end(i);
+					if (time > max) {
+						max = time;
+					}
+				}
 				if (video.buffered.length == 1) {
-					const bufferPercent = video.buffered.end(0) / video.duration;
+					const bufferPercent = max / video.duration;
 					document.querySelector('.timeline-buffer').style.setProperty('--buffer-position', bufferPercent);
 				}
 			}
@@ -813,6 +821,7 @@ video {
 	right: calc(100% - var(--progress-position) * 100%);
 	background-color: red;
 	border-radius: 50px;
+	z-index: 51;
 }
 
 .timeline .thumb-indicator {
