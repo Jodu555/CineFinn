@@ -12,7 +12,7 @@
 		<ActorContainer v-if="false" />
 		<font-awesome-icon class="skip skip-left" size="2xl" icon="fa-solid fa-backward" />
 		<font-awesome-icon class="skip skip-right" size="2xl" icon="fa-solid fa-forward" />
-		<div class="video-controls-container">
+		<div v-show="!dataLoading" class="video-controls-container">
 			<div class="timeline-container">
 				<div class="timeline">
 					<img class="preview-img" />
@@ -101,6 +101,11 @@
 				</button>
 			</div>
 		</div>
+		<div v-if="videoLoading" class="video-spinner-container">
+			<div class="spinner-border text-light video-spinner" role="status">
+				<span class="visually-hidden">Loading...</span>
+			</div>
+		</div>
 		<video preload="auto" oncontextmenu="return false" :src="videoSrc"></video>
 	</div>
 </template>
@@ -116,6 +121,8 @@ export default {
 	data() {
 		return {
 			cleanupFN: null,
+			videoLoading: false,
+			dataLoading: false,
 		};
 	},
 	computed: {
@@ -300,14 +307,19 @@ export default {
 			// Duration
 			video.addEventListener('loadeddata', () => {
 				totalTimeElem.textContent = formatDuration(video.duration);
+				console.log('loading got data...');
+				v.dataLoading = false;
 			});
 			// video.addEventListener('progress', () => {
 			// 	console.log('progress');
 			// });
 			video.addEventListener('loadstart', () => {
 				console.log('loading started...');
+				v.videoLoading = true;
+				v.dataLoading = true;
 			});
 			video.addEventListener('canplay', () => {
+				v.videoLoading = false;
 				console.log('loading finished...');
 			});
 
@@ -496,6 +508,15 @@ export default {
 };
 </script>
 <style scoped>
+.video-spinner-container {
+	position: absolute;
+	top: 50%;
+}
+
+.video-spinner {
+	width: 5rem;
+	height: 5rem;
+}
 .skip {
 	position: absolute;
 	top: 50%;
