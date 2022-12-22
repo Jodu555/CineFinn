@@ -330,15 +330,22 @@ export default {
 			video.addEventListener('waiting', () => {
 				console.log('waiting for data (no current data but video still laying cause of buffering)');
 			});
+			video.addEventListener('progress', () => {
+				updateBuffer();
+			});
 
 			video.volume = v.settings.volume.value;
 
-			const timeUpdateThrottle = throttle(v.sendVideoTimeUpdate, TIME_UPDATE_THROTTLE);
-			video.addEventListener('timeupdate', () => {
+			function updateBuffer() {
 				if (video.buffered.length == 1) {
 					const bufferPercent = video.buffered.end(0) / video.duration;
 					document.querySelector('.timeline-buffer').style.setProperty('--buffer-position', bufferPercent);
 				}
+			}
+
+			const timeUpdateThrottle = throttle(v.sendVideoTimeUpdate, TIME_UPDATE_THROTTLE);
+			video.addEventListener('timeupdate', () => {
+				updateBuffer();
 				timeUpdateThrottle(video.currentTime);
 				currentTimeElem.textContent = formatDuration(video.currentTime);
 				const percent = video.currentTime / video.duration;
@@ -781,6 +788,7 @@ video {
 	bottom: 0;
 	right: calc(100% - var(--buffer-position) * 100%);
 	background-color: rgb(99, 99, 99);
+	border-radius: 50px;
 }
 
 .timeline::before {
@@ -792,6 +800,8 @@ video {
 	right: calc(100% - var(--preview-position) * 100%);
 	background-color: rgb(150, 150, 150);
 	display: none;
+	border-radius: 50px;
+	z-index: 50;
 }
 
 .timeline::after {
@@ -802,6 +812,7 @@ video {
 	bottom: 0;
 	right: calc(100% - var(--progress-position) * 100%);
 	background-color: red;
+	border-radius: 50px;
 }
 
 .timeline .thumb-indicator {
@@ -875,6 +886,11 @@ video {
 
 .video-container.scrubbing .timeline,
 .timeline-container:hover .timeline {
+	height: 100%;
+}
+
+.video-container.scrubbing .timeline-buffer,
+.timeline-container:hover .timeline-buffer {
 	height: 100%;
 }
 </style>
