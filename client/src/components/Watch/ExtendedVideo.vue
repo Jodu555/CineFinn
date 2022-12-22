@@ -314,19 +314,27 @@ export default {
 			// 	console.log('progress');
 			// });
 			video.addEventListener('loadstart', () => {
-				console.log('loading started...');
 				v.videoLoading = true;
 				v.dataLoading = true;
 			});
 			video.addEventListener('canplay', () => {
 				v.videoLoading = false;
-				console.log('loading finished...');
+			});
+			video.addEventListener('seeking', () => {
+				v.videoLoading = true;
+			});
+			video.addEventListener('stalled', () => {
+				console.log('stalled, the internet seems to be missing video could not be loaded');
+			});
+			video.addEventListener('waiting', () => {
+				console.log('waiting for data (no current data but video still laying cause of buffering)');
 			});
 
 			video.volume = v.settings.volume.value;
 
 			const timeUpdateThrottle = throttle(v.sendVideoTimeUpdate, TIME_UPDATE_THROTTLE);
 			video.addEventListener('timeupdate', () => {
+				console.log(video.buffered.length, video.buffered.start(0), video.buffered.end(0));
 				timeUpdateThrottle(video.currentTime);
 				currentTimeElem.textContent = formatDuration(video.currentTime);
 				const percent = video.currentTime / video.duration;
