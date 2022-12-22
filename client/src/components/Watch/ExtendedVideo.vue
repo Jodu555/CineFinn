@@ -15,6 +15,7 @@
 		<div v-show="!dataLoading" class="video-controls-container">
 			<div class="timeline-container">
 				<div class="timeline">
+					<div class="timeline-buffer"></div>
 					<img class="preview-img" />
 					<div class="thumb-indicator"></div>
 					<p class="time-info-timeline-indicator">55:55</p>
@@ -334,7 +335,10 @@ export default {
 
 			const timeUpdateThrottle = throttle(v.sendVideoTimeUpdate, TIME_UPDATE_THROTTLE);
 			video.addEventListener('timeupdate', () => {
-				console.log(video.buffered.length, video.buffered.start(0), video.buffered.end(0));
+				if (video.buffered.length == 1) {
+					const bufferPercent = video.buffered.end(0) / video.duration;
+					document.querySelector('.timeline-buffer').style.setProperty('--buffer-position', bufferPercent);
+				}
 				timeUpdateThrottle(video.currentTime);
 				currentTimeElem.textContent = formatDuration(video.currentTime);
 				const percent = video.currentTime / video.duration;
@@ -761,6 +765,22 @@ video {
 	height: 3px;
 	width: 100%;
 	position: relative;
+}
+
+.timeline-buffer {
+	height: 2px;
+	width: 100%;
+	position: relative;
+}
+
+.timeline-buffer::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	right: calc(100% - var(--buffer-position) * 100%);
+	background-color: rgb(99, 99, 99);
 }
 
 .timeline::before {

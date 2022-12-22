@@ -3,7 +3,7 @@
 		<div v-if="currentSeries == undefined">
 			<h1>No Series with that ID</h1>
 		</div>
-		<div v-if="loading" class="d-flex justify-content-center">
+		<div v-if="homeLoading || loading" class="d-flex justify-content-center">
 			<div class="spinner-border" role="status">
 				<span class="visually-hidden">Loading...</span>
 			</div>
@@ -87,6 +87,7 @@ export default {
 		};
 	},
 	computed: {
+		...mapState({ homeLoading: 'loading' }),
 		...mapState('watch', ['loading', 'currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode', 'currentLanguage', 'watchList']),
 		...mapState('auth', ['authToken', 'settings']),
 		...mapGetters('watch', ['videoSrc', 'entityObject']),
