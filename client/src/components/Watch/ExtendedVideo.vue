@@ -337,7 +337,6 @@ export default {
 			video.volume = v.settings.volume.value;
 
 			function updateBuffer() {
-				console.log(video.buffered.length);
 				let max = -Infinity;
 				for (let i = 0; i < video.buffered.length; i++) {
 					const time = video.buffered.end(i);
@@ -835,6 +834,7 @@ video {
 	border-radius: 50%;
 	transition: transform 150ms ease-in-out;
 	aspect-ratio: 1 / 1;
+	z-index: 51;
 }
 
 .timeline .preview-img {
