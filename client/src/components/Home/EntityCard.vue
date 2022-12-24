@@ -38,8 +38,7 @@
 				</div>
 			</div>
 			<div class="card-footer text-muted">
-				{{ entity.movies.length >= 1 ? entity.movies.length + ' ' + (entity.movies.length > 1 ? 'Movies' : 'Movie') : '' }}
-				{{ (entity.movies.length >= 1 ? ' | ' : '') + entity.seasons.length + ' ' + (entity.seasons.length > 1 ? 'Seasons' : 'Season') }}
+				{{ entityInfoString }}
 			</div>
 		</div>
 	</div>
@@ -54,6 +53,14 @@ export default {
 		};
 	},
 	created() {},
+	computed: {
+		entityInfoString() {
+			const moviePart = this.entity.movies.length >= 1 ? this.entity.movies.length + ' ' + (this.entity.movies.length > 1 ? 'Movies' : 'Movie') : '';
+			const seasonPart =
+				this.entity.seasons.length >= 1 ? this.entity.seasons.length + ' ' + (this.entity.seasons.length > 1 ? 'Seasons' : 'Season') : '';
+			return this.entity.movies.length >= 1 && this.entity.seasons.length >= 1 ? moviePart + ' | ' + seasonPart : moviePart + seasonPart;
+		},
+	},
 	methods: {
 		buildCoverURL(entity) {
 			const url = new URL(this.$networking.API_URL + `/images/${entity.ID}/cover.jpg`);

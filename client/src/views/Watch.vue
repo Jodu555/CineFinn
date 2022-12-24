@@ -46,6 +46,7 @@
 			<!-- Seasons -->
 			<EntityListView
 				title="Seasons:"
+				v-if="currentSeries.seasons.length >= 1"
 				:array="currentSeries.seasons"
 				:current="currentSeason"
 				:chnageFN="changeSeason"
