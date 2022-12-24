@@ -106,6 +106,10 @@ const markSeason = async (UUID, seriesID, seasonID, bool) => {
 	const watchString = await load(UUID);
 	const segmentList = parse(watchString);
 
+	//Get all episodes for the given seriesID and seasonID
+	//IN case of watched either Update or add to the segment list time over 301
+	// In case of not watched, just loop through the segment list and set the times to 0 and then recompute the data
+
 	segmentUpdateFunction(segment);
 	segment.calc();
 	await save(UUID, generateStr(segmentList));
