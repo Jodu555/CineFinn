@@ -102,6 +102,16 @@ const updateSegment = async (UUID, searchCriteria, segmentUpdateFunction) => {
 	return segmentList;
 };
 
+const markSeason = async (UUID, seriesID, seasonID, bool) => {
+	const watchString = await load(UUID);
+	const segmentList = parse(watchString);
+
+	segmentUpdateFunction(segment);
+	segment.calc();
+	await save(UUID, generateStr(segmentList));
+	return segmentList;
+};
+
 module.exports = {
 	Segment,
 	generateStr,

@@ -9,4 +9,8 @@ router.get('/info', async (req, res, next) => {
 	res.json(segList.filter((seg) => seg.ID == req.query.series));
 });
 
+router.get('/mark/:seriesID/season/:seasonID/:bool', (req, res, next) => {
+	const { seriesID, seasonID, bool } = req.params;
+});
+
 module.exports = { router };

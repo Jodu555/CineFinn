@@ -25,6 +25,30 @@
 			<div v-auto-animate v-if="showLatestWatchButton" class="text-center">
 				<button @click="skipToLatestTime" class="btn btn-outline-info">Jump to Latest watch position!</button>
 			</div>
+			<div class="d-flex justify-content-end">
+				<div class="btn-group">
+					<button
+						class="btn btn-outline-primary dropdown-toggle"
+						type="button"
+						id="seenmark"
+						data-bs-toggle="dropdown"
+						aria-haspopup="true"
+						aria-expanded="false"
+					>
+						Staffel Gesehen ?
+					</button>
+					<div class="dropdown-menu" aria-labelledby="seenmark">
+						<button type="button" class="dropdown-item" :class="{ disabled: currentSeason == -1 }"><b>Gesehen</b></button>
+						<button type="button" class="dropdown-item" :class="{ disabled: currentSeason == -1 }"><b>Nicht gesehen</b></button>
+
+						<!-- <button type="button" class="dropdown-item" :class="{ disabled: currentSeason == -1 }">Staffel als <b>gesehen</b> markieren</button>
+						<button type="button" class="dropdown-item" :class="{ disabled: currentEpisode == -1 }">Folge als <b>gesehen</b> markieren</button>
+						<div class="dropdown-divider"></div>
+						<button type="button" class="dropdown-item" :class="{ disabled: currentSeason == -1 }">Staffel als <b>nicht gesehen</b> markieren</button>
+						<button type="button" class="dropdown-item" :class="{ disabled: currentEpisode == -1 }">Folge als <b>nicht gesehen</b> markieren</button> -->
+					</div>
+				</div>
+			</div>
 			<pre v-if="settings.developerMode.value">
 				currentMovie: {{ currentMovie }}
 				currentSeason: {{ currentSeason }}
