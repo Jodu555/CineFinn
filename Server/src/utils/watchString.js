@@ -132,4 +132,5 @@ module.exports = {
 	load,
 	save,
 	updateSegment,
+	markSeason,
 };
