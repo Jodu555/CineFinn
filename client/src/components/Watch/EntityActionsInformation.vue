@@ -76,7 +76,7 @@ export default {
 	cursor: pointer;
 }
 .flag.active {
-	-webkit-box-shadow: 0px 17px 15px 0px #65abf3 !important;
-	box-shadow: 0px 17px 15px 0px #65abf3 !important;
+	-webkit-box-shadow: 0 8px 10px 0 #65abf3 !important;
+	box-shadow: 0 8px 10px 0 #65abf3 !important;
 }
 </style>
