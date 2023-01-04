@@ -17,8 +17,14 @@ socket.on('disconnect', () => {
 });
 socket.on('connect', async () => {
 	console.log('Socket Connection: Connected');
-	const res = await axios.get('http://localhost:4895/index/all?auth-token=SECR-DEV');
-	compareForNewReleases(res.data);
+	// const res = await axios.get('http://localhost:4895/index/all?auth-token=SECR-DEV');
+	// compareForNewReleases(res.data);
+	const anime = new Aniworld('https://aniworld.to/anime/stream/sky-wizard-academy');
+
+	const informations = (await anime.parseInformations()).informations;
+
+	console.log(JSON.stringify({ ...informations, image: true }, null, 3));
+	console.log(informations.image);
 });
 
 function buildFunction(method, cb) {
