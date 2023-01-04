@@ -21,7 +21,7 @@ const routes = [
 		path: '/watch',
 		name: 'Watch',
 		component: function () {
-			return import(/* webpackChunkName: "about" */ '../views/Watch.vue');
+			return import(/* webpackChunkName: "watch" */ '../views/Watch.vue');
 		},
 		meta: { requiresLogin: true },
 	},
@@ -29,7 +29,7 @@ const routes = [
 		path: '/news',
 		name: 'News',
 		component: function () {
-			return import(/* webpackChunkName: "about" */ '../views/News.vue');
+			return import(/* webpackChunkName: "news" */ '../views/News.vue');
 		},
 		meta: { requiresLogin: true },
 	},
