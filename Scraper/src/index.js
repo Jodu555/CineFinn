@@ -17,14 +17,19 @@ socket.on('disconnect', () => {
 });
 socket.on('connect', async () => {
 	console.log('Socket Connection: Connected');
+	const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN);
 	// const res = await axios.get('http://localhost:4895/index/all?auth-token=SECR-DEV');
-	// compareForNewReleases(res.data);
-	const anime = new Aniworld('https://aniworld.to/anime/stream/sky-wizard-academy');
 
-	const informations = (await anime.parseInformations()).informations;
+	// Check if there are missing refenreces
+	// console.log(res.data.filter((d) => !Boolean(d.references.aniworld)).map((d) => ({ ID: d.ID, title: d.title })));
 
-	console.log(JSON.stringify({ ...informations, image: true }, null, 3));
-	console.log(informations.image);
+	compareForNewReleases(res.data);
+
+	// Sub manually print the infos out
+	// const anime = new Aniworld('https://aniworld.to/anime/stream/ive-somehow-gotten-stronger-when-i-improved-my-farm-related-skills');
+	// const { url, informations } = await anime.parseInformations();
+	// console.log(JSON.stringify({ ...informations, references: { aniworld: url }, image: true }, null, 3));
+	// console.log(informations.image);
 });
 
 function buildFunction(method, cb) {
