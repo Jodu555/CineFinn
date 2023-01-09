@@ -1,20 +1,24 @@
+const promiseLimit = require('promise-limit');
 const Aniworld = require('../class/AniWorld');
 
 /**
  * @param  {Object} series the current series[] object
  */
 async function compareForNewReleases(series) {
+	const limit = promiseLimit(10);
 	const data = series.filter((x) => x.references?.aniworld);
 	const compare = await Promise.all(
 		data.map(async (serie) => {
-			return new Promise(async (res, _) => {
-				const world = new Aniworld(serie.references.aniworld);
-				const out = await world.parseInformations();
-				res({
-					ID: serie.ID,
-					title: serie.title,
-					references: serie.references,
-					...out,
+			return limit(() => {
+				return new Promise(async (res, _) => {
+					const world = new Aniworld(serie.references.aniworld);
+					const out = await world.parseInformations();
+					res({
+						ID: serie.ID,
+						title: serie.title,
+						references: serie.references,
+						...out,
+					});
 				});
 			});
 		})
