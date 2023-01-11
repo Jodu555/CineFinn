@@ -1,3 +1,4 @@
+const fs = require('fs');
 const promiseLimit = require('promise-limit');
 const Aniworld = require('../class/AniWorld');
 
@@ -56,6 +57,7 @@ async function compareForNewReleases(series) {
 
 	for (const aniworldSeries of compare) {
 		const localSeries = series.find((e) => e.ID == aniworldSeries.ID);
+		console.log(localSeries.title);
 		for (const aniworldSeasonIDX in aniworldSeries.seasons) {
 			const aniworldSeason = aniworldSeries.seasons[aniworldSeasonIDX];
 			const localSeason = localSeries.seasons[aniworldSeasonIDX];
@@ -68,13 +70,21 @@ async function compareForNewReleases(series) {
 				const localEpisode = localSeason[aniworldEpisodeIDX];
 
 				if (!localEpisode) {
-					console.log('The whole Episode is missing Season:', Number(aniworldSeasonIDX) + 1, ' Episode:', Number(aniworldEpisodeIDX) + 1);
-					//TODO: Figure the language out
-					addtoOutputList(localSeries.title, localSeries.references.aniworld, Number(aniworldSeasonIDX) + 1, Number(aniworldEpisodeIDX) + 1, 'TODO');
+					console.log('The whole Episode is missing Season:', Number(aniworldSeasonIDX) + 1, 'Episode:', Number(aniworldEpisodeIDX) + 1);
+					const language = aniworldEpisode.langs.find((e) => ['GerDub', 'GerSub', 'EngSub'].find((x) => x.includes(e)));
+					console.log('Started the language Decision Process Aniworld Langs:', aniworldEpisode.langs, 'Resulted in', { language });
+
+					addtoOutputList(
+						localSeries.title,
+						localSeries.references.aniworld,
+						Number(aniworldSeasonIDX) + 1,
+						Number(aniworldEpisodeIDX) + 1,
+						language
+					);
 					continue;
 				}
 				if (aniworldEpisode.langs.includes('GerDub') && !localEpisode.langs.includes('GerDub')) {
-					console.log('The German Dub is missing in Season:', Number(aniworldSeasonIDX) + 1, ' Episode:', Number(aniworldEpisodeIDX) + 1);
+					console.log('The German Dub is missing in Season:', Number(aniworldSeasonIDX) + 1, 'Episode:', Number(aniworldEpisodeIDX) + 1);
 					addtoOutputList(
 						localSeries.title,
 						localSeries.references.aniworld,
@@ -87,7 +97,8 @@ async function compareForNewReleases(series) {
 		}
 	}
 
-	console.log(outputDlList);
+	// console.log(outputDlList);
+	fs.writeFileSync('dlList.json', JSON.stringify(outputDlList, null, 3));
 
 	// for (const aniworldSeries of compare) {
 	// 	const currentSeries = series.find((e) => e.ID == aniworldSeries.ID);
