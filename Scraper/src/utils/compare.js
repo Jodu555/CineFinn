@@ -47,6 +47,7 @@ async function compareForNewReleases(series) {
 
 	const addtoOutputList = (title, reference, season, episode, lang) => {
 		outputDlList.push({
+			_animeFolder: title,
 			finished: true,
 			folder: 'Season ' + season,
 			file: `${title} St.${season} Flg.${episode}_${lang}`,
@@ -57,7 +58,7 @@ async function compareForNewReleases(series) {
 
 	for (const aniworldSeries of compare) {
 		const localSeries = series.find((e) => e.ID == aniworldSeries.ID);
-		console.log(localSeries.title);
+		console.log('-----=====', localSeries.title, '=====-----   START');
 		for (const aniworldSeasonIDX in aniworldSeries.seasons) {
 			const aniworldSeason = aniworldSeries.seasons[aniworldSeasonIDX];
 			const localSeason = localSeries.seasons[aniworldSeasonIDX];
@@ -95,6 +96,7 @@ async function compareForNewReleases(series) {
 				}
 			}
 		}
+		console.log('-----=====', localSeries.title, '=====-----   END');
 	}
 
 	// console.log(outputDlList);

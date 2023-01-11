@@ -19,10 +19,10 @@ socket.on('disconnect', () => {
 socket.on('connect', async () => {
 	console.log('Socket Connection: Connected');
 
-	const data = JSON.parse(fs.readFileSync('dlList.json', 'utf-8'));
-	console.log(data.length);
+	// const data = JSON.parse(fs.readFileSync('dlList.json', 'utf-8'));
+	// console.log(data.length);
 
-	// const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
+	const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 	// const res = await axios.get('http://localhost:4895/index/all?auth-token=SECR-DEV');
 
 	// Check if there are missing refenreces
@@ -32,7 +32,7 @@ socket.on('connect', async () => {
 
 	// console.log(`res.data`, res.data);
 
-	// compareForNewReleases(res.data);
+	compareForNewReleases(res.data);
 
 	// Sub manually print the infos out
 	// const anime = new Aniworld('https://aniworld.to/anime/stream/black-summoner');
