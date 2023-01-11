@@ -23,15 +23,7 @@ async function compareForNewReleases(series) {
 			});
 		})
 	);
-	const outputDlList = [
-		{
-			finished: true,
-			folder: 'Season x',
-			file: 'Anime Name St.x Flg.y_lang',
-			url: 'https://aniworld.to/anime/stream/refURL/staffel-x/episode-y',
-			m3u8: '',
-		},
-	];
+	const outputDlList = [];
 
 	/**
 	 * Loop through the aniworld series
@@ -49,6 +41,53 @@ async function compareForNewReleases(series) {
 	 *  just proceed with the usual method
 	 *
 	 */
+
+	//TODO: although when the seasons might be equal from the lenght theire could be an language update
+
+	const addtoOutputList = (title, reference, season, episode, lang) => {
+		outputDlList.push({
+			finished: true,
+			folder: 'Season ' + season,
+			file: `${title} St.${season} Flg.${episode}_${lang}`,
+			url: `${reference}/staffel-${season}/episode-${episode}`,
+			m3u8: '',
+		});
+	};
+
+	for (const aniworldSeries of compare) {
+		const localSeries = series.find((e) => e.ID == aniworldSeries.ID);
+		for (const aniworldSeasonIDX in aniworldSeries.seasons) {
+			const aniworldSeason = aniworldSeries.seasons[aniworldSeasonIDX];
+			const localSeason = localSeries.seasons[aniworldSeasonIDX];
+			if (!localSeason) {
+				console.log('Add the missing Seasons aniworld', aniworldSeries.seasons.length, 'local', localSeries.seasons.length);
+				continue;
+			}
+			for (const aniworldEpisodeIDX in aniworldSeason) {
+				const aniworldEpisode = aniworldSeason[aniworldEpisodeIDX];
+				const localEpisode = localSeason[aniworldEpisodeIDX];
+
+				if (!localEpisode) {
+					console.log('The whole Episode is missing Season:', Number(aniworldSeasonIDX) + 1, ' Episode:', Number(aniworldEpisodeIDX) + 1);
+					//TODO: Figure the language out
+					addtoOutputList(localSeries.title, localSeries.references.aniworld, Number(aniworldSeasonIDX) + 1, Number(aniworldEpisodeIDX) + 1, 'TODO');
+					continue;
+				}
+				if (aniworldEpisode.langs.includes('GerDub') && !localEpisode.langs.includes('GerDub')) {
+					console.log('The German Dub is missing in Season:', Number(aniworldSeasonIDX) + 1, ' Episode:', Number(aniworldEpisodeIDX) + 1);
+					addtoOutputList(
+						localSeries.title,
+						localSeries.references.aniworld,
+						Number(aniworldSeasonIDX) + 1,
+						Number(aniworldEpisodeIDX) + 1,
+						'GerDub'
+					);
+				}
+			}
+		}
+	}
+
+	console.log(outputDlList);
 
 	// for (const aniworldSeries of compare) {
 	// 	const currentSeries = series.find((e) => e.ID == aniworldSeries.ID);
