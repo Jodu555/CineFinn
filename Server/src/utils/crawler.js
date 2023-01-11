@@ -55,8 +55,13 @@ const crawlAndIndex = () => {
 
 		const item = series.find((x) => x.title.includes(parsedData.title));
 		if (parsedData.movie == true) {
-			const movie = new Movie(e, parsedData.movieTitle, '', [parsedData.language]);
-			item.movies.push(movie);
+			const existMovie = item.movies.find((x) => x.primaryName.includes(parsedData.movieTitle));
+			if (existMovie) {
+				existMovie.langs.push(parsedData.language);
+			} else {
+				const movie = new Movie(e, parsedData.movieTitle, '', [parsedData.language]);
+				item.movies.push(movie);
+			}
 		} else {
 			const currentArr = item.seasons[parsedData.season - 1];
 
