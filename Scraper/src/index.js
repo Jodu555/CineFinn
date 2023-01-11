@@ -18,28 +18,28 @@ socket.on('disconnect', () => {
 socket.on('connect', async () => {
 	console.log('Socket Connection: Connected');
 
-	// const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
+	const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 	// const res = await axios.get('http://localhost:4895/index/all?auth-token=SECR-DEV');
 
 	// Check if there are missing refenreces
 	// console.log(res.data.filter((d) => !Boolean(d.references.aniworld)).map((d) => ({ ID: d.ID, title: d.title })));
 
-	// compareForNewReleases(res.data);
+	compareForNewReleases(res.data);
 
 	// Sub manually print the infos out
-	const anime = new Aniworld('https://aniworld.to/anime/stream/black-summoner');
-	const { url, informations } = await anime.parseInformations();
+	// const anime = new Aniworld('https://aniworld.to/anime/stream/black-summoner');
+	// const { url, informations } = await anime.parseInformations();
 
-	const output = {
-		references: { aniworld: url },
-		infos: {
-			...informations,
-			image: true,
-		},
-	};
+	// const output = {
+	// 	references: { aniworld: url },
+	// 	infos: {
+	// 		...informations,
+	// 		image: true,
+	// 	},
+	// };
 
-	console.log(JSON.stringify(output, null, 3));
-	console.log(informations.image);
+	// console.log(JSON.stringify(output, null, 3));
+	// console.log(informations.image);
 });
 
 function buildFunction(method, cb) {
