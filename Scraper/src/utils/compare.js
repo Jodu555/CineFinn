@@ -75,27 +75,23 @@ async function compareForNewReleases(series) {
 				);
 				continue;
 			}
-			for (const aniworldEpisodeIDX in aniworldSeason) {
+			for (let aniworldEpisodeIDX in aniworldSeason) {
+				aniworldEpisodeIDX = Number(aniworldEpisodeIDX);
 				const aniworldEpisode = aniworldSeason[aniworldEpisodeIDX];
-				const localEpisode = localSeason[aniworldEpisodeIDX];
+				const localEpisode = localSeason.find((x) => x.episode == aniworldEpisodeIDX + 1);
 
 				if (!localEpisode) {
-					console.log('The whole Episode is missing Season:', aniworldSeasonIDX, 'Episode:', Number(aniworldEpisodeIDX));
+					// console.log(aniworldSeasonIDX, aniworldEpisodeIDX, localSeason.find((x) => x.episode == aniworldEpisodeIDX), localSeason.find((x) => x.episode == aniworldEpisodeIDX + 1));
+					console.log('The whole Episode is missing Season:', aniworldSeasonIDX + 1, 'Episode:', aniworldEpisodeIDX + 1);
 					const language = aniworldEpisode.langs.find((e) => ['GerDub', 'GerSub', 'EngSub'].find((x) => x.includes(e)));
 					console.log('Started the language Decision Process Aniworld Langs:', aniworldEpisode.langs, 'Resulted in', { language });
 
-					addtoOutputList(localSeries.title, localSeries.references.aniworld, aniworldSeasonIDX + 1, Number(aniworldEpisodeIDX) + 1, language);
+					addtoOutputList(localSeries.title, localSeries.references.aniworld, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, language);
 					continue;
 				}
 				if (aniworldEpisode.langs.includes('GerDub') && !localEpisode.langs.includes('GerDub')) {
-					console.log('The German Dub is missing in Season:', aniworldSeasonIDX + 1, 'Episode:', Number(aniworldEpisodeIDX) + 1);
-					addtoOutputList(
-						localSeries.title,
-						localSeries.references.aniworld,
-						Number(aniworldSeasonIDX) + 1,
-						Number(aniworldEpisodeIDX) + 1,
-						'GerDub'
-					);
+					console.log('The German Dub is missing in Season:', aniworldSeasonIDX + 1, 'Episode:', aniworldEpisodeIDX + 1);
+					addtoOutputList(localSeries.title, localSeries.references.aniworld, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, 'GerDub');
 				}
 			}
 		}
