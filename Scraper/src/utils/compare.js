@@ -98,8 +98,8 @@ async function compareForNewReleases(series) {
 		console.log('-----=====', localSeries.title, '=====-----   END');
 	}
 
-	// console.log(outputDlList);
-	// fs.writeFileSync('dlList.json', JSON.stringify(outputDlList, null, 3));
+	console.log(outputDlList.length);
+	fs.writeFileSync('dlList.json', JSON.stringify(outputDlList, null, 3));
 
 	// for (const aniworldSeries of compare) {
 	// 	const currentSeries = series.find((e) => e.ID == aniworldSeries.ID);
