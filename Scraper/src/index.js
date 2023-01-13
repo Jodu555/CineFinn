@@ -28,7 +28,7 @@ socket.on('connect', async () => {
 	// Check if there are missing refenreces
 	// console.log(res.data.filter((d) => !Boolean(d.references.aniworld)).map((d) => ({ ID: d.ID, title: d.title })));
 
-	res.data = res.data.filter((x) => x.title.includes('One Piece'));
+	res.data = res.data.filter((x) => x.title.includes('Grace'));
 
 	// console.log(`res.data`, res.data);
 

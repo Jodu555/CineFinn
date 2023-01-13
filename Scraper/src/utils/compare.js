@@ -65,14 +65,13 @@ async function compareForNewReleases(series) {
 			const aniworldSeason = aniworldSeries.seasons[aniworldSeasonIDX];
 			const localSeason = localSeries.seasons.find((x) => x[0].season == aniworldSeasonIDX + 1);
 			if (!localSeason) {
-				console.log(
-					'Add the missing Seasons aniworld',
-					aniworldSeries.seasons.length,
-					'local',
-					localSeries.seasons.length,
-					'Season:',
-					aniworldSeasonIDX + 1
-				);
+				console.log('Missing Season:', aniworldSeasonIDX + 1, 'with', aniworldSeason.length, 'Episode/s');
+				for (let episodeIDX in aniworldSeason) {
+					episodeIDX = Number(episodeIDX);
+					const episode = aniworldSeason[episodeIDX];
+					const language = episode.langs.find((e) => ['GerDub', 'GerSub', 'EngSub'].find((x) => x.includes(e)));
+					addtoOutputList(localSeries.title, localSeries.references.aniworld, aniworldSeasonIDX + 1, episodeIDX + 1, language);
+				}
 				continue;
 			}
 			for (let aniworldEpisodeIDX in aniworldSeason) {
