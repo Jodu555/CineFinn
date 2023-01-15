@@ -355,7 +355,8 @@ export default {
 				updateBuffer();
 				timeUpdateThrottle(video.currentTime);
 				currentTimeElem.textContent = formatDuration(video.currentTime);
-				const percent = video.currentTime / video.duration;
+				let percent = video.currentTime / video.duration;
+				percent = isNaN(percent) ? 0 : percent;
 				timelineContainer.style.setProperty('--progress-position', percent);
 			});
 			const leadingZeroFormatter = new Intl.NumberFormat(undefined, {
