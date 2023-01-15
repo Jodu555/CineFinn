@@ -76,8 +76,6 @@ socket.on('connect', async () => {
 		};
 	});
 
-	console.log(mappedArr);
-
 	compareForNewReleases(mappedArr);
 
 	// Sub manually print the infos out
