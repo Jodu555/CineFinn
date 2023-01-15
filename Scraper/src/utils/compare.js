@@ -26,6 +26,8 @@ async function compareForNewReleases(series) {
 	);
 	const outputDlList = [];
 
+	console.log(compare);
+
 	/**
 	 * Loop through the aniworld series
 	 * check if the season amount is equal ?

@@ -1,4 +1,5 @@
 const fs = require('fs');
+const crypto = require('crypto');
 require('dotenv').config();
 const axios = require('axios');
 const io = require('socket.io-client');
@@ -22,7 +23,7 @@ socket.on('connect', async () => {
 	// const data = JSON.parse(fs.readFileSync('dlList.json', 'utf-8'));
 	// console.log(data.length);
 
-	const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
+	// const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 	// const res = await axios.get('http://localhost:4895/index/all?auth-token=SECR-DEV');
 
 	// Check if there are missing refenreces
@@ -32,7 +33,52 @@ socket.on('connect', async () => {
 
 	// console.log(`res.data`, res.data);
 
-	compareForNewReleases(res.data);
+	// compareForNewReleases(res.data);
+
+	const arr = [
+		{
+			title: 'The Maid I Recently Hired Is Mysterious',
+			url: 'the-maid-i-recently-hired-is-mysterious',
+		},
+		{
+			title: 'Domestic Girlfriend',
+			url: 'domestic-girlfriend',
+		},
+		{
+			title: 'The Eminence in Shadow',
+			url: 'the-eminence-in-shadow',
+		},
+		{
+			title: 'My Hero Academia',
+			url: 'my-hero-academia',
+		},
+		{
+			title: "Shikimori's Not Just a Cutie",
+			url: 'shikimoris-not-just-a-cutie',
+		},
+		{
+			title: 'Don’t Toy With Me, Miss Nagatoro',
+			url: 'dont-toy-with-me-miss-nagatoro',
+		},
+		{
+			title: 'Reincarnated as a Sword',
+			url: 'reincarnated-as-a-sword',
+		},
+	];
+
+	const mappedArr = arr.map((x) => {
+		return {
+			ID: crypto.randomUUID().split('-')[0],
+			title: x.title,
+			references: { aniworld: 'https://aniworld.to/anime/stream/' + x.url },
+			seasons: [],
+			movies: [],
+		};
+	});
+
+	console.log(mappedArr);
+
+	compareForNewReleases(mappedArr);
 
 	// Sub manually print the infos out
 	// const anime = new Aniworld('https://aniworld.to/anime/stream/');
