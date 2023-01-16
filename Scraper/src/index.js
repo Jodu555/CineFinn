@@ -20,88 +20,79 @@ socket.on('disconnect', () => {
 socket.on('connect', async () => {
 	console.log('Socket Connection: Connected');
 
-	// const seasons = [11, 10, 10, 10, 10, 10];
+	await checkForUpdates();
 
-	// const output = seasons
-	// 	.map((x, i) => {
-	// 		const s = i + 1;
-	// 		const out = [];
-	// 		for (let j = 0; j < x; j++) {
-	// 			const e = j + 1;
-	// 			out.push({
-	// 				_animeFolder: 'Rick and Morty',
-	// 				finished: false,
-	// 				folder: `Season ${s}`,
-	// 				file: `Rick and Morty St.${s} Flg.${e}_GerDub`,
-	// 				url: `http://190.115.18.20/serie/stream/rick-and-morty/staffel-${s}/episode-${e}`,
-	// 				m3u8: '',
-	// 			});
-	// 		}
-	// 		return out;
-	// 	})
-	// 	.flat();
-
-	// console.log(output.length);
-
-	// fs.writeFileSync('dlList.json', JSON.stringify(output, null, 3));
-
-	// const data = JSON.parse(fs.readFileSync('dlList.json', 'utf-8'));
-	// console.log(data.length);
-
-	// const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
-	// const res = await axios.get('http://localhost:4895/index/all?auth-token=SECR-DEV');
-
-	// Check if there are missing refenreces
-	// console.log(res.data.filter((d) => !Boolean(d.references.aniworld)).map((d) => ({ ID: d.ID, title: d.title })));
-
-	// res.data = res.data.filter((x) => x.title.includes('Grace'));
-
-	// console.log(`res.data`, res.data);
-
-	// compareForNewReleases(res.data);
-
-	// const arr = [
-	// 	{
-	// 		title: "Shikimori's Not Just a Cutie",
-	// 		url: 'shikimoris-not-just-a-cutie',
-	// 	},
-	// 	{
-	// 		title: 'Don’t Toy With Me, Miss Nagatoro',
-	// 		url: 'dont-toy-with-me-miss-nagatoro',
-	// 	},
-	// 	{
-	// 		title: 'Reincarnated as a Sword',
-	// 		url: 'reincarnated-as-a-sword',
-	// 	},
-	// ];
-
-	// const mappedArr = arr.map((x) => {
-	// 	return {
-	// 		ID: crypto.randomUUID().split('-')[0],
-	// 		title: x.title,
-	// 		references: { aniworld: 'https://aniworld.to/anime/stream/' + x.url },
-	// 		seasons: [],
-	// 		movies: [],
-	// 	};
-	// });
-
-	// compareForNewReleases(mappedArr);
-
-	// Sub manually print the infos out
-	// const anime = new Aniworld('https://aniworld.to/anime/stream/');
-	// const { url, informations } = await anime.parseInformations();
-
-	// const output = {
-	// 	references: { aniworld: url },
-	// 	infos: {
-	// 		...informations,
-	// 		image: true,
-	// 	},
-	// };
-
-	// console.log(JSON.stringify(output, null, 3));
-	// console.log(informations.image);
+	// await manuallyCraftTheList();
+	// await generateNewDownloadList();
+	// await manuallyPrintTheInfosOut();
 });
+
+async function checkForUpdates() {
+	const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
+	await compareForNewReleases(res.data);
+}
+
+async function generateNewDownloadList() {
+	const arr = [
+		{
+			title: 'Folder Name',
+			url: 'URL',
+		},
+	];
+
+	const mappedArr = arr.map((x) => {
+		return {
+			ID: crypto.randomUUID().split('-')[0],
+			title: x.title,
+			references: { aniworld: 'https://aniworld.to/anime/stream/' + x.url },
+			seasons: [],
+			movies: [],
+		};
+	});
+
+	compareForNewReleases(mappedArr);
+}
+
+async function manuallyPrintTheInfosOut() {
+	const anime = new Aniworld('https://aniworld.to/anime/stream/');
+	const { url, informations } = await anime.parseInformations();
+
+	const output = {
+		references: { aniworld: url },
+		infos: {
+			...informations,
+			image: true,
+		},
+	};
+
+	console.log(JSON.stringify(output, null, 3));
+	console.log(informations.image);
+}
+
+async function manuallyCraftTheList() {
+	const seasons = [11, 10, 10, 10, 10, 10];
+
+	const output = seasons
+		.map((x, i) => {
+			const s = i + 1;
+			const out = [];
+			for (let j = 0; j < x; j++) {
+				const e = j + 1;
+				out.push({
+					_animeFolder: 'Rick and Morty',
+					finished: false,
+					folder: `Season ${s}`,
+					file: `Rick and Morty St.${s} Flg.${e}_GerDub`,
+					url: `http://190.115.18.20/serie/stream/rick-and-morty/staffel-${s}/episode-${e}`,
+					m3u8: '',
+				});
+			}
+			return out;
+		})
+		.flat();
+
+	fs.writeFileSync('dlList.json', JSON.stringify(output, null, 3));
+}
 
 function buildFunction(method, cb) {
 	socket.on(`call${method}`, async (data) => {
