@@ -20,8 +20,20 @@ socket.on('disconnect', () => {
 socket.on('connect', async () => {
 	console.log('Socket Connection: Connected');
 
-	await checkForUpdates();
+	const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 
+	const cleaned = res.data.filter((x) => x.categorie == 'Aniworld' && !x.infos.infos && !x.title.includes('She-Ra'));
+
+	const commands = [];
+
+	for (const x of cleaned) {
+		const img = await manuallyPrintTheInfosOut(x.references.aniworld);
+		commands.push(`wget ${img} -O ${x.ID}/cover.jpg`);
+	}
+
+	console.log(commands);
+
+	// await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
@@ -53,8 +65,8 @@ async function generateNewDownloadList() {
 	compareForNewReleases(mappedArr);
 }
 
-async function manuallyPrintTheInfosOut() {
-	const anime = new Aniworld('https://aniworld.to/anime/stream/');
+async function manuallyPrintTheInfosOut(refUrl) {
+	const anime = !refUrl ? new Aniworld('https://aniworld.to/anime/stream/reincarnated-as-a-sword') : new Aniworld(refUrl);
 	const { url, informations } = await anime.parseInformations();
 
 	const output = {
@@ -66,7 +78,8 @@ async function manuallyPrintTheInfosOut() {
 	};
 
 	console.log(JSON.stringify(output, null, 3));
-	console.log(informations.image);
+	// console.log(informations.image);
+	return informations.image;
 }
 
 async function manuallyCraftTheList() {
