@@ -1,5 +1,6 @@
 const fs = require('fs');
 const promiseLimit = require('promise-limit');
+const sanitizeFilename = require('sanitize-filename');
 const Aniworld = require('../class/AniWorld');
 
 function similar(a, b) {
@@ -13,6 +14,10 @@ function similar(a, b) {
 	}
 	var weight = equivalency / maxLength;
 	return weight * 100;
+}
+
+function sanitizeFileName(str) {
+	return sanitizeFilename(str, { replacement: ' ' }).replace(/  +/g, ' ');
 }
 
 /**
@@ -68,12 +73,12 @@ async function compareForNewReleases(series) {
 			m3u8: '',
 		});
 	};
-	const addtoOutputListMovie = (title, reference, movie, movieIdx, lang) => {
+	const addtoOutputListMovie = (title, reference, movieTitle, movieIdx, lang) => {
 		outputDlList.push({
 			_animeFolder: title,
 			finished: false,
 			folder: 'Movies',
-			file: `${title}_${lang}`,
+			file: `${movieTitle}_${lang}`,
 			url: `${reference}/filme/film-${movieIdx}`,
 			m3u8: '',
 		});
@@ -122,16 +127,19 @@ async function compareForNewReleases(series) {
 			for (let aniworldMovieIDX in aniworldSeries.movies) {
 				aniworldMovieIDX = Number(aniworldMovieIDX);
 				const aniworldMovie = aniworldSeries.movies[aniworldMovieIDX];
+
+				aniworldMovie.secondName = sanitizeFileName(aniworldMovie.secondName);
+
 				const localMovie = localSeries.movies.find((x) => similar(aniworldMovie.secondName, x.primaryName) > 50);
 				if (!localMovie) {
 					console.log('Missing Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
 					const language = aniworldMovie.langs.find((e) => ['GerDub', 'GerSub', 'EngSub'].find((x) => x.includes(e)));
-					addtoOutputListMovie(localSeries.title, localSeries.references.aniworld, aniworldMovie.mainName, aniworldMovieIDX + 1, language);
+					addtoOutputListMovie(localSeries.title, localSeries.references.aniworld, aniworldMovie.secondName, aniworldMovieIDX + 1, language);
 					continue;
 				} else {
 					if (aniworldMovie.langs.includes('GerDub') && !localMovie.langs.includes('GerDub')) {
 						console.log('The German Dub is missing in Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
-						addtoOutputList(localSeries.title, localSeries.references.aniworld, aniworldMovie.mainName, aniworldMovieIDX + 1, 'GerDub');
+						addtoOutputList(localSeries.title, localSeries.references.aniworld, aniworldMovie.secondName, aniworldMovieIDX + 1, 'GerDub');
 					}
 				}
 			}
@@ -140,7 +148,7 @@ async function compareForNewReleases(series) {
 	}
 
 	console.log(outputDlList.length);
-	// fs.writeFileSync('dlList.json', JSON.stringify(outputDlList, null, 3));
+	fs.writeFileSync('dlList.json', JSON.stringify(outputDlList, null, 3));
 
 	// for (const aniworldSeries of compare) {
 	// 	const currentSeries = series.find((e) => e.ID == aniworldSeries.ID);
