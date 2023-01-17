@@ -56,7 +56,7 @@ async function compareForNewReleases(series) {
 	 *
 	 */
 
-	//TODO: although when the seasons might be equal from the lenght theire could be an language update
+	//TODO: the system currently only checks if the gerdub is relased, but when we initially have the engsub and the gersub is released, the system does not care
 
 	const addtoOutputList = (title, reference, season, episode, lang) => {
 		outputDlList.push({
