@@ -94,6 +94,7 @@ async function compareForNewReleases(series) {
 				}
 			}
 		}
+		//TODO: Add the movies too
 		console.log('-----=====', localSeries.title, '=====-----   END');
 	}
 

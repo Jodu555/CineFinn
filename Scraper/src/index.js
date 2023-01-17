@@ -20,20 +20,20 @@ socket.on('disconnect', () => {
 socket.on('connect', async () => {
 	console.log('Socket Connection: Connected');
 
-	const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
+	// const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 
-	const cleaned = res.data.filter((x) => x.categorie == 'Aniworld' && !x.infos.infos && !x.title.includes('She-Ra'));
+	// const cleaned = res.data.filter((x) => x.categorie == 'Aniworld' && !x.infos.infos && !x.title.includes('She-Ra'));
 
-	const commands = [];
+	// const commands = [];
 
-	for (const x of cleaned) {
-		const img = await manuallyPrintTheInfosOut(x.references.aniworld);
-		commands.push(`wget ${img} -O ${x.ID}/cover.jpg`);
-	}
+	// for (const x of cleaned) {
+	// 	const img = await manuallyPrintTheInfosOut(x.references.aniworld);
+	// 	commands.push(`wget ${img} -O ${x.ID}/cover.jpg`);
+	// }
 
-	console.log(commands);
+	// console.log(commands);
 
-	// await checkForUpdates();
+	await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
@@ -47,8 +47,12 @@ async function checkForUpdates() {
 async function generateNewDownloadList() {
 	const arr = [
 		{
-			title: 'Folder Name',
-			url: 'URL',
+			title: 'Eromanga Sensei',
+			url: 'eromanga-sensei',
+		},
+		{
+			title: 'War God System! I’m Counting On You!',
+			url: 'war-god-system-im-counting-on-you',
 		},
 	];
 
