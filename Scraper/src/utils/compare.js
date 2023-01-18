@@ -119,6 +119,7 @@ async function compareForNewReleases(series) {
 				aniworldMovie.secondName = sanitizeFileName(aniworldMovie.secondName);
 
 				const localMovie = localSeries.movies.find((x) => similar(aniworldMovie.secondName, x.primaryName) > 50);
+
 				if (!localMovie) {
 					console.log('Missing Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
 					const language = aniworldMovie.langs.find((e) => ['GerDub', 'GerSub', 'EngSub'].find((x) => x.includes(e)));

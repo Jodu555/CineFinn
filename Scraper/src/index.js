@@ -5,6 +5,7 @@ const axios = require('axios');
 const io = require('socket.io-client');
 const Aniworld = require('./class/AniWorld');
 const { compareForNewReleases } = require('./utils/compare');
+const { similar } = require('./utils/utils');
 
 const socket = io(process.env.CORE_URL, { auth: { type: 'scraper', token: process.env.AUTH_TOKEN } });
 
