@@ -41,7 +41,7 @@ socket.on('connect', async () => {
 
 async function checkForUpdates() {
 	const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
-	res.data = res.data.filter((x) => x.title.includes('To Love-Ru') || x.title.includes('Irregular'));
+	// res.data = res.data.filter((x) => x.title.includes('To Love-Ru') || x.title.includes('Irregular'));
 	await compareForNewReleases(res.data);
 }
 
