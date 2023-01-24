@@ -463,6 +463,7 @@ export default {
 			playPauseBtn.addEventListener('click', togglePlay);
 			video.addEventListener('click', togglePlay);
 			function togglePlay() {
+				console.log('Called togglePlay');
 				video.paused ? video.play() : video.pause();
 			}
 			video.addEventListener('play', () => {
@@ -474,6 +475,7 @@ export default {
 
 			//Mobile Accessibillity
 			let tapedTwice = false;
+			let prevDblTapTimeout;
 			video.addEventListener(
 				'touchstart',
 				(event) => {
@@ -519,10 +521,19 @@ export default {
 					// console.log('You tapped me Twice !!!');
 
 					const out = isIntersecting();
-					if (out.value) skip(out.velocity);
+					if (out.value) {
+						skip(out.velocity);
+					}
+
+					if (prevDblTapTimeout) clearTimeout(prevDblTapTimeout);
+
+					prevDblTapTimeout = setTimeout(() => {
+						video.play();
+					}, 301);
 				},
 				{ passive: true }
 			);
+
 			return () => {
 				document.removeEventListener('keydown', documentKeyDown);
 				document.removeEventListener('mouseup', documentMouseUp);
