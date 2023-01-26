@@ -23,7 +23,17 @@
 					</li>
 				</ul>
 				<div v-if="loggedIn" class="d-flex">
-					<input ref="autocomplete" type="text" class="form-control" placeholder="Search for a series..." style="width: 18rem" autocomplete="off" />
+					<AutoComplete />
+					<!--
+						<input
+						ref="autocomplete"
+						type="text"
+						class="form-control"
+						placeholder="Search for a series..."
+						style="width: 18rem"
+						autocomplete="off"
+					/>
+					-->
 					<div class="btn-group" style="margin-left: 2rem" role="group" aria-label="Basic outlined example">
 						<button
 							title="Settings"
@@ -47,8 +57,10 @@
 <script>
 import Autocomplete from '@/plugins/autocomplete';
 import { mapState, mapActions } from 'vuex';
+import AutoComplete from './AutoComplete.vue';
 
 export default {
+	components: { AutoComplete },
 	data() {
 		return {
 			ac: null,
@@ -78,8 +90,8 @@ export default {
 	},
 	watch: {
 		series() {
+			return;
 			if (!this.$refs.autocomplete) return;
-
 			!this.ac &&
 				(this.ac = new Autocomplete(this.$refs.autocomplete, {
 					data: [],
