@@ -23,10 +23,11 @@
 					</li>
 				</ul>
 				<div v-if="loggedIn" class="d-flex">
-					<!-- <AutoComplete /> -->
-
-					<input ref="autocomplete" type="text" class="form-control" placeholder="Search for a series..." style="width: 18rem" autocomplete="off" />
-
+					<AutoComplete
+						:options="{ placeholder: 'Search for a series...', clearAfterSelect: true }"
+						:data="autoCompleteSeries"
+						:select-fn="autocompleteSearch"
+					/>
 					<div class="btn-group" style="margin-left: 2rem" role="group" aria-label="Basic outlined example">
 						<button
 							title="Settings"
@@ -48,10 +49,11 @@
 </template>
 
 <script>
-import Autocomplete from '@/plugins/autocomplete';
 import { mapState, mapActions } from 'vuex';
+import AutoComplete from './AutoComplete.vue';
 
 export default {
+	components: { AutoComplete },
 	data() {
 		return {
 			ac: null,
@@ -61,6 +63,9 @@ export default {
 	computed: {
 		...mapState(['series']),
 		...mapState('auth', ['loggedIn']),
+		autoCompleteSeries() {
+			return this.series.map((x) => ({ value: x.title, ID: x.ID }));
+		},
 	},
 	created() {
 		window.addEventListener('keyup', this.handleKeyUp);
@@ -78,38 +83,8 @@ export default {
 		handleKeyDown(e) {
 			if (this.pressedKeys[e.key] != false) this.pressedKeys[e.key] = true;
 		},
-	},
-	watch: {
-		series() {
-			return;
-			if (!this.$refs.autocomplete) return;
-			!this.ac &&
-				(this.ac = new Autocomplete(this.$refs.autocomplete, {
-					data: [],
-					maximumItems: 5,
-					threshold: 1,
-					onSelectItem: ({ event, label, value }) => {
-						this.$refs.autocomplete.value = '';
-						if (event.ctrlKey || this.pressedKeys['j']) {
-							console.log({ ctrl: event.ctrlKey, j: this.pressedKeys['j'] });
-							this.pressedKeys['j'] && (this.pressedKeys['j'] = false);
-							//Open in new tab
-							let routeData = this.$router.resolve({
-								path: '/watch',
-								query: { id: value },
-							});
-							console.log(routeData);
-							window.open(routeData.href, '_blank');
-						} else {
-							this.$router.push({ path: '/watch', query: { id: value } });
-						}
-					},
-				}));
-			this.ac.setData(
-				this.series.map((x) => {
-					return { label: x.title, value: x.ID };
-				})
-			);
+		autocompleteSearch(ID, value) {
+			this.$router.push({ path: '/watch', query: { id: ID } });
 		},
 	},
 };
