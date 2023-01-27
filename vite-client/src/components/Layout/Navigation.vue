@@ -21,6 +21,9 @@
 					<li class="nav-item">
 						<router-link class="nav-link" exact-active-class="active" to="/news">News</router-link>
 					</li>
+					<li class="nav-item">
+						<router-link class="nav-link" exact-active-class="active" to="/sync">Sync</router-link>
+					</li>
 				</ul>
 				<div v-if="loggedIn" class="d-flex">
 					<AutoComplete

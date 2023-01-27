@@ -33,6 +33,22 @@ const routes = [
 		},
 		meta: { requiresLogin: true },
 	},
+	{
+		path: '/sync',
+		name: 'Sync',
+		component: function () {
+			return import(/* webpackChunkName: "sync" */ '../views/SyncList.vue');
+		},
+		meta: { requiresLogin: true },
+	},
+	{
+		path: '/sync/:key',
+		name: 'SyncRoom',
+		component: function () {
+			return import(/* webpackChunkName: "sync" */ '../views/SyncRoom.vue');
+		},
+		meta: { requiresLogin: true },
+	},
 	{ path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound },
 ];
 
