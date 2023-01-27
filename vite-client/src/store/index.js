@@ -1,5 +1,6 @@
 import { createLogger, createStore } from 'vuex';
 
+import sync from '@/store/sync.store';
 import watch from '@/store/watch.store';
 import auth from '@/store/auth.store';
 
@@ -88,6 +89,7 @@ export default createStore({
 	modules: {
 		watch,
 		auth,
+		sync,
 	},
 	// plugins: [logger]
 });

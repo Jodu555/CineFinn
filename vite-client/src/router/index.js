@@ -37,18 +37,27 @@ const routes = [
 		path: '/sync',
 		name: 'Sync',
 		component: function () {
-			return import(/* webpackChunkName: "sync" */ '../views/SyncList.vue');
+			return import(/* webpackChunkName: "synclist" */ '../views/SyncList.vue');
 		},
 		meta: { requiresLogin: true },
+		children: [
+			{
+				path: ':key',
+				component: function () {
+					return import(/* webpackChunkName: "syncroom" */ '../views/SyncRoom.vue');
+				},
+				meta: { requiresLogin: true },
+			},
+		],
 	},
-	{
-		path: '/sync/:key',
-		name: 'SyncRoom',
-		component: function () {
-			return import(/* webpackChunkName: "sync" */ '../views/SyncRoom.vue');
-		},
-		meta: { requiresLogin: true },
-	},
+	// {
+	// 	path: '/sync/:key',
+	// 	name: 'SyncRoom',
+	// 	component: function () {
+	// 		return import(/* webpackChunkName: "sync" */ '../views/SyncRoom.vue');
+	// 	},
+	// 	meta: { requiresLogin: true },
+	// },
 	{ path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound },
 ];
 
