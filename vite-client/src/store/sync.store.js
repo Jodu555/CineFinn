@@ -47,6 +47,11 @@ export default {
 			commit('setCurrentRoomID', ID);
 			dispatch('loadRoomInfo');
 		},
+		async leaveRoom({ commit, dispatch, rootState }) {
+			//TODO: make the socket call
+			commit('reset');
+			await router.push('/sync/');
+		},
 		async loadRoomInfo({ commit, state, dispatch, rootState }) {
 			commit('setLoading', true);
 

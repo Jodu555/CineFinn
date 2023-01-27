@@ -35,12 +35,20 @@ const routes = [
 	},
 	{
 		path: '/sync',
-		name: 'Sync',
+
 		component: function () {
-			return import(/* webpackChunkName: "synclist" */ '../views/SyncList.vue');
+			return import(/* webpackChunkName: "synclist" */ '../views/Sync.vue');
 		},
 		meta: { requiresLogin: true },
 		children: [
+			{
+				name: 'Sync',
+				path: '',
+				component: function () {
+					return import(/* webpackChunkName: "syncroom" */ '../views/SyncList.vue');
+				},
+				meta: { requiresLogin: true },
+			},
 			{
 				path: ':key',
 				component: function () {
