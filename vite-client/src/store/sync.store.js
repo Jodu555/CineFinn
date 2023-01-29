@@ -4,7 +4,34 @@ import router from '@/router/index';
 const getDefaultState = () => {
 	return {
 		loading: false,
-		roomList: [],
+		roomList: [
+			{
+				ID: '58932',
+				created: Date.now(),
+				seriesID: '8bde73ae',
+				members: {
+					UUID: 'Jodu555',
+					UUID1: 'TRyFlow',
+				},
+			},
+			{
+				ID: '58962',
+				created: Date.now(),
+				seriesID: 'c5ea6cb7',
+				members: {
+					UUID: 'Jodu555',
+					UUID1: 'TRyFlow',
+				},
+			},
+			{
+				ID: '58972',
+				created: Date.now(),
+				seriesID: '1998be8e',
+				members: {
+					UUID: 'Jodu555',
+				},
+			},
+		],
 		currentRoomID: -1,
 		isOwner: false,
 		currentSeries: { ID: -1 },
