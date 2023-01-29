@@ -11,6 +11,17 @@ export default {
 	methods: {
 		...mapActions('sync', ['leaveRoom']),
 	},
+	mounted() {
+		this.$socket.on('roomVideoAction', ({ action, value }) => {
+			if (action == 'playback') {
+			} else if (action == 'skip') {
+			} else if (action == 'skipPercent') {
+			}
+		});
+	},
+	async unmounted() {
+		this.$socket.off('roomVideoAction');
+	},
 };
 </script>
 <style lang=""></style>

@@ -122,17 +122,22 @@ export default {
 	data() {
 		return {
 			cleanupFN: null,
+			skip: null,
+			skipPercent: null,
 			videoLoading: false,
 			dataLoading: false,
 		};
 	},
 	computed: {
-		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode', 'currentLanguage', 'watchList']),
+		...mapState('watch', ['currentSeries', 'currentMovie', 'currentLanguage']),
 		...mapState('auth', ['authToken', 'settings']),
 		...mapGetters('watch', ['videoSrc', 'entityObject']),
 	},
 	async mounted() {
-		this.cleanupFN = this.initialize();
+		const { skip, skipPercent, cleanupFN } = this.initialize();
+		this.skip = skip;
+		this.skipPercent = skipPercent;
+		this.cleanupFN = cleanupFN;
 	},
 	beforeUnmount() {
 		this.cleanupFN();
@@ -463,7 +468,6 @@ export default {
 			playPauseBtn.addEventListener('click', togglePlay);
 			video.addEventListener('click', togglePlay);
 			function togglePlay() {
-				console.log('Called togglePlay');
 				video.paused ? video.play() : video.pause();
 			}
 			video.addEventListener('play', () => {
@@ -534,11 +538,15 @@ export default {
 				{ passive: true }
 			);
 
-			return () => {
-				document.removeEventListener('keydown', documentKeyDown);
-				document.removeEventListener('mouseup', documentMouseUp);
-				document.removeEventListener('mousemove', documentMouseMove);
-				document.removeEventListener('fullscreenchange', documentFullScreenChange);
+			return {
+				skip,
+				skipPercent,
+				cleanupFN: () => {
+					document.removeEventListener('keydown', documentKeyDown);
+					document.removeEventListener('mouseup', documentMouseUp);
+					document.removeEventListener('mousemove', documentMouseMove);
+					document.removeEventListener('fullscreenchange', documentFullScreenChange);
+				},
 			};
 		},
 	},

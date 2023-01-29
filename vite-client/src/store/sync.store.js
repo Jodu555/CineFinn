@@ -6,9 +6,15 @@ const getDefaultState = () => {
 		loading: false,
 		roomList: [
 			{
+				//Let's say im in this room
 				ID: '58932',
 				created: Date.now(),
 				seriesID: '8bde73ae',
+				entityInfo: {
+					season: 0,
+					episode: 0,
+					movie: 0,
+				},
 				members: {
 					UUID: 'Jodu555',
 					UUID1: 'TRyFlow',
@@ -34,7 +40,6 @@ const getDefaultState = () => {
 		],
 		currentRoomID: -1,
 		isOwner: false,
-		currentSeries: { ID: -1 },
 		videoSrc: '',
 	};
 };
@@ -50,9 +55,6 @@ export default {
 		},
 		setIsOwner(state, isowner) {
 			state.isOwner = isowner;
-		},
-		setCurrentSeries(state, series) {
-			state.currentSeries = series;
 		},
 		setRoomList(state, roomList) {
 			state.roomList = roomList;
@@ -73,6 +75,7 @@ export default {
 			//TODO: make here the socket call to join
 			commit('setCurrentRoomID', ID);
 			dispatch('loadRoomInfo');
+			await router.push('/sync/' + ID);
 		},
 		async leaveRoom({ commit, dispatch, rootState }) {
 			//TODO: make the socket call

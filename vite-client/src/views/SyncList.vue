@@ -7,11 +7,19 @@
 					<div class="card-body">
 						<h3 class="card-title">Join a Room</h3>
 						<div class="mb-3">
-							<input type="text" class="form-control" name="roomid" id="roomid" aria-describedby="helpId" placeholder="RoomID" />
+							<input
+								type="text"
+								v-model="roomInputID"
+								class="form-control"
+								name="roomid"
+								id="roomid"
+								aria-describedby="helpId"
+								placeholder="RoomID"
+							/>
 							<small id="helpId" class="form-text text-muted">The ID of the room you want to join</small>
 						</div>
 						<div class="d-grid gap-2">
-							<button @click="joinRoom()" type="button" class="btn btn-success">Join</button>
+							<button @click="joinRoom(roomInputID)" type="button" class="btn btn-success">Join</button>
 						</div>
 					</div>
 				</div>
@@ -37,6 +45,11 @@ import RoomCard from '../components/Sync/RoomCard.vue';
 
 export default {
 	components: { RoomCard },
+	data() {
+		return {
+			roomInputID: '',
+		};
+	},
 	computed: {
 		...mapState('sync', ['roomList']),
 	},

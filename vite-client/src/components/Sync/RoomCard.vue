@@ -2,7 +2,7 @@
 	<div>
 		<div class="card text-start">
 			<div class="card-body">
-				<h4 class="card-title">{{ getSeriesName(room.seriesID) }}</h4>
+				<h4 class="card-title">{{ getSeries(room.seriesID)?.title }}</h4>
 				<p class="card-text">Opend: {{ timeAgo(new Date(room.created)) }} with {{ Object.keys(room.members).length }} users</p>
 				<button class="btn btn-outline-success">Join</button>
 			</div>
@@ -43,8 +43,8 @@ export default {
 			}
 			return value;
 		},
-		getSeriesName(ID) {
-			return this.series.find((x) => x.ID == ID).title;
+		getSeries(ID) {
+			return this.series.find((x) => x.ID == ID);
 		},
 	},
 };
