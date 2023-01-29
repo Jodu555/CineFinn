@@ -76,6 +76,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [ ] Think about maybe a clean entity switch even if the video is finished playing
 - [x] Update the Client Navigation Search to use native vue for better data updates
 - [x] Port the client application to vite for faster builds and better HMR
+- [ ] Add a PATCH /index/ID route to update single anime informations
 - [ ] Port vuex to pinia
 - [ ] Add better mobile accessbillity for scrubbing
 - [x] Add Loading Indicators
