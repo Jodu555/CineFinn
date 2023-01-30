@@ -9,11 +9,12 @@ const getDefaultState = () => {
 				//Let's say im in this room
 				ID: '58932',
 				created: Date.now(),
-				seriesID: '8bde73ae',
-				entityInfo: {
-					season: 0,
-					episode: 0,
+				seriesID: '8dc12299',
+				entityInfos: {
+					season: 1,
+					episode: 1,
 					movie: 0,
+					lang: 'GerDub',
 				},
 				members: {
 					UUID: 'Jodu555',
