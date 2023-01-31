@@ -34,8 +34,8 @@ socket.on('connect', async () => {
 
 	// console.log(commands);
 
-	await checkForUpdates();
-	// await manuallyCraftTheList();
+	// await checkForUpdates();
+	await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
 });
