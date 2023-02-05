@@ -4,7 +4,7 @@
 			<img v-if="entity?.infos?.image" :src="buildCoverURL(entity)" class="card-img-top" alt="..." />
 			<img v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" class="card-img-top" alt="..." />
 			<div class="card-body">
-				<h4 class="card-title">{{ entity.title }}</h4>
+				<h4 class="card-title">{{ entity.infos?.title || entity.title }}</h4>
 				<p class="card-text">
 					<template v-if="entity.infos.description">
 						{{
@@ -15,7 +15,7 @@
 						<small v-if="!showDescription && entity.infos.description.length >= descriptionLength" class="read-more" @click="showDescription = true"
 							>More</small
 						>
-						<small v-else class="read-more" @click="showDescription = false">Less</small>
+						<small v-else-if="entity.infos.description.length >= descriptionLength" class="read-more" @click="showDescription = false">Less</small>
 						<br />
 					</template>
 					<template v-else>

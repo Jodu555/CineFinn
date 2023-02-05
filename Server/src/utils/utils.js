@@ -74,6 +74,7 @@ const promiseAllLimit = (...args) => {
 };
 
 function deepMerge(current, updates) {
+	if (updates === null) return current;
 	for (key of Object.keys(updates)) {
 		if (!current.hasOwnProperty(key) || typeof updates[key] !== 'object') current[key] = updates[key];
 		else deepMerge(current[key], updates[key]);
