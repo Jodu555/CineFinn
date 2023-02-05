@@ -73,6 +73,14 @@ const promiseAllLimit = (...args) => {
 	});
 };
 
+function deepMerge(current, updates) {
+	for (key of Object.keys(updates)) {
+		if (!current.hasOwnProperty(key) || typeof updates[key] !== 'object') current[key] = updates[key];
+		else deepMerge(current[key], updates[key]);
+	}
+	return current;
+}
+
 module.exports = {
 	getSeries,
 	setSeries,
@@ -85,4 +93,5 @@ module.exports = {
 	debounce,
 	toAllSockets,
 	promiseAllLimit,
+	deepMerge,
 };

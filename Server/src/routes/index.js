@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { cleanupSeriesBeforeFrontResponse } = require('../classes/series');
-const { getSeries } = require('../utils/utils');
+const { getSeries, setSeries, deepMerge } = require('../utils/utils');
 const axios = require('axios');
 
 router.get('/', async (req, res, next) => {
@@ -32,6 +32,30 @@ router.get('/:ID', async (req, res, next) => {
 	} else {
 		next(new Error('Serie no found!'));
 	}
+});
+
+router.patch('/:ID', async (req, res, next) => {
+	console.log(req.params);
+	console.log(req.body);
+	const out = deepMerge(
+		{
+			references: {
+				sto: 'Hello 123',
+			},
+			infos: {},
+		},
+		req.body
+	);
+	res.json(out);
+	// setSeries(
+	// 	getSeries.map((x) => {
+	// 		if (x.ID == req.params.ID) {
+	// 			return {...x, ...req.body}
+	// 		} else {
+	// 			return x;
+	// 		}
+	// 	})
+	// );
 });
 
 module.exports = { router };
