@@ -3,6 +3,7 @@ const router = express.Router();
 const { cleanupSeriesBeforeFrontResponse } = require('../classes/series');
 const { getSeries, setSeries, deepMerge } = require('../utils/utils');
 const axios = require('axios');
+const { sendSeriesReloadToAll } = require('../sockets/client.socket');
 
 router.get('/', async (req, res, next) => {
 	const series = cleanupSeriesBeforeFrontResponse(getSeries()).map((x) => {
@@ -35,27 +36,20 @@ router.get('/:ID', async (req, res, next) => {
 });
 
 router.patch('/:ID', async (req, res, next) => {
-	console.log(req.params);
-	console.log(req.body);
-	const out = deepMerge(
-		{
-			references: {
-				sto: 'Hello 123',
-			},
-			infos: {},
-		},
-		req.body
+	//TODO: IMPORTANT: Add restriction to this route
+	setSeries(
+		getSeries().map((x) => {
+			if (x.ID == req.params.ID) {
+				const out = deepMerge(x, req.body);
+				res.json(out);
+				return out;
+			} else {
+				return x;
+			}
+		})
 	);
-	res.json(out);
-	// setSeries(
-	// 	getSeries.map((x) => {
-	// 		if (x.ID == req.params.ID) {
-	// 			return {...x, ...req.body}
-	// 		} else {
-	// 			return x;
-	// 		}
-	// 	})
-	// );
+
+	await sendSeriesReloadToAll();
 });
 
 module.exports = { router };
