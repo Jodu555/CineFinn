@@ -35,9 +35,10 @@ socket.on('connect', async () => {
 	// console.log(commands);
 
 	// await checkForUpdates();
-	await manuallyCraftTheList();
+	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
+	await programmaticallyInsertTheInfos();
 });
 
 async function checkForUpdates() {
@@ -82,6 +83,13 @@ async function manuallyPrintTheInfosOut(refUrl) {
 	console.log(JSON.stringify(output, null, 3));
 	// console.log(informations.image);
 	return informations.image;
+}
+
+async function programmaticallyInsertTheInfos() {
+	const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
+	res.data = res.data.filter((x) => (x.refenreces?.aniworld && !x.infos.title) || !x.infos.description);
+
+	console.log(res.data.map((x) => ({ ID: x.ID, title: x.title, infos: x.infos })));
 }
 
 async function manuallyCraftTheList() {
