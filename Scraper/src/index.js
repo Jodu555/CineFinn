@@ -90,7 +90,7 @@ async function programmaticallyInsertTheInfos() {
 	// const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 
 	res.data = res.data.filter((x) => x.references?.aniworld);
-	res.data = res.data.filter((x) => !x.infos.title || !x.infos.description);
+	res.data = res.data.filter((x) => !(x.infos.title || x.infos.description));
 
 	for (const series of res.data) {
 		const anime = new Aniworld(series.references.aniworld);
