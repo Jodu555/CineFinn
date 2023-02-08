@@ -101,14 +101,17 @@ async function programmaticallyInsertTheInfos() {
 		const patchBody = {
 			infos: {
 				...informations,
-				imageURL: img,
+				// imageURL: img,
+				image: true, //This is here because no on local i would download the images to disk
 			},
 		};
-		const response = await axios.patch('http://localhost:3100/index/' + series.ID + '?auth-token=' + process.env.AUTH_TOKEN_REST, patchBody);
+		const response = await axios.patch(`http://localhost:3100/index/${series.ID}?auth-token=${process.env.AUTH_TOKEN_REST}`, patchBody);
 
-		console.log(response);
+		// console.log(response.status, { ID: series.ID, title: series.title, infos: series.infos, references: series.references }, patchBody);
 
-		console.log({ ID: series.ID, title: series.title, infos: series.infos, references: series.references }, patchBody);
+		console.log(`Patched Series ${series.ID} - ${series.title} with the reference ${series.references}`);
+		console.log('  => With ', patchBody);
+		console.log(`  => Resulting In ${response.status}`);
 	}
 }
 
