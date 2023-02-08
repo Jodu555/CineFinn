@@ -1,21 +1,27 @@
 <template>
-	<div v-if="loading" class="text-center justtify-content-center mt-3">
-		<div class="spinner-border" style="width: 3rem; height: 3rem" role="status">
-			<span class="visually-hidden">Loading...</span>
+	<div>
+		<div v-if="loading" class="text-center justtify-content-center mt-3">
+			<div class="spinner-border" style="width: 3rem; height: 3rem" role="status">
+				<span class="visually-hidden">Loading...</span>
+			</div>
 		</div>
+		<img ref="image" :class="props.childclass" :alt="props.alt" />
 	</div>
-	<img v-else ref="image" :alt="props.alt" />
 </template>
 <script setup>
 import { onMounted, ref } from 'vue';
 
-const props = defineProps(['src', 'alt']);
+const props = defineProps(['src', 'alt', 'childclass']);
 
 const loading = ref(true);
 
 const image = ref(null);
 
 function loadImage() {
+	image.value.addEventListener('load', () => {
+		loading.value = false;
+	});
+	image.value.addEventListener('error', () => console.log('Error on Loading Image', props.src));
 	image.value.src = props.src;
 }
 
@@ -37,10 +43,8 @@ function createObserver() {
 
 onMounted(() => {
 	if (window['IntersectionObserver']) {
-		console.log('Observer Created');
 		createObserver();
 	} else {
-		console.log('Loaded Image onMount');
 		loadImage();
 	}
 });

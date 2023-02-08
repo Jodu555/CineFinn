@@ -1,8 +1,8 @@
 <template>
 	<div class="col">
 		<div class="card">
-			<LazyImage v-if="entity?.infos?.image" :src="buildCoverURL(entity)" class="card-img-top" alt="..." />
-			<LazyImage v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" class="card-img-top" alt="..." />
+			<LazyImage v-if="entity?.infos?.image" :src="buildCoverURL(entity)" :childclass="'card-img-top'" alt="..." />
+			<LazyImage v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" :childclass="'card-img-top'" alt="..." />
 			<!-- <img v-if="entity?.infos?.image" :src="buildCoverURL(entity)" class="card-img-top" alt="..." />
 			<img v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" class="card-img-top" alt="..." /> -->
 			<div class="card-body">
