@@ -1,8 +1,10 @@
 <template>
 	<div class="col">
 		<div class="card">
-			<img v-if="entity?.infos?.image" :src="buildCoverURL(entity)" class="card-img-top" alt="..." />
-			<img v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" class="card-img-top" alt="..." />
+			<LazyImage v-if="entity?.infos?.image" :src="buildCoverURL(entity)" class="card-img-top" alt="..." />
+			<LazyImage v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" class="card-img-top" alt="..." />
+			<!-- <img v-if="entity?.infos?.image" :src="buildCoverURL(entity)" class="card-img-top" alt="..." />
+			<img v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" class="card-img-top" alt="..." /> -->
 			<div class="card-body">
 				<h4 class="card-title">{{ entity.infos?.title || entity.title }}</h4>
 				<p class="card-text">
@@ -44,6 +46,8 @@
 	</div>
 </template>
 <script>
+import LazyImage from '../LazyImage.vue';
+
 export default {
 	props: ['entity'],
 	data() {
@@ -68,6 +72,7 @@ export default {
 			return url.href;
 		},
 	},
+	components: { LazyImage },
 };
 </script>
 <style scoped>

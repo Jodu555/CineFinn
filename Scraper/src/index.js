@@ -89,7 +89,9 @@ async function programmaticallyInsertTheInfos() {
 	const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 	res.data = res.data.filter((x) => (x.refenreces?.aniworld && !x.infos.title) || !x.infos.description);
 
-	console.log(res.data.map((x) => ({ ID: x.ID, title: x.title, infos: x.infos })));
+	res.data.forEach((x) => {
+		console.log({ ID: x.ID, title: x.title, infos: x.infos });
+	});
 }
 
 async function manuallyCraftTheList() {
