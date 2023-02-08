@@ -86,12 +86,30 @@ async function manuallyPrintTheInfosOut(refUrl) {
 }
 
 async function programmaticallyInsertTheInfos() {
-	const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
-	res.data = res.data.filter((x) => (x.refenreces?.aniworld && !x.infos.title) || !x.infos.description);
+	const res = await axios.get('http://localhost:3100/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
+	// const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 
-	res.data.forEach((x) => {
-		console.log({ ID: x.ID, title: x.title, infos: x.infos });
-	});
+	res.data = res.data.filter((x) => x.references?.aniworld);
+	res.data = res.data.filter((x) => !x.infos.title || !x.infos.description);
+
+	for (const series of res.data) {
+		const anime = new Aniworld(series.references.aniworld);
+		const { url, informations } = await anime.parseInformations();
+
+		const img = informations.image;
+		delete informations.image;
+		const patchBody = {
+			infos: {
+				...informations,
+				imageURL: img,
+			},
+		};
+		const response = await axios.patch('http://localhost:3100/index/' + series.ID + '?auth-token=' + process.env.AUTH_TOKEN_REST, patchBody);
+
+		console.log(response);
+
+		console.log({ ID: series.ID, title: series.title, infos: series.infos, references: series.references }, patchBody);
+	}
 }
 
 async function manuallyCraftTheList() {
