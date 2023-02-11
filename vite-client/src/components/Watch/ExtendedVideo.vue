@@ -433,8 +433,10 @@ export default {
 				} else {
 					volumeLevel = 'low';
 				}
-				v.settings.volume.value = video.volume;
-				v.updateSettings();
+				if (v.settings.volume.value !== video.volume) {
+					v.settings.volume.value = video.volume;
+					v.updateSettings();
+				}
 				videoContainer.dataset.volumeLevel = volumeLevel;
 			});
 			// View Modes

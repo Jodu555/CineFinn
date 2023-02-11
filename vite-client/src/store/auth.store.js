@@ -55,9 +55,8 @@ export default {
 	},
 	actions: {
 		async updateSettings({ commit, state, dispatch }) {
-			// console.log('Settings Update', state.settings);
+			console.log('Settings Emitted', state.settings);
 			this.$socket.emit('updateSettings', state.settings);
-			//Decide if either make an api call or an socket event
 		},
 		async login({ commit, state, dispatch }, credentials) {
 			const response = await this.$networking.post('/auth/login', JSON.stringify(credentials));
