@@ -38,4 +38,23 @@ module.exports = () => {
 			type: 'TEXT',
 		},
 	});
+
+	database.createTable('sync_rooms', {
+		options: {
+			timestamps: {
+				createdAt: true,
+			},
+		},
+		ID: {
+			type: 'varchar(64)',
+			null: false,
+		},
+		seriesID: {
+			type: 'varchar(64)',
+			null: false,
+		},
+		members: {
+			type: 'TEXT',
+		},
+	});
 };

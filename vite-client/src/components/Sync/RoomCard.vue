@@ -3,7 +3,7 @@
 		<div class="card text-start">
 			<div class="card-body">
 				<h4 class="card-title">{{ getSeries(room.seriesID)?.title }}</h4>
-				<p class="card-text">Opend: {{ timeAgo(new Date(room.created)) }} with {{ Object.keys(room.members).length }} users</p>
+				<p class="card-text">Opend: {{ ago }} with {{ room.members.length }} users</p>
 				<button class="btn btn-outline-success">Join</button>
 			</div>
 		</div>
@@ -14,6 +14,17 @@ import { mapState } from 'vuex';
 
 export default {
 	props: ['room'],
+	data() {
+		return {
+			ago: '',
+		};
+	},
+	mounted() {
+		// this.ago = timeAgo(new Date(this.room.created));
+		// setInterval(() => {
+		// 	this.ago = timeAgo(new Date(this.room.created));
+		// }, 1000);
+	},
 	computed: {
 		...mapState(['series']),
 	},
