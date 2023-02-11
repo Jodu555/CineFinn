@@ -5,7 +5,7 @@
 				© Copyright
 				{{ new Date().getFullYear() }}
 				by <a href="https://Jodu555.de" target="_blank">Jodu555</a> /
-				<a href="https://www.youtube.com/c/TRyFlow" target="_blank">TRyFlow</a> /
+				<!-- <a href="https://www.youtube.com/c/TRyFlow" target="_blank">TRyFlow</a> / -->
 				<a href="https://jodu555.de/imprint">Impressum</a> /
 				<a href="https://jodu555.de/privacy">Privacy Policy</a>
 			</p>

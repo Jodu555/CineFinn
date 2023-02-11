@@ -20,10 +20,10 @@ export default {
 		};
 	},
 	mounted() {
-		// this.ago = timeAgo(new Date(this.room.created));
-		// setInterval(() => {
-		// 	this.ago = timeAgo(new Date(this.room.created));
-		// }, 1000);
+		this.ago = this.timeAgo(new Date(this.room.created));
+		setInterval(() => {
+			this.ago = this.timeAgo(new Date(this.room.created));
+		}, 1000);
 	},
 	computed: {
 		...mapState(['series']),
