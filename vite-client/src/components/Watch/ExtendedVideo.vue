@@ -118,6 +118,7 @@ export default {
 	props: {
 		switchTo: { type: Function },
 		sendVideoTimeUpdate: { type: Function },
+		interaction: { type: Boolean, default: true },
 	},
 	data() {
 		return {

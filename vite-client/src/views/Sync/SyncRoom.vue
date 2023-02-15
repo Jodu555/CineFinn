@@ -1,5 +1,10 @@
 <template>
 	<div class="mt-3 container">
+		<div v-if="watchLoading || syncLoading" class="d-flex justify-content-center">
+			<div class="spinner-border" role="status">
+				<span class="visually-hidden">Loading...</span>
+			</div>
+		</div>
 		<div class="mb-3 d-flex justify-content-between">
 			<button @click="leaveRoom()" type="button" class="btn btn-outline-danger">Leave Room</button>
 			<AutoComplete :options="{ placeholder: 'Select a Series...', clearAfterSelect: true }" :data="autoCompleteSeries" :select-fn="selectSeries" />
@@ -36,7 +41,7 @@
 			/>
 
 			<EntityActionsInformation />
-			<ExtendedVideo v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="sendVideoTimeUpdate" />
+			<ExtendedVideo v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="() => {}" />
 		</div>
 	</div>
 </template>
@@ -51,7 +56,9 @@ export default {
 	components: { AutoComplete, EntityActionsInformation, EntityListView, ExtendedVideo },
 	computed: {
 		...mapState(['series']),
-		...mapState('watch', ['loading', 'currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode', 'currentLanguage', 'watchList']),
+		...mapState('sync', { syncLoading: 'loading' }),
+		...mapState('watch', { watchLoading: 'loading' }),
+		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode', 'currentLanguage', 'watchList']),
 		...mapState('auth', ['authToken', 'settings']),
 		...mapGetters('watch', ['videoSrc', 'entityObject']),
 		autoCompleteSeries() {
@@ -102,7 +109,7 @@ export default {
 			const prevTime = video.currentTime;
 
 			console.log('GOT handleVideoChange() EMIT to Server', { season, episode, movie, langchange, lang });
-
+			//TODO: make here an emit to the server
 			video.pause();
 
 			setTimeout(() => {
@@ -130,8 +137,11 @@ export default {
 				// value = true = Play
 				// Value = false = Pause
 			} else if (action == 'sync-skip') {
+				// The Skip if you click the arrow keys
 			} else if (action == 'sync-skipPercent') {
+				// The Skip you can perform with the numpad
 			} else if (action == 'sync-skipTimeline') {
+				// The skip if you click on the timeline at any position
 			}
 		});
 	},

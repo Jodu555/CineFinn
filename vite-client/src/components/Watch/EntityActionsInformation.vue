@@ -17,7 +17,7 @@
 					@click="changeLanguage(lang)"
 					class="flag shadow mb-4 bg-body"
 					:class="{ active: this.currentLanguage == lang }"
-					:src="`./flag-langs/${lang.toLowerCase()}.svg`"
+					:src="`/flag-langs/${lang.toLowerCase()}.svg`"
 					:alt="langDetails[lang.toLowerCase()]?.alt || 'None Alt'"
 					:title="langDetails[lang.toLowerCase()]?.title || 'None Title'"
 				/>

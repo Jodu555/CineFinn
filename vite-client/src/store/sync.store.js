@@ -33,7 +33,6 @@ const getDefaultState = () => {
 		],
 		currentRoomID: -1,
 		isOwner: false,
-		videoSrc: '',
 	};
 };
 
