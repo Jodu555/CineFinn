@@ -90,7 +90,7 @@
 </template>
 <script>
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex';
-import { singleDimSwitcher, multiDimSwitcher } from '@/plugins/switcher';
+import { singleDimSwitcher, multiDimSwitcher, deepswitchTo } from '@/plugins/switcher';
 import EntityListView from '@/components/Watch/EntityListView.vue';
 import ExtendedVideo from '@/components/Watch/ExtendedVideo.vue';
 import ControlsInformation from '@/components/Watch/ControlsInformation.vue';
@@ -152,41 +152,7 @@ export default {
 			this.forceHideButton = true;
 		},
 		switchTo(vel) {
-			if (this.currentSeason == -1) {
-				if (this.currentMovie == -1) {
-					console.log('Error');
-					const title = `No entry point for '${vel == 1 ? 'Next' : 'Previous'}'`;
-					this.$swal({
-						toast: true,
-						position: 'top-end',
-						showConfirmButton: false,
-						timer: 1500,
-						icon: 'error',
-						title,
-						timerProgressBar: true,
-					});
-					return;
-				}
-				//Switch in Movies
-				const { idxptr, value } = singleDimSwitcher(this.currentSeries.movies, this.currentMovie - 1, vel);
-				// console.log(idxptr, value);
-				this.handleVideoChange(-1, -1, idxptr + 1);
-				return;
-			} else {
-				//Switch in Episodes
-				const seasonIdx = this.currentSeries.seasons.findIndex((x) => x[0].season == this.entityObject.season);
-				const episodeIdx = this.currentSeries.seasons[seasonIdx].findIndex((x) => x.episode == this.entityObject.episode);
-
-				// console.log({ dimArr: this.currentSeries.seasons, seasonIdx, episodeIdx });
-
-				const { arrptr, idxptr, value } = multiDimSwitcher(this.currentSeries.seasons, seasonIdx, episodeIdx, vel);
-				console.log(arrptr, idxptr, value);
-
-				const entity = this.currentSeries.seasons[arrptr][idxptr];
-
-				this.handleVideoChange(entity.season, entity.episode);
-				return;
-			}
+			deepswitchTo(vel, this);
 		},
 		changeMovie(ID) {
 			if (this.currentMovie == ID) return this.handleVideoChange();
