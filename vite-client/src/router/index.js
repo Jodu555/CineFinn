@@ -37,7 +37,7 @@ const routes = [
 		path: '/sync',
 
 		component: function () {
-			return import(/* webpackChunkName: "synclist" */ '../views/Sync.vue');
+			return import(/* webpackChunkName: "synclist" */ '../views/Sync/Sync.vue');
 		},
 		meta: { requiresLogin: true },
 		children: [
@@ -45,14 +45,14 @@ const routes = [
 				name: 'Sync',
 				path: '',
 				component: function () {
-					return import(/* webpackChunkName: "syncroom" */ '../views/SyncList.vue');
+					return import(/* webpackChunkName: "syncroom" */ '../views/Sync/SyncList.vue');
 				},
 				meta: { requiresLogin: true },
 			},
 			{
 				path: ':key',
 				component: function () {
-					return import(/* webpackChunkName: "syncroom" */ '../views/SyncRoom.vue');
+					return import(/* webpackChunkName: "syncroom" */ '../views/Sync/SyncRoom.vue');
 				},
 				meta: { requiresLogin: true },
 			},

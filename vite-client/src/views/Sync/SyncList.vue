@@ -41,7 +41,7 @@
 </template>
 <script>
 import { mapActions, mapMutations, mapState } from 'vuex';
-import RoomCard from '../components/Sync/RoomCard.vue';
+import RoomCard from '../../components/Sync/RoomCard.vue';
 
 export default {
 	components: { RoomCard },

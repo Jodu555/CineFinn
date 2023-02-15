@@ -1,7 +1,7 @@
 <template lang="">
 	<div>
-		<h1 class="text-center mt-4 text-danger-emphasis">Work in Progress...</h1>
-		<!-- <router-view> </router-view> -->
+		<!-- <h1 class="text-center mt-4 text-danger-emphasis">Work in Progress...</h1> -->
+		<router-view> </router-view>
 	</div>
 </template>
 <script>

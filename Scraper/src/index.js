@@ -34,11 +34,11 @@ socket.on('connect', async () => {
 
 	// console.log(commands);
 
-	await checkForUpdates();
+	// await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
-	// await programmaticallyInsertTheInfos();
+	await programmaticallyInsertTheInfos();
 });
 
 async function checkForUpdates() {
@@ -86,11 +86,15 @@ async function manuallyPrintTheInfosOut(refUrl) {
 }
 
 async function programmaticallyInsertTheInfos() {
-	const res = await axios.get('http://localhost:3100/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
-	// const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
+	// const res = await axios.get('http://localhost:3100/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
+	const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 
 	res.data = res.data.filter((x) => x.references?.aniworld);
 	res.data = res.data.filter((x) => !(x.infos.title || x.infos.description));
+
+	console.log(res.data);
+
+	const imageList = [];
 
 	for (const series of res.data) {
 		const anime = new Aniworld(series.references.aniworld);
@@ -105,7 +109,10 @@ async function programmaticallyInsertTheInfos() {
 				image: true, //This is here because no on local i would download the images to disk
 			},
 		};
-		const response = await axios.patch(`http://localhost:3100/index/${series.ID}?auth-token=${process.env.AUTH_TOKEN_REST}`, patchBody);
+
+		imageList.push(img);
+
+		const response = await axios.patch(`http://cinema-api.jodu555.de/index/${series.ID}?auth-token=${process.env.AUTH_TOKEN_REST}`, patchBody);
 
 		// console.log(response.status, { ID: series.ID, title: series.title, infos: series.infos, references: series.references }, patchBody);
 
@@ -113,6 +120,10 @@ async function programmaticallyInsertTheInfos() {
 		console.log('  => With ', patchBody);
 		console.log(`  => Resulting In ${response.status}`);
 	}
+
+	imageList.forEach((imgs) => {
+		console.log(imgs);
+	});
 }
 
 async function manuallyCraftTheList() {
