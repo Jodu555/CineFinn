@@ -103,6 +103,8 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 
 - [ ] Add a Setting to toggle the card images (for lower bandwidth)
 - [ ] Update the preview images to be language specific (preview images for every language an episode is in) cause if the episode is longer or shorter
+- [ ] Implement the update check for EngDub Series
+- [ ] Implement the update check for sto series
 - [ ] Account/Authentication System Update
   - [ ] Implement a password change in the settings
   - [ ] Implement Email Change in the settings
