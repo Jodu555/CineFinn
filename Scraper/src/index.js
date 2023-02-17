@@ -34,16 +34,28 @@ socket.on('connect', async () => {
 
 	// console.log(commands);
 
-	// await checkForUpdates();
+	await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
-	await programmaticallyInsertTheInfos();
+	// await programmaticallyInsertTheInfos();
 });
 
 async function checkForUpdates() {
 	const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 	// res.data = res.data.filter((x) => x.title.includes('To Love-Ru') || x.title.includes('Irregular'));
+
+	//This list should say, that these animes should the new episodes no be included unless they are german dubbed
+	const ignoranceList = [
+		{
+			ID: 'c8001b23', // Detektiv Conan
+			lang: 'GerDub',
+		},
+		{
+			ID: 'a9f36e78', // Peter Grill and the Philosopher’s Time
+			lang: 'GerDub',
+		},
+	];
 	await compareForNewReleases(res.data);
 }
 
