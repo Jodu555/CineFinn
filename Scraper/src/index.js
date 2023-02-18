@@ -43,7 +43,10 @@ socket.on('connect', async () => {
 
 async function checkForUpdates() {
 	const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
-	// res.data = res.data.filter((x) => x.title.includes('To Love-Ru') || x.title.includes('Irregular'));
+	// res.data = res.data.filter((x) => x.ID == 'a9f36e78');
+	// res.data = res.data.filter((x) => x.ID == 'c8001b23' || x.ID == 'a9f36e78');
+
+	// console.log(res.data);
 
 	//This list should say, that these animes should the new episodes no be included unless they are german dubbed
 	const ignoranceList = [
@@ -56,7 +59,7 @@ async function checkForUpdates() {
 			lang: 'GerDub',
 		},
 	];
-	await compareForNewReleases(res.data);
+	await compareForNewReleases(res.data, ignoranceList);
 }
 
 async function generateNewDownloadList() {
