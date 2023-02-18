@@ -83,6 +83,7 @@ async function compareForNewReleases(series, ignoranceList) {
 			const localSeason = localSeries.seasons.find((x) => x[0].season == aniworldSeasonIDX + 1);
 			if (!localSeason) {
 				console.log('Missing Season:', aniworldSeasonIDX + 1, 'with', aniworldSeason.length, 'Episode/s');
+				let ignoranceSkip = true;
 				for (let episodeIDX in aniworldSeason) {
 					episodeIDX = Number(episodeIDX);
 					const episode = aniworldSeason[episodeIDX];
@@ -90,8 +91,10 @@ async function compareForNewReleases(series, ignoranceList) {
 					if (ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
 						continue;
 					}
+					ignoranceSkip = false;
 					addtoOutputList(localSeries.title, localSeries.references.aniworld, aniworldSeasonIDX + 1, episodeIDX + 1, language);
 				}
+				console.log(' => Skipped due to the ignorance list', ignoranceObject);
 				continue;
 			}
 			for (let aniworldEpisodeIDX in aniworldSeason) {
