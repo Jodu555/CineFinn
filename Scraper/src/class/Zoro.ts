@@ -10,6 +10,9 @@ const jsdom = require('jsdom');
  * ## To Get Episode Informations (Sub / Dub)
  * https://zoro.to/ajax/v2/episode/servers?episodeId=92390
  *
+ * ## To Get the stream embed iframe
+ * https://zoro.to/ajax/v2/episode/sources?id=serverid
+ *
  * ## To Get a Character List
  * https://zoro.to/ajax/character/list/17978
  *
