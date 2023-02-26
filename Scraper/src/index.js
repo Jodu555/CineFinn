@@ -36,7 +36,7 @@ socket.on('connect', async () => {
 	// console.log(commands);
 
 	const zoro = new Zoro('https://zoro.to/watch/im-quitting-heroingl-17978');
-	zoro.getEpisodeList();
+	// zoro.getEpisodeListWithLang();
 
 	// await checkForUpdates();
 	// await manuallyCraftTheList();
