@@ -24,7 +24,7 @@ interface SimpleZoroEpisode {
 
 interface ExtendedZoroEpisode extends SimpleZoroEpisode {
 	langs: string[];
-	streamingServers: any[];
+	streamingServers: StreamingServers[];
 }
 
 interface StreamingServers {
@@ -90,10 +90,10 @@ class Zoro {
 		};
 	}
 
-	async getStream(streamID: string) {
+	async getStream(streamID: string): Promise<string> {
 		const response = await axios.get('https://zoro.to/ajax/v2/episode/sources?id=' + streamID);
 		return response.data.link;
 	}
 }
 
-module.exports = Zoro;
+export default Zoro;

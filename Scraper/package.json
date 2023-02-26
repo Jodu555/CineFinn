@@ -4,8 +4,7 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"start": "node src/index.js",
-		"dev": "nodemon src/index.js"
+		"dev": "nodemon -e ts,ts -w ./src -x tsc && node dist/index.js"
 	},
 	"keywords": [],
 	"author": "",
@@ -19,5 +18,8 @@
 		"puppeteer": "^19.3.0",
 		"sanitize-filename": "^1.6.3",
 		"socket.io-client": "^4.5.4"
+	},
+	"devDependencies": {
+		"ts-node": "^10.9.1"
 	}
 }

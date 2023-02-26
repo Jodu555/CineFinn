@@ -1,12 +1,12 @@
-const fs = require('fs');
+import * as fs from 'fs';
 const crypto = require('crypto');
 require('dotenv').config();
-const axios = require('axios');
+import axios from 'axios';
 const io = require('socket.io-client');
 const Aniworld = require('./class/AniWorld');
 const { compareForNewReleases } = require('./utils/compare');
 const { similar } = require('./utils/utils');
-const Zoro = require('./class/Zoro.ts');
+import Zoro from './class/Zoro';
 
 const socket = io(process.env.CORE_URL, { auth: { type: 'scraper', token: process.env.AUTH_TOKEN } });
 
@@ -35,11 +35,46 @@ socket.on('connect', async () => {
 
 	// console.log(commands);
 
-	const zoro = new Zoro('https://zoro.to/watch/im-quitting-heroingl-17978');
-	const { episodes } = await zoro.getEpisodeListWithLang();
-	for (const episode of episodes) {
-		console.log(episode);
+	interface ExtendedEpisodeDownload {
+		_animeFolder: string;
+		finished: boolean;
+		folder: string;
+		file: string;
+		url: string;
+		m3u8: string;
 	}
+
+	// {
+	// 	"_animeFolder": "By the Grace of the Gods",
+	// 	"finished": false,
+	// 	"folder": "Season 2",
+	// 	"file": "By the Grace of the Gods St.2 Flg.7_GerSub",
+	// 	"url": "https://aniworld.to/anime/stream/by-the-grace-of-the-gods/staffel-2/episode-7",
+	// 	"m3u8": ""
+	// },
+
+	const array: ExtendedEpisodeDownload[] = [];
+
+	const zoro = new Zoro('https://zoro.to/watch/saving-80000-gold-in-another-world-for-my-retirement-18297');
+	const { total, episodes } = await zoro.getExtendedEpisodeList();
+	console.log('Got', total, 'Episodes');
+
+	for (const episode of episodes) {
+		if (episode.langs.includes('dub')) {
+			array.push({
+				_animeFolder: 'Saving 80,000 Gold in Another World for My Retirement',
+				finished: false,
+				folder: 'Season-1',
+				file: `Saving 80,000 Gold in Another World for My Retirement St.1 Flg.${episode.number}_EngDub`,
+				url: episode.url,
+				m3u8: '',
+			});
+		}
+	}
+
+	console.log(array);
+
+	fs.writeFileSync('zorolist.json', JSON.stringify(array));
 
 	// await checkForUpdates();
 	// await manuallyCraftTheList();
