@@ -15,13 +15,34 @@ const jsdom = require('jsdom');
  *
  */
 
+interface SimpleZoroEpisode {
+	ID: string;
+	title: string;
+	number: string;
+	url: string;
+}
+
+interface ExtendedZoroEpisode extends SimpleZoroEpisode {
+	langs: string[];
+	streamingServers: any[];
+}
+
+interface StreamingServers {
+	type: 'sub' | 'dub';
+	ID: string;
+	serverIndex: string;
+	name: string;
+}
+
 class Zoro {
-	constructor(url) {
+	url: string;
+	ID: any;
+	constructor(url: string) {
 		this.url = url;
-		this.ID = this.url.split('/').pop().split('-').pop();
+		this.ID = this.url?.split('/')?.pop()?.split('-').pop();
 	}
 
-	async getEpisodeList() {
+	async getEpisodeList(): Promise<{ total: number; episodes: SimpleZoroEpisode[] }> {
 		const response = await axios.get('https://zoro.to/ajax/v2/episode/list/' + this.ID);
 		const total = response.data.totalItems;
 		const { document } = new jsdom.JSDOM(response.data.html).window;
@@ -40,31 +61,38 @@ class Zoro {
 		};
 	}
 
-	async getEpisodeListWithLang() {
+	async getExtendedEpisodeList(): Promise<{ total: number; episodes: ExtendedZoroEpisode[] }> {
 		const { total, episodes } = await this.getEpisodeList();
 
-		const episode = episodes[0];
+		const extendedEpisodes: ExtendedZoroEpisode[] = [];
 
 		for (const episode of episodes) {
+			const outputEpisode = { ...episode } as ExtendedZoroEpisode;
 			const response = await axios.get('https://zoro.to/ajax/v2/episode/servers?episodeId=' + episode.ID);
-			// console.log(response);
 			const { document } = new jsdom.JSDOM(response.data.html).window;
-			const streamingServers = [...document.querySelectorAll('div.server-item')].map((server) => {
+			const streamingServers: StreamingServers[] = [...document.querySelectorAll('div.server-item')].map((server) => {
 				return {
 					type: server.dataset.type,
 					ID: server.dataset.id,
-					serverId: server.dataset.serverId,
+					serverIndex: server.dataset.serverId,
 					name: server.querySelector('a').text,
 				};
 			});
 
-			episode.langs = [...new Set(streamingServers.map((x) => x.type))];
+			outputEpisode.langs = [...new Set(streamingServers.map((x) => x.type))];
+			outputEpisode.streamingServers = streamingServers;
+			extendedEpisodes.push(outputEpisode);
 		}
 
 		return {
 			total,
-			episodes,
+			episodes: extendedEpisodes,
 		};
+	}
+
+	async getStream(streamID: string) {
+		const response = await axios.get('https://zoro.to/ajax/v2/episode/sources?id=' + streamID);
+		return response.data.link;
 	}
 }
 

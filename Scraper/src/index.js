@@ -6,7 +6,7 @@ const io = require('socket.io-client');
 const Aniworld = require('./class/AniWorld');
 const { compareForNewReleases } = require('./utils/compare');
 const { similar } = require('./utils/utils');
-const Zoro = require('./class/Zoro');
+const Zoro = require('./class/Zoro.ts');
 
 const socket = io(process.env.CORE_URL, { auth: { type: 'scraper', token: process.env.AUTH_TOKEN } });
 
@@ -36,7 +36,10 @@ socket.on('connect', async () => {
 	// console.log(commands);
 
 	const zoro = new Zoro('https://zoro.to/watch/im-quitting-heroingl-17978');
-	// zoro.getEpisodeListWithLang();
+	const { episodes } = await zoro.getEpisodeListWithLang();
+	for (const episode of episodes) {
+		console.log(episode);
+	}
 
 	// await checkForUpdates();
 	// await manuallyCraftTheList();
