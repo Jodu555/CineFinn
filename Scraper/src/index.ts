@@ -3,7 +3,7 @@ const crypto = require('crypto');
 require('dotenv').config();
 import axios from 'axios';
 const io = require('socket.io-client');
-const Aniworld = require('./class/AniWorld');
+import Aniworld from './class/Aniworld';
 const { compareForNewReleases } = require('./utils/compare');
 const { similar } = require('./utils/utils');
 import Zoro from './class/Zoro';

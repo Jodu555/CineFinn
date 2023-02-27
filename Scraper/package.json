@@ -20,6 +20,7 @@
 		"socket.io-client": "^4.5.4"
 	},
 	"devDependencies": {
+		"@types/node": "^18.14.2",
 		"ts-node": "^10.9.1"
 	}
 }

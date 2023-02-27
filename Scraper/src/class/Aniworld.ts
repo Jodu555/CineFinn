@@ -1,13 +1,38 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const jsdom = require('jsdom');
+
+interface AniWorldEntity {
+	mainName: string;
+	secondName: string;
+	langs: string[];
+}
+
+interface AniWorldAdditionalSeriesInformations {
+	infos: string;
+	startDate: string;
+	endDate: string;
+	description: string;
+	image: string | boolean;
+}
+
+interface AniWorldSeriesInformations {
+	url: string;
+	informations: AniWorldAdditionalSeriesInformations;
+	hasMovies: boolean;
+	movies?: AniWorldEntity[];
+	seasons: AniWorldEntity[][];
+}
+
 class Aniworld {
-	constructor(url) {
+	url: string;
+	imageSRCPrefix: string;
+	constructor(url: string) {
 		this.url = url;
 		this.imageSRCPrefix = 'https://aniworld.to';
 	}
 
-	async parseInformations() {
+	async parseInformations(): Promise<AniWorldSeriesInformations> {
 		const response = await axios.get(this.url, {
 			headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36' },
 		});
@@ -16,7 +41,7 @@ class Aniworld {
 
 		const { numberOfSeasons, hasMovies } = this.parseEntityInformations(response.data);
 
-		const output = { url: this.url, informations: additional, hasMovies, seasons: new Array(numberOfSeasons) };
+		const output: AniWorldSeriesInformations = { url: this.url, informations: additional, hasMovies, seasons: new Array(numberOfSeasons) };
 
 		console.log('Parsed: ');
 		console.log(' ' + this.url);
@@ -38,7 +63,7 @@ class Aniworld {
 		return output;
 	}
 
-	parseEntityInformations(data) {
+	parseEntityInformations(data: string): { numberOfSeasons: number; hasMovies: boolean } {
 		const { document } = new jsdom.JSDOM(data).window;
 		const seasonsUl = [...document.querySelectorAll('span')].find((e) => e.textContent.includes('Staffeln:')).parentElement.parentElement;
 		const seasonsTab = [...seasonsUl.querySelectorAll('li')].map((e) => e.querySelector('a')?.title).filter((e) => e != undefined);
@@ -52,7 +77,7 @@ class Aniworld {
 		};
 	}
 
-	parseAdditionalInformations(data) {
+	parseAdditionalInformations(data: string): AniWorldAdditionalSeriesInformations {
 		const $ = cheerio.load(data);
 		const infos = $('h1[itemprop="name"] > span').text();
 		const description = $('p.seri_des').text();
@@ -64,16 +89,16 @@ class Aniworld {
 		const imageSRC = image.attr('data-src');
 
 		if (infos == '') {
-			console.log('Not Found!!!!!!', url, this.imageSRCPrefix);
+			console.log('Not Found!!!!!!', this.url, this.imageSRCPrefix);
 		}
 
 		return { infos, startDate, endDate, description, image: `${this.imageSRCPrefix}${imageSRC}` };
 	}
 
-	getListInformations(data) {
+	getListInformations(data: string): AniWorldEntity[] {
 		const { document } = new jsdom.JSDOM(data).window;
 		const episodes = [...document.querySelectorAll('tr[itemprop="episode"]')];
-		const out = [];
+		const out: AniWorldEntity[] = [];
 		episodes.forEach((ep) => {
 			let langs = [];
 			[...ep.querySelectorAll('.editFunctions img')].forEach((lang) => {
@@ -102,4 +127,4 @@ class Aniworld {
 	}
 }
 
-module.exports = Aniworld;
+export default Aniworld;
