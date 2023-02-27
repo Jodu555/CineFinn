@@ -53,28 +53,28 @@ socket.on('connect', async () => {
 	// 	"m3u8": ""
 	// },
 
-	const array: ExtendedEpisodeDownload[] = [];
+	// const array: ExtendedEpisodeDownload[] = [];
 
-	const zoro = new Zoro('the-reincarnation-of-the-strongest-exorcist-in-another-world-18290');
-	const { total, episodes } = await zoro.getExtendedEpisodeList();
-	console.log('Got', total, 'Episodes');
+	// const zoro = new Zoro('the-reincarnation-of-the-strongest-exorcist-in-another-world-18290');
+	// const { total, episodes } = await zoro.getExtendedEpisodeList();
+	// console.log('Got', total, 'Episodes');
 
-	for (const episode of episodes) {
-		if (episode.langs.includes('dub')) {
-			array.push({
-				_animeFolder: 'The Reincarnation of the Strongest Exorcist in Another World',
-				finished: false,
-				folder: 'Season-1',
-				file: `The Reincarnation of the Strongest Exorcist in Another World St.1 Flg.${episode.number}_EngDub`,
-				url: episode.url,
-				m3u8: '',
-			});
-		}
-	}
+	// for (const episode of episodes) {
+	// 	if (episode.langs.includes('dub')) {
+	// 		array.push({
+	// 			_animeFolder: 'The Reincarnation of the Strongest Exorcist in Another World',
+	// 			finished: false,
+	// 			folder: 'Season-1',
+	// 			file: `The Reincarnation of the Strongest Exorcist in Another World St.1 Flg.${episode.number}_EngDub`,
+	// 			url: episode.url,
+	// 			m3u8: '',
+	// 		});
+	// 	}
+	// }
 
-	console.log(array);
+	// console.log(array);
 
-	fs.writeFileSync('zorolist.json', JSON.stringify(array, null, 3));
+	// fs.writeFileSync('zorolist.json', JSON.stringify(array, null, 3));
 
 	// await checkForUpdates();
 	// await manuallyCraftTheList();

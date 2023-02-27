@@ -41,8 +41,13 @@ class Zoro {
 	url: string;
 	ID: any;
 	constructor(url: string) {
-		this.url = url;
-		this.ID = this.url?.split('/')?.pop()?.split('-').pop();
+		if (url.includes('/')) {
+			this.url = url;
+			this.ID = this.url?.split('/')?.pop()?.split('-').pop();
+		} else {
+			this.ID = url;
+			this.getEpisodeList().then((x) => (this.url = x.episodes[0].url));
+		}
 	}
 
 	async getEpisodeList(): Promise<{ total: number; episodes: SimpleZoroEpisode[] }> {
