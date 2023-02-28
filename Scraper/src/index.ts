@@ -7,6 +7,7 @@ import Aniworld from './class/Aniworld';
 const { compareForNewReleases } = require('./utils/compare');
 const { similar } = require('./utils/utils');
 import Zoro from './class/Zoro';
+import { Serie } from './utils/types';
 
 const socket = io(process.env.CORE_URL, { auth: { type: 'scraper', token: process.env.AUTH_TOKEN } });
 
@@ -19,6 +20,7 @@ socket.on('connect_error', (error) => {
 socket.on('disconnect', () => {
 	console.log('Socket Connection: Disconnected');
 });
+
 socket.on('connect', async () => {
 	console.log('Socket Connection: Connected');
 
@@ -76,7 +78,7 @@ socket.on('connect', async () => {
 
 	// fs.writeFileSync('zorolist.json', JSON.stringify(array, null, 3));
 
-	// await checkForUpdates();
+	await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
@@ -105,7 +107,7 @@ async function addReference() {
 }
 
 async function checkForUpdates() {
-	const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
+	const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 	// res.data = res.data.filter((x) => x.ID == 'a9f36e78');
 	// res.data = res.data.filter((x) => x.ID == 'c8001b23' || x.ID == 'a9f36e78');
 

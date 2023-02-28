@@ -1,17 +1,15 @@
-const fs = require('fs');
+import * as fs from 'fs';
 const promiseLimit = require('promise-limit');
 const sanitizeFilename = require('sanitize-filename');
-const Aniworld = require('../class/AniWorld');
+import Aniworld from '../class/Aniworld';
 const { similar } = require('./utils');
+import { Serie } from '../utils/types';
 
 function sanitizeFileName(str) {
 	return sanitizeFilename(str, { replacement: ' ' }).replace(/  +/g, ' ');
 }
 
-/**
- * @param  {Object} series the current series[] object
- */
-async function compareForNewReleases(series, ignoranceList) {
+async function compareForNewReleases(series: Serie[], ignoranceList) {
 	const limit = promiseLimit(10);
 	const data = series.filter((x) => x.references?.aniworld);
 	const compare = await Promise.all(
