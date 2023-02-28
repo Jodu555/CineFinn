@@ -81,7 +81,28 @@ socket.on('connect', async () => {
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
 	// await programmaticallyInsertTheInfos();
+	// await addReference();
 });
+
+async function addReference() {
+	const update: { [key: string]: string } = {
+		ed0b1eba: '18122', //War God System! I’m Counting On You! --------
+		'2fb85af9': '18161', // Reincarnated as a Sword ------------
+		e26e2bf8: '17372', // Banished From the Heroes' Party !!!!!!!!!!!!!!!!!!!!!!
+	};
+
+	for (const ID in update) {
+		const zoroID = update[ID];
+		const patchBody = {
+			references: {
+				zoro: zoroID,
+			},
+		};
+
+		const response = await axios.patch(`http://cinema-api.jodu555.de/index/${ID}?auth-token=${process.env.AUTH_TOKEN_REST}`, patchBody);
+		// console.log(patchBody, response.status);
+	}
+}
 
 async function checkForUpdates() {
 	const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
