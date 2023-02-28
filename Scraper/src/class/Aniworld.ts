@@ -1,3 +1,4 @@
+import { Langs } from '..//utils/types';
 const axios = require('axios');
 const cheerio = require('cheerio');
 const jsdom = require('jsdom');
@@ -5,7 +6,7 @@ const jsdom = require('jsdom');
 export interface AniWorldEntity {
 	mainName: string;
 	secondName: string;
-	langs: string[];
+	langs: Langs[];
 }
 
 export interface AniWorldAdditionalSeriesInformations {

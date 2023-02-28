@@ -4,7 +4,7 @@ const promiseLimit = require('promise-limit');
 const sanitizeFilename = require('sanitize-filename');
 import Aniworld from '../class/Aniworld';
 const { similar } = require('./utils');
-import { Serie, SerieReference } from '../utils/types';
+import { Langs, Serie, SerieReference } from '../utils/types';
 
 function sanitizeFileName(str) {
 	return sanitizeFilename(str, { replacement: ' ' }).replace(/  +/g, ' ');
@@ -12,17 +12,18 @@ function sanitizeFileName(str) {
 
 interface IgnoranceItem {
 	ID?: string; // Detektiv Conan
-	lang?: 'GerDub' | 'GerSub' | 'EngDub' | 'EngSub';
+	lang?: Langs;
+}
+
+interface AniWorldSerieCompare extends AniWorldSeriesInformations {
+	ID: string;
+	title: string;
+	references: SerieReference;
 }
 
 async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceItem[]) {
 	const limit = promiseLimit(10);
 	const data = series.filter((x) => x.references?.aniworld);
-	interface AniWorldSerieCompare extends AniWorldSeriesInformations {
-		ID: string;
-		title: string;
-		references: SerieReference;
-	}
 
 	const compare: AniWorldSerieCompare[] = await Promise.all(
 		data.map(async (serie) => {

@@ -14,7 +14,7 @@ export interface SerieEntity {
 	secondaryName: string;
 	season: number;
 	episode: number;
-	langs: string[];
+	langs: Langs[];
 }
 
 export interface SerieInfo {
@@ -24,5 +24,7 @@ export interface SerieInfo {
 	endDate?: string;
 	description?: string;
 }
+
+export type Langs = 'GerDub' | 'GerSub' | 'EngDub' | 'EngSub';
 
 export type SerieReference = Record<'aniworld' | 'zoro' | 'sto', string>;
