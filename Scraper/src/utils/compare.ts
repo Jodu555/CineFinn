@@ -4,15 +4,10 @@ const promiseLimit = require('promise-limit');
 const sanitizeFilename = require('sanitize-filename');
 import Aniworld from '../class/Aniworld';
 const { similar } = require('./utils');
-import { Langs, Serie, SerieReference } from '../utils/types';
+import { IgnoranceItem, Langs, Serie, SerieReference } from '../utils/types';
 
 function sanitizeFileName(str) {
 	return sanitizeFilename(str, { replacement: ' ' }).replace(/  +/g, ' ');
-}
-
-interface IgnoranceItem {
-	ID?: string; // Detektiv Conan
-	lang?: Langs;
 }
 
 interface AniWorldSerieCompare extends AniWorldSeriesInformations {

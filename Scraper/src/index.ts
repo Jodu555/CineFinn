@@ -7,7 +7,7 @@ import Aniworld from './class/Aniworld';
 const { compareForNewReleases } = require('./utils/compare');
 const { similar } = require('./utils/utils');
 import Zoro from './class/Zoro';
-import { Serie } from './utils/types';
+import { IgnoranceItem, Serie } from './utils/types';
 
 const socket = io(process.env.CORE_URL, { auth: { type: 'scraper', token: process.env.AUTH_TOKEN } });
 
@@ -114,7 +114,7 @@ async function checkForUpdates() {
 	// console.log(res.data);
 
 	//This list should say, that these animes should the new episodes no be included unless they are german dubbed
-	const ignoranceList = [
+	const ignoranceList: IgnoranceItem[] = [
 		{
 			ID: 'c8001b23', // Detektiv Conan
 			lang: 'GerDub',

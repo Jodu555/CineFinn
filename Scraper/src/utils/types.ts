@@ -25,6 +25,11 @@ export interface SerieInfo {
 	description?: string;
 }
 
+export type SerieReference = Record<'aniworld' | 'zoro' | 'sto', string>;
+
 export type Langs = 'GerDub' | 'GerSub' | 'EngDub' | 'EngSub';
 
-export type SerieReference = Record<'aniworld' | 'zoro' | 'sto', string>;
+export interface IgnoranceItem {
+	ID?: string;
+	lang?: Langs;
+}

@@ -18,19 +18,19 @@ const jsdom = require('jsdom');
  *
  */
 
-interface SimpleZoroEpisode {
+export interface SimpleZoroEpisode {
 	ID: string;
 	title: string;
 	number: string;
 	url: string;
 }
 
-interface ExtendedZoroEpisode extends SimpleZoroEpisode {
+export interface ExtendedZoroEpisode extends SimpleZoroEpisode {
 	langs: string[];
 	streamingServers: StreamingServers[];
 }
 
-interface StreamingServers {
+export interface StreamingServers {
 	type: 'sub' | 'dub';
 	ID: string;
 	serverIndex: string;
