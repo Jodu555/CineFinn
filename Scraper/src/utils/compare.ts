@@ -1,18 +1,30 @@
+import { AniWorldSeriesInformations } from './../class/Aniworld';
 import * as fs from 'fs';
 const promiseLimit = require('promise-limit');
 const sanitizeFilename = require('sanitize-filename');
 import Aniworld from '../class/Aniworld';
 const { similar } = require('./utils');
-import { Serie } from '../utils/types';
+import { Serie, SerieReference } from '../utils/types';
 
 function sanitizeFileName(str) {
 	return sanitizeFilename(str, { replacement: ' ' }).replace(/  +/g, ' ');
 }
 
-async function compareForNewReleases(series: Serie[], ignoranceList) {
+interface IgnoranceItem {
+	ID?: string; // Detektiv Conan
+	lang?: 'GerDub' | 'GerSub' | 'EngDub' | 'EngSub';
+}
+
+async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceItem[]) {
 	const limit = promiseLimit(10);
 	const data = series.filter((x) => x.references?.aniworld);
-	const compare = await Promise.all(
+	interface AniWorldSerieCompare extends AniWorldSeriesInformations {
+		ID: string;
+		title: string;
+		references: SerieReference;
+	}
+
+	const compare: AniWorldSerieCompare[] = await Promise.all(
 		data.map(async (serie) => {
 			return limit(() => {
 				return new Promise(async (res, _) => {
@@ -72,18 +84,18 @@ async function compareForNewReleases(series: Serie[], ignoranceList) {
 
 	for (const aniworldSeries of compare) {
 		const localSeries = series.find((e) => e.ID == aniworldSeries.ID);
-		const ignoranceObject = ignoranceList.find((x) => x.ID == aniworldSeries.ID) || {};
+		const ignoranceObject = ignoranceList.find((x) => x.ID == aniworldSeries.ID) || ({} as IgnoranceItem);
 		console.log('-----=====', localSeries.title, '=====-----   START');
-		for (let aniworldSeasonIDX in aniworldSeries.seasons) {
-			aniworldSeasonIDX = Number(aniworldSeasonIDX);
+		for (const _aniworldSeasonIDX in aniworldSeries.seasons) {
+			const aniworldSeasonIDX = Number(_aniworldSeasonIDX);
 
 			const aniworldSeason = aniworldSeries.seasons[aniworldSeasonIDX];
 			const localSeason = localSeries.seasons.find((x) => x[0].season == aniworldSeasonIDX + 1);
 			if (!localSeason) {
 				console.log('Missing Season:', aniworldSeasonIDX + 1, 'with', aniworldSeason.length, 'Episode/s');
 				let ignoranceSkip = true;
-				for (let episodeIDX in aniworldSeason) {
-					episodeIDX = Number(episodeIDX);
+				for (const _episodeIDX in aniworldSeason) {
+					const episodeIDX = Number(_episodeIDX);
 					const episode = aniworldSeason[episodeIDX];
 					const language = episode.langs.find((e) => ['GerDub', 'GerSub', 'EngSub'].find((x) => x.includes(e)));
 					if (ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
@@ -95,8 +107,8 @@ async function compareForNewReleases(series: Serie[], ignoranceList) {
 				console.log(' => Skipped due to the ignorance list', ignoranceObject);
 				continue;
 			}
-			for (let aniworldEpisodeIDX in aniworldSeason) {
-				aniworldEpisodeIDX = Number(aniworldEpisodeIDX);
+			for (const _aniworldEpisodeIDX in aniworldSeason) {
+				const aniworldEpisodeIDX = Number(_aniworldEpisodeIDX);
 				const aniworldEpisode = aniworldSeason[aniworldEpisodeIDX];
 				const localEpisode = localSeason.find((x) => x.episode == aniworldEpisodeIDX + 1);
 
@@ -120,8 +132,8 @@ async function compareForNewReleases(series: Serie[], ignoranceList) {
 		}
 		//TODO: Add the movies too
 		if (aniworldSeries.hasMovies) {
-			for (let aniworldMovieIDX in aniworldSeries.movies) {
-				aniworldMovieIDX = Number(aniworldMovieIDX);
+			for (const _aniworldMovieIDX in aniworldSeries.movies) {
+				const aniworldMovieIDX = Number(_aniworldMovieIDX);
 				const aniworldMovie = aniworldSeries.movies[aniworldMovieIDX];
 
 				aniworldMovie.secondName = sanitizeFileName(aniworldMovie.secondName);

@@ -1,6 +1,7 @@
 export interface Serie {
 	ID: string;
 	categorie: string;
+	title: string;
 	seasons: SerieEntity[][];
 	movies: SerieEntity[];
 	references: SerieReference;

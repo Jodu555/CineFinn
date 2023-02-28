@@ -2,13 +2,13 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const jsdom = require('jsdom');
 
-interface AniWorldEntity {
+export interface AniWorldEntity {
 	mainName: string;
 	secondName: string;
 	langs: string[];
 }
 
-interface AniWorldAdditionalSeriesInformations {
+export interface AniWorldAdditionalSeriesInformations {
 	infos: string;
 	startDate: string;
 	endDate: string;
@@ -16,7 +16,7 @@ interface AniWorldAdditionalSeriesInformations {
 	image: string | boolean;
 }
 
-interface AniWorldSeriesInformations {
+export interface AniWorldSeriesInformations {
 	url: string;
 	informations: AniWorldAdditionalSeriesInformations;
 	hasMovies: boolean;
