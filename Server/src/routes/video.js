@@ -50,18 +50,32 @@ module.exports = (req, res) => {
 
 	debug && console.log('Got Video Entitiy', videoEntity);
 
-	let filePath = videoEntity.filePath;
+	const settings = JSON.parse(req.credentials.user.settings);
 
-	if (videoEntity.langs.length > 1) {
-		if (language) {
-			if (language == 'GerSub' || language == 'GerDub') {
-				const { dir, name, ext } = path.parse(filePath);
-				filePath = path.join(dir, `${name.split('_')[0]}_${language}${ext}`);
+	debug && console.log('Got Settings', settings);
+
+	let filePath;
+	//The Birthday stuff
+	if (settings?.isBirthday != undefined && settings?.isBirthday) {
+		filePath = path.join(process.cwd(), 'test.mp4');
+	} else {
+		filePath = videoEntity.filePath;
+
+		if (videoEntity.langs.length > 1) {
+			if (language) {
+				if (language == 'GerSub' || language == 'GerDub') {
+					const { dir, name, ext } = path.parse(filePath);
+					filePath = path.join(dir, `${name.split('_')[0]}_${language}${ext}`);
+				}
 			}
 		}
 	}
 
+	debug && console.log('Got filePath', filePath);
+
 	const videoSize = fs.statSync(filePath).size;
+
+	debug && console.log('Got videoSize', videoSize);
 
 	// const CHUNK_SIZE = 10 ** 6; // 1MB
 	const CHUNK_SIZE = process.env.VIDEO_CHUNK_SIZE;
