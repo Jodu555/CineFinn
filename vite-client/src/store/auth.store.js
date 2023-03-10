@@ -71,8 +71,6 @@ export default {
 			}
 		},
 		async authenticate({ state, commit, dispatch }, redirectToSlash = false) {
-			// This can be removed when the settings are stored in the db
-			// if (getCookie('account_settings')) commit('setSettings', JSON.parse(getCookie('account_settings')));
 			try {
 				const authtoken = getCookie('auth-token') || state.authToken;
 				if (authtoken) {
