@@ -6,10 +6,9 @@ import Aniworld from '../class/Aniworld';
 const { similar } = require('./utils');
 import { IgnoranceItem, Langs, Serie, SerieReference } from '../utils/types';
 
-function sanitizeFileName(str) {
+function sanitizeFileName(str: string): string {
 	return sanitizeFilename(str, { replacement: ' ' }).replace(/  +/g, ' ');
 }
-
 interface AniWorldSerieCompare extends AniWorldSeriesInformations {
 	ID: string;
 	title: string;
