@@ -4,7 +4,7 @@ require('dotenv').config();
 import axios from 'axios';
 const io = require('socket.io-client');
 import Aniworld from './class/Aniworld';
-const { compareForNewReleases } = require('./utils/compare');
+import { compareForNewReleases, compareForNewReleasesZoro } from './utils/compare';
 const { similar } = require('./utils/utils');
 import Zoro from './class/Zoro';
 import { IgnoranceItem, Serie } from './utils/types';
@@ -78,7 +78,41 @@ socket.on('connect', async () => {
 
 	// fs.writeFileSync('zorolist.json', JSON.stringify(array, null, 3));
 
-	await checkForUpdates();
+	// const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
+
+	// const refs = new Set();
+
+	// res.data.forEach((serie) => {
+	// 	refs.add(serie.references);
+	// });
+
+	// console.log(refs);
+
+	// const zoro = new Zoro('18290');
+	// const { total, episodes } = await zoro.getExtendedEpisodeList();
+	// console.log('Got', total, 'Episodes: ', episodes);
+
+	compareForNewReleasesZoro(
+		[
+			{
+				ID: '384ß2',
+				categorie: 'Aniworld',
+				references: {
+					zoro: {
+						'Season-1': '4398',
+						'Season-2': '5324',
+					},
+				},
+				title: 'IS - Infinite Stratos',
+				seasons: [],
+				movies: [],
+				infos: {},
+			},
+		],
+		[]
+	);
+
+	// await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
@@ -124,7 +158,8 @@ async function checkForUpdates() {
 			lang: 'GerDub',
 		},
 	];
-	await compareForNewReleases(res.data, ignoranceList);
+	// await compareForNewReleases(res.data, ignoranceList);
+	await compareForNewReleasesZoro(res.data, ignoranceList);
 }
 
 async function generateNewDownloadList() {
@@ -145,7 +180,7 @@ async function generateNewDownloadList() {
 		};
 	});
 
-	compareForNewReleases(mappedArr);
+	// compareForNewReleases(mappedArr);
 }
 
 async function manuallyPrintTheInfosOut(refUrl) {

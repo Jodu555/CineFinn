@@ -1,3 +1,4 @@
+import { ExtendedZoroEpisode } from './../class/Zoro';
 import { AniWorldSeriesInformations } from './../class/Aniworld';
 import * as fs from 'fs';
 const promiseLimit = require('promise-limit');
@@ -5,6 +6,7 @@ const sanitizeFilename = require('sanitize-filename');
 import Aniworld from '../class/Aniworld';
 const { similar } = require('./utils');
 import { IgnoranceItem, Langs, Serie, SerieReference } from '../utils/types';
+import Zoro from '../class/Zoro';
 
 function sanitizeFileName(str: string): string {
 	return sanitizeFilename(str, { replacement: ' ' }).replace(/  +/g, ' ');
@@ -16,6 +18,12 @@ interface AniWorldSerieCompare extends AniWorldSeriesInformations {
 }
 
 async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceItem[]) {
+	console.log('------ Compare Aniworld ------');
+	await compareForNewReleasesAniWorld(series, ignoranceList);
+	console.log('------ Compare Aniworld ------');
+}
+
+async function compareForNewReleasesAniWorld(series: Serie[], ignoranceList: IgnoranceItem[]) {
 	const limit = promiseLimit(10);
 	const data = series.filter((x) => x.references?.aniworld);
 
@@ -23,7 +31,8 @@ async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceIt
 		data.map(async (serie) => {
 			return limit(() => {
 				return new Promise(async (res, _) => {
-					const world = new Aniworld(serie.references.aniworld);
+					let world: Aniworld;
+					if (typeof serie.references.aniworld == 'string') world = new Aniworld(serie.references.aniworld);
 					const out = await world.parseInformations();
 					res({
 						ID: serie.ID,
@@ -56,7 +65,7 @@ async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceIt
 
 	//TODO: the system currently only checks if the gerdub is relased, but when we initially have the engsub and the gersub is released, the system does not care
 
-	const addtoOutputList = (title, reference, season, episode, lang) => {
+	const addtoOutputList = (title, reference, season, episode, lang: Langs) => {
 		outputDlList.push({
 			_animeFolder: title,
 			finished: false,
@@ -198,6 +207,54 @@ async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceIt
 	// }
 }
 
-module.exports = {
-	compareForNewReleases,
-};
+interface ZoroSerieCompare {
+	ID: string;
+	title: string;
+	references: SerieReference;
+	seasons: ExtendedZoroEpisode[][];
+	movies: ExtendedZoroEpisode[];
+}
+
+async function compareForNewReleasesZoro(series: Serie[], ignoranceList: IgnoranceItem[]) {
+	const limit = promiseLimit(10);
+	const data = series.filter((x) => x.references?.zoro);
+
+	const compare: ZoroSerieCompare[] = await Promise.all(
+		data.map(async (serie) => {
+			return limit(() => {
+				return new Promise(async (res, _) => {
+					const out = {
+						movies: [],
+						seasons: [],
+					};
+					if (typeof serie.references.zoro == 'string') {
+						const zoro = new Zoro(serie.references.zoro);
+						const { episodes } = await zoro.getExtendedEpisodeList();
+						out.seasons.push(episodes);
+					} else {
+						for (const [key, value] of Object.entries(serie.references.zoro)) {
+							if (key.startsWith('Season-')) {
+								const number = parseInt(key.replace('Season-', ''));
+								const zoro = new Zoro(value);
+								const { episodes } = await zoro.getExtendedEpisodeList();
+								out.seasons[number - 1] = episodes;
+							} else {
+							}
+						}
+					}
+					res({
+						ID: serie.ID,
+						title: serie.title,
+						references: serie.references,
+						...out,
+					});
+				});
+			});
+		})
+	);
+	const outputDlList = [];
+
+	console.log(compare[0].seasons);
+}
+
+export { compareForNewReleases, compareForNewReleasesAniWorld, compareForNewReleasesZoro };
