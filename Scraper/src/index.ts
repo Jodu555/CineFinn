@@ -92,27 +92,27 @@ socket.on('connect', async () => {
 	// const { total, episodes } = await zoro.getExtendedEpisodeList();
 	// console.log('Got', total, 'Episodes: ', episodes);
 
-	compareForNewReleasesZoro(
-		[
-			{
-				ID: '384ß2',
-				categorie: 'Aniworld',
-				references: {
-					zoro: {
-						'Season-1': '4398',
-						'Season-2': '5324',
-					},
-				},
-				title: 'IS - Infinite Stratos',
-				seasons: [],
-				movies: [],
-				infos: {},
-			},
-		],
-		[]
-	);
+	// compareForNewReleasesZoro(
+	// 	[
+	// 		{
+	// 			ID: '384ß2',
+	// 			categorie: 'Aniworld',
+	// 			references: {
+	// 				zoro: {
+	// 					'Season-1': '4398',
+	// 					'Season-2': '5324',
+	// 				},
+	// 			},
+	// 			title: 'IS - Infinite Stratos',
+	// 			seasons: [],
+	// 			movies: [],
+	// 			infos: {},
+	// 		},
+	// 	],
+	// 	[]
+	// );
 
-	// await checkForUpdates();
+	await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
@@ -158,8 +158,8 @@ async function checkForUpdates() {
 			lang: 'GerDub',
 		},
 	];
-	// await compareForNewReleases(res.data, ignoranceList);
-	await compareForNewReleasesZoro(res.data, ignoranceList);
+	await compareForNewReleases(res.data, ignoranceList);
+	// await compareForNewReleasesZoro(res.data, ignoranceList);
 }
 
 async function generateNewDownloadList() {
