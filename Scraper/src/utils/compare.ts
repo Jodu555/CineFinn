@@ -302,7 +302,8 @@ async function compareForNewReleasesZoro(series: Serie[], ignoranceList: Ignoran
 		console.log('-----=====', localSeries.title, '=====-----   END');
 	}
 
-	console.log(outputDlList);
+	// console.log(outputDlList);
+	fs.writeFileSync('dlList.json', JSON.stringify(outputDlList, null, 3));
 }
 
 export { compareForNewReleases, compareForNewReleasesAniWorld, compareForNewReleasesZoro };

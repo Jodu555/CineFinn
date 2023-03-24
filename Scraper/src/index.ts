@@ -84,9 +84,8 @@ socket.on('connect', async () => {
 	// console.log('Got', total, 'Episodes: ', episodes);
 	const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 
-	const temp = res.data.filter((x) => x.references.zoro && x.title.includes('Eminence'));
-
-	// console.log(temp[0].seasons[0]);
+	// const temp = res.data.filter((x) => x.references.zoro && x.title.includes('Eminence'));
+	const temp = res.data;
 
 	compareForNewReleasesZoro(temp, []);
 
