@@ -33,3 +33,12 @@ export interface IgnoranceItem {
 	ID?: string;
 	lang?: Langs;
 }
+
+export interface ExtendedEpisodeDownload {
+	_animeFolder: string;
+	finished: boolean;
+	folder: string;
+	file: string;
+	url: string;
+	m3u8: string;
+}

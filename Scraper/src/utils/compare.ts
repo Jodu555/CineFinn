@@ -1,3 +1,4 @@
+import { ExtendedEpisodeDownload } from './types';
 import { ExtendedZoroEpisode } from './../class/Zoro';
 import { AniWorldSeriesInformations } from './../class/Aniworld';
 import * as fs from 'fs';
@@ -44,7 +45,7 @@ async function compareForNewReleasesAniWorld(series: Serie[], ignoranceList: Ign
 			});
 		})
 	);
-	const outputDlList = [];
+	const outputDlList: ExtendedEpisodeDownload[] = [];
 
 	/**
 	 * Loop through the aniworld series
@@ -167,52 +168,29 @@ async function compareForNewReleasesAniWorld(series: Serie[], ignoranceList: Ign
 
 	console.log(outputDlList.length);
 	fs.writeFileSync('dlList.json', JSON.stringify(outputDlList, null, 3));
-
-	// for (const aniworldSeries of compare) {
-	// 	const currentSeries = series.find((e) => e.ID == aniworldSeries.ID);
-
-	// 	//Check if there are the same number of seasons
-	// 	const numberSeasons = aniworldSeries.seasons.length == currentSeries.seasons.length;
-
-	// 	//TODO: Combine the diff and lnaguage check into one loop to save some computation + make it look cleaner
-
-	// 	//Check if there are episode differences
-	// 	const diff = aniworldSeries.seasons.map((e, i) => ({
-	// 		value: currentSeries.seasons?.[i]?.length == e.length,
-	// 		diff: e.length - currentSeries.seasons?.[i]?.length,
-	// 	}));
-
-	// 	//Check if there are language losses
-	// 	const languages = aniworldSeries.seasons.map((s, i) => [
-	// 		...s.map((e, j) => {
-	// 			const episodeCurrent = currentSeries.seasons?.[i]?.[j];
-	// 			const currFilteredLangs = episodeCurrent?.langs.filter((e) => e === 'GerDub');
-	// 			const newFilteredLangs = e.langs.filter((e) => e === 'GerDub');
-	// 			return {
-	// 				info: { ID: aniworldSeries.ID, season: episodeCurrent?.season, episode: episodeCurrent?.episode },
-	// 				value: currFilteredLangs?.length == newFilteredLangs?.length,
-	// 			};
-	// 		}),
-	// 	]);
-
-	// 	const langThere = languages.map((s) => s.filter((x) => !x.value)).flat();
-
-	// 	if (numberSeasons == false || diff.some((v) => v.diff > 0 || isNaN(v.diff)) || langThere.length > 0) {
-	// 		console.log(currentSeries.title);
-	// 		console.log('  =>', numberSeasons, diff);
-	// 		if (langThere.length >= 0) {
-	// 			console.log('  langThere =>', langThere.length);
-	// 		}
-	// 	}
-	// }
 }
 
 interface ZoroSerieCompare {
 	ID: string;
 	title: string;
 	references: SerieReference;
-	seasons: ExtendedZoroEpisode[][];
+	seasons: ChangedZoroEpisode[][];
 	movies: ExtendedZoroEpisode[];
+}
+
+interface ChangedZoroEpisode extends Omit<ExtendedZoroEpisode, 'langs'> {
+	langs: Langs[];
+}
+
+function changeEpisode(ep: any): ChangedZoroEpisode {
+	ep.langs = ep.langs.map((x: String) => {
+		if (x == 'sub') {
+			return 'EngSub';
+		} else {
+			return 'EngDub';
+		}
+	});
+	return ep as ChangedZoroEpisode;
 }
 
 async function compareForNewReleasesZoro(series: Serie[], ignoranceList: IgnoranceItem[]) {
@@ -230,15 +208,17 @@ async function compareForNewReleasesZoro(series: Serie[], ignoranceList: Ignoran
 					if (typeof serie.references.zoro == 'string') {
 						const zoro = new Zoro(serie.references.zoro);
 						const { episodes } = await zoro.getExtendedEpisodeList();
-						out.seasons.push(episodes);
+						out.seasons.push(episodes.map(changeEpisode));
 					} else {
 						for (const [key, value] of Object.entries(serie.references.zoro)) {
 							if (key.startsWith('Season-')) {
 								const number = parseInt(key.replace('Season-', ''));
 								const zoro = new Zoro(value);
 								const { episodes } = await zoro.getExtendedEpisodeList();
-								out.seasons[number - 1] = episodes;
+
+								out.seasons[number - 1] = episodes.map(changeEpisode);
 							} else {
+								//TODO: Do Movie stuff later here
 							}
 						}
 					}
@@ -252,9 +232,77 @@ async function compareForNewReleasesZoro(series: Serie[], ignoranceList: Ignoran
 			});
 		})
 	);
-	const outputDlList = [];
+	const outputDlList: ExtendedEpisodeDownload[] = [];
 
-	console.log(compare[0].seasons);
+	const addtoOutputList = (url: string, title: string, season: number, episode: number, lang: Langs) => {
+		// console.log('addtoOutputList', url, lang);
+
+		outputDlList.push({
+			_animeFolder: title,
+			finished: false,
+			folder: 'Season ' + season,
+			file: `${title} St.${season} Flg.${episode}_${lang}`,
+			url: `${url}`,
+			m3u8: '',
+		});
+	};
+
+	for (const zoroSeries of compare) {
+		const localSeries = series.find((e) => e.ID == zoroSeries.ID);
+		const ignoranceObject = ignoranceList.find((x) => x.ID == zoroSeries.ID) || ({} as IgnoranceItem);
+		console.log('-----=====', localSeries.title, '=====-----   START');
+		for (const _zoroSeasonIDX in zoroSeries.seasons) {
+			const zoroSeasonIDX = Number(_zoroSeasonIDX);
+
+			const zoroSeason = zoroSeries.seasons[zoroSeasonIDX];
+			const localSeason = localSeries.seasons.find((x) => x[0].season == zoroSeasonIDX + 1);
+			if (!localSeason) {
+				console.log('Missing Season:', zoroSeasonIDX + 1, 'with', zoroSeason.length, 'Episode/s');
+				let ignoranceSkip = true;
+				for (const _episodeIDX in zoroSeason) {
+					const episodeIDX = Number(_episodeIDX);
+					const episode = zoroSeason[episodeIDX];
+					const language = episode.langs.find((e) => ['EngDub'].find((x) => x.includes(e)));
+					if (ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
+						continue;
+					}
+					ignoranceSkip = false;
+
+					addtoOutputList(episode.url, localSeries.title, zoroSeasonIDX + 1, episodeIDX + 1, language);
+				}
+				console.log(' => Skipped due to the ignorance list', ignoranceObject);
+				continue;
+			}
+			for (const _zoroEpisodeIDX in zoroSeason) {
+				const zoroEpisodeIDX = Number(_zoroEpisodeIDX);
+				const zoroEpisode = zoroSeason[zoroEpisodeIDX];
+				const localEpisode = localSeason.find((x) => x.episode == zoroEpisodeIDX + 1);
+
+				if (!localEpisode) {
+					// console.log(zoroSeasonIDX, zoroEpisodeIDX, localSeason.find((x) => x.episode == zoroEpisodeIDX), localSeason.find((x) => x.episode == zoroEpisodeIDX + 1));
+					console.log('The whole Episode is missing Season:', zoroSeasonIDX + 1, 'Episode:', zoroEpisodeIDX + 1);
+					const language = zoroEpisode.langs.find((e) => ['EngDub'].find((x) => x.includes(e)));
+					console.log('Started the language Decision Process zoro Langs:', zoroEpisode.langs, 'Resulted in', { language });
+					if (ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
+						console.log('Ignored due to the ignorance List');
+						continue;
+					}
+
+					addtoOutputList(zoroEpisode.url, localSeries.title, zoroSeasonIDX + 1, zoroEpisodeIDX + 1, language);
+					continue;
+				}
+				console.log(zoroEpisodeIDX, zoroEpisode.langs, localEpisode.langs);
+
+				if (zoroEpisode.langs.includes('EngDub') && !localEpisode.langs.includes('EngDub')) {
+					console.log('The EngDub is missing in Season:', zoroSeasonIDX + 1, 'Episode:', zoroEpisodeIDX + 1);
+					addtoOutputList(zoroEpisode.url, localSeries.title, zoroSeasonIDX + 1, zoroEpisodeIDX + 1, 'EngDub');
+				}
+			}
+		}
+		console.log('-----=====', localSeries.title, '=====-----   END');
+	}
+
+	console.log(outputDlList);
 }
 
 export { compareForNewReleases, compareForNewReleasesAniWorld, compareForNewReleasesZoro };

@@ -37,15 +37,6 @@ socket.on('connect', async () => {
 
 	// console.log(commands);
 
-	interface ExtendedEpisodeDownload {
-		_animeFolder: string;
-		finished: boolean;
-		folder: string;
-		file: string;
-		url: string;
-		m3u8: string;
-	}
-
 	// {
 	// 	"_animeFolder": "By the Grace of the Gods",
 	// 	"finished": false,
@@ -88,31 +79,18 @@ socket.on('connect', async () => {
 
 	// console.log(refs);
 
-	// const zoro = new Zoro('18290');
+	// const zoro = new Zoro('17473');
 	// const { total, episodes } = await zoro.getExtendedEpisodeList();
 	// console.log('Got', total, 'Episodes: ', episodes);
+	const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 
-	// compareForNewReleasesZoro(
-	// 	[
-	// 		{
-	// 			ID: '384ß2',
-	// 			categorie: 'Aniworld',
-	// 			references: {
-	// 				zoro: {
-	// 					'Season-1': '4398',
-	// 					'Season-2': '5324',
-	// 				},
-	// 			},
-	// 			title: 'IS - Infinite Stratos',
-	// 			seasons: [],
-	// 			movies: [],
-	// 			infos: {},
-	// 		},
-	// 	],
-	// 	[]
-	// );
+	const temp = res.data.filter((x) => x.references.zoro && x.title.includes('Eminence'));
 
-	await checkForUpdates();
+	// console.log(temp[0].seasons[0]);
+
+	compareForNewReleasesZoro(temp, []);
+
+	// await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
