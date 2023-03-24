@@ -18,13 +18,32 @@ interface AniWorldSerieCompare extends AniWorldSeriesInformations {
 	references: SerieReference;
 }
 
+interface ZoroSerieCompare {
+	ID: string;
+	title: string;
+	references: SerieReference;
+	seasons: ChangedZoroEpisode[][];
+	movies: ExtendedZoroEpisode[];
+}
+
+interface ChangedZoroEpisode extends Omit<ExtendedZoroEpisode, 'langs'> {
+	langs: Langs[];
+}
+
 async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceItem[]) {
+	const output: ExtendedEpisodeDownload[] = [];
 	console.log('------ Compare Aniworld ------');
-	await compareForNewReleasesAniWorld(series, ignoranceList);
+	const tmp1 = await compareForNewReleasesAniWorld(series, ignoranceList);
+	const tmp2 = await compareForNewReleasesZoro(series, ignoranceList);
+	output.push(...tmp1, ...tmp2);
 	console.log('------ Compare Aniworld ------');
 }
 
-async function compareForNewReleasesAniWorld(series: Serie[], ignoranceList: IgnoranceItem[]) {
+async function compareForNewReleasesAniWorld(
+	series: Serie[],
+	ignoranceList: IgnoranceItem[],
+	inherit: boolean = true
+): Promise<ExtendedEpisodeDownload[]> {
 	const limit = promiseLimit(10);
 	const data = series.filter((x) => x.references?.aniworld);
 
@@ -167,19 +186,12 @@ async function compareForNewReleasesAniWorld(series: Serie[], ignoranceList: Ign
 	}
 
 	console.log(outputDlList.length);
-	fs.writeFileSync('dlList.json', JSON.stringify(outputDlList, null, 3));
-}
-
-interface ZoroSerieCompare {
-	ID: string;
-	title: string;
-	references: SerieReference;
-	seasons: ChangedZoroEpisode[][];
-	movies: ExtendedZoroEpisode[];
-}
-
-interface ChangedZoroEpisode extends Omit<ExtendedZoroEpisode, 'langs'> {
-	langs: Langs[];
+	if (inherit) {
+		return outputDlList;
+	} else {
+		fs.writeFileSync('dlList.json', JSON.stringify(outputDlList, null, 3));
+		return [];
+	}
 }
 
 function changeEpisode(ep: any): ChangedZoroEpisode {
@@ -193,7 +205,11 @@ function changeEpisode(ep: any): ChangedZoroEpisode {
 	return ep as ChangedZoroEpisode;
 }
 
-async function compareForNewReleasesZoro(series: Serie[], ignoranceList: IgnoranceItem[]) {
+async function compareForNewReleasesZoro(
+	series: Serie[],
+	ignoranceList: IgnoranceItem[],
+	inherit: boolean = true
+): Promise<ExtendedEpisodeDownload[]> {
 	const limit = promiseLimit(10);
 	const data = series.filter((x) => x.references?.zoro);
 
@@ -302,8 +318,13 @@ async function compareForNewReleasesZoro(series: Serie[], ignoranceList: Ignoran
 		console.log('-----=====', localSeries.title, '=====-----   END');
 	}
 
-	// console.log(outputDlList);
-	fs.writeFileSync('dlList.json', JSON.stringify(outputDlList, null, 3));
+	console.log(outputDlList.length);
+	if (inherit) {
+		return outputDlList;
+	} else {
+		fs.writeFileSync('dlList.json', JSON.stringify(outputDlList, null, 3));
+		return [];
+	}
 }
 
 export { compareForNewReleases, compareForNewReleasesAniWorld, compareForNewReleasesZoro };
