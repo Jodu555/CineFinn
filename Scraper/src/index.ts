@@ -79,17 +79,7 @@ socket.on('connect', async () => {
 
 	// console.log(refs);
 
-	// const zoro = new Zoro('17473');
-	// const { total, episodes } = await zoro.getExtendedEpisodeList();
-	// console.log('Got', total, 'Episodes: ', episodes);
-	const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
-
-	// const temp = res.data.filter((x) => x.references.zoro && x.title.includes('Eminence'));
-	const temp = res.data;
-
-	compareForNewReleasesZoro(temp, []);
-
-	// await checkForUpdates();
+	await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
@@ -135,8 +125,8 @@ async function checkForUpdates() {
 			lang: 'GerDub',
 		},
 	];
-	await compareForNewReleases(res.data, ignoranceList);
-	// await compareForNewReleasesZoro(res.data, ignoranceList);
+	// await compareForNewReleases(res.data, ignoranceList);
+	await compareForNewReleasesZoro(res.data, ignoranceList, false);
 }
 
 async function generateNewDownloadList() {

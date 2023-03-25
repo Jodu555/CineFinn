@@ -51,6 +51,8 @@ class Zoro {
 	}
 
 	async getEpisodeList(): Promise<{ total: number; episodes: SimpleZoroEpisode[] }> {
+		console.log('Parsed: ');
+		console.log(' ' + this.url);
 		const response = await axios.get('https://zoro.to/ajax/v2/episode/list/' + this.ID);
 		const total = response.data.totalItems;
 		const { document } = new jsdom.JSDOM(response.data.html).window;

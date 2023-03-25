@@ -34,9 +34,12 @@ async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceIt
 	const output: ExtendedEpisodeDownload[] = [];
 	console.log('------ Compare Aniworld ------');
 	const tmp1 = await compareForNewReleasesAniWorld(series, ignoranceList);
-	const tmp2 = await compareForNewReleasesZoro(series, ignoranceList);
-	output.push(...tmp1, ...tmp2);
 	console.log('------ Compare Aniworld ------');
+	console.log('------ Compare Zoro ------');
+	const tmp2 = await compareForNewReleasesZoro(series, ignoranceList);
+	console.log('------ Compare Zoro ------');
+	output.push(...tmp1, ...tmp2);
+	fs.writeFileSync('dlList.json', JSON.stringify(output, null, 3));
 }
 
 async function compareForNewReleasesAniWorld(
@@ -304,10 +307,14 @@ async function compareForNewReleasesZoro(
 						continue;
 					}
 
+					if (language == undefined) {
+						console.log('Ignored due to undefined');
+						continue;
+					}
+
 					addtoOutputList(zoroEpisode.url, localSeries.title, zoroSeasonIDX + 1, zoroEpisodeIDX + 1, language);
 					continue;
 				}
-				console.log(zoroEpisodeIDX, zoroEpisode.langs, localEpisode.langs);
 
 				if (zoroEpisode.langs.includes('EngDub') && !localEpisode.langs.includes('EngDub')) {
 					console.log('The EngDub is missing in Season:', zoroSeasonIDX + 1, 'Episode:', zoroEpisodeIDX + 1);
