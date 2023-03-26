@@ -120,10 +120,10 @@ async function checkForUpdates() {
 			ID: 'c8001b23', // Detektiv Conan
 			lang: 'GerDub',
 		},
-		// {
-		// 	ID: 'a9f36e78', // Peter Grill and the Philosopher’s Time
-		// 	lang: 'GerDub',
-		// },
+		{
+			ID: 'a9f36e78', // Peter Grill and the Philosopher’s Time
+			lang: 'GerDub', // Has only the first episode in GerSub rest in EngSub
+		},
 	];
 
 	await compareForNewReleases(res.data, ignoranceList);
