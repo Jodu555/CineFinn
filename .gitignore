@@ -8,6 +8,7 @@ out-remote.json
 dlList.json
 dlListOther.json
 zorolist.json
+Scraper/*.json
 *.mp4
 
 ChromeAnalyze/
