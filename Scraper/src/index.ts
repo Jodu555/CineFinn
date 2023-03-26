@@ -115,18 +115,18 @@ async function checkForUpdates() {
 	// console.log(res.data);
 
 	//This list should say, that these animes should the new episodes no be included unless they are german dubbed
-	// const ignoranceList: IgnoranceItem[] = [
-	// 	{
-	// 		ID: 'c8001b23', // Detektiv Conan
-	// 		lang: 'GerDub',
-	// 	},
-	// 	{
-	// 		ID: 'a9f36e78', // Peter Grill and the Philosopher’s Time
-	// 		lang: 'GerDub',
-	// 	},
-	// ];
+	const ignoranceList: IgnoranceItem[] = [
+		{
+			ID: 'c8001b23', // Detektiv Conan
+			lang: 'GerDub',
+		},
+		// {
+		// 	ID: 'a9f36e78', // Peter Grill and the Philosopher’s Time
+		// 	lang: 'GerDub',
+		// },
+	];
 
-	await compareForNewReleases(res.data, []);
+	await compareForNewReleases(res.data, ignoranceList);
 	// await compareForNewReleasesZoro(res.data, ignoranceList, false);
 }
 
