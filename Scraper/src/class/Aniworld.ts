@@ -122,7 +122,7 @@ class Aniworld {
 			const mainName = ep.querySelector('.seasonEpisodeTitle strong').textContent;
 			const secondName = ep.querySelector('.seasonEpisodeTitle span').textContent;
 
-			out.push({ mainName, secondName, langs });
+			if (langs.length > 0) out.push({ mainName, secondName, langs });
 		});
 		return out;
 	}

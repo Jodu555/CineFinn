@@ -127,14 +127,16 @@ async function compareForNewReleasesAniWorld(
 				for (const _episodeIDX in aniworldSeason) {
 					const episodeIDX = Number(_episodeIDX);
 					const episode = aniworldSeason[episodeIDX];
-					const language = episode.langs.find((e) => ['GerDub', 'GerSub', 'EngSub'].find((x) => x.includes(e)));
+					const language = episode.langs.find((e) => {
+						return ['GerDub', 'GerSub', 'EngSub'].find((x) => x.includes(e));
+					});
 					if (ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
 						continue;
 					}
 					ignoranceSkip = false;
 					addtoOutputList(localSeries.title, localSeries.references.aniworld, aniworldSeasonIDX + 1, episodeIDX + 1, language);
 				}
-				console.log(' => Skipped due to the ignorance list', ignoranceObject);
+				if (ignoranceSkip) console.log(' => Skipped due to the ignorance Object', ignoranceObject);
 				continue;
 			}
 			for (const _aniworldEpisodeIDX in aniworldSeason) {
@@ -143,12 +145,13 @@ async function compareForNewReleasesAniWorld(
 				const localEpisode = localSeason.find((x) => x.episode == aniworldEpisodeIDX + 1);
 
 				if (!localEpisode) {
-					// console.log(aniworldSeasonIDX, aniworldEpisodeIDX, localSeason.find((x) => x.episode == aniworldEpisodeIDX), localSeason.find((x) => x.episode == aniworldEpisodeIDX + 1));
 					console.log('The whole Episode is missing Season:', aniworldSeasonIDX + 1, 'Episode:', aniworldEpisodeIDX + 1);
-					const language = aniworldEpisode.langs.find((e) => ['GerDub', 'GerSub', 'EngSub'].find((x) => x.includes(e)));
+					const language = aniworldEpisode.langs.find((e) => {
+						return ['GerDub', 'GerSub', 'EngSub'].find((x) => x.includes(e));
+					});
 					console.log('Started the language Decision Process Aniworld Langs:', aniworldEpisode.langs, 'Resulted in', { language });
 					if (ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
-						console.log('Ignored due to the ignorance List');
+						console.log('Skipped due to the ignorance Object', ignoranceObject);
 						continue;
 					}
 					addtoOutputList(localSeries.title, localSeries.references.aniworld, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, language);
@@ -175,7 +178,7 @@ async function compareForNewReleasesAniWorld(
 					const language = aniworldMovie.langs.find((e) => ['GerDub', 'GerSub', 'EngSub'].find((x) => x.includes(e)));
 					console.log('Started the language Decision Process Aniworld Langs:', aniworldMovie.langs, 'Resulted in', { language });
 					if (ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
-						console.log('Ignored due to the ignorance List');
+						console.log('Skipped due to the ignorance Object', ignoranceObject);
 						continue;
 					}
 					addtoOutputListMovie(localSeries.title, localSeries.references.aniworld, aniworldMovie.secondName, aniworldMovieIDX + 1, language);
@@ -285,9 +288,9 @@ async function compareForNewReleasesZoro(
 					const episodeIDX = Number(_episodeIDX);
 					const episode = zoroSeason[episodeIDX];
 					const language = episode.langs.find((e) => ['EngDub'].find((x) => x.includes(e)));
-					if (ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
-						continue;
-					}
+					// if (ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
+					// 	continue;
+					// }
 					ignoranceSkip = false;
 
 					addtoOutputList(episode.url, localSeries.title, zoroSeasonIDX + 1, episodeIDX + 1, language);
@@ -305,10 +308,10 @@ async function compareForNewReleasesZoro(
 					console.log('The whole Episode is missing Season:', zoroSeasonIDX + 1, 'Episode:', zoroEpisodeIDX + 1);
 					const language = zoroEpisode.langs.find((e) => ['EngDub'].find((x) => x.includes(e)));
 					console.log('Started the language Decision Process zoro Langs:', zoroEpisode.langs, 'Resulted in', { language });
-					if (ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
-						console.log('Ignored due to the ignorance List');
-						continue;
-					}
+					// if (ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
+					// 	console.log('Ignored due to the ignorance List');
+					// 	continue;
+					// }
 
 					if (language == undefined) {
 						console.log('Ignored due to undefined');
