@@ -51,7 +51,7 @@ async function compareForNewReleasesAniWorld(
 	inherit: boolean = true
 ): Promise<ExtendedEpisodeDownload[]> {
 	const limit = promiseLimit(10);
-	const data = series.filter((x) => x.references?.aniworld);
+	const data = series.filter((x) => x.references?.aniworld && !ignoranceList.find((v) => v.ID == x.ID && !v.lang));
 
 	const compare: AniWorldSerieCompare[] = await Promise.all(
 		data.map(async (serie) => {
@@ -171,7 +171,10 @@ async function compareForNewReleasesAniWorld(
 
 				aniworldMovie.secondName = sanitizeFileName(aniworldMovie.secondName);
 
-				const localMovie = localSeries.movies.find((x) => similar(aniworldMovie.secondName, x.primaryName) > 50);
+				const localMovie = localSeries.movies.find((x) => {
+					// console.log(aniworldMovie.secondName, x.primaryName, similar(aniworldMovie.secondName, x.primaryName));
+					return similar(aniworldMovie.secondName, x.primaryName) > 50;
+				});
 
 				if (!localMovie) {
 					console.log('Missing Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
@@ -186,7 +189,7 @@ async function compareForNewReleasesAniWorld(
 				} else {
 					if (aniworldMovie.langs.includes('GerDub') && !localMovie.langs.includes('GerDub')) {
 						console.log('The German Dub is missing in Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
-						addtoOutputList(localSeries.title, localSeries.references.aniworld, aniworldMovie.secondName, aniworldMovieIDX + 1, 'GerDub');
+						addtoOutputListMovie(localSeries.title, localSeries.references.aniworld, aniworldMovie.secondName, aniworldMovieIDX + 1, 'GerDub');
 					}
 				}
 			}

@@ -4,7 +4,7 @@ require('dotenv').config();
 import axios from 'axios';
 const io = require('socket.io-client');
 import Aniworld from './class/Aniworld';
-import { compareForNewReleases, compareForNewReleasesZoro } from './utils/compare';
+import { compareForNewReleases, compareForNewReleasesAniWorld, compareForNewReleasesZoro } from './utils/compare';
 const { similar } = require('./utils/utils');
 import Zoro from './class/Zoro';
 import { IgnoranceItem, Serie } from './utils/types';
@@ -110,7 +110,8 @@ async function addReference() {
 async function checkForUpdates() {
 	const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 	// res.data = res.data.filter((x) => x.ID == 'a9f36e78');
-	// res.data = res.data.filter((x) => x.ID == 'c8001b23' || x.ID == 'a9f36e78');
+	// res.data = res.data.filter((x) => x.ID == 'c8001b23' || x.title.includes('Piece'));
+	res.data = res.data.filter((x) => x.title.includes('Mushoku'));
 
 	// console.log(res.data);
 
@@ -118,7 +119,6 @@ async function checkForUpdates() {
 	const ignoranceList: IgnoranceItem[] = [
 		{
 			ID: 'c8001b23', // Detektiv Conan
-			lang: 'GerDub',
 		},
 		{
 			ID: 'a9f36e78', // Peter Grill and the Philosopher’s Time
@@ -126,7 +126,9 @@ async function checkForUpdates() {
 		},
 	];
 
-	await compareForNewReleases(res.data, ignoranceList);
+	console.log(await compareForNewReleasesAniWorld(res.data, ignoranceList));
+
+	// await compareForNewReleases(res.data, ignoranceList);
 	// await compareForNewReleasesZoro(res.data, ignoranceList, false);
 }
 
