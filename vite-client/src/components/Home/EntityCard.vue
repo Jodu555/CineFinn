@@ -43,37 +43,38 @@
 
 				<div v-if="editing">
 					<hr />
-					<pre>{{ editObject }}</pre>
-					<h5>References:</h5>
-					<div class="mb-3">
-						<input type="text" @v-model="editObject.references.aniworld" class="form-control" placeholder="Aniworld" />
-					</div>
-					<div class="mb-3">
-						<input type="text" @v-model="editObject.references.zoro" class="form-control" placeholder="Zoro" />
-					</div>
-
-					<div class="mb-3">
-						<label for="" class="form-label">Title</label>
-						<input type="text" @v-model="editObject.infos" class="form-control" id="title" placeholder="Title" />
-					</div>
-
-					<label for="" class="form-label">Start / End - Date</label>
-					<div class="row">
-						<div class="col">
-							<input type="text" @v-model="editObject.startDate" class="form-control" placeholder="Start" />
+					<form @submit.prevent="saveEditObject">
+						<h5>References:</h5>
+						<div class="mb-3">
+							<input type="text" v-model="editObject.references.aniworld" class="form-control" placeholder="Aniworld" />
 						</div>
-						<div class="col">
-							<input type="text" @v-model="editObject.endDate" class="form-control" placeholder="End" />
+						<div class="mb-3">
+							<input type="text" v-model="editObject.references.zoro" class="form-control" placeholder="Zoro" />
 						</div>
-					</div>
+						<h5>Infos:</h5>
+						<div class="mb-3">
+							<label for="" class="form-label">Title</label>
+							<input type="text" v-model="editObject.infos.infos" class="form-control" id="title" placeholder="Title" />
+						</div>
 
-					<div class="mb-3 mt-3">
-						<label for="" class="form-label">Description</label>
-						<textarea @v-model="editObject.description" class="form-control" id="description" rows="3">{{ entity.infos.description }}</textarea>
-					</div>
-					<div class="d-flex">
-						<button type="button" class="ms-auto btn btn-outline-success">Save</button>
-					</div>
+						<label for="" class="form-label">Start / End - Date</label>
+						<div class="row">
+							<div class="col">
+								<input type="text" v-model="editObject.infos.startDate" class="form-control" placeholder="Start" />
+							</div>
+							<div class="col">
+								<input type="text" v-model="editObject.infos.endDate" class="form-control" placeholder="End" />
+							</div>
+						</div>
+
+						<div class="mb-3 mt-3">
+							<label for="" class="form-label">Description</label>
+							<textarea v-model="editObject.infos.description" class="form-control" id="description" rows="3"></textarea>
+						</div>
+						<div class="d-flex">
+							<button type="submit" class="ms-auto btn btn-outline-success">Save</button>
+						</div>
+					</form>
 				</div>
 			</div>
 			<div class="card-footer text-muted">
@@ -83,6 +84,7 @@
 	</div>
 </template>
 <script>
+import { mapActions } from 'vuex';
 import LazyImage from '../LazyImage.vue';
 
 export default {
@@ -97,14 +99,20 @@ export default {
 					aniworld: '',
 					zoro: '',
 				},
-				infos: '',
-				startDate: '',
-				endDate: '',
-				description: '',
+				infos: {
+					infos: '',
+					startDate: '',
+					endDate: '',
+					description: '',
+				},
 			},
 		};
 	},
-	created() {},
+	created() {
+		this.editObject.infos = this.entity.infos;
+		this.editObject.references.aniworld = this.entity.references?.aniworld || '';
+		this.editObject.references.zoro = this.entity.references?.zoro || '';
+	},
 	computed: {
 		entityInfoString() {
 			const moviePart = this.entity.movies.length >= 1 ? this.entity.movies.length + ' ' + (this.entity.movies.length > 1 ? 'Movies' : 'Movie') : '';
@@ -114,10 +122,38 @@ export default {
 		},
 	},
 	methods: {
+		...mapActions(['loadSeries']),
 		buildCoverURL(entity) {
 			const url = new URL(this.$networking.API_URL + `/images/${entity.ID}/cover.jpg`);
 			url.searchParams.append('auth-token', this.$networking.auth_token);
 			return url.href;
+		},
+		async saveEditObject() {
+			const response = await this.$networking.patch('/index/' + this.entity.ID, JSON.stringify(this.editObject));
+
+			if (response.success) {
+				this.loadSeries();
+				this.$swal({
+					toast: true,
+					position: 'top-end',
+					showConfirmButton: false,
+					timer: 3000,
+					icon: 'success',
+					title: `Series ${this.entity.ID} Updated Successfully`,
+					timerProgressBar: true,
+				});
+			} else {
+				console.log(`response`, response);
+				this.$swal({
+					toast: true,
+					position: 'top-end',
+					showConfirmButton: false,
+					timer: 3000,
+					icon: 'danger',
+					title: `${response.error}`,
+					timerProgressBar: true,
+				});
+			}
 		},
 	},
 	components: { LazyImage },
