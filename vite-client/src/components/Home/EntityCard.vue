@@ -5,7 +5,7 @@
 			<LazyImage v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" :childclass="'card-img-top'" alt="..." />
 			<!-- <img v-if="entity?.infos?.image" :src="buildCoverURL(entity)" class="card-img-top" alt="..." />
 			<img v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" class="card-img-top" alt="..." /> -->
-			<div class="card-body">
+			<div v-auto-animate class="card-body">
 				<h4 class="card-title">{{ entity.infos?.title || entity.title }}</h4>
 				<p class="card-text">
 					<template v-if="entity.infos.description">
@@ -35,8 +35,45 @@
 				<!-- <p v-else class="card-text">
 				</p> -->
 				<router-link class="btn btn-outline-primary btn-sm" :to="'/watch?id=' + entity.ID">Go & Watch</router-link>
+				<button type="button" class="btn btn-outline-info btn-sm ms-3" @click="editing = !editing">Edit</button>
+
 				<div class="d-flex">
 					<p class="ms-auto text-muted" style="margin-bottom: 0.1rem">ID: {{ entity.ID }}</p>
+				</div>
+
+				<div v-if="editing">
+					<hr />
+					<pre>{{ editObject }}</pre>
+					<h5>References:</h5>
+					<div class="mb-3">
+						<input type="text" @v-model="editObject.references.aniworld" class="form-control" placeholder="Aniworld" />
+					</div>
+					<div class="mb-3">
+						<input type="text" @v-model="editObject.references.zoro" class="form-control" placeholder="Zoro" />
+					</div>
+
+					<div class="mb-3">
+						<label for="" class="form-label">Title</label>
+						<input type="text" @v-model="editObject.infos" class="form-control" id="title" placeholder="Title" />
+					</div>
+
+					<label for="" class="form-label">Start / End - Date</label>
+					<div class="row">
+						<div class="col">
+							<input type="text" @v-model="editObject.startDate" class="form-control" placeholder="Start" />
+						</div>
+						<div class="col">
+							<input type="text" @v-model="editObject.endDate" class="form-control" placeholder="End" />
+						</div>
+					</div>
+
+					<div class="mb-3 mt-3">
+						<label for="" class="form-label">Description</label>
+						<textarea @v-model="editObject.description" class="form-control" id="description" rows="3">{{ entity.infos.description }}</textarea>
+					</div>
+					<div class="d-flex">
+						<button type="button" class="ms-auto btn btn-outline-success">Save</button>
+					</div>
 				</div>
 			</div>
 			<div class="card-footer text-muted">
@@ -54,6 +91,17 @@ export default {
 		return {
 			descriptionLength: 125,
 			showDescription: false,
+			editing: false,
+			editObject: {
+				references: {
+					aniworld: '',
+					zoro: '',
+				},
+				infos: '',
+				startDate: '',
+				endDate: '',
+				description: '',
+			},
 		};
 	},
 	created() {},
