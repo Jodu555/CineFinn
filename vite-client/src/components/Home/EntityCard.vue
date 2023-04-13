@@ -35,11 +35,11 @@
 				<!-- <p v-else class="card-text">
 				</p> -->
 				<router-link class="btn btn-outline-primary btn-sm" :to="'/watch?id=' + entity.ID">Go & Watch</router-link>
-				<button type="button" class="btn btn-outline-info btn-sm ms-3" @click="editing = !editing">Edit</button>
 
 				<div class="d-flex">
 					<p class="ms-auto text-muted" style="margin-bottom: 0.1rem">ID: {{ entity.ID }}</p>
 				</div>
+				<button v-if="settings.showNewsAddForm.value" type="button" class="btn btn-outline-info btn-sm" @click="editing = !editing">Edit</button>
 
 				<div v-if="editing">
 					<hr />
@@ -84,7 +84,7 @@
 	</div>
 </template>
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import LazyImage from '../LazyImage.vue';
 
 export default {
@@ -114,6 +114,7 @@ export default {
 		this.editObject.references.zoro = this.entity.references?.zoro || '';
 	},
 	computed: {
+		...mapState('auth', ['settings']),
 		entityInfoString() {
 			const moviePart = this.entity.movies.length >= 1 ? this.entity.movies.length + ' ' + (this.entity.movies.length > 1 ? 'Movies' : 'Movie') : '';
 			const seasonPart =
