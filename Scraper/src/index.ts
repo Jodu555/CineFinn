@@ -111,7 +111,7 @@ async function checkForUpdates() {
 	const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 	// res.data = res.data.filter((x) => x.ID == 'a9f36e78');
 	// res.data = res.data.filter((x) => x.ID == 'c8001b23' || x.title.includes('Piece'));
-	res.data = res.data.filter((x) => x.title.includes('Mushoku'));
+	// res.data = res.data.filter((x) => x.title.includes('Mushoku'));
 
 	// console.log(res.data);
 
@@ -126,10 +126,10 @@ async function checkForUpdates() {
 		},
 	];
 
-	console.log(await compareForNewReleasesAniWorld(res.data, ignoranceList));
+	// console.log(await compareForNewReleasesAniWorld(res.data, ignoranceList));
 
-	// await compareForNewReleases(res.data, ignoranceList);
-	// await compareForNewReleasesZoro(res.data, ignoranceList, false);
+	await compareForNewReleases(res.data, ignoranceList);
+	await compareForNewReleasesZoro(res.data, ignoranceList, false);
 }
 
 async function generateNewDownloadList() {
