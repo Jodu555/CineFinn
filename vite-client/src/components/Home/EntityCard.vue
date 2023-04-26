@@ -133,7 +133,7 @@ export default {
 			const response = await this.$networking.patch('/index/' + this.entity.ID, JSON.stringify(this.editObject));
 
 			if (response.success) {
-				this.loadSeries();
+				// this.loadSeries();
 				this.$swal({
 					toast: true,
 					position: 'top-end',
