@@ -25,15 +25,12 @@
 						<br />
 						<br />
 					</template>
-					<!-- <pre>{{ entity.infos}}</pre> -->
 
 					<small v-if="entity.infos.startDate || entity.infos.endDate" class="text-muted"
 						>{{ entity.infos.startDate }} - {{ entity.infos.endDate }}</small
 					>
 					<small v-else class="text-mute">- Get Ready for it</small>
 				</p>
-				<!-- <p v-else class="card-text">
-				</p> -->
 				<router-link class="btn btn-outline-primary btn-sm" :to="'/watch?id=' + entity.ID">Go & Watch</router-link>
 
 				<div class="d-flex">
@@ -55,12 +52,12 @@
 						</div>
 						<h5>Infos:</h5>
 						<div class="mb-3">
-							<label for="" class="form-label">Title</label>
+							<label for="title" class="form-label">Title</label>
 							<input type="text" v-model="editObject.infos.infos" class="form-control" id="title" placeholder="Title" />
 						</div>
 
 						<label for="" class="form-label">Start / End - Date</label>
-						<div class="row">
+						<div class="row mb-3">
 							<div class="col">
 								<input type="text" v-model="editObject.infos.startDate" class="form-control" placeholder="Start" />
 							</div>
@@ -69,11 +66,21 @@
 							</div>
 						</div>
 
-						<div class="mb-3 mt-3">
+						<div v-if="editObject.infos.image != null" class="form-check mb-3">
+							<input class="form-check-input" type="checkbox" v-model="editObject.infos.image" />
+							<label class="form-check-label" for=""> Has Image </label>
+						</div>
+						<div v-if="editObject.infos.imageURL != null" class="mb-3">
+							<label for="imgurl" class="form-label">Image Url</label>
+							<input type="text" v-model="editObject.infos.imageURL" class="form-control" id="imgurl" placeholder="ImageUrl" />
+						</div>
+
+						<div class="mb-5">
 							<label for="" class="form-label">Description</label>
 							<textarea v-model="editObject.infos.description" class="form-control" id="description" rows="3"></textarea>
 						</div>
 						<div class="d-flex">
+							<button type="submit" class="btn btn-outline-danger">Cancel</button>
 							<button type="submit" class="ms-auto btn btn-outline-success">Save</button>
 						</div>
 					</form>
@@ -103,6 +110,8 @@ export default {
 				},
 				infos: {
 					infos: '',
+					image: false,
+					imageURL: '',
 					startDate: '',
 					endDate: '',
 					description: '',
@@ -111,7 +120,7 @@ export default {
 		};
 	},
 	created() {
-		this.editObject.infos = this.entity.infos;
+		this.editObject.infos = { ...this.editObject.infos, ...this.entity.infos };
 		this.editObject.references.aniworld = this.entity.references?.aniworld || '';
 		this.editObject.references.zoro = this.entity.references?.zoro || '';
 	},
@@ -135,6 +144,7 @@ export default {
 			const response = await this.$networking.patch('/index/' + this.entity.ID, JSON.stringify(this.editObject));
 
 			if (response.success) {
+				this.editing = false;
 				// this.loadSeries();
 				this.$swal({
 					toast: true,
