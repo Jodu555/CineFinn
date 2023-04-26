@@ -39,7 +39,9 @@
 				<div class="d-flex">
 					<p class="ms-auto text-muted" style="margin-bottom: 0.1rem">ID: {{ entity.ID }}</p>
 				</div>
-				<button v-if="settings.showNewsAddForm.value" type="button" class="btn btn-outline-info btn-sm" @click="editing = !editing">Edit</button>
+				<button v-if="settings.showNewsAddForm.value" type="button" class="btn btn-outline-info btn-sm" @click="editing = !editing">
+					<font-awesome-icon :icon="['fa-solid', 'fa-pen']" size="lg" />
+				</button>
 
 				<div v-if="editing">
 					<hr />
