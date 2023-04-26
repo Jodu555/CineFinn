@@ -153,7 +153,7 @@ async function generateNewDownloadList() {
 	// compareForNewReleases(mappedArr);
 }
 
-async function manuallyPrintTheInfosOut(refUrl) {
+async function manuallyPrintTheInfosOut(refUrl: string) {
 	const anime = !refUrl ? new Aniworld('https://aniworld.to/anime/stream/reincarnated-as-a-sword') : new Aniworld(refUrl);
 	const { url, informations } = await anime.parseInformations();
 
@@ -172,7 +172,7 @@ async function manuallyPrintTheInfosOut(refUrl) {
 
 async function programmaticallyInsertTheInfos() {
 	// const res = await axios.get('http://localhost:3100/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
-	const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
+	const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 
 	res.data = res.data.filter((x) => x.references?.aniworld);
 	res.data = res.data.filter((x) => !(x.infos.title || x.infos.description));
@@ -182,7 +182,7 @@ async function programmaticallyInsertTheInfos() {
 	const imageList = [];
 
 	for (const series of res.data) {
-		const anime = new Aniworld(series.references.aniworld);
+		const anime = new Aniworld(series.references.aniworld as string);
 		const { url, informations } = await anime.parseInformations();
 
 		const img = informations.image;

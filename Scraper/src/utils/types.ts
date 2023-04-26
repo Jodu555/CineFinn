@@ -20,6 +20,7 @@ export interface SerieEntity {
 export interface SerieInfo {
 	image?: string | boolean;
 	infos?: string;
+	title?: string;
 	startDate?: string;
 	endDate?: string;
 	description?: string;
