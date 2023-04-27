@@ -80,7 +80,7 @@
 							<textarea v-model="editObject.infos.description" class="form-control" id="description" rows="3"></textarea>
 						</div>
 						<div class="d-flex">
-							<button type="submit" class="btn btn-outline-danger">Cancel</button>
+							<button @click="editing = false" type="button" class="btn btn-outline-danger">Cancel</button>
 							<button type="submit" class="ms-auto btn btn-outline-success">Save</button>
 						</div>
 					</form>
@@ -121,6 +121,7 @@ export default {
 	},
 	created() {
 		this.editObject.infos = { ...this.editObject.infos, ...this.entity.infos };
+
 		this.editObject.references.aniworld = this.entity.references?.aniworld || '';
 		this.editObject.references.zoro = this.entity.references?.zoro || '';
 	},

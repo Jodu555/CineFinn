@@ -123,7 +123,7 @@ const cleanupSeriesBeforeFrontResponse = (series) => {
 		const newMovies = serie.movies.map((p) => {
 			return { ...p, filePath: path.parse(p.filePath).base };
 		});
-		delete serie.references;
+		// delete serie.references;
 		return {
 			...serie,
 			seasons: newSeasons,
