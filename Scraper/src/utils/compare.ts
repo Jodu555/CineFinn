@@ -187,9 +187,16 @@ async function compareForNewReleasesAniWorld(
 					addtoOutputListMovie(localSeries.title, localSeries.references.aniworld, aniworldMovie.secondName, aniworldMovieIDX + 1, language);
 					continue;
 				} else {
+					console.log('Got Local Compare Movie', localMovie, aniworldMovie);
+
 					if (aniworldMovie.langs.includes('GerDub') && !localMovie.langs.includes('GerDub')) {
 						console.log('The German Dub is missing in Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
 						addtoOutputListMovie(localSeries.title, localSeries.references.aniworld, aniworldMovie.secondName, aniworldMovieIDX + 1, 'GerDub');
+					}
+
+					if (aniworldMovie.langs.includes('GerSub') && !localMovie.langs.includes('GerDub') && !localMovie.langs.includes('GerSub')) {
+						console.log('The German Dub is missing in Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
+						addtoOutputListMovie(localSeries.title, localSeries.references.aniworld, aniworldMovie.secondName, aniworldMovieIDX + 1, 'GerSub');
 					}
 				}
 			}
