@@ -83,8 +83,8 @@ const filenameParser = (filepath, filename) => {
 
 const series = JSON.parse(fs.readFileSync(process.env.LOCAL_DB_FILE, 'utf8'));
 
-const serie = series.find((x) => x.ID == 'cc3a933b');
-console.log(serie);
+// const serie = series.find((x) => x.ID == 'cc3a933b');
+// console.log(serie);
 
 const wait = (ms) =>
 	new Promise((rs, _) =>
@@ -95,8 +95,8 @@ const wait = (ms) =>
 	);
 
 (async () => {
-	await generateImages([serie]);
-	console.log('Came');
+	// await generateImages([serie]);
+	// console.log('Came');
 
 	// const limit = await promiseAllLimit(5);
 
@@ -120,6 +120,7 @@ const wait = (ms) =>
 						return await Promise.all(
 							season.map((e) => {
 								return new Promise(async (resolve, _) => {
+									console.log('started', e.primaryName);
 									const duration = await getVideoDurationInSeconds(e.filePath);
 									console.log('got', e.primaryName, duration);
 									resolve({ ...e, duration });
