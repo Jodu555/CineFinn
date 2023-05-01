@@ -79,9 +79,9 @@ socket.on('connect', async () => {
 
 	// console.log(refs);
 
-	await checkForUpdates();
+	// await checkForUpdates();
 	// await manuallyCraftTheList();
-	// await generateNewDownloadList();
+	await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
 	// await programmaticallyInsertTheInfos();
 	// await addReference();
@@ -135,22 +135,32 @@ async function checkForUpdates() {
 async function generateNewDownloadList() {
 	const arr = [
 		{
-			title: 'Ya Boy Kongming!',
-			url: 'ya-boy-kongming',
+			title: 'Sugar Apple Fairy Tale',
+			aniworldID: 'sugar-apple-fairy-tale',
+			zoroID: '18301',
 		},
 	];
 
 	const mappedArr = arr.map((x) => {
+		const ref = { aniworld: '', zoro: '' };
+		if (x.aniworldID) {
+			ref.aniworld = 'https://aniworld.to/anime/stream/' + x.aniworldID;
+		}
+		if (x.zoroID) {
+			ref.zoro = x.zoroID;
+		}
 		return {
 			ID: crypto.randomUUID().split('-')[0],
 			title: x.title,
-			references: { aniworld: 'https://aniworld.to/anime/stream/' + x.url },
+			references: ref,
+			categorie: 'aniworld',
+			infos: {},
 			seasons: [],
 			movies: [],
 		};
 	});
 
-	// compareForNewReleases(mappedArr);
+	compareForNewReleases(mappedArr, []);
 }
 
 async function manuallyPrintTheInfosOut(refUrl: string) {
