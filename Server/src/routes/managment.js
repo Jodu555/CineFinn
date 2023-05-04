@@ -63,15 +63,19 @@ router.get('/job/img/generate', (req, res, next) => {
 			startTime: Date.now(),
 			data: {},
 		});
-		generateImages(getSeries(), async () => {
+		try {
+			generateImages(getSeries(), async () => {
+				setActiveJobs(getActiveJobs().filter((x) => x.id !== id));
+				toAllSockets(
+					(s) => {
+						s.emit(callpointToEvent(LOOKUP[id].callpoint));
+					},
+					(s) => s.auth.type == 'client'
+				);
+			});
+		} catch (error) {
 			setActiveJobs(getActiveJobs().filter((x) => x.id !== id));
-			toAllSockets(
-				(s) => {
-					s.emit(callpointToEvent(LOOKUP[id].callpoint));
-				},
-				(s) => s.auth.type == 'client'
-			);
-		});
+		}
 		res.json(getActiveJobs());
 	}
 });
@@ -104,18 +108,22 @@ router.get('/job/crawl', (req, res, next) => {
 		const error = new Error('Job is already running!');
 		next(error);
 	} else {
-		getActiveJobs().push({
-			id,
-			name: LOOKUP[id].name,
-			startTime: Date.now(),
-			data: {},
-		});
-		setSeries(crawlAndIndex());
-		setTimeout(async () => {
+		try {
+			getActiveJobs().push({
+				id,
+				name: LOOKUP[id].name,
+				startTime: Date.now(),
+				data: {},
+			});
+			setSeries(crawlAndIndex());
+			setTimeout(async () => {
+				setActiveJobs(getActiveJobs().filter((x) => x.id !== id));
+				sendSeriesReloadToAll((s) => s.emit(callpointToEvent(LOOKUP[id].callpoint)));
+			}, 3600);
+			res.json(getActiveJobs());
+		} catch (error) {
 			setActiveJobs(getActiveJobs().filter((x) => x.id !== id));
-			sendSeriesReloadToAll((s) => s.emit(callpointToEvent(LOOKUP[id].callpoint)));
-		}, 3600);
-		res.json(getActiveJobs());
+		}
 	}
 });
 
