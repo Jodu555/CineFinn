@@ -161,6 +161,10 @@ async function compareForNewReleasesAniWorld(
 					console.log('The German Dub is missing in Season:', aniworldSeasonIDX + 1, 'Episode:', aniworldEpisodeIDX + 1);
 					addtoOutputList(localSeries.title, localSeries.references.aniworld, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, 'GerDub');
 				}
+				if (aniworldEpisode.langs.includes('GerSub') && !localEpisode.langs.includes('GerDub') && !localEpisode.langs.includes('GerSub')) {
+					console.log('The German Sub is missing in Season:', aniworldSeasonIDX + 1, 'Episode:', aniworldEpisodeIDX + 1);
+					addtoOutputList(localSeries.title, localSeries.references.aniworld, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, 'GerSub');
+				}
 			}
 		}
 		//TODO: Add the movies too

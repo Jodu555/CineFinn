@@ -112,6 +112,7 @@ async function checkForUpdates() {
 	// res.data = res.data.filter((x) => x.ID == 'a9f36e78');
 	// res.data = res.data.filter((x) => x.title.includes('Kaguya'));
 	// res.data = res.data.filter((x) => x.title.includes('Mushoku'));
+	// res.data = res.data.filter((x) => x.title.includes('Honor'));
 
 	// console.log(res.data);
 
