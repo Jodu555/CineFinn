@@ -34,14 +34,14 @@ async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceIt
 	const output: ExtendedEpisodeDownload[] = [];
 
 	console.log('------ Compare Aniworld ------');
-	const aniworld = await compareForNewReleasesAniWorld(series, ignoranceList);
+	// const aniworld = await compareForNewReleasesAniWorld(series, ignoranceList);
 	console.log('------ Compare Aniworld ------');
 
 	console.log('------ Compare Zoro ------');
 	const zoro = await compareForNewReleasesZoro(series, ignoranceList);
 	console.log('------ Compare Zoro ------');
 
-	fs.writeFileSync('dlListAniworld.json', JSON.stringify(aniworld, null, 3));
+	// fs.writeFileSync('dlListAniworld.json', JSON.stringify(aniworld, null, 3));
 	fs.writeFileSync('dlListZoro.json', JSON.stringify(zoro, null, 3));
 }
 
@@ -245,9 +245,14 @@ async function compareForNewReleasesZoro(
 						seasons: [],
 					};
 					if (typeof serie.references.zoro == 'string') {
-						const zoro = new Zoro(serie.references.zoro);
-						const { episodes } = await zoro.getExtendedEpisodeList();
-						out.seasons.push(episodes.map(changeEpisode));
+						try {
+							const zoro = new Zoro(serie.references.zoro);
+							const { episodes } = await zoro.getExtendedEpisodeList();
+							out.seasons.push(episodes.map(changeEpisode));
+						} catch (error) {
+							console.log(error);
+							console.log('Error parsing', serie);
+						}
 					} else {
 						for (const [key, value] of Object.entries(serie.references.zoro)) {
 							if (key.startsWith('Season-')) {
