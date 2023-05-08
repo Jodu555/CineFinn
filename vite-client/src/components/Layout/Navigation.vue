@@ -81,13 +81,24 @@ export default {
 	methods: {
 		...mapActions('auth', ['logout']),
 		handleKeyUp(e) {
-			if (this.pressedKeys[e.key] != true) this.pressedKeys[e.key] = false;
+			console.log('UP', e.key);
+			this.pressedKeys[e.key] = false;
+			// if (this.pressedKeys[e.key] != true) this.pressedKeys[e.key] = false;
 		},
 		handleKeyDown(e) {
-			if (this.pressedKeys[e.key] != false) this.pressedKeys[e.key] = true;
+			console.log('DOWN', e.key);
+			this.pressedKeys[e.key] = true;
+			// if (this.pressedKeys[e.key] != false) this.pressedKeys[e.key] = true;
 		},
 		autocompleteSearch(ID, value) {
-			this.$router.push({ path: '/watch', query: { id: ID } });
+			console.log();
+			if (this.pressedKeys?.j) {
+				const routeData = this.$router.resolve({ path: '/watch', query: { id: ID } });
+				window.open(routeData.href, '_blank');
+				this.pressedKeys.j = false;
+			} else {
+				this.$router.push({ path: '/watch', query: { id: ID } });
+			}
 		},
 	},
 };
