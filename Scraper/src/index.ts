@@ -136,9 +136,9 @@ async function checkForUpdates() {
 async function generateNewDownloadList() {
 	const arr = [
 		{
-			title: 'Sugar Apple Fairy Tale',
-			aniworldID: 'sugar-apple-fairy-tale',
-			zoroID: '18301',
+			title: 'Demon Slayer',
+			aniworldID: '',
+			zoroID: '17483',
 		},
 	];
 

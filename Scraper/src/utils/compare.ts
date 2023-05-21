@@ -36,12 +36,11 @@ async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceIt
 	console.log('------ Compare Aniworld ------');
 	const aniworld = await compareForNewReleasesAniWorld(series, ignoranceList);
 	console.log('------ Compare Aniworld ------');
+	fs.writeFileSync('dlListAniworld.json', JSON.stringify(aniworld, null, 3));
 
 	console.log('------ Compare Zoro ------');
 	const zoro = await compareForNewReleasesZoro(series, ignoranceList);
 	console.log('------ Compare Zoro ------');
-
-	fs.writeFileSync('dlListAniworld.json', JSON.stringify(aniworld, null, 3));
 	fs.writeFileSync('dlListZoro.json', JSON.stringify(zoro, null, 3));
 }
 
