@@ -136,9 +136,9 @@ async function checkForUpdates() {
 async function generateNewDownloadList() {
 	const arr = [
 		{
-			title: 'Demon Slayer',
-			aniworldID: '',
-			zoroID: '17483',
+			title: 'Campfire Cooking in Another World with My Absurd Skill',
+			aniworldID: 'campfire-cooking-in-another-world-with-my-absurd-skill',
+			zoroID: '',
 		},
 	];
 

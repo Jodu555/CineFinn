@@ -364,6 +364,13 @@ export default {
 				let percent = video.currentTime / video.duration;
 				percent = isNaN(percent) ? 0 : percent;
 				timelineContainer.style.setProperty('--progress-position', percent);
+				console.log(this.settings);
+				if (video.currentTime == video.duration) {
+					this.switchTo(1);
+					setTimeout(() => {
+						video.play();
+					}, 400);
+				}
 			});
 			const leadingZeroFormatter = new Intl.NumberFormat(undefined, {
 				minimumIntegerDigits: 2,
