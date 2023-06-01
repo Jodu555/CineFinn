@@ -4,6 +4,7 @@ const defaultSettings = {
 	showLatestWatchButton: { title: 'Show the latest watch button?', type: 'checkbox', value: true },
 	developerMode: { title: 'Show the developer Infos?', type: 'checkbox', value: false },
 	showNewsAddForm: { title: 'Show the Add News Form', type: 'checkbox', value: true },
+	autoSkip: { title: 'Auto Skip to next Episode at the end?', type: 'checkbox', value: true },
 	volume: { type: 'hide', value: 1 },
 };
 

@@ -364,8 +364,7 @@ export default {
 				let percent = video.currentTime / video.duration;
 				percent = isNaN(percent) ? 0 : percent;
 				timelineContainer.style.setProperty('--progress-position', percent);
-				console.log(this.settings);
-				if (video.currentTime == video.duration) {
+				if (this.settings?.autoSkip.value == true && video.currentTime == video.duration) {
 					this.switchTo(1);
 					setTimeout(() => {
 						video.play();

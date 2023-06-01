@@ -48,15 +48,6 @@
 				<hr />
 				<div v-if="showSettings">
 					<div v-for="(setting, key) of settings" :key="key" class="mb-3 form-check">
-						<!-- <template v-if="key === 'preferredLanguage'">
-							<div class="mb-3">
-								<label for="preflang" class="form-label">Prefered Language:</label>
-								<select class="form-select" id="preflang">
-									<option value="GerDub" selected>GerDub</option>
-									<option value="GerSub">GerSub</option>
-								</select>
-							</div>
-						</template> -->
 						<template v-if="setting.type === 'checkbox'">
 							<input
 								type="checkbox"
@@ -73,24 +64,6 @@
 							<label class="form-check-label" :for="key">{{ setting.title }}</label>
 						</template>
 					</div>
-					<!-- <div class="mb-3 form-check">
-						<input type="checkbox" v-model="settings.developerMode" @change="toggleDevMode" class="form-check-input" id="devmode" />
-						<label class="form-check-label" for="devmode">Developer Mode</label>
-					</div>
-					<div class="mb-3 form-check">
-						<input
-							type="checkbox"
-							v-model="settings.showVideoTitleContainer"
-							@change="toggleTitleContainer"
-							class="form-check-input"
-							id="vidtitlecontainer"
-						/>
-						<label class="form-check-label" for="vidtitlecontainer">Show Video Title Container</label>
-					</div>
-					<div class="mb-3 form-check">
-						<input type="checkbox" v-model="settings.showNewsAddForm" @change="toggleshowNewsAddForm" class="form-check-input" id="shownewsaddform" />
-						<label class="form-check-label" for="shownewsaddform">Show News Add Form</label>
-					</div> -->
 				</div>
 			</div>
 		</div>
