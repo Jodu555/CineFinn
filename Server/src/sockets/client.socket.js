@@ -1,6 +1,6 @@
 const { Database } = require('@jodu555/mysqlapi');
 const { cleanupSeriesBeforeFrontResponse } = require('../classes/series');
-const { compareSettings } = require('../utils/settings');
+const { compareSettings, defaultSettings } = require('../utils/settings');
 const { debounce, toAllSockets, getSeries } = require('../utils/utils');
 const { writeWatchInfoToDatabase } = require('../utils/watchManager');
 const { parse, load } = require('../utils/watchString');
@@ -40,6 +40,16 @@ const initialize = (socket) => {
 		await toAllSockets(
 			(s) => {
 				s.emit('updateSettings', outSettings);
+			},
+			(s) => s.auth.type == 'client' && s.auth.user.UUID == auth.user.UUID
+		);
+	});
+
+	socket.on('resetSettings', async () => {
+		await database.get('accounts').update({ UUID: auth.user.UUID }, { settings: JSON.stringify(defaultSettings) });
+		await toAllSockets(
+			(s) => {
+				s.emit('updateSettings', defaultSettings);
 			},
 			(s) => s.auth.type == 'client' && s.auth.user.UUID == auth.user.UUID
 		);

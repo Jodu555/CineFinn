@@ -64,6 +64,10 @@
 							<label class="form-check-label" :for="key">{{ setting.title }}</label>
 						</template>
 					</div>
+
+					<div class="d-grid gap-2">
+						<button type="button" @click="resetSettings()" class="btn btn-outline-danger">Reset to Default Settings</button>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -95,7 +99,7 @@ export default {
 		});
 	},
 	methods: {
-		...mapActions('auth', ['updateSettings']),
+		...mapActions('auth', ['updateSettings', 'resetSettings']),
 		async load() {
 			const response = await this.$networking.get('/managment/jobs/info');
 			if (!response.success) return;
