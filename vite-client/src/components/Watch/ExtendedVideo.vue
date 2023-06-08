@@ -107,7 +107,26 @@
 				<span class="visually-hidden">Loading...</span>
 			</div>
 		</div>
-		<video preload="auto" oncontextmenu="return false" :src="videoSrc"></video>
+		<pre class="internal-video-devinfos" v-if="settings.developerMode.value">
+			VideoLoading: {{ videoLoading }} 
+			CurrentTime: {{ $refs.mainVid?.currentTime }}ms
+			Duration: {{ $refs.mainVid?.duration }}ms
+			Progress: {{ $refs.mainVid?.duration - $refs.mainVid?.currentTime }}ms
+			Volume: {{ $refs.mainVid?.volume }}
+			Buffers: 
+				<div class="internal-video-devinfos-child">
+					<span v-for="i in $refs.mainVid?.buffered.length">
+						{{ $refs.mainVid.buffered.start(i - 1)  }}ms - {{ $refs.mainVid.buffered.end(i -1) }}ms
+					</span>
+				</div>
+			Seekable: 
+				<div class="internal-video-devinfos-child">
+					<span v-for="i in $refs.mainVid?.seekable.length">
+						{{ $refs.mainVid.seekable.start(i - 1)  }}ms - {{ $refs.mainVid.seekable.end(i -1) }}ms
+					</span>
+				</div>
+		</pre>
+		<video ref="mainVid" preload="auto" oncontextmenu="return false" :src="videoSrc"></video>
 	</div>
 </template>
 <script>
@@ -360,10 +379,15 @@ export default {
 			});
 			video.addEventListener('stalled', () => {
 				console.log('stalled, the internet seems to be missing video could not be loaded');
+				v.videoLoading = true;
 			});
 			video.addEventListener('waiting', () => {
 				console.log('waiting for data (no current data but video still playing cause of buffering)');
 			});
+			video.addEventListener('error', (event) => {
+				console.error('Error loading: Video');
+			});
+
 			video.addEventListener('progress', () => {
 				updateBuffer();
 			});
@@ -585,6 +609,25 @@ export default {
 };
 </script>
 <style scoped>
+.internal-video-devinfos-child {
+	line-height: 0.8;
+	margin-left: -10%;
+	margin-top: -4%;
+	margin-bottom: -4%;
+}
+.internal-video-devinfos {
+	position: absolute;
+	top: 10%;
+	left: 0;
+	right: 5%;
+	background-color: rgba(0, 0, 0, 0.75);
+	color: white;
+	z-index: 100;
+	line-height: 1.5;
+	margin: 1rem;
+	height: 70%;
+}
+
 .video-spinner-container {
 	position: absolute;
 	top: 50%;
