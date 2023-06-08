@@ -27,7 +27,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [Web Dev Simplified](https://www.youtube.com/watch?v=ZeNyjnneq_w)
 - [His Repository](https://github.com/WebDevSimplified/youtube-video-player-clone)
 
-### The Bootstrap 5 Autocomplete
+### The Bootstrap 5 Autocomplete (Moderately changed and customized by myself + integrated into the Vue Eco System)
 
 - [gch1p](https://github.com/gch1p)
 - [His Repository](https://github.com/gch1p/bootstrap-5-autocomplete)
@@ -103,9 +103,9 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 
 - [ ] Add a Setting to toggle the card images (for lower bandwidth)
 - [ ] Update the preview images to be language specific (preview images for every language an episode is in) cause if the episode is longer or shorter
-- [ ] Implement the update check for EngDub Series
+- [x] Implement the update check for EngDub Series
 - [ ] Implement the update check for sto series
-- [ ] Implement my own hover so when the mouse is still over, but has'nt moved since hide the menu
+- [x] Implement my own hover so when the mouse is still over, but has'nt moved since hide the menu
 - [ ] Account/Authentication System Update
   - [ ] Implement a password change in the settings
   - [ ] Implement Email Change in the settings
