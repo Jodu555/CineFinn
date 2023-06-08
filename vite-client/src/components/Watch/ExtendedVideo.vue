@@ -259,6 +259,34 @@ export default {
 						break;
 				}
 			}
+
+			//Video Container Hover Logic
+			var timeoutId;
+
+			function resetTimeout() {
+				clearTimeout(timeoutId);
+				timeoutId = setTimeout(() => {
+					videoContainer.classList.remove('hovered');
+					videoContainer.style.cursor = 'none';
+				}, 5000);
+				videoContainer.classList.add('hovered');
+			}
+
+			videoContainer.addEventListener('mouseover', function () {
+				videoContainer.classList.add('hovered');
+				resetTimeout();
+			});
+
+			videoContainer.addEventListener('mouseout', function () {
+				videoContainer.classList.remove('hovered');
+				videoContainer.style.cursor = '';
+			});
+
+			videoContainer.addEventListener('mousemove', function () {
+				resetTimeout();
+				videoContainer.style.cursor = '';
+			});
+
 			// Timeline
 			function documentMouseUp(e) {
 				if (isScrubbing) toggleScrubbing(e);
@@ -334,7 +362,7 @@ export default {
 				console.log('stalled, the internet seems to be missing video could not be loaded');
 			});
 			video.addEventListener('waiting', () => {
-				console.log('waiting for data (no current data but video still laying cause of buffering)');
+				console.log('waiting for data (no current data but video still playing cause of buffering)');
 			});
 			video.addEventListener('progress', () => {
 				updateBuffer();
@@ -617,8 +645,8 @@ export default {
 	opacity: 0;
 	transition: opacity 300ms ease-in-out;
 }
-
-.video-container:hover .video-title-container,
+/* This was changed */
+.video-container.hovered .video-title-container,
 .video-container:focus-within .video-title-container,
 .video-container.paused .video-title-container {
 	opacity: 0.8;
@@ -683,8 +711,8 @@ video {
 	z-index: -1;
 	pointer-events: none;
 }
-
-.video-container:hover .video-controls-container,
+/* This was changed */
+.video-container.hovered .video-controls-container,
 .video-container:focus-within .video-controls-container,
 .video-container.paused .video-controls-container {
 	opacity: 1;
