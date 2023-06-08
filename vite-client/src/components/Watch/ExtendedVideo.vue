@@ -350,10 +350,8 @@ export default {
 						max = time;
 					}
 				}
-				if (video.buffered.length == 1) {
-					const bufferPercent = max / video.duration;
-					document.querySelector('.timeline-buffer').style.setProperty('--buffer-position', bufferPercent);
-				}
+				const bufferPercent = max / video.duration;
+				document.querySelector('.timeline-buffer').style.setProperty('--buffer-position', bufferPercent);
 			}
 
 			const timeUpdateThrottle = throttle(v.sendVideoTimeUpdate, TIME_UPDATE_THROTTLE);
@@ -496,13 +494,9 @@ export default {
 						const { top, left, width } = video.getBoundingClientRect();
 
 						const localX = event.touches[0].clientX - left;
-						// const localY = event.touches[0].clientY - top;
 
 						const middle = top == 0 && left == 0 ? window.innerWidth / 2 : width / 2;
 						const max = top == 0 && left == 0 ? window.innerWidth : width;
-
-						// console.log(top, left);
-						// console.log(localX, localY);
 
 						let value = false;
 						let velocity = 0;
