@@ -18,7 +18,7 @@
 				</button>
 			</div>
 			<!-- <SeriesInformation /> -->
-			<ControlsInformation />
+			<ControlInformationModal />
 			<h1 class="text-truncate" data-bs-toggle="tooltip" :data-bs-title="displayTitle">
 				{{ displayTitle }}
 			</h1>
@@ -93,11 +93,11 @@ import { mapState, mapMutations, mapActions, mapGetters } from 'vuex';
 import { singleDimSwitcher, multiDimSwitcher, deepswitchTo } from '@/plugins/switcher';
 import EntityListView from '@/components/Watch/EntityListView.vue';
 import ExtendedVideo from '@/components/Watch/ExtendedVideo.vue';
-import ControlsInformation from '@/components/Watch/ControlsInformation.vue';
+import ControlInformationModal from '@/components/Watch/ControlInformationModal.vue';
 import EntityActionsInformation from '@/components/Watch/EntityActionsInformation.vue';
 
 export default {
-	components: { EntityListView, ExtendedVideo, ControlsInformation, EntityActionsInformation },
+	components: { EntityListView, ExtendedVideo, ControlInformationModal, EntityActionsInformation },
 	data() {
 		return {
 			cleanupFN: null,

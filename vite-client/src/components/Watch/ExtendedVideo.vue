@@ -1,33 +1,6 @@
 <template>
 	<div>
-		<div class="modal fade" aria-modal="true" id="shareModal" tabindex="-1" aria-labelledby="shareModal" aria-hidden="true">
-			<div class="modal-dialog modal-lg modal-dialog-centered">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title" id="shareModalLabel">Share</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-						<div class="row g-3 align-items-center">
-							<div class="col-auto">
-								<label for="sharelink" class="col-form-label">Link</label>
-							</div>
-							<div class="col-9">
-								<input type="text" :value="shareLink" id="sharelink" readonly class="form-control" />
-							</div>
-							<div class="col-auto">
-								<button @click="copyURL(shareLink)" type="button" class="btn btn-outline-primary">Copy</button>
-							</div>
-						</div>
-						<hr />
-						<div class="form-check d-flex gap-3 justify-content-center">
-							<input class="form-check-input" v-model="shareInclTime" id="inclTime" type="checkbox" />
-							<label class="form-check-label" for="inclTime"> Zeit Inkludieren </label>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+		<ShareModal />
 		<div style="margin-top: 0.5%" class="video-container paused" data-volume-level="high">
 			<img class="thumbnail-img" />
 			<div v-if="entityObject && settings.showVideoTitleContainer.value" class="video-title-container">
@@ -51,7 +24,7 @@
 					</div>
 				</div>
 				<div class="controls">
-					<button class="play-pause-btn">
+					<button title="Toggle Video State" class="play-pause-btn">
 						<svg class="play-icon" viewBox="0 0 24 24">
 							<path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
 						</svg>
@@ -84,10 +57,10 @@
 						/
 						<div class="total-time"></div>
 					</div>
-					<button data-bs-toggle="modal" data-bs-target="#shareModal" disabled @click="shareModal()">
+					<button title="Share Video" data-bs-toggle="modal" data-bs-target="#shareModal" disabled @click="shareModal()">
 						<font-awesome-icon icon="fa-solid fa-share" size="lg" />
 					</button>
-					<button @click="switchTo(-1)" title="Previous Episode">
+					<button title="Previous Episode" @click="switchTo(-1)">
 						<svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path
 								fill-rule="evenodd"
@@ -107,7 +80,7 @@
 							></path>
 						</svg>
 					</button>
-					<button class="speed-btn wide-btn">1x</button>
+					<button title="Toggle Video Speed" class="speed-btn wide-btn">1x</button>
 					<button title="Toggle Mini Player" class="mini-player-btn">
 						<svg viewBox="0 0 24 24">
 							<path
@@ -166,6 +139,7 @@
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { throttle } from '@/plugins/debounceAndThrottle';
 import ActorContainer from './ActorContainer.vue';
+import ShareModal from './ShareModal.vue';
 export default {
 	props: {
 		switchTo: { type: Function },
@@ -179,19 +153,12 @@ export default {
 			skipPercent: null,
 			videoLoading: false,
 			dataLoading: false,
-			shareInclTime: false,
 		};
 	},
 	computed: {
 		...mapState('watch', ['currentSeries', 'currentMovie', 'currentLanguage']),
 		...mapState('auth', ['authToken', 'settings']),
 		...mapGetters('watch', ['videoSrc', 'entityObject']),
-		shareLink() {
-			const video = document.querySelector('video');
-			const time = this.shareInclTime ? '&time=' + parseInt(video.currentTime) : '';
-			return `${location.origin}/watch?id=${this.currentSeries?.ID}&idx=${this.entityObject?.season}x${this.entityObject?.episode}${time}`;
-			// return '';
-		},
 	},
 	async mounted() {
 		const { skip, skipPercent, cleanupFN } = this.initialize();
@@ -210,30 +177,6 @@ export default {
 	},
 	methods: {
 		...mapActions('auth', ['updateSettings']),
-		async copyURL(url) {
-			try {
-				await navigator.clipboard.writeText(url);
-				this.$swal({
-					toast: true,
-					position: 'top-end',
-					showConfirmButton: false,
-					timer: 2500,
-					icon: 'success',
-					title: `Url Copied Successful`,
-					timerProgressBar: true,
-				});
-			} catch ($e) {
-				this.$swal({
-					toast: true,
-					position: 'top-end',
-					showConfirmButton: false,
-					timer: 2500,
-					icon: 'error',
-					title: `Url Copied Error`,
-					timerProgressBar: true,
-				});
-			}
-		},
 		generatePreviewImageURL(previewImgNumber) {
 			let previewImgSrc = '';
 			if (this.currentSeries != undefined && this.currentSeries.ID != -1) {
@@ -669,7 +612,7 @@ export default {
 			};
 		},
 	},
-	components: { ActorContainer },
+	components: { ActorContainer, ShareModal },
 };
 </script>
 <style scoped>
