@@ -60,10 +60,24 @@ import {
 	faForward,
 	faBackward,
 	faPen,
+	faShare,
 } from '@fortawesome/free-solid-svg-icons';
 import { faKeyboard } from '@fortawesome/free-regular-svg-icons';
 
-library.add(faUpLong, faInfo, faForwardStep, faBackwardStep, faRightFromBracket, faGears, faChevronUp, faChevronDown, faForward, faBackward, faPen); // solid
+library.add(
+	faUpLong,
+	faInfo,
+	faForwardStep,
+	faBackwardStep,
+	faRightFromBracket,
+	faGears,
+	faChevronUp,
+	faChevronDown,
+	faForward,
+	faBackward,
+	faPen,
+	faShare
+); // solid
 library.add(faKeyboard); // regular
 
 app.component('font-awesome-icon', FontAwesomeIcon);

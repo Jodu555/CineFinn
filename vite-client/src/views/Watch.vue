@@ -168,7 +168,7 @@ export default {
 		changeLanguage(lang) {
 			this.handleVideoChange(this.currentSeason, this.currentEpisode, this.currentMovie, true, lang);
 		},
-		handleVideoChange(season = -1, episode = -1, movie = -1, langchange = false, lang) {
+		handleVideoChange(season = -1, episode = -1, movie = -1, langchange = false, lang, callback) {
 			if (langchange && this.currentLanguage == lang) return;
 			const video = document.querySelector('video');
 
@@ -216,6 +216,7 @@ export default {
 					video.load();
 					langchange ? (video.currentTime = prevTime) : (video.currentTime = 0);
 					!wasPaused && video.play();
+					callback(video);
 				}, 100);
 			}, 200);
 		},
@@ -239,11 +240,18 @@ export default {
 			const data = JSON.parse(localStorage.getItem('data'));
 
 			this.loadWatchList(seriesID);
-
-			if (data && data.ID == seriesID) {
+			if (this.$route.query?.idx) {
+				const [se, ep] = this.$route.query?.idx.split('x').map((x) => Number(x));
+				this.handleVideoChange(se, ep, -1, undefined, undefined, (video) => {
+					if (this.$route.query?.time != undefined && parseInt(this.$route.query?.time)) {
+						video.currentTime = parseInt(this.$route.query?.time);
+					}
+				});
+			} else if (data && data.ID == seriesID) {
 				this.handleVideoChange(data.season || -1, data.episode || -1, data.movie || -1);
 			} else {
 				localStorage.removeItem('data');
+
 				this.handleVideoChange(-1, -1, -1);
 			}
 

@@ -1,113 +1,151 @@
 <template>
-	<div style="margin-top: 0.5%" class="video-container paused" data-volume-level="high">
-		<img class="thumbnail-img" />
-		<div v-if="entityObject && settings.showVideoTitleContainer.value" class="video-title-container">
-			<p v-if="currentMovie == -1">
-				{{ entityObject.primaryName }} - {{ String(entityObject.season).padStart(2, '0') }}x{{ String(entityObject.episode).padStart(2, '0') }}
-			</p>
-			<p v-if="currentMovie !== -1">
-				{{ entityObject.primaryName }}
-			</p>
-		</div>
-		<ActorContainer v-if="false" />
-		<font-awesome-icon class="skip skip-left" size="2xl" icon="fa-solid fa-backward" />
-		<font-awesome-icon class="skip skip-right" size="2xl" icon="fa-solid fa-forward" />
-		<div v-show="!dataLoading" class="video-controls-container">
-			<div class="timeline-container">
-				<div class="timeline">
-					<div class="timeline-buffer"></div>
-					<img class="preview-img" />
-					<div class="thumb-indicator"></div>
-					<p class="time-info-timeline-indicator">55:55</p>
+	<div>
+		<div class="modal fade" aria-modal="true" id="shareModal" tabindex="-1" aria-labelledby="shareModal" aria-hidden="true">
+			<div class="modal-dialog modal-lg modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="shareModalLabel">Share</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="row g-3 align-items-center">
+							<div class="col-auto">
+								<label for="sharelink" class="col-form-label">Link</label>
+							</div>
+							<div class="col-9">
+								<input type="text" :value="shareLink" id="sharelink" readonly class="form-control" />
+							</div>
+							<div class="col-auto">
+								<button @click="copyURL(shareLink)" type="button" class="btn btn-outline-primary">Copy</button>
+							</div>
+						</div>
+						<!-- <div class="mb-3">
+						<div class="d-flex">
+							<label for="sharelink" class="form-label">Link</label>
+							<input type="text" class="form-control form-control-lg" name="sharelink" />
+						</div>
+					</div> -->
+						<hr />
+						<div class="form-check d-flex gap-3 justify-content-center">
+							<input class="form-check-input" v-model="shareInclTime" id="inclTime" type="checkbox" />
+							<label class="form-check-label" for="inclTime"> Zeit Inkludieren </label>
+						</div>
+					</div>
 				</div>
 			</div>
-			<div class="controls">
-				<button class="play-pause-btn">
-					<svg class="play-icon" viewBox="0 0 24 24">
-						<path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
-					</svg>
-					<svg class="pause-icon" viewBox="0 0 24 24">
-						<path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z" />
-					</svg>
-				</button>
-				<div class="volume-container">
-					<button class="mute-btn">
-						<svg class="volume-high-icon" viewBox="0 0 24 24">
-							<path
-								fill="currentColor"
-								d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z"
-							/>
+		</div>
+		<div style="margin-top: 0.5%" class="video-container paused" data-volume-level="high">
+			<img class="thumbnail-img" />
+			<div v-if="entityObject && settings.showVideoTitleContainer.value" class="video-title-container">
+				<p v-if="currentMovie == -1">
+					{{ entityObject.primaryName }} - {{ String(entityObject.season).padStart(2, '0') }}x{{ String(entityObject.episode).padStart(2, '0') }}
+				</p>
+				<p v-if="currentMovie !== -1">
+					{{ entityObject.primaryName }}
+				</p>
+			</div>
+			<ActorContainer v-if="false" />
+			<font-awesome-icon class="skip skip-left" size="2xl" icon="fa-solid fa-backward" />
+			<font-awesome-icon class="skip skip-right" size="2xl" icon="fa-solid fa-forward" />
+			<div v-show="!dataLoading" class="video-controls-container">
+				<div class="timeline-container">
+					<div class="timeline">
+						<div class="timeline-buffer"></div>
+						<img class="preview-img" />
+						<div class="thumb-indicator"></div>
+						<p class="time-info-timeline-indicator">55:55</p>
+					</div>
+				</div>
+				<div class="controls">
+					<button class="play-pause-btn">
+						<svg class="play-icon" viewBox="0 0 24 24">
+							<path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
 						</svg>
-						<svg class="volume-low-icon" viewBox="0 0 24 24">
-							<path fill="currentColor" d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
+						<svg class="pause-icon" viewBox="0 0 24 24">
+							<path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z" />
 						</svg>
-						<svg class="volume-muted-icon" viewBox="0 0 24 24">
+					</button>
+					<div class="volume-container">
+						<button class="mute-btn">
+							<svg class="volume-high-icon" viewBox="0 0 24 24">
+								<path
+									fill="currentColor"
+									d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z"
+								/>
+							</svg>
+							<svg class="volume-low-icon" viewBox="0 0 24 24">
+								<path fill="currentColor" d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
+							</svg>
+							<svg class="volume-muted-icon" viewBox="0 0 24 24">
+								<path
+									fill="currentColor"
+									d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z"
+								/>
+							</svg>
+						</button>
+						<input class="volume-slider" type="range" min="0" max="1" step="any" value="1" />
+					</div>
+					<div class="duration-container">
+						<div class="current-time">0:00</div>
+						/
+						<div class="total-time"></div>
+					</div>
+					<button data-bs-toggle="modal" data-bs-target="#shareModal" disabled @click="shareModal()">
+						<font-awesome-icon icon="fa-solid fa-share" size="lg" />
+					</button>
+					<button @click="switchTo(-1)" title="Previous Episode">
+						<svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path
+								fill-rule="evenodd"
+								clip-rule="evenodd"
+								d="M0 18H2L2 0H0L0 18ZM17.7139 17.3827C18.7133 17.9977 20 17.2787 20 16.1052L20 1.8948C20 0.7213 18.7133 0.00230002 17.7139 0.6173L6.1679 7.7225C5.2161 8.3082 5.2161 9.6918 6.1679 10.2775L17.7139 17.3827ZM18 2.7896V15.2104L7.908 9L18 2.7896Z"
 								fill="currentColor"
-								d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z"
 							/>
 						</svg>
 					</button>
-					<input class="volume-slider" type="range" min="0" max="1" step="any" value="1" />
+					<button title="Next Episode" @click="switchTo(1)">
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="Hawkins-Icon Hawkins-Icon-Standard">
+							<path
+								fill-rule="evenodd"
+								clip-rule="evenodd"
+								d="M22 3H20V21H22V3ZM4.28615 3.61729C3.28674 3.00228 2 3.7213 2 4.89478V19.1052C2 20.2787 3.28674 20.9977 4.28615 20.3827L15.8321 13.2775C16.7839 12.6918 16.7839 11.3082 15.8321 10.7225L4.28615 3.61729ZM4 18.2104V5.78956L14.092 12L4 18.2104Z"
+								fill="currentColor"
+							></path>
+						</svg>
+					</button>
+					<button class="speed-btn wide-btn">1x</button>
+					<button title="Toggle Mini Player" class="mini-player-btn">
+						<svg viewBox="0 0 24 24">
+							<path
+								fill="currentColor"
+								d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-10-7h9v6h-9z"
+							/>
+						</svg>
+					</button>
+					<button title="Toggle Theatre Player" class="theater-btn">
+						<svg class="tall" viewBox="0 0 24 24">
+							<path fill="currentColor" d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z" />
+						</svg>
+						<svg class="wide" viewBox="0 0 24 24">
+							<path fill="currentColor" d="M19 7H5c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 8H5V9h14v6z" />
+						</svg>
+					</button>
+					<button title="Toggle Fullscreen Player" class="full-screen-btn">
+						<svg class="open" viewBox="0 0 24 24">
+							<path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
+						</svg>
+						<svg class="close" viewBox="0 0 24 24">
+							<path fill="currentColor" d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
+						</svg>
+					</button>
 				</div>
-				<div class="duration-container">
-					<div class="current-time">0:00</div>
-					/
-					<div class="total-time"></div>
+			</div>
+			<div v-if="videoLoading" class="video-spinner-container">
+				<div class="spinner-border text-light video-spinner" role="status">
+					<span class="visually-hidden">Loading...</span>
 				</div>
-				<button @click="switchTo(-1)">
-					<svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path
-							fill-rule="evenodd"
-							clip-rule="evenodd"
-							d="M0 18H2L2 0H0L0 18ZM17.7139 17.3827C18.7133 17.9977 20 17.2787 20 16.1052L20 1.8948C20 0.7213 18.7133 0.00230002 17.7139 0.6173L6.1679 7.7225C5.2161 8.3082 5.2161 9.6918 6.1679 10.2775L17.7139 17.3827ZM18 2.7896V15.2104L7.908 9L18 2.7896Z"
-							fill="currentColor"
-						/>
-					</svg>
-				</button>
-				<button @click="switchTo(1)">
-					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="Hawkins-Icon Hawkins-Icon-Standard">
-						<path
-							fill-rule="evenodd"
-							clip-rule="evenodd"
-							d="M22 3H20V21H22V3ZM4.28615 3.61729C3.28674 3.00228 2 3.7213 2 4.89478V19.1052C2 20.2787 3.28674 20.9977 4.28615 20.3827L15.8321 13.2775C16.7839 12.6918 16.7839 11.3082 15.8321 10.7225L4.28615 3.61729ZM4 18.2104V5.78956L14.092 12L4 18.2104Z"
-							fill="currentColor"
-						></path>
-					</svg>
-				</button>
-				<button class="speed-btn wide-btn">1x</button>
-				<button class="mini-player-btn">
-					<svg viewBox="0 0 24 24">
-						<path
-							fill="currentColor"
-							d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-10-7h9v6h-9z"
-						/>
-					</svg>
-				</button>
-				<button class="theater-btn">
-					<svg class="tall" viewBox="0 0 24 24">
-						<path fill="currentColor" d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z" />
-					</svg>
-					<svg class="wide" viewBox="0 0 24 24">
-						<path fill="currentColor" d="M19 7H5c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 8H5V9h14v6z" />
-					</svg>
-				</button>
-				<button class="full-screen-btn">
-					<svg class="open" viewBox="0 0 24 24">
-						<path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
-					</svg>
-					<svg class="close" viewBox="0 0 24 24">
-						<path fill="currentColor" d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
-					</svg>
-				</button>
 			</div>
-		</div>
-		<div v-if="videoLoading" class="video-spinner-container">
-			<div class="spinner-border text-light video-spinner" role="status">
-				<span class="visually-hidden">Loading...</span>
-			</div>
-		</div>
-		<pre class="internal-video-devinfos" v-if="settings.developerMode.value">
+			<pre class="internal-video-devinfos" v-if="settings.developerMode.value">
 			VideoLoading: {{ videoLoading }} 
 			CurrentTime: {{ $refs.mainVid?.currentTime }}ms
 			Duration: {{ $refs.mainVid?.duration }}ms
@@ -126,7 +164,8 @@
 					</span>
 				</div>
 		</pre>
-		<video ref="mainVid" preload="auto" oncontextmenu="return false" :src="videoSrc"></video>
+			<video ref="mainVid" preload="auto" oncontextmenu="return false" :src="videoSrc"></video>
+		</div>
 	</div>
 </template>
 <script>
@@ -146,12 +185,19 @@ export default {
 			skipPercent: null,
 			videoLoading: false,
 			dataLoading: false,
+			shareInclTime: false,
 		};
 	},
 	computed: {
 		...mapState('watch', ['currentSeries', 'currentMovie', 'currentLanguage']),
 		...mapState('auth', ['authToken', 'settings']),
 		...mapGetters('watch', ['videoSrc', 'entityObject']),
+		shareLink() {
+			const video = document.querySelector('video');
+			const time = this.shareInclTime ? '&time=' + parseInt(video.currentTime) : '';
+			return `${location.origin}/watch?id=${this.currentSeries?.ID}&idx=${this.entityObject?.season}x${this.entityObject?.episode}${time}`;
+			// return '';
+		},
 	},
 	async mounted() {
 		const { skip, skipPercent, cleanupFN } = this.initialize();
@@ -170,6 +216,30 @@ export default {
 	},
 	methods: {
 		...mapActions('auth', ['updateSettings']),
+		async copyURL(url) {
+			try {
+				await navigator.clipboard.writeText(url);
+				this.$swal({
+					toast: true,
+					position: 'top-end',
+					showConfirmButton: false,
+					timer: 2500,
+					icon: 'success',
+					title: `Url Copied Successful`,
+					timerProgressBar: true,
+				});
+			} catch ($e) {
+				this.$swal({
+					toast: true,
+					position: 'top-end',
+					showConfirmButton: false,
+					timer: 2500,
+					icon: 'error',
+					title: `Url Copied Error`,
+					timerProgressBar: true,
+				});
+			}
+		},
 		generatePreviewImageURL(previewImgNumber) {
 			let previewImgSrc = '';
 			if (this.currentSeries != undefined && this.currentSeries.ID != -1) {
