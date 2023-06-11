@@ -19,12 +19,6 @@
 								<button @click="copyURL(shareLink)" type="button" class="btn btn-outline-primary">Copy</button>
 							</div>
 						</div>
-						<!-- <div class="mb-3">
-						<div class="d-flex">
-							<label for="sharelink" class="form-label">Link</label>
-							<input type="text" class="form-control form-control-lg" name="sharelink" />
-						</div>
-					</div> -->
 						<hr />
 						<div class="form-check d-flex gap-3 justify-content-center">
 							<input class="form-check-input" v-model="shareInclTime" id="inclTime" type="checkbox" />
