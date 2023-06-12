@@ -648,8 +648,8 @@ export default {
 .internal-video-devinfos-child {
 	line-height: 0.8;
 	margin-left: -10%;
-	margin-top: -4%;
-	margin-bottom: -4%;
+	margin-top: -3%;
+	margin-bottom: -3%;
 }
 .internal-video-devinfos {
 	position: absolute;
