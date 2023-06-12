@@ -216,7 +216,9 @@ export default {
 					video.load();
 					langchange ? (video.currentTime = prevTime) : (video.currentTime = 0);
 					!wasPaused && video.play();
-					callback(video);
+					if (callback && typeof callback == 'function') {
+						callback(video);
+					}
 				}, 100);
 			}, 200);
 		},

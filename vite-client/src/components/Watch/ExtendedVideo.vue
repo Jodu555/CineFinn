@@ -113,24 +113,25 @@
 				</div>
 			</div>
 			<pre class="internal-video-devinfos" v-if="settings.developerMode.value">
-			VideoLoading: {{ videoLoading }} 
-			CurrentTime: {{ $refs.mainVid?.currentTime }}ms
-			Duration: {{ $refs.mainVid?.duration }}ms
-			Progress: {{ $refs.mainVid?.duration - $refs.mainVid?.currentTime }}ms
-			Volume: {{ $refs.mainVid?.volume }}
-			Buffers: 
-				<div class="internal-video-devinfos-child">
-					<span v-for="i in $refs.mainVid?.buffered.length">
-						{{ $refs.mainVid.buffered.start(i - 1)  }}ms - {{ $refs.mainVid.buffered.end(i -1) }}ms
-					</span>
-				</div>
-			Seekable: 
-				<div class="internal-video-devinfos-child">
-					<span v-for="i in $refs.mainVid?.seekable.length">
-						{{ $refs.mainVid.seekable.start(i - 1)  }}ms - {{ $refs.mainVid.seekable.end(i -1) }}ms
-					</span>
-				</div>
-		</pre>
+				VideoLoading: {{ videoLoading }} 
+				CurrentTime: {{ videoData.currentTime }}ms
+				Duration: {{ videoData.duration }}ms
+				Progress: {{ videoData.duration - videoData.currentTime }}ms
+				Volume: {{ videoData.volume }}
+				Quality: T{{ videoData.quality?.totalVideoFrames }} / D{{ videoData.quality?.droppedVideoFrames }} / C{{ videoData.quality?.corruptedVideoFrames }}
+				Buffers: 
+					<div class="internal-video-devinfos-child">
+						<span v-for="i in videoData.buffered?.length">
+							{{ $refs.mainVid.buffered?.start(i - 1)  }}ms - {{ $refs.mainVid.buffered?.end(i -1) }}ms
+						</span>
+					</div>
+				Seekable: 
+					<div class="internal-video-devinfos-child">
+						<span v-for="i in videoData.seekable?.length">
+							{{ $refs.mainVid.seekable?.start(i - 1)  }}ms - {{ $refs.mainVid.seekable?.end(i -1) }}ms
+						</span>
+					</div>
+			</pre>
 			<video ref="mainVid" preload="auto" oncontextmenu="return false" :src="videoSrc"></video>
 		</div>
 	</div>
@@ -153,6 +154,14 @@ export default {
 			skipPercent: null,
 			videoLoading: false,
 			dataLoading: false,
+			videoData: {
+				currentTime: 0,
+				duration: 0,
+				volume: 0,
+				quality: undefined,
+				buffered: undefined,
+				seekable: undefined,
+			},
 		};
 	},
 	computed: {
@@ -286,6 +295,19 @@ export default {
 				}
 			}
 
+			//Vue Video
+			function updateVueVideoData() {
+				const { creationTime, totalVideoFrames, droppedVideoFrames, corruptedVideoFrames } = video.getVideoPlaybackQuality();
+				v.videoData = {
+					currentTime: video.currentTime,
+					duration: video.duration,
+					volume: video.volume,
+					quality: { creationTime, totalVideoFrames, droppedVideoFrames, corruptedVideoFrames },
+					buffered: video.buffered,
+					seekable: video.seekable,
+				};
+			}
+
 			//Video Container Hover Logic
 			var timeoutId;
 
@@ -379,6 +401,7 @@ export default {
 				v.dataLoading = true;
 			});
 			video.addEventListener('canplay', () => {
+				updateVueVideoData();
 				v.videoLoading = false;
 			});
 			video.addEventListener('seeking', () => {
@@ -397,6 +420,11 @@ export default {
 
 			video.addEventListener('progress', () => {
 				updateBuffer();
+				updateVueVideoData();
+			});
+
+			video.addEventListener('durationchange', () => {
+				updateVueVideoData();
 			});
 
 			video.volume = v.settings.volume.value;
@@ -415,6 +443,7 @@ export default {
 
 			const timeUpdateThrottle = throttle(v.sendVideoTimeUpdate, TIME_UPDATE_THROTTLE);
 			video.addEventListener('timeupdate', () => {
+				updateVueVideoData();
 				updateBuffer();
 				timeUpdateThrottle(video.currentTime);
 				currentTimeElem.textContent = formatDuration(video.currentTime);
