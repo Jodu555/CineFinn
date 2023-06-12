@@ -41,9 +41,9 @@ class Series {
 	 * @param {oS} o
 	 */
 	static fromObject(o) {
-		const mappedSeasons = o.seasons.map((v) => v.map((e) => Episode.fromObject(e)));
-		const mappedMovies = o.movies.map((v) => Movie.fromObject(v));
-		return new Series(o.ID, o.categorie, o.title, mappedMovies, mappedSeasons, o.references, o.infos);
+		const mappedSeasons = o?.seasons?.map((v) => v.map((e) => Episode.fromObject(e)));
+		const mappedMovies = o?.movies?.map((v) => Movie.fromObject(v));
+		return new Series(o.ID, o.categorie, o.title, mappedMovies, mappedSeasons, o.references, o?.infos);
 	}
 }
 

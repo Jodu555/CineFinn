@@ -148,4 +148,4 @@ const mergeSeriesArrays = (before, after) => {
 	return output;
 };
 
-module.exports = { crawlAndIndex, mergeSeriesArrays };
+module.exports = { crawlAndIndex, mergeSeriesArrays, generateID };

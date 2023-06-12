@@ -38,7 +38,9 @@ const getSeries = (forceLoad = false, forceFile = false) => {
 	}
 	return series;
 };
-
+/**
+ * @param  {Series[]} _series
+ */
 const setSeries = async (_series) => {
 	console.log('Loaded or Setted & merged new Series!');
 	if (series != null) {

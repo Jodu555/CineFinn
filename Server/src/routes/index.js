@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { cleanupSeriesBeforeFrontResponse } = require('../classes/series');
+const { cleanupSeriesBeforeFrontResponse, Series } = require('../classes/series');
 const { getSeries, setSeries, deepMerge } = require('../utils/utils');
 const axios = require('axios');
 const { sendSeriesReloadToAll } = require('../sockets/client.socket');
+const { generateID } = require('../utils/crawler');
 
 router.get('/', async (req, res, next) => {
 	const series = cleanupSeriesBeforeFrontResponse(getSeries()).map((x) => {
@@ -48,8 +49,18 @@ router.patch('/:ID', async (req, res, next) => {
 			}
 		})
 	);
+	res.json(getSeries().filter((x) => x.ID == req.params.ID));
+	await sendSeriesReloadToAll();
+});
+
+router.post('/', async (req, res, next) => {
+	//TODO: IMPORTANT: Add restriction to this route
+	req.body.ID = generateID();
+	const serie = Series.fromObject(req.body);
+	setSeries([...getSeries(), serie]);
 
 	await sendSeriesReloadToAll();
+	res.json(serie);
 });
 
 module.exports = { router };
