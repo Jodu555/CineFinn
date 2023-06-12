@@ -120,15 +120,16 @@
 				Volume: {{ videoData.volume }}
 				Quality: T{{ videoData.quality?.totalVideoFrames }} / D{{ videoData.quality?.droppedVideoFrames }} / C{{ videoData.quality?.corruptedVideoFrames }}
 				Buffers: 
+					{{ videoData.bufferedPercentage }}% / 100%
 					<div class="internal-video-devinfos-child">
 						<span v-for="i in videoData.buffered?.length">
-							{{ $refs.mainVid.buffered?.start(i - 1)  }}ms - {{ $refs.mainVid.buffered?.end(i -1) }}ms
+							{{ $refs.mainVid.buffered?.start(i - 1)  }}ms - {{ $refs.mainVid.buffered?.end(i -1) }}ms = {{ Math.round(Math.abs($refs.mainVid.buffered?.start(i - 1) - $refs.mainVid.buffered?.end(i -1))) }}ms
 						</span>
 					</div>
 				Seekable: 
 					<div class="internal-video-devinfos-child">
 						<span v-for="i in videoData.seekable?.length">
-							{{ $refs.mainVid.seekable?.start(i - 1)  }}ms - {{ $refs.mainVid.seekable?.end(i -1) }}ms
+							{{ $refs.mainVid.seekable?.start(i - 1)  }}ms - {{ $refs.mainVid.seekable?.end(i -1) }}ms = {{ Math.round(Math.abs($refs.mainVid.seekable?.start(i - 1) - $refs.mainVid.seekable?.end(i -1))) }}ms
 						</span>
 					</div>
 			</pre>
@@ -160,6 +161,7 @@ export default {
 				volume: 0,
 				quality: undefined,
 				buffered: undefined,
+				bufferedPercentage: 0,
 				seekable: undefined,
 			},
 		};
@@ -298,12 +300,21 @@ export default {
 			//Vue Video
 			function updateVueVideoData() {
 				const { creationTime, totalVideoFrames, droppedVideoFrames, corruptedVideoFrames } = video.getVideoPlaybackQuality();
+
+				let bufferedTime = 0;
+				for (let i = 0; i < video.buffered.length; i++) {
+					bufferedTime += video.buffered.end(i) - video.buffered.start(i);
+				}
+
+				const bufferedPercentage = (bufferedTime / video.duration) * 100;
+
 				v.videoData = {
 					currentTime: video.currentTime,
 					duration: video.duration,
 					volume: video.volume,
 					quality: { creationTime, totalVideoFrames, droppedVideoFrames, corruptedVideoFrames },
 					buffered: video.buffered,
+					bufferedPercentage: bufferedPercentage.toFixed(2),
 					seekable: video.seekable,
 				};
 			}
