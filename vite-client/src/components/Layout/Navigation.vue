@@ -65,7 +65,7 @@ export default {
 	},
 	computed: {
 		...mapState(['series']),
-		...mapState('auth', ['loggedIn']),
+		...mapState('auth', ['loggedIn', 'settings']),
 		autoCompleteSeries() {
 			return this.series.map((x) => ({ value: x.title, ID: x.ID }));
 		},
@@ -79,7 +79,7 @@ export default {
 		window.removeEventListener('keydown', this.handleKeyDown);
 	},
 	methods: {
-		...mapActions('auth', ['logout']),
+		...mapActions('auth', ['logout', 'updateSettings']),
 		handleKeyUp(e) {
 			console.log('UP', e.key);
 			this.pressedKeys[e.key] = false;
@@ -88,7 +88,13 @@ export default {
 		handleKeyDown(e) {
 			console.log('DOWN', e.key);
 			this.pressedKeys[e.key] = true;
-			// if (this.pressedKeys[e.key] != false) this.pressedKeys[e.key] = true;
+
+			if (this.pressedKeys?.['Shift'] == true && this.pressedKeys?.['D'] == true) {
+				this.settings.developerMode.value = true;
+			}
+			if (this.pressedKeys?.['Shift'] == true && this.pressedKeys?.['Z'] == true) {
+				this.settings.developerMode.value = false;
+			}
 		},
 		autocompleteSearch(ID, value) {
 			console.log();
