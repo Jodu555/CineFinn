@@ -90,9 +90,11 @@ export default {
 			this.pressedKeys[e.key] = true;
 
 			if (this.pressedKeys?.['Shift'] == true && this.pressedKeys?.['D'] == true) {
+				console.log('Developer Mode Activated');
 				this.settings.developerMode.value = true;
 			}
 			if (this.pressedKeys?.['Shift'] == true && this.pressedKeys?.['Z'] == true) {
+				console.log('Normie Mode Activated');
 				this.settings.developerMode.value = false;
 			}
 		},
