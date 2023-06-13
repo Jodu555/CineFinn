@@ -1,5 +1,9 @@
 <template>
 	<div class="container">
+		<pre v-if="settings.developerMode.value">
+				{{ { loading: loading, newsInput: newsInput, sort: sort } }}
+		</pre
+		>
 		<div>
 			<h1 class="text-center">News</h1>
 			<div v-if="settings.showNewsAddForm.value">

@@ -1,6 +1,10 @@
 <template>
 	<div>
 		<div class="card text-start">
+			<pre v-if="settings.developerMode.value">
+				{{ { room: room, ago: ago, series: getSeries(room.seriesID) } }}
+			</pre
+			>
 			<div class="card-body">
 				<h4 class="card-title">{{ getSeries(room.seriesID)?.title }}</h4>
 				<p class="card-text">Opend: {{ ago }} with {{ room.members.length }} users</p>
@@ -27,6 +31,7 @@ export default {
 	},
 	computed: {
 		...mapState(['series']),
+		...mapState('auth', ['settings']),
 	},
 	methods: {
 		timeAgo(timestamp, locale = 'en') {

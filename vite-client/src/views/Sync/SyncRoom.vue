@@ -5,6 +5,17 @@
 				<span class="visually-hidden">Loading...</span>
 			</div>
 		</div>
+		<pre v-if="settings.developerMode.value">
+				syncLoading: {{ syncLoading }}
+				watchLoading: {{ watchLoading }}
+				currentMovie: {{ currentMovie }}
+				currentSeason: {{ currentSeason }}
+				currentEpisode: {{ currentEpisode }}
+				currentLanguage: {{ currentLanguage }}
+				videoSrc: {{ videoSrc }}
+				entityObject: {{ entityObject }}
+		</pre
+		>
 		<div class="mb-3 d-flex justify-content-between">
 			<button @click="leaveRoom()" type="button" class="btn btn-outline-danger">Leave Room</button>
 			<AutoComplete :options="{ placeholder: 'Select a Series...', clearAfterSelect: true }" :data="autoCompleteSeries" :select-fn="selectSeries" />

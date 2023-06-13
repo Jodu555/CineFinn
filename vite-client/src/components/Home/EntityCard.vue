@@ -1,6 +1,10 @@
 <template>
 	<div class="col">
-		<div class="card">
+		<div class="card" v-auto-animate>
+			<pre v-if="settings.developerMode.value">
+				{{ { editing: editing, title: entity.title, categorie: entity.categorie, infos: entity.infos, references: entity.references } }}
+			</pre
+			>
 			<LazyImage v-if="entity?.infos?.image" :src="buildCoverURL(entity)" :childclass="'card-img-top'" alt="..." />
 			<LazyImage v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" :childclass="'card-img-top'" alt="..." />
 			<!-- <img v-if="entity?.infos?.image" :src="buildCoverURL(entity)" class="card-img-top" alt="..." />

@@ -97,7 +97,6 @@ export default {
 			}
 		},
 		autocompleteSearch(ID, value) {
-			console.log();
 			if (this.pressedKeys?.j) {
 				const routeData = this.$router.resolve({ path: '/watch', query: { id: ID } });
 				window.open(routeData.href, '_blank');
