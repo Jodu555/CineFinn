@@ -58,14 +58,14 @@ const routes = [
 			},
 		],
 	},
-	// {
-	// 	path: '/sync/:key',
-	// 	name: 'SyncRoom',
-	// 	component: function () {
-	// 		return import(/* webpackChunkName: "sync" */ '../views/SyncRoom.vue');
-	// 	},
-	// 	meta: { requiresLogin: true },
-	// },
+	{
+		path: '/rmvc',
+		name: 'RemoteVidoeControl',
+		component: function () {
+			return import(/* webpackChunkName: "news" */ '../views/Rmvc.vue');
+		},
+		meta: { requiresLogin: false },
+	},
 	{ path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound },
 ];
 

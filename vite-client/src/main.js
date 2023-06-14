@@ -61,6 +61,8 @@ import {
 	faBackward,
 	faPen,
 	faShare,
+	faPlay,
+	faPause,
 } from '@fortawesome/free-solid-svg-icons';
 import { faKeyboard } from '@fortawesome/free-regular-svg-icons';
 
@@ -76,7 +78,9 @@ library.add(
 	faForward,
 	faBackward,
 	faPen,
-	faShare
+	faShare,
+	faPlay,
+	faPause
 ); // solid
 library.add(faKeyboard); // regular
 
