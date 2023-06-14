@@ -69,6 +69,13 @@ export default {
 	},
 
 	async mounted() {
+		const video = document.querySelector('video');
+		video.addEventListener('play', () => {
+			this.$socket.emit('rmvc-send-videoStateChange', { isPlaying: true });
+		});
+		video.addEventListener('pause', () => {
+			this.$socket.emit('rmvc-send-videoStateChange', { isPlaying: false });
+		});
 		this.$socket.on('rmvc-sessionCreated', (sessionID) => {
 			this.sessionID = sessionID;
 			this.sessionStarted = true;
