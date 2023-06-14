@@ -1,6 +1,7 @@
 const { getIO, getAuthHelper } = require('../utils/utils');
 const { initialize: socketInitClient } = require('./client.socket.js');
 const { initialize: socketInitScraper } = require('./scraper.socket.js');
+const { initialize: socketInitRMVCEmitter } = require('./rmvcEmitter.socket.js');
 
 const initialize = () => {
 	const io = getIO();
@@ -30,12 +31,18 @@ const initialize = () => {
 				next(new Error('Authentication error'));
 			}
 		}
+		if (type === 'rmvc-emitter') {
+			const authToken = socket.handshake.auth.token;
+			socket.auth = { type };
+			return next();
+		}
 	});
 
 	io.on('connection', async (socket) => {
 		const auth = socket.auth;
 
 		if (auth.type == 'client') socketInitClient(socket);
+		if (auth.type == 'rmvc-emitter') socketInitRMVCEmitter(socket);
 		if (auth.type == 'scraper') socketInitScraper(socket);
 	});
 };

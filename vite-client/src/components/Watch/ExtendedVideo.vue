@@ -1,6 +1,7 @@
 <template>
 	<div>
-		<ShareModal />
+		<ShareModal :switchTo="switchTo" :skip="skip" />
+		<RmvcModal />
 		<div style="margin-top: 0.5%" class="video-container paused" data-volume-level="high">
 			<img class="thumbnail-img" />
 			<div v-if="entityObject && settings.showVideoTitleContainer.value" class="video-title-container">
@@ -57,7 +58,10 @@
 						/
 						<div class="total-time"></div>
 					</div>
-					<button title="Share Video" data-bs-toggle="modal" data-bs-target="#shareModal" disabled @click="shareModal()">
+					<button data-bs-toggle="modal" data-bs-target="#rmvcModal">
+						<font-awesome-icon icon="fa-solid fa-network-wired" />
+					</button>
+					<button title="Share Video" data-bs-toggle="modal" data-bs-target="#shareModal">
 						<font-awesome-icon icon="fa-solid fa-share" size="lg" />
 					</button>
 					<button title="Previous Episode" @click="switchTo(-1)">
@@ -142,6 +146,7 @@ import { mapState, mapGetters, mapActions } from 'vuex';
 import { throttle } from '@/plugins/debounceAndThrottle';
 import ActorContainer from './ActorContainer.vue';
 import ShareModal from './ShareModal.vue';
+import RmvcModal from './RmvcModal.vue';
 export default {
 	props: {
 		switchTo: { type: Function },
@@ -652,7 +657,7 @@ export default {
 			};
 		},
 	},
-	components: { ActorContainer, ShareModal },
+	components: { ActorContainer, ShareModal, RmvcModal },
 };
 </script>
 <style scoped>

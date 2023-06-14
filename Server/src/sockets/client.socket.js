@@ -55,6 +55,19 @@ const initialize = (socket) => {
 		);
 	});
 
+	socket.on('rmvc-send-sessionStart', () => {
+		const sessionID = Math.floor(Math.random() * 10 ** 5);
+		console.log('User', auth.user.username, 'Just started a rmvc Session with ID', sessionID);
+		socket.auth.RMVCSessionID = sessionID;
+		socket.emit('rmvc-sessionCreated', sessionID);
+	});
+
+	socket.on('rmvc-send-sessionStop', () => {
+		console.log('User', auth.user.username, 'Just destroyed his/her rmvc Session with ID', socket.RMVCSessionID);
+		socket.auth.RMVCSessionID = '';
+		socket.emit('rmvc-sessionDestroyed');
+	});
+
 	socket.on('disconnect', () => {
 		console.log('Socket DisConnection:', auth.type.toUpperCase(), auth.user.username, socket.id);
 	});

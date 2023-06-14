@@ -2,11 +2,24 @@
 	<div class="container" v-auto-animate>
 		<h2 class="text-center mb-5">Remote Video Control</h2>
 		<div v-if="!isConnected" class="row justify-content-center">
-			<div class="text-center col-10 col-sm-5">
+			<div class="text-center col-12 col-sm-6">
 				<div class="mb-3">
 					<label for="rmvcID" class="form-label">Remote Control ID</label>
+					<div class="input-group">
+						<input type="text" class="form-control" id="rmvcID" v-model="rmvcID" aria-describedby="helprmvcID" />
+						<button @click="isConnected = true" type="button" class="btn btn-outline-primary">Connect</button>
+					</div>
+					<small id="helprmvcID" class="form-text text-muted">The Remote Control ID that the player gave you</small>
+					<!-- <br />
+					<br />
+					<br />
+					<br /> -->
+					<!-- <label for="rmvcID" class="form-label">Remote Control ID</label>
 					<input type="text" class="form-control" id="rmvcID" v-model="rmvcID" aria-describedby="helprmvcID" />
 					<small id="helprmvcID" class="form-text text-muted">The Remote Control ID that the player gave you</small>
+					<br />
+					<br />
+					<button type="button" class="btn btn-outline-primary">Connect</button> -->
 				</div>
 			</div>
 		</div>
@@ -20,7 +33,12 @@
 					<font-awesome-icon v-if="isPlaying" size="xl" icon="fa-solid fa-pause" />
 				</button>
 				<button>
-					<font-awesome-icon class="skip skip-right" size="xl" icon="fa-solid fa-forward" />
+					<font-awesome-icon
+						class="skip skip-right"
+						@click="$socket.emit('rmvc-send-action', { rmvcID, action: 'forward' })"
+						size="xl"
+						icon="fa-solid fa-forward"
+					/>
 				</button>
 			</div>
 			<div class="group d-flex gap-4 justify-content-evenly mt-5 mb-5">
@@ -62,7 +80,7 @@
 			</div>
 
 			<div class="row justify-content-center mt-5">
-				<button type="button" @click="rmvcID = ''" class="col-8 col-sm-3 btn btn-outline-danger">Disconnect</button>
+				<button type="button" @click="isConnected = false" class="col-8 col-sm-3 btn btn-outline-danger">Disconnect</button>
 			</div>
 		</div>
 	</div>
@@ -71,14 +89,27 @@
 export default {
 	data() {
 		return {
+			isConnected: false,
 			isPlaying: true,
 			rmvcID: '',
 		};
 	},
-	computed: {
-		isConnected() {
-			return this.rmvcID == '555';
-		},
+	async mounted() {
+		this.$socket.auth = { type: 'rmvc-emitter' };
+		this.$socket.connect();
+		this.$socket.on('rmvc-recieve-videoStateChange', (videoState) => {
+			this.isPlaying = videoState;
+		});
+		// this.$socket.emit('rmvc-send-action', { rmvcID, action: 'play' });
+		// this.$socket.emit('rmvc-send-action', { rmvcID, action: 'forward' });
+		// this.$socket.emit('rmvc-send-action', { rmvcID, action: 'backward' });
+		// this.$socket.emit('rmvc-send-action', { rmvcID, action: 'nextEp' });
+		// this.$socket.emit('rmvc-send-action', { rmvcID, action: 'prevEp' });
+		// this.$socket.emit('rmvc-send-action', { rmvcID, action: 'volHigh' });
+		// this.$socket.emit('rmvc-send-action', { rmvcID, action: 'volDown' });
+	},
+	unmounted() {
+		this.$socket.off('rmvc-videoStateChange');
 	},
 };
 </script>

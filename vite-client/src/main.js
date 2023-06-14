@@ -40,12 +40,12 @@ const socket = app.config.globalProperties.$socket;
 
 socket.on('connect_error', async (err) => {
 	console.log('Socket Connect Error: ', err.message); // prints the message associated with the error
-	if (err.message.includes('Authentication')) await store.dispatch('auth/authenticate', true);
+	if (err.message.includes('Authentication') && socket.auth.type !== 'rmvc-emitter') await store.dispatch('auth/authenticate', true);
 });
 
 socket.on('connect', () => {
 	console.log('Socket Connect Success');
-	store.dispatch('auth/authenticate');
+	if (socket.auth.type == 'client') store.dispatch('auth/authenticate');
 });
 
 import {
@@ -63,6 +63,7 @@ import {
 	faShare,
 	faPlay,
 	faPause,
+	faNetworkWired,
 } from '@fortawesome/free-solid-svg-icons';
 import { faKeyboard } from '@fortawesome/free-regular-svg-icons';
 
@@ -79,6 +80,7 @@ library.add(
 	faBackward,
 	faPen,
 	faShare,
+	faNetworkWired,
 	faPlay,
 	faPause
 ); // solid
