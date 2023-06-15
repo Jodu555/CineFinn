@@ -1,7 +1,7 @@
 <template>
 	<div>
-		<ShareModal :switchTo="switchTo" :skip="skip" />
-		<RmvcModal />
+		<ShareModal />
+		<RmvcModal :switchTo="switchTo" :skip="skip" />
 		<div style="margin-top: 0.5%" class="video-container paused" data-volume-level="high">
 			<img class="thumbnail-img" />
 			<div v-if="entityObject && settings.showVideoTitleContainer.value" class="video-title-container">

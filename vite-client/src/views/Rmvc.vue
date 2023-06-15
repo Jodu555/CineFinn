@@ -1,6 +1,11 @@
 <template>
 	<div class="container" v-auto-animate>
 		<h2 class="text-center mb-5">Remote Video Control</h2>
+		<div v-if="loading" class="d-flex justify-content-center">
+			<div class="spinner-border" role="status">
+				<span class="visually-hidden">Loading...</span>
+			</div>
+		</div>
 		<div v-if="!isConnected" class="row justify-content-center">
 			<div class="text-center col-12 col-sm-6">
 				<div class="mb-3">
@@ -10,39 +15,24 @@
 						<button @click="connect" type="button" class="btn btn-outline-primary">Connect</button>
 					</div>
 					<small id="helprmvcID" class="form-text text-muted">The Remote Control ID that the player gave you</small>
-					<!-- <br />
-					<br />
-					<br />
-					<br /> -->
-					<!-- <label for="rmvcID" class="form-label">Remote Control ID</label>
-					<input type="text" class="form-control" id="rmvcID" v-model="rmvcID" aria-describedby="helprmvcID" />
-					<small id="helprmvcID" class="form-text text-muted">The Remote Control ID that the player gave you</small>
-					<br />
-					<br />
-					<button type="button" class="btn btn-outline-primary">Connect</button> -->
 				</div>
 			</div>
 		</div>
 		<div v-if="isConnected" class="rmvc">
 			<div class="group d-flex gap-4 justify-content-evenly mb-5">
-				<button>
+				<button @click="this.$socket.emit('rmvc-send-action', { rmvcID, action: 'backward' })">
 					<font-awesome-icon class="skip skip-left" size="xl" icon="fa-solid fa-backward" />
 				</button>
-				<button>
+				<button @click="this.$socket.emit('rmvc-send-action', { rmvcID, action: isPlaying ? 'pause' : 'play' })">
 					<font-awesome-icon v-if="!isPlaying" size="xl" icon="fa-solid fa-play" />
 					<font-awesome-icon v-if="isPlaying" size="xl" icon="fa-solid fa-pause" />
 				</button>
-				<button>
-					<font-awesome-icon
-						class="skip skip-right"
-						@click="$socket.emit('rmvc-send-action', { rmvcID, action: 'forward' })"
-						size="xl"
-						icon="fa-solid fa-forward"
-					/>
+				<button @click="$socket.emit('rmvc-send-action', { rmvcID, action: 'forward' })">
+					<font-awesome-icon class="skip skip-right" size="xl" icon="fa-solid fa-forward" />
 				</button>
 			</div>
 			<div class="group d-flex gap-4 justify-content-evenly mt-5 mb-5">
-				<button>
+				<button @click="this.$socket.emit('rmvc-send-action', { rmvcID, action: 'prevEp' })">
 					<svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path
 							fill-rule="evenodd"
@@ -52,7 +42,7 @@
 						/>
 					</svg>
 				</button>
-				<button>
+				<button @click="this.$socket.emit('rmvc-send-action', { rmvcID, action: 'volHigh' })">
 					<svg class="volume-high-icon" viewBox="0 0 24 24">
 						<path
 							fill="currentColor"
@@ -60,7 +50,7 @@
 						/>
 					</svg>
 				</button>
-				<button>
+				<button @click="this.$socket.emit('rmvc-send-action', { rmvcID, action: 'nextEp' })">
 					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="Hawkins-Icon Hawkins-Icon-Standard">
 						<path
 							fill-rule="evenodd"
@@ -72,7 +62,7 @@
 				</button>
 			</div>
 			<div class="group d-flex justify-content-center mt-5 mb-5">
-				<button>
+				<button @click="this.$socket.emit('rmvc-send-action', { rmvcID, action: 'volDown' })">
 					<svg class="volume-low-icon" viewBox="0 0 24 24">
 						<path fill="currentColor" d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
 					</svg>
@@ -116,13 +106,6 @@ export default {
 		this.$socket.on('rmvc-recieve-videoStateChange', ({ isPlaying }) => {
 			this.isPlaying = isPlaying;
 		});
-		// this.$socket.emit('rmvc-send-action', { rmvcID, action: 'play' });
-		// this.$socket.emit('rmvc-send-action', { rmvcID, action: 'forward' });
-		// this.$socket.emit('rmvc-send-action', { rmvcID, action: 'backward' });
-		// this.$socket.emit('rmvc-send-action', { rmvcID, action: 'nextEp' });
-		// this.$socket.emit('rmvc-send-action', { rmvcID, action: 'prevEp' });
-		// this.$socket.emit('rmvc-send-action', { rmvcID, action: 'volHigh' });
-		// this.$socket.emit('rmvc-send-action', { rmvcID, action: 'volDown' });
 	},
 	unmounted() {
 		this.$socket.off('rmvc-videoStateChange');

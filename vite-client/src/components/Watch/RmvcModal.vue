@@ -88,6 +88,30 @@ export default {
 		});
 		this.$socket.on('rmvc-recieve-action', (action) => {
 			console.log('Recieved Action', action);
+			if (action == 'play') {
+				video.play();
+			}
+			if (action == 'pause') {
+				video.pause();
+			}
+			if (action == 'forward') {
+				this.skip(5);
+			}
+			if (action == 'backward') {
+				this.skip(-5);
+			}
+			if (action == 'nextEp') {
+				this.switchTo(1);
+			}
+			if (action == 'prevEp') {
+				this.switchTo(-1);
+			}
+			if (action == 'volHigh') {
+				console.log('TODO', action);
+			}
+			if (action == 'volDown') {
+				console.log('TODO', action);
+			}
 		});
 	},
 	unmounted() {
