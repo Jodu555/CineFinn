@@ -1,11 +1,20 @@
 const { Database } = require('@jodu555/mysqlapi');
-const { toAllSockets } = require('../utils/utils');
+const { toAllSockets, getIO } = require('../utils/utils');
 
 const database = Database.getDatabase();
 
 const initialize = (socket) => {
 	const auth = socket.auth;
 	console.log('Socket Connection:', auth.type.toUpperCase(), socket.id);
+
+	socket.on('rmvc-connect', async ({ rmvcID }) => {
+		const sockets = await getIO().fetchSockets();
+		const rmvcIDValid = sockets.find((s) => s.auth.type == 'client' && s.auth.RMVCSessionID == rmvcID) != null;
+		socket.auth.RMVCEmitterSessionID = rmvcID;
+		console.log('GOT rmvc-connect with ID', rmvcID, 'status', rmvcIDValid);
+
+		socket.emit('rmvc-connection', { status: rmvcIDValid });
+	});
 
 	socket.on('rmvc-send-action', async ({ rmvcID: RMVCSessionID, action }) => {
 		console.log('Recieved rmvc-emitter-action', action, socket.id);

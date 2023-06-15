@@ -7,7 +7,7 @@
 					<label for="rmvcID" class="form-label">Remote Control ID</label>
 					<div class="input-group">
 						<input type="text" class="form-control" id="rmvcID" v-model="rmvcID" aria-describedby="helprmvcID" />
-						<button @click="isConnected = true" type="button" class="btn btn-outline-primary">Connect</button>
+						<button @click="connect" type="button" class="btn btn-outline-primary">Connect</button>
 					</div>
 					<small id="helprmvcID" class="form-text text-muted">The Remote Control ID that the player gave you</small>
 					<!-- <br />
@@ -89,16 +89,32 @@
 export default {
 	data() {
 		return {
+			loading: false,
 			isConnected: false,
 			isPlaying: true,
+			error: '',
 			rmvcID: '',
 		};
+	},
+	methods: {
+		connect() {
+			this.loading = true;
+			this.error = '';
+			this.$socket.emit('rmvc-connect', { rmvcID: this.rmvcID });
+		},
 	},
 	async mounted() {
 		this.$socket.auth = { type: 'rmvc-emitter' };
 		this.$socket.connect();
-		this.$socket.on('rmvc-recieve-videoStateChange', (videoState) => {
-			this.isPlaying = videoState;
+		this.$socket.on('rmvc-connection', ({ status }) => {
+			this.loading = false;
+			this.isConnected = status;
+			if (!status) {
+				this.error = 'RMVCID seems to be invalid!';
+			}
+		});
+		this.$socket.on('rmvc-recieve-videoStateChange', ({ isPlaying }) => {
+			this.isPlaying = isPlaying;
 		});
 		// this.$socket.emit('rmvc-send-action', { rmvcID, action: 'play' });
 		// this.$socket.emit('rmvc-send-action', { rmvcID, action: 'forward' });

@@ -68,6 +68,15 @@ const initialize = (socket) => {
 		socket.emit('rmvc-sessionDestroyed');
 	});
 
+	socket.on('rmvc-send-videoStateChange', async ({ isPlaying }) => {
+		await toAllSockets(
+			(s) => {
+				s.emit('rmvc-recieve-videoStateChange', { isPlaying });
+			},
+			(s) => s.auth.RMVCEmitterSessionID == socket.auth.RMVCSessionID
+		);
+	});
+
 	socket.on('disconnect', () => {
 		console.log('Socket DisConnection:', auth.type.toUpperCase(), auth.user.username, socket.id);
 	});
