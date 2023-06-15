@@ -107,10 +107,14 @@ export default {
 				this.switchTo(-1);
 			}
 			if (action == 'volHigh') {
-				console.log('TODO', action);
+				try {
+					video.volume += 0.1;
+				} catch (_) {}
 			}
 			if (action == 'volDown') {
-				console.log('TODO', action);
+				try {
+					video.volume -= 0.1;
+				} catch (_) {}
 			}
 		});
 	},

@@ -18,12 +18,17 @@ const initialize = (socket) => {
 
 	socket.on('rmvc-send-action', async ({ rmvcID: RMVCSessionID, action }) => {
 		console.log('Recieved rmvc-emitter-action', action, socket.id);
-		await toAllSockets(
-			(s) => {
-				s.emit('rmvc-recieve-action', action);
-			},
-			(s) => s.auth.type == 'client' && s.auth.RMVCSessionID == RMVCSessionID
-		);
+		const rmvcIDValid = sockets.find((s) => s.auth.type == 'client' && s.auth.RMVCSessionID == rmvcID) != null;
+		if (rmvcIDValid) {
+			await toAllSockets(
+				(s) => {
+					s.emit('rmvc-recieve-action', action);
+				},
+				(s) => s.auth.type == 'client' && s.auth.RMVCSessionID == RMVCSessionID
+			);
+		} else {
+			socket.emit('rmvc-connection', { status: rmvcIDValid });
+		}
 	});
 
 	socket.on('disconnect', () => {
