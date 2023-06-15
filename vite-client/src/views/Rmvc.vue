@@ -81,6 +81,8 @@
 	</div>
 </template>
 <script>
+import { mapState } from 'vuex';
+
 export default {
 	data() {
 		return {
@@ -98,9 +100,15 @@ export default {
 			this.$socket.emit('rmvc-connect', { rmvcID: this.rmvcID });
 		},
 	},
+	computed: {
+		...mapState('auth', ['loggedIn']),
+	},
 	async mounted() {
-		this.$socket.auth = { type: 'rmvc-emitter' };
-		this.$socket.connect();
+		if (!this.loggedIn) {
+			this.$socket.auth = { type: 'rmvc-emitter' };
+			this.$socket.connect();
+		}
+
 		this.$socket.on('rmvc-connection', ({ status }) => {
 			this.loading = false;
 			this.isConnected = status;

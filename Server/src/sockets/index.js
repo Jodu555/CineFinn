@@ -41,7 +41,10 @@ const initialize = () => {
 	io.on('connection', async (socket) => {
 		const auth = socket.auth;
 
-		if (auth.type == 'client') socketInitClient(socket);
+		if (auth.type == 'client') {
+			socketInitClient(socket);
+			socketInitRMVCEmitter(socket);
+		}
 		if (auth.type == 'rmvc-emitter') socketInitRMVCEmitter(socket);
 		if (auth.type == 'scraper') socketInitScraper(socket);
 	});
