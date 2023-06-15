@@ -122,7 +122,8 @@ export default {
 		});
 	},
 	unmounted() {
-		this.$socket.off('rmvc-videoStateChange');
+		this.$socket.off('rmvc-recieve-videoStateChange');
+		this.$socket.off('rmvc-connection');
 	},
 };
 </script>
