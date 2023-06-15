@@ -18,8 +18,9 @@ const initialize = (socket) => {
 
 	socket.on('rmvc-send-action', async ({ rmvcID: RMVCSessionID, action }) => {
 		console.log('Recieved rmvc-emitter-action', action, socket.id);
-		const rmvcIDValid = sockets.find((s) => s.auth.type == 'client' && s.auth.RMVCSessionID == rmvcID) != null;
-		if (rmvcIDValid) {
+		const sockets = await getIO().fetchSockets();
+		const rmvcIDValid = sockets.find((s) => s.auth.type == 'client' && s.auth.RMVCSessionID == RMVCSessionID) != null;
+		if (rmvcIDValid && RMVCSessionID == socket.auth.RMVCEmitterSessionID) {
 			await toAllSockets(
 				(s) => {
 					s.emit('rmvc-recieve-action', action);

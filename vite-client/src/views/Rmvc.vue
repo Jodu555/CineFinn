@@ -6,6 +6,11 @@
 				<span class="visually-hidden">Loading...</span>
 			</div>
 		</div>
+		<div v-if="error != ''" class="alert alert-danger alert-dismissible fade show" role="alert">
+			<button @click="error = ''" type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			<strong>Error:</strong> {{ error }}
+		</div>
+
 		<div v-if="!isConnected" class="row justify-content-center">
 			<div class="text-center col-12 col-sm-6">
 				<div class="mb-3">
@@ -100,7 +105,8 @@ export default {
 			this.loading = false;
 			this.isConnected = status;
 			if (!status) {
-				this.error = 'RMVCID seems to be invalid!';
+				this.error = 'RMVCID seems to be invalid! Or has been stopped!';
+				this.rmvcID = '';
 			}
 		});
 		this.$socket.on('rmvc-recieve-videoStateChange', ({ isPlaying }) => {
