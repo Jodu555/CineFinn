@@ -6,8 +6,8 @@
 				<span class="visually-hidden">Loading...</span>
 			</div>
 		</div>
-		<pre>
-			{{ { loading, isConnected, isPlaying, error, rmvcID, socket: this.$socket.id, socketExists: this.$socket != null, url: $networking } }}
+		<pre v-if="settings.developerMode.value">
+			{{ { loading, isConnected, isPlaying, error, rmvcID, socket: this.$socket.id, socketExists: this.$socket != null, url: $networking.API_URL } }}
 		</pre
 		>
 		<div v-if="error != ''" class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -105,7 +105,7 @@ export default {
 		},
 	},
 	computed: {
-		...mapState('auth', ['loggedIn']),
+		...mapState('auth', ['loggedIn', 'settings']),
 	},
 	async mounted() {
 		if (!this.loggedIn) {
