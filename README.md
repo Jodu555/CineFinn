@@ -53,6 +53,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [ ] Implement a method to un watch a specific series or season
 - [ ] Anime Preview (10 - 15 sec.)
 - [ ] Implement the command manager and some basic command (session = to list current sockets, info = to show series infos and space infos, reload = to reload the series from their file)
+- [ ] **Finally Upgrade to TypeScript so i do not have this fucking pain in my ass!!!**
 - [ ] Implement the sharing also with movies
 - [ ] Implement the sharing to include the language
 - [ ] Use a vue integrated modal instead of the bootstrap javascript one (get's confused on HMR)
