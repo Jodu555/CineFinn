@@ -1,6 +1,6 @@
 <template>
 	<div class="modal fade" aria-modal="true" id="rmvcModal" tabindex="-1" aria-labelledby="rmvcModal" aria-hidden="true">
-		<div class="modal-dialog modal-lg modal-dialog-centered">
+		<div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="rmvcModalLabel">ReMote Video Control Session</h5>
@@ -29,6 +29,20 @@
 						<div class="d-flex justify-content-end">
 							<button type="button" @click="stopSession" class="btn btn-outline-danger">Stop Session</button>
 						</div>
+						<table class="table">
+							<thead>
+								<tr>
+									<th scope="col">Time</th>
+									<th scope="col">Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr v-for="record in [...actionRecord].reverse()">
+									<td>{{ new Date(record.time).toLocaleString() }}</td>
+									<td>{{ record.action }}</td>
+								</tr>
+							</tbody>
+						</table>
 					</div>
 				</div>
 			</div>
@@ -48,6 +62,7 @@ export default {
 			loading: false,
 			sessionStarted: false,
 			sessionID: '',
+			actionRecord: [],
 		};
 	},
 	computed: {
@@ -91,6 +106,10 @@ export default {
 		});
 		this.$socket.on('rmvc-recieve-action', (action) => {
 			console.log('Recieved Action', action);
+			this.actionRecord.push({
+				action,
+				time: Date.now(),
+			});
 			if (action == 'play') {
 				video.play();
 			}
@@ -120,6 +139,8 @@ export default {
 				} catch (_) {}
 			}
 		});
+		this.loading = true;
+		this.$socket.emit('rmvc-send-sessionInfo');
 	},
 	unmounted() {
 		this.$socket.off('rmvc-sessionCreated');

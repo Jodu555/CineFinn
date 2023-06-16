@@ -55,6 +55,15 @@ const initialize = (socket) => {
 		);
 	});
 
+	socket.on('rmvc-send-sessionInfo', () => {
+		const sessionID = socket.auth.RMVCSessionID;
+		if (sessionID) {
+			socket.emit('rmvc-sessionCreated', sessionID);
+		} else {
+			socket.emit('rmvc-sessionDestroyed');
+		}
+	});
+
 	socket.on('rmvc-send-sessionStart', () => {
 		const sessionID = Math.floor(Math.random() * 10 ** 5);
 		console.log('User', auth.user.username, 'Just started a rmvc Session with ID', sessionID);
