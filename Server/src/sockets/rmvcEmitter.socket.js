@@ -9,10 +9,11 @@ const initialize = (socket) => {
 
 	socket.on('rmvc-connect', async ({ rmvcID }) => {
 		const sockets = await getIO().fetchSockets();
-		const rmvcIDValid = sockets.find((s) => s.auth.type == 'client' && s.auth.RMVCSessionID == rmvcID) != null;
+		const recieverSocket = sockets.find((s) => s.auth.type == 'client' && s.auth.RMVCSessionID == rmvcID);
+		const rmvcIDValid = recieverSocket != null;
 		socket.auth.RMVCEmitterSessionID = rmvcID;
 		console.log('GOT rmvc-connect with ID', rmvcID, 'status', rmvcIDValid);
-
+		if (recieverSocket) recieverSocket.emit('rmvc-get-videoState');
 		socket.emit('rmvc-connection', { status: rmvcIDValid });
 	});
 

@@ -6,6 +6,10 @@
 				<span class="visually-hidden">Loading...</span>
 			</div>
 		</div>
+		<pre>
+			{{ { loading, isConnected, isPlaying, error, rmvcID, socket: this.$socket.id, socketExists: this.$socket != null, url: $networking } }}
+		</pre
+		>
 		<div v-if="error != ''" class="alert alert-danger alert-dismissible fade show" role="alert">
 			<button @click="error = ''" type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 			<strong>Error:</strong> {{ error }}
