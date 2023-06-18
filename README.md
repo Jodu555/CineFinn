@@ -130,7 +130,12 @@ and an Language Integration system
 
 ## v3
 
-This Version introduces the playlist idea and the account information/settings idea
+This Version introduces the RMVC (Remote Video Control) System the Upgraded Video Player
+(Enhanced One Screen Mouse Over) the Sharing Functionallity and the improved account settings
+
+## v4 (TODO)
+
+This Version introduces the playlist idea and the account restriction idea
 although the general permission system and therefore the account restrictions
 
 ## Stretch
