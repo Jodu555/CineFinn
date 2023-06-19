@@ -48,9 +48,15 @@ socket.on('connect', async () => {
 
 	// const array: ExtendedEpisodeDownload[] = [];
 
-	// const zoro = new Zoro('the-reincarnation-of-the-strongest-exorcist-in-another-world-18290');
+	// const zoro = new Zoro('18244');
+	// const zoro = new Zoro('1560');
+
+	// const ret = await zoro.getSeasons();
+
+	// console.log(ret);
+
 	// const { total, episodes } = await zoro.getExtendedEpisodeList();
-	// console.log('Got', total, 'Episodes');
+	// console.log(episodes);
 
 	// for (const episode of episodes) {
 	// 	if (episode.langs.includes('dub')) {
@@ -113,6 +119,7 @@ async function checkForUpdates() {
 	// res.data = res.data.filter((x) => x.title.includes('Kaguya'));
 	// res.data = res.data.filter((x) => x.title.includes('Mushoku'));
 	// res.data = res.data.filter((x) => x.title.includes('Honor'));
+	res.data = res.data.filter((x) => x.title.includes('Grace'));
 
 	// console.log(res.data);
 

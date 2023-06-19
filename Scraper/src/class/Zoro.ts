@@ -37,33 +37,62 @@ export interface StreamingServers {
 	name: string;
 }
 
+export interface SeasonInformation {
+	ID: string;
+	IDX: string;
+	title: string;
+}
+
 class Zoro {
 	url: string;
 	ID: any;
 	initialized: boolean;
 	constructor(url: string) {
+		this.initialized = false;
 		if (url.includes('/')) {
 			this.url = url;
 			this.ID = this.url?.split('/')?.pop()?.split('-').pop();
 		} else {
 			this.ID = url;
-			this.initialize();
+			// this.initialize();
 		}
 	}
 
 	async initialize() {
-		this.initialized = true;
 		const list = await this.getEpisodeList();
+
 		this.url = list.episodes[0].url;
 		console.log('Parsed: ');
 		console.log(' ' + this.url);
+		this.initialized = true;
+	}
+
+	async getSeasons(): Promise<SeasonInformation[]> {
+		try {
+			if (!this.initialized) {
+				await this.initialize();
+			}
+			const response = await axios.get(this.url);
+			const { document } = new jsdom.JSDOM(response.data).window;
+
+			const infos = [...document.querySelectorAll('.os-item')]
+				.map((anchor) => {
+					return {
+						ID: anchor.href.split('-')[anchor.href.split('-').length - 1] as string,
+						IDX: anchor.querySelector('.title').textContent.trim().replaceAll('Season ', ''),
+						title: anchor.querySelector('.title').textContent.trim() as string,
+					};
+				})
+				.filter((x) => !x.title.includes('(') && x.title.includes('Season'));
+			return infos;
+		} catch (error) {
+			console.log('Seems like the Season div does not yet exists');
+
+			return [];
+		}
 	}
 
 	async getEpisodeList(): Promise<{ total: number; episodes: SimpleZoroEpisode[] }> {
-		if (!this.initialized) {
-			await this.initialize();
-		}
-
 		const response = await axios.get('https://zoro.to/ajax/v2/episode/list/' + this.ID);
 		const total = response.data.totalItems;
 		const { document } = new jsdom.JSDOM(response.data.html).window;
@@ -115,9 +144,6 @@ class Zoro {
 	}
 
 	async getStream(streamID: string): Promise<string> {
-		if (!this.initialized) {
-			await this.initialize();
-		}
 		const response = await axios.get('https://zoro.to/ajax/v2/episode/sources?id=' + streamID);
 		return response.data.link;
 	}

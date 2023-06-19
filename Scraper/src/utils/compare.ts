@@ -246,8 +246,17 @@ async function compareForNewReleasesZoro(
 					if (typeof serie.references.zoro == 'string') {
 						try {
 							const zoro = new Zoro(serie.references.zoro);
-							const { episodes } = await zoro.getExtendedEpisodeList();
-							out.seasons.push(episodes.map(changeEpisode));
+							const seasons = await zoro.getSeasons();
+							if (seasons.length > 0) {
+								for (const seasonObj of seasons) {
+									const tmpZoro = new Zoro(seasonObj.ID);
+									const { episodes } = await tmpZoro.getExtendedEpisodeList();
+									out.seasons[parseInt(seasonObj.IDX) - 1] = episodes.map(changeEpisode);
+								}
+							} else {
+								const { episodes } = await zoro.getExtendedEpisodeList();
+								out.seasons.push(episodes.map(changeEpisode));
+							}
 						} catch (error) {
 							console.log(error);
 							console.log('Error parsing', serie);
