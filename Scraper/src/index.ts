@@ -85,9 +85,9 @@ socket.on('connect', async () => {
 
 	// console.log(refs);
 
-	await checkForUpdates();
+	// await checkForUpdates();
 	// await manuallyCraftTheList();
-	// await generateNewDownloadList();
+	await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
 	// await programmaticallyInsertTheInfos();
 	// await addReference();
@@ -143,9 +143,9 @@ async function checkForUpdates() {
 async function generateNewDownloadList() {
 	const arr = [
 		{
-			title: 'Campfire Cooking in Another World with My Absurd Skill',
-			aniworldID: 'campfire-cooking-in-another-world-with-my-absurd-skill',
-			zoroID: '',
+			title: 'Tsuredure Children',
+			aniworldID: '',
+			zoroID: '1002',
 		},
 	];
 

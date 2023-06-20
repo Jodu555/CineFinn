@@ -49,7 +49,6 @@ router.patch('/:ID', async (req, res, next) => {
 			}
 		})
 	);
-	res.json(getSeries().filter((x) => x.ID == req.params.ID));
 	await sendSeriesReloadToAll();
 });
 

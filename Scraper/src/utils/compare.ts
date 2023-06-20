@@ -322,7 +322,7 @@ async function compareForNewReleasesZoro(
 
 					addtoOutputList(episode.url, localSeries.title, zoroSeasonIDX + 1, episodeIDX + 1, language);
 				}
-				console.log(' => Skipped due to the ignorance list', ignoranceObject);
+				// console.log(' => Skipped due to the ignorance list', ignoranceObject);
 				continue;
 			}
 			for (const _zoroEpisodeIDX in zoroSeason) {
