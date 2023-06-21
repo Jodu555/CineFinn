@@ -24,6 +24,9 @@
 					<li class="nav-item">
 						<router-link class="nav-link" active-class="active" to="/sync">Sync</router-link>
 					</li>
+					<li class="nav-item">
+						<router-link class="nav-link" active-class="active" to="/todo">Todo</router-link>
+					</li>
 				</ul>
 				<div v-if="loggedIn" class="d-flex">
 					<AutoComplete

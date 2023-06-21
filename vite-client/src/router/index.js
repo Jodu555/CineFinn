@@ -34,6 +34,14 @@ const routes = [
 		meta: { requiresLogin: true },
 	},
 	{
+		path: '/todo',
+		name: 'Todo',
+		component: function () {
+			return import(/* webpackChunkName: "news" */ '../views/Todo.vue');
+		},
+		meta: { requiresLogin: true },
+	},
+	{
 		path: '/sync',
 
 		component: function () {
