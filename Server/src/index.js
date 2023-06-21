@@ -98,6 +98,7 @@ const { router: watch_router } = require('./routes/watch');
 const { router: news_router } = require('./routes/news');
 const { router: index_router } = require('./routes/index');
 const video = require('./routes/video.js');
+const todo = require('./routes/todo.js');
 const { generateImages } = require('./utils/images');
 
 // Your Middleware handlers here
@@ -110,6 +111,7 @@ app.use('/index', authHelper.authentication(), index_router);
 
 //Your direct routing stuff here
 app.get('/video', authHelper.authentication(), video);
+app.get('/todo', authHelper.authentication(), todo);
 
 const errorHelper = new ErrorHelper();
 app.use(errorHelper.install());

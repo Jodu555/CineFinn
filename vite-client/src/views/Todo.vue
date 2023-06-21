@@ -1,9 +1,10 @@
 <template>
-	<div class="container">
+	<div class="container" v-auto-animate>
 		<br />
 		<button class="btn btn-outline-primary" @click="addEmptyItem">Add Item</button>
 
 		<draggable
+			v-auto-animate
 			class="list-group"
 			tag="ul"
 			:component-data="{
@@ -115,24 +116,38 @@
 			</template>
 		</draggable>
 
-		<div class="mt-5">
+		<div v-if="settings.developerMode.value" class="mt-5">
 			<pre>{{ state.list }}</pre>
 		</div>
 	</div>
 </template>
 <script setup>
-import { reactive, computed, ref, onMounted } from 'vue';
+import { reactive, computed, ref, onMounted, getCurrentInstance, onUnmounted } from 'vue';
 import draggable from 'vuedraggable';
+import { useStore } from 'vuex';
+
+const instance = getCurrentInstance().appContext.config.globalProperties;
+const store = useStore();
+
+const settings = computed(() => store.state.auth.settings);
 
 const state = reactive({
 	list: [],
 });
 
 onMounted(async () => {
-	const response = await this.$networking.get('/todo/');
+	instance.$socket.on('todoListUpdate', (list) => {
+		state.list = list;
+	});
+
+	const response = await instance.$networking.get('/todo/');
 	if (response.success) {
 		state.list = response.json;
 	}
+});
+
+onUnmounted(() => {
+	instance.$socket.off('todoListUpdate');
 });
 
 const drag = ref(false);
@@ -141,8 +156,6 @@ const change = (event) => {
 	state.list = state.list.map((name, index) => {
 		return { ...name, order: index + 1 };
 	});
-	console.log('Change');
-	//Here we can save the state to the database
 	pushTodoListUpdate();
 };
 
@@ -150,7 +163,6 @@ const addEmptyItem = () => {
 	const ID = Math.round(Math.random() * 10 ** 6);
 	const item = { name: '', edited: false, categorie: '', references: { aniworld: '', zoro: '', sto: '' }, order: -1, ID };
 	state.list.push(item);
-	// pushTodoListUpdate();
 	change();
 };
 
@@ -163,8 +175,7 @@ const pushTodoListUpdate = async () => {
 		delete x.edited;
 		return x;
 	});
-	this.$socket.emit('todoListUpdate', saveList);
-	console.log(saveList);
+	instance.$socket.emit('todoListUpdate', saveList);
 };
 
 const dragOptions = computed(() => {
