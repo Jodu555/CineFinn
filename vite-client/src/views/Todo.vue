@@ -1,7 +1,7 @@
 <template>
 	<div class="container" v-auto-animate>
 		<br />
-		<button class="btn btn-outline-primary" @click="addEmptyItem">Add Item</button>
+		<button class="btn btn-outline-primary mb-5" @click="addEmptyItem">Add Item</button>
 
 		<draggable
 			v-auto-animate
