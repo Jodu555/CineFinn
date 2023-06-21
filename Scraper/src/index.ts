@@ -85,9 +85,9 @@ socket.on('connect', async () => {
 
 	// console.log(refs);
 
-	// await checkForUpdates();
+	await checkForUpdates();
 	// await manuallyCraftTheList();
-	await generateNewDownloadList();
+	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
 	// await programmaticallyInsertTheInfos();
 	// await addReference();

@@ -308,6 +308,7 @@ async function compareForNewReleasesZoro(
 
 			const zoroSeason = zoroSeries.seasons[zoroSeasonIDX];
 			const localSeason = localSeries.seasons.find((x) => x[0].season == zoroSeasonIDX + 1);
+
 			if (!localSeason) {
 				console.log('Missing Season:', zoroSeasonIDX + 1, 'with', zoroSeason.length, 'Episode/s');
 				let ignoranceSkip = true;
@@ -349,7 +350,7 @@ async function compareForNewReleasesZoro(
 					continue;
 				}
 
-				if (zoroEpisode.langs.includes('EngDub') && !localEpisode.langs.includes('EngDub')) {
+				if (zoroEpisode.langs.includes('EngDub') && !localEpisode.langs.includes('EngDub') && !localEpisode.langs.includes('GerDub')) {
 					console.log('The EngDub is missing in Season:', zoroSeasonIDX + 1, 'Episode:', zoroEpisodeIDX + 1);
 					addtoOutputList(zoroEpisode.url, localSeries.title, zoroSeasonIDX + 1, zoroEpisodeIDX + 1, 'EngDub');
 				}
