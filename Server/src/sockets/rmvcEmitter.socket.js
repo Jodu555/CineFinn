@@ -3,6 +3,8 @@ const { toAllSockets, getIO } = require('../utils/utils');
 
 const database = Database.getDatabase();
 
+const debug = false;
+
 const initialize = (socket) => {
 	const auth = socket.auth;
 	console.log('Socket Connection:', auth.type.toUpperCase(), socket.id);
@@ -12,13 +14,16 @@ const initialize = (socket) => {
 		const recieverSocket = sockets.find((s) => s.auth.type == 'client' && s.auth.RMVCSessionID == rmvcID);
 		const rmvcIDValid = recieverSocket != null;
 		socket.auth.RMVCEmitterSessionID = rmvcID;
-		console.log('GOT rmvc-connect with ID', rmvcID, 'status', rmvcIDValid);
-		if (recieverSocket) recieverSocket.emit('rmvc-get-videoState');
+		debug && console.log('GOT rmvc-connect with ID', rmvcID, 'status', rmvcIDValid);
+		if (recieverSocket) {
+			debug && console.log('rmvc-get-videoState');
+			recieverSocket.emit('rmvc-get-videoState');
+		}
 		socket.emit('rmvc-connection', { status: rmvcIDValid });
 	});
 
 	socket.on('rmvc-send-action', async ({ rmvcID: RMVCSessionID, action }) => {
-		console.log('Recieved rmvc-emitter-action', action, socket.id);
+		debug && console.log('Recieved rmvc-emitter-action', action, socket.id);
 		const sockets = await getIO().fetchSockets();
 		const rmvcIDValid = sockets.find((s) => s.auth.type == 'client' && s.auth.RMVCSessionID == RMVCSessionID) != null;
 		if (rmvcIDValid && RMVCSessionID == socket.auth.RMVCEmitterSessionID) {

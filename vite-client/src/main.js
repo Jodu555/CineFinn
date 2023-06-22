@@ -18,12 +18,20 @@ import { io } from 'socket.io-client';
 
 import 'bootstrap';
 
-const serverURL =
-	location.hostname == 'localhost'
-		? 'http://localhost:3100'
-		: location.hostname == '192.168.178.30'
-		? 'http://192.168.178.30:3100'
-		: 'http://cinema-api.jodu555.de';
+// const serverURL =
+// 	location.hostname == 'localhost'
+// 		? 'http://localhost:3100'
+// 		: location.hostname == '192.168.178.26'
+// 		? 'http://192.168.178.26:3100'
+// 		: 'http://cinema-api.jodu555.de';
+
+let serverURL;
+
+if (location.hostname == 'localhost' || location.hostname.includes('192.168')) {
+	serverURL = `http://${location.hostname}:3100`;
+} else {
+	serverURL = 'http://cinema-api.jodu555.de';
+}
 
 const socketPlugin = {
 	install: (app, options) => {
