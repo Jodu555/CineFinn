@@ -54,6 +54,9 @@
 						<div class="mb-3">
 							<input type="text" v-model="editObject.references.zoro" class="form-control" placeholder="Zoro" />
 						</div>
+						<div class="mb-3">
+							<input type="text" v-model="editObject.references.sto" class="form-control" placeholder="STO" />
+						</div>
 						<h5>Infos:</h5>
 						<div class="mb-3">
 							<label for="title" class="form-label">Title</label>
