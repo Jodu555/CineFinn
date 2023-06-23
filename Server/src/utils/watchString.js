@@ -1,4 +1,5 @@
 const { Database } = require('@jodu555/mysqlapi');
+const { getSeries } = require('./utils');
 
 /**
  * @param  {[Segment]} segmentList
@@ -103,19 +104,35 @@ const updateSegment = async (UUID, searchCriteria, segmentUpdateFunction) => {
 };
 
 const markSeason = async (UUID, seriesID, seasonID, bool) => {
+	if (bool == 'true') bool = true;
+	if (bool == 'false') bool = false;
 	const watchString = await load(UUID);
-	const segmentList = parse(watchString);
+	let segmentList = parse(watchString);
 
 	if (bool) {
 		//Mark as watched
 		//Get all episodes for the given ser{iesID and seasonID
 		//IN case of watched either Update or add to the segment list time over 301
+		const serie = getSeries().find((x) => x.ID == seriesID);
+
+		const season = serie.seasons[seasonID - 1];
+
+		segmentList = segmentList.filter((segment) => segment.ID !== seriesID && segment.season !== seasonID);
+
+		console.log(segmentList.length);
+		segmentList.push(
+			...season.map((ep) => {
+				return new Segment(seriesID, seasonID, ep.episode, -1, 310);
+			})
+		);
+		console.log(segmentList.length);
 	} else {
 		//Mark as un-watched
 		segmentList.map((segment) => {
 			if (segment.ID == seriesID && segment.season == seasonID) {
 				segment.time = 0;
 				segment.calc();
+				console.log('Changed', segment);
 			}
 			return segment;
 		});

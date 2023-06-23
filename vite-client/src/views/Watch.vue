@@ -25,7 +25,7 @@
 			<div v-auto-animate v-if="showLatestWatchButton" class="text-center">
 				<button @click="skipToLatestTime" class="btn btn-outline-info">Jump to Latest watch position!</button>
 			</div>
-			<!-- <div class="d-flex justify-content-end">
+			<div class="d-flex justify-content-end">
 				<div class="btn-group">
 					<button
 						class="btn btn-outline-primary dropdown-toggle"
@@ -38,11 +38,13 @@
 						Staffel Gesehen ?
 					</button>
 					<div class="dropdown-menu" aria-labelledby="seenmark">
-						<button type="button" class="dropdown-item" :class="{ disabled: currentSeason == -1 }"><b>Gesehen</b></button>
-						<button type="button" class="dropdown-item" :class="{ disabled: currentSeason == -1 }"><b>Nicht gesehen</b></button>
+						<button type="button" class="dropdown-item" @click="markSeason(true)" :class="{ disabled: currentSeason == -1 }"><b>Gesehen</b></button>
+						<button type="button" class="dropdown-item" @click="markSeason(false)" :class="{ disabled: currentSeason == -1 }">
+							<b>Nicht gesehen</b>
+						</button>
 					</div>
 				</div>
-			</div> -->
+			</div>
 			<pre v-if="settings.developerMode.value">
 				currentMovie: {{ currentMovie }}
 				currentSeason: {{ currentSeason }}
@@ -144,7 +146,7 @@ export default {
 	},
 	methods: {
 		...mapMutations('watch', ['setCurrentMovie', 'setCurrentSeason', 'setCurrentEpisode', 'setCurrentLanguage', 'setWatchList']),
-		...mapActions('watch', ['loadSeriesInfo', 'loadWatchList']),
+		...mapActions('watch', ['loadSeriesInfo', 'loadWatchList', 'markSeason']),
 		skipToLatestTime() {
 			const segment = this.watchList.find((segment) => segment.season == this.currentSeason && segment.episode == this.currentEpisode);
 			const video = document.querySelector('video');

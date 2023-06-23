@@ -125,6 +125,10 @@ export default {
 			const response = await this.$networking.get(`/watch/info?series=${ID}`);
 			if (response.success) commit('setWatchList', response.json);
 		},
+		async markSeason({ state }, marking) {
+			console.log(state);
+			await this.$networking.get(`/watch/mark/${state.currentSeries.ID}/season/${state.currentSeason}/${marking}`);
+		},
 	},
 	namespaced: true,
 };
