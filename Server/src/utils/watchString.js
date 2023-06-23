@@ -106,6 +106,8 @@ const updateSegment = async (UUID, searchCriteria, segmentUpdateFunction) => {
 const markSeason = async (UUID, seriesID, seasonID, bool) => {
 	if (bool == 'true') bool = true;
 	if (bool == 'false') bool = false;
+	console.log('Marked Series', seriesID, 'Season', seasonID, 'as', bool, 'watched', 'for', UUID);
+
 	const watchString = await load(UUID);
 	let segmentList = parse(watchString);
 
@@ -119,20 +121,17 @@ const markSeason = async (UUID, seriesID, seasonID, bool) => {
 
 		segmentList = segmentList.filter((segment) => segment.ID !== seriesID && segment.season !== seasonID);
 
-		console.log(segmentList.length);
 		segmentList.push(
 			...season.map((ep) => {
 				return new Segment(seriesID, seasonID, ep.episode, -1, 310);
 			})
 		);
-		console.log(segmentList.length);
 	} else {
 		//Mark as un-watched
 		segmentList.map((segment) => {
 			if (segment.ID == seriesID && segment.season == seasonID) {
 				segment.time = 0;
 				segment.calc();
-				console.log('Changed', segment);
 			}
 			return segment;
 		});
