@@ -27,7 +27,7 @@
 				title="Movies:"
 				:array="currentSeries.movies"
 				:current="currentMovie"
-				:chnageFN="changeMovie"
+				:changeFN="changeMovie"
 				:watchList="[]"
 			/>
 			<!-- Seasons -->
@@ -36,7 +36,7 @@
 				v-if="currentSeries.seasons.length >= 1"
 				:array="currentSeries.seasons"
 				:current="currentSeason"
-				:chnageFN="changeSeason"
+				:changeFN="changeSeason"
 				:season="true"
 				:watchList="[]"
 			/>
@@ -47,7 +47,7 @@
 				:array="currentSeries.seasons.find((x) => x[0].season == entityObject.season)"
 				:current="currentEpisode"
 				:currentSeason="currentSeason"
-				:chnageFN="changeEpisode"
+				:changeFN="changeEpisode"
 				:watchList="[]"
 			/>
 

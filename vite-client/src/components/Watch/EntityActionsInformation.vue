@@ -45,18 +45,18 @@ export default {
 			langDetails: {
 				gerdub: {
 					title: 'Deutsch/German',
-					alt: 'Deutsche Sprache, Flagge',
+					alt: 'Deutsche Sprache, Deutsche Flagge, Flagge, Flag',
 				},
 				gersub: {
 					title: 'Mit deutschen Untertiteln',
-					alt: 'Deutsche Flagge, Untertitel, Flagge',
+					alt: 'Deutsche Flagge, Flagge, Untertitel, Flag',
 				},
 				engdub: {
 					title: 'Englisch/English',
-					alt: 'Englische Flagge, Flagge',
+					alt: 'Englische Sprache, Englische Flagge, Flagge, Flag',
 				},
 				engsub: {
-					title: 'mit englischen Untertiteln',
+					title: 'Mit englischen Untertiteln',
 					alt: 'Englische Flagge, Flagge, Untertitel, Flag',
 				},
 			},
