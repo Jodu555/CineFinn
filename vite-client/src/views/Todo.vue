@@ -33,6 +33,13 @@
 							<button v-if="element.edited" type="button" @click="element.edited = false" class="btn btn-close"></button>
 						</div>
 					</div>
+					<h6>Infos</h6>
+					<!-- <ul>
+						<li>Episodes: 20</li>
+						<li>&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk: {{ Math.round((20 * 260) / 1024) }}GB</li>
+						<li>Movies: 2</li>
+						<li>&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk: {{ Math.round((2 * 2000) / 1024) }}GB</li>
+					</ul> -->
 
 					<div v-if="element.edited">
 						<div class="row text-center mt-2 mb-2 align-items-center">
