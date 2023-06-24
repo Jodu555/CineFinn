@@ -36,7 +36,12 @@
 							<button v-if="element.edited" type="button" @click="element.edited = false" class="btn btn-close"></button>
 						</div>
 					</div>
-					<h6>Infos</h6>
+					<h5>Infos</h5>
+					<div style="width: 15%" class="d-flex justify-content-around">
+						<span v-if="element.references.aniworld" class="h6">A</span>
+						<span v-if="element.references.zoro" class="h6">Z</span>
+						<span v-if="element.references.sto" class="h6">S</span>
+					</div>
 					<!-- <ul>
 						<li>Episodes: 20</li>
 						<li>&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk: {{ Math.round((20 * 260) / 1024) }}GB</li>
