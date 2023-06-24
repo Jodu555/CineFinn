@@ -89,7 +89,7 @@ const initialize = (socket) => {
 	});
 
 	socket.on('todoListUpdate', async (list) => {
-		console.log('Recieved todoListUpdate');
+		const didID = [];
 		for (const todo of list) {
 			const item = await database.get('todos').getOne({ ID: todo.ID });
 			if (item) {
@@ -97,7 +97,15 @@ const initialize = (socket) => {
 			} else {
 				await database.get('todos').create({ ID: todo.ID, content: JSON.stringify(todo) });
 			}
+			didID.push(todo.ID);
 		}
+		const items = await database.get('todos').get();
+		const deleted = items.filter((x) => !didID.find((y) => y == x.ID));
+
+		for (const deletedItem of deleted) {
+			await database.get('todos').delete({ ID: deletedItem.ID, content: deletedItem.content });
+		}
+
 		await toAllSockets(
 			(s) => {
 				s.emit('todoListUpdate', list);
