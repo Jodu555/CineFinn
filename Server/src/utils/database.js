@@ -38,6 +38,15 @@ module.exports = () => {
 			type: 'TEXT',
 		},
 	});
+	database.createTable('todos', {
+		ID: {
+			type: 'varchar(64)',
+			null: false,
+		},
+		content: {
+			type: 'TEXT',
+		},
+	});
 
 	database.createTable('sync_rooms', {
 		options: {

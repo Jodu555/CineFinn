@@ -86,6 +86,24 @@ const initialize = (socket) => {
 		);
 	});
 
+	socket.on('todoListUpdate', async (list) => {
+		console.log('Recieved todoListUpdate');
+		for (const todo of list) {
+			const item = await database.get('todos').getOne({ ID: todo.ID });
+			if (item) {
+				await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
+			} else {
+				await database.get('todos').create({ ID: todo.ID, content: JSON.stringify(todo) });
+			}
+		}
+		await toAllSockets(
+			(s) => {
+				s.emit('todoListUpdate', list);
+			},
+			(s) => s.auth.type == 'client' && s.id != socket.id
+		);
+	});
+
 	socket.on('disconnect', () => {
 		console.log('Socket DisConnection:', auth.type.toUpperCase(), auth.user.username, socket.id);
 	});
