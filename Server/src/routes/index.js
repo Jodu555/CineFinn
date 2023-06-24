@@ -53,8 +53,8 @@ router.patch('/:ID', async (req, res, next) => {
 });
 
 router.post('/', async (req, res, next) => {
-	res.status(501).json({});
-	return;
+	// res.status(501).json({});
+	// return;
 	//TODO: IMPORTANT: Add restriction to this route
 	req.body.ID = generateID();
 	const serie = Series.fromObject(req.body);

@@ -199,7 +199,7 @@ const useTodo = async (ID) => {
 		references: todoObject.references,
 		infos: {},
 	};
-	// await instance.$networking.post('/index/', JSON.stringify(seriesObject));
+	await instance.$networking.post('/index/', JSON.stringify(seriesObject));
 };
 
 const save = () => {
