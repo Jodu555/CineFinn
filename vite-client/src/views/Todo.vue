@@ -24,9 +24,12 @@
 						<div>
 							{{ element.name }} -
 							{{ element.categorie }}
-							<span class="badge bg-info mx-2">{{ element.order }}</span>
-							<button v-if="!element.edited" type="button" @click="element.edited = true" class="btn btn-outline-primary">
+							<span class="badge bg-info mx-2 me-3">{{ element.order }}</span>
+							<button v-if="!element.edited" title="Edit" type="button" @click="element.edited = true" class="btn btn-outline-primary me-3">
 								<font-awesome-icon :icon="['fa-solid', 'fa-pen']" size="lg" />
+							</button>
+							<button v-if="!element.edited" title="Delete" type="button" @click="deleteTodo(element.ID)" class="btn btn-outline-danger">
+								<font-awesome-icon :icon="['fa-solid', 'fa-trash']" size="lg" />
 							</button>
 						</div>
 						<div>
@@ -170,6 +173,11 @@ const addEmptyItem = () => {
 	const ID = Math.round(Math.random() * 10 ** 6);
 	const item = { name: '', edited: false, categorie: '', references: { aniworld: '', zoro: '', sto: '' }, order: -1, ID };
 	state.list.push(item);
+	change();
+};
+
+const deleteTodo = (ID) => {
+	state.list = state.list.filter((x) => x.ID != ID);
 	change();
 };
 
