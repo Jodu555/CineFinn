@@ -19,7 +19,7 @@
 			</div>
 			<!-- <SeriesInformation /> -->
 			<ControlInformationModal />
-			<h1 class="text-truncate" data-bs-toggle="tooltip" :data-bs-title="displayTitle">
+			<h1 class="text-truncate" :title="displayTitle">
 				{{ displayTitle }}
 			</h1>
 			<div v-auto-animate v-if="showLatestWatchButton" class="text-center">
@@ -62,7 +62,7 @@
 				title="Movies:"
 				:array="currentSeries.movies"
 				:current="currentMovie"
-				:chnageFN="changeMovie"
+				:changeFN="changeMovie"
 				:watchList="watchList"
 			/>
 			<!-- Seasons -->
@@ -71,7 +71,7 @@
 				v-if="currentSeries.seasons.length >= 1"
 				:array="currentSeries.seasons"
 				:current="currentSeason"
-				:chnageFN="changeSeason"
+				:changeFN="changeSeason"
 				:season="true"
 				:watchList="watchList"
 			/>
@@ -82,7 +82,7 @@
 				:array="currentSeries.seasons.find((x) => x[0].season == entityObject.season)"
 				:current="currentEpisode"
 				:currentSeason="currentSeason"
-				:chnageFN="changeEpisode"
+				:changeFN="changeEpisode"
 				:watchList="watchList"
 			/>
 			<!-- Previous & Title & Languages & Next -->

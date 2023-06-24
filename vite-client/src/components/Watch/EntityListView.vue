@@ -17,7 +17,7 @@
 					}"
 					v-for="(s, i) in array"
 					:key="s"
-					@click="chnageFN(getNumber(s, i))"
+					@click="changeFN(getNumber(s, i))"
 				>
 					{{ getNumber(s, i) }}
 				</button>
@@ -27,12 +27,11 @@
 </template>
 <script>
 export default {
-	// props: ['title', 'array', 'current', 'chnageFN', 'watchList'],
 	props: {
 		title: { type: String },
 		array: { type: Array },
 		current: { type: Number },
-		chnageFN: { type: Function },
+		changeFN: { type: Function },
 		currentSeason: { type: Number, default: -1 },
 		watchList: { type: Array, default: [] },
 		season: { type: Boolean, default: false },
