@@ -7,6 +7,8 @@ const { parse, load } = require('../utils/watchString');
 
 const database = Database.getDatabase();
 
+const timeDebug = false;
+
 const initialize = (socket) => {
 	const auth = socket.auth;
 	console.log('Socket Connection:', auth.type.toUpperCase(), auth.user.username, socket.id);
@@ -14,7 +16,7 @@ const initialize = (socket) => {
 	socket.on('timeUpdate', (obj) => {
 		obj.time = Math.ceil(obj.time);
 		if (obj.movie == -1 && obj.season == -1 && obj.episode == -1) return;
-		console.log('TUpd:', auth.user.username, obj);
+		timeDebug && console.log('TUpd:', auth.user.username, obj);
 		if (obj.force) {
 			writeWatchInfoToDatabase(socket, obj);
 		} else {
