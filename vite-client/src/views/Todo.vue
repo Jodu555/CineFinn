@@ -28,6 +28,9 @@
 							<button v-if="!element.edited" title="Edit" type="button" @click="element.edited = true" class="btn btn-outline-primary me-3">
 								<font-awesome-icon :icon="['fa-solid', 'fa-pen']" size="lg" />
 							</button>
+							<button v-if="!element.edited" title="Use" type="button" @click="useTodo(element.ID)" class="btn btn-outline-success me-3">
+								<font-awesome-icon :icon="['fa-solid', 'fa-check']" size="lg" />
+							</button>
 							<button v-if="!element.edited" title="Delete" type="button" @click="deleteTodo(element.ID)" class="btn btn-outline-danger">
 								<font-awesome-icon :icon="['fa-solid', 'fa-trash']" size="lg" />
 							</button>
@@ -184,6 +187,19 @@ const addEmptyItem = () => {
 const deleteTodo = (ID) => {
 	state.list = state.list.filter((x) => x.ID != ID);
 	change();
+};
+
+const useTodo = async (ID) => {
+	const todoObject = state.list.find((x) => x.ID == ID);
+	const seriesObject = {
+		categorie: todoObject.categorie,
+		title: todoObject.name,
+		movies: [],
+		seasons: [],
+		references: todoObject.references,
+		infos: {},
+	};
+	// await instance.$networking.post('/index/', JSON.stringify(seriesObject));
 };
 
 const save = () => {

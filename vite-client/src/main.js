@@ -78,6 +78,7 @@ import {
 	faPause,
 	faNetworkWired,
 	faTrash,
+	faCheck,
 } from '@fortawesome/free-solid-svg-icons';
 import { faKeyboard } from '@fortawesome/free-regular-svg-icons';
 
@@ -97,7 +98,8 @@ library.add(
 	faNetworkWired,
 	faPlay,
 	faPause,
-	faTrash
+	faTrash,
+	faCheck
 ); // solid
 library.add(faKeyboard); // regular
 
