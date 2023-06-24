@@ -162,10 +162,13 @@ onMounted(async () => {
 	if (response.success) {
 		state.list = response.json;
 	}
+
+	document.title = `Cinema | Todo`;
 });
 
 onUnmounted(() => {
 	instance.$socket.off('todoListUpdate');
+	document.title = `Cinema | Jodu555`;
 });
 
 const drag = ref(false);
