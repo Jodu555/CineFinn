@@ -228,12 +228,23 @@ export default {
 
 			this.loadWatchList(seriesID);
 			if (this.$route.query?.idx) {
-				const [se, ep] = this.$route.query?.idx.split('x').map((x) => Number(x));
-				this.handleVideoChange(se, ep, -1, undefined, undefined, (video) => {
-					if (this.$route.query?.time != undefined && parseInt(this.$route.query?.time)) {
-						video.currentTime = parseInt(this.$route.query?.time);
-					}
-				});
+				if (this.$route.query?.idx.includes('x')) {
+					//SeasonxEpisode
+					const [se, ep] = this.$route.query?.idx.split('x').map((x) => Number(x));
+					this.handleVideoChange(se, ep, -1, undefined, undefined, (video) => {
+						if (this.$route.query?.time != undefined && parseInt(this.$route.query?.time)) {
+							video.currentTime = parseInt(this.$route.query?.time);
+						}
+					});
+				} else {
+					//Movie
+					const movieID = parseInt(this.$route.query?.idx);
+					this.handleVideoChange(-1, -1, movieID, undefined, undefined, (video) => {
+						if (this.$route.query?.time != undefined && parseInt(this.$route.query?.time)) {
+							video.currentTime = parseInt(this.$route.query?.time);
+						}
+					});
+				}
 			} else if (data && data.ID == seriesID) {
 				this.handleVideoChange(data.season || -1, data.episode || -1, data.movie || -1);
 			} else {

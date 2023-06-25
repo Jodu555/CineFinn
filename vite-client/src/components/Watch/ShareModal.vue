@@ -7,7 +7,7 @@
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<div class="modal-body" v-auto-animate>
-					<pre v-if="settings.developerMode.value">{{ { entityObject, shareInclTime, shareLink } }}</pre>
+					<pre v-if="settings.developerMode.value">{{ { entityObject, shareInclTime, shareLink, currentMovie } }}</pre>
 					<div class="row g-3 align-items-center">
 						<div class="col-auto">
 							<label for="sharelink" class="col-form-label">Link</label>
@@ -45,7 +45,12 @@ export default {
 		shareLink() {
 			const video = document.querySelector('video');
 			const time = this.shareInclTime ? '&time=' + parseInt(video.currentTime) : '';
-			return `${location.origin}/watch?id=${this.currentSeries?.ID}&idx=${this.entityObject?.season}x${this.entityObject?.episode}${time}`;
+			console.log(this.entityObject);
+			if (this.currentMovie == -1) {
+				return `${location.origin}/watch?id=${this.currentSeries?.ID}&idx=${this.entityObject?.season}x${this.entityObject?.episode}${time}`;
+			} else {
+				return `${location.origin}/watch?id=${this.currentSeries?.ID}&idx=${this.currentMovie}${time}`;
+			}
 		},
 	},
 
