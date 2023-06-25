@@ -187,22 +187,42 @@ const addEmptyItem = () => {
 	change();
 };
 
-const deleteTodo = (ID) => {
-	state.list = state.list.filter((x) => x.ID != ID);
-	change();
+const deleteTodo = async (ID) => {
+	const { isConfirmed: confirmed } = await instance.$swal.fire({
+		title: 'Error!',
+		text: 'Do you really want to DELETE this Todo?',
+		icon: 'warning',
+		showCancelButton: true,
+		cancelButtonText: 'No im stupid!',
+		confirmButtonText: 'Yes im sure!',
+	});
+	if (confirmed) {
+		state.list = state.list.filter((x) => x.ID != ID);
+		change();
+	}
 };
 
 const useTodo = async (ID) => {
-	const todoObject = state.list.find((x) => x.ID == ID);
-	const seriesObject = {
-		categorie: todoObject.categorie,
-		title: todoObject.name,
-		movies: [],
-		seasons: [],
-		references: todoObject.references,
-		infos: {},
-	};
-	await instance.$networking.post('/index/', JSON.stringify(seriesObject));
+	const { isConfirmed: confirmed } = await instance.$swal.fire({
+		title: 'Error!',
+		text: 'Do you really want to USE this Todo?',
+		icon: 'warning',
+		showCancelButton: true,
+		cancelButtonText: 'No im stupid!',
+		confirmButtonText: 'Yes im sure!',
+	});
+	if (confirmed) {
+		const todoObject = state.list.find((x) => x.ID == ID);
+		const seriesObject = {
+			categorie: todoObject.categorie,
+			title: todoObject.name,
+			movies: [],
+			seasons: [],
+			references: todoObject.references,
+			infos: {},
+		};
+		await instance.$networking.post('/index/', JSON.stringify(seriesObject));
+	}
 };
 
 const save = () => {
