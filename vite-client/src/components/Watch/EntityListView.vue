@@ -19,6 +19,7 @@
 					:key="s"
 					@click="changeFN(getNumber(s, i))"
 				>
+					<pre v-if="settings.developerMode.value">c{{ current }}-i{{ i }}-n{{ getNumber(s, i) }}-w{{ checkWatched(getNumber(s, i)) }}</pre>
 					{{ getNumber(s, i) }}
 				</button>
 			</h3>
@@ -26,6 +27,8 @@
 	</div>
 </template>
 <script>
+import { mapState } from 'vuex';
+
 export default {
 	props: {
 		title: { type: String },
@@ -37,6 +40,7 @@ export default {
 		season: { type: Boolean, default: false },
 	},
 	computed: {
+		...mapState('auth', ['settings']),
 		isMovie() {
 			return this.currentSeason == -1 && this.season == false;
 		},
@@ -57,7 +61,7 @@ export default {
 							return (
 								segment.ID == this.$route.query.id &&
 								segment.watched &&
-								((segment.season == this.currentSeason && segment.episode == index) || segment.movie == index)
+								((segment.season == this.currentSeason && segment.episode == index) || (this.currentSeason == -1 && segment.movie == index))
 							);
 						})
 					);

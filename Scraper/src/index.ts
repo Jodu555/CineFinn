@@ -119,7 +119,7 @@ async function checkForUpdates() {
 	// res.data = res.data.filter((x) => x.title.includes('Kaguya'));
 	// res.data = res.data.filter((x) => x.title.includes('Mushoku'));
 	// res.data = res.data.filter((x) => x.title.includes('Honor'));
-	res.data = res.data.filter((x) => x.title.includes('Grace'));
+	// res.data = res.data.filter((x) => x.title.includes('Grace'));
 
 	// console.log(res.data);
 
