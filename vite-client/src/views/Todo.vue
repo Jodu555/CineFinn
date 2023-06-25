@@ -193,7 +193,7 @@ const deleteTodo = async (ID) => {
 		text: 'Do you really want to DELETE this Todo?',
 		icon: 'warning',
 		showCancelButton: true,
-		cancelButtonText: 'No im stupid!',
+		cancelButtonText: 'No im not sure anymore!',
 		confirmButtonText: 'Yes im sure!',
 	});
 	if (confirmed) {
@@ -204,11 +204,11 @@ const deleteTodo = async (ID) => {
 
 const useTodo = async (ID) => {
 	const { isConfirmed: confirmed } = await instance.$swal.fire({
-		title: 'Error!',
+		title: 'Super!',
 		text: 'Do you really want to USE this Todo?',
-		icon: 'warning',
+		icon: 'success',
 		showCancelButton: true,
-		cancelButtonText: 'No im stupid!',
+		cancelButtonText: 'No im not sure anymore!',
 		confirmButtonText: 'Yes im sure!',
 	});
 	if (confirmed) {
