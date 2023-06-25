@@ -53,7 +53,7 @@ export default {
 			if (this.season) {
 				const filteredList = this.watchList.filter((seg) => seg.ID == this.$route.query.id && seg.watched && seg.season == index);
 				const idx = this.array.findIndex((s) => s[0].season == index);
-				return this.array[idx].length == filteredList.length;
+				return this.array[idx].length <= filteredList.length;
 			} else {
 				if (this.watchList.length != 0) {
 					return Boolean(

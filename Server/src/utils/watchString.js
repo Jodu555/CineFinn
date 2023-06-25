@@ -119,7 +119,10 @@ const markSeason = async (UUID, seriesID, seasonID, bool) => {
 
 		const season = serie.seasons[seasonID - 1];
 
-		segmentList = segmentList.filter((segment) => segment.ID == seriesID && segment.season !== seasonID);
+		//Filter out all segments that are the current series and the current season
+		segmentList = segmentList.filter((segment) => {
+			return segment.ID !== seriesID || segment.season !== seasonID;
+		});
 
 		segmentList.push(
 			...season.map((ep) => {

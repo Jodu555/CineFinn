@@ -259,9 +259,10 @@ export default {
 		}
 	},
 	async mounted() {
-		this.$socket.on('watchListChange', (watchList) => {
+		this.$socket.on('watchListChange', ({ watchList, seriesID }) => {
 			console.log('GOT watchListChange');
-			this.setWatchList(watchList.filter((e) => e.ID == this.$route.query.id));
+			if (seriesID == undefined) this.setWatchList(watchList.filter((e) => e.ID == this.$route.query.id));
+			if (seriesID == this.$route.query.id) this.setWatchList(watchList.filter((e) => e.ID == this.$route.query.id));
 		});
 		this.$socket.emit('getWatchList', { ID: this.$route.query.id });
 	},

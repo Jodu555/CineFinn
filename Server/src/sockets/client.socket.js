@@ -142,12 +142,9 @@ async function sendSeriesReloadToAll(cb) {
 
 async function sendWatchListChange(updatedSegmentList, socket, searchOBJ) {
 	if (searchOBJ) {
-		socket.emit(
-			'watchListChange',
-			updatedSegmentList.filter((x) => x.ID == searchOBJ.series)
-		);
+		socket.emit('watchListChange', { watchList: updatedSegmentList.filter((x) => x.ID == searchOBJ.series), seriesID: searchOBJ.series });
 	} else {
-		socket.emit('watchListChange', updatedSegmentList);
+		socket.emit('watchListChange', { watchList: updatedSegmentList });
 	}
 	// await toAllSockets(
 	// 	(s) => {
