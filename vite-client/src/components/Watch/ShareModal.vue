@@ -45,7 +45,6 @@ export default {
 		shareLink() {
 			const video = document.querySelector('video');
 			const time = this.shareInclTime ? '&time=' + parseInt(video.currentTime) : '';
-			console.log(this.entityObject);
 			if (this.currentMovie == -1) {
 				return `${location.origin}/watch?id=${this.currentSeries?.ID}&idx=${this.entityObject?.season}x${this.entityObject?.episode}${time}`;
 			} else {
