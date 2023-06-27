@@ -28,10 +28,7 @@ const initialize = (socket) => {
 	socket.on('getWatchList', ({ ID }) => {
 		new Promise(async (resolve, _) => {
 			const segList = parse(await load(auth.user.UUID));
-			socket.emit(
-				'watchListChange',
-				segList.filter((seg) => seg.ID == ID)
-			);
+			socket.emit('watchListChange', { watchList: segList.filter((seg) => seg.ID == ID) });
 			resolve();
 		});
 	});
