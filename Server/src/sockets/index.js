@@ -32,7 +32,6 @@ const initialize = () => {
 			}
 		}
 		if (type === 'rmvc-emitter') {
-			const authToken = socket.handshake.auth.token;
 			socket.auth = { type };
 			return next();
 		}
