@@ -6,7 +6,6 @@
 		<div v-if="homeLoading || loading" class="d-flex justify-content-center">
 			<div class="spinner-border" role="status">
 				<span class="visually-hidden">Loading...</span>
-				import MarkSeasonDropdown from '../components/Watch/MarkSeasonDropdown.vue';
 			</div>
 		</div>
 		<div v-auto-animate class="container" v-if="currentSeries != undefined && currentSeries.ID != -1">
