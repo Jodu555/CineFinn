@@ -432,6 +432,7 @@ export default {
 			});
 			video.addEventListener('error', (event) => {
 				console.error('Error loading: Video');
+				v.videoLoading = true;
 			});
 
 			video.addEventListener('progress', () => {
