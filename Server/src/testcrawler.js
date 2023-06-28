@@ -251,7 +251,7 @@ const mergeSeriesArrays = (before, after) => {
 	// console.timeEnd('crawlAndIndex');
 	console.time('newCrawlAndIndex');
 	const series = newCrawlAndIndex();
-	console.log(series);
+	// console.log(series);
 	console.timeEnd('newCrawlAndIndex');
 })();
 
