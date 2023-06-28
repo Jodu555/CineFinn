@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 const { listFiles } = require('./utils/fileutils');
@@ -111,23 +112,22 @@ const crawlAndIndex = () => {
 const newCrawlAndIndex = () => {
 	const { Series, filenameParser, Episode, Movie } = require('./classes/series');
 
-	const overcategories = ['Aniworld', 'STO'];
-	const obj = {};
+	const overcategories = fs.readdirSync(process.env.VIDEO_PATH);
+	const categorieMap = new Map();
+
+	for (const cat of overcategories) {
+		const series = fs.readdirSync(path.join(process.env.VIDEO_PATH, cat));
+		series.forEach((source) => {
+			categorieMap.set(source, cat);
+		});
+	}
 
 	let { dirs, files } = listFiles(process.env.VIDEO_PATH);
 
 	//Strip all non mp4 files from the files
 	files = files.filter((f) => path.parse(f).ext == '.mp4');
 
-	//Sort dirs into the overcategories into the object
-	let sortIdx = -1;
-	dirs.forEach((dir) => {
-		if (overcategories.includes(dir)) {
-			sortIdx == -1 ? (sortIdx = 0) : sortIdx++;
-		} else {
-			obj[overcategories[sortIdx]] == undefined ? (obj[overcategories[sortIdx]] = [dir]) : obj[overcategories[sortIdx]].push(dir);
-		}
-	});
+	console.log(categorieMap);
 
 	// Strip the dirs down and seperate between season or movie dirs or series dirs
 	/**
@@ -135,26 +135,17 @@ const newCrawlAndIndex = () => {
 	 */
 	let series = [];
 
-	Object.keys(obj).forEach((categorie) => {
-		const dirs = obj[categorie];
-		for (let i = 0; i < dirs.length; ) {
-			const title = dirs[i];
-			const seasons = [];
-			const movies = [];
-			i++;
-			while (dirs[i] != undefined && (dirs[i].includes('Season-') || dirs[i].includes('Movies'))) {
-				// dirs[i].includes('Season-') ? seasons.push(dirs[i]) : movies.push(dirs[i]);
-				i++;
-			}
-			series.push(new Series(generateID(), categorie, title, movies, seasons));
-		}
-	});
-
 	files.forEach((e) => {
 		const base = path.parse(e).base;
 		const parsedData = filenameParser(e, base);
 
-		const item = series.find((x) => x.title.includes(parsedData.title));
+		let item = series.find((x) => x.title.includes(parsedData.title));
+		if (item == undefined) {
+			const categorie = categorieMap.get(parsedData.title);
+			const serie = new Series(generateID(), categorie, parsedData.title, [], []);
+			series.push(serie);
+			item = serie;
+		}
 		if (parsedData.movie == true) {
 			const existMovie = item.movies.find((x) => x.primaryName.includes(parsedData.movieTitle));
 			if (existMovie) {
@@ -260,6 +251,7 @@ const mergeSeriesArrays = (before, after) => {
 	// console.timeEnd('crawlAndIndex');
 	console.time('newCrawlAndIndex');
 	const series = newCrawlAndIndex();
+	console.log(series);
 	console.timeEnd('newCrawlAndIndex');
 })();
 
