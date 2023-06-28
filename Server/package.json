@@ -8,7 +8,9 @@
 		"dev": "nodemon src/index.js",
 		"job": "node src/jobs/index.js",
 		"dev:test": "nodemon src/test.js",
-		"start:test": "node src/test.js"
+		"start:test": "node src/test.js",
+		"dev:testcrawler": "nodemon src/testcrawler.js",
+		"start:testcrawler": "node src/testcrawler.js"
 	},
 	"nodemonConfig": {
 		"ignore": [
