@@ -56,7 +56,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [ ] IMPORTANT: **Finally Upgrade to TypeScript so i do not have this fucking pain in my ass!!!**
 - [ ] Rewrite the crawler to remove some stupid old stuff
 - [x] Implement the sharing also with movies
-- [ ] Implement the sharing to include the language
+- [x] Implement the sharing to include the language
 - [ ] Use a vue integrated modal instead of the bootstrap javascript one (get's confused on HMR)
   - [ ] For the ShareModal
   - [ ] For the ControlsInformationModal
