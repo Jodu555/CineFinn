@@ -68,7 +68,6 @@ module.exports = (req, res) => {
 			}
 		}
 	}
-	console.log(videoEntity, filePath);
 
 	debug && console.log('Got filePath', filePath);
 
