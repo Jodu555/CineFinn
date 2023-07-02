@@ -60,6 +60,8 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [ ] Use a vue integrated modal instead of the bootstrap javascript one (get's confused on HMR)
   - [ ] For the ShareModal
   - [ ] For the ControlsInformationModal
+  - [ ] For the RMVCModal
+  - [ ] For the Settings Side Drawer
 - [ ] Maybe add a brightness control to the video element with CSS Property"filter: brightness(0.7);"
 - [x] Implement a job-cli system to run a pre specified job with the cli
   - [ ] Change ID Job : A Job for which i can change an ID instant wihout any problems
