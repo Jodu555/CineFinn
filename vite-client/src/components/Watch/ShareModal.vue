@@ -7,7 +7,7 @@
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<div class="modal-body" v-auto-animate>
-					<pre v-if="settings.developerMode.value">{{ { entityObject, shareInclTime, shareLink, currentMovie } }}</pre>
+					<pre v-if="settings.developerMode.value">{{ { entityObject, shareInclTime, shareInclLang, shareLink, currentMovie } }}</pre>
 					<div class="row g-3 align-items-center">
 						<div class="col-auto">
 							<label for="sharelink" class="col-form-label">Link</label>
@@ -24,6 +24,10 @@
 						<input class="form-check-input" v-model="shareInclTime" id="inclTime" type="checkbox" />
 						<label class="form-check-label" for="inclTime"> Zeit Inkludieren </label>
 					</div>
+					<div class="form-check d-flex gap-3 justify-content-center">
+						<input class="form-check-input" v-model="shareInclLang" id="inclLang" type="checkbox" />
+						<label class="form-check-label" for="inclTime"> Sprache Inkludieren </label>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -36,19 +40,21 @@ export default {
 	data() {
 		return {
 			shareInclTime: false,
+			shareInclLang: false,
 		};
 	},
 	computed: {
 		...mapState('auth', ['settings']),
-		...mapState('watch', ['currentSeries', 'currentMovie']),
+		...mapState('watch', ['currentSeries', 'currentMovie', 'currentLanguage']),
 		...mapGetters('watch', ['entityObject']),
 		shareLink() {
 			const video = document.querySelector('video');
 			const time = this.shareInclTime ? '&time=' + parseInt(video.currentTime) : '';
+			const language = this.shareInclLang ? '&lang=' + this.currentLanguage : '';
 			if (this.currentMovie == -1) {
-				return `${location.origin}/watch?id=${this.currentSeries?.ID}&idx=${this.entityObject?.season}x${this.entityObject?.episode}${time}`;
+				return `${location.origin}/watch?id=${this.currentSeries?.ID}&idx=${this.entityObject?.season}x${this.entityObject?.episode}${time}${language}`;
 			} else {
-				return `${location.origin}/watch?id=${this.currentSeries?.ID}&idx=${this.currentMovie}${time}`;
+				return `${location.origin}/watch?id=${this.currentSeries?.ID}&idx=${this.currentMovie}${time}${language}`;
 			}
 		},
 	},

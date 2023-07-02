@@ -157,12 +157,12 @@ export default {
 			const video = document.querySelector('video');
 
 			//TODO: Maybe add here default language from user prefered settings
-			let defaultLanguage = 'GerDub';
+			let defaultLanguage = this.currentLanguage || 'GerDub';
 
 			const wasPaused = video.paused;
 			const prevTime = video.currentTime;
 
-			console.log('GOT handleVideoChange()', { season, episode, movie, langchange, lang });
+			console.log('GOT handleVideoChange()', { season, episode, movie, langchange, lang }, { wasPaused, prevTime, defaultLanguage });
 			this.sendVideoTimeUpdate(video.currentTime, true);
 
 			video.pause();
@@ -192,6 +192,7 @@ export default {
 
 				//Ensure that the selected language exists on the entity
 				if (this.entityObject && !this.entityObject.langs.includes(defaultLanguage) && !langchange) {
+					console.log('The Requestes Language does not exist on the Entity');
 					defaultLanguage = this.entityObject.langs[0];
 				}
 
@@ -227,10 +228,12 @@ export default {
 
 			this.loadWatchList(seriesID);
 			if (this.$route.query?.idx) {
+				const language = this.$route.query?.lang || undefined;
 				if (this.$route.query?.idx.includes('x')) {
 					//SeasonxEpisode
 					const [se, ep] = this.$route.query?.idx.split('x').map((x) => Number(x));
-					this.handleVideoChange(se, ep, -1, undefined, undefined, (video) => {
+
+					this.handleVideoChange(se, ep, -1, language != undefined, language, (video) => {
 						if (this.$route.query?.time != undefined && parseInt(this.$route.query?.time)) {
 							video.currentTime = parseInt(this.$route.query?.time);
 						}
@@ -238,7 +241,7 @@ export default {
 				} else {
 					//Movie
 					const movieID = parseInt(this.$route.query?.idx);
-					this.handleVideoChange(-1, -1, movieID, undefined, undefined, (video) => {
+					this.handleVideoChange(-1, -1, movieID, language != undefined, language, (video) => {
 						if (this.$route.query?.time != undefined && parseInt(this.$route.query?.time)) {
 							video.currentTime = parseInt(this.$route.query?.time);
 						}
