@@ -26,7 +26,7 @@
 					</div>
 					<div class="form-check d-flex gap-3 justify-content-center">
 						<input class="form-check-input" v-model="shareInclLang" id="inclLang" type="checkbox" />
-						<label class="form-check-label" for="inclTime"> Sprache Inkludieren </label>
+						<label class="form-check-label" for="inclLang"> Sprache Inkludieren </label>
 					</div>
 				</div>
 			</div>

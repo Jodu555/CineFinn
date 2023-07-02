@@ -63,13 +63,12 @@ module.exports = (req, res) => {
 
 		if (videoEntity.langs.length > 1) {
 			if (language) {
-				if (language == 'GerSub' || language == 'GerDub') {
-					const { dir, name, ext } = path.parse(filePath);
-					filePath = path.join(dir, `${name.split('_')[0]}_${language}${ext}`);
-				}
+				const { dir, name, ext } = path.parse(filePath);
+				filePath = path.join(dir, `${name.split('_')[0]}_${language}${ext}`);
 			}
 		}
 	}
+	console.log(videoEntity, filePath);
 
 	debug && console.log('Got filePath', filePath);
 

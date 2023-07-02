@@ -58,7 +58,7 @@
 						/
 						<div class="total-time"></div>
 					</div>
-					<button data-bs-toggle="modal" data-bs-target="#rmvcModal">
+					<button title="RMVC Controls" data-bs-toggle="modal" data-bs-target="#rmvcModal">
 						<font-awesome-icon icon="fa-solid fa-network-wired" />
 					</button>
 					<button title="Share Video" data-bs-toggle="modal" data-bs-target="#shareModal">
@@ -198,12 +198,12 @@ export default {
 			if (this.currentSeries != undefined && this.currentSeries.ID != -1) {
 				previewImgSrc = `${this.$networking.API_URL}/images/${this.currentSeries.ID}/previewImages/`;
 				if (this.currentMovie != -1 && this.currentMovie != undefined) {
-					previewImgSrc += `Movies/${this.currentSeries.movies[this.currentMovie - 1].primaryName}/preview${previewImgNumber}.jpg?auth-token=${
-						this.authToken
-					}`;
+					previewImgSrc += `Movies/${this.currentSeries.movies[this.currentMovie - 1].primaryName}`;
 				} else {
-					previewImgSrc += `${this.entityObject.season}-${this.entityObject.episode}/preview${previewImgNumber}.jpg?auth-token=${this.authToken}`;
+					previewImgSrc += `${this.entityObject.season}-${this.entityObject.episode}`;
 				}
+
+				previewImgSrc += `/preview${previewImgNumber}.jpg?auth-token=${this.authToken}`;
 			}
 			return previewImgSrc;
 		},
