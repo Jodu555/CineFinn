@@ -27,6 +27,9 @@
 					<li class="nav-item">
 						<router-link class="nav-link" active-class="active" to="/todo">Todo</router-link>
 					</li>
+					<li class="nav-item">
+						<router-link class="nav-link" active-class="active" to="/rmvc">RMVC</router-link>
+					</li>
 				</ul>
 				<div v-if="loggedIn" class="d-flex">
 					<AutoComplete

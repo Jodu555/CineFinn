@@ -8,9 +8,7 @@
 					seems to doesnt exist.
 				</h1>
 				<div class="d-grid gap-2 pt-3">
-					<router-link class="btn btn-lg btn-outline-info" :to="{ name: 'Login' }"
-						>Go to Login</router-link
-					>
+					<router-link class="btn btn-lg btn-outline-info" to="/login">Go to Login</router-link>
 				</div>
 			</div>
 			<div class="col">

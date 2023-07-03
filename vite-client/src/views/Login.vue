@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
 		<h1 class="text-center mb-3">Login - CineFinn</h1>
-		<div v-if="error != null" class="alert alert-danger alert-dismissible">
+		<div v-if="error != null && !(this.form.usernameValid && this.form.passwordValid)" class="alert alert-danger alert-dismissible">
 			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 			<strong
 				>Error: <span>{{ error.error }}</span></strong
@@ -15,6 +15,11 @@
 					<div class="card-body">
 						<h4 class="card-title">Login to the Cinema</h4>
 						<hr />
+						<div v-if="loading" class="d-flex justify-content-center">
+							<div class="spinner-border" role="status">
+								<span class="visually-hidden">Loading...</span>
+							</div>
+						</div>
 						<form @submit.prevent="onLogin()" class="card-text" id="loginForm">
 							<fieldset>
 								<div class="form-group">
@@ -68,6 +73,7 @@ export default {
 	},
 	data() {
 		return {
+			loading: false,
 			form: {
 				username: '',
 				usernameValid: null,
@@ -86,10 +92,14 @@ export default {
 	computed: {
 		...mapState('auth', ['error']),
 	},
+	mounted() {
+		this.authenticate(true);
+	},
 	methods: {
-		...mapActions('auth', ['login']),
+		...mapActions('auth', ['login', 'authenticate']),
 		async onLogin() {
 			if (this.form.usernameValid && this.form.passwordValid) {
+				this.loading = true;
 				await this.login({ username: this.form.username, password: this.form.password });
 				this.form = {
 					username: '',
@@ -97,6 +107,7 @@ export default {
 					password: '',
 					passwordValid: null,
 				};
+				this.loading = false;
 			}
 		},
 	},
