@@ -55,6 +55,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [ ] Implement the command manager and some basic command (session = to list current sockets, info = to show series infos and space infos, reload = to reload the series from their file)
 - [ ] IMPORTANT: **Finally Upgrade to TypeScript so i do not have this fucking pain in my ass!!!**
 - [ ] Rewrite the crawler to remove some stupid old stuff
+- [ ] Remove my Networking library cause it lags some stuff, and replace it with axios
 - [x] Implement the sharing also with movies
 - [x] Implement the sharing to include the language
 - [ ] Use a vue integrated modal instead of the bootstrap javascript one (get's confused on HMR)

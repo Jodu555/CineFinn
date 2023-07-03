@@ -98,8 +98,8 @@ export default {
 					} else {
 						await commit('setError', response);
 						await dispatch('logout');
-						// await dispatch('reset', null, { root: true })
-						// deleteCookie('auth-token');
+						await dispatch('reset', null, { root: true });
+						deleteCookie('auth-token');
 					}
 				} else {
 					await commit('logout');
