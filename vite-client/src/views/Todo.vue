@@ -1,7 +1,14 @@
 <template>
 	<div class="container" v-auto-animate>
 		<br />
+
 		<button class="btn btn-outline-primary mb-5" @click="addEmptyItem">Add Item</button>
+
+		<div v-if="loading" class="d-flex justify-content-center">
+			<div class="spinner-border" role="status">
+				<span class="visually-hidden">Loading...</span>
+			</div>
+		</div>
 
 		<draggable
 			v-auto-animate
@@ -45,12 +52,14 @@
 						<span v-if="element.references.zoro" class="h6">Z</span>
 						<span v-if="element.references.sto" class="h6">S</span>
 					</div>
-					<!-- <ul>
-						<li>Episodes: 20</li>
-						<li>&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk: {{ Math.round((20 * 260) / 1024) }}GB</li>
-						<li>Movies: 2</li>
-						<li>&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk: {{ Math.round((2 * 2000) / 1024) }}GB</li>
-					</ul> -->
+					<ul v-if="element.scraped">
+						<li>Episodes: {{ element?.scraped?.informations?.seasons.flat().length }}</li>
+						<li>
+							&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk: {{ Math.round((element?.scraped?.informations?.seasons.flat().length * 260) / 1024) }}GB
+						</li>
+						<li>Movies: {{ element?.scraped?.informations?.movies.length }}</li>
+						<li>&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk: {{ Math.round((element?.scraped?.informations?.movies.length * 2000) / 1024) }}GB</li>
+					</ul>
 
 					<div v-if="element.edited">
 						<div class="row text-center mt-2 mb-2 align-items-center">
@@ -149,21 +158,25 @@ const store = useStore();
 
 const settings = computed(() => store.state.auth.settings);
 
+const loading = ref(false);
+
 const state = reactive({
 	list: [],
 });
 
 onMounted(async () => {
+	document.title = `Cinema | Todo`;
+
 	instance.$socket.on('todoListUpdate', (list) => {
 		state.list = list;
 	});
-
+	loading.value = true;
 	const response = await instance.$networking.get('/todo/');
 	if (response.success) {
 		state.list = response.json;
+		console.log(state.list);
 	}
-
-	document.title = `Cinema | Todo`;
+	loading.value = false;
 });
 
 onUnmounted(() => {
@@ -221,6 +234,11 @@ const useTodo = async (ID) => {
 			references: todoObject.references,
 			infos: {},
 		};
+
+		if (todoObject.scraped) {
+			seriesObject.infos = JSON.parse(JSON.stringify(todoObject?.scraped?.informations?.informations));
+			delete seriesObject.infos.image;
+		}
 		await instance.$networking.post('/index/', JSON.stringify(seriesObject));
 	}
 };
@@ -232,6 +250,7 @@ const save = () => {
 const pushTodoListUpdate = async () => {
 	const saveList = JSON.parse(JSON.stringify(state.list)).map((x) => {
 		delete x.edited;
+		// delete x.scraped;
 		return x;
 	});
 	instance.$socket.emit('todoListUpdate', saveList);

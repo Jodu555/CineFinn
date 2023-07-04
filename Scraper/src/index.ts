@@ -85,7 +85,7 @@ socket.on('connect', async () => {
 
 	// console.log(refs);
 
-	await checkForUpdates();
+	// await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
@@ -264,6 +264,12 @@ function buildFunction(method, cb) {
 buildFunction('AniworldData', async ({ url }) => {
 	const anime = new Aniworld(url);
 	const informations = await anime.parseInformations();
+	return { informations };
+});
+
+buildFunction('ZoroData', async ({ ID }) => {
+	const zoro = new Zoro(ID);
+	const informations = await zoro.getExtendedEpisodeList();
 	return { informations };
 });
 

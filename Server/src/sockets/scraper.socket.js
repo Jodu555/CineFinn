@@ -15,13 +15,15 @@ const initialize = async (socket) => {
 };
 
 const getAniworldInfos = buildAwaitSocketReturn('AniworldData');
+const getZoroInfos = buildAwaitSocketReturn('ZoroData');
 
 const manageTitle = buildAwaitSocketReturn('manageTitle');
 
 function buildAwaitSocketReturn(method) {
 	return (input) => {
 		return new Promise((resolve, reject) => {
-			const timeout = setTimeout(() => reject, 1000 * 5);
+			if (!$socket) return reject();
+			const timeout = setTimeout(() => reject(), 1000 * 5);
 			$socket.once(`return${method}`, (data) => {
 				resolve(data);
 				clearTimeout(timeout);
