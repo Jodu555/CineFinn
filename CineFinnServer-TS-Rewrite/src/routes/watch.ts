@@ -24,4 +24,4 @@ router.get('/mark/:seriesID/season/:seasonID/:bool', async (req: AuthenticatedRe
 	res.json(list.filter((s) => s.ID == seriesID));
 });
 
-module.exports = { router };
+export { router };

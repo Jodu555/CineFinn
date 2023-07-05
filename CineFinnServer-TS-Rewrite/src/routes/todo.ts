@@ -4,7 +4,7 @@ import { AuthenticatedRequest, DatabaseTodoItem } from '../utils/types';
 const { getAniworldInfos } = require('../sockets/scraper.socket');
 const database = Database.getDatabase();
 
-module.exports = async (req: AuthenticatedRequest, res: Response) => {
+export default async (req: AuthenticatedRequest, res: Response) => {
 	const todosDB = await database.get<DatabaseTodoItem>('todos').get();
 	const todos = todosDB.map((t) => JSON.parse(t.content));
 

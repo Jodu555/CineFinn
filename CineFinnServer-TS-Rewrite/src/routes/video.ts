@@ -1,9 +1,11 @@
-const fs = require('fs');
-const path = require('path');
+import path from 'path';
+import fs from 'fs';
+import { Response } from 'express';
+import { getSeries } from '../utils/utils';
+import { AuthenticatedRequest } from '../utils/types';
 const { getVideoEntity, getVideoMovie } = require('../classes/series');
-const { getSeries } = require('../utils/utils');
 
-module.exports = (req, res) => {
+module.exports = (req: AuthenticatedRequest, res: Response) => {
 	const { series: seriesID, season, episode, movie, language } = req.query;
 
 	const debug = false;
@@ -16,7 +18,7 @@ module.exports = (req, res) => {
 	}
 	debug && console.log('Got Range', range);
 
-	if (seriesID == -1 || season == -1 || episode == -1) {
+	if (seriesID == '' || Number(season) == -1 || Number(episode) == -1) {
 		res.status(404).send('No Video!');
 		return;
 	}
@@ -50,7 +52,7 @@ module.exports = (req, res) => {
 
 	debug && console.log('Got Video Entitiy', videoEntity);
 
-	const settings = JSON.parse(req.credentials.user.settings);
+	const settings = JSON.parse(req.credentials.user.settings as string);
 
 	debug && console.log('Got Settings', settings);
 
@@ -76,7 +78,7 @@ module.exports = (req, res) => {
 	debug && console.log('Got videoSize', videoSize);
 
 	// const CHUNK_SIZE = 10 ** 6; // 1MB
-	const CHUNK_SIZE = process.env.VIDEO_CHUNK_SIZE;
+	const CHUNK_SIZE = Number(process.env.VIDEO_CHUNK_SIZE);
 	const start = Number(range.replace(/\D/g, ''));
 	const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
 

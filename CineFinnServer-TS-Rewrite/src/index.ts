@@ -1,4 +1,4 @@
-const path = require('path');
+import path from 'path';
 import fs from 'fs';
 import http from 'http';
 import express from 'express';
@@ -96,11 +96,11 @@ setIO(
 socket_initialize();
 
 const { router: managment_router } = require('./routes/managment.js');
-const { router: watch_router } = require('./routes/watch');
+import { router as watch_router } from './routes/watch';
 const { router: news_router } = require('./routes/news');
 const { router: index_router } = require('./routes/index');
 const video = require('./routes/video.js');
-const todo = require('./routes/todo.js');
+import todo from './routes/todo.js';
 const { generateImages } = require('./utils/images');
 
 // Your Middleware handlers here
