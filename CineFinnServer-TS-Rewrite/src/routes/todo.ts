@@ -1,11 +1,11 @@
-const { Database } = require('@jodu555/mysqlapi');
-const fs = require('fs');
-const path = require('path');
+import express, { Response } from 'express';
+import { Database } from '@jodu555/mysqlapi';
+import { AuthenticatedRequest, DatabaseTodoItem } from '../utils/types';
 const { getAniworldInfos } = require('../sockets/scraper.socket');
 const database = Database.getDatabase();
 
-module.exports = async (req, res) => {
-	const todosDB = await database.get('todos').get();
+module.exports = async (req: AuthenticatedRequest, res: Response) => {
+	const todosDB = await database.get<DatabaseTodoItem>('todos').get();
 	const todos = todosDB.map((t) => JSON.parse(t.content));
 
 	for (const todo of todos) {

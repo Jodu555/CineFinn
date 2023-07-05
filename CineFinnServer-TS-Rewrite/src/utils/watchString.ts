@@ -138,12 +138,4 @@ const markSeason = async (UUID: string, seriesID: string, seasonID: number, bool
 	return segmentList;
 };
 
-module.exports = {
-	Segment,
-	generateStr,
-	parse,
-	load,
-	save,
-	updateSegment,
-	markSeason,
-};
+export { Segment, generateStr, parse, load, save, updateSegment, markSeason, searchObject };

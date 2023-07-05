@@ -1,13 +1,12 @@
 import { ExtendedSocket, timeUpdateObject } from './types';
-
-const { updateSegment } = require('./watchString');
+import { searchObject, updateSegment } from './watchString';
 
 async function writeWatchInfoToDatabase(socket: ExtendedSocket, obj: timeUpdateObject) {
 	console.log('Write Through:', socket.auth.user.username, obj);
 
 	const { movie = -1, season, episode, time } = obj;
 
-	const searchOBJ = {
+	const searchOBJ: searchObject = {
 		series: obj.series,
 		movie: obj.movie || -1,
 		season: obj.season,
@@ -24,9 +23,10 @@ async function writeWatchInfoToDatabase(socket: ExtendedSocket, obj: timeUpdateO
 		}
 	};
 
-	if (!searchOBJ.series || searchOBJ.series == null || searchOBJ.series == -1) {
+	if (!searchOBJ.series || searchOBJ.series == null || Number(searchOBJ.series) == -1) {
 		return;
 	}
+
 	if (movie !== -1 && movie !== undefined) {
 		updatedSegmentList = await updateSegment(socket.auth.user.UUID, searchOBJ, updateFunction);
 	}

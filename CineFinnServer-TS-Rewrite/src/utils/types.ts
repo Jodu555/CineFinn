@@ -1,3 +1,7 @@
+import { Request } from 'express';
+import { RemoteSocket, Socket } from 'socket.io';
+import { DefaultEventsMap } from 'socket.io/dist/typed-events';
+
 export interface User {
 	UUID: string;
 	username: string;
@@ -35,6 +39,14 @@ type SettingsObject = {
 	};
 };
 
+export interface AuthCredentials {
+	user: User;
+}
+
+export interface AuthenticatedRequest extends Request {
+	credentials: AuthCredentials;
+}
+
 export interface SocketAuthObject {
 	type: 'client' | 'scraper' | 'rmvc-emitter';
 	token?: string;
@@ -43,9 +55,6 @@ export interface SocketAuthObject {
 	RMVCSessionID?: string;
 	RMVCEmitterSessionID?: string;
 }
-
-import { RemoteSocket, Socket } from 'socket.io';
-import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 
 interface videoStateChangeArg {
 	isPlaying: boolean;
@@ -73,7 +82,7 @@ interface ClientToServerEvents {
 }
 
 export interface timeUpdateObject {
-	series: number;
+	series: string;
 	season: number;
 	episode: number;
 	movie: number;

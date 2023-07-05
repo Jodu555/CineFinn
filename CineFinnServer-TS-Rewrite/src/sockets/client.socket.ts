@@ -152,9 +152,4 @@ async function sendWatchListChange(updatedSegmentList, socket, searchOBJ) {
 	// );
 }
 
-module.exports = {
-	initialize,
-	sendSiteReload,
-	sendWatchListChange,
-	sendSeriesReloadToAll,
-};
+export { initialize, sendSiteReload, sendWatchListChange, sendSeriesReloadToAll };
