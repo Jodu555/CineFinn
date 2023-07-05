@@ -1,0 +1,38 @@
+{
+	"name": "server",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"start": "ts-node src/index.ts",
+		"dev": "nodemon src/index.ts",
+		"job": "node src/jobs/index.js",
+		"dev:test": "nodemon src/test.js",
+		"start:test": "node src/test.js",
+		"dev:testcrawler": "nodemon src/testcrawler.js",
+		"start:testcrawler": "node src/testcrawler.js"
+	},
+	"nodemonConfig": {
+		"ignore": [
+			"*.json"
+		]
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@jodu555/commandmanager": "^1.5.3",
+		"@jodu555/express-helpers": "^1.2.4",
+		"@jodu555/mysqlapi": "^4.0.7",
+		"axios": "^1.2.0",
+		"cors": "^2.8.5",
+		"dotenv": "^16.0.3",
+		"express": "^4.18.2",
+		"ffmpeg": "^0.0.4",
+		"get-video-duration": "^4.1.0",
+		"morgan": "^1.10.0",
+		"p-limit": "^4.0.0",
+		"socket.io": "^4.5.4",
+		"uuid": "^9.0.0"
+	}
+}
