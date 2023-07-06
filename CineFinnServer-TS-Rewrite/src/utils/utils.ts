@@ -1,12 +1,13 @@
 import { RemoteSocket, Server, Socket } from 'socket.io';
-import { ExtendedRemoteSocket, Serie } from './types';
+import { ExtendedRemoteSocket } from './types';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
+import { Series } from '../classes/series';
 
 const fs = require('fs');
 const { crawlAndIndex, mergeSeriesArrays } = require('./crawler');
 const outputFileName = process.env.LOCAL_DB_FILE;
 
-let series: Serie[] = null;
+let series: Series[] = null;
 let activeJobs = [];
 let io: Server = null;
 let authHelper = null;
@@ -21,7 +22,7 @@ function debounce(cb: Function, delay = 1000) {
 		}, delay);
 	};
 }
-const getSeries = (forceLoad: boolean = false, forceFile: boolean = false): Serie[] => {
+const getSeries = (forceLoad: boolean = false, forceFile: boolean = false): Series[] => {
 	if (forceLoad || !series || forceFile) {
 		if ((fs.existsSync(outputFileName) && !forceLoad) || forceFile) {
 			const { Series } = require('../classes/series');
@@ -38,7 +39,7 @@ const getSeries = (forceLoad: boolean = false, forceFile: boolean = false): Seri
 	return series;
 };
 
-const setSeries = async (_series: Serie[]) => {
+const setSeries = async (_series: Series[]) => {
 	console.log('Loaded or Setted & merged new Series!');
 	if (series != null) {
 		series = mergeSeriesArrays(series, _series);

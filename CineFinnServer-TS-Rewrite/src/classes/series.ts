@@ -1,25 +1,16 @@
-const path = require('path');
-const { getSeries } = require('../utils/utils');
-
-/**
- * @typedef {Object} SeriesInformation
- * @property {String} infos
- * @property {String} description
- * @property {String} startDate
- * @property {String} image
- */
+import path from 'path';
+import { getSeries } from '../utils/utils';
+import { Langs, SerieEpisodeObject, SerieInfo, SerieMovieObject, SerieObject, SerieReference } from '../utils/types';
 
 class Series {
-	/**
-	 * @param  {String} ID
-	 * @param  {String} categorie
-	 * @param  {String} title
-	 * @param  {[Movie]} movies=[]
-	 * @param  {[[Episode]]} seasons=[]
-	 * @param {Object} references = {}
-	 * @param {SeriesInformation} infos = {}
-	 */
-	constructor(ID, categorie, title, movies = [], seasons = [], references = {}, infos = {}) {
+	ID: string;
+	categorie: string;
+	title: string;
+	movies: Movie[];
+	seasons: Episode[][];
+	references: SerieReference;
+	infos: SerieInfo;
+	constructor(ID: string, categorie: string, title: string, movies = [], seasons = [], references = {}, infos = {}) {
 		this.ID = ID;
 		this.categorie = categorie;
 		this.title = title;
@@ -28,19 +19,8 @@ class Series {
 		this.references = references;
 		this.infos = infos;
 	}
-	/**
-	 * @typedef {Object} oS
-	 * @property {String} ID
-	 * @property {String} categorie
-	 * @property {String} title
-	 * @property {[Movie]} movies=[]
-	 * @property {[[Episode]]} seasons=[]
-	 * @property {Object} references = {}
-	 */
-	/**
-	 * @param {oS} o
-	 */
-	static fromObject(o) {
+
+	static fromObject(o: SerieObject) {
 		const mappedSeasons = o?.seasons?.map((v) => v.map((e) => Episode.fromObject(e)));
 		const mappedMovies = o?.movies?.map((v) => Movie.fromObject(v));
 		return new Series(o.ID, o.categorie, o.title, mappedMovies, mappedSeasons, o.references, o?.infos);
@@ -48,15 +28,13 @@ class Series {
 }
 
 class Episode {
-	/**
-	 * @param  {String} filePath
-	 * @param  {String} primaryName
-	 * @param  {String} secondaryName
-	 * @param  {Number} season
-	 * @param  {Number} episode
-	 * @param  {[String]} langs
-	 */
-	constructor(filePath, primaryName, secondaryName, season, episode, langs) {
+	filePath: string;
+	primaryName: string;
+	secondaryName: string;
+	season: number;
+	episode: number;
+	langs: Langs[];
+	constructor(filePath: string, primaryName: string, secondaryName: string, season: number, episode: number, langs: Langs[]) {
 		this.filePath = filePath;
 		this.primaryName = primaryName;
 		this.secondaryName = secondaryName;
@@ -64,54 +42,30 @@ class Episode {
 		this.episode = episode;
 		this.langs = langs;
 	}
-	/**
-	 * @typedef {Object} oE
-	 * @property  {String} filePath
-	 * @property  {String} primaryName
-	 * @property  {String} secondaryName
-	 * @property  {Number} season
-	 * @property  {Number} episode
-	 * @property  {[String]} langs
-	 */
-	/**
-	 * @param {oE} o
-	 */
-	static fromObject(o) {
+
+	static fromObject(o: SerieEpisodeObject) {
 		return new Episode(o.filePath, o.primaryName, o.secondaryName, o.season, o.episode, o.langs);
 	}
 }
 
 class Movie {
-	/**
-	 * @param  {String} filePath
-	 * @param  {String} primaryName
-	 * @param  {String} secondaryName
-	 * @param  {[String]} langs
-	 */
-	constructor(filePath, primaryName, secondaryName, langs) {
+	filePath: string;
+	primaryName: string;
+	secondaryName: string;
+	langs: Langs[];
+	constructor(filePath: string, primaryName: string, secondaryName: string, langs: Langs[]) {
 		this.filePath = filePath;
 		this.primaryName = primaryName;
 		this.secondaryName = secondaryName;
 		this.langs = langs;
 	}
-	/**
-	 * @typedef {Object} oM
-	 * @property  {String} filePath
-	 * @property  {String} primaryName
-	 * @property  {String} secondaryName
-	 * @property  {[String]} langs
-	 */
-	/**
-	 * @param {oM} o
-	 */
-	static fromObject(o) {
+
+	static fromObject(o: SerieMovieObject) {
 		return new Movie(o.filePath, o.primaryName, o.secondaryName, o.langs);
 	}
 }
-/**
- * @param  {[Series]} series
- */
-const cleanupSeriesBeforeFrontResponse = (series) => {
+
+const cleanupSeriesBeforeFrontResponse = (series: Series[]) => {
 	//To Ensure that every deep object linking is removed
 	series = JSON.parse(JSON.stringify(series));
 	return series.map((serie) => {
@@ -132,16 +86,30 @@ const cleanupSeriesBeforeFrontResponse = (series) => {
 	});
 };
 
-const filenameParser = (filepath, filename) => {
+interface ParsedInformation {
+	movie: boolean;
+	title: string;
+	language: Langs;
+	season?: number;
+	episode?: number;
+	movieTitle?: string;
+}
+
+const filenameParser = (filepath: string, filename: string): ParsedInformation | any => {
 	// filename exp. Food Wars! Shokugeki no Sōma St#1 Flg#1.mp4
 
-	const parsers = [
+	interface pars {
+		re: RegExp;
+		parse: (match: RegExpExecArray) => ParsedInformation;
+	}
+
+	const parsers: pars[] = [
 		{
 			//v1 Episode Parser
 			re: /^(.*)St#(\d+) Flg#(\d+).mp4/gi,
 			parse: (match) => {
 				const [original, title, season, episode] = match;
-				return { movie: false, title: title.trim(), season: Number(season), episode: Number(episode), language: 'GerDub' };
+				return { movie: false, title: title.trim(), season: Number(season), episode: Number(episode), language: 'GerDub' } as ParsedInformation;
 			},
 		},
 		{
@@ -149,7 +117,7 @@ const filenameParser = (filepath, filename) => {
 			re: /^(.*)St#(\d+) Flg#(\d+)_(GerSub|GerDub|EngDub|EngSub).mp4/gi,
 			parse: (match) => {
 				const [original, title, season, episode, language] = match;
-				return { movie: false, title: title.trim(), season: Number(season), episode: Number(episode), language };
+				return { movie: false, title: title.trim(), season: Number(season), episode: Number(episode), language } as ParsedInformation;
 			},
 		},
 		{
@@ -159,7 +127,7 @@ const filenameParser = (filepath, filename) => {
 				// console.log(`match`, match);
 				const [original, movieTitle, language] = match;
 				const title = path.basename(path.dirname(path.dirname(filepath)));
-				return { movie: true, title, movieTitle, language };
+				return { movie: true, title, movieTitle, language } as ParsedInformation;
 			},
 		},
 		{
@@ -168,7 +136,7 @@ const filenameParser = (filepath, filename) => {
 			parse: (match) => {
 				const [original, movieTitle] = match;
 				const title = path.basename(path.dirname(path.dirname(filepath)));
-				return { movie: true, title, movieTitle, language: 'GerDub' };
+				return { movie: true, title, movieTitle, language: 'GerDub' } as ParsedInformation;
 			},
 		},
 	];
@@ -191,39 +159,19 @@ const filenameParser = (filepath, filename) => {
 	return output;
 };
 
-/**
- * @param  {String} seriesID the seriesID
- * @param  {Number} season the season 1 based
- * @param  {Number} episode the episode also 1 based
- * @returns {Episode}
- */
-function getVideoEntity(seriesID, season, episode) {
+function getVideoEntity(seriesID: string, season: number, episode: number): Episode {
 	const serie = getSeries().find((x) => x.ID == seriesID);
 	// Long (Especially when there are 50 seasons with 100 episodes each)
 	// const entity = serie.seasons.flat().find(x => x.season == season && x.episode == episode);
-	let entity;
+	let entity: Episode;
 	const seasonIndex = serie.seasons.findIndex((x) => x[0].season == season);
 	entity = serie.seasons[seasonIndex].find((x) => x.episode == episode);
 	return entity;
 }
 
-/**
- * @param  {String} seriesID the seriesID
- * @param  {Number} season the season 1 based
- * @param  {Number} episode the episode also 1 based
- * @returns {Movie}
- */
-function getVideoMovie(seriesID, movie) {
+function getVideoMovie(seriesID: string, movieID: number): Movie {
 	const serie = getSeries().find((x) => x.ID == seriesID);
-	return serie.movies[movie - 1];
+	return serie.movies[movieID - 1];
 }
 
-module.exports = {
-	Series,
-	Episode,
-	Movie,
-	filenameParser,
-	cleanupSeriesBeforeFrontResponse,
-	getVideoEntity,
-	getVideoMovie,
-};
+export { Series, Episode, Movie, filenameParser, cleanupSeriesBeforeFrontResponse, getVideoEntity, getVideoMovie };

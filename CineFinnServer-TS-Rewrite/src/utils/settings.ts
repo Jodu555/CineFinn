@@ -1,4 +1,6 @@
-const defaultSettings = {
+import { SettingsObject } from './types';
+
+const defaultSettings: SettingsObject = {
 	preferredLanguage: { title: 'Your Preffered Language', value: 'GerDub' },
 	showVideoTitleContainer: { title: 'Show the Video Title Container?', type: 'checkbox', value: true },
 	showLatestWatchButton: { title: 'Show the latest watch button?', type: 'checkbox', value: true },
@@ -8,7 +10,7 @@ const defaultSettings = {
 	volume: { type: 'hide', value: 1 },
 };
 
-function compareSettings(settings) {
+function compareSettings(settings: SettingsObject) {
 	const outputSettings = {};
 	for (const setting in defaultSettings) {
 		if (settings?.[setting]) {
@@ -20,7 +22,4 @@ function compareSettings(settings) {
 	return outputSettings;
 }
 
-module.exports = {
-	defaultSettings,
-	compareSettings,
-};
+export { defaultSettings, compareSettings };

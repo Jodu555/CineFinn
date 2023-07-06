@@ -10,7 +10,7 @@ export interface User {
 	settings: SettingsObject | string;
 }
 
-type SettingsObject = {
+export type SettingsObject = {
 	preferredLanguage: {
 		title: string;
 		value: string;
@@ -26,15 +26,22 @@ type SettingsObject = {
 		value: boolean;
 	};
 	developerMode: {
+		title: string;
 		value: boolean;
+		type: string;
 	};
 	showNewsAddForm: {
+		title: string;
+		type: string;
 		value: boolean;
 	};
 	autoSkip: {
+		title: string;
 		value: boolean;
+		type: string;
 	};
 	volume: {
+		type: 'hide';
 		value: number;
 	};
 };
@@ -115,22 +122,28 @@ export interface TodoItem {
 	references: SerieReference;
 }
 
-export interface Serie {
+export interface SerieObject {
 	ID: string;
 	categorie: string;
 	title: string;
-	seasons: SerieEntity[][];
-	movies: SerieEntity[];
+	seasons: SerieEpisodeObject[][];
+	movies: SerieMovieObject[];
 	references: SerieReference;
 	infos: SerieInfo;
 }
 
-export interface SerieEntity {
+export interface SerieEpisodeObject {
 	filePath: string;
 	primaryName: string;
 	secondaryName: string;
 	season: number;
 	episode: number;
+	langs: Langs[];
+}
+export interface SerieMovieObject {
+	filePath: string;
+	primaryName: string;
+	secondaryName: string;
 	langs: Langs[];
 }
 
