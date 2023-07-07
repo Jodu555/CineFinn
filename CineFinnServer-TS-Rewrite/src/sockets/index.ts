@@ -1,7 +1,6 @@
 import { getIO, getAuthHelper } from '../utils/utils';
 import { ExtendedSocket, User } from '../utils/types';
 
-// const { getIO, getAuthHelper } = require('../utils/utils');
 const { initialize: socketInitScraper } = require('./scraper.socket.js');
 // import { initialize as socketInitClient } from './scraper.socket';
 

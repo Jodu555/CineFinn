@@ -1,3 +1,4 @@
+import { sendWatchListChange } from '../sockets/client.socket';
 import { ExtendedSocket, timeUpdateObject } from './types';
 import { searchObject, updateSegment } from './watchString';
 
@@ -36,7 +37,6 @@ async function writeWatchInfoToDatabase(socket: ExtendedSocket, obj: timeUpdateO
 	}
 
 	if (update) {
-		const { sendWatchListChange } = require('../sockets/client.socket');
 		sendWatchListChange(updatedSegmentList, socket, searchOBJ);
 		console.log('  => Updated');
 	}

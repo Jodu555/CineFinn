@@ -1,10 +1,10 @@
 import { Database } from '@jodu555/mysqlapi';
 import { DatabaseTodoItem, ExtendedSocket } from '../utils/types';
 import { debounce, toAllSockets, getSeries } from '../utils/utils';
-const { cleanupSeriesBeforeFrontResponse } = require('../classes/series');
-const { compareSettings, defaultSettings } = require('../utils/settings');
-const { writeWatchInfoToDatabase } = require('../utils/watchManager');
-const { parse, load } = require('../utils/watchString');
+import { writeWatchInfoToDatabase } from '../utils/watchManager';
+import { parse, load } from '../utils/watchString';
+import { defaultSettings, compareSettings } from '../utils/settings';
+import { cleanupSeriesBeforeFrontResponse } from '../classes/series';
 
 const database = Database.getDatabase();
 

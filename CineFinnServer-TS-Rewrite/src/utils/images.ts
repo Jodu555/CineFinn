@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Series, filenameParser } from '../classes/series';
-const child_process = require('child_process');
+import child_process from 'child_process';
 const { getVideoDurationInSeconds } = require('get-video-duration');
 const { promiseAllLimit } = require('./utils');
 

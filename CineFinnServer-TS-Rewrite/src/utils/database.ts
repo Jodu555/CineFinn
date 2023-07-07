@@ -1,5 +1,5 @@
 import { Database } from '@jodu555/mysqlapi';
-module.exports = () => {
+export default () => {
 	const database = Database.getDatabase();
 
 	database.createTable('jobs', {

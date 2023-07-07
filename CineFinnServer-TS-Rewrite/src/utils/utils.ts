@@ -1,9 +1,8 @@
+import fs from 'fs';
 import { RemoteSocket, Server, Socket } from 'socket.io';
 import { ExtendedRemoteSocket } from './types';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { Series } from '../classes/series';
-
-const fs = require('fs');
 const { crawlAndIndex, mergeSeriesArrays } = require('./crawler');
 const outputFileName = process.env.LOCAL_DB_FILE;
 
@@ -25,7 +24,6 @@ function debounce(cb: Function, delay = 1000) {
 const getSeries = (forceLoad: boolean = false, forceFile: boolean = false): Series[] => {
 	if (forceLoad || !series || forceFile) {
 		if ((fs.existsSync(outputFileName) && !forceLoad) || forceFile) {
-			const { Series } = require('../classes/series');
 			console.log('Loaded series from file!');
 			const fileObject = JSON.parse(fs.readFileSync(outputFileName, 'utf8'));
 			setSeries(fileObject.map((e) => Series.fromObject(e)));
@@ -86,20 +84,6 @@ function deepMerge(current: object, updates: object) {
 	return current;
 }
 
-// module.exports = {
-// 	getSeries,
-// 	setSeries,
-// 	getActiveJobs,
-// 	setActiveJobs,
-// 	getAuthHelper,
-// 	setAuthHelper,
-// 	getIO,
-// 	setIO,
-// 	debounce,
-// 	toAllSockets,
-// 	promiseAllLimit,
-// 	deepMerge,
-// };
 export {
 	getSeries,
 	setSeries,

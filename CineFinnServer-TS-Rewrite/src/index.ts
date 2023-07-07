@@ -20,7 +20,8 @@ const { registerCommands } = require('./utils/commands');
 registerCommands();
 
 const { ErrorHelper, AuthenticationHelper } = require('@jodu555/express-helpers');
-require('./utils/database')();
+import databaseSetupFunction from './utils/database';
+databaseSetupFunction();
 
 import { initialize as socket_initialize } from './sockets';
 
