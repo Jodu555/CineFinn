@@ -44,6 +44,4 @@ const initialize = (socket: ExtendedSocket) => {
 	});
 };
 
-module.exports = {
-	initialize,
-};
+export { initialize };

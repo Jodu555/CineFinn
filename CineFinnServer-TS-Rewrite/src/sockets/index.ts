@@ -2,9 +2,11 @@ import { getIO, getAuthHelper } from '../utils/utils';
 import { ExtendedSocket, User } from '../utils/types';
 
 // const { getIO, getAuthHelper } = require('../utils/utils');
-const { initialize: socketInitClient } = require('./client.socket.js');
 const { initialize: socketInitScraper } = require('./scraper.socket.js');
-const { initialize: socketInitRMVCEmitter } = require('./rmvcEmitter.socket.js');
+// import { initialize as socketInitClient } from './scraper.socket';
+
+import { initialize as socketInitClient } from './client.socket';
+import { initialize as socketInitRMVCEmitter } from './rmvcEmitter.socket';
 
 const initialize = () => {
 	const io = getIO();

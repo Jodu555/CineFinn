@@ -7,7 +7,7 @@ import https from 'https';
 import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
-import { User } from './utils/types';
+import { User, SettingsObject } from './utils/types';
 import { Database } from '@jodu555/mysqlapi';
 dotenv.config();
 
@@ -24,9 +24,7 @@ require('./utils/database')();
 
 import { initialize as socket_initialize } from './sockets';
 
-import { getSeries, setIO, setAuthHelper } from './utils/utils.js';
-
-const { defaultSettings, compareSettings } = require('./utils/settings.js');
+import { getSeries, setIO, setAuthHelper } from './utils/utils';
 
 const app = express();
 app.use(cors());
@@ -55,7 +53,7 @@ authHelper.options.allowMultipleSessions = true;
 authHelper.options.authTokenStoreDatabase = true;
 authHelper.install(
 	async (token: string, userobj: User) => {
-		const outSettings = compareSettings(userobj.settings);
+		const outSettings = compareSettings(userobj.settings as SettingsObject);
 		await database.get('accounts').update({ UUID: userobj.UUID }, { settings: JSON.stringify(outSettings) });
 	},
 	async (userobj: User) => {
@@ -99,8 +97,9 @@ const { router: managment_router } = require('./routes/managment.js');
 import { router as watch_router } from './routes/watch';
 const { router: news_router } = require('./routes/news');
 const { router: index_router } = require('./routes/index');
-const video = require('./routes/video.js');
-import todo from './routes/todo.js';
+import video from './routes/video';
+import todo from './routes/todo';
+import { compareSettings, defaultSettings } from './utils/settings';
 const { generateImages } = require('./utils/images');
 
 // Your Middleware handlers here

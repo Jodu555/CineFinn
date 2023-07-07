@@ -1,9 +1,7 @@
-const path = require('path');
 import fs from 'fs';
-import { Serie } from './types';
+import path from 'path';
+import { Series, filenameParser } from '../classes/series';
 const child_process = require('child_process');
-
-const { filenameParser, Series } = require('../classes/series');
 const { getVideoDurationInSeconds } = require('get-video-duration');
 const { promiseAllLimit } = require('./utils');
 
@@ -21,7 +19,7 @@ async function deepExecPromisify(command: string, cwd: string = undefined) {
  * @param  {[Series]} series
  * @param  {function} cleanup
  */
-const generateImages = async (series: Serie[], cleanup = () => {}) => {
+const generateImages = async (series: Series[], cleanup = () => {}) => {
 	console.log('Started generateImages()');
 
 	const limit = await promiseAllLimit(Number(process.env.IMG_CONCURRENT_LIMIT_GENERATION || 5));
@@ -71,32 +69,32 @@ const generateImages = async (series: Serie[], cleanup = () => {}) => {
 	cleanup();
 };
 
-const validateImages = async (series: Serie[], cleanup = () => {}) => {
-	let totalImgs = 0;
+// const validateImages = async (series: Series[], cleanup = () => {}) => {
+// 	let totalImgs = 0;
 
-	// return;
-	for (const serie of series) {
-		const seasons = serie.seasons.flat(2);
-		let i = 0;
-		for (const season of seasons) {
-			i++;
-			const data = filenameParser(season, path.parse(season).base);
-			const location = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), `${data.season}-${data.episode}`);
-			const duration = await getVideoDurationInSeconds(season);
-			const imageAmount = Math.ceil(duration / 10);
-			totalImgs += imageAmount;
-			console.log(totalImgs);
-			if (!fs.existsSync(location)) {
-				//Failure
-				continue;
-			}
-			const files = fs.readdirSync(location);
-			console.log(`Check ${i} / ${seasons.length} - ${path.parse(season).base} = ${imageAmount} == ${files.length}`);
-		}
-	}
-	console.log('Finished');
-	cleanup();
-};
+// 	// return;
+// 	for (const serie of series) {
+// 		const seasons = serie.seasons.flat(2);
+// 		let i = 0;
+// 		for (const season of seasons) {
+// 			i++;
+// 			const data = filenameParser(season, path.parse(season).base);
+// 			const location = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), `${data.season}-${data.episode}`);
+// 			const duration = await getVideoDurationInSeconds(season);
+// 			const imageAmount = Math.ceil(duration / 10);
+// 			totalImgs += imageAmount;
+// 			console.log(totalImgs);
+// 			if (!fs.existsSync(location)) {
+// 				//Failure
+// 				continue;
+// 			}
+// 			const files = fs.readdirSync(location);
+// 			console.log(`Check ${i} / ${seasons.length} - ${path.parse(season).base} = ${imageAmount} == ${files.length}`);
+// 		}
+// 	}
+// 	console.log('Finished');
+// 	cleanup();
+// };
 
 export {
 	generateImages,

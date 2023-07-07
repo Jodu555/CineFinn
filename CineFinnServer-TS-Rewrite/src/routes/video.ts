@@ -3,9 +3,9 @@ import fs from 'fs';
 import { Response } from 'express';
 import { getSeries } from '../utils/utils';
 import { AuthenticatedRequest } from '../utils/types';
-const { getVideoEntity, getVideoMovie } = require('../classes/series');
+import { getVideoMovie, getVideoEntity } from '../classes/series';
 
-module.exports = (req: AuthenticatedRequest, res: Response) => {
+export = (req: AuthenticatedRequest, res: Response) => {
 	const { series: seriesID, season, episode, movie, language } = req.query;
 
 	const debug = false;
@@ -41,9 +41,9 @@ module.exports = (req: AuthenticatedRequest, res: Response) => {
 	// let videoEntity = isMovie ? serie.movies[movie] : serie.seasons[season][episode];
 	let videoEntity = null;
 	if (isMovie) {
-		videoEntity = getVideoMovie(serie.ID, movie);
+		videoEntity = getVideoMovie(serie.ID, Number(movie));
 	} else {
-		videoEntity = getVideoEntity(serie.ID, season, episode);
+		videoEntity = getVideoEntity(serie.ID, Number(season), Number(episode));
 	}
 	if (videoEntity == null || videoEntity == undefined) {
 		res.status(400).send('Season or Episode does not exists');
