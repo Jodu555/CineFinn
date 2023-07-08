@@ -1,6 +1,6 @@
 import { sendWatchListChange } from '../sockets/client.socket';
 import { ExtendedSocket, timeUpdateObject } from './types';
-import { searchObject, updateSegment } from './watchString';
+import { Segment, searchObject, updateSegment } from './watchString';
 
 async function writeWatchInfoToDatabase(socket: ExtendedSocket, obj: timeUpdateObject) {
 	console.log('Write Through:', socket.auth.user.username, obj);
@@ -15,7 +15,7 @@ async function writeWatchInfoToDatabase(socket: ExtendedSocket, obj: timeUpdateO
 	};
 
 	let update = false;
-	let updatedSegmentList;
+	let updatedSegmentList: Segment[];
 
 	const updateFunction = (seg) => {
 		if (seg.time < time) {
@@ -37,7 +37,7 @@ async function writeWatchInfoToDatabase(socket: ExtendedSocket, obj: timeUpdateO
 	}
 
 	if (update) {
-		sendWatchListChange(updatedSegmentList, socket, searchOBJ);
+		sendWatchListChange(updatedSegmentList, socket, { series: searchOBJ.series });
 		console.log('  => Updated');
 	}
 }

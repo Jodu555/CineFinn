@@ -2,7 +2,7 @@ import { Database } from '@jodu555/mysqlapi';
 import { DatabaseTodoItem, ExtendedRemoteSocket, ExtendedSocket } from '../utils/types';
 import { debounce, toAllSockets, getSeries } from '../utils/utils';
 import { writeWatchInfoToDatabase } from '../utils/watchManager';
-import { parse, load } from '../utils/watchString';
+import { parse, load, Segment, searchObject } from '../utils/watchString';
 import { defaultSettings, compareSettings } from '../utils/settings';
 import { cleanupSeriesBeforeFrontResponse } from '../classes/series';
 
@@ -135,21 +135,20 @@ async function sendSeriesReloadToAll(cb?: (socket: ExtendedRemoteSocket) => void
 	);
 }
 
-async function sendWatchListChange(updatedSegmentList, socket, searchOBJ) {
+export interface WatchListChangeSearchObject {
+	series: string;
+}
+
+async function sendWatchListChange(
+	updatedSegmentList: Segment[],
+	socket: ExtendedRemoteSocket | ExtendedSocket,
+	searchOBJ: WatchListChangeSearchObject
+) {
 	if (searchOBJ) {
 		socket.emit('watchListChange', { watchList: updatedSegmentList.filter((x) => x.ID == searchOBJ.series), seriesID: searchOBJ.series });
 	} else {
 		socket.emit('watchListChange', { watchList: updatedSegmentList });
 	}
-	// await toAllSockets(
-	// 	(s) => {
-	// 		s.emit(
-	// 			'watchListChange',
-	// 			updatedSegmentList.filter((x) => x.ID == searchOBJ.series)
-	// 		);
-	// 	},
-	// 	(s) => s.auth.type == 'client' && s.auth.user.UUID == socket.auth.user.UUID
-	// );
 }
 
 export { initialize, sendSiteReload, sendWatchListChange, sendSeriesReloadToAll };
