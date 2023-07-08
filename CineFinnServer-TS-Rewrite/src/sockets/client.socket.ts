@@ -1,5 +1,5 @@
 import { Database } from '@jodu555/mysqlapi';
-import { DatabaseTodoItem, ExtendedSocket } from '../utils/types';
+import { DatabaseTodoItem, ExtendedRemoteSocket, ExtendedSocket } from '../utils/types';
 import { debounce, toAllSockets, getSeries } from '../utils/utils';
 import { writeWatchInfoToDatabase } from '../utils/watchManager';
 import { parse, load } from '../utils/watchString';
@@ -125,7 +125,7 @@ async function sendSiteReload() {
 	);
 }
 
-async function sendSeriesReloadToAll(cb) {
+async function sendSeriesReloadToAll(cb?: (socket: ExtendedRemoteSocket) => void) {
 	toAllSockets(
 		(s) => {
 			if (typeof cb === 'function') cb(s);

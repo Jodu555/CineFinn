@@ -39,6 +39,7 @@ export default () => {
 			type: 'TEXT',
 		},
 	});
+
 	database.createTable('todos', {
 		options: {},
 		ID: {

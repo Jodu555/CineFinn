@@ -1,9 +1,9 @@
-const fs = require('fs');
-const { CommandManager, Command } = require('@jodu555/commandmanager');
-const { sendSiteReload, sendSeriesReloadToAll } = require('../sockets/client.socket');
-const { getAniworldInfos } = require('../sockets/scraper.socket');
-const { getSeries, getAuthHelper, getIO, toAllSockets } = require('./utils');
-const { cleanupSeriesBeforeFrontResponse } = require('../classes/series');
+import fs from 'fs';
+import { sendSeriesReloadToAll, sendSiteReload } from '../sockets/client.socket';
+import { getAniworldInfos } from '../sockets/scraper.socket';
+import { getSeries, getAuthHelper, getIO } from './utils';
+import { CommandManager, Command } from '@jodu555/commandmanager';
+import { ExtendedRemoteSocket } from './types';
 
 const commandManager = CommandManager.getCommandManager();
 
@@ -39,7 +39,7 @@ function registerCommands() {
 	commandManager.registerCommand(
 		new Command(['socketsessions', 'ss'], 'socketsessions', 'Lists the current active socket sessions', async (command, [...args], scope) => {
 			const output = ['Current socket sessions:'];
-			const sockets = await getIO().fetchSockets();
+			const sockets = (await getIO().fetchSockets()) as ExtendedRemoteSocket[];
 			for (const socket of sockets) {
 				output.push(` - ${socket.auth.type.toUpperCase()} => ${socket.auth.user.username}`);
 			}
@@ -72,7 +72,7 @@ function registerCommands() {
 				if (serie == undefined) {
 					return 'Cant find series with that ID';
 				}
-				if (serie.reference.aniworld == undefined) {
+				if (serie.references.aniworld == undefined) {
 					return 'The Series has no reference point for aniworld';
 				}
 				getAniworldInfos(serie.references.aniworld);
