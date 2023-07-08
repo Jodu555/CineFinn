@@ -246,13 +246,14 @@ const mergeSeriesArrays = (before, after) => {
 	 * 22 ms to max 38 ms before
 	 */
 	console.log('Started');
-	// console.time('crawlAndIndex');
-	// const series = crawlAndIndex();
-	// console.timeEnd('crawlAndIndex');
-	console.time('newCrawlAndIndex');
-	const series = newCrawlAndIndex();
-	// console.log(series);
-	console.timeEnd('newCrawlAndIndex');
+	const beforeTimes = [];
+	for (let i = 0; i < 100; i++) {
+		const before = Date.now();
+		const series = crawlAndIndex();
+		console.log(series.length);
+		beforeTimes.push(before - Date.now());
+	}
+	console.log(beforeTimes);
 })();
 
 // module.exports = { crawlAndIndex, mergeSeriesArrays, generateID };

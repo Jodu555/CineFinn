@@ -1,9 +1,9 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const listFiles = (lcPath) => {
-	const files = [];
-	const dirs = [];
+const listFiles = (lcPath: string) => {
+	const files: string[] = [];
+	const dirs: string[] = [];
 	fs.readdirSync(lcPath)
 		.map((e) => {
 			return { name: e, path: path.join(lcPath, e) };

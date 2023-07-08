@@ -123,13 +123,12 @@ const newCrawlAndIndex = () => {
 	}
 
 	let { dirs, files } = listFiles(process.env.VIDEO_PATH);
+	const manipulatedDirs = dirs.filter((x) => !(x.includes('Season') || x.includes('Movies')));
 
 	//Strip all non mp4 files from the files
 	files = files.filter((f) => path.parse(f).ext == '.mp4');
 
-	console.log(categorieMap);
-
-	// Strip the dirs down and seperate between season or movie dirs or series dirs
+	// console.log(categorieMap);
 	/**
 	 * @type Series[]
 	 */
@@ -245,14 +244,38 @@ const mergeSeriesArrays = (before, after) => {
 	/**
 	 * 22 ms to max 38 ms before
 	 */
-	console.log('Started');
-	// console.time('crawlAndIndex');
-	// const series = crawlAndIndex();
-	// console.timeEnd('crawlAndIndex');
-	console.time('newCrawlAndIndex');
-	const series = newCrawlAndIndex();
-	// console.log(series);
-	console.timeEnd('newCrawlAndIndex');
+
+	newCrawlAndIndex();
+
+	// const testTries = 200;
+
+	// console.log('Started');
+	// const beforeTimes = [];
+	// for (let i = 0; i < testTries; i++) {
+	// 	i % 50 == 0 && console.log('Before', i);
+	// 	const before = Date.now();
+	// 	const series = crawlAndIndex();
+	// 	beforeTimes.push(Date.now() - before);
+	// }
+
+	// const afterTimes = [];
+	// for (let i = 0; i < testTries; i++) {
+	// 	i % 50 == 0 && console.log('After', i);
+	// 	const before = Date.now();
+	// 	const series = newCrawlAndIndex();
+	// 	// console.log(series.length);
+	// 	afterTimes.push(Date.now() - before);
+	// }
+
+	// console.log('Before', sumAverage(beforeTimes));
+	// console.log('After', sumAverage(afterTimes));
 })();
+
+function sumAverage(numbers) {
+	const sum = numbers.reduce((acc, curr) => acc + curr, 0);
+	const average = sum / numbers.length;
+
+	return average;
+}
 
 // module.exports = { crawlAndIndex, mergeSeriesArrays, generateID };
