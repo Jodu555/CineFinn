@@ -9,7 +9,6 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { Database } from '@jodu555/mysqlapi';
 import { User, SettingsObject } from './utils/types';
-import { registerCommands } from './utils/commands';
 dotenv.config();
 
 const database = Database.createDatabase(process.env.DB_HOST, process.env.DB_USERNAME, process.env.DB_PASSWORD, process.env.DB_DATABASE);
@@ -17,6 +16,7 @@ database.connect();
 
 import { CommandManager } from '@jodu555/commandmanager';
 CommandManager.createCommandManager(process.stdin, process.stdout);
+import { registerCommands } from './utils/commands';
 registerCommands();
 
 const { ErrorHelper, AuthenticationHelper } = require('@jodu555/express-helpers');
