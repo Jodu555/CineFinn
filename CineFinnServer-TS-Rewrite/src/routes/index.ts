@@ -1,14 +1,16 @@
-const express = require('express');
-const router = express.Router();
-const { cleanupSeriesBeforeFrontResponse, Series } = require('../classes/series');
-const { getSeries, setSeries, deepMerge } = require('../utils/utils');
-const axios = require('axios');
-const { sendSeriesReloadToAll } = require('../sockets/client.socket');
-const { generateID } = require('../utils/crawler');
+import express, { NextFunction, Response } from 'express';
+import axios from 'axios';
+import { AuthenticatedRequest, DatabaseJobItem, DatabaseNewsItem, DatabaseTodoItem } from '../utils/types';
+import { cleanupSeriesBeforeFrontResponse, Series } from '../classes/series';
+import { sendSeriesReloadToAll } from '../sockets/client.socket';
+import { generateID } from '../utils/crawler';
+import { getSeries, setSeries, deepMerge } from '../utils/utils';
 
-router.get('/', async (req, res, next) => {
+const router = express.Router();
+
+router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const series = cleanupSeriesBeforeFrontResponse(getSeries()).map((x) => {
-		const y = JSON.parse(JSON.stringify(x));
+		const y = JSON.parse(JSON.stringify(x)) as Series;
 		y.seasons = new Array(y.seasons.length).fill(-1);
 		y.movies = new Array(y.movies.length).fill(-1);
 		return y;
@@ -21,12 +23,12 @@ router.get('/', async (req, res, next) => {
 	}
 });
 
-router.get('/all', async (req, res, next) => {
+router.get('/all', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const series = getSeries();
 	res.json(series);
 });
 
-router.get('/:ID', async (req, res, next) => {
+router.get('/:ID', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const series = cleanupSeriesBeforeFrontResponse(getSeries());
 	const serie = series.find((x) => x.ID === req.params.ID);
 	if (serie) {
@@ -36,12 +38,12 @@ router.get('/:ID', async (req, res, next) => {
 	}
 });
 
-router.patch('/:ID', async (req, res, next) => {
+router.patch('/:ID', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	//TODO: IMPORTANT: Add restriction to this route
 	setSeries(
 		getSeries().map((x) => {
 			if (x.ID == req.params.ID) {
-				const out = deepMerge(x, req.body);
+				const out = deepMerge<Series>(x, req.body);
 				res.json(out);
 				return out;
 			} else {
@@ -52,7 +54,7 @@ router.patch('/:ID', async (req, res, next) => {
 	await sendSeriesReloadToAll();
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	// res.status(501).json({});
 	// return;
 	//TODO: IMPORTANT: Add restriction to this route

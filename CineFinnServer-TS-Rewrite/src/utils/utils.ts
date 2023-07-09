@@ -74,7 +74,7 @@ const promiseAllLimit = (args) => {
 	});
 };
 
-function deepMerge(current: object, updates: object) {
+function deepMerge<T>(current: T, updates: T): T {
 	// if (updates === null) return current;
 	if (typeof updates !== 'object') return current;
 	for (const key of Object.keys(updates)) {
