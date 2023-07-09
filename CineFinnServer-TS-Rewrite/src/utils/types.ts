@@ -132,6 +132,13 @@ export interface TodoItem {
 	references: SerieReference;
 }
 
+export interface ActiveJob {
+	id: string;
+	name: string;
+	startTime: number;
+	data: any;
+}
+
 export interface SerieObject {
 	ID: string;
 	categorie: string;

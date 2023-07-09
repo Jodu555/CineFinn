@@ -1,13 +1,12 @@
 import fs from 'fs';
 import { RemoteSocket, Server, Socket } from 'socket.io';
-import { ExtendedRemoteSocket } from './types';
-import { DefaultEventsMap } from 'socket.io/dist/typed-events';
+import { ActiveJob, ExtendedRemoteSocket, SerieObject } from './types';
 import { Series } from '../classes/series';
 const { crawlAndIndex, mergeSeriesArrays } = require('./crawler');
 const outputFileName = process.env.LOCAL_DB_FILE;
 
 let series: Series[] = null;
-let activeJobs = [];
+let activeJobs: ActiveJob[] = [];
 let io: Server = null;
 let authHelper = null;
 
@@ -25,7 +24,7 @@ const getSeries = (forceLoad: boolean = false, forceFile: boolean = false): Seri
 	if (forceLoad || !series || forceFile) {
 		if ((fs.existsSync(outputFileName) && !forceLoad) || forceFile) {
 			console.log('Loaded series from file!');
-			const fileObject = JSON.parse(fs.readFileSync(outputFileName, 'utf8'));
+			const fileObject = JSON.parse(fs.readFileSync(outputFileName, 'utf8')) as SerieObject[];
 			setSeries(fileObject.map((e) => Series.fromObject(e)));
 		} else {
 			console.log('Crawled the series!');
@@ -50,13 +49,13 @@ const setSeries = async (_series: Series[]) => {
 };
 
 const getActiveJobs = () => activeJobs;
-const setActiveJobs = (_activeJobs) => (activeJobs = _activeJobs);
+const setActiveJobs = (_activeJobs: ActiveJob[]) => (activeJobs = _activeJobs);
 
 const getAuthHelper = () => authHelper;
 const setAuthHelper = (_authHelper) => (authHelper = _authHelper);
 
 const getIO = () => io;
-const setIO = (_io) => (io = _io);
+const setIO = (_io: Server) => (io = _io);
 
 type toAllSocketsFunctionCB = (socket: ExtendedRemoteSocket) => void;
 type toAllSocketsFunctionFilter = (socket: ExtendedRemoteSocket) => boolean;

@@ -15,11 +15,7 @@ async function deepExecPromisify(command: string, cwd: string = undefined) {
 		});
 	});
 }
-/**
- * @param  {[Series]} series
- * @param  {function} cleanup
- */
-const generateImages = async (series: Series[], cleanup = () => {}) => {
+const generateImages = async (series: Series[], cleanup: () => void = () => {}) => {
 	console.log('Started generateImages()');
 
 	const limit = await promiseAllLimit(Number(process.env.IMG_CONCURRENT_LIMIT_GENERATION || 5));
