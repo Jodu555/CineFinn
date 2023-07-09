@@ -1,10 +1,11 @@
-const { Database } = require('@jodu555/mysqlapi');
+import express, { NextFunction, Response } from 'express';
+import { Database } from '@jodu555/mysqlapi';
+import { AuthenticatedRequest, DatabaseJobItem } from '../utils/types';
+import { sendSeriesReloadToAll } from '../sockets/client.socket';
+import { crawlAndIndex } from '../utils/crawler';
+import { generateImages } from '../utils/images';
+import { getActiveJobs, getSeries, setActiveJobs, toAllSockets, setSeries } from '../utils/utils';
 const database = Database.getDatabase();
-const express = require('express');
-const { sendSeriesReloadToAll } = require('../sockets/client.socket');
-const { crawlAndIndex } = require('../utils/crawler');
-const { generateImages } = require('../utils/images');
-const { getActiveJobs, setActiveJobs, getSeries, setSeries, toAllSockets } = require('../utils/utils');
 const router = express.Router();
 
 const LOOKUP = {
@@ -13,11 +14,11 @@ const LOOKUP = {
 	// validator: { name: 'Validating Preview-Images', callpoint: '/job/img/validate' },
 };
 
-const callpointToEvent = (callpoint) => `${callpoint.replace('/', '').replaceAll('/', '_')}-end`;
+const callpointToEvent = (callpoint: string) => `${callpoint.replace('/', '').replaceAll('/', '_')}-end`;
 
 Promise.all(
 	Object.keys(LOOKUP).map(async (id) => {
-		const jobDB = await database.get('jobs').getOne({ ID: id });
+		const jobDB = await database.get<DatabaseJobItem>('jobs').getOne({ ID: id });
 		if (jobDB) {
 			const lastRun = jobDB.lastRun ? Number(jobDB.lastRun) : undefined;
 			LOOKUP[id] = { ...LOOKUP[id], lastRun };
@@ -28,7 +29,7 @@ Promise.all(
 	})
 );
 
-router.use((req, res, next) => {
+router.use((req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const jobID = Object.keys(LOOKUP).find((v) => LOOKUP[v].callpoint == req.path);
 	if (jobID) {
 		const lastRun = Date.now();
@@ -38,7 +39,7 @@ router.use((req, res, next) => {
 	next();
 });
 
-router.get('/jobs/info', (req, res, next) => {
+router.get('/jobs/info', (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const response = [];
 	Object.keys(LOOKUP).forEach((id) => {
 		response.push({
@@ -50,7 +51,7 @@ router.get('/jobs/info', (req, res, next) => {
 	res.json(response);
 });
 
-router.get('/job/img/generate', (req, res, next) => {
+router.get('/job/img/generate', (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const id = 'generate';
 	const job = getActiveJobs().find((x) => x.id == id);
 	if (job) {
@@ -80,7 +81,7 @@ router.get('/job/img/generate', (req, res, next) => {
 	}
 });
 
-// router.get('/job/img/validate', (req, res, next) => {
+// router.get('/job/img/validate', (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 //     const id = 'validator';
 //     const job = getActiveJobs().find(x => x.id == id);
 //     if (job) {
@@ -101,7 +102,7 @@ router.get('/job/img/generate', (req, res, next) => {
 //     }
 // });
 
-router.get('/job/crawl', (req, res, next) => {
+router.get('/job/crawl', (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const id = 'crawl';
 	const job = getActiveJobs().find((x) => x.id == id);
 	if (job) {
@@ -127,4 +128,4 @@ router.get('/job/crawl', (req, res, next) => {
 	}
 });
 
-module.exports = { router };
+export { router };

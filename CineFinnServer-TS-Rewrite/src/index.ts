@@ -94,7 +94,7 @@ setIO(
 
 socket_initialize();
 
-const { router: managment_router } = require('./routes/managment.js');
+import { router as managment_router } from './routes/managment';
 import { router as watch_router } from './routes/watch';
 import { router as news_router } from './routes/news';
 import { router as index_router } from './routes/index';

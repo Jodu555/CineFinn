@@ -21,6 +21,4 @@ const listFiles = (lcPath: string) => {
 	return { files, dirs };
 };
 
-module.exports = {
-	listFiles,
-};
+export { listFiles };
