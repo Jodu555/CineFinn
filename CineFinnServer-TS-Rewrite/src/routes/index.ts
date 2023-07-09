@@ -66,4 +66,4 @@ router.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunc
 	res.json(serie);
 });
 
-module.exports = { router };
+export { router };

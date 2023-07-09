@@ -1,22 +1,22 @@
 import path from 'path';
 import fs from 'fs';
 import http from 'http';
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { Server } from 'socket.io';
 import https from 'https';
 import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
-import { User, SettingsObject } from './utils/types';
 import { Database } from '@jodu555/mysqlapi';
+import { User, SettingsObject } from './utils/types';
+import { registerCommands } from './utils/commands';
 dotenv.config();
 
 const database = Database.createDatabase(process.env.DB_HOST, process.env.DB_USERNAME, process.env.DB_PASSWORD, process.env.DB_DATABASE);
 database.connect();
 
-const { CommandManager } = require('@jodu555/commandmanager');
+import { CommandManager } from '@jodu555/commandmanager';
 CommandManager.createCommandManager(process.stdin, process.stdout);
-const { registerCommands } = require('./utils/commands');
 registerCommands();
 
 const { ErrorHelper, AuthenticationHelper } = require('@jodu555/express-helpers');
@@ -31,7 +31,7 @@ const app = express();
 app.use(cors());
 app.use(
 	morgan('dev', {
-		skip: (req, res) => {
+		skip: (req: Request, res: Response) => {
 			if (process.env.NODE_ENV == 'development') {
 				return false;
 			}
@@ -96,12 +96,11 @@ socket_initialize();
 
 const { router: managment_router } = require('./routes/managment.js');
 import { router as watch_router } from './routes/watch';
-const { router: news_router } = require('./routes/news');
-const { router: index_router } = require('./routes/index');
+import { router as news_router } from './routes/news';
+import { router as index_router } from './routes/index';
 import video from './routes/video';
 import todo from './routes/todo';
 import { compareSettings, defaultSettings } from './utils/settings';
-const { generateImages } = require('./utils/images');
 
 // Your Middleware handlers here
 app.use('/images', authHelper.authentication(), express.static(path.join(process.env.PREVIEW_IMGS_PATH)));
@@ -122,13 +121,4 @@ const PORT = process.env.PORT || 3100;
 server.listen(PORT, async () => {
 	console.log(`Express & Socket App Listening ${process.env.https ? 'with SSL ' : ''}on ${PORT}`);
 	console.log(getSeries().length);
-
-	// console.log(getSeries().map(x => [...x.seasons, ...x.movies]).flat(5).length);
-
-	// console.log([getSeries()[14]]);
-
-	// generateImages([getSeries()[14]]);
-	// const merge = mergeSeriesArrays(crawlAndIndex(), crawlAndIndex())
-	// console.log(merge);
-	// generateImages([getSeries()[0]])
 });

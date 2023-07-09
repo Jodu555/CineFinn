@@ -82,6 +82,4 @@ function registerCommands() {
 	);
 }
 
-module.exports = {
-	registerCommands,
-};
+export { registerCommands };

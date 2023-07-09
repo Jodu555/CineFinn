@@ -28,4 +28,4 @@ router.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunc
 	}
 });
 
-module.exports = { router };
+export { router };
