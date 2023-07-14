@@ -1,9 +1,7 @@
+import { ExtendedSocket } from '../types/session';
 import { getIO, getAuthHelper } from '../utils/utils';
-import { ExtendedSocket, User } from '../utils/types';
 
-const { initialize: socketInitScraper } = require('./scraper.socket.js');
-// import { initialize as socketInitClient } from './scraper.socket';
-
+import { initialize as socketInitScraper } from './scraper.socket';
 import { initialize as socketInitClient } from './client.socket';
 import { initialize as socketInitRMVCEmitter } from './rmvcEmitter.socket';
 

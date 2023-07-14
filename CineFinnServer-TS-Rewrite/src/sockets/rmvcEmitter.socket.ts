@@ -1,5 +1,5 @@
 import { Database } from '@jodu555/mysqlapi';
-import { ExtendedRemoteSocket, ExtendedSocket } from '../utils/types';
+import { ExtendedRemoteSocket, ExtendedSocket } from '../types/session';
 import { toAllSockets, getIO } from '../utils/utils';
 
 const database = Database.getDatabase();

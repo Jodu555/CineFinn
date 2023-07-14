@@ -1,5 +1,6 @@
+import { timeUpdateObject } from '../types/classes';
+import { ExtendedSocket } from '../types/session';
 import { sendWatchListChange } from '../sockets/client.socket';
-import { ExtendedSocket, timeUpdateObject } from './types';
 import { Segment, searchObject, updateSegment } from './watchString';
 
 async function writeWatchInfoToDatabase(socket: ExtendedSocket, obj: timeUpdateObject) {

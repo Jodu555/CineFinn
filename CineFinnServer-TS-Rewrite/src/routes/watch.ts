@@ -1,5 +1,5 @@
 import express, { Request } from 'express';
-import { AuthenticatedRequest } from '../utils/types';
+import { AuthenticatedRequest } from '../types/session';
 import { sendWatchListChange } from '../sockets/client.socket';
 import { toAllSockets } from '../utils/utils';
 import { markSeason, load, parse } from '../utils/watchString';

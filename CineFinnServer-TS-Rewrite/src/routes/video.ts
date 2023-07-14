@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import { Response } from 'express';
 import { getSeries } from '../utils/utils';
-import { AuthenticatedRequest } from '../utils/types';
+import { AuthenticatedRequest } from '../types/session';
 import { getVideoMovie, getVideoEntity } from '../classes/series';
 
 export = (req: AuthenticatedRequest, res: Response) => {

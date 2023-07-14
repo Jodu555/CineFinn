@@ -1,6 +1,12 @@
-const path = require('path');
-const { listFiles } = require('./fileutils');
-const { v4: uuidv4 } = require('uuid');
+// const path = require('path');
+// const { listFiles } = require('./fileutils');
+// const { v4: uuidv4 } = require('uuid');
+
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import { listFiles } from './fileutils';
+import { Series } from '../classes/series';
+import { SerieObject } from '../types/classes';
 
 const generateID = () => {
 	return uuidv4().split('-')[0];
@@ -29,10 +35,7 @@ const crawlAndIndex = () => {
 	});
 
 	// Strip the dirs down and seperate between season or movie dirs or series dirs
-	/**
-	 * @type Series[]
-	 */
-	let series = [];
+	let series: SerieObject[] = [];
 
 	Object.keys(obj).forEach((categorie) => {
 		const dirs = obj[categorie];
@@ -106,11 +109,8 @@ const crawlAndIndex = () => {
 
 	return series;
 };
-/**
- * @param  {Series[]} before
- * @param  {Series[]} after
- */
-const mergeSeriesArrays = (before, after) => {
+
+const mergeSeriesArrays = (before: Series[], after: Series[]) => {
 	const { Series } = require('../classes/series');
 	const output = [];
 
@@ -148,4 +148,4 @@ const mergeSeriesArrays = (before, after) => {
 	return output;
 };
 
-module.exports = { crawlAndIndex, mergeSeriesArrays, generateID };
+export { crawlAndIndex, mergeSeriesArrays, generateID };

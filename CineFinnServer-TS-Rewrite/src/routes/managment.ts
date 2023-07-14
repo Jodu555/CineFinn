@@ -1,10 +1,11 @@
 import express, { NextFunction, Response } from 'express';
 import { Database } from '@jodu555/mysqlapi';
-import { AuthenticatedRequest, DatabaseJobItem } from '../utils/types';
 import { sendSeriesReloadToAll } from '../sockets/client.socket';
 import { crawlAndIndex } from '../utils/crawler';
 import { generateImages } from '../utils/images';
 import { getActiveJobs, getSeries, setActiveJobs, toAllSockets, setSeries } from '../utils/utils';
+import { DatabaseJobItem } from '../types/database';
+import { AuthenticatedRequest } from '../types/session';
 const database = Database.getDatabase();
 const router = express.Router();
 

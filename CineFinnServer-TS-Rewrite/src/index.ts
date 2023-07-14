@@ -8,7 +8,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { Database } from '@jodu555/mysqlapi';
-import { User, SettingsObject } from './utils/types';
+import { User, SettingsObject } from './types/session';
 dotenv.config();
 
 const database = Database.createDatabase(process.env.DB_HOST, process.env.DB_USERNAME, process.env.DB_PASSWORD, process.env.DB_DATABASE);

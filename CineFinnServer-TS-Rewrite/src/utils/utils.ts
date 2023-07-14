@@ -1,8 +1,9 @@
 import fs from 'fs';
 import { RemoteSocket, Server, Socket } from 'socket.io';
-import { ActiveJob, ExtendedRemoteSocket, SerieObject } from './types';
 import { Series } from '../classes/series';
-const { crawlAndIndex, mergeSeriesArrays } = require('./crawler');
+import { crawlAndIndex, mergeSeriesArrays } from './crawler';
+import { ActiveJob, SerieObject } from '../types/classes';
+import { ExtendedRemoteSocket } from '../types/session';
 const outputFileName = process.env.LOCAL_DB_FILE;
 
 let series: Series[] = null;
@@ -36,7 +37,7 @@ const getSeries = (forceLoad: boolean = false, forceFile: boolean = false): Seri
 	return series;
 };
 
-const setSeries = async (_series: Series[]) => {
+const setSeries = (_series: Series[]) => {
 	console.log('Loaded or Setted & merged new Series!');
 	if (series != null) {
 		series = mergeSeriesArrays(series, _series);

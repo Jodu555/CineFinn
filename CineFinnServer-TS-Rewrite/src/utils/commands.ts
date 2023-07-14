@@ -3,7 +3,7 @@ import { sendSeriesReloadToAll, sendSiteReload } from '../sockets/client.socket'
 import { getAniworldInfos } from '../sockets/scraper.socket';
 import { getSeries, getAuthHelper, getIO } from './utils';
 import { CommandManager, Command } from '@jodu555/commandmanager';
-import { ExtendedRemoteSocket } from './types';
+import { ExtendedRemoteSocket } from '../types/session';
 
 const commandManager = CommandManager.getCommandManager();
 
@@ -75,7 +75,7 @@ function registerCommands() {
 				if (serie.references.aniworld == undefined) {
 					return 'The Series has no reference point for aniworld';
 				}
-				getAniworldInfos(serie.references.aniworld);
+				getAniworldInfos(serie.references.aniworld as string);
 			}
 			return '';
 		})

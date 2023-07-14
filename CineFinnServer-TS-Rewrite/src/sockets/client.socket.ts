@@ -1,10 +1,11 @@
 import { Database } from '@jodu555/mysqlapi';
-import { DatabaseTodoItem, ExtendedRemoteSocket, ExtendedSocket } from '../utils/types';
 import { debounce, toAllSockets, getSeries } from '../utils/utils';
 import { writeWatchInfoToDatabase } from '../utils/watchManager';
 import { parse, load, Segment, searchObject } from '../utils/watchString';
 import { defaultSettings, compareSettings } from '../utils/settings';
 import { cleanupSeriesBeforeFrontResponse } from '../classes/series';
+import { DatabaseTodoItem } from '../types/database';
+import { ExtendedSocket, ExtendedRemoteSocket } from '../types/session';
 
 const database = Database.getDatabase();
 

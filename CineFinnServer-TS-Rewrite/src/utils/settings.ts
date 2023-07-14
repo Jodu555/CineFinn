@@ -1,4 +1,4 @@
-import { SettingsObject } from './types';
+import { SettingsObject } from '../types/session';
 
 const defaultSettings: SettingsObject = {
 	preferredLanguage: { title: 'Your Preffered Language', value: 'GerDub' },

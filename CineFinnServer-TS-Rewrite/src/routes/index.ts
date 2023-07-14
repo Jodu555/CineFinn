@@ -1,10 +1,11 @@
 import express, { NextFunction, Response } from 'express';
 import axios from 'axios';
-import { AuthenticatedRequest, DatabaseJobItem, DatabaseNewsItem, DatabaseTodoItem } from '../utils/types';
+import { DatabaseJobItem, DatabaseNewsItem, DatabaseTodoItem } from '../types/database';
 import { cleanupSeriesBeforeFrontResponse, Series } from '../classes/series';
 import { sendSeriesReloadToAll } from '../sockets/client.socket';
 import { generateID } from '../utils/crawler';
 import { getSeries, setSeries, deepMerge } from '../utils/utils';
+import { AuthenticatedRequest } from '../types/session';
 
 const router = express.Router();
 

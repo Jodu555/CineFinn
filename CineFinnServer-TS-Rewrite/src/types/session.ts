@@ -1,6 +1,7 @@
 import { Request } from 'express';
 import { RemoteSocket, Socket } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
+import { TodoItem, timeUpdateObject } from './classes';
 
 export interface User {
 	UUID: string;
@@ -87,92 +88,9 @@ interface ClientToServerEvents {
 	'rmvc-send-action': (arg0: rmvcSendActionArg) => void;
 	todoListUpdate: (list: TodoItem[]) => void;
 }
-
-export interface timeUpdateObject {
-	series: string;
-	season: number;
-	episode: number;
-	movie: number;
-	time: number;
-	force: boolean;
-}
-
 export interface ExtendedSocket extends Socket<ClientToServerEvents, DefaultEventsMap, any> {
 	auth: SocketAuthObject;
 }
 export interface ExtendedRemoteSocket extends RemoteSocket<DefaultEventsMap, any> {
 	auth: SocketAuthObject;
 }
-
-export interface DatabaseWatchStringItem {
-	account_UUID: string;
-	watch_string: string;
-}
-
-export interface DatabaseJobItem {
-	ID: string;
-	lastRun: number;
-}
-
-export interface DatabaseNewsItem {
-	time: number;
-	content: string;
-}
-
-export interface DatabaseTodoItem {
-	ID: string;
-	content: string;
-}
-
-export interface TodoItem {
-	ID: string;
-	categorie: string;
-	name: string;
-	order: number;
-	references: SerieReference;
-}
-
-export interface ActiveJob {
-	id: string;
-	name: string;
-	startTime: number;
-	data: any;
-}
-
-export interface SerieObject {
-	ID: string;
-	categorie: string;
-	title: string;
-	seasons: SerieEpisodeObject[][];
-	movies: SerieMovieObject[];
-	references: SerieReference;
-	infos: SerieInfo;
-}
-
-export interface SerieEpisodeObject {
-	filePath: string;
-	primaryName: string;
-	secondaryName: string;
-	season: number;
-	episode: number;
-	langs: Langs[];
-}
-export interface SerieMovieObject {
-	filePath: string;
-	primaryName: string;
-	secondaryName: string;
-	langs: Langs[];
-}
-
-export interface SerieInfo {
-	image?: string | boolean;
-	infos?: string;
-	title?: string;
-	startDate?: string;
-	endDate?: string;
-	description?: string;
-}
-
-export type SerieReference = Record<'aniworld' | 'zoro' | 'sto' | string, string | Record<string, string>>;
-
-export type Langs = 'GerDub' | 'GerSub' | 'EngDub' | 'EngSub';

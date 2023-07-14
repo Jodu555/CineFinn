@@ -1,6 +1,7 @@
 import express, { Response } from 'express';
 import { Database } from '@jodu555/mysqlapi';
-import { AuthenticatedRequest, DatabaseTodoItem } from '../utils/types';
+import { DatabaseTodoItem } from '../types/database';
+import { AuthenticatedRequest } from '../types/session';
 const { getAniworldInfos } = require('../sockets/scraper.socket');
 const database = Database.getDatabase();
 
