@@ -26,6 +26,7 @@ databaseSetupFunction();
 import { initialize as socket_initialize } from './sockets';
 
 import { getSeries, setIO, setAuthHelper } from './utils/utils';
+import { compareSettings, defaultSettings } from './utils/settings';
 
 const app = express();
 app.use(cors());
@@ -100,7 +101,6 @@ import { router as news_router } from './routes/news';
 import { router as index_router } from './routes/index';
 import video from './routes/video';
 import todo from './routes/todo';
-import { compareSettings, defaultSettings } from './utils/settings';
 
 // Your Middleware handlers here
 app.use('/images', authHelper.authentication(), express.static(path.join(process.env.PREVIEW_IMGS_PATH)));

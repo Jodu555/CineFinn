@@ -1,10 +1,13 @@
-const fs = require('fs');
-const path = require('path');
-require('dotenv').config();
-const { listFiles } = require('./utils/fileutils');
-const { v4: uuidv4 } = require('uuid');
+import fs from 'fs';
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import { listFiles } from './utils/fileutils';
+import dotenv from 'dotenv';
+import { Series } from './classes/series';
+import { SerieObject } from './types/classes';
+dotenv.config();
 
-const generateID = () => {
+const generateID = (): string => {
 	return uuidv4().split('-')[0];
 	// return Math.floor(Math.random() * 10000);
 };
@@ -113,7 +116,7 @@ const newCrawlAndIndex = () => {
 	const { Series, filenameParser, Episode, Movie } = require('./classes/series');
 
 	const overcategories = fs.readdirSync(process.env.VIDEO_PATH);
-	const categorieMap = new Map();
+	const categorieMap = new Map<string, string>();
 
 	for (const cat of overcategories) {
 		const series = fs.readdirSync(path.join(process.env.VIDEO_PATH, cat));
@@ -130,10 +133,7 @@ const newCrawlAndIndex = () => {
 	console.log(categorieMap);
 
 	// Strip the dirs down and seperate between season or movie dirs or series dirs
-	/**
-	 * @type Series[]
-	 */
-	let series = [];
+	let series: SerieObject[] = [];
 
 	files.forEach((e) => {
 		const base = path.parse(e).base;
@@ -199,11 +199,7 @@ const newCrawlAndIndex = () => {
 	return series;
 };
 
-/**
- * @param  {Series[]} before
- * @param  {Series[]} after
- */
-const mergeSeriesArrays = (before, after) => {
+const mergeSeriesArrays = (before: Series[], after: Series[]) => {
 	const { Series } = require('../classes/series');
 	const output = [];
 
