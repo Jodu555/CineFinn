@@ -43,6 +43,8 @@ export interface SeasonInformation {
 	title: string;
 }
 
+const debug = false;
+
 class Zoro {
 	url: string;
 	ID: string | number;
@@ -59,19 +61,19 @@ class Zoro {
 	}
 
 	async initialize() {
-		console.log('Called Zoro.initialize');
+		debug && console.log('Called Zoro.initialize');
 
 		const list = await this.getEpisodeList();
 
 		this.url = list.episodes[0].url;
 		this.initialized = true;
 		console.log('Parsed: ');
-		console.log(' ' + this.url, this);
-		await new Promise((res, _) => setTimeout(res, 400));
+		console.log(' ' + this.url);
+		await new Promise((res, _) => setTimeout(res, 100));
 	}
 
 	async getSeasons(): Promise<SeasonInformation[]> {
-		console.log('Called Zoro.getSeasons');
+		debug && console.log('Called Zoro.getSeasons');
 		if (!this.initialized) {
 			await this.initialize();
 		}
@@ -90,7 +92,7 @@ class Zoro {
 				.filter((x) => !x.title.includes('(') && x.title.includes('Season'));
 			return infos;
 		} catch (error) {
-			console.log(error);
+			debug && console.log(error);
 
 			console.log('Seems like the Season div does not yet exists');
 
@@ -99,7 +101,7 @@ class Zoro {
 	}
 
 	async getEpisodeList(): Promise<{ total: number; episodes: SimpleZoroEpisode[] }> {
-		console.log('Called Zoro.getEpisodeList');
+		debug && console.log('Called Zoro.getEpisodeList');
 		const response = await axios.get('https://aniwatch.to/ajax/v2/episode/list/' + this.ID);
 		const total = response.data.totalItems;
 		const { document } = new jsdom.JSDOM(response.data.html).window;
@@ -119,7 +121,8 @@ class Zoro {
 	}
 
 	async getExtendedEpisodeList(): Promise<{ total: number; episodes: ExtendedZoroEpisode[] }> {
-		console.log('Called Zoro.getExtendedEpisodeList');
+		debug && console.log('Called Zoro.getExtendedEpisodeList');
+
 		if (!this.initialized) {
 			await this.initialize();
 		}
