@@ -41,7 +41,7 @@ async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceIt
 	console.log('------ Compare Zoro ------');
 	const zoro = await compareForNewReleasesZoro(series, ignoranceList);
 	console.log('------ Compare Zoro ------');
-	// fs.writeFileSync('dlListZoro.json', JSON.stringify(zoro, null, 3));
+	fs.writeFileSync('dlListZoro.json', JSON.stringify(zoro, null, 3));
 }
 
 async function compareForNewReleasesAniWorld(
@@ -233,8 +233,8 @@ async function compareForNewReleasesZoro(
 	inherit: boolean = true
 ): Promise<ExtendedEpisodeDownload[]> {
 	const limit = promiseLimit(10);
-	const data = series.filter((x, i) => x.references?.zoro).filter((x, i) => i < 1);
-	console.log(data.length);
+	const data = series.filter((x, i) => x.references?.zoro);
+	// .filter((x, i) => i < 1);
 
 	const compare: ZoroSerieCompare[] = await Promise.all(
 		data.map(async (serie) => {
@@ -247,7 +247,6 @@ async function compareForNewReleasesZoro(
 					if (typeof serie.references.zoro == 'string') {
 						try {
 							const zoro = new Zoro(serie.references.zoro);
-							console.log(zoro);
 
 							const seasons = await zoro.getSeasons();
 							if (seasons.length > 0) {
