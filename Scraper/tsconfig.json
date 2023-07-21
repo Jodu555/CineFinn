@@ -3,7 +3,7 @@
 		"module": "commonjs",
 		"esModuleInterop": true,
 		"target": "es6",
-		"lib": ["es6"],
+		"lib": ["es2021"],
 		"noImplicitAny": false,
 		"moduleResolution": "node",
 		"sourceMap": true,

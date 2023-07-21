@@ -1,20 +1,20 @@
-const axios = require('axios');
-const jsdom = require('jsdom');
+import axios from 'axios';
+import jsdom from 'jsdom';
 
 /**
  *
  * # Reverse Enginneered:
  * ## To Get all Episodes of the anime ID
- * https://zoro.to/ajax/v2/episode/list/17978
+ * https://aniwatch.to/ajax/v2/episode/list/17978
  *
  * ## To Get Episode Informations (Sub / Dub)
- * https://zoro.to/ajax/v2/episode/servers?episodeId=92390
+ * https://aniwatch.to/ajax/v2/episode/servers?episodeId=92390
  *
  * ## To Get the stream embed iframe
- * https://zoro.to/ajax/v2/episode/sources?id=serverid
+ * https://aniwatch.to/ajax/v2/episode/sources?id=serverid
  *
  * ## To Get a Character List
- * https://zoro.to/ajax/character/list/17978
+ * https://aniwatch.to/ajax/character/list/17978
  *
  */
 
@@ -45,7 +45,7 @@ export interface SeasonInformation {
 
 class Zoro {
 	url: string;
-	ID: any;
+	ID: string | number;
 	initialized: boolean;
 	constructor(url: string) {
 		this.initialized = false;
@@ -59,24 +59,28 @@ class Zoro {
 	}
 
 	async initialize() {
+		console.log('Called Zoro.initialize');
+
 		const list = await this.getEpisodeList();
 
 		this.url = list.episodes[0].url;
-		console.log('Parsed: ');
-		console.log(' ' + this.url);
 		this.initialized = true;
+		console.log('Parsed: ');
+		console.log(' ' + this.url, this);
+		await new Promise((res, _) => setTimeout(res, 400));
 	}
 
 	async getSeasons(): Promise<SeasonInformation[]> {
+		console.log('Called Zoro.getSeasons');
+		if (!this.initialized) {
+			await this.initialize();
+		}
 		try {
-			if (!this.initialized) {
-				await this.initialize();
-			}
 			const response = await axios.get(this.url);
 			const { document } = new jsdom.JSDOM(response.data).window;
 
 			const infos = [...document.querySelectorAll('.os-item')]
-				.map((anchor) => {
+				.map((anchor: HTMLAnchorElement) => {
 					return {
 						ID: anchor.href.split('-')[anchor.href.split('-').length - 1] as string,
 						IDX: anchor.querySelector('.title').textContent.trim().replaceAll('Season ', ''),
@@ -86,6 +90,8 @@ class Zoro {
 				.filter((x) => !x.title.includes('(') && x.title.includes('Season'));
 			return infos;
 		} catch (error) {
+			console.log(error);
+
 			console.log('Seems like the Season div does not yet exists');
 
 			return [];
@@ -93,16 +99,17 @@ class Zoro {
 	}
 
 	async getEpisodeList(): Promise<{ total: number; episodes: SimpleZoroEpisode[] }> {
-		const response = await axios.get('https://zoro.to/ajax/v2/episode/list/' + this.ID);
+		console.log('Called Zoro.getEpisodeList');
+		const response = await axios.get('https://aniwatch.to/ajax/v2/episode/list/' + this.ID);
 		const total = response.data.totalItems;
 		const { document } = new jsdom.JSDOM(response.data.html).window;
 
-		const episodes = [...document.querySelectorAll('a.ep-item')].map((anchor) => {
+		const episodes = [...document.querySelectorAll('a.ep-item')].map((anchor: HTMLAnchorElement) => {
 			return {
 				ID: anchor.dataset.id,
 				title: anchor.title,
 				number: anchor.dataset.number,
-				url: 'https://zoro.to' + anchor.href,
+				url: 'https://aniwatch.to' + anchor.href,
 			};
 		});
 		return {
@@ -112,6 +119,7 @@ class Zoro {
 	}
 
 	async getExtendedEpisodeList(): Promise<{ total: number; episodes: ExtendedZoroEpisode[] }> {
+		console.log('Called Zoro.getExtendedEpisodeList');
 		if (!this.initialized) {
 			await this.initialize();
 		}
@@ -121,11 +129,11 @@ class Zoro {
 
 		for (const episode of episodes) {
 			const outputEpisode = { ...episode } as ExtendedZoroEpisode;
-			const response = await axios.get('https://zoro.to/ajax/v2/episode/servers?episodeId=' + episode.ID);
+			const response = await axios.get('https://aniwatch.to/ajax/v2/episode/servers?episodeId=' + episode.ID);
 			const { document } = new jsdom.JSDOM(response.data.html).window;
-			const streamingServers: StreamingServers[] = [...document.querySelectorAll('div.server-item')].map((server) => {
+			const streamingServers: StreamingServers[] = [...document.querySelectorAll('div.server-item')].map((server: HTMLAnchorElement) => {
 				return {
-					type: server.dataset.type,
+					type: server.dataset.type as 'sub' | 'dub',
 					ID: server.dataset.id,
 					serverIndex: server.dataset.serverId,
 					name: server.querySelector('a').text,
@@ -144,7 +152,7 @@ class Zoro {
 	}
 
 	async getStream(streamID: string): Promise<string> {
-		const response = await axios.get('https://zoro.to/ajax/v2/episode/sources?id=' + streamID);
+		const response = await axios.get('https://aniwatch.to/ajax/v2/episode/sources?id=' + streamID);
 		return response.data.link;
 	}
 }
