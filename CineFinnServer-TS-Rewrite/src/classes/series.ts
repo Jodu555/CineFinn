@@ -86,7 +86,7 @@ const cleanupSeriesBeforeFrontResponse = (series: Series[]) => {
 	});
 };
 
-interface ParsedInformation {
+export interface ParsedInformation {
 	movie: boolean;
 	title: string;
 	language: Langs;
@@ -95,7 +95,7 @@ interface ParsedInformation {
 	movieTitle?: string;
 }
 
-const filenameParser = (filepath: string, filename: string): ParsedInformation | any => {
+const filenameParser = (filepath: string, filename: string): ParsedInformation | never => {
 	// filename exp. Food Wars! Shokugeki no Sōma St#1 Flg#1.mp4
 
 	interface pars {
@@ -152,11 +152,11 @@ const filenameParser = (filepath: string, filename: string): ParsedInformation |
 			break;
 		}
 	}
-
 	if (!found) {
 		console.log('No Parser found for', found, filename);
+		throw new Error(['No Parser found for', found, filename].join(' '));
 	}
-	return output;
+	return output as ParsedInformation;
 };
 
 function getVideoEntity(seriesID: string, season: number, episode: number): Episode {

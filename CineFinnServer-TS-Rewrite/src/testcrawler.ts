@@ -3,8 +3,8 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { listFiles } from './utils/fileutils';
 import dotenv from 'dotenv';
-import { Series } from './classes/series';
-import { SerieObject } from './types/classes';
+import { SerieEpisodeObject, SerieObject } from './types/classes';
+import { Series, filenameParser, Episode, Movie, ParsedInformation } from './classes/series';
 dotenv.config();
 
 const generateID = (): string => {
@@ -113,13 +113,15 @@ const crawlAndIndex = () => {
 };
 
 const newCrawlAndIndex = () => {
-	const { Series, filenameParser, Episode, Movie } = require('./classes/series');
+	const pathEntries = [process.env.VIDEO_PATH];
 
 	let files: string[] = [];
 
-	let { files: tmp_files } = listFiles(process.env.VIDEO_PATH);
-	files.push(...tmp_files);
-	tmp_files = null;
+	for (const pathEntrie of pathEntries) {
+		let { files: tmp_files } = listFiles(pathEntrie);
+		files.push(...tmp_files);
+		tmp_files = null;
+	}
 
 	// let { files: tmp2_files } = listFiles('Z:\\home\\laterIntegrate');
 	// files.push(...tmp2_files);
@@ -171,7 +173,7 @@ const newCrawlAndIndex = () => {
 		}
 	});
 
-	const sorterFunction = (a, b) => {
+	const sorterFunction = (a: SerieEpisodeObject, b: SerieEpisodeObject) => {
 		return a.episode - b.episode;
 	};
 
