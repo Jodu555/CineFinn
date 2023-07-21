@@ -115,22 +115,20 @@ const crawlAndIndex = () => {
 const newCrawlAndIndex = () => {
 	const { Series, filenameParser, Episode, Movie } = require('./classes/series');
 
-	const overcategories = fs.readdirSync(process.env.VIDEO_PATH);
-	const categorieMap = new Map<string, string>();
+	let files: string[] = [];
 
-	for (const cat of overcategories) {
-		const series = fs.readdirSync(path.join(process.env.VIDEO_PATH, cat));
-		series.forEach((source) => {
-			categorieMap.set(source, cat);
-		});
-	}
+	let { files: tmp_files } = listFiles(process.env.VIDEO_PATH);
+	files.push(...tmp_files);
+	tmp_files = null;
 
-	let { dirs, files } = listFiles(process.env.VIDEO_PATH);
+	// let { files: tmp2_files } = listFiles('Z:\\home\\laterIntegrate');
+	// files.push(...tmp2_files);
+	// tmp_files = null;
 
 	//Strip all non mp4 files from the files
 	files = files.filter((f) => path.parse(f).ext == '.mp4');
 
-	console.log(categorieMap);
+	// console.log(categorieMap);
 
 	// Strip the dirs down and seperate between season or movie dirs or series dirs
 	let series: SerieObject[] = [];
@@ -141,7 +139,7 @@ const newCrawlAndIndex = () => {
 
 		let item = series.find((x) => x.title.includes(parsedData.title));
 		if (item == undefined) {
-			const categorie = categorieMap.get(parsedData.title);
+			const categorie = path.parse(path.join(path.parse(e).dir, '../../')).base;
 			const serie = new Series(generateID(), categorie, parsedData.title, [], []);
 			series.push(serie);
 			item = serie;
@@ -178,7 +176,7 @@ const newCrawlAndIndex = () => {
 	};
 
 	//Strinify in Json and then parse to deal with the empty array items the they are null
-	series = JSON.parse(JSON.stringify(series));
+	// series = JSON.parse(JSON.stringify(series));
 
 	series = series.map((e) => {
 		const newSeasons = e.seasons
@@ -241,15 +239,20 @@ const mergeSeriesArrays = (before: Series[], after: Series[]) => {
 	/**
 	 * 22 ms to max 38 ms before
 	 */
+	// const series = newCrawlAndIndex();
+	// console.log(series);
+
 	console.log('Started');
 	const beforeTimes = [];
 	for (let i = 0; i < 100; i++) {
 		const before = Date.now();
-		const series = crawlAndIndex();
+		const series = newCrawlAndIndex();
+		// const series = crawlAndIndex();
 		console.log(series.length);
-		beforeTimes.push(before - Date.now());
+		beforeTimes.push(Date.now() - before);
 	}
-	console.log(beforeTimes);
+	const avg = beforeTimes.reduce((a, b) => a + b) / beforeTimes.length;
+	console.log(beforeTimes, avg);
 })();
 
 // module.exports = { crawlAndIndex, mergeSeriesArrays, generateID };

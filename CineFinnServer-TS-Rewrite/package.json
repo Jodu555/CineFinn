@@ -7,10 +7,10 @@
 		"start": "ts-node src/index.ts",
 		"dev": "nodemon src/index.ts",
 		"job": "node src/jobs/index.js",
-		"dev:test": "nodemon src/test.js",
-		"start:test": "node src/test.js",
-		"dev:testcrawler": "nodemon src/testcrawler.js",
-		"start:testcrawler": "node src/testcrawler.js"
+		"dev:test": "nodemon src/test.ts",
+		"start:test": "ts-node src/test.ts",
+		"dev:testcrawler": "nodemon src/testcrawler.ts",
+		"start:testcrawler": "ts-node src/testcrawler.ts"
 	},
 	"nodemonConfig": {
 		"ignore": [
