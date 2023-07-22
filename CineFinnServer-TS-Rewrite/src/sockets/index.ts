@@ -11,6 +11,8 @@ const initialize = () => {
 	const authHelper = getAuthHelper();
 
 	io.use(async (socket: ExtendedSocket, next) => {
+		console.log(socket.handshake);
+
 		const type = socket.handshake.auth.type;
 		if (type === 'client') {
 			const authToken = socket.handshake.auth.token;
