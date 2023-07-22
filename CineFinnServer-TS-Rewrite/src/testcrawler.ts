@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { listFiles } from './utils/fileutils';
 import dotenv from 'dotenv';
 import { SerieEpisodeObject, SerieObject } from './types/classes';
-import { Series, filenameParser, Episode, Movie, ParsedInformation } from './classes/series';
+import { Series, filenameParser, Episode, Movie } from './classes/series';
 dotenv.config();
 
 const generateID = (): string => {

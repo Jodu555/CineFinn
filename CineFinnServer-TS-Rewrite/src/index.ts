@@ -87,7 +87,7 @@ if (process.env.https) {
 setIO(
 	new Server(server, {
 		cors: {
-			origin: ['localhost:8080', '1b2.jodu555.de', 'cinema.jodu555.de', 'cinema-api.jodu555.de'],
+			origin: ['localhost:8080', 'localhost:5173', '1b2.jodu555.de', 'cinema.jodu555.de', 'cinema-api.jodu555.de'],
 			methods: ['GET', 'POST'],
 		},
 	})
