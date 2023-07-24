@@ -2,8 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import getVideoDurationInSeconds from 'get-video-duration';
 import dotenv from 'dotenv';
-import { Series } from './classes/series';
 import { SerieObject } from './types/classes';
+import { generateImages } from './utils/images';
 dotenv.config();
 
 // const { Database } = require('@jodu555/mysqlapi');
@@ -17,6 +17,15 @@ dotenv.config();
 // console.log(JSON.stringify(parse(watchStr)) == JSON.stringify(new_parse(watchStr)));
 
 const series: SerieObject[] = JSON.parse(fs.readFileSync(process.env.LOCAL_DB_FILE, 'utf8'));
+
+const irregular = series.find((x) => x.title.includes('Irregular'));
+
+irregular.seasons[0].length = 5;
+irregular.seasons[1].length = 5;
+
+generateImages([irregular], () => {
+	console.log('Finished');
+});
 
 // const serie = series.find((x) => x.ID == 'cc3a933b');
 // console.log(serie);

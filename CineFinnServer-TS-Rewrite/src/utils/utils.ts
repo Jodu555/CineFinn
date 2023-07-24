@@ -66,14 +66,6 @@ const toAllSockets = async (cb: toAllSocketsFunctionCB, filter: toAllSocketsFunc
 	sockets.filter(filter).forEach(cb);
 };
 
-const promiseAllLimit = (args) => {
-	return new Promise((resolve, _) => {
-		import('p-limit').then((pMLimit) => {
-			resolve(pMLimit.default(args));
-		});
-	});
-};
-
 function deepMerge<T>(current: T, updates: T): T {
 	// if (updates === null) return current;
 	if (typeof updates !== 'object') return current;
@@ -84,17 +76,4 @@ function deepMerge<T>(current: T, updates: T): T {
 	return current;
 }
 
-export {
-	getSeries,
-	setSeries,
-	getActiveJobs,
-	setActiveJobs,
-	getAuthHelper,
-	setAuthHelper,
-	getIO,
-	setIO,
-	debounce,
-	toAllSockets,
-	promiseAllLimit,
-	deepMerge,
-};
+export { getSeries, setSeries, getActiveJobs, setActiveJobs, getAuthHelper, setAuthHelper, getIO, setIO, debounce, toAllSockets, deepMerge };
