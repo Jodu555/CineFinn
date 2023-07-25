@@ -33,10 +33,10 @@ interface ChangedZoroEpisode extends Omit<ExtendedZoroEpisode, 'langs'> {
 async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceItem[]) {
 	const output: ExtendedEpisodeDownload[] = [];
 
-	// console.log('------ Compare Aniworld ------');
-	// const aniworld = await compareForNewReleasesAniWorld(series, ignoranceList);
-	// console.log('------ Compare Aniworld ------');
-	// fs.writeFileSync('dlListAniworld.json', JSON.stringify(aniworld, null, 3));
+	console.log('------ Compare Aniworld ------');
+	const aniworld = await compareForNewReleasesAniWorld(series, ignoranceList);
+	console.log('------ Compare Aniworld ------');
+	fs.writeFileSync('dlListAniworld.json', JSON.stringify(aniworld, null, 3));
 
 	console.log('------ Compare Zoro ------');
 	const zoro = await compareForNewReleasesZoro(series, ignoranceList);
