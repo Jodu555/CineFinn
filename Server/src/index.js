@@ -34,7 +34,7 @@ app.use(
 			if (process.env.NODE_ENV || 'production' == 'development') {
 				return false;
 			}
-			if (req.originalUrl.includes('/images') || req.originalUrl.includes('/video')) {
+			if (req.originalUrl.includes('/images') || req.originalUrl.includes('/video') || req.originalUrl.includes('/status')) {
 				return true;
 			} else {
 				return false;
@@ -103,6 +103,9 @@ const { generateImages } = require('./utils/images');
 
 // Your Middleware handlers here
 app.use('/images', authHelper.authentication(), express.static(path.join(process.env.PREVIEW_IMGS_PATH)));
+app.get('/status', (req, res) => {
+	res.status(200).json({});
+}); // For some Uptime check
 
 app.use('/managment', authHelper.authentication(), managment_router);
 app.use('/watch', authHelper.authentication(), watch_router);
