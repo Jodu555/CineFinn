@@ -6,6 +6,7 @@
 	"scripts": {
 		"start": "ts-node src/index.ts",
 		"dev": "nodemon src/index.ts",
+		"debug": "node --inspect=0.0.0.0:9229 -r ts-node/register src/index.ts",
 		"job": "node src/jobs/index.js",
 		"dev:test": "nodemon src/test.ts",
 		"start:test": "ts-node src/test.ts",
@@ -36,6 +37,8 @@
 		"uuid": "^9.0.0"
 	},
 	"devDependencies": {
-		"@types/express": "^4.17.17"
+		"@types/express": "^4.17.17",
+		"ts-node": "^10.9.1",
+		"typescript": "^5.1.6"
 	}
 }
