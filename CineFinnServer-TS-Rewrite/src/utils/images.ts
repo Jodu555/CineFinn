@@ -31,10 +31,10 @@ async function generateEntityImages(i: number, serie: Series, entity: Episode | 
 			const filePath = path.join(dir, `${name.split('_')[0]}_${lang}${ext}`);
 
 			const command = `ffmpeg -i "${filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
-			if (entity instanceof Movie) console.log(command);
-			// await deepExecPromisify(command);
+			// console.log(command);
+			await deepExecPromisify(command);
 			if (entity instanceof Episode) {
-				// console.log(`  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base}`);
+				console.log(`  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base}`);
 			} else if (entity instanceof Movie) {
 				console.log(`  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${entity.primaryName}`);
 			}
@@ -56,25 +56,6 @@ const generateImages = async (series: Series[], cleanup: () => void = () => {}) 
 				() =>
 					new Promise<void>(async (resolve, _) => {
 						await generateEntityImages(i, serie, episode, seasons);
-						// for (const lang of episode.langs) {
-						// 	const output = path.join(
-						// 		process.env.PREVIEW_IMGS_PATH,
-						// 		String(serie.ID),
-						// 		'previewImages',
-						// 		`${episode.season}-${episode.episode}`,
-						// 		lang
-						// 	);
-						// 	fs.mkdirSync(output, { recursive: true });
-						// 	if (fs.readdirSync(output).length == 0) {
-						// 		const { dir, name, ext } = path.parse(episode.filePath);
-						// 		const filePath = path.join(dir, `${name.split('_')[0]}_${lang}${ext}`);
-
-						// 		const command = `ffmpeg -i "${filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
-						// 		console.log(command);
-						// 		// await deepExecPromisify(command);
-						// 		console.log(`  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(episode.filePath).base}`);
-						// 	}
-						// }
 						resolve();
 					})
 			);
@@ -87,15 +68,6 @@ const generateImages = async (series: Series[], cleanup: () => void = () => {}) 
 				() =>
 					new Promise<void>(async (resolve, _) => {
 						await generateEntityImages(i, serie, movie, seasons);
-						// const output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), 'previewImages', 'Movies', `${movie.primaryName}`);
-						// fs.mkdirSync(output, { recursive: true });
-						// if (fs.readdirSync(output).length == 0) {
-						// 	const command = `ffmpeg -i "${movie.filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
-						// 	console.log(command);
-
-						// 	// await deepExecPromisify(command);
-						// 	console.log(`  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${movie.primaryName}`);
-						// }
 						resolve();
 					})
 			);
