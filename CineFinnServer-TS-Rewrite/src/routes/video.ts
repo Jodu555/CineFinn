@@ -6,9 +6,9 @@ import { AuthenticatedRequest } from '../types/session';
 import { getVideoMovie, getVideoEntity } from '../classes/series';
 
 export = (req: AuthenticatedRequest, res: Response) => {
-	const { series: seriesID, season, episode, movie, language } = req.query;
+	const { series: seriesID, season, episode, movie, language, debug: rmtDebug } = req.query;
 
-	const debug = false;
+	const debug = Boolean(rmtDebug) || false;
 
 	// Ensure there is a range given for the video
 	const range = req.headers.range;
@@ -56,7 +56,7 @@ export = (req: AuthenticatedRequest, res: Response) => {
 
 	debug && console.log('Got Settings', settings);
 
-	let filePath;
+	let filePath: string;
 	//The Birthday stuff
 	if (settings?.isBirthday != undefined && settings?.isBirthday) {
 		filePath = path.join(process.cwd(), 'test.mp4');

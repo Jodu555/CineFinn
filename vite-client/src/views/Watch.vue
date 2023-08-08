@@ -22,6 +22,11 @@
 			<h1 class="text-truncate" :title="displayTitle">
 				{{ displayTitle }}
 			</h1>
+			<pre v-if="settings.developerMode.value">
+				Watch Information:
+				{{ JSON.stringify(watchList.find((segment) => segment.season == this.currentSeason && segment.episode == this.currentEpisode)) }}
+			</pre
+			>
 			<div v-auto-animate v-if="showLatestWatchButton" class="text-center">
 				<button @click="skipToLatestTime" class="btn btn-outline-info">Jump to Latest watch position!</button>
 			</div>
