@@ -28,7 +28,7 @@ async function generateEntityImages(i: number, serie: Series, entity: Episode | 
 		fs.mkdirSync(output, { recursive: true });
 		if (fs.readdirSync(output).length == 0) {
 			const { dir, name, ext } = path.parse(entity.filePath);
-			const filePath = path.join(dir, `${name.split('_')[0]}_${lang}${ext}`);
+			const filePath = entity.langs.length > 1 ? path.join(dir, `${name.split('_')[0]}_${lang}${ext}`) : entity.filePath;
 
 			const command = `ffmpeg -i "${filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
 			// console.log(command);
