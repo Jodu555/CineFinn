@@ -24,7 +24,7 @@
 							<input type="text" class="form-control" id="rmvcID" v-model="rmvcID" aria-describedby="helprmvcID" />
 							<button type="submit" class="btn btn-outline-primary">Connect</button>
 						</div>
-						<small id="helprmvcID" class="form-text text-muted">The Remote Control ID that the player gave you</small>
+						<small id="helprmvcID" class="form-text text-muted">The Remote Control ID that the video player gave you</small>
 					</div>
 				</form>
 			</div>
