@@ -7,6 +7,7 @@
 			</div>
 			<div class="offcanvas-body">
 				<h2>User Infos:</h2>
+				<pre v-if="settings.developerMode.value">{{ userInfo }}</pre>
 				<hr />
 				<ul class="list-group list-group-flush">
 					<li class="list-group-item">
@@ -20,6 +21,7 @@
 						</h5>
 					</li>
 				</ul>
+				<pre v-if="settings.developerMode.value">{{ { showJobs, showSettings } }}</pre>
 				<h2 @click="showJobs = !showJobs">
 					<p class="d-flex justify-content-between" style="align-items: center">
 						Jobs:
@@ -28,6 +30,7 @@
 				</h2>
 				<hr />
 				<ul v-if="showJobs" class="list-group list-group-flush mb-3">
+					<pre v-if="settings.developerMode.value">{{ jobs }}</pre>
 					<JobListView
 						v-for="job in jobs"
 						:id="job.id"
@@ -47,6 +50,7 @@
 				</h2>
 				<hr />
 				<div v-if="showSettings">
+					<pre v-if="settings.developerMode.value">{{ settings }}</pre>
 					<div v-for="(setting, key) of settings" :key="key" class="mb-3 form-check">
 						<template v-if="setting.type === 'checkbox'">
 							<input
