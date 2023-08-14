@@ -1,7 +1,7 @@
 declare module '@jodu555/commandmanager' {
 	interface IOverCommandManager {
-		createCommandManager: (streamIn, streamOut) => CommandManagerImpl;
-		getCommandManager: () => CommandManagerImpl;
+		createCommandManager: (streamIn, streamOut) => CommandManager;
+		getCommandManager: () => CommandManager;
 	}
 
 	class Command {
@@ -21,6 +21,23 @@ declare module '@jodu555/commandmanager' {
 		registerCommand: (command: Command) => void;
 		unregisterCommand: (command: string) => void;
 		deleteCommand: (ID: number) => void;
+		getWriter: () => Writer;
+	}
+
+	interface SymbolsObject {
+		leftBorder: string = '[';
+		rightBorder: string = ']';
+		loaded: string = '#';
+		notLoaded: string = '-';
+	}
+
+	class Writer {
+		commandManager: CommandManager;
+		stdout: any;
+		displayProgress: (progress: number, max: number, type: number, steps?: number, smybols?: SymbolsObject, appender?: string) => void;
+		deepSameLineClear: (data: string, l: number) => void;
+		clearLines: (n: number) => void;
+		end: () => void;
 	}
 
 	export let CommandManager: IOverCommandManager;
