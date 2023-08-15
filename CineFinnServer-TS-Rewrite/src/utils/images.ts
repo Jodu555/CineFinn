@@ -4,7 +4,13 @@ import path from 'path';
 import { Episode, Movie, Series, filenameParser } from '../classes/series';
 import child_process from 'child_process';
 import pLimit from 'p-limit';
+import { CommandManager } from '@jodu555/commandmanager';
+const commandManager = CommandManager.getCommandManager();
 const { getVideoDurationInSeconds } = require('get-video-duration');
+
+const wait = (ms: number): Promise<void> => new Promise((r, _) => setTimeout(r, ms));
+
+const newProgress = false;
 
 async function deepExecPromisify(command: string, cwd: string = undefined) {
 	return await new Promise((resolve, reject) => {
@@ -32,11 +38,30 @@ async function generateEntityImages(i: number, serie: Series, entity: Episode | 
 
 			const command = `ffmpeg -i "${filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
 			// console.log(command);
-			await deepExecPromisify(command);
+			// await deepExecPromisify(command);
+			await wait(2000);
 			if (entity instanceof Episode) {
-				console.log(`  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base}`);
+				newProgress &&
+					commandManager
+						.getWriter()
+						.deepSameLineClear(
+							`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${
+								path.parse(entity.filePath).base
+							}`,
+							2
+						);
+				!newProgress && console.log(`  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base}`);
 			} else if (entity instanceof Movie) {
-				console.log(`  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${entity.primaryName}`);
+				newProgress &&
+					commandManager
+						.getWriter()
+						.deepSameLineClear(
+							`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${
+								entity.primaryName
+							}`,
+							2
+						);
+				!newProgress && console.log(`  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${entity.primaryName}`);
 			}
 		}
 	}
@@ -49,7 +74,8 @@ const generateImages = async (series: Series[], cleanup: () => void = () => {}) 
 
 	for (const serie of series) {
 		const seasons = serie.seasons.flat();
-		console.log(`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items`);
+		newProgress && commandManager.getWriter().deepSameLineClear(`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n `, 2);
+		!newProgress && console.log(`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items`);
 
 		const episodeImageGeneratingPromises = seasons.map((episode, i) => {
 			return limit(
