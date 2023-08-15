@@ -38,8 +38,8 @@ async function generateEntityImages(i: number, serie: Series, entity: Episode | 
 
 			const command = `ffmpeg -i "${filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
 			// console.log(command);
-			// await deepExecPromisify(command);
-			await wait(2000);
+			await deepExecPromisify(command);
+			// await wait(2000);
 			if (entity instanceof Episode) {
 				newProgress &&
 					commandManager

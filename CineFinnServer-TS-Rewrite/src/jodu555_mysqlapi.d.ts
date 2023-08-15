@@ -23,7 +23,7 @@ declare module '@jodu555/mysqlapi' {
 		null?: Boolean;
 	}
 
-	type Table<T extends object> = { options: TableOptions } & { [K in keyof T]: K extends 'options' ? TableOptions : TypeOptions };
+	type Table<T extends object> = { options?: TableOptions } & { [K in keyof T]: K extends 'options' ? TableOptions : TypeOptions | string };
 
 	interface Database {
 		connect: () => void;
@@ -39,7 +39,7 @@ declare module '@jodu555/mysqlapi' {
 		getOne: (search?: object) => Promise<X>;
 		get: (search?: object) => Promise<[X]>;
 		delete: (search: object) => void;
-		getLatest: (action: 'inserted' | 'updated' | 'deleted', search: object) => Promise<X>;
+		getLatest: (action: 'inserted' | 'updated' | 'deleted', search?: object) => Promise<X>;
 	}
 
 	type ValidationReturn = {

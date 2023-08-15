@@ -3,7 +3,6 @@ export default () => {
 	const database = Database.getDatabase();
 
 	database.createTable('jobs', {
-		options: {},
 		ID: {
 			type: 'varchar(64)',
 			null: false,
@@ -30,7 +29,6 @@ export default () => {
 	});
 
 	database.createTable('news', {
-		options: {},
 		time: {
 			type: 'varchar(64)',
 			null: false,
@@ -41,7 +39,6 @@ export default () => {
 	});
 
 	database.createTable('todos', {
-		options: {},
 		ID: {
 			type: 'varchar(64)',
 			null: false,
