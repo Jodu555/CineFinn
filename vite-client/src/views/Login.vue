@@ -10,7 +10,21 @@
 		<div class="row">
 			<div class="col-1"></div>
 			<div class="col-5">
-				<div class="card">
+				<div class="d-flex justify-content-evenly">
+					<button type="button" :disabled="login" class="btn btn-lg" :class="{ 'btn-secondary': login, 'btn-primary': !login }" @click="login = true">
+						Login
+					</button>
+					<button
+						type="button"
+						:disabled="!login"
+						class="btn btn-lg"
+						:class="{ 'btn-secondary': !login, 'btn-primary': login }"
+						@click="login = false"
+					>
+						Register
+					</button>
+				</div>
+				<div v-if="login" class="card mt-2">
 					<div class="card-header">Login - CineFinn</div>
 					<div class="card-body">
 						<h4 class="card-title">Login to the Cinema</h4>
@@ -51,6 +65,65 @@
 						</form>
 					</div>
 				</div>
+				<div v-if="!login" class="card mt-2">
+					<div class="card-header">Register - CineFinn</div>
+					<div class="card-body">
+						<h4 class="card-title">Register to the Cinema</h4>
+						<hr />
+						<div v-if="loading" class="d-flex justify-content-center">
+							<div class="spinner-border" role="status">
+								<span class="visually-hidden">Loading...</span>
+							</div>
+						</div>
+						<form @submit.prevent="onRegister()" class="card-text" id="loginForm">
+							<fieldset>
+								<div class="form-group">
+									<InputValidator
+										v-model="form.token"
+										v-model:valid="form.tokenValid"
+										type="text"
+										id="token"
+										name="Token"
+										autocomplete="registertoken"
+										placeholder="Enter your Registration Token"
+										:rules="rules.tokenRules"
+									/>
+								</div>
+								<div class="form-group">
+									<InputValidator
+										v-model="form.username"
+										v-model:valid="form.usernameValid"
+										type="text"
+										id="username"
+										name="Username"
+										autocomplete="username"
+										placeholder="Enter Username"
+										:rules="rules.usernameRules"
+									/>
+								</div>
+								<div class="form-group">
+									<InputValidator
+										v-model="form.password"
+										v-model:valid="form.passwordValid"
+										type="password"
+										id="password"
+										name="Password"
+										autocomplete="current-password"
+										placeholder="Enter Password"
+										:rules="rules.passwordRules"
+									/>
+								</div>
+								<button
+									type="submit"
+									:disabled="!(this.form.usernameValid && this.form.passwordValid && this.form.tokenValid)"
+									class="mt-4 btn btn-primary"
+								>
+									Register
+								</button>
+							</fieldset>
+						</form>
+					</div>
+				</div>
 			</div>
 			<div class="col-1"></div>
 			<div class="col-4">
@@ -58,7 +131,7 @@
 					If you got here by accident I would recommend you to go home! <br />
 					This page is for known users only!
 					<br />
-					Which is why there is only a login and no registration!
+					Which is why there is only a registration with a proprietary token!
 				</h2>
 			</div>
 		</div>
@@ -73,14 +146,18 @@ export default {
 	},
 	data() {
 		return {
+			login: true,
 			loading: false,
 			form: {
 				username: '',
 				usernameValid: null,
 				password: '',
 				passwordValid: null,
+				token: '',
+				tokenValid: null,
 			},
 			rules: {
+				tokenRules: [(value) => !!value || 'Cannot be empty.', (value) => value.length >= 10 || 'Must be at least 10 Characters'],
 				usernameRules: [(value) => !!value || 'Cannot be empty.', (value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 20'],
 				passwordRules: [
 					(value) => !!value || 'Cannot be empty.',
