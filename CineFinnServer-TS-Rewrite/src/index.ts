@@ -19,7 +19,7 @@ CommandManager.createCommandManager(process.stdin, process.stdout);
 import { registerCommands } from './utils/commands';
 registerCommands();
 
-const { ErrorHelper, AuthenticationHelper } = require('@jodu555/express-helpers');
+import { ErrorHelper, AuthenticationHelper } from '@jodu555/express-helpers';
 import databaseSetupFunction from './utils/database';
 databaseSetupFunction();
 
@@ -47,14 +47,14 @@ app.use(
 // app.use(helmet());
 app.use(express.json());
 
-const authHelper = new AuthenticationHelper(app, '/auth', database, false, {
+const authHelper = new AuthenticationHelper<User>(app, '/auth', database, false, {
 	settings: 'TEXT',
 });
 authHelper.options.register = false;
 authHelper.options.allowMultipleSessions = true;
 authHelper.options.authTokenStoreDatabase = true;
 authHelper.install(
-	async (token: string, userobj: User) => {
+	async (token, userobj: User) => {
 		const outSettings = compareSettings(userobj.settings as SettingsObject);
 		await database.get('accounts').update({ UUID: userobj.UUID }, { settings: JSON.stringify(outSettings) });
 	},
