@@ -54,11 +54,11 @@ authHelper.options.register = false;
 authHelper.options.allowMultipleSessions = true;
 authHelper.options.authTokenStoreDatabase = true;
 authHelper.install(
-	async (token, userobj: User) => {
+	async (token, userobj) => {
 		const outSettings = compareSettings(userobj.settings as SettingsObject);
 		await database.get('accounts').update({ UUID: userobj.UUID }, { settings: JSON.stringify(outSettings) });
 	},
-	async (userobj: User) => {
+	async (userobj) => {
 		//OnRegister
 		await database.get('accounts').update(
 			{

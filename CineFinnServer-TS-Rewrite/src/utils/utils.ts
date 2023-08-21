@@ -3,13 +3,14 @@ import { RemoteSocket, Server, Socket } from 'socket.io';
 import { Series } from '../classes/series';
 import { crawlAndIndex, mergeSeriesArrays } from './crawler';
 import { ActiveJob, SerieObject } from '../types/classes';
-import { ExtendedRemoteSocket } from '../types/session';
+import { ExtendedRemoteSocket, User } from '../types/session';
+import { AuthenticationHelper } from '@jodu555/express-helpers';
 const outputFileName = process.env.LOCAL_DB_FILE;
 
 let series: Series[] = null;
 let activeJobs: ActiveJob[] = [];
 let io: Server = null;
-let authHelper = null;
+let authHelper: AuthenticationHelper<User> = null;
 
 function debounce(cb: Function, delay = 1000) {
 	let timeout: NodeJS.Timeout;
@@ -53,7 +54,7 @@ const getActiveJobs = () => activeJobs;
 const setActiveJobs = (_activeJobs: ActiveJob[]) => (activeJobs = _activeJobs);
 
 const getAuthHelper = () => authHelper;
-const setAuthHelper = (_authHelper) => (authHelper = _authHelper);
+const setAuthHelper = (_authHelper: AuthenticationHelper<User>) => (authHelper = _authHelper);
 
 const getIO = () => io;
 const setIO = (_io: Server) => (io = _io);
