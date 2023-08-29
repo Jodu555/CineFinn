@@ -35,10 +35,10 @@ declare module '@jodu555/mysqlapi' {
 
 	interface thingDatabase<X> {
 		create: (thing: object) => Promise<X>;
-		update: (search: X, thing: X) => void;
+		update: (search: X, thing: X) => Promise<void>;
 		getOne: (search?: object) => Promise<X>;
 		get: (search?: object) => Promise<[X]>;
-		delete: (search: object) => void;
+		delete: (search: object) => Promise<void>;
 		getLatest: (action: 'inserted' | 'updated' | 'deleted', search?: object) => Promise<X>;
 	}
 
