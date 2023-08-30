@@ -84,8 +84,8 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
   - [ ] Let the user create its own playlists with names
 - [ ] Think about a way on how to make it work to add an intro skip button
 - [x] Implement a native (so called todo list) to see wich series are still not ripped/downloaded/uploaded and maybe also with sorting
-  - [ ] Add an confirmation Dialog on Using a Todo
-  - [ ] Add an confirmation Dialog on Deleting a Todo
+  - [x] Add an confirmation Dialog on Using a Todo
+  - [x] Add an confirmation Dialog on Deleting a Todo
 - [x] Implement a clean entity switch even if the video is finished playing
 - [x] Update the Client Navigation Search to use native vue for better data updates
 - [x] Port the client application to vite for faster builds and better HMR

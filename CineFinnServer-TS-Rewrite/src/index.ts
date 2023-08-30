@@ -75,7 +75,6 @@ type SchemaValidation = {
 };
 
 authHelper.options.restrictedRegister = (validation: SchemaValidation) => {
-	console.log(validation);
 	if (validation.success) {
 		// The not provided register token is longer than 15 chars to automatically make it impossible to register
 		if (validation.object.token == process.env.REGISTRATION_TOKEN || 'asdfghjklöäasdfghjklsdfghjk') {

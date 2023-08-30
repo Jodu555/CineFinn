@@ -11,20 +11,26 @@
 			<div class="col-1"></div>
 			<div class="col-5">
 				<div class="d-flex justify-content-evenly">
-					<button type="button" :disabled="login" class="btn btn-lg" :class="{ 'btn-secondary': login, 'btn-primary': !login }" @click="login = true">
+					<button
+						type="button"
+						:disabled="loggingin"
+						class="btn btn-lg"
+						:class="{ 'btn-secondary': loggingin, 'btn-primary': !loggingin }"
+						@click="loggingin = true"
+					>
 						Login
 					</button>
 					<button
 						type="button"
-						:disabled="!login"
+						:disabled="!loggingin"
 						class="btn btn-lg"
-						:class="{ 'btn-secondary': !login, 'btn-primary': login }"
-						@click="login = false"
+						:class="{ 'btn-secondary': !loggingin, 'btn-primary': loggingin }"
+						@click="loggingin = false"
 					>
 						Register
 					</button>
 				</div>
-				<div v-if="login" class="card mt-2">
+				<div v-if="loggingin" class="card mt-2">
 					<div class="card-header">Login - CineFinn</div>
 					<div class="card-body">
 						<h4 class="card-title">Login to the Cinema</h4>
@@ -65,7 +71,7 @@
 						</form>
 					</div>
 				</div>
-				<div v-if="!login" class="card mt-2">
+				<div v-if="!loggingin" class="card mt-2">
 					<div class="card-header">Register - CineFinn</div>
 					<div class="card-body">
 						<h4 class="card-title">Register to the Cinema</h4>
@@ -146,7 +152,7 @@ export default {
 	},
 	data() {
 		return {
-			login: true,
+			loggingin: true,
 			loading: false,
 			form: {
 				username: '',
@@ -196,7 +202,6 @@ export default {
 				this.loading = true;
 				await this.register({
 					username: this.form.username,
-					// email: `${this.form.username}@nil.com`,
 					password: this.form.password,
 					token: this.form.token,
 				});
