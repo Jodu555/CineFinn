@@ -157,7 +157,11 @@ export default {
 				tokenValid: null,
 			},
 			rules: {
-				tokenRules: [(value) => !!value || 'Cannot be empty.', (value) => value.length >= 10 || 'Must be at least 10 Characters'],
+				tokenRules: [
+					(value) => !!value || 'Cannot be empty.',
+					(value) => value.length >= 10 || 'Must be at least 10 Characters',
+					(value) => value.length <= 15 || 'Must be below 15 Characters',
+				],
 				usernameRules: [(value) => !!value || 'Cannot be empty.', (value) => value.length >= 3 || 'Must be at least 3 Characters and can only be 20'],
 				passwordRules: [
 					(value) => !!value || 'Cannot be empty.',
@@ -173,7 +177,7 @@ export default {
 		this.authenticate(true);
 	},
 	methods: {
-		...mapActions('auth', ['login', 'authenticate']),
+		...mapActions('auth', ['login', 'register', 'authenticate']),
 		async onLogin() {
 			if (this.form.usernameValid && this.form.passwordValid) {
 				this.loading = true;
@@ -183,6 +187,26 @@ export default {
 					usernameValid: null,
 					password: '',
 					passwordValid: null,
+				};
+				this.loading = false;
+			}
+		},
+		async onRegister() {
+			if (this.form.usernameValid && this.form.passwordValid && this.form.tokenValid) {
+				this.loading = true;
+				await this.register({
+					username: this.form.username,
+					// email: `${this.form.username}@nil.com`,
+					password: this.form.password,
+					token: this.form.token,
+				});
+				this.form = {
+					username: '',
+					usernameValid: null,
+					password: '',
+					passwordValid: null,
+					token: '',
+					tokenValid: null,
 				};
 				this.loading = false;
 			}

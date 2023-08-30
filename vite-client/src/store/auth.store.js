@@ -73,6 +73,15 @@ export default {
 				commit('setError', response);
 			}
 		},
+		async register({ commit, state, dispatch }, credentials) {
+			const response = await this.$networking.post('/auth/register', JSON.stringify(credentials));
+			if (response.success) {
+				delete credentials?.token;
+				await dispatch('login', credentials);
+			} else {
+				commit('setError', response);
+			}
+		},
 		async authenticate({ state, commit, dispatch }, redirectToSlash = false) {
 			try {
 				const authtoken = getCookie('auth-token') || state.authToken;

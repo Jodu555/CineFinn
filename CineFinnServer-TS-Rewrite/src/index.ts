@@ -47,10 +47,45 @@ app.use(
 // app.use(helmet());
 app.use(express.json());
 
-const authHelper = new AuthenticationHelper<User>(app, '/auth', database, false, {
-	settings: 'TEXT',
-});
-authHelper.options.register = false;
+const authHelper = new AuthenticationHelper<User>(
+	app,
+	'/auth',
+	database,
+	false,
+	{
+		settings: 'TEXT',
+		email: {
+			type: 'varchar(64)',
+			null: true,
+		},
+	},
+	{
+		token: {
+			min: 10,
+			max: 15,
+		},
+	}
+);
+authHelper.options.register = true;
+
+type SchemaValidation = {
+	success: boolean;
+	errors: [string];
+	object: any;
+};
+
+authHelper.options.restrictedRegister = (validation: SchemaValidation) => {
+	console.log(validation);
+	if (validation.success) {
+		// The not provided register token is longer than 15 chars to automatically make it impossible to register
+		if (validation.object.token == process.env.REGISTRATION_TOKEN || 'asdfghjklöäasdfghjklsdfghjk') {
+			delete validation.object.token;
+			return true;
+		}
+	}
+	return false;
+};
+
 authHelper.options.allowMultipleSessions = true;
 authHelper.options.authTokenStoreDatabase = true;
 authHelper.install(
@@ -66,6 +101,15 @@ authHelper.install(
 			},
 			{
 				settings: JSON.stringify(defaultSettings),
+			}
+		);
+
+		await database.get('accounts').update(
+			{
+				UUID: userobj.UUID,
+			},
+			{
+				email: userobj.username + '@nil.com',
 			}
 		);
 	}
