@@ -1,4 +1,3 @@
-import { Langs, Serie } from './../../../Scraper/src/utils/types';
 import fs from 'fs';
 import path from 'path';
 import { Episode, Movie, Series, filenameParser } from '../classes/series';
