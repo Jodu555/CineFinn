@@ -1,6 +1,6 @@
-import { ExtendedEpisodeDownload } from './types';
+import { ExtendedEpisodeDownload, SerieEntity } from './types';
 import { ExtendedZoroEpisode } from './../class/Zoro';
-import { AniWorldSeriesInformations } from './../class/Aniworld';
+import { AniWorldEntity, AniWorldSeriesInformations } from './../class/Aniworld';
 import * as fs from 'fs';
 const promiseLimit = require('promise-limit');
 const sanitizeFilename = require('sanitize-filename');
@@ -90,7 +90,7 @@ async function compareForNewReleasesAniWorld(
 
 	//TODO: the system currently only checks if the gerdub is relased, but when we initially have the engsub and the gersub is released, the system does not care
 
-	const addtoOutputList = (title, reference, season, episode, lang: Langs) => {
+	const addtoOutputList = (title: string, reference: string, season: number, episode: number, lang: Langs) => {
 		outputDlList.push({
 			_animeFolder: title,
 			finished: false,
@@ -100,7 +100,7 @@ async function compareForNewReleasesAniWorld(
 			m3u8: '',
 		});
 	};
-	const addtoOutputListMovie = (title, reference, movieTitle, movieIdx, lang) => {
+	const addtoOutputListMovie = (title: string, reference: string, movieTitle: string, movieIdx: number, lang: Langs) => {
 		outputDlList.push({
 			_animeFolder: title,
 			finished: false,
@@ -109,6 +109,63 @@ async function compareForNewReleasesAniWorld(
 			url: `${reference}/filme/film-${movieIdx}`,
 			m3u8: '',
 		});
+	};
+
+	interface Indices {
+		aniworldSeasonIDX?: number;
+		aniworldEpisodeIDX?: number;
+		aniworldMovieIDX?: number;
+	}
+
+	const existingLanguageDecision = (
+		isMovie: boolean,
+		remoteEntity: AniWorldEntity,
+		localEntity: SerieEntity,
+		localSeries: Serie,
+		indexes: Indices
+	) => {
+		if (remoteEntity.langs.includes('GerDub') && !localEntity.langs.includes('GerDub')) {
+			if (!isMovie) {
+				console.log('The German Dub is missing in Season', indexes.aniworldSeasonIDX + 1, 'Episode:', indexes.aniworldEpisodeIDX + 1);
+				addtoOutputList(
+					localSeries.title,
+					localSeries.references.aniworld as string,
+					indexes.aniworldSeasonIDX + 1,
+					indexes.aniworldEpisodeIDX + 1,
+					'GerDub'
+				);
+			} else {
+				console.log('The German Dub is missing in Movie:', remoteEntity.secondName, 'IDX:', indexes.aniworldMovieIDX + 1);
+				addtoOutputListMovie(
+					localSeries.title,
+					localSeries.references.aniworld as string,
+					remoteEntity.secondName,
+					indexes.aniworldMovieIDX + 1,
+					'GerDub'
+				);
+			}
+		}
+		if (remoteEntity.langs.includes('GerSub') && !localEntity.langs.includes('GerDub') && !localEntity.langs.includes('GerSub')) {
+			if (!isMovie) {
+				console.log('The German Sub is missing in Season:', indexes.aniworldSeasonIDX + 1, 'Episode:', indexes.aniworldEpisodeIDX + 1);
+				addtoOutputList(
+					localSeries.title,
+					localSeries.references.aniworld as string,
+					indexes.aniworldSeasonIDX + 1,
+					indexes.aniworldEpisodeIDX + 1,
+					'GerSub'
+				);
+			} else {
+				console.log('The German Dub is missing in Movie:', remoteEntity.secondName, 'IDX:', indexes.aniworldMovieIDX + 1);
+				addtoOutputListMovie(
+					localSeries.title,
+					localSeries.references.aniworld as string,
+					remoteEntity.secondName,
+					indexes.aniworldMovieIDX + 1,
+					'GerSub'
+				);
+			}
+		}
 	};
 
 	for (const aniworldSeries of compare) {
@@ -133,7 +190,7 @@ async function compareForNewReleasesAniWorld(
 						continue;
 					}
 					ignoranceSkip = false;
-					addtoOutputList(localSeries.title, localSeries.references.aniworld, aniworldSeasonIDX + 1, episodeIDX + 1, language);
+					addtoOutputList(localSeries.title, localSeries.references.aniworld as string, aniworldSeasonIDX + 1, episodeIDX + 1, language);
 				}
 				if (ignoranceSkip) console.log(' => Skipped due to the ignorance Object', ignoranceObject);
 				continue;
@@ -153,20 +210,21 @@ async function compareForNewReleasesAniWorld(
 						console.log('Skipped due to the ignorance Object', ignoranceObject);
 						continue;
 					}
-					addtoOutputList(localSeries.title, localSeries.references.aniworld, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, language);
+					addtoOutputList(localSeries.title, localSeries.references.aniworld as string, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, language);
 					continue;
 				}
-				if (aniworldEpisode.langs.includes('GerDub') && !localEpisode.langs.includes('GerDub')) {
-					console.log('The German Dub is missing in Season:', aniworldSeasonIDX + 1, 'Episode:', aniworldEpisodeIDX + 1);
-					addtoOutputList(localSeries.title, localSeries.references.aniworld, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, 'GerDub');
-				}
-				if (aniworldEpisode.langs.includes('GerSub') && !localEpisode.langs.includes('GerDub') && !localEpisode.langs.includes('GerSub')) {
-					console.log('The German Sub is missing in Season:', aniworldSeasonIDX + 1, 'Episode:', aniworldEpisodeIDX + 1);
-					addtoOutputList(localSeries.title, localSeries.references.aniworld, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, 'GerSub');
-				}
+				existingLanguageDecision(false, aniworldEpisode, localEpisode, localSeries, { aniworldSeasonIDX, aniworldEpisodeIDX });
+				// if (aniworldEpisode.langs.includes('GerDub') && !localEpisode.langs.includes('GerDub')) {
+				// 	console.log('The German Dub is missing in Season:', aniworldSeasonIDX + 1, 'Episode:', aniworldEpisodeIDX + 1);
+				// 	addtoOutputList(localSeries.title, localSeries.references.aniworld as string, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, 'GerDub');
+				// }
+				// if (aniworldEpisode.langs.includes('GerSub') && !localEpisode.langs.includes('GerDub') && !localEpisode.langs.includes('GerSub')) {
+				// 	console.log('The German Sub is missing in Season:', aniworldSeasonIDX + 1, 'Episode:', aniworldEpisodeIDX + 1);
+				// 	addtoOutputList(localSeries.title, localSeries.references.aniworld as string, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, 'GerSub');
+				// }
 			}
 		}
-		//TODO: Add the movies too
+
 		if (aniworldSeries.hasMovies) {
 			for (const _aniworldMovieIDX in aniworldSeries.movies) {
 				const aniworldMovieIDX = Number(_aniworldMovieIDX);
@@ -187,20 +245,25 @@ async function compareForNewReleasesAniWorld(
 						console.log('Skipped due to the ignorance Object', ignoranceObject);
 						continue;
 					}
-					addtoOutputListMovie(localSeries.title, localSeries.references.aniworld, aniworldMovie.secondName, aniworldMovieIDX + 1, language);
+					addtoOutputListMovie(
+						localSeries.title,
+						localSeries.references.aniworld as string,
+						aniworldMovie.secondName,
+						aniworldMovieIDX + 1,
+						language
+					);
 					continue;
 				} else {
-					// console.log('Got Local Compare Movie', localMovie, aniworldMovie);
-
-					if (aniworldMovie.langs.includes('GerDub') && !localMovie.langs.includes('GerDub')) {
-						console.log('The German Dub is missing in Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
-						addtoOutputListMovie(localSeries.title, localSeries.references.aniworld, aniworldMovie.secondName, aniworldMovieIDX + 1, 'GerDub');
-					}
-
-					if (aniworldMovie.langs.includes('GerSub') && !localMovie.langs.includes('GerDub') && !localMovie.langs.includes('GerSub')) {
-						console.log('The German Dub is missing in Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
-						addtoOutputListMovie(localSeries.title, localSeries.references.aniworld, aniworldMovie.secondName, aniworldMovieIDX + 1, 'GerSub');
-					}
+					console.log('Got Local Compare Movie', localMovie, aniworldMovie);
+					existingLanguageDecision(true, aniworldMovie, localMovie, localSeries, { aniworldMovieIDX });
+					// if (aniworldMovie.langs.includes('GerDub') && !localMovie.langs.includes('GerDub')) {
+					// 	console.log('The German Dub is missing in Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
+					// 	addtoOutputListMovie(localSeries.title, localSeries.references.aniworld as string, aniworldMovie.secondName, aniworldMovieIDX + 1, 'GerDub');
+					// }
+					// if (aniworldMovie.langs.includes('GerSub') && !localMovie.langs.includes('GerDub') && !localMovie.langs.includes('GerSub')) {
+					// 	console.log('The German Dub is missing in Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
+					// 	addtoOutputListMovie(localSeries.title, localSeries.references.aniworld as string, aniworldMovie.secondName, aniworldMovieIDX + 1, 'GerSub');
+					// }
 				}
 			}
 		}
