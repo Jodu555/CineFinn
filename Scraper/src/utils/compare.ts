@@ -124,47 +124,28 @@ async function compareForNewReleasesAniWorld(
 		localSeries: Serie,
 		indexes: Indices
 	) => {
+		let lang: Langs;
 		if (remoteEntity.langs.includes('GerDub') && !localEntity.langs.includes('GerDub')) {
-			if (!isMovie) {
-				console.log('The German Dub is missing in Season', indexes.aniworldSeasonIDX + 1, 'Episode:', indexes.aniworldEpisodeIDX + 1);
-				addtoOutputList(
-					localSeries.title,
-					localSeries.references.aniworld as string,
-					indexes.aniworldSeasonIDX + 1,
-					indexes.aniworldEpisodeIDX + 1,
-					'GerDub'
-				);
-			} else {
-				console.log('The German Dub is missing in Movie:', remoteEntity.secondName, 'IDX:', indexes.aniworldMovieIDX + 1);
-				addtoOutputListMovie(
-					localSeries.title,
-					localSeries.references.aniworld as string,
-					remoteEntity.secondName,
-					indexes.aniworldMovieIDX + 1,
-					'GerDub'
-				);
-			}
+			lang = 'GerDub';
 		}
 		if (remoteEntity.langs.includes('GerSub') && !localEntity.langs.includes('GerDub') && !localEntity.langs.includes('GerSub')) {
-			if (!isMovie) {
-				console.log('The German Sub is missing in Season:', indexes.aniworldSeasonIDX + 1, 'Episode:', indexes.aniworldEpisodeIDX + 1);
-				addtoOutputList(
-					localSeries.title,
-					localSeries.references.aniworld as string,
-					indexes.aniworldSeasonIDX + 1,
-					indexes.aniworldEpisodeIDX + 1,
-					'GerSub'
-				);
-			} else {
-				console.log('The German Dub is missing in Movie:', remoteEntity.secondName, 'IDX:', indexes.aniworldMovieIDX + 1);
-				addtoOutputListMovie(
-					localSeries.title,
-					localSeries.references.aniworld as string,
-					remoteEntity.secondName,
-					indexes.aniworldMovieIDX + 1,
-					'GerSub'
-				);
-			}
+			lang = 'GerSub';
+		}
+		if (!isMovie) {
+			console.log('The ' + lang + ' is missing in Season', indexes.aniworldSeasonIDX + 1, 'Episode:', indexes.aniworldEpisodeIDX + 1);
+		} else {
+			console.log('The ' + lang + ' is missing in Movie:', remoteEntity.secondName, 'IDX:', indexes.aniworldMovieIDX + 1);
+		}
+		if (!isMovie) {
+			addtoOutputList(
+				localSeries.title,
+				localSeries.references.aniworld as string,
+				indexes.aniworldSeasonIDX + 1,
+				indexes.aniworldEpisodeIDX + 1,
+				lang
+			);
+		} else {
+			addtoOutputListMovie(localSeries.title, localSeries.references.aniworld as string, remoteEntity.secondName, indexes.aniworldMovieIDX + 1, lang);
 		}
 	};
 
