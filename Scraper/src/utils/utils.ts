@@ -1,4 +1,5 @@
-const axios = require('axios');
+import fs from 'fs';
+import axios from 'axios';
 
 async function downloadImage(url, imagePath) {
 	try {
@@ -7,7 +8,7 @@ async function downloadImage(url, imagePath) {
 			responseType: 'stream',
 		});
 
-		return new Promise((resolve, reject) => {
+		return new Promise<void>((resolve, reject) => {
 			response.data
 				.pipe(fs.createWriteStream(imagePath))
 				.on('finish', () => resolve())
@@ -19,7 +20,7 @@ async function downloadImage(url, imagePath) {
 	}
 }
 
-function similar(a, b) {
+function similar(a: string, b: string): number {
 	var equivalency = 0;
 	var minLength = a.length > b.length ? b.length : a.length;
 	var maxLength = a.length < b.length ? b.length : a.length;
@@ -32,7 +33,4 @@ function similar(a, b) {
 	return weight * 100;
 }
 
-module.exports = {
-	downloadImage,
-	similar,
-};
+export { downloadImage, similar };
