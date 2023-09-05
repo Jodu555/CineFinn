@@ -85,7 +85,13 @@ socket.on('connect', async () => {
 
 	// console.log(refs);
 
-	await checkForUpdates();
+	// const sto = new Aniworld('http://186.2.175.5/serie/stream/chicago-med/');
+
+	// const infos = await sto.parseInformations();
+
+	// console.log(infos.seasons[0][16]);
+
+	// await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();

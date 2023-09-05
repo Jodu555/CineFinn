@@ -56,11 +56,11 @@ class Aniworld {
 
 		output.seasons[0] = this.getListInformations(response.data);
 		console.log(`    => Got Season ${0} with ${output.seasons[0].length} Episodes`);
-		for (let i = 1; i < numberOfSeasons; i++) {
-			const seaResponse = await axios.get(`${this.url}/staffel-${i + 1}`);
-			output.seasons[i] = this.getListInformations(seaResponse.data);
-			console.log(`    => Got Season ${i} with ${output.seasons[i].length} Episodes`);
-		}
+		// for (let i = 1; i < numberOfSeasons; i++) {
+		// 	const seaResponse = await axios.get(`${this.url}/staffel-${i + 1}`);
+		// 	output.seasons[i] = this.getListInformations(seaResponse.data);
+		// 	console.log(`    => Got Season ${i} with ${output.seasons[i].length} Episodes`);
+		// }
 		return output;
 	}
 
@@ -106,14 +106,20 @@ class Aniworld {
 				langs.push(lang.src);
 			});
 
+			console.log(langs);
+
 			langs = langs.map((l) => {
 				switch (l) {
 					case '/public/img/german.svg':
+					case '/public/svg/german.svg':
 						return 'GerDub';
 					case '/public/img/japanese-german.svg':
 						return 'GerSub';
 					case '/public/img/japanese-english.svg':
 						return 'EngSub';
+					case '/public/svg/english.svg':
+					case '/public/img/english.svg':
+						return 'EngDub';
 					default:
 						break;
 				}
