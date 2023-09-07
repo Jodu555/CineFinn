@@ -67,6 +67,14 @@ const routes = [
 		],
 	},
 	{
+		path: '/playlists',
+		name: 'Playlists',
+		component: function () {
+			return import(/* webpackChunkName: "news" */ '../views/Playlists.vue');
+		},
+		meta: { requiresLogin: true },
+	},
+	{
 		path: '/rmvc',
 		name: 'RemoteVidoeControl',
 		component: function () {
@@ -74,6 +82,7 @@ const routes = [
 		},
 		meta: { requiresLogin: false },
 	},
+
 	{ path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound },
 ];
 

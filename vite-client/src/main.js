@@ -28,7 +28,8 @@ import 'bootstrap';
 let serverURL;
 
 if (location.hostname == 'localhost' || location.hostname.includes('192.168')) {
-	serverURL = `http://${location.hostname}:3100`;
+	// serverURL = `http://${location.hostname}:3100`;
+	serverURL = 'http://cinema-api.jodu555.de';
 } else {
 	serverURL = 'http://cinema-api.jodu555.de';
 }
