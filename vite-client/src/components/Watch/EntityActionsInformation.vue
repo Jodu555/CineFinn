@@ -33,6 +33,7 @@
 </template>
 <script>
 import { mapGetters, mapState } from 'vuex';
+import { langDetails } from '@/plugins/constants';
 
 export default {
 	props: {
@@ -42,24 +43,7 @@ export default {
 	data() {
 		return {
 			showNextPrevTxt: false,
-			langDetails: {
-				gerdub: {
-					title: 'Deutsch/German',
-					alt: 'Deutsche Sprache, Deutsche Flagge, Flagge, Flag',
-				},
-				gersub: {
-					title: 'Mit deutschen Untertiteln',
-					alt: 'Deutsche Flagge, Flagge, Untertitel, Flag',
-				},
-				engdub: {
-					title: 'Englisch/English',
-					alt: 'Englische Sprache, Englische Flagge, Flagge, Flag',
-				},
-				engsub: {
-					title: 'Mit englischen Untertiteln',
-					alt: 'Englische Flagge, Flagge, Untertitel, Flag',
-				},
-			},
+			langDetails: langDetails,
 		};
 	},
 	computed: {

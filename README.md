@@ -91,7 +91,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [x] Port the client application to vite for faster builds and better HMR
 - [x] Add a PATCH /index/ID route to update single anime informations
 - [ ] Port vuex to pinia
-- [ ] Think about how to display if only movies are present for example for (Rush Hour/Star Wars)
+- [x] Think about how to display if only movies are present for example for (Rush Hour/Star Wars)
 - [ ] Add better mobile accessbillity for scrubbing
 - [x] Add Loading Indicators
   - [x] Initial Page Load

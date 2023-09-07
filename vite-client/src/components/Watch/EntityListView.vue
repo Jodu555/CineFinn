@@ -7,6 +7,7 @@
 				<button
 					style="font-weight: 900; font-size: 1.18rem; padding: 0.3rem 0.6rem"
 					type="button"
+					:title="isMovie ? s.primaryName : ''"
 					:class="{
 						btn: true,
 						'text-white': true,

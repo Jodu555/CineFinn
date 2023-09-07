@@ -1,3 +1,4 @@
+v-if
 <template>
 	<div class="innerdoc">
 		<div v-if="currentSeries == undefined">
@@ -40,35 +41,43 @@
 				entityObject: {{ entityObject }}
 			</pre
 			>
-			<!-- Movies -->
-			<EntityListView
-				v-if="currentSeries.movies.length >= 1"
-				title="Movies:"
-				:array="currentSeries.movies"
-				:current="currentMovie"
-				:changeFN="changeMovie"
-				:watchList="watchList"
-			/>
-			<!-- Seasons -->
-			<EntityListView
-				title="Seasons:"
-				v-if="currentSeries.seasons.length >= 1"
-				:array="currentSeries.seasons"
-				:current="currentSeason"
-				:changeFN="changeSeason"
-				:season="true"
-				:watchList="watchList"
-			/>
-			<!-- Episodes -->
-			<EntityListView
-				v-if="currentSeason != -1"
-				title="Episodes:"
-				:array="currentSeries.seasons.find((x) => x[0].season == entityObject.season)"
-				:current="currentEpisode"
-				:currentSeason="currentSeason"
-				:changeFN="changeEpisode"
-				:watchList="watchList"
-			/>
+
+			<div v-if="currentSeries.movies.length >= 1 && currentSeries.seasons.length == 0 && currentMovie == -1">
+				<EntityListViewMovies :changeMovie="changeMovie" />
+			</div>
+
+			<div v-else>
+				<!-- Movies -->
+				<EntityListView
+					v-if="currentSeries.movies.length >= 1"
+					title="Movies:"
+					:array="currentSeries.movies"
+					:current="currentMovie"
+					:changeFN="changeMovie"
+					:watchList="watchList"
+				/>
+				<!-- Seasons -->
+				<EntityListView
+					title="Seasons:"
+					v-if="currentSeries.seasons.length >= 1"
+					:array="currentSeries.seasons"
+					:current="currentSeason"
+					:changeFN="changeSeason"
+					:season="true"
+					:watchList="watchList"
+				/>
+				<!-- Episodes -->
+				<EntityListView
+					v-if="currentSeason != -1"
+					title="Episodes:"
+					:array="currentSeries.seasons.find((x) => x[0].season == entityObject.season)"
+					:current="currentEpisode"
+					:currentSeason="currentSeason"
+					:changeFN="changeEpisode"
+					:watchList="watchList"
+				/>
+			</div>
+
 			<!-- Previous & Title & Languages & Next -->
 			<EntityActionsInformation :switchTo="switchTo" :changeLanguage="changeLanguage" />
 		</div>
@@ -84,9 +93,10 @@ import ExtendedVideo from '@/components/Watch/ExtendedVideo.vue';
 import ControlInformationModal from '@/components/Watch/ControlInformationModal.vue';
 import EntityActionsInformation from '@/components/Watch/EntityActionsInformation.vue';
 import MarkSeasonDropdown from '@/components/Watch/MarkSeasonDropdown.vue';
+import EntityListViewMovies from '@/components/Watch/EntityListViewMovies.vue';
 
 export default {
-	components: { EntityListView, ExtendedVideo, ControlInformationModal, EntityActionsInformation, MarkSeasonDropdown },
+	components: { EntityListView, ExtendedVideo, ControlInformationModal, EntityActionsInformation, MarkSeasonDropdown, EntityListViewMovies },
 	data() {
 		return {
 			cleanupFN: null,
