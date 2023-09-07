@@ -7,11 +7,11 @@
 					v-auto-animate
 					class="card mb-3"
 					style="max-width: 540px; padding: 1rem"
-					:style="{ height: `${expand ? 58 : 35 + 2 + playlist.children.length * 1}vh` }"
+					:style="{ height: true ? '' : `${expand ? 58 : 20 + 2 + playlist.children.length * 1}vh` }"
 				>
 					<div v-if="!expand" class="row g-5">
 						<div class="col-md-5">
-							<div class="image-wrapper">
+							<div class="image-wrapper" :style="{ height: `${9 + playlist.children.length * 0.2}rem` }">
 								<img
 									v-for="(child, idx) in playlist.children.slice(0, 5)"
 									class="playlist-image rounded"
@@ -21,10 +21,10 @@
 								/>
 							</div>
 						</div>
-						<div class="col-md-6">
+						<div class="col-md-7">
 							<div class="card-body">
-								<div class="d-flex justify-content-between">
-									<div>
+								<div class="d-flex flex-row">
+									<div class="me-auto">
 										<h3 class="card-title">{{ playlist.name }}</h3>
 									</div>
 									<div>
@@ -51,17 +51,18 @@
 								</div>
 							</div>
 						</div>
-						<div class="d-flex mt-4 justify-content-between">
+						<div v-auto-animate class="d-flex mt-4 justify-content-between">
 							<div style="margin-top: 15%; margin-right: 5%">
 								<button @click="prev" type="button" class="btn btn-primary">&lt;</button>
 							</div>
-							<div v-auto-animate class="card-img-bottom image-wrapper">
+							<div v-auto-animate class="card-img-bottom image-wrapper" style="height: 35vh">
 								<img
 									v-for="(child, idx) in playlist.children.slice(start % playlist.children.length, end)"
 									:key="child.ID"
 									@mouseover="selected = child"
 									@click="$router.push({ path: '/watch', query: { id: child.ID } })"
 									class="playlist-image playlist-bottom-image rounded"
+									style="cursor: pointer"
 									:style="{ 'margin-left': `${idx * 2}rem`, 'z-index': playlist.children.length - idx }"
 									:src="`http://cinema-api.jodu555.de/images/${child.ID}/cover.jpg?auth-token=41d83991-b9a6-4b3b-b30e-856d42bdb0ee`"
 									:alt="child.ID"
@@ -72,7 +73,7 @@
 								<button @click="next(playlist)" type="button" class="btn btn-primary">></button>
 							</div>
 						</div>
-						<div style="margin-top: 16vh" class="d-flex justify-content-center">
+						<div class="d-flex mt-2 justify-content-center">
 							<h3 class="text-truncate">{{ selected.title }}</h3>
 						</div>
 					</div>
@@ -129,6 +130,11 @@ export default {
 		...mapState('auth', ['settings']),
 		...mapState(['series', 'loading']),
 	},
+	watch: {
+		loading(newval) {
+			!newval && this.handleData();
+		},
+	},
 	methods: {
 		next(playlist) {
 			this.end += 8;
@@ -153,7 +159,9 @@ export default {
 			// 	this.playlists = response.json;
 			// }
 			// this.loading = false;
-
+			if (this.loading == false) this.handleData();
+		},
+		handleData() {
 			this.playlists = this.playlists.map((x) => {
 				return {
 					name: x.name,
@@ -176,8 +184,7 @@ export default {
 <style>
 .image-wrapper {
 	position: relative;
-	width: 100%;
-	height: 100%;
+	/* height: 35vh; */
 }
 .playlist-image {
 	height: 35vh;
