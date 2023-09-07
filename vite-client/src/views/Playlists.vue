@@ -13,10 +13,10 @@
 						<div class="col-md-5">
 							<div class="image-wrapper">
 								<img
-									v-for="(childID, idx) in playlist.children.slice(0, 5)"
+									v-for="(child, idx) in playlist.children.slice(0, 5)"
 									class="playlist-image rounded"
 									:style="{ 'margin-left': `${idx * 1.1}rem`, 'margin-top': `${idx * 0.2}rem`, 'z-index': playlist.children.length - idx }"
-									:src="`http://cinema-api.jodu555.de/images/${childID}/cover.jpg?auth-token=41d83991-b9a6-4b3b-b30e-856d42bdb0ee`"
+									:src="`http://cinema-api.jodu555.de/images/${child.ID}/cover.jpg?auth-token=41d83991-b9a6-4b3b-b30e-856d42bdb0ee`"
 									alt="Title"
 								/>
 							</div>
@@ -57,14 +57,15 @@
 							</div>
 							<div v-auto-animate class="card-img-bottom image-wrapper">
 								<img
-									v-for="(childID, idx) in playlist.children.slice(start % playlist.children.length, end)"
-									:key="childID"
-									@mouseover="selected = childID"
+									v-for="(child, idx) in playlist.children.slice(start % playlist.children.length, end)"
+									:key="child.ID"
+									@mouseover="selected = child"
+									@click="$router.push({ path: '/watch', query: { id: child.ID } })"
 									class="playlist-image playlist-bottom-image rounded"
 									:style="{ 'margin-left': `${idx * 2}rem`, 'z-index': playlist.children.length - idx }"
-									:src="`http://cinema-api.jodu555.de/images/${childID}/cover.jpg?auth-token=41d83991-b9a6-4b3b-b30e-856d42bdb0ee`"
-									:alt="childID"
-									:text="childID"
+									:src="`http://cinema-api.jodu555.de/images/${child.ID}/cover.jpg?auth-token=41d83991-b9a6-4b3b-b30e-856d42bdb0ee`"
+									:alt="child.ID"
+									:text="child.ID"
 								/>
 							</div>
 							<div style="margin-top: 15%; margin-right: 5%">
@@ -72,7 +73,7 @@
 							</div>
 						</div>
 						<div style="margin-top: 16vh" class="d-flex justify-content-center">
-							<h1>{{ selected }}</h1>
+							<h3 class="text-truncate">{{ selected.title }}</h3>
 						</div>
 					</div>
 				</div>
@@ -145,13 +146,22 @@ export default {
 			if (this.start < 0) this.start = 0;
 		},
 		async loadData() {
+			//TODO: Do the get playlist stuff here
 			// this.loading = true;
-			// const response = await this.$networking.get('/news');
+			// const response = await this.$networking.get('/playlists');
 			// if (response.success) {
-			// 	this.news = response.json;
+			// 	this.playlists = response.json;
 			// }
-			// this.changeSort();
 			// this.loading = false;
+
+			this.playlists = this.playlists.map((x) => {
+				return {
+					name: x.name,
+					children: x.children.map((y) => {
+						return { ID: y, title: this.series.find((s) => s.ID == y).title };
+					}),
+				};
+			});
 		},
 	},
 	async created() {
