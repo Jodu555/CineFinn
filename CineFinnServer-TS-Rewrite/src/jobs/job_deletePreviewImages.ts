@@ -11,7 +11,6 @@ interface JobObject {
 }
 
 export = {
-	//This job i wrote cause aproximately it happens over and over that i want to change the indexing
 	help: {
 		description: 'This job deletes all generated PreviewImages but no covers or landings',
 		options: [],
