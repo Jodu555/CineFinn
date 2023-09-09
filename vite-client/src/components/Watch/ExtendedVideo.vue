@@ -203,7 +203,7 @@ export default {
 					previewImgSrc += `${this.entityObject.season}-${this.entityObject.episode}`;
 				}
 
-				previewImgSrc += `/preview${previewImgNumber}.jpg?auth-token=${this.authToken}`;
+				previewImgSrc += `/${currentLanguage}/preview${previewImgNumber}.jpg?auth-token=${this.authToken}`;
 			}
 			return previewImgSrc;
 		},

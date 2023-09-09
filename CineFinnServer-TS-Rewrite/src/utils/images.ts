@@ -23,84 +23,88 @@ async function deepExecPromisify(command: string, cwd: string = undefined) {
 }
 
 async function generateEntityImages(i: number, serie: Series, entity: Episode | Movie, seasons: Episode[]) {
-	// for (const lang of entity.langs) {
-	// 	let output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), 'previewImages');
-	// 	if (entity instanceof Episode) {
-	// 		output = path.join(output, `${entity.season}-${entity.episode}`, lang);
-	// 	} else if (entity instanceof Movie) {
-	// 		output = path.join(output, 'Movies', `${entity.primaryName}`, lang);
-	// 	}
-	// 	fs.mkdirSync(output, { recursive: true });
-	// 	if (fs.readdirSync(output).length == 0) {
-	// 		const { dir, name, ext } = path.parse(entity.filePath);
-	// 		const filePath = entity.langs.length > 1 ? path.join(dir, `${name.split('_')[0]}_${lang}${ext}`) : entity.filePath;
+	const languageSeperation = true;
+	if (languageSeperation) {
+		for (const lang of entity.langs) {
+			let output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), 'previewImages');
+			if (entity instanceof Episode) {
+				output = path.join(output, `${entity.season}-${entity.episode}`, lang);
+			} else if (entity instanceof Movie) {
+				output = path.join(output, 'Movies', `${entity.primaryName}`, lang);
+			}
+			fs.mkdirSync(output, { recursive: true });
+			if (fs.readdirSync(output).length == 0) {
+				const { dir, name, ext } = path.parse(entity.filePath);
+				const filePath = entity.langs.length > 1 ? path.join(dir, `${name.split('_')[0]}_${lang}${ext}`) : entity.filePath;
 
-	// 		const command = `ffmpeg -i "${filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
-	// 		// console.log(command);
-	// 		await deepExecPromisify(command);
-	// 		// await wait(2000);
-	// 		if (entity instanceof Episode) {
-	// 			newProgress &&
-	// 				commandManager
-	// 					.getWriter()
-	// 					.deepSameLineClear(
-	// 						`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${
-	// 							path.parse(entity.filePath).base
-	// 						}`,
-	// 						2
-	// 					);
-	// 			!newProgress && console.log(`  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base}`);
-	// 		} else if (entity instanceof Movie) {
-	// 			newProgress &&
-	// 				commandManager
-	// 					.getWriter()
-	// 					.deepSameLineClear(
-	// 						`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${
-	// 							entity.primaryName
-	// 						}`,
-	// 						2
-	// 					);
-	// 			!newProgress && console.log(`  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${entity.primaryName}`);
-	// 		}
-	// 	}
-	// }
-	let output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), 'previewImages');
-	if (entity instanceof Episode) {
-		output = path.join(output, `${entity.season}-${entity.episode}`);
-	} else if (entity instanceof Movie) {
-		output = path.join(output, 'Movies', `${entity.primaryName}`);
-	}
-	fs.mkdirSync(output, { recursive: true });
-	if (fs.readdirSync(output).length == 0) {
-		const { dir, name, ext } = path.parse(entity.filePath);
-		const filePath = entity.filePath;
-
-		const command = `ffmpeg -i "${filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
-		// console.log(command);
-		await deepExecPromisify(command);
-		// await wait(2000);
+				const command = `ffmpeg -i "${filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
+				// console.log(command);
+				await deepExecPromisify(command);
+				// await wait(2000);
+				if (entity instanceof Episode) {
+					newProgress &&
+						commandManager
+							.getWriter()
+							.deepSameLineClear(
+								`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${
+									path.parse(entity.filePath).base
+								}`,
+								2
+							);
+					!newProgress && console.log(`  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base}`);
+				} else if (entity instanceof Movie) {
+					newProgress &&
+						commandManager
+							.getWriter()
+							.deepSameLineClear(
+								`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (Movie) ${i + 1} / ${
+									serie.movies.length
+								} - ${entity.primaryName}`,
+								2
+							);
+					!newProgress && console.log(`  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${entity.primaryName}`);
+				}
+			}
+		}
+	} else {
+		let output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), 'previewImages');
 		if (entity instanceof Episode) {
-			newProgress &&
-				commandManager
-					.getWriter()
-					.deepSameLineClear(
-						`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${
-							path.parse(entity.filePath).base
-						}`,
-						2
-					);
-			!newProgress && console.log(`  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base}`);
+			output = path.join(output, `${entity.season}-${entity.episode}`);
 		} else if (entity instanceof Movie) {
-			newProgress &&
-				commandManager
-					.getWriter()
-					.deepSameLineClear(
-						`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${
-							entity.primaryName
-						}`,
-						2
-					);
-			!newProgress && console.log(`  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${entity.primaryName}`);
+			output = path.join(output, 'Movies', `${entity.primaryName}`);
+		}
+		fs.mkdirSync(output, { recursive: true });
+		if (fs.readdirSync(output).length == 0) {
+			const { dir, name, ext } = path.parse(entity.filePath);
+			const filePath = entity.filePath;
+
+			const command = `ffmpeg -i "${filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
+			// console.log(command);
+			await deepExecPromisify(command);
+			// await wait(2000);
+			if (entity instanceof Episode) {
+				newProgress &&
+					commandManager
+						.getWriter()
+						.deepSameLineClear(
+							`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${
+								path.parse(entity.filePath).base
+							}`,
+							2
+						);
+				!newProgress && console.log(`  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base}`);
+			} else if (entity instanceof Movie) {
+				newProgress &&
+					commandManager
+						.getWriter()
+						.deepSameLineClear(
+							`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${
+								entity.primaryName
+							}`,
+							2
+						);
+				!newProgress && console.log(`  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${entity.primaryName}`);
+			}
 		}
 	}
 }
