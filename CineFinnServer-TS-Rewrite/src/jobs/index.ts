@@ -1,5 +1,7 @@
-require('dotenv').config();
-const options = {};
+import dotenv from 'dotenv';
+dotenv.config();
+
+const options: any = {};
 let waitFor = null;
 process.argv.forEach((args) => {
 	if (args.startsWith('--')) {
@@ -18,9 +20,18 @@ process.argv.forEach((args) => {
 	}
 });
 
+interface JobObject {
+	help: {
+		description: string;
+		options: string[];
+	};
+	run: (options: Record<string, string | number | boolean>) => Promise<void>;
+}
+
 //Info: if there are -- then a value is expected if there is only one it is a bool value
 
-const data = require(`./job_${options.name}.js`);
+// const data = require(`./job_${options.name}.js`);
+const data: JobObject = require(`./job_${options.name}.ts`);
 
 let valid = true;
 data.help.options.forEach((opt) => {

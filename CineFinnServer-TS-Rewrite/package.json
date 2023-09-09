@@ -7,7 +7,7 @@
 		"start": "ts-node src/index.ts",
 		"dev": "nodemon src/index.ts",
 		"debug": "node --inspect=0.0.0.0:9229 -r ts-node/register src/index.ts",
-		"job": "node src/jobs/index.js",
+		"job": "ts-node src/jobs/index.ts",
 		"dev:test": "nodemon src/test.ts",
 		"start:test": "ts-node src/test.ts",
 		"dev:testcrawler": "nodemon src/testcrawler.ts",
