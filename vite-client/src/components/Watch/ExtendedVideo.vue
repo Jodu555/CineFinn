@@ -202,8 +202,7 @@ export default {
 				} else {
 					previewImgSrc += `${this.entityObject.season}-${this.entityObject.episode}`;
 				}
-
-				previewImgSrc += `/${currentLanguage}/preview${previewImgNumber}.jpg?auth-token=${this.authToken}`;
+				previewImgSrc += `/${this.currentLanguage}/preview${previewImgNumber}.jpg?auth-token=${this.authToken}`;
 			}
 			return previewImgSrc;
 		},
