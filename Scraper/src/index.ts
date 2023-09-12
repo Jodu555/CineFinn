@@ -91,7 +91,7 @@ socket.on('connect', async () => {
 
 	// console.log(infos.seasons[0][16]);
 
-	// await checkForUpdates();
+	await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
@@ -124,8 +124,9 @@ async function checkForUpdates() {
 	// res.data = res.data.filter((x) => x.ID == 'a9f36e78');
 	// res.data = res.data.filter((x) => x.title.includes('Kaguya'));
 	// res.data = res.data.filter((x) => x.title.includes('Mushoku'));
-	// res.data = res.data.filter((x) => x.title.includes('Honor'));
+	// res.data = res.data.filter((x) => x.title.includes('Honor') || x.title.includes('Grace'));
 	// res.data = res.data.filter((x) => x.title.includes('Grace'));
+	// res.data.length = res.data.length / 0.5;
 
 	// console.log(res.data);
 

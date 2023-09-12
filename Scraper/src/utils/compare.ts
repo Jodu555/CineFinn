@@ -38,10 +38,10 @@ async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceIt
 	console.log('------ Compare Aniworld ------');
 	fs.writeFileSync('dlListAniworld.json', JSON.stringify(aniworld, null, 3));
 
-	console.log('------ Compare Zoro ------');
-	const zoro = await compareForNewReleasesZoro(series, ignoranceList);
-	console.log('------ Compare Zoro ------');
-	fs.writeFileSync('dlListZoro.json', JSON.stringify(zoro, null, 3));
+	// console.log('------ Compare Zoro ------');
+	// const zoro = await compareForNewReleasesZoro(series, ignoranceList);
+	// console.log('------ Compare Zoro ------');
+	// fs.writeFileSync('dlListZoro.json', JSON.stringify(zoro, null, 3));
 }
 
 async function compareForNewReleasesAniWorld(
@@ -124,13 +124,17 @@ async function compareForNewReleasesAniWorld(
 		localSeries: Serie,
 		indexes: Indices
 	) => {
-		let lang: Langs;
+		let lang: Langs | undefined = undefined;
+
 		if (remoteEntity.langs.includes('GerDub') && !localEntity.langs.includes('GerDub')) {
 			lang = 'GerDub';
 		}
 		if (remoteEntity.langs.includes('GerSub') && !localEntity.langs.includes('GerDub') && !localEntity.langs.includes('GerSub')) {
 			lang = 'GerSub';
 		}
+
+		if (lang == undefined) return;
+
 		if (!isMovie) {
 			console.log('The ' + lang + ' is missing in Season', indexes.aniworldSeasonIDX + 1, 'Episode:', indexes.aniworldEpisodeIDX + 1);
 		} else {

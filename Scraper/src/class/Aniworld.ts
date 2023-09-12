@@ -56,11 +56,11 @@ class Aniworld {
 
 		output.seasons[0] = this.getListInformations(response.data);
 		console.log(`    => Got Season ${0} with ${output.seasons[0].length} Episodes`);
-		// for (let i = 1; i < numberOfSeasons; i++) {
-		// 	const seaResponse = await axios.get(`${this.url}/staffel-${i + 1}`);
-		// 	output.seasons[i] = this.getListInformations(seaResponse.data);
-		// 	console.log(`    => Got Season ${i} with ${output.seasons[i].length} Episodes`);
-		// }
+		for (let i = 1; i < numberOfSeasons; i++) {
+			const seaResponse = await axios.get(`${this.url}/staffel-${i + 1}`);
+			output.seasons[i] = this.getListInformations(seaResponse.data);
+			console.log(`    => Got Season ${i} with ${output.seasons[i].length} Episodes`);
+		}
 		return output;
 	}
 
@@ -105,8 +105,6 @@ class Aniworld {
 			[...ep.querySelectorAll('.editFunctions img')].forEach((lang) => {
 				langs.push(lang.src);
 			});
-
-			console.log(langs);
 
 			langs = langs.map((l) => {
 				switch (l) {
