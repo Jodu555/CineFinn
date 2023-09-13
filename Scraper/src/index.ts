@@ -7,7 +7,7 @@ import Aniworld from './class/Aniworld';
 import { compareForNewReleases, compareForNewReleasesAniWorld, compareForNewReleasesZoro } from './utils/compare';
 const { similar } = require('./utils/utils');
 import Zoro from './class/Zoro';
-import { IgnoranceItem, Serie } from './utils/types';
+import { ExtendedEpisodeDownload, IgnoranceItem, Serie } from './utils/types';
 
 const socket = io(process.env.CORE_URL, { auth: { type: 'scraper', token: process.env.AUTH_TOKEN } });
 
@@ -127,7 +127,21 @@ async function checkForUpdates() {
 	// res.data = res.data.filter((x) => x.title.includes('Honor') || x.title.includes('Grace'));
 	// res.data = res.data.filter((x) => x.title.includes('Grace'));
 	// res.data.length = res.data.length / 0.5;
-
+	// const res: { data: Serie[] } = {
+	// 	data: [
+	// 		{
+	// 			ID: '2131415sd',
+	// 			title: 'The Legendary Hero is Dead!',
+	// 			categorie: 'Aniworld',
+	// 			seasons: [],
+	// 			movies: [],
+	// 			infos: {},
+	// 			references: {
+	// 				aniworld: 'https://aniworld.to/anime/stream/the-legendary-hero-is-dead',
+	// 			},
+	// 		},
+	// 	],
+	// };
 	// console.log(res.data);
 
 	//This list should say, that these animes should the new episodes no be included unless they are german dubbed
@@ -144,7 +158,45 @@ async function checkForUpdates() {
 	// console.log(await compareForNewReleasesAniWorld(res.data, ignoranceList));
 	// await compareForNewReleasesZoro(res.data, ignoranceList, false);
 
-	await compareForNewReleases(res.data, ignoranceList);
+	// await compareForNewReleases(res.data, ignoranceList);
+
+	const data: ExtendedEpisodeDownload = JSON.parse(fs.readFileSync('dlListAniworld.json', 'utf-8'));
+
+	const headers = {
+		token: process.env.ANI_DL_TOKEN,
+	};
+
+	try {
+		console.time('Upload');
+		let out = await axios.post(
+			'http://localhost:1779/upload',
+			{
+				data,
+			},
+			{
+				headers,
+			}
+		);
+		console.log(out.status, out.data);
+		const ID = out.data.ID;
+		console.timeEnd('Upload');
+
+		console.time('Collect');
+		out = await axios.get('http://localhost:1779/collect/' + ID, {
+			headers,
+		});
+		console.log(out.status, out.data);
+		console.timeEnd('Collect');
+
+		console.time('Download');
+		out = await axios.get('http://localhost:1779/download/' + ID, {
+			headers,
+		});
+		console.log(out.status, out.data);
+		console.timeEnd('Download');
+	} catch (error) {
+		console.error(error);
+	}
 }
 
 async function generateNewDownloadList() {
