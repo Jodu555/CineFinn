@@ -122,10 +122,7 @@ async function addReference() {
 async function checkForUpdates() {
 	const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 	// res.data = res.data.filter((x) => x.ID == 'a9f36e78');
-	// res.data = res.data.filter((x) => x.title.includes('Kaguya'));
-	// res.data = res.data.filter((x) => x.title.includes('Mushoku'));
 	// res.data = res.data.filter((x) => x.title.includes('Honor') || x.title.includes('Grace'));
-	// res.data = res.data.filter((x) => x.title.includes('Grace'));
 	// res.data.length = res.data.length / 0.5;
 	// const res: { data: Serie[] } = {
 	// 	data: [
@@ -155,13 +152,14 @@ async function checkForUpdates() {
 		},
 	];
 
-	// console.log(await compareForNewReleasesAniWorld(res.data, ignoranceList));
-	// await compareForNewReleasesZoro(res.data, ignoranceList, false);
+	const output = await compareForNewReleases(res.data, ignoranceList);
+	// kickOffAniDl(output.aniworld);
 
-	// await compareForNewReleases(res.data, ignoranceList);
+	// const data: ExtendedEpisodeDownload[] = JSON.parse(fs.readFileSync('dlListAniworld.json', 'utf-8'));
+	// kickOffAniDl(data);
+}
 
-	const data: ExtendedEpisodeDownload = JSON.parse(fs.readFileSync('dlListAniworld.json', 'utf-8'));
-
+async function kickOffAniDl(list: ExtendedEpisodeDownload[]) {
 	const headers = {
 		token: process.env.ANI_DL_TOKEN,
 	};
@@ -169,9 +167,9 @@ async function checkForUpdates() {
 	try {
 		console.time('Upload');
 		let out = await axios.post(
-			'http://localhost:1779/upload',
+			`${process.env.ANI_DL_HOST}/upload`,
 			{
-				data,
+				data: list,
 			},
 			{
 				headers,
@@ -182,14 +180,14 @@ async function checkForUpdates() {
 		console.timeEnd('Upload');
 
 		console.time('Collect');
-		out = await axios.get('http://localhost:1779/collect/' + ID, {
+		out = await axios.get(`${process.env.ANI_DL_HOST}/collect/${ID}`, {
 			headers,
 		});
 		console.log(out.status, out.data);
 		console.timeEnd('Collect');
 
 		console.time('Download');
-		out = await axios.get('http://localhost:1779/download/' + ID, {
+		out = await axios.get(`${process.env.ANI_DL_HOST}/download/${ID}`, {
 			headers,
 		});
 		console.log(out.status, out.data);

@@ -42,6 +42,11 @@ async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceIt
 	const zoro = await compareForNewReleasesZoro(series, ignoranceList);
 	console.log('------ Compare Zoro ------');
 	fs.writeFileSync('dlListZoro.json', JSON.stringify(zoro, null, 3));
+
+	return {
+		aniworld,
+		zoro,
+	};
 }
 
 async function compareForNewReleasesAniWorld(
