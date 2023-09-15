@@ -115,8 +115,8 @@ const crawlAndIndex = () => {
 
 	let files: string[] = [];
 
-	for (const pathEntrie of pathEntries) {
-		let { files: tmp_files } = listFiles(pathEntrie);
+	for (const pathEntry of pathEntries) {
+		let { files: tmp_files } = listFiles(pathEntry);
 		files.push(...tmp_files);
 		tmp_files = null;
 	}
