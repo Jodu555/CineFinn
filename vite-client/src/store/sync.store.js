@@ -16,19 +16,25 @@ const getDefaultState = () => {
 					movie: 0,
 					lang: 'GerDub',
 				},
-				members: ['Jodu555', 'TRyFlow'],
+				members: [
+					{ name: 'Jodu555', UUID: '', role: 1 },
+					{ name: 'TRyFlow', UUID: '', role: 1 },
+				],
 			},
 			{
 				ID: '58962',
 				created: Date.now(),
 				seriesID: 'c5ea6cb7',
-				members: ['Jodu555', 'TRyFlow'],
+				members: [
+					{ name: 'Jodu555', UUID: '', role: 1 },
+					{ name: 'TRyFlow', UUID: '', role: 1 },
+				],
 			},
 			{
 				ID: '58972',
 				created: Date.now(),
 				seriesID: '1998be8e',
-				members: ['Jodu555'],
+				members: [{ name: 'Jodu555', UUID: '', role: 1 }],
 			},
 		],
 		currentRoomID: -1,
