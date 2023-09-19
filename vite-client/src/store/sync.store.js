@@ -16,10 +16,11 @@ const getDefaultState = () => {
 					movie: 0,
 					lang: 'GerDub',
 				},
-				members: [
-					{ name: 'Jodu555', UUID: '', role: 1 },
-					{ name: 'TRyFlow', UUID: '', role: 1 },
-				],
+				members: ['Jodu555', 'TRyFlow'],
+				// members: [
+				// 	{ name: 'Jodu555', UUID: '', role: 1 },
+				// 	{ name: 'TRyFlow', UUID: '', role: 1 },
+				// ],
 			},
 			{
 				ID: '58962',
@@ -79,6 +80,18 @@ export default {
 			//TODO: make the socket call
 			commit('reset');
 			await router.push('/sync/');
+		},
+		async loadRooms({ commit, state, dispatch, rootState }) {
+			commit('setLoading', true);
+
+			//Load the Series Details
+			const response = await this.$networking.get('/room/');
+			if (response.success) {
+				const json = response.json;
+			}
+
+			commit('setRoomList', json.rooms);
+			commit('setLoading', false);
 		},
 		async loadRoomInfo({ commit, state, dispatch, rootState }) {
 			commit('setLoading', true);
