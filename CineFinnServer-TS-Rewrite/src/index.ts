@@ -142,6 +142,7 @@ import { router as managment_router } from './routes/managment';
 import { router as watch_router } from './routes/watch';
 import { router as news_router } from './routes/news';
 import { router as index_router } from './routes/index';
+import { router as room_router } from './routes/room';
 import video from './routes/video';
 import todo from './routes/todo';
 
@@ -155,6 +156,7 @@ app.use('/managment', authHelper.authentication(), managment_router);
 app.use('/watch', authHelper.authentication(), watch_router);
 app.use('/news', authHelper.authentication(), news_router);
 app.use('/index', authHelper.authentication(), index_router);
+app.use('/room', authHelper.authentication(), room_router);
 
 //Your direct routing stuff here
 app.get('/video', authHelper.authentication(), video);

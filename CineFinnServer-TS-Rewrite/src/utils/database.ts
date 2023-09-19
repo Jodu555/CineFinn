@@ -62,6 +62,9 @@ export default () => {
 			type: 'varchar(64)',
 			null: false,
 		},
+		entityInfos: {
+			type: 'TEXT',
+		},
 		members: {
 			type: 'TEXT',
 		},
