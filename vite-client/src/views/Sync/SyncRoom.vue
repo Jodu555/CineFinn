@@ -5,7 +5,7 @@
 				<span class="visually-hidden">Loading...</span>
 			</div>
 		</div>
-		<pre v-if="settings.developerMode.value">
+		<pre>
 				syncLoading: {{ syncLoading }}
 				watchLoading: {{ watchLoading }}
 				currentMovie: {{ currentMovie }}
@@ -14,44 +14,56 @@
 				currentLanguage: {{ currentLanguage }}
 				videoSrc: {{ videoSrc }}
 				entityObject: {{ entityObject }}
+				currentRoom: {{ currentRoom }}
 		</pre
 		>
 		<div class="mb-3 d-flex justify-content-between">
 			<button @click="leaveRoom()" type="button" class="btn btn-outline-danger">Leave Room</button>
-			<AutoComplete :options="{ placeholder: 'Select a Series...', clearAfterSelect: true }" :data="autoCompleteSeries" :select-fn="selectSeries" />
+			<AutoComplete
+				:options="{ placeholder: 'Select a Series...', clearAfterSelect: true }"
+				:data="autoCompleteSeries"
+				:select-fn="
+					(id) => {
+						isOwner ? selectSeries(id) : null;
+					}
+				"
+			/>
 		</div>
 		<div v-if="currentSeries != undefined && currentSeries.ID != -1">
-			<!-- Movies -->
-			<EntityListView
-				v-if="currentSeries.movies.length >= 1"
-				title="Movies:"
-				:array="currentSeries.movies"
-				:current="currentMovie"
-				:changeFN="changeMovie"
-				:watchList="[]"
-			/>
-			<!-- Seasons -->
-			<EntityListView
-				title="Seasons:"
-				v-if="currentSeries.seasons.length >= 1"
-				:array="currentSeries.seasons"
-				:current="currentSeason"
-				:changeFN="changeSeason"
-				:season="true"
-				:watchList="[]"
-			/>
-			<!-- Episodes -->
-			<EntityListView
-				v-if="currentSeason != -1"
-				title="Episodes:"
-				:array="currentSeries.seasons.find((x) => x[0].season == entityObject.season)"
-				:current="currentEpisode"
-				:currentSeason="currentSeason"
-				:changeFN="changeEpisode"
-				:watchList="[]"
-			/>
+			<div v-if="isOwner">
+				<!-- Movies -->
+				<EntityListView
+					v-if="currentSeries.movies.length >= 1"
+					title="Movies:"
+					:array="currentSeries.movies"
+					:current="currentMovie"
+					:changeFN="changeMovie"
+					:watchList="[]"
+				/>
+				<!-- Seasons -->
+				<EntityListView
+					title="Seasons:"
+					v-if="currentSeries.seasons.length >= 1"
+					:array="currentSeries.seasons"
+					:current="currentSeason"
+					:changeFN="changeSeason"
+					:season="true"
+					:watchList="[]"
+				/>
+				<!-- Episodes -->
+				<EntityListView
+					v-if="currentSeason != -1"
+					title="Episodes:"
+					:array="currentSeries.seasons.find((x) => x[0].season == entityObject.season)"
+					:current="currentEpisode"
+					:currentSeason="currentSeason"
+					:changeFN="changeEpisode"
+					:watchList="[]"
+				/>
 
-			<EntityActionsInformation />
+				<EntityActionsInformation :switch-to="switchTo" :change-language="changeLanguage" />
+			</div>
+
 			<ExtendedVideo v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="() => {}" />
 		</div>
 	</div>
@@ -62,18 +74,24 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import EntityActionsInformation from '../../components/Watch/EntityActionsInformation.vue';
 import EntityListView from '../../components/Watch/EntityListView.vue';
 import ExtendedVideo from '../../components/Watch/ExtendedVideo.vue';
+import { deepswitchTo } from '@/plugins/switcher';
 
 export default {
 	components: { AutoComplete, EntityActionsInformation, EntityListView, ExtendedVideo },
 	computed: {
 		...mapState(['series']),
-		...mapState('sync', { syncLoading: 'loading' }),
+		...mapState('sync', { syncLoading: 'loading', roomList: 'roomList' }),
 		...mapState('watch', { watchLoading: 'loading' }),
 		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode', 'currentLanguage', 'watchList']),
 		...mapState('auth', ['authToken', 'settings']),
 		...mapGetters('watch', ['videoSrc', 'entityObject']),
+		...mapGetters('sync', ['currentRoom', 'isOwner']),
 		autoCompleteSeries() {
-			return this.series.map((x) => ({ value: x.title, ID: x.ID }));
+			if (this.isOwner) {
+				return this.series.map((x) => ({ value: x.title, ID: x.ID }));
+			} else {
+				return [];
+			}
 		},
 		showVideo() {
 			return (
@@ -84,7 +102,7 @@ export default {
 		},
 	},
 	methods: {
-		...mapActions('sync', ['leaveRoom']),
+		...mapActions('sync', ['leaveRoom', 'loadRooms', 'joinRoom']),
 		...mapActions('watch', ['loadSeriesInfo']),
 		...mapMutations('watch', ['setCurrentMovie', 'setCurrentSeason', 'setCurrentEpisode', 'setCurrentLanguage', 'setWatchList']),
 		changeMovie(ID) {
@@ -142,7 +160,21 @@ export default {
 			}, 200);
 		},
 	},
-	mounted() {
+	async mounted() {
+		if (this.currentRoom == undefined) {
+			await this.loadRooms();
+			const roomID = Number(this.$route.params.key);
+			console.log(roomID);
+			await this.joinRoom(roomID);
+		}
+		await this.selectSeries(this.currentRoom?.seriesID);
+		this.handleVideoChange(
+			parseInt(this.currentRoom?.entityInfos?.season),
+			parseInt(this.currentRoom?.entityInfos?.episode),
+			parseInt(this.currentRoom?.entityInfos?.movie),
+			true,
+			this.currentRoom?.entityInfos?.lang
+		);
 		this.$socket.on('sync-videoAction', ({ action, value }) => {
 			if (action == 'sync-playback') {
 				// value = true = Play

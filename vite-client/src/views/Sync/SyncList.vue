@@ -1,6 +1,11 @@
 <template>
-	<div class="container">
+	<div v-auto-animate class="container">
 		<h2 class="text-center mb-4">Sync-Room List</h2>
+		<div v-if="loading" class="d-flex justify-content-center mb-4">
+			<div class="spinner-border" role="status">
+				<span class="visually-hidden">Loading...</span>
+			</div>
+		</div>
 		<div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 row-cols-xxl-5 g-4">
 			<!-- Join Room -->
 			<div>
@@ -53,7 +58,7 @@ export default {
 		};
 	},
 	computed: {
-		...mapState('sync', ['roomList']),
+		...mapState('sync', ['roomList', 'loading']),
 	},
 	methods: {
 		...mapActions('sync', ['createRoom', 'joinRoom', 'loadRooms']),

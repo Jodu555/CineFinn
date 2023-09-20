@@ -39,7 +39,7 @@ const getDefaultState = () => {
 			// },
 		],
 		currentRoomID: -1,
-		isOwner: false,
+		own: false,
 	};
 };
 
@@ -52,14 +52,19 @@ export default {
 		setCurrentRoomID(state, roomID) {
 			state.currentRoomID = roomID;
 		},
-		setIsOwner(state, isowner) {
-			state.isOwner = isowner;
-		},
 		setRoomList(state, roomList) {
 			state.roomList = roomList;
 		},
 		setLoading(state, loading) {
 			state.loading = loading;
+		},
+	},
+	getters: {
+		isOwner(state, o) {
+			return state.own;
+		},
+		currentRoom(state) {
+			return state.roomList.find((r) => r.ID == state.currentRoomID);
 		},
 	},
 	actions: {
@@ -73,8 +78,8 @@ export default {
 		async joinRoom({ commit, dispatch, rootState }, ID) {
 			//TODO: make here the socket call to join
 			commit('setCurrentRoomID', ID);
-			dispatch('loadRoomInfo');
-			// await router.push('/sync/' + ID);
+			await dispatch('loadRoomInfo');
+			await router.push('/sync/' + ID);
 		},
 		async leaveRoom({ commit, dispatch, rootState }) {
 			//TODO: make the socket call
