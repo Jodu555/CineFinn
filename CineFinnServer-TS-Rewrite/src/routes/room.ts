@@ -7,21 +7,36 @@ const database = Database.getDatabase();
 const router = express.Router();
 
 router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-	const rooms = (await database.get<DatabaseSyncRoomItem>('sync_rooms').get()).filter((r) => roomToFullObject(r));
+	const rooms = (await database.get<DatabaseSyncRoomItem>('sync_rooms').get()).map((r) => roomToFullObject(r));
 
 	console.log(rooms);
 
-	res.json(rooms);
+	res.json(
+		rooms.map((r) => {
+			delete r.entityInfos;
+			return r;
+		})
+	);
+});
+
+router.get('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+	const room = roomToFullObject(await database.get<DatabaseSyncRoomItem>('sync_rooms').getOne({ ID: req.params.id }));
+
+	console.log(room);
+
+	res.json(room);
 });
 
 function roomToFullObject(room: DatabaseSyncRoomItem): DatabaseParsedSyncRoomItem {
-	let newRoom: DatabaseParsedSyncRoomItem;
+	console.log(room);
+
+	let newRoom: any = {};
 	newRoom.ID = room.ID;
 	newRoom.seriesID = room.seriesID;
 	newRoom.entityInfos = JSON.parse(room.entityInfos);
 	newRoom.members = JSON.parse(room.members);
 	newRoom.created_at = room.created_at;
-	return newRoom;
+	return newRoom as DatabaseParsedSyncRoomItem;
 }
 
 export { router };

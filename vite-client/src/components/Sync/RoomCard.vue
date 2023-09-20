@@ -8,13 +8,13 @@
 			<div class="card-body">
 				<h4 class="card-title">{{ getSeries(room.seriesID)?.title }}</h4>
 				<p class="card-text">Opend: {{ ago }} with {{ room.members.length }} users</p>
-				<button class="btn btn-outline-success">Join</button>
+				<button class="btn btn-outline-success" @click="joinRoom(room.ID)">Join</button>
 			</div>
 		</div>
 	</div>
 </template>
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 
 export default {
 	props: ['room'],
@@ -24,16 +24,18 @@ export default {
 		};
 	},
 	mounted() {
-		this.ago = this.timeAgo(new Date(this.room.created));
+		console.log(Number(this.room.created_at));
+		this.ago = this.timeAgo(new Date(Number(this.room.created_at)));
 		setInterval(() => {
-			this.ago = this.timeAgo(new Date(this.room.created));
-		}, 1000);
+			this.ago = this.timeAgo(new Date(Number(this.room.created_at)));
+		}, 5000);
 	},
 	computed: {
 		...mapState(['series']),
 		...mapState('auth', ['settings']),
 	},
 	methods: {
+		...mapActions('sync', ['joinRoom']),
 		timeAgo(timestamp, locale = 'en') {
 			let value;
 			const diff = (new Date().getTime() - timestamp.getTime()) / 1000;

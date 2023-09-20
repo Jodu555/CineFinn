@@ -5,38 +5,38 @@ const getDefaultState = () => {
 	return {
 		loading: false,
 		roomList: [
-			{
-				//Let's say im in this room
-				ID: '58932',
-				created: Date.now(),
-				seriesID: '8dc12299',
-				entityInfos: {
-					season: 1,
-					episode: 1,
-					movie: 0,
-					lang: 'GerDub',
-				},
-				members: ['Jodu555', 'TRyFlow'],
-				// members: [
-				// 	{ name: 'Jodu555', UUID: '', role: 1 },
-				// 	{ name: 'TRyFlow', UUID: '', role: 1 },
-				// ],
-			},
-			{
-				ID: '58962',
-				created: Date.now(),
-				seriesID: 'c5ea6cb7',
-				members: [
-					{ name: 'Jodu555', UUID: '', role: 1 },
-					{ name: 'TRyFlow', UUID: '', role: 1 },
-				],
-			},
-			{
-				ID: '58972',
-				created: Date.now(),
-				seriesID: '1998be8e',
-				members: [{ name: 'Jodu555', UUID: '', role: 1 }],
-			},
+			// {
+			// 	//Let's say im in this room
+			// 	ID: '58932',
+			// 	created: Date.now(),
+			// 	seriesID: '8dc12299',
+			// 	entityInfos: {
+			// 		season: 1,
+			// 		episode: 1,
+			// 		movie: 0,
+			// 		lang: 'GerDub',
+			// 	},
+			// 	members: ['Jodu555', 'TRyFlow'],
+			// 	// members: [
+			// 	// 	{ name: 'Jodu555', UUID: '', role: 1 },
+			// 	// 	{ name: 'TRyFlow', UUID: '', role: 1 },
+			// 	// ],
+			// },
+			// {
+			// 	ID: '58962',
+			// 	created: Date.now(),
+			// 	seriesID: 'c5ea6cb7',
+			// 	members: [
+			// 		{ name: 'Jodu555', UUID: '', role: 1 },
+			// 		{ name: 'TRyFlow', UUID: '', role: 1 },
+			// 	],
+			// },
+			// {
+			// 	ID: '58972',
+			// 	created: Date.now(),
+			// 	seriesID: '1998be8e',
+			// 	members: [{ name: 'Jodu555', UUID: '', role: 1 }],
+			// },
 		],
 		currentRoomID: -1,
 		isOwner: false,
@@ -74,7 +74,7 @@ export default {
 			//TODO: make here the socket call to join
 			commit('setCurrentRoomID', ID);
 			dispatch('loadRoomInfo');
-			await router.push('/sync/' + ID);
+			// await router.push('/sync/' + ID);
 		},
 		async leaveRoom({ commit, dispatch, rootState }) {
 			//TODO: make the socket call
@@ -88,9 +88,9 @@ export default {
 			const response = await this.$networking.get('/room/');
 			if (response.success) {
 				const json = response.json;
+				commit('setRoomList', json);
 			}
 
-			commit('setRoomList', json.rooms);
 			commit('setLoading', false);
 		},
 		async loadRoomInfo({ commit, state, dispatch, rootState }) {
@@ -100,9 +100,17 @@ export default {
 			const response = await this.$networking.get('/room/' + state.currentRoomID);
 			if (response.success) {
 				const json = response.json;
+				commit(
+					'setRoomList',
+					state.roomList.map((r) => {
+						if (r.ID == json.ID) {
+							r = json;
+						}
+						return r;
+					})
+				);
 			}
 
-			commit('setCurrentRoom', series);
 			commit('setLoading', false);
 		},
 		async loadWatchList({ commit, dispatch, rootState }, ID) {

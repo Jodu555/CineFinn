@@ -145,6 +145,7 @@ import { router as index_router } from './routes/index';
 import { router as room_router } from './routes/room';
 import video from './routes/video';
 import todo from './routes/todo';
+import { DatabaseSyncRoomItem } from './types/database';
 
 // Your Middleware handlers here
 app.use('/images', authHelper.authentication(), express.static(path.join(process.env.PREVIEW_IMGS_PATH)));
@@ -169,4 +170,20 @@ const PORT = process.env.PORT || 3100;
 server.listen(PORT, async () => {
 	console.log(`Express & Socket App Listening ${process.env.https ? 'with SSL ' : ''}on ${PORT}`);
 	console.log(getSeries().length);
+
+	// database.get<DatabaseSyncRoomItem>('sync_rooms').create({
+	// 	ID: '58932',
+	// 	created_at: Date.now(),
+	// 	seriesID: '8dc12299',
+	// 	entityInfos: JSON.stringify({
+	// 		season: 1,
+	// 		episode: 1,
+	// 		movie: 0,
+	// 		lang: 'GerDub',
+	// 	}),
+	// 	members: JSON.stringify([
+	// 		{ name: 'Jodu555', UUID: '', role: 1 },
+	// 		{ name: 'TRyFlow', UUID: '', role: 1 },
+	// 	]),
+	// });
 });

@@ -2,6 +2,7 @@
 	<div class="container">
 		<h2 class="text-center mb-4">Sync-Room List</h2>
 		<div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 row-cols-xxl-5 g-4">
+			<!-- Join Room -->
 			<div>
 				<div class="card text-start">
 					<div class="card-body">
@@ -24,6 +25,7 @@
 					</div>
 				</div>
 			</div>
+			<!-- Open Room -->
 			<div>
 				<div class="card text-start">
 					<div class="card-body">
@@ -54,7 +56,10 @@ export default {
 		...mapState('sync', ['roomList']),
 	},
 	methods: {
-		...mapActions('sync', ['createRoom', 'joinRoom']),
+		...mapActions('sync', ['createRoom', 'joinRoom', 'loadRooms']),
+	},
+	mounted() {
+		this.loadRooms();
 	},
 };
 </script>
