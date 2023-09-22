@@ -192,6 +192,13 @@ async function kickOffAniDl(list: ExtendedEpisodeDownload[]) {
 		});
 		console.log(out.status, out.data);
 		console.timeEnd('Download');
+
+		console.time('Finish');
+		out = await axios.get(`${process.env.ANI_DL_HOST}/finish/${ID}`, {
+			headers,
+		});
+		console.log(out.status, out.data);
+		console.timeEnd('Finish');
 	} catch (error) {
 		console.error(error);
 	}
