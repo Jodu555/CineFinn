@@ -52,9 +52,10 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [x] Add the full series watched information dropdown
 - [x] Implement a method to un watch a specific series or season
 - [ ] Anime Preview (10 - 15 sec.)
-- [ ] Implement the command manager and some basic command (session = to list current sockets, info = to show series infos and space infos, reload = to reload the series from their file)
-- [ ] IMPORTANT: **Finally Upgrade to TypeScript so i do not have this fucking pain in my ass!!!**
-- [ ] Rewrite the crawler to remove some stupid old stuff
+- [x] Implement the command manager and some basic command (session = to list current sockets, info = to show series infos and space infos, reload = to reload the series from their file)
+- [x] IMPORTANT: **Finally Upgrade to TypeScript so i do not have this fucking pain in my ass!!!**
+- [ ] IMPORTANT: **Finally Upgrade the client to TypeScript so adding new features gets easier!!!**
+- [x] Rewrite the crawler to remove some stupid old stuff
 - [ ] Remove my Networking library cause it lags some stuff, and replace it with axios
 - [x] Implement the sharing also with movies
 - [x] Implement the sharing to include the language
@@ -67,7 +68,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [x] Implement a job-cli system to run a pre specified job with the cli
   - [ ] Change ID Job : A Job for which i can change an ID instant wihout any problems
   - [ ] Obtain Side-Infos : To Obtain the series image and infos as well as start & end date
-  - [ ] Write a job to re calculate the watch list to the episode and season numbers (1 based)
+  - [x] Delete Preview Images: To Instantly delete all Preview Images
 - [x] ReThink the current series store
 - [x] Rework the whole watch page and use code splitting smart indexing and much more
   - [x] Basically rewirte the whole watch page
