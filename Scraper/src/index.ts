@@ -152,11 +152,11 @@ async function checkForUpdates() {
 		},
 	];
 
-	const output = await compareForNewReleases(res.data, ignoranceList);
+	// const output = await compareForNewReleases(res.data, ignoranceList);
 	// kickOffAniDl(output.aniworld);
 
-	// const data: ExtendedEpisodeDownload[] = JSON.parse(fs.readFileSync('dlListAniworld.json', 'utf-8'));
-	// kickOffAniDl(data);
+	const data: ExtendedEpisodeDownload[] = JSON.parse(fs.readFileSync('dlListAniworld.json', 'utf-8'));
+	kickOffAniDl(data);
 }
 
 async function kickOffAniDl(list: ExtendedEpisodeDownload[]) {

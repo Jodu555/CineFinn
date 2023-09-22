@@ -6,7 +6,7 @@
 				<span class="visually-hidden">Loading...</span>
 			</div>
 		</div>
-		<div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 row-cols-xxl-5 g-4">
+		<div v-auto-animate class="row row-cols-1 row-cols-sm-2 row-cols-md-4 row-cols-xxl-5 g-4">
 			<!-- Join Room -->
 			<div>
 				<div class="card text-start">
