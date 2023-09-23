@@ -240,6 +240,12 @@ const useTodo = async (ID) => {
 			delete seriesObject.infos.image;
 		}
 		await instance.$networking.post('/index/', JSON.stringify(seriesObject));
+
+		const newsObject = {
+			content: `Added ${seriesObject.title}`,
+			time: Date.now(),
+		};
+		await instance.$networking.post('/news/', JSON.stringify(newsObject));
 	}
 };
 

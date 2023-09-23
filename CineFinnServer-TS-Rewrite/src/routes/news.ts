@@ -19,11 +19,11 @@ router.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunc
 	if (req.body.content != undefined && req.body.content.trim() !== '' && req.body.content.length > 5) {
 		const jobDB = await database.get<DatabaseJobItem>('jobs').getOne({ ID: 'crawl' });
 		const newsObject = {
-			time: jobDB.lastRun,
-			content: req.body.content,
+			time: parseInt(req.body.time) || jobDB.lastRun,
+			content: req.body.content as string,
 		};
 		await database.get<DatabaseNewsItem>('news').create(newsObject);
-		res.json({ success: true });
+		res.json({ success: true, object: newsObject });
 	} else {
 		next(new Error('Parsing Error: news must be a string and should be longer than 5 chars'));
 	}

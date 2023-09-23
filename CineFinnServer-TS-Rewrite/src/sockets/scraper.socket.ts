@@ -1,11 +1,17 @@
+import { ExtendedSocket } from '../types/session';
 import { Langs } from '../types/classes';
 
-let $socket;
+let $socket: ExtendedSocket;
 
-const initialize = async (socket) => {
+const initialize = async (socket: ExtendedSocket) => {
 	const auth = socket.auth;
 	console.log('Socket Connection:', auth.type.toUpperCase());
 	$socket = socket;
+
+	socket.on('disconnect', () => {
+		console.log('Socket DisConnection:', auth.type.toUpperCase());
+		$socket = null;
+	});
 };
 
 export interface AniWorldEntity {
@@ -60,7 +66,7 @@ export interface ZoroReturn {
 	episodes: ExtendedZoroEpisode[];
 }
 
-const getAniworldInfos = buildAwaitSocketReturn<AniWorldSeriesInformations, string>('AniworldData');
+const getAniworldInfos = buildAwaitSocketReturn<AniWorldSeriesInformations, any>('AniworldData');
 const getZoroInfos = buildAwaitSocketReturn<ZoroReturn, string | number>('ZoroData');
 
 const manageTitle = buildAwaitSocketReturn('manageTitle');
@@ -70,6 +76,8 @@ function buildAwaitSocketReturn<R, T>(method: string): (arg0: T) => Promise<R> {
 		return new Promise<R>((resolve, reject) => {
 			if (!$socket) return reject();
 			const timeout = setTimeout(() => reject(), 1000 * 5);
+			// TODO: Why is this failing
+			// @ts-ignore:next-line
 			$socket.once(`return${method}`, (data: R) => {
 				resolve(data);
 				clearTimeout(timeout);
@@ -79,4 +87,8 @@ function buildAwaitSocketReturn<R, T>(method: string): (arg0: T) => Promise<R> {
 	};
 }
 
-export { initialize, getAniworldInfos, manageTitle };
+function isScraperSocketConnected() {
+	return Boolean($socket);
+}
+
+export { initialize, getAniworldInfos, manageTitle, isScraperSocketConnected };
