@@ -13,7 +13,8 @@ const newProgress = false;
 
 async function deepExecPromisify(command: string, cwd: string = undefined) {
 	return await new Promise((resolve, reject) => {
-		child_process.exec(command, { encoding: 'utf8', cwd }, (error, stdout, stderr) => {
+		//maxBuffer: Default: 200KB and this sets it to 900KB
+		child_process.exec(command, { encoding: 'utf8', cwd, maxBuffer: 124 * 900 }, (error, stdout, stderr) => {
 			if (error) {
 				reject(error);
 			}

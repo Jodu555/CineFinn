@@ -64,7 +64,7 @@
 				<EntityActionsInformation :switch-to="switchTo" :change-language="changeLanguage" />
 			</div>
 
-			<ExtendedVideo v-show="showVideo" :inSyncRoom="true" :switchTo="switchTo" :sendVideoTimeUpdate="() => {}" />
+			<ExtendedVideo v-show="showVideo" :inSyncRoom="true" :canPlay="isOwner" :switchTo="switchTo" :sendVideoTimeUpdate="() => {}" />
 		</div>
 	</div>
 </template>
