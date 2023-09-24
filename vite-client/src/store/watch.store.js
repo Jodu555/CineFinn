@@ -57,14 +57,17 @@ export default {
 			return url.href;
 		},
 		entityObject(state) {
+			console.log('entityObject eval ', JSON.stringify(state, null, 3));
 			try {
 				if (state.currentMovie != -1) {
+					console.log('entityObject eval ', 1);
 					return state.currentSeries?.movies?.[state.currentMovie - 1];
 				} else if (state.currentSeason != -1 && state.currentEpisode != -1) {
 					// Long (Especially when there are 50 seasons with 100 episodes each)
 
 					// console.log(state.currentSeries);
 					// console.log(state.currentSeason, state.currentEpisode);
+					console.log('entityObject eval ', 2);
 
 					const entity = state.currentSeries.seasons.flat().find((x) => x.season == state.currentSeason && x.episode == state.currentEpisode);
 
@@ -84,12 +87,15 @@ export default {
 					// entity = state.currentSeries.seasons[seasonIndex].find(
 					//     (x) => x.episode == state.currentEpisode
 					// );
+					console.log('entityObject eval ', 3);
 
 					return entity;
 				}
 			} catch (error) {
+				console.log('entityObject eval ', 4);
 				console.error('watch.store.js', error);
 			}
+			console.log('entityObject eval ', 5);
 
 			return null;
 		},

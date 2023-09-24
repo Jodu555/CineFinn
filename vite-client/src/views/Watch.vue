@@ -28,7 +28,7 @@ v-if
 				{{ JSON.stringify(watchList.find((segment) => segment.season == this.currentSeason && segment.episode == this.currentEpisode)) }}
 			</pre
 			>
-			<div v-auto-animate v-if="showLatestWatchButton" class="text-center">
+			<div v-auto-animate v-if="showLatestWatchButton" class="text-center mb-2">
 				<button @click="skipToLatestTime" class="btn btn-outline-info">Jump to Latest watch position!</button>
 			</div>
 			<MarkSeasonDropdown />

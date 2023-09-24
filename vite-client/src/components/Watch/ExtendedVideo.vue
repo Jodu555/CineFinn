@@ -1,7 +1,9 @@
 <template>
 	<div>
-		<ShareModal />
-		<RmvcModal :switchTo="switchTo" :skip="skip" />
+		<div v-if="!inSyncRoom">
+			<ShareModal />
+			<RmvcModal :switchTo="switchTo" :skip="skip" />
+		</div>
 		<div style="margin-top: 0.5%" class="video-container paused" data-volume-level="high">
 			<img class="thumbnail-img" />
 			<div v-if="entityObject && settings.showVideoTitleContainer.value" class="video-title-container">
@@ -58,10 +60,10 @@
 						/
 						<div class="total-time"></div>
 					</div>
-					<button title="RMVC Controls" data-bs-toggle="modal" data-bs-target="#rmvcModal">
+					<button v-if="!inSyncRoom" title="RMVC Controls" data-bs-toggle="modal" data-bs-target="#rmvcModal">
 						<font-awesome-icon icon="fa-solid fa-network-wired" />
 					</button>
-					<button title="Share Video" data-bs-toggle="modal" data-bs-target="#shareModal">
+					<button v-if="!inSyncRoom" title="Share Video" data-bs-toggle="modal" data-bs-target="#shareModal">
 						<font-awesome-icon icon="fa-solid fa-share" size="lg" />
 					</button>
 					<button title="Previous Episode" @click="switchTo(-1)">
@@ -151,10 +153,12 @@ export default {
 	props: {
 		switchTo: { type: Function },
 		sendVideoTimeUpdate: { type: Function },
-		interaction: { type: Boolean, default: true },
+		// inSyncRoom: { type: Boolean, default: false },
 	},
 	data() {
 		return {
+			inSyncRoom: false,
+			canPlay: false, //TODO: Default true
 			cleanupFN: null,
 			skip: null,
 			skipPercent: null,
@@ -493,6 +497,7 @@ export default {
 				skip(duration, true);
 			}
 			function skip(duration, set = false) {
+				if (!v.canPlay) return;
 				const animationDuration = 400;
 				const doIconAnimation = Math.abs(duration) > 1 || Math.abs(duration) == 0;
 				let pref = '';
@@ -579,6 +584,7 @@ export default {
 			playPauseBtn.addEventListener('click', togglePlay);
 			video.addEventListener('click', togglePlay);
 			function togglePlay() {
+				if (!v.canPlay) return;
 				video.paused ? video.play() : video.pause();
 			}
 			video.addEventListener('play', () => {

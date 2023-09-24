@@ -64,7 +64,7 @@
 				<EntityActionsInformation :switch-to="switchTo" :change-language="changeLanguage" />
 			</div>
 
-			<ExtendedVideo v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="() => {}" />
+			<ExtendedVideo v-show="showVideo" :inSyncRoom="true" :switchTo="switchTo" :sendVideoTimeUpdate="() => {}" />
 		</div>
 	</div>
 </template>
@@ -73,7 +73,7 @@ import AutoComplete from '@/components/Layout/AutoComplete.vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import EntityActionsInformation from '../../components/Watch/EntityActionsInformation.vue';
 import EntityListView from '../../components/Watch/EntityListView.vue';
-import ExtendedVideo from '../../components/Watch/ExtendedVideo.vue';
+import ExtendedVideo from '@/components/Watch/ExtendedVideo.vue';
 import { deepswitchTo } from '@/plugins/switcher';
 
 export default {
@@ -164,7 +164,7 @@ export default {
 		if (this.currentRoom == undefined) {
 			await this.loadRooms();
 			const roomID = Number(this.$route.params.key);
-			console.log(roomID);
+			console.log(roomID, this.series);
 			await this.joinRoom(roomID);
 		}
 		await this.selectSeries(this.currentRoom?.seriesID);
