@@ -60,8 +60,13 @@ export default {
 		},
 	},
 	getters: {
-		isOwner(state, o) {
-			return state.own;
+		isOwner(state, getters, rootState) {
+			if (getters.currentRoom == undefined) return;
+			const userUUID = rootState.auth?.userInfo?.UUID;
+			if (userUUID == undefined) return;
+			const memberObject = getters.currentRoom.members.find((x) => x.UUID == userUUID);
+			if (memberObject == undefined) return;
+			return memberObject.role == 1;
 		},
 		currentRoom(state) {
 			return state.roomList.find((r) => r.ID == state.currentRoomID);

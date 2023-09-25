@@ -153,12 +153,11 @@ export default {
 	props: {
 		switchTo: { type: Function },
 		sendVideoTimeUpdate: { type: Function },
-		// inSyncRoom: { type: Boolean, default: false },
+		inSyncRoom: { type: Boolean, default: false },
+		canPlay: { type: Boolean, default: true },
 	},
 	data() {
 		return {
-			inSyncRoom: false,
-			canPlay: false, //TODO: Default true
 			cleanupFN: null,
 			skip: null,
 			skipPercent: null,

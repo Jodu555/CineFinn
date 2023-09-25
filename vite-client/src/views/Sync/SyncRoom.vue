@@ -94,6 +94,16 @@ export default {
 			}
 		},
 		showVideo() {
+			console.log(
+				'this.currentSeries',
+				this.currentSeries,
+				'this.currentMovie',
+				this.currentMovie,
+				'this.currentSeason',
+				this.currentSeason,
+				'this.currentEpisode',
+				this.currentEpisode
+			);
 			return (
 				this.currentSeries != undefined &&
 				this.currentSeries.ID != -1 &&
@@ -168,6 +178,7 @@ export default {
 			await this.joinRoom(roomID);
 		}
 		await this.selectSeries(this.currentRoom?.seriesID);
+		console.log('this.currentRoom?.entityInfos?', JSON.stringify(this.currentRoom?.entityInfos));
 		this.handleVideoChange(
 			parseInt(this.currentRoom?.entityInfos?.season),
 			parseInt(this.currentRoom?.entityInfos?.episode),

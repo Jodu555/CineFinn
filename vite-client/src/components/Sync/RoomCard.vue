@@ -24,7 +24,6 @@ export default {
 		};
 	},
 	mounted() {
-		console.log(Number(this.room.created_at));
 		this.ago = this.timeAgo(new Date(Number(this.room.created_at)));
 		setInterval(() => {
 			this.ago = this.timeAgo(new Date(Number(this.room.created_at)));

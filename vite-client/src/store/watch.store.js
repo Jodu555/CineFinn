@@ -57,7 +57,7 @@ export default {
 			return url.href;
 		},
 		entityObject(state) {
-			console.log('entityObject eval ', JSON.stringify(state, null, 3));
+			// console.log('entityObject eval ', JSON.stringify(state, null, 3));
 			try {
 				if (state.currentMovie != -1) {
 					console.log('entityObject eval ', 1);
