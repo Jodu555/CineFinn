@@ -33,6 +33,8 @@ interface ChangedZoroEpisode extends Omit<ExtendedZoroEpisode, 'langs'> {
 async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceItem[]) {
 	const output: ExtendedEpisodeDownload[] = [];
 
+	// compareForNewReleasesSTO(series, ignoranceList);
+
 	console.log('------ Compare Aniworld ------');
 	const aniworld = await compareForNewReleasesAniWorld(series, ignoranceList);
 	console.log('------ Compare Aniworld ------');
@@ -63,6 +65,226 @@ async function compareForNewReleasesAniWorld(
 				return new Promise(async (res, _) => {
 					let world: Aniworld;
 					if (typeof serie.references.aniworld == 'string') world = new Aniworld(serie.references.aniworld);
+					const out = await world.parseInformations();
+					res({
+						ID: serie.ID,
+						title: serie.title,
+						references: serie.references,
+						...out,
+					});
+				});
+			});
+		})
+	);
+	const outputDlList: ExtendedEpisodeDownload[] = [];
+
+	/**
+	 * Loop through the aniworld series
+	 * check if the season amount is equal ?
+	 * if it is:
+	 * 	check if the episode amount is equal ?
+	 * 	if it is:
+	 *   check if there is a gerDub out which isnt on the server
+	 * 	 if, then add it to the list
+	 *  if it is not:
+	 * 	 Use the usual method to add to the list:
+	 * 	 if GerDub take it, if not just GerSub
+	 *
+	 * if it is not:
+	 *  just proceed with the usual method
+	 *
+	 */
+
+	//TODO: the system currently only checks if the gerdub is relased, but when we initially have the engsub and the gersub is released, the system does not care
+
+	const addtoOutputList = (title: string, reference: string, season: number, episode: number, lang: Langs) => {
+		outputDlList.push({
+			_animeFolder: title,
+			finished: false,
+			folder: 'Season ' + season,
+			file: `${title} St.${season} Flg.${episode}_${lang}`,
+			url: `${reference}/staffel-${season}/episode-${episode}`,
+			m3u8: '',
+		});
+	};
+	const addtoOutputListMovie = (title: string, reference: string, movieTitle: string, movieIdx: number, lang: Langs) => {
+		outputDlList.push({
+			_animeFolder: title,
+			finished: false,
+			folder: 'Movies',
+			file: `${movieTitle}_${lang}`,
+			url: `${reference}/filme/film-${movieIdx}`,
+			m3u8: '',
+		});
+	};
+
+	interface Indices {
+		aniworldSeasonIDX?: number;
+		aniworldEpisodeIDX?: number;
+		aniworldMovieIDX?: number;
+	}
+
+	const existingLanguageDecision = (
+		isMovie: boolean,
+		remoteEntity: AniWorldEntity,
+		localEntity: SerieEntity,
+		localSeries: Serie,
+		indexes: Indices
+	) => {
+		let lang: Langs | undefined = undefined;
+
+		if (remoteEntity.langs.includes('GerDub') && !localEntity.langs.includes('GerDub')) {
+			lang = 'GerDub';
+		}
+		if (remoteEntity.langs.includes('GerSub') && !localEntity.langs.includes('GerDub') && !localEntity.langs.includes('GerSub')) {
+			lang = 'GerSub';
+		}
+
+		if (lang == undefined) return;
+
+		if (!isMovie) {
+			console.log('The ' + lang + ' is missing in Season', indexes.aniworldSeasonIDX + 1, 'Episode:', indexes.aniworldEpisodeIDX + 1);
+		} else {
+			console.log('The ' + lang + ' is missing in Movie:', remoteEntity.secondName, 'IDX:', indexes.aniworldMovieIDX + 1);
+		}
+		if (!isMovie) {
+			addtoOutputList(
+				localSeries.title,
+				localSeries.references.aniworld as string,
+				indexes.aniworldSeasonIDX + 1,
+				indexes.aniworldEpisodeIDX + 1,
+				lang
+			);
+		} else {
+			addtoOutputListMovie(localSeries.title, localSeries.references.aniworld as string, remoteEntity.secondName, indexes.aniworldMovieIDX + 1, lang);
+		}
+	};
+
+	for (const aniworldSeries of compare) {
+		const localSeries = series.find((e) => e.ID == aniworldSeries.ID);
+		const ignoranceObject = ignoranceList.find((x) => x.ID == aniworldSeries.ID) || ({} as IgnoranceItem);
+		console.log('-----=====', localSeries.title, '=====-----   START');
+		for (const _aniworldSeasonIDX in aniworldSeries.seasons) {
+			const aniworldSeasonIDX = Number(_aniworldSeasonIDX);
+
+			const aniworldSeason = aniworldSeries.seasons[aniworldSeasonIDX];
+			const localSeason = localSeries.seasons.find((x) => x[0].season == aniworldSeasonIDX + 1);
+			if (!localSeason) {
+				console.log('Missing Season:', aniworldSeasonIDX + 1, 'with', aniworldSeason.length, 'Episode/s');
+				let ignoranceSkip = true;
+				for (const _episodeIDX in aniworldSeason) {
+					const episodeIDX = Number(_episodeIDX);
+					const episode = aniworldSeason[episodeIDX];
+					const language = episode.langs.find((e) => {
+						return ['GerDub', 'GerSub', 'EngSub'].find((x) => x.includes(e));
+					});
+					if (ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
+						continue;
+					}
+					ignoranceSkip = false;
+					addtoOutputList(localSeries.title, localSeries.references.aniworld as string, aniworldSeasonIDX + 1, episodeIDX + 1, language);
+				}
+				if (ignoranceSkip) console.log(' => Skipped due to the ignorance Object', ignoranceObject);
+				continue;
+			}
+			for (const _aniworldEpisodeIDX in aniworldSeason) {
+				const aniworldEpisodeIDX = Number(_aniworldEpisodeIDX);
+				const aniworldEpisode = aniworldSeason[aniworldEpisodeIDX];
+				const localEpisode = localSeason.find((x) => x.episode == aniworldEpisodeIDX + 1);
+
+				if (!localEpisode) {
+					console.log('The whole Episode is missing Season:', aniworldSeasonIDX + 1, 'Episode:', aniworldEpisodeIDX + 1);
+					const language = aniworldEpisode.langs.find((e) => {
+						return ['GerDub', 'GerSub', 'EngSub'].find((x) => x.includes(e));
+					});
+					console.log('Started the language Decision Process Aniworld Langs:', aniworldEpisode.langs, 'Resulted in', { language });
+					if (ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
+						console.log('Skipped due to the ignorance Object', ignoranceObject);
+						continue;
+					}
+					addtoOutputList(localSeries.title, localSeries.references.aniworld as string, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, language);
+					continue;
+				}
+				existingLanguageDecision(false, aniworldEpisode, localEpisode, localSeries, { aniworldSeasonIDX, aniworldEpisodeIDX });
+				// if (aniworldEpisode.langs.includes('GerDub') && !localEpisode.langs.includes('GerDub')) {
+				// 	console.log('The German Dub is missing in Season:', aniworldSeasonIDX + 1, 'Episode:', aniworldEpisodeIDX + 1);
+				// 	addtoOutputList(localSeries.title, localSeries.references.aniworld as string, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, 'GerDub');
+				// }
+				// if (aniworldEpisode.langs.includes('GerSub') && !localEpisode.langs.includes('GerDub') && !localEpisode.langs.includes('GerSub')) {
+				// 	console.log('The German Sub is missing in Season:', aniworldSeasonIDX + 1, 'Episode:', aniworldEpisodeIDX + 1);
+				// 	addtoOutputList(localSeries.title, localSeries.references.aniworld as string, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, 'GerSub');
+				// }
+			}
+		}
+
+		if (aniworldSeries.hasMovies) {
+			for (const _aniworldMovieIDX in aniworldSeries.movies) {
+				const aniworldMovieIDX = Number(_aniworldMovieIDX);
+				const aniworldMovie = aniworldSeries.movies[aniworldMovieIDX];
+
+				aniworldMovie.secondName = sanitizeFileName(aniworldMovie.secondName);
+
+				const localMovie = localSeries.movies.find((x) => {
+					// console.log(aniworldMovie.secondName, x.primaryName, similar(aniworldMovie.secondName, x.primaryName));
+					return similar(aniworldMovie.secondName, x.primaryName) > 50;
+				});
+
+				if (!localMovie) {
+					console.log('Missing Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
+					const language = aniworldMovie.langs.find((e) => ['GerDub', 'GerSub', 'EngSub'].find((x) => x.includes(e)));
+					console.log('Started the language Decision Process Aniworld Langs:', aniworldMovie.langs, 'Resulted in', { language });
+					if (ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
+						console.log('Skipped due to the ignorance Object', ignoranceObject);
+						continue;
+					}
+					addtoOutputListMovie(
+						localSeries.title,
+						localSeries.references.aniworld as string,
+						aniworldMovie.secondName,
+						aniworldMovieIDX + 1,
+						language
+					);
+					continue;
+				} else {
+					console.log('Got Local Compare Movie', localMovie, aniworldMovie);
+					existingLanguageDecision(true, aniworldMovie, localMovie, localSeries, { aniworldMovieIDX });
+					// if (aniworldMovie.langs.includes('GerDub') && !localMovie.langs.includes('GerDub')) {
+					// 	console.log('The German Dub is missing in Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
+					// 	addtoOutputListMovie(localSeries.title, localSeries.references.aniworld as string, aniworldMovie.secondName, aniworldMovieIDX + 1, 'GerDub');
+					// }
+					// if (aniworldMovie.langs.includes('GerSub') && !localMovie.langs.includes('GerDub') && !localMovie.langs.includes('GerSub')) {
+					// 	console.log('The German Dub is missing in Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
+					// 	addtoOutputListMovie(localSeries.title, localSeries.references.aniworld as string, aniworldMovie.secondName, aniworldMovieIDX + 1, 'GerSub');
+					// }
+				}
+			}
+		}
+		console.log('-----=====', localSeries.title, '=====-----   END');
+	}
+
+	console.log(outputDlList.length);
+	if (inherit) {
+		return outputDlList;
+	} else {
+		fs.writeFileSync('dlList.json', JSON.stringify(outputDlList, null, 3));
+		return [];
+	}
+}
+
+async function compareForNewReleasesSTO(
+	series: Serie[],
+	ignoranceList: IgnoranceItem[],
+	inherit: boolean = true
+): Promise<ExtendedEpisodeDownload[]> {
+	const limit = promiseLimit(10);
+	const data = series.filter((x) => x.references?.sto && !ignoranceList.find((v) => v.ID == x.ID && !v.lang));
+
+	const compare: AniWorldSerieCompare[] = await Promise.all(
+		data.map(async (serie) => {
+			return limit(() => {
+				return new Promise(async (res, _) => {
+					let world: Aniworld;
+					if (typeof serie.references.sto == 'string') world = new Aniworld(serie.references.sto);
 					const out = await world.parseInformations();
 					res({
 						ID: serie.ID,

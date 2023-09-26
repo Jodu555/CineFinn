@@ -1,4 +1,3 @@
-import store from './index';
 import router from '@/router/index';
 
 const getDefaultState = () => {
