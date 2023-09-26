@@ -198,7 +198,6 @@ const crawlAndIndex = () => {
 };
 
 const mergeSeriesArrays = (before: Series[], after: Series[]) => {
-	const { Series } = require('../classes/series');
 	const output = [];
 
 	//Compare and overwrite ids
