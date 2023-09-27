@@ -33,21 +33,25 @@ interface ChangedZoroEpisode extends Omit<ExtendedZoroEpisode, 'langs'> {
 async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceItem[]) {
 	const output: ExtendedEpisodeDownload[] = [];
 
-	// compareForNewReleasesSTO(series, ignoranceList);
+	console.log('------ Compare STO ------');
+	const sto = await compareForNewReleasesSTO(series, ignoranceList);
+	console.log('------ Compare STO ------');
+	fs.writeFileSync('dlListSTO.json', JSON.stringify(sto, null, 3));
 
-	console.log('------ Compare Aniworld ------');
-	const aniworld = await compareForNewReleasesAniWorld(series, ignoranceList);
-	console.log('------ Compare Aniworld ------');
-	fs.writeFileSync('dlListAniworld.json', JSON.stringify(aniworld, null, 3));
+	// console.log('------ Compare Aniworld ------');
+	// const aniworld = await compareForNewReleasesAniWorld(series, ignoranceList);
+	// console.log('------ Compare Aniworld ------');
+	// fs.writeFileSync('dlListAniworld.json', JSON.stringify(aniworld, null, 3));
 
-	console.log('------ Compare Zoro ------');
-	const zoro = await compareForNewReleasesZoro(series, ignoranceList);
-	console.log('------ Compare Zoro ------');
-	fs.writeFileSync('dlListZoro.json', JSON.stringify(zoro, null, 3));
+	// console.log('------ Compare Zoro ------');
+	// const zoro = await compareForNewReleasesZoro(series, ignoranceList);
+	// console.log('------ Compare Zoro ------');
+	// fs.writeFileSync('dlListZoro.json', JSON.stringify(zoro, null, 3));
 
 	return {
-		aniworld,
-		zoro,
+		// aniworld,
+		// zoro,
+		// sto,
 	};
 }
 

@@ -146,17 +146,21 @@ async function checkForUpdates() {
 		{
 			ID: 'c8001b23', // Detektiv Conan
 		},
+		// {
+		// 	ID: '9d59f7ba', // Family Guy
+		// },
 		{
 			ID: 'a9f36e78', // Peter Grill and the Philosopher’s Time
 			lang: 'GerDub', // Has only the first episode in GerSub rest in EngSub
 		},
 	];
 
-	const output = await compareForNewReleases(res.data, ignoranceList);
-	kickOffAniDl(output.aniworld);
+	// const output = await compareForNewReleases(res.data, ignoranceList);
+	// kickOffAniDl(output.aniworld);
 
 	// const data: ExtendedEpisodeDownload[] = JSON.parse(fs.readFileSync('dlListAniworld.json', 'utf-8'));
-	// kickOffAniDl(data);
+	const data: ExtendedEpisodeDownload[] = JSON.parse(fs.readFileSync('dlListSTO.json', 'utf-8'));
+	kickOffAniDl(data);
 }
 
 async function kickOffAniDl(list: ExtendedEpisodeDownload[]) {
