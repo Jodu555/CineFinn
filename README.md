@@ -116,9 +116,9 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 ```
 
 - [ ] Add a Setting to toggle the card images (for lower bandwidth)
-- [ ] Update the preview images to be language specific (preview images for every language an episode is in) cause if the episode is longer or shorter
+- [x] Update the preview images to be language specific (preview images for every language an episode is in) cause if the episode is longer or shorter
 - [x] Implement the update check for EngDub Series
-- [ ] Implement the update check for sto series
+- [x] Implement the update check for sto series
 - [x] Implement my own hover so when the mouse is still over, but has'nt moved since hide the menu
 - [ ] Account/Authentication System Update
   - [ ] Implement a password change in the settings
@@ -148,5 +148,5 @@ although the general permission system and therefore the account restrictions
 ## Stretch
 
 - [ ] implement a cron job which automatically checks all downloaded series for updates and writes them to a list
-- [ ] Add the downloader and scraping service into ext. services
+- [x] Add the downloader and scraping service into ext. services
 - [ ] Implement a way to sync watch animes smth. like SyncTube for YT or Watchtogether
