@@ -210,14 +210,6 @@ async function compareForNewReleasesAniWorld(
 					continue;
 				}
 				existingLanguageDecision(false, aniworldEpisode, localEpisode, localSeries, { aniworldSeasonIDX, aniworldEpisodeIDX });
-				// if (aniworldEpisode.langs.includes('GerDub') && !localEpisode.langs.includes('GerDub')) {
-				// 	console.log('The German Dub is missing in Season:', aniworldSeasonIDX + 1, 'Episode:', aniworldEpisodeIDX + 1);
-				// 	addtoOutputList(localSeries.title, localSeries.references.aniworld as string, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, 'GerDub');
-				// }
-				// if (aniworldEpisode.langs.includes('GerSub') && !localEpisode.langs.includes('GerDub') && !localEpisode.langs.includes('GerSub')) {
-				// 	console.log('The German Sub is missing in Season:', aniworldSeasonIDX + 1, 'Episode:', aniworldEpisodeIDX + 1);
-				// 	addtoOutputList(localSeries.title, localSeries.references.aniworld as string, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, 'GerSub');
-				// }
 			}
 		}
 
@@ -252,14 +244,6 @@ async function compareForNewReleasesAniWorld(
 				} else {
 					// console.log('Got Local Compare Movie', localMovie, aniworldMovie);
 					existingLanguageDecision(true, aniworldMovie, localMovie, localSeries, { aniworldMovieIDX });
-					// if (aniworldMovie.langs.includes('GerDub') && !localMovie.langs.includes('GerDub')) {
-					// 	console.log('The German Dub is missing in Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
-					// 	addtoOutputListMovie(localSeries.title, localSeries.references.aniworld as string, aniworldMovie.secondName, aniworldMovieIDX + 1, 'GerDub');
-					// }
-					// if (aniworldMovie.langs.includes('GerSub') && !localMovie.langs.includes('GerDub') && !localMovie.langs.includes('GerSub')) {
-					// 	console.log('The German Dub is missing in Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
-					// 	addtoOutputListMovie(localSeries.title, localSeries.references.aniworld as string, aniworldMovie.secondName, aniworldMovieIDX + 1, 'GerSub');
-					// }
 				}
 			}
 		}
@@ -430,14 +414,6 @@ async function compareForNewReleasesSTO(
 					continue;
 				}
 				existingLanguageDecision(false, aniworldEpisode, localEpisode, localSeries, { aniworldSeasonIDX, aniworldEpisodeIDX });
-				// if (aniworldEpisode.langs.includes('GerDub') && !localEpisode.langs.includes('GerDub')) {
-				// 	console.log('The German Dub is missing in Season:', aniworldSeasonIDX + 1, 'Episode:', aniworldEpisodeIDX + 1);
-				// 	addtoOutputList(localSeries.title, localSeries.references.aniworld as string, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, 'GerDub');
-				// }
-				// if (aniworldEpisode.langs.includes('GerSub') && !localEpisode.langs.includes('GerDub') && !localEpisode.langs.includes('GerSub')) {
-				// 	console.log('The German Sub is missing in Season:', aniworldSeasonIDX + 1, 'Episode:', aniworldEpisodeIDX + 1);
-				// 	addtoOutputList(localSeries.title, localSeries.references.aniworld as string, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, 'GerSub');
-				// }
 			}
 		}
 
@@ -470,16 +446,8 @@ async function compareForNewReleasesSTO(
 					);
 					continue;
 				} else {
-					console.log('Got Local Compare Movie', localMovie, aniworldMovie);
+					// console.log('Got Local Compare Movie', localMovie, aniworldMovie);
 					existingLanguageDecision(true, aniworldMovie, localMovie, localSeries, { aniworldMovieIDX });
-					// if (aniworldMovie.langs.includes('GerDub') && !localMovie.langs.includes('GerDub')) {
-					// 	console.log('The German Dub is missing in Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
-					// 	addtoOutputListMovie(localSeries.title, localSeries.references.aniworld as string, aniworldMovie.secondName, aniworldMovieIDX + 1, 'GerDub');
-					// }
-					// if (aniworldMovie.langs.includes('GerSub') && !localMovie.langs.includes('GerDub') && !localMovie.langs.includes('GerSub')) {
-					// 	console.log('The German Dub is missing in Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
-					// 	addtoOutputListMovie(localSeries.title, localSeries.references.aniworld as string, aniworldMovie.secondName, aniworldMovieIDX + 1, 'GerSub');
-					// }
 				}
 			}
 		}
