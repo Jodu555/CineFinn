@@ -2,7 +2,7 @@ import * as fs from 'fs';
 const crypto = require('crypto');
 require('dotenv').config();
 import axios from 'axios';
-const io = require('socket.io-client');
+import io from 'socket.io-client';
 import Aniworld from './class/Aniworld';
 import { compareForNewReleases, compareForNewReleasesAniWorld, compareForNewReleasesZoro } from './utils/compare';
 const { similar } = require('./utils/utils');
@@ -155,12 +155,14 @@ async function checkForUpdates() {
 		},
 	];
 
-	// const output = await compareForNewReleases(res.data, ignoranceList);
-	// kickOffAniDl(output.aniworld);
+	console.time('Compare');
+	const output = await compareForNewReleases(res.data, ignoranceList);
+	console.timeEnd('Compare');
+	kickOffAniDl(output.aniworld);
 
 	// const data: ExtendedEpisodeDownload[] = JSON.parse(fs.readFileSync('dlListAniworld.json', 'utf-8'));
-	const data: ExtendedEpisodeDownload[] = JSON.parse(fs.readFileSync('dlListSTO.json', 'utf-8'));
-	kickOffAniDl(data);
+	// const data: ExtendedEpisodeDownload[] = JSON.parse(fs.readFileSync('dlListSTO.json', 'utf-8'));
+	// kickOffAniDl(data);
 }
 
 async function kickOffAniDl(list: ExtendedEpisodeDownload[]) {
