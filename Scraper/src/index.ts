@@ -158,11 +158,14 @@ async function checkForUpdates() {
 	console.time('Compare');
 	const output = await compareForNewReleases(res.data, ignoranceList);
 	console.timeEnd('Compare');
+
 	kickOffAniDl(output.aniworld);
 
 	// const data: ExtendedEpisodeDownload[] = JSON.parse(fs.readFileSync('dlListAniworld.json', 'utf-8'));
 	// const data: ExtendedEpisodeDownload[] = JSON.parse(fs.readFileSync('dlListSTO.json', 'utf-8'));
 	// kickOffAniDl(data);
+
+	recrawlArchive();
 }
 
 async function kickOffAniDl(list: ExtendedEpisodeDownload[]) {
@@ -208,6 +211,14 @@ async function kickOffAniDl(list: ExtendedEpisodeDownload[]) {
 	} catch (error) {
 		console.error(error);
 	}
+}
+
+function recrawlArchive() {
+	axios.get('http://cinema-api.jodu555.de/managment/job/crawl', {
+		headers: {
+			'auth-token': process.env.AUTH_TOKEN_REST,
+		},
+	});
 }
 
 async function generateNewDownloadList() {
