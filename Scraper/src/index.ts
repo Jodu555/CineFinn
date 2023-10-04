@@ -214,11 +214,13 @@ async function kickOffAniDl(list: ExtendedEpisodeDownload[]) {
 }
 
 function recrawlArchive() {
+	console.time('Recrawl');
 	axios.get('http://cinema-api.jodu555.de/managment/job/crawl', {
 		headers: {
 			'auth-token': process.env.AUTH_TOKEN_REST,
 		},
 	});
+	console.timeEnd('Recrawl');
 }
 
 async function generateNewDownloadList() {
