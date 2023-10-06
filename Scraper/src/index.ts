@@ -156,7 +156,7 @@ async function checkForUpdates() {
 	];
 
 	console.time('Compare');
-	const output = await compareForNewReleases(res.data, ignoranceList);
+	const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: false, zoro: false });
 	console.timeEnd('Compare');
 
 	kickOffAniDl(output.aniworld);

@@ -30,23 +30,39 @@ interface ChangedZoroEpisode extends Omit<ExtendedZoroEpisode, 'langs'> {
 	langs: Langs[];
 }
 
-async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceItem[]) {
+interface CheckProvider {
+	sto: boolean;
+	aniworld: boolean;
+	zoro: boolean;
+}
+
+async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceItem[], providerCheck?: CheckProvider) {
 	const output: ExtendedEpisodeDownload[] = [];
 
-	console.log('------ Compare STO ------');
-	const sto = await compareForNewReleasesSTO(series, ignoranceList);
-	console.log('------ Compare STO ------');
-	fs.writeFileSync('dlListSTO.json', JSON.stringify(sto, null, 3));
+	let sto: ExtendedEpisodeDownload[] = [];
+	let aniworld: ExtendedEpisodeDownload[] = [];
+	let zoro: ExtendedEpisodeDownload[] = [];
 
-	console.log('------ Compare Aniworld ------');
-	const aniworld = await compareForNewReleasesAniWorld(series, ignoranceList);
-	console.log('------ Compare Aniworld ------');
-	fs.writeFileSync('dlListAniworld.json', JSON.stringify(aniworld, null, 3));
+	if (providerCheck.sto) {
+		console.log('------ Compare STO ------');
+		sto = await compareForNewReleasesSTO(series, ignoranceList);
+		console.log('------ Compare STO ------');
+		fs.writeFileSync('dlListSTO.json', JSON.stringify(sto, null, 3));
+	}
 
-	console.log('------ Compare Zoro ------');
-	const zoro = await compareForNewReleasesZoro(series, ignoranceList);
-	console.log('------ Compare Zoro ------');
-	fs.writeFileSync('dlListZoro.json', JSON.stringify(zoro, null, 3));
+	if (providerCheck.aniworld) {
+		console.log('------ Compare Aniworld ------');
+		aniworld = await compareForNewReleasesAniWorld(series, ignoranceList);
+		console.log('------ Compare Aniworld ------');
+		fs.writeFileSync('dlListAniworld.json', JSON.stringify(aniworld, null, 3));
+	}
+
+	if (providerCheck.zoro) {
+		console.log('------ Compare Zoro ------');
+		zoro = await compareForNewReleasesZoro(series, ignoranceList);
+		console.log('------ Compare Zoro ------');
+		fs.writeFileSync('dlListZoro.json', JSON.stringify(zoro, null, 3));
+	}
 
 	return {
 		aniworld,
