@@ -159,13 +159,13 @@ async function checkForUpdates() {
 	const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: false, zoro: false });
 	console.timeEnd('Compare');
 
-	kickOffAniDl(output.aniworld);
+	await kickOffAniDl(output.aniworld);
 
 	// const data: ExtendedEpisodeDownload[] = JSON.parse(fs.readFileSync('dlListAniworld.json', 'utf-8'));
 	// const data: ExtendedEpisodeDownload[] = JSON.parse(fs.readFileSync('dlListSTO.json', 'utf-8'));
-	// kickOffAniDl(data);
+	// await kickOffAniDl(data);
 
-	recrawlArchive();
+	await recrawlArchive();
 }
 
 async function kickOffAniDl(list: ExtendedEpisodeDownload[]) {
@@ -213,9 +213,9 @@ async function kickOffAniDl(list: ExtendedEpisodeDownload[]) {
 	}
 }
 
-function recrawlArchive() {
+async function recrawlArchive() {
 	console.time('Recrawl');
-	axios.get('http://cinema-api.jodu555.de/managment/job/crawl', {
+	await axios.get('http://cinema-api.jodu555.de/managment/job/crawl', {
 		headers: {
 			'auth-token': process.env.AUTH_TOKEN_REST,
 		},
