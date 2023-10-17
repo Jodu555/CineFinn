@@ -166,6 +166,7 @@ async function checkForUpdates() {
 	// await kickOffAniDl(data);
 
 	await recrawlArchive();
+	await generateImages();
 }
 
 async function kickOffAniDl(list: ExtendedEpisodeDownload[]) {
@@ -221,6 +222,16 @@ async function recrawlArchive() {
 		},
 	});
 	console.timeEnd('Recrawl');
+}
+
+async function generateImages() {
+	console.time('GenerateImg');
+	await axios.get('http://cinema-api.jodu555.de/managment/job/img/generate', {
+		headers: {
+			'auth-token': process.env.AUTH_TOKEN_REST,
+		},
+	});
+	console.timeEnd('GenerateImg');
 }
 
 async function generateNewDownloadList() {
