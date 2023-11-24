@@ -20,6 +20,7 @@
 			<div v-show="!dataLoading" class="video-controls-container">
 				<div class="timeline-container">
 					<div class="timeline">
+						<div class="timeline-intro-skip"></div>
 						<div class="timeline-buffer"></div>
 						<img class="preview-img" />
 						<div class="thumb-indicator"></div>
@@ -946,6 +947,23 @@ video {
 	bottom: 0;
 	right: calc(100% - var(--buffer-position) * 100%);
 	background-color: rgb(99, 99, 99);
+	border-radius: 50px;
+}
+
+.timeline-intro-skip {
+	height: 2px;
+	width: 100%;
+	position: relative;
+}
+
+.timeline-intro-skip::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	right: calc(100% - var(40) * 100%);
+	background-color: rgb(0, 165, 247);
 	border-radius: 50px;
 }
 
