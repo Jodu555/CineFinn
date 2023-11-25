@@ -83,7 +83,10 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [ ] Add an Primy like sidebar with the characters
 - [ ] Add Playlists for users e.g. (Watchlist)
   - [ ] Let the user create its own playlists with names
-- [ ] Think about a way on how to make it work to add an intro skip button
+- [x] Think about a way on how to make it work to add an intro skip button
+- [x] Show the Approx. Intro in the timeline
+- [ ] Implement a Intro Skip button
+- [ ] Collect the Intro Skip Informations from an External API
 - [x] Implement a native (so called todo list) to see wich series are still not ripped/downloaded/uploaded and maybe also with sorting
   - [x] Add an confirmation Dialog on Using a Todo
   - [x] Add an confirmation Dialog on Deleting a Todo
