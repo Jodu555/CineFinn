@@ -20,13 +20,20 @@
 			<div v-show="!dataLoading" class="video-controls-container">
 				<div class="timeline-container">
 					<div class="timeline">
-						<div class="timeline-intro-skip"></div>
+						<div
+							class="timeline-intro-skip"
+							:style="{
+								'--intro-skip-start': 150 / videoData.duration,
+								'--intro-skip-end': 200 / videoData.duration,
+							}"
+						></div>
+
 						<div
 							v-for="i in videoData.buffered?.length"
 							v-show="Math.round(Math.abs($refs.mainVid.buffered?.start(i - 1) - $refs.mainVid.buffered?.end(i - 1))) > 10"
 							class="timeline-buffer"
 							:style="{
-								'--buffer-start': 1 - $refs.mainVid.buffered?.start(i - 1) / videoData.duration,
+								'--buffer-start': $refs.mainVid.buffered?.start(i - 1) / videoData.duration,
 								'--buffer-end': $refs.mainVid.buffered?.end(i - 1) / videoData.duration,
 								// '--length': Math.round(Math.abs($refs.mainVid.buffered?.start(i - 1) - $refs.mainVid.buffered?.end(i - 1))),
 							}"
@@ -955,7 +962,7 @@ video {
 .timeline-buffer::before {
 	content: '';
 	position: absolute;
-	left: calc(100% - var(--buffer-start) * 100%);
+	left: calc(100% - calc(1 - var(--buffer-start)) * 100%);
 	top: 0;
 	bottom: 0;
 	right: calc(100% - var(--buffer-end) * 100%);
@@ -964,18 +971,19 @@ video {
 }
 
 .timeline-intro-skip {
-	/* height: 2px; */
+	height: 2px;
 	width: 100%;
+	position: absolute;
 }
 
 .timeline-intro-skip::before {
-	z-index: 100;
+	z-index: 1;
 	content: '';
 	position: absolute;
-	/* left: calc(100% - 0.1 * 100%);
+	left: calc(100% - calc(1 - var(--intro-skip-start)) * 100%);
 	top: 0;
 	bottom: 0;
-	right: calc(100% - 0.4 * 100%); */
+	right: calc(100% - var(--intro-skip-end) * 100%);
 	background-color: rgb(0, 165, 247);
 	border-radius: 50px;
 }
@@ -1082,6 +1090,11 @@ video {
 
 .video-container.scrubbing .timeline-buffer,
 .timeline-container:hover .timeline-buffer {
+	height: 100%;
+}
+
+.video-container.scrubbing .timeline-intro-skip,
+.timeline-container:hover .timeline-intro-skip {
 	height: 100%;
 }
 </style>
