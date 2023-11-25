@@ -21,7 +21,20 @@
 				<div class="timeline-container">
 					<div class="timeline">
 						<div class="timeline-intro-skip"></div>
-						<div class="timeline-buffer"></div>
+						<div
+							v-for="i in videoData.buffered?.length"
+							v-show="Math.round(Math.abs($refs.mainVid.buffered?.start(i - 1) - $refs.mainVid.buffered?.end(i - 1))) > 10"
+							class="timeline-buffer"
+							:style="{
+								'--buffer-start': 1 - $refs.mainVid.buffered?.start(i - 1) / videoData.duration,
+								'--buffer-end': $refs.mainVid.buffered?.end(i - 1) / videoData.duration,
+								// '--length': Math.round(Math.abs($refs.mainVid.buffered?.start(i - 1) - $refs.mainVid.buffered?.end(i - 1))),
+							}"
+						></div>
+
+						<!-- <span v-for="i in videoData.buffered?.length">
+							{{ $refs.mainVid.buffered?.start(i - 1)  }}ms - {{ $refs.mainVid.buffered?.end(i -1) }}ms = {{ Math.round(Math.abs($refs.mainVid.buffered?.start(i - 1) - $refs.mainVid.buffered?.end(i -1))) }}ms
+						</span> -->
 						<img class="preview-img" />
 						<div class="thumb-indicator"></div>
 						<p class="time-info-timeline-indicator">55:55</p>
@@ -450,15 +463,15 @@ export default {
 			video.volume = v.settings.volume.value;
 
 			function updateBuffer() {
-				let max = -Infinity;
-				for (let i = 0; i < video.buffered.length; i++) {
-					const time = video.buffered.end(i);
-					if (time > max) {
-						max = time;
-					}
-				}
-				const bufferPercent = max / video.duration;
-				document.querySelector('.timeline-buffer').style.setProperty('--buffer-position', bufferPercent);
+				// let max = -Infinity;
+				// for (let i = 0; i < video.buffered.length; i++) {
+				// 	const time = video.buffered.end(i);
+				// 	if (time > max) {
+				// 		max = time;
+				// 	}
+				// }
+				// const bufferPercent = max / video.duration;
+				// document.querySelector('.timeline-buffer').style.setProperty('--buffer-position', bufferPercent);
 			}
 
 			const timeUpdateThrottle = throttle(v.sendVideoTimeUpdate, TIME_UPDATE_THROTTLE);
@@ -936,33 +949,33 @@ video {
 .timeline-buffer {
 	height: 2px;
 	width: 100%;
-	position: relative;
+	position: absolute;
 }
 
 .timeline-buffer::before {
 	content: '';
 	position: absolute;
-	left: 0;
+	left: calc(100% - var(--buffer-start) * 100%);
 	top: 0;
 	bottom: 0;
-	right: calc(100% - var(--buffer-position) * 100%);
+	right: calc(100% - var(--buffer-end) * 100%);
 	background-color: rgb(99, 99, 99);
 	border-radius: 50px;
 }
 
 .timeline-intro-skip {
-	height: 2px;
+	/* height: 2px; */
 	width: 100%;
-	position: relative;
 }
 
 .timeline-intro-skip::before {
+	z-index: 100;
 	content: '';
 	position: absolute;
-	left: 0;
+	/* left: calc(100% - 0.1 * 100%);
 	top: 0;
 	bottom: 0;
-	right: calc(100% - var(40) * 100%);
+	right: calc(100% - 0.4 * 100%); */
 	background-color: rgb(0, 165, 247);
 	border-radius: 50px;
 }
