@@ -218,7 +218,7 @@ export default {
 			video.volume = newValue;
 		},
 		async videoSrc() {
-			if (true) {
+			if (false) {
 				const response = await fetch(`http://localhost:4896/intro/${this.currentSeries.ID}/${this.entityObject.season}/${this.entityObject.episode}`);
 				const json = await response.json();
 				this.introData = json;
