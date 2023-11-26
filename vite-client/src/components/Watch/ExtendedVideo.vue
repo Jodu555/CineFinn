@@ -21,10 +21,11 @@
 				<div class="timeline-container">
 					<div class="timeline">
 						<div
+							v-if="introData && introData?.type == 'intro'"
 							class="timeline-intro-skip"
 							:style="{
-								'--intro-skip-start': 150 / videoData.duration,
-								'--intro-skip-end': 200 / videoData.duration,
+								'--intro-skip-start': introData.startms / videoData.duration,
+								'--intro-skip-end': introData.endms / videoData.duration,
 							}"
 						></div>
 
@@ -146,6 +147,7 @@
 				Progress: {{ videoData.duration - videoData.currentTime }}ms
 				Volume: {{ videoData.volume }}
 				Quality: T{{ videoData.quality?.totalVideoFrames }} / D{{ videoData.quality?.droppedVideoFrames }} / C{{ videoData.quality?.corruptedVideoFrames }}
+				IntroData: {{ JSON.stringify(introData) }}
 				Buffers: 
 					{{ videoData.bufferedPercentage }}% / 100%
 					<div class="internal-video-devinfos-child">
@@ -193,6 +195,7 @@ export default {
 				bufferedPercentage: 0,
 				seekable: undefined,
 			},
+			introData: {},
 		};
 	},
 	computed: {
@@ -213,6 +216,13 @@ export default {
 		'settings.volume.value'(newValue) {
 			const video = document.querySelector('video');
 			video.volume = newValue;
+		},
+		async videoSrc() {
+			if (true) {
+				const response = await fetch(`http://localhost:4896/intro/${this.currentSeries.ID}/${this.entityObject.season}/${this.entityObject.episode}`);
+				const json = await response.json();
+				this.introData = json;
+			}
 		},
 	},
 	methods: {
