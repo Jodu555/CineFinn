@@ -17,8 +17,13 @@
 			<ActorContainer v-if="false" />
 			<font-awesome-icon class="skip skip-left" size="2xl" icon="fa-solid fa-backward" />
 			<font-awesome-icon class="skip skip-right" size="2xl" icon="fa-solid fa-forward" />
-			<div class="btn-intro-skip-container">
-				<button type="button" class="btn btn-light">Skip Intro <font-awesome-icon size="lg" icon="fa-solid fa-forward" /></button>
+			<div
+				:class="{
+					'btn-intro-skip-container': true,
+					enabled: isIntercetingWithIntro,
+				}"
+			>
+				<button type="button" @click="skipIntro" class="btn btn-light">Skip Intro <font-awesome-icon size="lg" icon="fa-solid fa-forward" /></button>
 			</div>
 			<div v-show="!dataLoading" class="video-controls-container">
 				<div class="timeline-container">
@@ -199,12 +204,21 @@ export default {
 				seekable: undefined,
 			},
 			introData: {},
+			alreadySkipped: [],
 		};
 	},
 	computed: {
 		...mapState('watch', ['currentSeries', 'currentMovie', 'currentLanguage']),
 		...mapState('auth', ['authToken', 'settings']),
 		...mapGetters('watch', ['videoSrc', 'entityObject']),
+		isIntercetingWithIntro() {
+			return (
+				this.introData &&
+				this.introData?.type == 'intro' &&
+				this.videoData?.currentTime >= this.introData?.startms &&
+				this.videoData?.currentTime <= this.introData?.endms
+			);
+		},
 	},
 	async mounted() {
 		const { skip, skipPercent, cleanupFN } = this.initialize();
@@ -240,7 +254,14 @@ export default {
 			}
 			return previewImgSrc;
 		},
+		skipIntro() {
+			if (this.isIntercetingWithIntro) {
+				console.log('Skipped Intro: ButtonSkip');
+				this.skip(this.introData?.endms + 2, true);
+			}
+		},
 		async loadIntroData() {
+			this.alreadySkipped = [];
 			if (true) {
 				const response = await fetch(`http://localhost:4897/intro/${this.currentSeries.ID}/${this.entityObject.season}/${this.entityObject.episode}`);
 				const json = await response.json();
@@ -517,10 +538,13 @@ export default {
 				if (
 					this.introData &&
 					this.introData.type == 'intro' &&
+					!this.alreadySkipped.find((x) => 'intro') &&
 					video.currentTime >= this.introData.startms &&
 					video.currentTime <= this.introData.endms
 				) {
-					//Add to so the function does not loop itself
+					//Add 2 so the function does not loop itself
+					console.log('Skipped Intro: AutoSkip');
+					this.alreadySkipped.push('intro');
 					skip(this.introData.endms + 2, true);
 				}
 			});
@@ -715,16 +739,17 @@ export default {
 </script>
 <style scoped>
 .btn-intro-skip-container {
-	pointer-events: auto;
+	pointer-events: none;
 	position: absolute;
 	bottom: 3.3rem;
 	right: 1rem;
-	z-index: 100;
 	opacity: 0;
 	transition: opacity 300ms ease-in-out;
 }
 .btn-intro-skip-container.enabled {
+	pointer-events: auto;
 	opacity: 1;
+	z-index: 500;
 	transition: opacity 300ms ease-in-out;
 }
 
