@@ -17,6 +17,9 @@
 			<ActorContainer v-if="false" />
 			<font-awesome-icon class="skip skip-left" size="2xl" icon="fa-solid fa-backward" />
 			<font-awesome-icon class="skip skip-right" size="2xl" icon="fa-solid fa-forward" />
+			<div class="btn-intro-skip-container">
+				<button type="button" class="btn btn-light">Skip Intro <font-awesome-icon size="lg" icon="fa-solid fa-forward" /></button>
+			</div>
 			<div v-show="!dataLoading" class="video-controls-container">
 				<div class="timeline-container">
 					<div class="timeline">
@@ -208,6 +211,7 @@ export default {
 		this.skip = skip;
 		this.skipPercent = skipPercent;
 		this.cleanupFN = cleanupFN;
+		await this.loadIntroData();
 	},
 	beforeUnmount() {
 		this.cleanupFN();
@@ -218,11 +222,7 @@ export default {
 			video.volume = newValue;
 		},
 		async videoSrc() {
-			if (false) {
-				const response = await fetch(`http://localhost:4896/intro/${this.currentSeries.ID}/${this.entityObject.season}/${this.entityObject.episode}`);
-				const json = await response.json();
-				this.introData = json;
-			}
+			await this.loadIntroData();
 		},
 	},
 	methods: {
@@ -239,6 +239,13 @@ export default {
 				previewImgSrc += `/${this.currentLanguage}/preview${previewImgNumber}.jpg?auth-token=${this.authToken}`;
 			}
 			return previewImgSrc;
+		},
+		async loadIntroData() {
+			if (true) {
+				const response = await fetch(`http://localhost:4897/intro/${this.currentSeries.ID}/${this.entityObject.season}/${this.entityObject.episode}`);
+				const json = await response.json();
+				this.introData = json;
+			}
 		},
 		initialize() {
 			const TIME_UPDATE_THROTTLE = 1000;
@@ -469,7 +476,7 @@ export default {
 			});
 
 			video.addEventListener('progress', () => {
-				updateBuffer();
+				// updateBuffer();
 				updateVueVideoData();
 			});
 
@@ -494,7 +501,7 @@ export default {
 			const timeUpdateThrottle = throttle(v.sendVideoTimeUpdate, TIME_UPDATE_THROTTLE);
 			video.addEventListener('timeupdate', () => {
 				updateVueVideoData();
-				updateBuffer();
+				// updateBuffer();
 				timeUpdateThrottle(video.currentTime);
 				currentTimeElem.textContent = formatDuration(video.currentTime);
 				let percent = video.currentTime / video.duration;
@@ -505,6 +512,16 @@ export default {
 					setTimeout(() => {
 						video.play();
 					}, 400);
+				}
+
+				if (
+					this.introData &&
+					this.introData.type == 'intro' &&
+					video.currentTime >= this.introData.startms &&
+					video.currentTime <= this.introData.endms
+				) {
+					//Add to so the function does not loop itself
+					skip(this.introData.endms + 2, true);
 				}
 			});
 			const leadingZeroFormatter = new Intl.NumberFormat(undefined, {
@@ -697,6 +714,20 @@ export default {
 };
 </script>
 <style scoped>
+.btn-intro-skip-container {
+	pointer-events: auto;
+	position: absolute;
+	bottom: 3.3rem;
+	right: 1rem;
+	z-index: 100;
+	opacity: 0;
+	transition: opacity 300ms ease-in-out;
+}
+.btn-intro-skip-container.enabled {
+	opacity: 1;
+	transition: opacity 300ms ease-in-out;
+}
+
 .internal-video-devinfos-child {
 	line-height: 0.8;
 	margin-left: -10%;
