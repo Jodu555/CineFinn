@@ -85,8 +85,8 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
   - [ ] Let the user create its own playlists with names
 - [x] Think about a way on how to make it work to add an intro skip button
 - [x] Show the Approx. Intro in the timeline
-- [ ] Implement a Intro Skip button
-- [ ] Collect the Intro Skip Informations from an External API
+- [x] Implement a Intro Skip button
+- [x] Collect the Intro Skip Informations from an External API
 - [x] Implement a native (so called todo list) to see wich series are still not ripped/downloaded/uploaded and maybe also with sorting
   - [x] Add an confirmation Dialog on Using a Todo
   - [x] Add an confirmation Dialog on Deleting a Todo
@@ -119,6 +119,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 ```
 
 - [ ] Add a Setting to toggle the card images (for lower bandwidth)
+- [ ] Add a Setting to toggle auto intro skip
 - [x] Update the preview images to be language specific (preview images for every language an episode is in) cause if the episode is longer or shorter
 - [x] Implement the update check for EngDub Series
 - [x] Implement the update check for sto series
@@ -153,3 +154,7 @@ although the general permission system and therefore the account restrictions
 - [ ] implement a cron job which automatically checks all downloaded series for updates and writes them to a list
 - [x] Add the downloader and scraping service into ext. services
 - [ ] Implement a way to sync watch animes smth. like SyncTube for YT or Watchtogether
+- [ ] Think about a somehow ForYou Page instead of the basic list **Where xy is shown:**
+  - [ ] Last Watched
+  - [ ] Newly Added
+  - [ ] You Might Like
