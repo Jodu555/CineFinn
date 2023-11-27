@@ -54,6 +54,7 @@ const authHelper = new AuthenticationHelper<User>(
 	false,
 	{
 		settings: 'TEXT',
+		role: 'INT',
 		email: {
 			type: 'varchar(64)',
 			null: true,
@@ -122,6 +123,10 @@ authHelper.install(
 				role: Role.User,
 			}
 		);
+	},
+	async (req, userobj) => {
+		// req.ip
+
 	}
 );
 
