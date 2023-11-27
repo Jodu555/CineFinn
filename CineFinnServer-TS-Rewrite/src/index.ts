@@ -157,6 +157,7 @@ import { router as room_router } from './routes/room';
 import video from './routes/video';
 import todo from './routes/todo';
 import { DatabaseSyncRoomItem } from './types/database';
+import { roleAuthorization } from './utils/roleManager';
 
 // Your Middleware handlers here
 app.use('/images', authHelper.authentication(), express.static(path.join(process.env.PREVIEW_IMGS_PATH)));

@@ -5,13 +5,14 @@ import { crawlAndIndex } from '../utils/crawler';
 import { generateImages } from '../utils/images';
 import { getActiveJobs, getSeries, setActiveJobs, toAllSockets, setSeries } from '../utils/utils';
 import { DatabaseJobItem } from '../types/database';
-import { AuthenticatedRequest } from '../types/session';
+import { AuthenticatedRequest, Role } from '../types/session';
+import { AuthenticationError } from '@jodu555/express-helpers';
 const database = Database.getDatabase();
 const router = express.Router();
 
 const LOOKUP = {
-	crawl: { name: 'Recrawl the archive', callpoint: '/job/crawl' },
-	generate: { name: 'Generating Preview-Images', callpoint: '/job/img/generate' },
+	crawl: { name: 'Recrawl the archive', callpoint: '/job/crawl', role: Role.Mod },
+	generate: { name: 'Generating Preview-Images', callpoint: '/job/img/generate', role: Role.Admin },
 	// validator: { name: 'Validating Preview-Images', callpoint: '/job/img/validate' },
 };
 
@@ -33,9 +34,15 @@ Promise.all(
 router.use((req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const jobID = Object.keys(LOOKUP).find((v) => LOOKUP[v].callpoint == req.path);
 	if (jobID) {
-		const lastRun = Date.now();
-		database.get('jobs').update({ ID: jobID }, { lastRun });
-		LOOKUP[jobID] = { ...LOOKUP[jobID], lastRun };
+		console.log(LOOKUP[jobID].role, req.credentials.user.role);
+
+		if (req.credentials.user.role >= LOOKUP[jobID].role) {
+			const lastRun = Date.now();
+			database.get('jobs').update({ ID: jobID }, { lastRun });
+			LOOKUP[jobID] = { ...LOOKUP[jobID], lastRun };
+		} else {
+			next(new AuthenticationError('Insufficent Permission'));
+		}
 	}
 	next();
 });

@@ -5,7 +5,8 @@ import { parse, load, Segment, searchObject } from '../utils/watchString';
 import { defaultSettings, compareSettings } from '../utils/settings';
 import { cleanupSeriesBeforeFrontResponse } from '../classes/series';
 import { DatabaseTodoItem } from '../types/database';
-import { ExtendedSocket, ExtendedRemoteSocket } from '../types/session';
+import { ExtendedSocket, ExtendedRemoteSocket, Role } from '../types/session';
+import { isPermitted } from '../utils/roleManager';
 
 const database = Database.getDatabase();
 
@@ -85,6 +86,12 @@ const initialize = (socket: ExtendedSocket) => {
 	});
 
 	socket.on('todoListUpdate', async (list) => {
+		if (!isPermitted(auth.user, Role.Mod)) {
+			const todosDB = await database.get<DatabaseTodoItem>('todos').get();
+			const todos = todosDB.map((t) => JSON.parse(t.content));
+			socket.emit('todoListUpdate', todos);
+			return;
+		}
 		const didID: string[] = [];
 		for (const todo of list) {
 			const item = await database.get<DatabaseTodoItem>('todos').getOne({ ID: todo.ID });
