@@ -157,6 +157,7 @@ const instance = getCurrentInstance().appContext.config.globalProperties;
 const store = useStore();
 
 const settings = computed(() => store.state.auth.settings);
+const userInfo = computed(() => store.state.auth.userInfo);
 
 const loading = ref(false);
 
@@ -254,6 +255,15 @@ const save = () => {
 };
 
 const pushTodoListUpdate = async () => {
+	console.log(userInfo.value.role, 2, userInfo.value.role >= 2);
+	if (!(userInfo.value.role >= 2)) {
+		console.log('Fire');
+		instance.$swal.fire({
+			icon: 'error',
+			title: 'Oops...',
+			text: 'Seems Like you do not have enough Permission to do that',
+		});
+	}
 	const saveList = JSON.parse(JSON.stringify(state.list)).map((x) => {
 		delete x.edited;
 		// delete x.scraped;

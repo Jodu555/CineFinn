@@ -20,28 +20,37 @@
 							<b>E-Mail:</b> <span class="text-muted">{{ userInfo.email }}</span>
 						</h5>
 					</li>
+					<li class="list-group-item">
+						<h5>
+							<b>Rolle:</b> <span class="text-muted">{{ roleIDToName(userInfo.role) }}</span>
+						</h5>
+					</li>
 				</ul>
-				<pre v-if="settings.developerMode.value">{{ { showJobs, showSettings } }}</pre>
-				<h2 @click="showJobs = !showJobs">
-					<p class="d-flex justify-content-between" style="align-items: center">
-						Jobs:
-						<font-awesome-icon style="margin-left: 0.5rem" size="xs" :icon="['fa-solid', showJobs ? 'chevron-up' : 'chevron-down']" />
-					</p>
-				</h2>
-				<hr />
-				<ul v-if="showJobs" class="list-group list-group-flush mb-3">
-					<pre v-if="settings.developerMode.value">{{ jobs }}</pre>
-					<JobListView
-						v-for="job in jobs"
-						:id="job.id"
-						:title="job.name"
-						:callpoint="job.callpoint"
-						:key="job.id"
-						:running="job.running"
-						:lastRun="job.lastRun"
-						:click="start"
-					/>
-				</ul>
+				<template v-if="jobs.some((x) => userInfo.role >= x?.role)">
+					<pre v-if="settings.developerMode.value">{{ { showJobs, showSettings } }}</pre>
+					<h2 @click="showJobs = !showJobs">
+						<p class="d-flex justify-content-between" style="align-items: center">
+							Jobs:
+							<font-awesome-icon style="margin-left: 0.5rem" size="xs" :icon="['fa-solid', showJobs ? 'chevron-up' : 'chevron-down']" />
+						</p>
+					</h2>
+					<hr />
+					<ul v-if="showJobs" class="list-group list-group-flush mb-3">
+						<pre v-if="settings.developerMode.value">{{ jobs }}</pre>
+						<template v-for="job in jobs">
+							<JobListView
+								v-if="parseInt(userInfo.role) >= parseInt(job.role)"
+								:id="job.id"
+								:title="job.name"
+								:callpoint="job.callpoint"
+								:key="job.id"
+								:running="job.running"
+								:lastRun="job.lastRun"
+								:click="start"
+							/>
+						</template>
+					</ul>
+				</template>
 				<h2 @click="showSettings = !showSettings">
 					<p class="d-flex justify-content-between" style="align-items: center">
 						Settings:
@@ -80,6 +89,7 @@
 <script>
 import { mapActions, mapMutations, mapState } from 'vuex';
 import JobListView from '@/components/Layout/JobListView.vue';
+import { roleIDToName as _roleIDToName } from '@/plugins/constants';
 
 export default {
 	components: { JobListView },
@@ -104,6 +114,9 @@ export default {
 	},
 	methods: {
 		...mapActions('auth', ['updateSettings', 'resetSettings']),
+		roleIDToName(id) {
+			return _roleIDToName(id);
+		},
 		async load() {
 			const response = await this.$networking.get('/managment/jobs/info');
 			if (!response.success) return;

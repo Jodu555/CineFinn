@@ -17,4 +17,15 @@ const langDetails = {
 	},
 };
 
-export { langDetails };
+function roleIDToName(id) {
+	switch (id) {
+		case 1:
+			return 'User';
+		case 2:
+			return 'Moderator';
+		case 3:
+			return 'Administrator';
+	}
+}
+
+export { langDetails, roleIDToName };

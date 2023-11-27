@@ -34,8 +34,6 @@ Promise.all(
 router.use((req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const jobID = Object.keys(LOOKUP).find((v) => LOOKUP[v].callpoint == req.path);
 	if (jobID) {
-		console.log(LOOKUP[jobID].role, req.credentials.user.role);
-
 		if (req.credentials.user.role >= LOOKUP[jobID].role) {
 			const lastRun = Date.now();
 			database.get('jobs').update({ ID: jobID }, { lastRun });

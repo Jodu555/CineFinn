@@ -94,6 +94,7 @@ export default {
 							UUID: json.UUID,
 							username: json.username,
 							email: json.email,
+							role: json.role,
 						});
 						commit('setSettings', JSON.parse(json.settings));
 						await commit('setLoggedIn', true);
