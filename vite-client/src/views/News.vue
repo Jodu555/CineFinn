@@ -82,7 +82,7 @@ export default {
 					position: 'top-end',
 					showConfirmButton: false,
 					timer: 3000,
-					icon: 'danger',
+					icon: 'error',
 					title: `${response.error}`,
 					timerProgressBar: true,
 				});

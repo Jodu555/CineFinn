@@ -5,7 +5,8 @@ import { cleanupSeriesBeforeFrontResponse, Series } from '../classes/series';
 import { sendSeriesReloadToAll } from '../sockets/client.socket';
 import { generateID } from '../utils/crawler';
 import { getSeries, setSeries, deepMerge } from '../utils/utils';
-import { AuthenticatedRequest } from '../types/session';
+import { AuthenticatedRequest, Role } from '../types/session';
+import { roleAuthorization } from '../utils/roleManager';
 
 const router = express.Router();
 
@@ -39,8 +40,7 @@ router.get('/:ID', async (req: AuthenticatedRequest, res: Response, next: NextFu
 	}
 });
 
-router.patch('/:ID', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-	//TODO: IMPORTANT: Add restriction to this route
+router.patch('/:ID', roleAuthorization(Role.Mod), async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	setSeries(
 		getSeries().map((x) => {
 			if (x.ID == req.params.ID) {
@@ -55,10 +55,7 @@ router.patch('/:ID', async (req: AuthenticatedRequest, res: Response, next: Next
 	await sendSeriesReloadToAll();
 });
 
-router.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-	// res.status(501).json({});
-	// return;
-	//TODO: IMPORTANT: Add restriction to this route
+router.post('/', roleAuthorization(Role.Admin), async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	req.body.ID = generateID();
 	const serie = Series.fromObject(req.body);
 	setSeries([...getSeries(), serie]);

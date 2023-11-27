@@ -240,13 +240,27 @@ const useTodo = async (ID) => {
 			seriesObject.infos = JSON.parse(JSON.stringify(todoObject?.scraped?.informations?.informations));
 			delete seriesObject.infos.image;
 		}
-		await instance.$networking.post('/index/', JSON.stringify(seriesObject));
+		const response = await instance.$networking.post('/index/', JSON.stringify(seriesObject));
 
-		const newsObject = {
-			content: `Added ${seriesObject.title}`,
-			time: Date.now(),
-		};
-		await instance.$networking.post('/news/', JSON.stringify(newsObject));
+		console.log(response, response.success);
+
+		if (!response.success) {
+			instance.$swal.fire({
+				toast: true,
+				position: 'top-end',
+				showConfirmButton: false,
+				timer: 3000,
+				icon: 'error',
+				title: `${response.error}`,
+				timerProgressBar: true,
+			});
+		} else {
+			const newsObject = {
+				content: `Added ${seriesObject.title}`,
+				time: Date.now(),
+			};
+			await instance.$networking.post('/news/', JSON.stringify(newsObject));
+		}
 	}
 };
 

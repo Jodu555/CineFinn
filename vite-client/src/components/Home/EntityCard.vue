@@ -40,7 +40,12 @@
 				<div class="d-flex">
 					<p class="ms-auto text-muted" style="margin-bottom: 0.1rem">ID: {{ entity.ID }}</p>
 				</div>
-				<button v-if="settings.showNewsAddForm.value" type="button" class="btn btn-outline-info btn-sm" @click="editing = !editing">
+				<button
+					v-if="settings.showNewsAddForm.value && userInfo.role >= 2"
+					type="button"
+					class="btn btn-outline-info btn-sm"
+					@click="editing = !editing"
+				>
 					<font-awesome-icon :icon="['fa-solid', 'fa-pen']" size="lg" />
 				</button>
 
@@ -133,7 +138,7 @@ export default {
 		this.editObject.references.zoro = this.entity.references?.zoro || '';
 	},
 	computed: {
-		...mapState('auth', ['settings']),
+		...mapState('auth', ['settings', 'userInfo']),
 		entityInfoString() {
 			const moviePart = this.entity.movies.length >= 1 ? this.entity.movies.length + ' ' + (this.entity.movies.length > 1 ? 'Movies' : 'Movie') : '';
 			const seasonPart =
