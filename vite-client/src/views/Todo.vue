@@ -242,8 +242,6 @@ const useTodo = async (ID) => {
 		}
 		const response = await instance.$networking.post('/index/', JSON.stringify(seriesObject));
 
-		console.log(response, response.success);
-
 		if (!response.success) {
 			instance.$swal.fire({
 				toast: true,

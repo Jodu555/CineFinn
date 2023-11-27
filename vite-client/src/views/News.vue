@@ -76,7 +76,6 @@ export default {
 			if (response.success) {
 				await this.loadData();
 			} else {
-				console.log(`response`, response);
 				this.$swal({
 					toast: true,
 					position: 'top-end',
