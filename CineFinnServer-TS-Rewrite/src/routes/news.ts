@@ -1,7 +1,8 @@
 import express, { NextFunction, Response } from 'express';
 import { Database } from '@jodu555/mysqlapi';
 import { DatabaseNewsItem, DatabaseJobItem } from '../types/database';
-import { AuthenticatedRequest } from '../types/session';
+import { AuthenticatedRequest, Role } from '../types/session';
+import { roleAuthorization } from '../utils/roleManager';
 const { getAniworldInfos } = require('../sockets/scraper.socket');
 const database = Database.getDatabase();
 const router = express.Router();
@@ -15,7 +16,7 @@ router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunct
 	}
 });
 
-router.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+router.post('/', roleAuthorization(Role.Mod), async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	if (req.body.content != undefined && req.body.content.trim() !== '' && req.body.content.length > 5) {
 		const jobDB = await database.get<DatabaseJobItem>('jobs').getOne({ ID: 'crawl' });
 		const newsObject = {

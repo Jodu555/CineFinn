@@ -3,12 +3,19 @@ import { RemoteSocket, Socket } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { TodoItem, timeUpdateObject } from './classes';
 
+export enum Role {
+	Admin = 3,
+	Mod = 2,
+	User = 1
+}
+
 export interface User {
 	UUID: string;
 	username: string;
 	email: string;
 	password?: string;
 	settings: SettingsObject | string;
+	role: Role
 }
 
 export type SettingsObject = {

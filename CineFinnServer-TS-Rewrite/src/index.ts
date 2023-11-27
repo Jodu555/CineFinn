@@ -8,7 +8,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { Database } from '@jodu555/mysqlapi';
-import { User, SettingsObject } from './types/session';
+import { User, SettingsObject, Role } from './types/session';
 dotenv.config();
 
 const database = Database.createDatabase(process.env.DB_HOST, process.env.DB_USERNAME, process.env.DB_PASSWORD, process.env.DB_DATABASE);
@@ -87,14 +87,16 @@ authHelper.options.restrictedRegister = (validation: SchemaValidation) => {
 
 authHelper.options.allowMultipleSessions = true;
 authHelper.options.authTokenStoreDatabase = true;
+
 authHelper.install(
 	async (token, userobj) => {
+		//OnLogin
 		const outSettings = compareSettings(userobj.settings as SettingsObject);
-		await database.get('accounts').update({ UUID: userobj.UUID }, { settings: JSON.stringify(outSettings) });
+		await database.get<Partial<User>>('accounts').update({ UUID: userobj.UUID }, { settings: JSON.stringify(outSettings) });
 	},
 	async (userobj) => {
 		//OnRegister
-		await database.get('accounts').update(
+		await database.get<Partial<User>>('accounts').update(
 			{
 				UUID: userobj.UUID,
 			},
@@ -103,12 +105,21 @@ authHelper.install(
 			}
 		);
 
-		await database.get('accounts').update(
+		await database.get<Partial<User>>('accounts').update(
 			{
 				UUID: userobj.UUID,
 			},
 			{
 				email: userobj.username + '@nil.com',
+			}
+		);
+
+		await database.get<Partial<User>>('accounts').update(
+			{
+				UUID: userobj.UUID,
+			},
+			{
+				role: Role.User,
 			}
 		);
 	}
