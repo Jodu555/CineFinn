@@ -9,7 +9,7 @@
 				<h2>User Infos:</h2>
 				<pre v-if="settings.developerMode.value">{{ userInfo }}</pre>
 				<hr />
-				<ul class="list-group list-group-flush">
+				<ul class="list-group list-group-flush mb-2">
 					<li class="list-group-item">
 						<h5>
 							<b>Username:</b> <span class="text-muted">{{ userInfo.username }}</span>
