@@ -127,6 +127,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [ ] Account/Authentication System Update
   - [ ] Implement a password change in the settings
   - [ ] Implement Email Change in the settings
+  - [x] Implement IP and last Handshake logging
   - [x] Restrict accounts so they cannot trigger certain jobs / Only Show the jobs an account is permitted to execute
   - [x] Save the audio volume number in state, and maybe also in account
   - [x] Implement User Settings to toggle specific infos

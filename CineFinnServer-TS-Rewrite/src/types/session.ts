@@ -16,6 +16,13 @@ export interface User {
 	password?: string;
 	settings: SettingsObject | string;
 	role: Role
+	activityDetails: ActivityDetails | string;
+}
+
+export type ActivityDetails = {
+	lastIP?: string,
+	lastHandshake?: string,
+	lastLogin?: string,
 }
 
 export type SettingsObject = {

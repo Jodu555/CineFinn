@@ -8,7 +8,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { Database } from '@jodu555/mysqlapi';
-import { User, SettingsObject, Role } from './types/session';
+import { User, SettingsObject, Role, ActivityDetails } from './types/session';
 dotenv.config();
 
 const database = Database.createDatabase(process.env.DB_HOST, process.env.DB_USERNAME, process.env.DB_PASSWORD, process.env.DB_DATABASE);
@@ -93,7 +93,11 @@ authHelper.install(
 	async (token, userobj) => {
 		//OnLogin
 		const outSettings = compareSettings(userobj.settings as SettingsObject);
-		await database.get<Partial<User>>('accounts').update({ UUID: userobj.UUID }, { settings: JSON.stringify(outSettings) });
+		const details: ActivityDetails = {
+			...typeof userobj.activityDetails == 'string' ? (JSON.parse(userobj.activityDetails) as ActivityDetails) : userobj.activityDetails,
+			lastLogin: typeof userobj.activityDetails == 'string' ? (JSON.parse(userobj.activityDetails) as ActivityDetails)?.lastLogin : userobj.activityDetails?.lastLogin
+		}
+		await database.get<Partial<User>>('accounts').update({ UUID: userobj.UUID }, { settings: JSON.stringify(outSettings), activityDetails: JSON.stringify(details) });
 	},
 	async (userobj) => {
 		//OnRegister
@@ -125,8 +129,13 @@ authHelper.install(
 		);
 	},
 	async (req, userobj) => {
-		// req.ip
+		const details: ActivityDetails = {
+			lastIP: req.ip,
+			lastHandshake: new Date().toLocaleString(),
+			lastLogin: typeof userobj.activityDetails == 'string' ? (JSON.parse(userobj.activityDetails) as ActivityDetails)?.lastLogin : userobj.activityDetails?.lastLogin
+		}
 
+		await database.get<Partial<User>>('accounts').update({ UUID: userobj.UUID }, { activityDetails: JSON.stringify(details) });
 	}
 );
 
