@@ -127,14 +127,14 @@ async function checkForUpdates() {
 	// const res: { data: Serie[] } = {
 	// 	data: [
 	// 		{
-	// 			ID: '2131415sd',
-	// 			title: 'The Legendary Hero is Dead!',
+	// 			ID: 'dwddawdwadwd',
+	// 			title: 'Farming Life in Another World',
 	// 			categorie: 'Aniworld',
 	// 			seasons: [],
 	// 			movies: [],
 	// 			infos: {},
 	// 			references: {
-	// 				aniworld: 'https://aniworld.to/anime/stream/the-legendary-hero-is-dead',
+	// 				zoro: '18284',
 	// 			},
 	// 		},
 	// 	],
