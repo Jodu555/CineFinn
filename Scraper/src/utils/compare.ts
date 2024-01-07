@@ -479,7 +479,7 @@ async function compareForNewReleasesSTO(
 	}
 }
 
-function changeEpisode(ep: any): ChangedZoroEpisode {
+function changeEpisode(ep: ExtendedZoroEpisode): ChangedZoroEpisode {
 	ep.langs = ep.langs.map((x: String) => {
 		if (x == 'sub') {
 			return 'EngSub';
