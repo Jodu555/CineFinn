@@ -831,6 +831,7 @@ export default {
 
 	opacity: 0;
 	transition: opacity 300ms ease-in-out;
+	text-shadow: 2px 2px 10px #000000;
 }
 /* This was changed */
 .video-container.hovered .video-title-container,
