@@ -22,7 +22,7 @@
 			<div
 				:class="{
 					'btn-intro-skip-container': true,
-					enabled: isIntercetingWithIntro,
+					enabled: isInterceptingWithIntro,
 				}"
 			>
 				<button type="button" @click="skipIntro" class="btn btn-light">Skip Intro <font-awesome-icon size="lg" icon="fa-solid fa-forward" /></button>
@@ -214,7 +214,7 @@ export default {
 		...mapState('watch', ['currentSeries', 'currentMovie', 'currentLanguage']),
 		...mapState('auth', ['authToken', 'settings']),
 		...mapGetters('watch', ['videoSrc', 'entityObject']),
-		isIntercetingWithIntro() {
+		isInterceptingWithIntro() {
 			return (
 				this.introData &&
 				this.introData?.type == 'intro' &&
@@ -268,7 +268,7 @@ export default {
 			return previewImgSrc;
 		},
 		skipIntro() {
-			if (this.isIntercetingWithIntro) {
+			if (this.isInterceptingWithIntro) {
 				console.log('Skipped Intro: ButtonSkip');
 				this.skip(this.introData?.endms + 2, true);
 			}
