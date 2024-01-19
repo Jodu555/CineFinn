@@ -1,5 +1,7 @@
 <template>
 	<div>
+		<!-- <button type="button" class="btn btn-outline-info" @click="handleResize">Recalc Window width</button> -->
+
 		<div v-if="!inSyncRoom">
 			<ShareModal />
 			<RmvcModal :switchTo="switchTo" :skip="skip" />
@@ -90,7 +92,7 @@
 						/
 						<div class="total-time"></div>
 					</div>
-					<button v-if="!inSyncRoom" title="RMVC Controls" data-bs-toggle="modal" data-bs-target="#rmvcModal">
+					<button v-if="!inSyncRoom && screenWidth >= 470" title="RMVC Controls" data-bs-toggle="modal" data-bs-target="#rmvcModal">
 						<font-awesome-icon icon="fa-solid fa-network-wired" />
 					</button>
 					<button v-if="!inSyncRoom" title="Share Video" data-bs-toggle="modal" data-bs-target="#shareModal">
@@ -116,7 +118,7 @@
 							></path>
 						</svg>
 					</button>
-					<button title="Toggle Video Speed" class="speed-btn wide-btn">1x</button>
+					<button v-if="screenWidth >= 380" title="Toggle Video Speed" class="speed-btn wide-btn">1x</button>
 					<button title="Toggle Mini Player" class="mini-player-btn">
 						<svg viewBox="0 0 24 24">
 							<path
@@ -125,7 +127,7 @@
 							/>
 						</svg>
 					</button>
-					<button title="Toggle Theatre Player" class="theater-btn">
+					<button v-if="screenWidth >= 450" title="Toggle Theatre Player" class="theater-btn">
 						<svg class="tall" viewBox="0 0 24 24">
 							<path fill="currentColor" d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z" />
 						</svg>
@@ -203,6 +205,7 @@ export default {
 				bufferedPercentage: 0,
 				seekable: undefined,
 			},
+			screenWidth: window.innerWidth,
 			introData: {},
 			alreadySkipped: [],
 		};
@@ -239,8 +242,18 @@ export default {
 			await this.loadIntroData();
 		},
 	},
+	created() {
+		window.addEventListener('resize', this.handleResize);
+	},
+	destroyed() {
+		window.removeEventListener('resize', this.handleResize);
+	},
 	methods: {
 		...mapActions('auth', ['updateSettings']),
+		handleResize() {
+			console.log(window.innerWidth);
+			this.screenWidth = window.innerWidth;
+		},
 		generatePreviewImageURL(previewImgNumber) {
 			let previewImgSrc = '';
 			if (this.currentSeries != undefined && this.currentSeries.ID != -1) {
@@ -262,10 +275,16 @@ export default {
 		},
 		async loadIntroData() {
 			this.alreadySkipped = [];
-			if (true) {
-				const response = await fetch(`http://localhost:4897/intro/${this.currentSeries.ID}/${this.entityObject.season}/${this.entityObject.episode}`);
-				const json = await response.json();
-				this.introData = json;
+			if (false) {
+				try {
+					const response = await fetch(
+						`http://localhost:4897/intro/${this.currentSeries.ID}/${this.entityObject.season}/${this.entityObject.episode}`
+					);
+					const json = await response.json();
+					this.introData = json;
+				} catch (error) {
+					console.error('It was not possible to load any intro data maybe because the system is not available');
+				}
 			}
 		},
 		initialize() {
@@ -457,7 +476,7 @@ export default {
 				}
 			}
 			// Playback Speed
-			speedBtn.addEventListener('click', changePlaybackSpeed);
+			speedBtn?.addEventListener('click', changePlaybackSpeed);
 			function changePlaybackSpeed() {
 				let newPlaybackRate = video.playbackRate + 0.25;
 				if (newPlaybackRate > 2) newPlaybackRate = 0.25;
@@ -625,7 +644,7 @@ export default {
 				videoContainer.dataset.volumeLevel = volumeLevel;
 			});
 			// View Modes
-			theaterBtn.addEventListener('click', toggleTheaterMode);
+			theaterBtn?.addEventListener('click', toggleTheaterMode);
 			fullScreenBtn.addEventListener('click', toggleFullScreenMode);
 			miniPlayerBtn.addEventListener('click', toggleMiniPlayerMode);
 			function toggleTheaterMode() {
