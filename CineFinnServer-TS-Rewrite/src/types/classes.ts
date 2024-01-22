@@ -58,4 +58,4 @@ export interface SerieInfo {
 
 export type SerieReference = Record<'aniworld' | 'zoro' | 'sto' | string, string | Record<string, string>>;
 
-export type Langs = 'GerDub' | 'GerSub' | 'EngDub' | 'EngSub';
+export type Langs = 'GerDub' | 'GerSub' | 'EngDub' | 'EngSub' | 'JapDub';

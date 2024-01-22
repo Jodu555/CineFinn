@@ -15,6 +15,10 @@ const langDetails = {
 		title: 'Mit englischen Untertiteln',
 		alt: 'Englische Flagge, Flagge, Untertitel, Flag',
 	},
+	japdub: {
+		title: 'Japanisch/Japanese',
+		alt: 'Japanische Flagge, Flagge, Original, Flag',
+	},
 };
 
 function roleIDToName(id) {
