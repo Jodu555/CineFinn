@@ -107,28 +107,31 @@ authHelper.install(
 			},
 			{
 				settings: JSON.stringify(defaultSettings),
-			}
-		);
-
-		await database.get<Partial<User>>('accounts').update(
-			{
-				UUID: userobj.UUID,
-			},
-			{
 				email: userobj.username + '@nil.com',
-			}
-		);
-
-		await database.get<Partial<User>>('accounts').update(
-			{
-				UUID: userobj.UUID,
-			},
-			{
 				role: Role.User,
 			}
 		);
+
+		// await database.get<Partial<User>>('accounts').update(
+		// 	{
+		// 		UUID: userobj.UUID,
+		// 	},
+		// 	{
+		// 		email: userobj.username + '@nil.com',
+		// 	}
+		// );
+
+		// await database.get<Partial<User>>('accounts').update(
+		// 	{
+		// 		UUID: userobj.UUID,
+		// 	},
+		// 	{
+		// 		role: Role.User,
+		// 	}
+		// );
 	},
 	async (req, userobj) => {
+		//onAuthenticated
 		const details: ActivityDetails = {
 			lastIP: req.ip,
 			lastHandshake: new Date().toLocaleString(),
