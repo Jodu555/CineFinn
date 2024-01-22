@@ -47,6 +47,9 @@ export default {
 			url.searchParams.append('auth-token', store.$networking.auth_token);
 			url.searchParams.append('series', state.currentSeries.ID);
 			url.searchParams.append('language', state.currentLanguage);
+			if (store._state.data.auth.settings.developerMode.value) {
+				url.searchParams.append('debug', true);
+			}
 			if (state.currentSeason == -1) {
 				if (state.currentMovie == -1) return '';
 				url.searchParams.append('movie', state.currentMovie);
