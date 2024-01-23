@@ -133,7 +133,7 @@ authHelper.install(
 	async (req, userobj) => {
 		//onAuthenticated
 		const details: ActivityDetails = {
-			lastIP: req.ip,
+			lastIP: req.headers['x-forwarded-for'] as string,
 			lastHandshake: new Date().toLocaleString(),
 			lastLogin: typeof userobj.activityDetails == 'string' ? (JSON.parse(userobj.activityDetails) as ActivityDetails)?.lastLogin : userobj.activityDetails?.lastLogin
 		}
