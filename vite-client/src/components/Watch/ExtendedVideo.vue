@@ -672,7 +672,21 @@ export default {
 			});
 			// Play/Pause
 			playPauseBtn.addEventListener('click', togglePlay);
-			video.addEventListener('click', togglePlay);
+			// video.addEventListener('click', togglePlay);
+			video.addEventListener('pointerdown', (ev) => {
+				console.log(ev.pointerType);
+				if (ev.pointerType == 'mouse') {
+					togglePlay();
+				} else {
+					if (!videoContainer.classList.includes('paused')) {
+						videoContainer.classList.add('paused');
+						setTimeout(() => {
+							videoContainer.classList.remove('paused');
+						}, 3 * 1000);
+					}
+					videoContainer.classList.remove('paused');
+				}
+			});
 			function togglePlay() {
 				if (!v.canPlay) return;
 				video.paused ? video.play() : video.pause();
@@ -948,6 +962,8 @@ video {
 .video-controls-container .controls button:hover {
 	opacity: 1;
 }
+
+/* TODO: Change ME  */
 
 .video-container.paused .pause-icon {
 	display: none;
