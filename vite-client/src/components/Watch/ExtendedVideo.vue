@@ -682,7 +682,7 @@ export default {
 						videoContainer.classList.add('paused');
 						setTimeout(() => {
 							videoContainer.classList.remove('paused');
-						}, 3 * 1000);
+						}, 1 * 1000);
 					}
 					videoContainer.classList.remove('paused');
 				}
