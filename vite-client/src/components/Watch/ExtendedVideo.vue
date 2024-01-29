@@ -18,6 +18,14 @@
 			</div>
 			<ActorContainer v-if="false" />
 			<font-awesome-icon class="skip skip-left" size="2xl" icon="fa-solid fa-backward" />
+
+			<div class="middle-play">
+				<button type="button" @click="togglePlay()">
+					<font-awesome-icon v-if="!videoData.isPlaying" size="4x" icon="fa-solid fa-play" />
+					<font-awesome-icon v-else size="4x" icon="fa-solid fa-pause" />
+				</button>
+			</div>
+
 			<font-awesome-icon class="skip skip-right" size="2xl" icon="fa-solid fa-forward" />
 			<div
 				:class="{
@@ -194,9 +202,11 @@ export default {
 			cleanupFN: null,
 			skip: null,
 			skipPercent: null,
+			togglePlay: null,
 			videoLoading: false,
 			dataLoading: false,
 			videoData: {
+				isPlaying: false,
 				currentTime: 0,
 				duration: 0,
 				volume: 0,
@@ -224,7 +234,8 @@ export default {
 		},
 	},
 	async mounted() {
-		const { skip, skipPercent, cleanupFN } = this.initialize();
+		const { skip, skipPercent, togglePlay, cleanupFN } = this.initialize();
+		this.togglePlay = togglePlay;
 		this.skip = skip;
 		this.skipPercent = skipPercent;
 		this.cleanupFN = cleanupFN;
@@ -394,6 +405,7 @@ export default {
 				const bufferedPercentage = (bufferedTime / video.duration) * 100;
 
 				v.videoData = {
+					isPlaying: !video.paused,
 					currentTime: video.currentTime,
 					duration: video.duration,
 					volume: video.volume,
@@ -673,23 +685,29 @@ export default {
 			// Play/Pause
 			playPauseBtn.addEventListener('click', togglePlay);
 			// video.addEventListener('click', togglePlay);
+			let touchTimeout = null;
 			video.addEventListener('pointerdown', (ev) => {
 				console.log(ev.pointerType);
 				if (ev.pointerType == 'mouse') {
 					togglePlay();
 				} else {
-					if (!videoContainer.classList.includes('paused')) {
+					if (!videoContainer.classList.contains('paused')) {
+						//Triggere the paused state shortly so the icons get shown
 						videoContainer.classList.add('paused');
-						setTimeout(() => {
-							videoContainer.classList.remove('paused');
-						}, 1 * 1000);
 					}
 					videoContainer.classList.remove('paused');
+					videoContainer.classList.add('touched');
+					if (touchTimeout != null) clearTimeout(touchTimeout);
+					touchTimeout = setTimeout(() => {
+						videoContainer.classList.remove('touched');
+						touchTimeout = null;
+					}, 5 * 1000);
 				}
 			});
 			function togglePlay() {
 				if (!v.canPlay) return;
 				video.paused ? video.play() : video.pause();
+				updateVueVideoData();
 			}
 			video.addEventListener('play', () => {
 				videoContainer.classList.remove('paused');
@@ -758,6 +776,7 @@ export default {
 			return {
 				skip,
 				skipPercent,
+				togglePlay,
 				cleanupFN: () => {
 					document.removeEventListener('keydown', documentKeyDown);
 					document.removeEventListener('mouseup', documentMouseUp);
@@ -820,6 +839,30 @@ export default {
 	left: 50%;
 	color: white;
 	opacity: 0;
+}
+
+.middle-play button {
+	background: none;
+	border: none;
+	color: white;
+}
+.middle-play {
+	z-index: 100;
+	background: none;
+	position: absolute;
+	border: none;
+	top: 50%;
+	left: 50%;
+	opacity: 0;
+	transform: translate(-50%, -50%);
+	transition: opacity 150ms ease-in-out;
+	cursor: pointer;
+	pointer-events: all;
+}
+
+.video-container.touched .middle-play {
+	pointer-events: all;
+	opacity: 1;
 }
 
 @keyframes skip {
