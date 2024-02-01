@@ -34,6 +34,8 @@ async function generateEntityImages(i: number, serie: Series, entity: Episode | 
 				output = path.join(output, 'Movies', `${entity.primaryName}`, lang);
 			}
 			fs.mkdirSync(output, { recursive: true });
+			console.log(output, fs.readdirSync(output).length);
+
 			if (fs.readdirSync(output).length == 0) {
 				const { dir, name, ext } = path.parse(entity.filePath);
 				const filePath = entity.langs.length > 1 ? path.join(dir, `${name.split('_')[0]}_${lang}${ext}`) : entity.filePath;
@@ -47,8 +49,7 @@ async function generateEntityImages(i: number, serie: Series, entity: Episode | 
 						commandManager
 							.getWriter()
 							.deepSameLineClear(
-								`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${
-									path.parse(entity.filePath).base
+								`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base
 								}`,
 								2
 							);
@@ -58,8 +59,7 @@ async function generateEntityImages(i: number, serie: Series, entity: Episode | 
 						commandManager
 							.getWriter()
 							.deepSameLineClear(
-								`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (Movie) ${i + 1} / ${
-									serie.movies.length
+								`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (Movie) ${i + 1} / ${serie.movies.length
 								} - ${entity.primaryName}`,
 								2
 							);
@@ -88,8 +88,7 @@ async function generateEntityImages(i: number, serie: Series, entity: Episode | 
 					commandManager
 						.getWriter()
 						.deepSameLineClear(
-							`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${
-								path.parse(entity.filePath).base
+							`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base
 							}`,
 							2
 						);
@@ -99,8 +98,7 @@ async function generateEntityImages(i: number, serie: Series, entity: Episode | 
 					commandManager
 						.getWriter()
 						.deepSameLineClear(
-							`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${
-								entity.primaryName
+							`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${entity.primaryName
 							}`,
 							2
 						);
@@ -110,15 +108,15 @@ async function generateEntityImages(i: number, serie: Series, entity: Episode | 
 	}
 }
 
-const generateImages = async (series: Series[], cleanup: () => void = () => {}) => {
+const generateImages = async (series: Series[], cleanup: () => void = () => { }) => {
 	console.log('Started generateImages()');
 
 	const limit = pLimit(Number(process.env.IMG_CONCURRENT_LIMIT_GENERATION || 5));
 
+	const promises = [];
+
 	for (const serie of series) {
 		const seasons = serie.seasons.flat();
-		newProgress && commandManager.getWriter().deepSameLineClear(`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n `, 2);
-		!newProgress && console.log(`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items`);
 
 		const episodeImageGeneratingPromises = seasons.map((episode, i) => {
 			return limit(
@@ -130,7 +128,7 @@ const generateImages = async (series: Series[], cleanup: () => void = () => {}) 
 			);
 		});
 
-		await Promise.all(episodeImageGeneratingPromises);
+		// await Promise.all(episodeImageGeneratingPromises);
 
 		const movieImageGeneratingPromises = serie.movies.map((movie, i) => {
 			return limit(
@@ -141,9 +139,22 @@ const generateImages = async (series: Series[], cleanup: () => void = () => {}) 
 					})
 			);
 		});
+		console.log(serie.title);
 
-		await Promise.all(movieImageGeneratingPromises);
+		if (episodeImageGeneratingPromises.length > 0 && movieImageGeneratingPromises.length > 0) {
+			newProgress && commandManager.getWriter().deepSameLineClear(`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n `, 2);
+			!newProgress && console.log(`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items and ${episodeImageGeneratingPromises.length + movieImageGeneratingPromises.length} Processes`);
+		}
+
+
+		// await Promise.all(movieImageGeneratingPromises);
+		promises.push(...episodeImageGeneratingPromises, ...movieImageGeneratingPromises);
 	}
+
+	console.log(`Every Series has been checked and there are ${promises.length} Processes Waiting`);
+
+	// await Promise.all(promises);
+
 
 	console.log('Finished generateImages()');
 	cleanup();
