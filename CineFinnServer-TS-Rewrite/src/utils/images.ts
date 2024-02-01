@@ -153,7 +153,7 @@ const generateImages = async (series: Series[], cleanup: () => void = () => { })
 
 	console.log(`Every Series has been checked and there are ${promises.length} Processes Waiting`);
 
-	// await Promise.all(promises);
+	await Promise.all(promises);
 
 
 	console.log('Finished generateImages()');
