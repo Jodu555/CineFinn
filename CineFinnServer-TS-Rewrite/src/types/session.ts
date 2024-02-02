@@ -101,6 +101,7 @@ interface ClientToServerEvents {
 	'rmvc-connect': (arg0: rmvcConnectArg) => void;
 	'rmvc-send-action': (arg0: rmvcSendActionArg) => void;
 	todoListUpdate: (list: TodoItem[]) => void;
+	'sync-selectSeries': (obj: { ID: number }) => void;
 }
 export interface ExtendedSocket extends Socket<ClientToServerEvents, DefaultEventsMap, any> {
 	auth: SocketAuthObject;

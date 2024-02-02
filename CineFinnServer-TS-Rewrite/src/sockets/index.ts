@@ -3,6 +3,7 @@ import { getIO, getAuthHelper } from '../utils/utils';
 
 import { initialize as socketInitScraper } from './scraper.socket';
 import { initialize as socketInitClient } from './client.socket';
+import { initialize as socketInitSync } from './sync.socket';
 import { initialize as socketInitRMVCEmitter } from './rmvcEmitter.socket';
 
 const initialize = () => {
@@ -44,6 +45,7 @@ const initialize = () => {
 
 		if (auth.type == 'client') {
 			socketInitClient(socket);
+			socketInitSync(socket);
 			socketInitRMVCEmitter(socket);
 		}
 		if (auth.type == 'rmvc-emitter') socketInitRMVCEmitter(socket);

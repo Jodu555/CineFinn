@@ -9,7 +9,7 @@ const router = express.Router();
 router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const rooms = (await database.get<DatabaseSyncRoomItem>('sync_rooms').get()).map((r) => roomToFullObject(r));
 
-	console.log(rooms);
+	console.log('2', rooms);
 
 	res.json(
 		rooms.map((r) => {
@@ -20,15 +20,20 @@ router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunct
 });
 
 router.get('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+	console.log(
+		'Got room',
+		req.params.id
+	);
+
 	const room = roomToFullObject(await database.get<DatabaseSyncRoomItem>('sync_rooms').getOne({ ID: req.params.id }));
 
-	console.log(room);
+	console.log('3', room);
 
 	res.json(room);
 });
 
 function roomToFullObject(room: DatabaseSyncRoomItem): DatabaseParsedSyncRoomItem {
-	console.log(room);
+	console.log('1', room);
 
 	let newRoom: any = {};
 	newRoom.ID = room.ID;
