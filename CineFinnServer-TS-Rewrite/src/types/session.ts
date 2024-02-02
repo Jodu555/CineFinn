@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { RemoteSocket, Socket } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-import { TodoItem, timeUpdateObject } from './classes';
+import { Langs, TodoItem, timeUpdateObject } from './classes';
 
 export enum Role {
 	Admin = 3,
@@ -102,10 +102,18 @@ interface ClientToServerEvents {
 	'rmvc-send-action': (arg0: rmvcSendActionArg) => void;
 	todoListUpdate: (list: TodoItem[]) => void;
 	'sync-selectSeries': (obj: { ID: number }) => void;
+	'sync-join': (obj: { ID: number }) => void;
+	'sync-video-change': (obj: { season: number, episode: number, movie: number, langchange: Boolean, lang: Langs }) => void;
+	'sync-video-action': (obj: { action: VideoAction, value: any }) => void;
 }
+
+
+export type VideoAction = 'sync-playback' | 'sync-skip' | 'sync-skipTimeline';
 export interface ExtendedSocket extends Socket<ClientToServerEvents, DefaultEventsMap, any> {
 	auth: SocketAuthObject;
+	sync?: any;
 }
 export interface ExtendedRemoteSocket extends RemoteSocket<DefaultEventsMap, any> {
 	auth: SocketAuthObject;
+	sync?: any;
 }

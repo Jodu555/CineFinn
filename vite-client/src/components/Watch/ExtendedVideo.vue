@@ -459,6 +459,9 @@ export default {
 			timelineContainer.addEventListener('mousemove', handleTimelineUpdate);
 			timelineContainer.addEventListener('mousedown', toggleScrubbing);
 			function toggleScrubbing(e) {
+				if (!v.canPlay) {
+					return;
+				}
 				const rect = timelineContainer.getBoundingClientRect();
 				const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
 				isScrubbing = (e.buttons & 1) === 1;
@@ -477,7 +480,6 @@ export default {
 				const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
 				document.querySelector('.time-info-timeline-indicator').innerText = formatDuration(percent * video.duration);
 				const previewImgNumber = Math.max(1, Math.floor((percent * video.duration) / 10));
-				// let previewImgSrc = `/assets/previewImgs/preview${previewImgNumber}.jpg`;
 				const previewImgSrc = v.generatePreviewImageURL(previewImgNumber);
 				previewImg.src = previewImgSrc;
 				timelineContainer.style.setProperty('--preview-position', percent);

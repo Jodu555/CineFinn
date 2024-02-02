@@ -8,7 +8,8 @@ import { getVideoMovie, getVideoEntity } from '../classes/series';
 export = (req: AuthenticatedRequest, res: Response) => {
 	const { series: seriesID, season, episode, movie, language, debug: rmtDebug } = req.query;
 
-	const debug = Boolean(rmtDebug) || false;
+	const debug = false;
+	// const debug = Boolean(rmtDebug) || false;
 
 	// Ensure there is a range given for the video
 	const range = req.headers.range;

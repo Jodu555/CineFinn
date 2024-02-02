@@ -60,11 +60,11 @@ export default {
 	},
 	getters: {
 		isOwner(state, getters, rootState) {
-			if (getters.currentRoom == undefined) return;
+			if (getters.currentRoom == undefined) return false;
 			const userUUID = rootState.auth?.userInfo?.UUID;
-			if (userUUID == undefined) return;
+			if (userUUID == undefined) return false;
 			const memberObject = getters.currentRoom.members.find((x) => x.UUID == userUUID);
-			if (memberObject == undefined) return;
+			if (memberObject == undefined) return false;
 			return memberObject.role == 1;
 		},
 		currentRoom(state) {
@@ -73,20 +73,20 @@ export default {
 	},
 	actions: {
 		async createRoom({ commit, dispatch, rootState }) {
-			//TODO: call the socket and let them give back an room id
 			const ID = Math.round(Math.random() * 10000);
+			this.$socket.emit('sync-create', { ID });
 			commit('setCurrentRoomID', ID);
 			dispatch('loadRoomInfo');
 			await router.push('/sync/' + ID);
 		},
 		async joinRoom({ commit, dispatch, rootState }, ID) {
-			//TODO: make here the socket call to join
+			this.$socket.emit('sync-join', { ID });
 			commit('setCurrentRoomID', ID);
 			await dispatch('loadRoomInfo');
 			await router.push('/sync/' + ID);
 		},
-		async leaveRoom({ commit, dispatch, rootState }) {
-			//TODO: make the socket call
+		async leaveRoom({ commit, dispatch, state, rootState }) {
+			this.$socket.emit('sync-leave', { ID: state.currentRoomID });
 			commit('reset');
 			await router.push('/sync/');
 		},

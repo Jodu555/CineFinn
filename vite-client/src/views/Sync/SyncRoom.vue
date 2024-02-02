@@ -15,6 +15,7 @@
 				videoSrc: {{ videoSrc }}
 				entityObject: {{ entityObject }}
 				currentRoom: {{ currentRoom }}
+				isOwner: {{ isOwner }}
 		</pre
 		>
 		<div class="mb-3 d-flex justify-content-between">
@@ -129,15 +130,30 @@ export default {
 		changeLanguage(lang) {
 			this.handleVideoChange(this.currentSeason, this.currentEpisode, this.currentMovie, true, lang);
 		},
-		async selectSeries(ID) {
-			await this.$socket.emit('sync-selectSeries', { ID });
+		async selectSeries(ID, broadcast = true) {
+			if (broadcast) {
+				await this.$socket.emit('sync-selectSeries', { ID });
+			}
 			await this.loadSeriesInfo(ID);
 			this.handleVideoChange(-1, -1, -1);
 		},
 		switchTo(vel) {
 			deepswitchTo(vel, this);
 		},
-		handleVideoChange(season = -1, episode = -1, movie = -1, langchange = false, lang) {
+
+		/**
+		 * Handles changing the video that is playing in the sync room.
+		 *
+		 * @param {number} season - The season number to change to. Default -1 for no change.
+		 * @param {number} episode - The episode number to change to. Default -1 for no change.
+		 * @param {number} movie - The movie ID to change to. Default -1 for no change.
+		 * @param {boolean} langchange - Whether to change the language. Default false.
+		 * @param {string} lang - The language code to change to if langchange is true.
+		 * @param {boolean} silent - Whether to suppress emit to server. Default false.
+		 */
+		//silent = false not send back to server (so user based switch)
+		handleVideoChange(season = -1, episode = -1, movie = -1, langchange = false, lang, silent = false) {
+			if (!silent && !this.isOwner) return;
 			if (langchange && this.currentLanguage == lang) return;
 			const video = document.querySelector('video');
 
@@ -148,7 +164,7 @@ export default {
 			const prevTime = video.currentTime;
 
 			console.log('GOT handleVideoChange() EMIT to Server', { season, episode, movie, langchange, lang });
-			//TODO: make here an emit to the server
+			!silent && this.$socket.emit('sync-video-change', { season, episode, movie, langchange, lang });
 			video.pause();
 
 			setTimeout(() => {
@@ -177,7 +193,7 @@ export default {
 			console.log(roomID, this.series);
 			await this.joinRoom(roomID);
 		}
-		await this.selectSeries(this.currentRoom?.seriesID);
+		await this.selectSeries(this.currentRoom?.seriesID, false);
 		console.log('this.currentRoom?.entityInfos?', JSON.stringify(this.currentRoom?.entityInfos));
 		this.handleVideoChange(
 			parseInt(this.currentRoom?.entityInfos?.season),
@@ -186,21 +202,27 @@ export default {
 			true,
 			this.currentRoom?.entityInfos?.lang
 		);
-		this.$socket.on('sync-videoAction', ({ action, value }) => {
+		this.$socket.on('sync-video-action', ({ action, value }) => {
 			if (action == 'sync-playback') {
 				// value = true = Play
 				// Value = false = Pause
 			} else if (action == 'sync-skip') {
-				// The Skip if you click the arrow keys
-			} else if (action == 'sync-skipPercent') {
-				// The Skip you can perform with the numpad
+				// The Skip if you click the arrow keys or number keys
 			} else if (action == 'sync-skipTimeline') {
 				// The skip if you click on the timeline at any position
 			}
 		});
+		this.$socket.on('sync-selectSeries', async ({ ID }) => {
+			this.selectSeries(ID, false);
+		});
+
+		this.$socket.on('sync-video-change', async ({ season, episode, movie, langchange, lang }) => {
+			this.handleVideoChange(season, episode, movie, langchange, lang, true);
+		});
 	},
 	async unmounted() {
-		this.$socket.off('roomVideoAction');
+		this.$socket.off('sync-videoAction');
+		this.$socket.off('sync-selectSeries');
 	},
 };
 </script>
