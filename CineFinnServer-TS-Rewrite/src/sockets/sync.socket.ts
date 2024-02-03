@@ -30,6 +30,16 @@ const initialize = (socket: ExtendedSocket) => {
         );
     })
 
+    socket.on('sync-video-action', async (obj) => {
+        console.log('SOCKET with auth', auth.user.username, 'and room', socket.sync, 'sync-video-action', obj);
+        await toAllSockets(
+            (s) => {
+                s.emit('sync-video-action', obj);
+            },
+            (s) => s.auth.type == 'client' && s.id != socket.id && s.sync && s.sync.ID == socket.sync?.ID
+        );
+    })
+
     socket.on('sync-join', (obj) => {
         console.log('SOCKET with auth', auth.user.username, 'sync-join', obj);
         socket.sync = obj;

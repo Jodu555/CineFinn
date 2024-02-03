@@ -104,7 +104,7 @@ interface ClientToServerEvents {
 	'sync-selectSeries': (obj: { ID: number }) => void;
 	'sync-join': (obj: { ID: number }) => void;
 	'sync-video-change': (obj: { season: number, episode: number, movie: number, langchange: Boolean, lang: Langs }) => void;
-	'sync-video-action': (obj: { action: VideoAction, value: any }) => void;
+	'sync-video-action': (obj: { action: VideoAction, value: boolean | string }) => void;
 }
 
 

@@ -65,7 +65,15 @@
 				<EntityActionsInformation :switch-to="switchTo" :change-language="changeLanguage" />
 			</div>
 
-			<ExtendedVideo v-show="showVideo" :inSyncRoom="true" :canPlay="isOwner" :switchTo="switchTo" :sendVideoTimeUpdate="() => {}" />
+			<ExtendedVideo
+				ref="extendedVideoChild"
+				v-show="showVideo"
+				:events="{ playback: deepPlayback, skip: deepSkip, skipTimeline: deepSkipTimeline }"
+				:inSyncRoom="true"
+				:canPlay="isOwner"
+				:switchTo="switchTo"
+				:sendVideoTimeUpdate="() => {}"
+			/>
 		</div>
 	</div>
 </template>
@@ -116,6 +124,18 @@ export default {
 		...mapActions('sync', ['leaveRoom', 'loadRooms', 'joinRoom']),
 		...mapActions('watch', ['loadSeriesInfo']),
 		...mapMutations('watch', ['setCurrentMovie', 'setCurrentSeason', 'setCurrentEpisode', 'setCurrentLanguage', 'setWatchList']),
+		deepPlayback(state) {
+			console.log('deepPlayback() Emitting sync-video-action: "sync-playback" with value:', state);
+			this.$socket.emit('sync-video-action', { action: 'sync-playback', value: state });
+		},
+		deepSkip(time) {
+			console.log('deepSkip() Emitting sync-video-action: "sync-skip" with value:', time);
+			this.$socket.emit('sync-video-action', { action: 'sync-skip', value: time });
+		},
+		deepSkipTimeline(time) {
+			console.log('deepSkipTimeline() Emitting sync-video-action: "sync-skipTimeline" with value:', time);
+			this.$socket.emit('sync-video-action', { action: 'sync-skipTimeline', value: time });
+		},
 		changeMovie(ID) {
 			if (this.currentMovie == ID) return this.handleVideoChange();
 			this.handleVideoChange(-1, -1, ID);
@@ -153,9 +173,12 @@ export default {
 		 */
 		//silent = false not send back to server (so user based switch)
 		handleVideoChange(season = -1, episode = -1, movie = -1, langchange = false, lang, silent = false) {
+			console.log('Came', 0);
 			if (!silent && !this.isOwner) return;
+			console.log('Came', 1);
 			if (langchange && this.currentLanguage == lang) return;
 			const video = document.querySelector('video');
+			console.log('Came', 2);
 
 			//TODO: Maybe add here default language from user prefered settings
 			let defaultLanguage = 'GerDub';
@@ -195,21 +218,46 @@ export default {
 		}
 		await this.selectSeries(this.currentRoom?.seriesID, false);
 		console.log('this.currentRoom?.entityInfos?', JSON.stringify(this.currentRoom?.entityInfos));
-		this.handleVideoChange(
-			parseInt(this.currentRoom?.entityInfos?.season),
-			parseInt(this.currentRoom?.entityInfos?.episode),
-			parseInt(this.currentRoom?.entityInfos?.movie),
-			true,
-			this.currentRoom?.entityInfos?.lang
-		);
+		console.log('mounted(), currentRoom', this.currentRoom);
+		setTimeout(() => {
+			console.log(
+				parseInt(this.currentRoom?.entityInfos?.season),
+				parseInt(this.currentRoom?.entityInfos?.episode),
+				parseInt(this.currentRoom?.entityInfos?.movie)
+			);
+			if (this.currentLanguage == this.currentRoom?.entityInfos?.lang) {
+				this.handleVideoChange(
+					parseInt(this.currentRoom?.entityInfos?.season),
+					parseInt(this.currentRoom?.entityInfos?.episode),
+					parseInt(this.currentRoom?.entityInfos?.movie),
+					false,
+					true
+				);
+			} else {
+				this.handleVideoChange(
+					parseInt(this.currentRoom?.entityInfos?.season),
+					parseInt(this.currentRoom?.entityInfos?.episode),
+					parseInt(this.currentRoom?.entityInfos?.movie),
+					true,
+					this.currentRoom?.entityInfos?.lang,
+					true
+				);
+			}
+		}, 500);
 		this.$socket.on('sync-video-action', ({ action, value }) => {
 			if (action == 'sync-playback') {
 				// value = true = Play
 				// Value = false = Pause
+				console.log(this.$refs.extendedVideoChild);
+				this.$refs.extendedVideoChild?.trigger(action, value);
 			} else if (action == 'sync-skip') {
 				// The Skip if you click the arrow keys or number keys
+				console.log(this.$refs.extendedVideoChild);
+				this.$refs.extendedVideoChild?.trigger(action, value);
 			} else if (action == 'sync-skipTimeline') {
 				// The skip if you click on the timeline at any position
+				console.log(this.$refs.extendedVideoChild);
+				this.$refs.extendedVideoChild?.trigger(action, value);
 			}
 		});
 		this.$socket.on('sync-selectSeries', async ({ ID }) => {

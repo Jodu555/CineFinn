@@ -49,11 +49,11 @@
 
 						<div
 							v-for="i in videoData.buffered?.length"
-							v-show="Math.round(Math.abs($refs.mainVid.buffered?.start(i - 1) - $refs.mainVid.buffered?.end(i - 1))) > 10"
+							v-show="Math.round(Math.abs($refs.mainVid?.buffered?.start(i - 1) - $refs.mainVid.buffered?.end(i - 1))) > 10"
 							class="timeline-buffer"
 							:style="{
-								'--buffer-start': $refs.mainVid.buffered?.start(i - 1) / videoData.duration,
-								'--buffer-end': $refs.mainVid.buffered?.end(i - 1) / videoData.duration,
+								'--buffer-start': $refs.mainVid?.buffered?.start(i - 1) / videoData.duration,
+								'--buffer-end': $refs.mainVid?.buffered?.end(i - 1) / videoData.duration,
 								// '--length': Math.round(Math.abs($refs.mainVid.buffered?.start(i - 1) - $refs.mainVid.buffered?.end(i - 1))),
 							}"
 						></div>
@@ -196,6 +196,7 @@ export default {
 		sendVideoTimeUpdate: { type: Function },
 		inSyncRoom: { type: Boolean, default: false },
 		canPlay: { type: Boolean, default: true },
+		events: { type: Object, default: {} },
 	},
 	data() {
 		return {
@@ -296,6 +297,23 @@ export default {
 				} catch (error) {
 					console.error('It was not possible to load any intro data maybe because the system is not available');
 				}
+			}
+		},
+		trigger(action, value) {
+			console.log(action, value);
+			if (action == 'sync-playback') {
+				const video = document.querySelector('video');
+				if (value) {
+					video.play();
+				} else {
+					video.pause();
+				}
+			}
+			if (action == 'sync-skip') {
+				console.log('came');
+				this.skip(value, true, true);
+			}
+			if (action == 'sync-skipTimeline') {
 			}
 		},
 		initialize() {
@@ -470,6 +488,9 @@ export default {
 					wasPaused = video.paused;
 					video.pause();
 				} else {
+					if (v.events?.skipTimeline) {
+						v.events.skipTimeline(percent * video.duration);
+					}
 					video.currentTime = percent * video.duration;
 					if (!wasPaused) video.play();
 				}
@@ -600,8 +621,11 @@ export default {
 				const duration = (max / 100) * percent;
 				skip(duration, true);
 			}
-			function skip(duration, set = false) {
-				if (!v.canPlay) return;
+			function skip(duration, set = false, server = false) {
+				if (v.canPlay == false && server == false) return;
+				if (v.events?.skip && server == false) {
+					v.events?.skip(set ? duration : video.currentTime + duration);
+				}
 				const animationDuration = 400;
 				const doIconAnimation = Math.abs(duration) > 1 || Math.abs(duration) == 0;
 				let pref = '';
@@ -712,9 +736,15 @@ export default {
 				updateVueVideoData();
 			}
 			video.addEventListener('play', () => {
+				if (v.events?.playback) {
+					v.events.playback(true);
+				}
 				videoContainer.classList.remove('paused');
 			});
 			video.addEventListener('pause', () => {
+				if (v.events?.playback) {
+					v.events.playback(false);
+				}
 				videoContainer.classList.add('paused');
 			});
 
