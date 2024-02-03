@@ -44,4 +44,4 @@ function roomToFullObject(room: DatabaseSyncRoomItem): DatabaseParsedSyncRoomIte
 	return newRoom as DatabaseParsedSyncRoomItem;
 }
 
-export { router };
+export { router, roomToFullObject };
