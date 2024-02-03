@@ -125,14 +125,17 @@ export default {
 		...mapActions('watch', ['loadSeriesInfo']),
 		...mapMutations('watch', ['setCurrentMovie', 'setCurrentSeason', 'setCurrentEpisode', 'setCurrentLanguage', 'setWatchList']),
 		deepPlayback(state, time) {
+			if (!this.isOwner) return;
 			console.log('deepPlayback() Emitting sync-video-action: "sync-playback" with value:', state);
 			this.$socket.emit('sync-video-action', { action: 'sync-playback', value: state, time });
 		},
 		deepSkip(time) {
+			if (!this.isOwner) return;
 			console.log('deepSkip() Emitting sync-video-action: "sync-skip" with value:', time);
 			this.$socket.emit('sync-video-action', { action: 'sync-skip', value: time });
 		},
 		deepSkipTimeline(time) {
+			if (!this.isOwner) return;
 			console.log('deepSkipTimeline() Emitting sync-video-action: "sync-skipTimeline" with value:', time);
 			this.$socket.emit('sync-video-action', { action: 'sync-skip', value: time });
 		},

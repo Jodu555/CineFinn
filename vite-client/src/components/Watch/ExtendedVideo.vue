@@ -170,7 +170,7 @@
 					{{ videoData.bufferedPercentage }}% / 100%
 					<div class="internal-video-devinfos-child">
 						<span v-for="i in videoData.buffered?.length">
-							{{ $refs.mainVid.buffered?.start(i - 1)  }}ms - {{ $refs.mainVid.buffered?.end(i -1) }}ms = {{ Math.round(Math.abs($refs.mainVid.buffered?.start(i - 1) - $refs.mainVid.buffered?.end(i -1))) }}ms
+							{{ $refs.mainVid.buffered?.start(i - 1)  }}ms - {{ $refs.mainVid.buffered?.end(i -1) }}ms = {{ Math.round(Math.abs($refs.mainVid.buffered?.start(i - 1) - $refs.mainVid?.buffered?.end(i -1))) }}ms
 						</span>
 					</div>
 				Seekable: 
@@ -303,10 +303,10 @@ export default {
 			console.log(action, value, time);
 			if (action == 'sync-playback') {
 				const video = document.querySelector('video');
-				video.currentTime = time;
 				if (value) {
 					video.play();
 				} else {
+					video.currentTime = time;
 					video.pause();
 				}
 			}
@@ -315,6 +315,7 @@ export default {
 				this.skip(value, true, true);
 			}
 			if (action == 'sync-skipTimeline') {
+				this.skip(value, true, true);
 			}
 		},
 		initialize() {
