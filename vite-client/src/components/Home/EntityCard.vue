@@ -10,7 +10,7 @@
 			<!-- <img v-if="entity?.infos?.image" :src="buildCoverURL(entity)" class="card-img-top" alt="..." />
 			<img v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" class="card-img-top" alt="..." /> -->
 			<div v-auto-animate class="card-body">
-				<h4 class="card-title">{{ entity.infos?.title || entity.title }}</h4>
+				<h4 class="card-title">{{ entity.infos?.title || entity.infos?.infos || entity.title }}</h4>
 				<p class="card-text">
 					<template v-if="entity.infos.description">
 						{{
