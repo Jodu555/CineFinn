@@ -299,10 +299,11 @@ export default {
 				}
 			}
 		},
-		trigger(action, value) {
-			console.log(action, value);
+		trigger(action, value, time) {
+			console.log(action, value, time);
 			if (action == 'sync-playback') {
 				const video = document.querySelector('video');
+				video.currentTime = time;
 				if (value) {
 					video.play();
 				} else {
@@ -737,13 +738,13 @@ export default {
 			}
 			video.addEventListener('play', () => {
 				if (v.events?.playback) {
-					v.events.playback(true);
+					v.events.playback(true, video.currentTime);
 				}
 				videoContainer.classList.remove('paused');
 			});
 			video.addEventListener('pause', () => {
 				if (v.events?.playback) {
-					v.events.playback(false);
+					v.events.playback(false, video.currentTime);
 				}
 				videoContainer.classList.add('paused');
 			});

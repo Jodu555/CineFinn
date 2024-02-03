@@ -124,9 +124,9 @@ export default {
 		...mapActions('sync', ['leaveRoom', 'loadRooms', 'joinRoom']),
 		...mapActions('watch', ['loadSeriesInfo']),
 		...mapMutations('watch', ['setCurrentMovie', 'setCurrentSeason', 'setCurrentEpisode', 'setCurrentLanguage', 'setWatchList']),
-		deepPlayback(state) {
+		deepPlayback(state, time) {
 			console.log('deepPlayback() Emitting sync-video-action: "sync-playback" with value:', state);
-			this.$socket.emit('sync-video-action', { action: 'sync-playback', value: state });
+			this.$socket.emit('sync-video-action', { action: 'sync-playback', value: state, time });
 		},
 		deepSkip(time) {
 			console.log('deepSkip() Emitting sync-video-action: "sync-skip" with value:', time);
@@ -134,7 +134,7 @@ export default {
 		},
 		deepSkipTimeline(time) {
 			console.log('deepSkipTimeline() Emitting sync-video-action: "sync-skipTimeline" with value:', time);
-			this.$socket.emit('sync-video-action', { action: 'sync-skipTimeline', value: time });
+			this.$socket.emit('sync-video-action', { action: 'sync-skip', value: time });
 		},
 		changeMovie(ID) {
 			if (this.currentMovie == ID) return this.handleVideoChange();
@@ -244,12 +244,12 @@ export default {
 				);
 			}
 		}, 500);
-		this.$socket.on('sync-video-action', ({ action, value }) => {
+		this.$socket.on('sync-video-action', ({ action, value, time }) => {
 			if (action == 'sync-playback') {
 				// value = true = Play
 				// Value = false = Pause
 				console.log(this.$refs.extendedVideoChild);
-				this.$refs.extendedVideoChild?.trigger(action, value);
+				this.$refs.extendedVideoChild?.trigger(action, value, time);
 			} else if (action == 'sync-skip') {
 				// The Skip if you click the arrow keys or number keys
 				console.log(this.$refs.extendedVideoChild);
@@ -271,6 +271,7 @@ export default {
 	async unmounted() {
 		this.$socket.off('sync-videoAction');
 		this.$socket.off('sync-selectSeries');
+		this.$socket.off('sync-video-action');
 	},
 };
 </script>
