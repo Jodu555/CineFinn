@@ -52,13 +52,39 @@ const initialize = (socket: ExtendedSocket) => {
         );
     });
 
-    socket.on('sync-join', (obj) => {
+    socket.on('sync-join', async (obj) => {
         console.log('SOCKET with auth', auth.user.username, 'sync-join', obj);
         socket.sync = obj;
-        //TODO: Add to room
+
+        //Get Current Room
+        const room = await getSyncRoom(socket.sync?.ID);
+        //Add current user to room
+        room.members.push({
+            UUID: auth.user.UUID,
+            name: auth.user.username,
+            role: 0,
+        });
+        //Update Database with updated room object
+        await database.get<Partial<DatabaseSyncRoomItem>>('sync_rooms').update({ ID: room.ID }, { members: JSON.stringify(room.members) });
+
+
+        //Update Room list for other sockets
+        await toAllSockets(
+            (s) => {
+                s.emit('sync-update-rooms');
+            },
+            (s) => s.auth.type == 'client' && s.id != socket.id
+        );
     });
 
     socket.on('sync-selectSeries', async (obj) => {
+        //Check if Owner
+        const room = await getSyncRoom(socket.sync?.ID);
+        if (room.members.find(x => x.UUID == auth.user.UUID).role != 1) return;
+
+        //Update Database for the new series
+        await database.get<Partial<DatabaseSyncRoomItem>>('sync_rooms').update({ ID: room.ID }, { seriesID: String(obj.ID) });
+
         console.log('SOCKET with auth', auth.user.username, 'and room', socket.sync, 'sync-selectSeries', obj);
         await toAllSockets(
             (s) => {
