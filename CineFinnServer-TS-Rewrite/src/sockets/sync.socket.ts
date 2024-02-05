@@ -1,8 +1,8 @@
 import { toAllSockets } from "../utils/utils";
 import { ExtendedSocket } from "../types/session";
 import { Database } from '@jodu555/mysqlapi';
-import { DatabaseSyncRoomItem } from "../types/database";
-import { roomToFullObject } from "../routes/room";
+import { DatabaseParsedSyncRoomItem, DatabaseSyncRoomItem, DatabaseSyncRoomMember } from "../types/database";
+import { fullObjectToDatabase, roomToFullObject } from "../routes/room";
 const database = Database.getDatabase();
 
 const initialize = (socket: ExtendedSocket) => {
@@ -11,6 +11,51 @@ const initialize = (socket: ExtendedSocket) => {
 
     socket.on('disconnect', () => {
         console.log('Socket-Sync DisConnection:', auth.type.toUpperCase());
+    });
+
+    socket.on('sync-create', async (obj) => {
+        console.log('SOCKET with auth', auth.user.username, 'sync-create', obj);
+
+        //Check if room ID is unique
+        const room = await database.get<DatabaseSyncRoomItem>('sync_rooms').getOne({ ID: obj.ID });
+        if (room) {
+            socket.emit('sync-message', { type: 'error', message: 'The Room ID is already occupied, please try again!' })
+            return;
+        }
+
+        //Create room Object
+        const roomObject: DatabaseParsedSyncRoomItem = {
+            ID: String(obj.ID),
+            seriesID: '',
+            members: [
+                {
+                    UUID: auth.user.UUID,
+                    name: auth.user.username,
+                    role: 1,
+                }
+            ],
+            created_at: new Date().getTime(),
+        }
+
+        //Insert room Object into database
+        await database.get<DatabaseSyncRoomItem>('sync_rooms').create(fullObjectToDatabase(roomObject));
+
+        //Send success message
+        socket.emit('sync-message', { type: 'success', message: `Room with ID ${obj.ID} successfully created!` });
+
+        //Update Room list for other sockets
+        await toAllSockets(
+            (s) => {
+                s.emit('sync-update-rooms');
+            },
+            (s) => s.auth.type == 'client' && s.id != socket.id
+        );
+    });
+
+    socket.on('sync-join', (obj) => {
+        console.log('SOCKET with auth', auth.user.username, 'sync-join', obj);
+        socket.sync = obj;
+        //TODO: Add to room
     });
 
     socket.on('sync-selectSeries', async (obj) => {
@@ -54,11 +99,7 @@ const initialize = (socket: ExtendedSocket) => {
         );
     })
 
-    socket.on('sync-join', (obj) => {
-        console.log('SOCKET with auth', auth.user.username, 'sync-join', obj);
-        socket.sync = obj;
-        //TODO: Add to room
-    });
+
 
 }
 

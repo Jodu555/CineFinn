@@ -181,6 +181,7 @@ export default {
 			console.log('Came', 1);
 			if (langchange && this.currentLanguage == lang) return;
 			const video = document.querySelector('video');
+			if (!video) return;
 			console.log('Came', 2);
 
 			//TODO: Maybe add here default language from user prefered settings
@@ -272,9 +273,9 @@ export default {
 		});
 	},
 	async unmounted() {
-		this.$socket.off('sync-videoAction');
-		this.$socket.off('sync-selectSeries');
 		this.$socket.off('sync-video-action');
+		this.$socket.off('sync-selectSeries');
+		this.$socket.off('sync-video-change');
 	},
 };
 </script>

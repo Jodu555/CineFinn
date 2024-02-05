@@ -9,13 +9,11 @@ const router = express.Router();
 router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const rooms = (await database.get<DatabaseSyncRoomItem>('sync_rooms').get()).map((r) => roomToFullObject(r));
 
-	// console.log('2', rooms);
-
 	res.json(
 		rooms.map((r) => {
 			delete r.entityInfos;
 			return r;
-		})
+		}).filter(r => parseInt(r.ID) > 0)
 	);
 });
 
@@ -44,4 +42,15 @@ function roomToFullObject(room: DatabaseSyncRoomItem): DatabaseParsedSyncRoomIte
 	return newRoom as DatabaseParsedSyncRoomItem;
 }
 
-export { router, roomToFullObject };
+function fullObjectToDatabase(room: DatabaseParsedSyncRoomItem): DatabaseSyncRoomItem {
+	const DBroom: DatabaseSyncRoomItem = {
+		ID: room.ID,
+		seriesID: room.seriesID,
+		entityInfos: JSON.stringify(room.entityInfos),
+		members: JSON.stringify(room.members),
+		created_at: room.created_at,
+	}
+	return DBroom;
+}
+
+export { router, roomToFullObject, fullObjectToDatabase };
