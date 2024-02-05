@@ -122,7 +122,7 @@ export default {
 		},
 	},
 	methods: {
-		...mapActions('sync', ['leaveRoom', 'loadRooms', 'joinRoom']),
+		...mapActions('sync', ['leaveRoom', 'loadRooms', 'joinRoom', 'loadRoomInfo']),
 		...mapActions('watch', ['loadSeriesInfo']),
 		...mapMutations('watch', ['setCurrentMovie', 'setCurrentSeason', 'setCurrentEpisode', 'setCurrentLanguage', 'setWatchList']),
 		deepPlayback(state, time) {
@@ -267,10 +267,12 @@ export default {
 		});
 		this.$socket.on('sync-selectSeries', async ({ ID }) => {
 			this.selectSeries(ID, false);
+			this.loadRoomInfo();
 		});
 
 		this.$socket.on('sync-video-change', async ({ season, episode, movie, langchange, lang }) => {
 			this.handleVideoChange(season, episode, movie, langchange, lang, true);
+			this.loadRoomInfo();
 		});
 	},
 	async unmounted() {
