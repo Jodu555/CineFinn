@@ -32,12 +32,23 @@ function fullObjectToDatabase(room: DatabaseParsedSyncRoomItem): DatabaseSyncRoo
     return DBroom;
 }
 
-async function getRoomCheckIfExistsAndOwner(roomID: number, socket: ExtendedSocket): Promise<Boolean | DatabaseParsedSyncRoomItem> {
-    return false;
+async function getRoomCheckIfExistsAndOwner(roomID: number, socket: ExtendedSocket): Promise<false | DatabaseParsedSyncRoomItem> {
+    //Check if Owner
+    const room = await getSyncRoom(socket.sync?.ID);
+
+    if (!room) {
+        socket.emit('sync-message', { type: 'error', message: 'The Room ID does not exist!' })
+        return false;
+    }
+
+    if (room.members.find(x => x.UUID == socket.auth.user.UUID).role != 1) return false;
+
+    return room;
 }
 
 export {
     getSyncRoom,
     roomToFullObject,
-    fullObjectToDatabase
+    fullObjectToDatabase,
+    getRoomCheckIfExistsAndOwner
 }

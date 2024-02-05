@@ -2,7 +2,7 @@ import { toAllSockets } from "../utils/utils";
 import { ExtendedSocket } from "../types/session";
 import { Database } from '@jodu555/mysqlapi';
 import { DatabaseParsedSyncRoomItem, DatabaseSyncRoomItem, DatabaseSyncRoomMember } from "../types/database";
-import { fullObjectToDatabase, getSyncRoom } from "../utils/room.utils";
+import { fullObjectToDatabase, getRoomCheckIfExistsAndOwner, getSyncRoom } from "../utils/room.utils";
 const database = Database.getDatabase();
 
 const initialize = (socket: ExtendedSocket) => {
@@ -91,15 +91,10 @@ const initialize = (socket: ExtendedSocket) => {
     });
 
     socket.on('sync-selectSeries', async (obj) => {
-        //Check if Owner
-        const room = await getSyncRoom(socket.sync?.ID);
-
-        if (!room) {
-            socket.emit('sync-message', { type: 'error', message: 'The Room ID does not exist!' })
+        const room = await getRoomCheckIfExistsAndOwner(socket.sync?.ID, socket)
+        if (room == false) {
             return;
         }
-
-        if (room.members.find(x => x.UUID == auth.user.UUID).role != 1) return;
 
         //Update Database for the new series
         await database.get<Partial<DatabaseSyncRoomItem>>('sync_rooms').update({ ID: room.ID }, { seriesID: String(obj.ID) });
@@ -120,16 +115,10 @@ const initialize = (socket: ExtendedSocket) => {
     });
 
     socket.on('sync-video-change', async (obj) => {
-
-        //Check if Owner
-        const room = await getSyncRoom(socket.sync?.ID);
-
-        if (!room) {
-            socket.emit('sync-message', { type: 'error', message: 'The Room ID does not exist!' })
+        const room = await getRoomCheckIfExistsAndOwner(socket.sync?.ID, socket)
+        if (room == false) {
             return;
         }
-
-        if (room.members.find(x => x.UUID == auth.user.UUID).role != 1) return;
 
         //Update Room Object with the entityInfos
         room.entityInfos = {
@@ -154,13 +143,10 @@ const initialize = (socket: ExtendedSocket) => {
 
     socket.on('sync-video-action', async (obj) => {
 
-        //Check if Owner
-        const room = await getSyncRoom(socket.sync?.ID);
-        if (!room) {
-            socket.emit('sync-message', { type: 'error', message: 'The Room ID does not exist!' })
+        const room = await getRoomCheckIfExistsAndOwner(socket.sync?.ID, socket)
+        if (room == false) {
             return;
         }
-        if (room.members.find(x => x.UUID == auth.user.UUID).role != 1) return;
 
         console.log('SOCKET with auth', auth.user.username, 'and room', socket.sync, 'sync-video-action', obj);
         await toAllSockets(
