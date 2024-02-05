@@ -21,6 +21,7 @@
 		<div class="mb-3 d-flex justify-content-between">
 			<button @click="leaveRoom()" type="button" class="btn btn-outline-danger">Leave Room</button>
 			<AutoComplete
+				v-if="isOwner"
 				:options="{ placeholder: 'Select a Series...', clearAfterSelect: true }"
 				:data="autoCompleteSeries"
 				:select-fn="
@@ -190,8 +191,8 @@ export default {
 			const wasPaused = video.paused;
 			const prevTime = video.currentTime;
 
-			console.log('GOT handleVideoChange() EMIT to Server', { season, episode, movie, langchange, lang });
-			!silent && this.$socket.emit('sync-video-change', { season, episode, movie, langchange, lang });
+			console.log('GOT handleVideoChange() EMIT to Server', { season, episode, movie, langchange, lang: langchange ? lang : defaultLanguage });
+			!silent && this.$socket.emit('sync-video-change', { season, episode, movie, langchange, lang: langchange ? lang : defaultLanguage });
 			video.pause();
 
 			setTimeout(() => {
@@ -214,6 +215,7 @@ export default {
 		},
 	},
 	async mounted() {
+		console.log('mounted() SyncRoom');
 		if (this.currentRoom == undefined) {
 			await this.loadRooms();
 			const roomID = Number(this.$route.params.key);
@@ -225,6 +227,7 @@ export default {
 		console.log('mounted(), currentRoom', this.currentRoom);
 		setTimeout(() => {
 			console.log(
+				'setTimeout() videoChange',
 				parseInt(this.currentRoom?.entityInfos?.season),
 				parseInt(this.currentRoom?.entityInfos?.episode),
 				parseInt(this.currentRoom?.entityInfos?.movie)
@@ -235,6 +238,7 @@ export default {
 					parseInt(this.currentRoom?.entityInfos?.episode),
 					parseInt(this.currentRoom?.entityInfos?.movie),
 					false,
+					undefined,
 					true
 				);
 			} else {
@@ -252,15 +256,12 @@ export default {
 			if (action == 'sync-playback') {
 				// value = true = Play
 				// Value = false = Pause
-				console.log(this.$refs.extendedVideoChild);
 				this.$refs.extendedVideoChild?.trigger(action, value, time);
 			} else if (action == 'sync-skip') {
 				// The Skip if you click the arrow keys or number keys
-				console.log(this.$refs.extendedVideoChild);
 				this.$refs.extendedVideoChild?.trigger(action, value);
 			} else if (action == 'sync-skipTimeline') {
 				// The skip if you click on the timeline at any position
-				console.log(this.$refs.extendedVideoChild);
 				this.$refs.extendedVideoChild?.trigger(action, value);
 			}
 		});

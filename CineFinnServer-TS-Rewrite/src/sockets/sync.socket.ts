@@ -58,12 +58,20 @@ const initialize = (socket: ExtendedSocket) => {
 
         //Get Current Room
         const room = await getSyncRoom(socket.sync?.ID);
+
+        //Check if user is already in room
+        if (room.members.find(x => x.UUID == auth.user.UUID) !== undefined) {
+            socket.emit('sync-message', { type: 'error', message: `You are already in this room!` });
+            return;
+        }
+
         //Add current user to room
         room.members.push({
             UUID: auth.user.UUID,
             name: auth.user.username,
             role: 0,
         });
+
         //Update Database with updated room object
         await database.get<Partial<DatabaseSyncRoomItem>>('sync_rooms').update({ ID: room.ID }, { members: JSON.stringify(room.members) });
 
@@ -92,6 +100,12 @@ const initialize = (socket: ExtendedSocket) => {
             },
             (s) => s.auth.type == 'client' && s.id != socket.id && s.sync?.ID == socket.sync?.ID
         );
+        await toAllSockets(
+            (s) => {
+                s.emit('sync-update-rooms');
+            },
+            (s) => s.auth.type == 'client' && s.id != socket.id
+        );
     });
 
     socket.on('sync-video-change', async (obj) => {
@@ -99,6 +113,17 @@ const initialize = (socket: ExtendedSocket) => {
         //Check if Owner
         const room = await getSyncRoom(socket.sync?.ID);
         if (room.members.find(x => x.UUID == auth.user.UUID).role != 1) return;
+
+        //Update Room Object with the entityInfos
+        room.entityInfos = {
+            season: obj.season,
+            episode: obj.episode,
+            movie: obj.movie,
+            lang: obj.lang
+        }
+
+        //Update Database with updated room object
+        await database.get<Partial<DatabaseSyncRoomItem>>('sync_rooms').update({ ID: room.ID }, { entityInfos: JSON.stringify(room.entityInfos) });
 
         console.log('SOCKET with auth', auth.user.username, 'and room', socket.sync, 'sync-video-change', obj);
         if (obj.season == -1 && obj.episode == -1 && obj.movie == -1 && obj.langchange == false) return;
