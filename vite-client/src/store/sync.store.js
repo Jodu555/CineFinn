@@ -79,11 +79,13 @@ export default {
 			dispatch('loadRoomInfo');
 			await router.push('/sync/' + ID);
 		},
-		async joinRoom({ commit, dispatch, rootState }, ID) {
-			this.$socket.emit('sync-join', { ID });
+		async joinRoom({ commit, dispatch, state, rootState }, ID) {
 			commit('setCurrentRoomID', ID);
 			await dispatch('loadRoomInfo');
-			await router.push('/sync/' + ID);
+			if (state.currentRoomID == ID) {
+				this.$socket.emit('sync-join', { ID });
+				await router.push('/sync/' + ID);
+			}
 		},
 		async leaveRoom({ commit, dispatch, state, rootState }) {
 			this.$socket.emit('sync-leave', { ID: state.currentRoomID });
@@ -107,6 +109,7 @@ export default {
 
 			//Load the Series Details
 			const response = await this.$networking.get('/room/' + state.currentRoomID);
+			console.log(response);
 			if (response.success) {
 				const json = response.json;
 				commit(
@@ -118,6 +121,9 @@ export default {
 						return r;
 					})
 				);
+			} else {
+				commit('setCurrentRoomID', -1);
+				await router.push('/sync');
 			}
 
 			commit('setLoading', false);

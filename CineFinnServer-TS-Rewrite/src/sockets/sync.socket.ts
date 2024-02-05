@@ -2,7 +2,7 @@ import { toAllSockets } from "../utils/utils";
 import { ExtendedSocket } from "../types/session";
 import { Database } from '@jodu555/mysqlapi';
 import { DatabaseParsedSyncRoomItem, DatabaseSyncRoomItem, DatabaseSyncRoomMember } from "../types/database";
-import { fullObjectToDatabase, roomToFullObject } from "../routes/room";
+import { fullObjectToDatabase, getSyncRoom } from "../utils/room.utils";
 const database = Database.getDatabase();
 
 const initialize = (socket: ExtendedSocket) => {
@@ -171,14 +171,6 @@ const initialize = (socket: ExtendedSocket) => {
         );
     })
 
-
-
-}
-
-
-async function getSyncRoom(ID: number) {
-    const room = await database.get<DatabaseSyncRoomItem>('sync_rooms').getOne({ ID });
-    return room ? roomToFullObject(room) : false;
 }
 
 export { initialize };
