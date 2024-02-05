@@ -17,8 +17,8 @@ const initialize = (socket: ExtendedSocket) => {
         console.log('SOCKET with auth', auth.user.username, 'sync-create', obj);
 
         //Check if room ID is unique
-        const room = await database.get<DatabaseSyncRoomItem>('sync_rooms').getOne({ ID: obj.ID });
-        if (room) {
+        const room = getSyncRoom(obj.ID);
+        if (!room) {
             socket.emit('sync-message', { type: 'error', message: 'The Room ID is already occupied, please try again!' })
             return;
         }
@@ -59,6 +59,11 @@ const initialize = (socket: ExtendedSocket) => {
         //Get Current Room
         const room = await getSyncRoom(socket.sync?.ID);
 
+        if (!room) {
+            socket.emit('sync-message', { type: 'error', message: 'The Room ID does not exist!' })
+            return;
+        }
+
         //Check if user is already in room
         if (room.members.find(x => x.UUID == auth.user.UUID) !== undefined) {
             socket.emit('sync-message', { type: 'error', message: `You are already in this room!` });
@@ -88,6 +93,12 @@ const initialize = (socket: ExtendedSocket) => {
     socket.on('sync-selectSeries', async (obj) => {
         //Check if Owner
         const room = await getSyncRoom(socket.sync?.ID);
+
+        if (!room) {
+            socket.emit('sync-message', { type: 'error', message: 'The Room ID does not exist!' })
+            return;
+        }
+
         if (room.members.find(x => x.UUID == auth.user.UUID).role != 1) return;
 
         //Update Database for the new series
@@ -112,6 +123,12 @@ const initialize = (socket: ExtendedSocket) => {
 
         //Check if Owner
         const room = await getSyncRoom(socket.sync?.ID);
+
+        if (!room) {
+            socket.emit('sync-message', { type: 'error', message: 'The Room ID does not exist!' })
+            return;
+        }
+
         if (room.members.find(x => x.UUID == auth.user.UUID).role != 1) return;
 
         //Update Room Object with the entityInfos
@@ -139,6 +156,10 @@ const initialize = (socket: ExtendedSocket) => {
 
         //Check if Owner
         const room = await getSyncRoom(socket.sync?.ID);
+        if (!room) {
+            socket.emit('sync-message', { type: 'error', message: 'The Room ID does not exist!' })
+            return;
+        }
         if (room.members.find(x => x.UUID == auth.user.UUID).role != 1) return;
 
         console.log('SOCKET with auth', auth.user.username, 'and room', socket.sync, 'sync-video-action', obj);
@@ -157,7 +178,7 @@ const initialize = (socket: ExtendedSocket) => {
 
 async function getSyncRoom(ID: number) {
     const room = await database.get<DatabaseSyncRoomItem>('sync_rooms').getOne({ ID });
-    return roomToFullObject(room);
+    return room ? roomToFullObject(room) : false;
 }
 
 export { initialize };
