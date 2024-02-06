@@ -225,7 +225,7 @@ export default {
 		await this.selectSeries(this.currentRoom?.seriesID, false);
 		console.log('this.currentRoom?.entityInfos?', JSON.stringify(this.currentRoom?.entityInfos));
 		console.log('mounted(), currentRoom', this.currentRoom);
-		setTimeout(() => {
+		setTimeout(async () => {
 			console.log(
 				'setTimeout() videoChange',
 				parseInt(this.currentRoom?.entityInfos?.season),
@@ -251,6 +251,14 @@ export default {
 					true
 				);
 			}
+			if (this.isOwner == false) {
+				const response = await this.$networking.get(`/room/${this.currentRoom.ID}/headsup`);
+				if (response.success == true) {
+					setTimeout(() => {
+						this.$refs.extendedVideoChild?.trigger('sync-playback', response.json.isPlaying, response.json.currentTime);
+					}, 500);
+				}
+			}
 		}, 500);
 		this.$socket.on('sync-video-action', ({ action, value, time }) => {
 			if (action == 'sync-playback') {
@@ -274,11 +282,19 @@ export default {
 			this.handleVideoChange(season, episode, movie, langchange, lang, true);
 			this.loadRoomInfo();
 		});
+
+		this.$socket.on('sync-video-info', () => {
+			this.$socket.emit('sync-video-info', {
+				currentTime: this.$refs.extendedVideoChild?.videoData?.currentTime || 0,
+				isPlaying: this.$refs.extendedVideoChild?.videoData?.isPlaying || false,
+			});
+		});
 	},
 	async unmounted() {
 		this.$socket.off('sync-video-action');
 		this.$socket.off('sync-selectSeries');
 		this.$socket.off('sync-video-change');
+		this.$socket.off('sync-video-info');
 	},
 };
 </script>

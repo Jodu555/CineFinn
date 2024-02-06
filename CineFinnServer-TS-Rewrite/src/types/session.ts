@@ -106,6 +106,7 @@ interface ClientToServerEvents {
 	'sync-selectSeries': (obj: { ID: number }) => void;
 	'sync-video-change': (obj: { season: number, episode: number, movie: number, langchange: Boolean, lang: Langs }) => void;
 	'sync-video-action': (obj: { action: VideoAction, value: boolean | string, time?: string }) => void;
+	'sync-video-info': (obj: { currentTime: number, isPlaying: boolean }) => void;
 }
 
 
@@ -116,5 +117,5 @@ export interface ExtendedSocket extends Socket<ClientToServerEvents, DefaultEven
 }
 export interface ExtendedRemoteSocket extends RemoteSocket<DefaultEventsMap, any> {
 	auth: SocketAuthObject;
-	sync?: any;
+	sync?: { ID: number | string };
 }
