@@ -215,23 +215,25 @@ export default {
 		},
 	},
 	async mounted() {
-		console.log('mounted() SyncRoom');
+		const debug = false;
+		debug && console.log('mounted() SyncRoom', JSON.stringify(this.currentRoom, null, 3));
 		if (this.currentRoom == undefined) {
 			await this.loadRooms();
 			const roomID = Number(this.$route.params.key);
-			console.log(roomID, this.series);
+			debug && console.log(roomID, this.series);
 			await this.joinRoom(roomID);
 		}
 		await this.selectSeries(this.currentRoom?.seriesID, false);
-		console.log('this.currentRoom?.entityInfos?', JSON.stringify(this.currentRoom?.entityInfos));
-		console.log('mounted(), currentRoom', this.currentRoom);
+		debug && console.log('this.currentRoom?.entityInfos?', JSON.stringify(this.currentRoom?.entityInfos));
+		debug && console.log('mounted(), currentRoom', this.currentRoom);
 		setTimeout(async () => {
-			console.log(
-				'setTimeout() videoChange',
-				parseInt(this.currentRoom?.entityInfos?.season),
-				parseInt(this.currentRoom?.entityInfos?.episode),
-				parseInt(this.currentRoom?.entityInfos?.movie)
-			);
+			debug &&
+				console.log(
+					'setTimeout() videoChange',
+					parseInt(this.currentRoom?.entityInfos?.season),
+					parseInt(this.currentRoom?.entityInfos?.episode),
+					parseInt(this.currentRoom?.entityInfos?.movie)
+				);
 			if (this.currentLanguage == this.currentRoom?.entityInfos?.lang) {
 				this.handleVideoChange(
 					parseInt(this.currentRoom?.entityInfos?.season),

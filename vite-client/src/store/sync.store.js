@@ -38,12 +38,16 @@ export default {
 		},
 	},
 	actions: {
-		async createRoom({ commit, dispatch, rootState }) {
+		async createRoom({ commit, state, dispatch, rootState }) {
 			const ID = Math.round(Math.random() * 10000);
 			this.$socket.emit('sync-create', { ID });
 			commit('setCurrentRoomID', ID);
-			dispatch('loadRoomInfo');
-			await router.push('/sync/' + ID);
+			await dispatch('loadRooms');
+			await dispatch('loadRoomInfo');
+
+			if (state.currentRoomID == ID) {
+				await router.push('/sync/' + ID);
+			}
 		},
 		async joinRoom({ commit, dispatch, state, rootState }, ID) {
 			commit('setCurrentRoomID', ID);
@@ -56,6 +60,7 @@ export default {
 		async leaveRoom({ commit, dispatch, state, rootState }) {
 			this.$socket.emit('sync-leave', { ID: state.currentRoomID });
 			commit('reset');
+			await dispatch('loadRooms');
 			await router.push('/sync/');
 		},
 		async loadRooms({ commit, state, dispatch, rootState }) {

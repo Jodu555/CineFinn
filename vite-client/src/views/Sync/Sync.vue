@@ -16,6 +16,15 @@ export default {
 		});
 		this.$socket.on('sync-message', ({ type, message }) => {
 			//TODO: Perform SWAL
+			this.$swal({
+				toast: true,
+				position: 'top-end',
+				showConfirmButton: false,
+				timer: 3000,
+				icon: type,
+				title: `${message}`,
+				timerProgressBar: true,
+			});
 			console.log('Message from sync-message type:', type, 'message:', message);
 		});
 	},
