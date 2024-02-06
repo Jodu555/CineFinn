@@ -21,13 +21,17 @@ export default {
 	data() {
 		return {
 			ago: '',
+			interval: null,
 		};
 	},
 	mounted() {
 		this.ago = this.timeAgo(new Date(Number(this.room.created_at)));
-		setInterval(() => {
+		this.interval = setInterval(() => {
 			this.ago = this.timeAgo(new Date(Number(this.room.created_at)));
 		}, 5000);
+	},
+	unmounted() {
+		clearInterval(this.interval);
 	},
 	computed: {
 		...mapState(['series']),
@@ -56,7 +60,7 @@ export default {
 			} else if (minutes > 0) {
 				value = rtf.format(0 - minutes, 'minute');
 			} else {
-				value = rtf.format(0 - diff, 'second');
+				value = rtf.format(parseInt(0 - diff), 'second');
 			}
 			return value;
 		},

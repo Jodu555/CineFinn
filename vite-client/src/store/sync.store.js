@@ -3,42 +3,8 @@ import router from '@/router/index';
 const getDefaultState = () => {
 	return {
 		loading: false,
-		roomList: [
-			// {
-			// 	//Let's say im in this room
-			// 	ID: '58932',
-			// 	created: Date.now(),
-			// 	seriesID: '8dc12299',
-			// 	entityInfos: {
-			// 		season: 1,
-			// 		episode: 1,
-			// 		movie: 0,
-			// 		lang: 'GerDub',
-			// 	},
-			// 	members: ['Jodu555', 'TRyFlow'],
-			// 	// members: [
-			// 	// 	{ name: 'Jodu555', UUID: '', role: 1 },
-			// 	// 	{ name: 'TRyFlow', UUID: '', role: 1 },
-			// 	// ],
-			// },
-			// {
-			// 	ID: '58962',
-			// 	created: Date.now(),
-			// 	seriesID: 'c5ea6cb7',
-			// 	members: [
-			// 		{ name: 'Jodu555', UUID: '', role: 1 },
-			// 		{ name: 'TRyFlow', UUID: '', role: 1 },
-			// 	],
-			// },
-			// {
-			// 	ID: '58972',
-			// 	created: Date.now(),
-			// 	seriesID: '1998be8e',
-			// 	members: [{ name: 'Jodu555', UUID: '', role: 1 }],
-			// },
-		],
+		roomList: [],
 		currentRoomID: -1,
-		own: false,
 	};
 };
 
@@ -99,6 +65,16 @@ export default {
 			const response = await this.$networking.get('/room/');
 			if (response.success) {
 				const json = response.json;
+				//For Testing Purposes
+				// json.push({
+				// 	ID: '58962',
+				// 	created_at: Date.now(),
+				// 	seriesID: 'c5ea6cb7',
+				// 	members: [
+				// 		{ name: 'Jodu555', UUID: '', role: 1 },
+				// 		{ name: 'TRyFlow', UUID: '', role: 1 },
+				// 	],
+				// });
 				commit('setRoomList', json);
 			}
 
