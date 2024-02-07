@@ -49,11 +49,11 @@
 
 						<div
 							v-for="i in videoData.buffered?.length"
-							v-show="Math.round(Math.abs($refs.mainVid?.buffered?.start(i - 1) - $refs.mainVid.buffered?.end(i - 1))) > 10"
+							v-show="Math.round(Math.abs(videoData.buffered?.start(i - 1) - videoData.buffered?.end(i - 1))) > 10"
 							class="timeline-buffer"
 							:style="{
-								'--buffer-start': $refs.mainVid?.buffered?.start(i - 1) / videoData.duration,
-								'--buffer-end': $refs.mainVid?.buffered?.end(i - 1) / videoData.duration,
+								'--buffer-start': videoData.buffered?.start(i - 1) / videoData.duration,
+								'--buffer-end': videoData.buffered?.end(i - 1) / videoData.duration,
 								// '--length': Math.round(Math.abs($refs.mainVid.buffered?.start(i - 1) - $refs.mainVid.buffered?.end(i - 1))),
 							}"
 						></div>
@@ -170,7 +170,7 @@
 					{{ videoData.bufferedPercentage }}% / 100%
 					<div class="internal-video-devinfos-child">
 						<span v-for="i in videoData.buffered?.length">
-							{{ $refs.mainVid.buffered?.start(i - 1)  }}ms - {{ $refs.mainVid.buffered?.end(i -1) }}ms = {{ Math.round(Math.abs($refs.mainVid.buffered?.start(i - 1) - $refs.mainVid?.buffered?.end(i -1))) }}ms
+							{{ videoData.buffered?.start(i - 1)  }}ms - {{ videoData.buffered?.end(i -1) }}ms = {{ Math.round(Math.abs(videoData.buffered?.start(i - 1) - videoData.buffered?.end(i -1))) }}ms
 						</span>
 					</div>
 				Seekable: 
@@ -419,7 +419,9 @@ export default {
 
 				let bufferedTime = 0;
 				for (let i = 0; i < video.buffered.length; i++) {
-					bufferedTime += video.buffered.end(i) - video.buffered.start(i);
+					try {
+						bufferedTime += video.buffered.end(i) - video.buffered.start(i);
+					} catch (error) {}
 				}
 
 				const bufferedPercentage = (bufferedTime / video.duration) * 100;
