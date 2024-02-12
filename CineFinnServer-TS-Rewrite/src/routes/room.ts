@@ -45,9 +45,9 @@ router.get('/:id/headsup', async (req: AuthenticatedRequest, res: Response, next
 
 	const socket: ExtendedSocket = sockets.find((socket: ExtendedSocket) => {
 		if (socket.sync?.ID == room.ID) {
-			console.log(socket.sync, room, socket.auth);
+			console.log('Found a room with', room.members, 'to the provided socket.sync', socket.sync, 'with the following auth', socket.auth);
 			const owner = room.members.find(x => x.UUID == socket.auth.user.UUID && x.role == 1);
-			console.log(owner);
+			console.log('Owner Result:', owner);
 			return owner != undefined
 		}
 	});
@@ -70,6 +70,7 @@ router.get('/:id/headsup', async (req: AuthenticatedRequest, res: Response, next
 		})
 		socket.emit('sync-video-info');
 		setTimeout(() => {
+			console.log('Room Headsup timeout reached after ', Date.now() - time, 'ms');
 			socket.removeAllListeners('sync-video-info');
 			resolve(false)
 		}, 15 * 1000);

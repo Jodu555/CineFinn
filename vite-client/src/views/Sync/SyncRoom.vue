@@ -354,6 +354,7 @@ export default {
 		});
 
 		this.$socket.on('sync-video-info', () => {
+			if (!this.isOwner) return;
 			this.$socket.emit('sync-video-info', {
 				currentTime: this.$refs.extendedVideoChild?.videoData?.currentTime || 0,
 				isPlaying: this.$refs.extendedVideoChild?.videoData?.isPlaying || false,
