@@ -11,6 +11,15 @@ const wait = (ms: number): Promise<void> => new Promise((r, _) => setTimeout(r, 
 
 const newProgress = false;
 
+interface PromissesJob {
+	meta: {
+		serieID: string;
+		entity: Episode | Movie;
+		lang: string;
+	}
+	run: () => Promise<void>;
+}
+
 async function deepExecPromisify(command: string, cwd: string = undefined) {
 	return await new Promise((resolve, reject) => {
 		//maxBuffer: Default: 200KB and this sets it to 900KB
@@ -23,88 +32,64 @@ async function deepExecPromisify(command: string, cwd: string = undefined) {
 	});
 }
 
-async function generateEntityImages(i: number, serie: Series, entity: Episode | Movie, seasons: Episode[]) {
-	const languageSeperation = true;
-	if (languageSeperation) {
-		for (const lang of entity.langs) {
-			let output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), 'previewImages');
-			if (entity instanceof Episode) {
-				output = path.join(output, `${entity.season}-${entity.episode}`, lang);
-			} else if (entity instanceof Movie) {
-				output = path.join(output, 'Movies', `${entity.primaryName}`, lang);
-			}
-			fs.mkdirSync(output, { recursive: true });
-			// console.log(output, fs.readdirSync(output).length);
-
-			if (fs.readdirSync(output).length == 0) {
-				const { dir, name, ext } = path.parse(entity.filePath);
-				const filePath = entity.langs.length > 1 ? path.join(dir, `${name.split('_')[0]}_${lang}${ext}`) : entity.filePath;
-
-				const command = `ffmpeg -i "${filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
-				// console.log(command);
-				await deepExecPromisify(command);
-				// await wait(2000);
-				if (entity instanceof Episode) {
-					newProgress &&
-						commandManager
-							.getWriter()
-							.deepSameLineClear(
-								`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base
-								}`,
-								2
-							);
-					!newProgress && console.log(`  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base}`);
-				} else if (entity instanceof Movie) {
-					newProgress &&
-						commandManager
-							.getWriter()
-							.deepSameLineClear(
-								`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (Movie) ${i + 1} / ${serie.movies.length
-								} - ${entity.primaryName}`,
-								2
-							);
-					!newProgress && console.log(`  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${entity.primaryName}`);
-				}
-			}
-		}
-	} else {
+function generateEntityImages(i: number, serie: Series, entity: Episode | Movie, seasons: Episode[]): PromissesJob | false {
+	for (const lang of entity.langs) {
 		let output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), 'previewImages');
 		if (entity instanceof Episode) {
-			output = path.join(output, `${entity.season}-${entity.episode}`);
+			output = path.join(output, `${entity.season}-${entity.episode}`, lang);
 		} else if (entity instanceof Movie) {
-			output = path.join(output, 'Movies', `${entity.primaryName}`);
+			output = path.join(output, 'Movies', `${entity.primaryName}`, lang);
 		}
 		fs.mkdirSync(output, { recursive: true });
-		if (fs.readdirSync(output).length == 0) {
-			const { dir, name, ext } = path.parse(entity.filePath);
-			const filePath = entity.filePath;
+		// console.log(output, fs.readdirSync(output).length);
 
-			const command = `ffmpeg -i "${filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
-			// console.log(command);
-			await deepExecPromisify(command);
-			// await wait(2000);
-			if (entity instanceof Episode) {
-				newProgress &&
-					commandManager
-						.getWriter()
-						.deepSameLineClear(
-							`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base
-							}`,
-							2
-						);
-				!newProgress && console.log(`  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base}`);
-			} else if (entity instanceof Movie) {
-				newProgress &&
-					commandManager
-						.getWriter()
-						.deepSameLineClear(
-							`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${entity.primaryName
-							}`,
-							2
-						);
-				!newProgress && console.log(`  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${entity.primaryName}`);
-			}
-		}
+		if (fs.readdirSync(output).length != 0)
+			return false;
+
+		return {
+			meta: {
+				serieID: serie.ID,
+				entity,
+				lang,
+			},
+			run: () => new Promise<void>(async (resolve, reject) => {
+				try {
+					const { dir, name, ext } = path.parse(entity.filePath);
+					const filePath = entity.langs.length > 1 ? path.join(dir, `${name.split('_')[0]}_${lang}${ext}`) : entity.filePath;
+
+					const command = `ffmpeg -i "${filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
+					// console.log(command);
+					await deepExecPromisify(command);
+					// await wait(1000 + Math.floor(Math.random() * 100));
+
+					//Logging
+					if (entity instanceof Episode) {
+						newProgress &&
+							commandManager
+								.getWriter()
+								.deepSameLineClear(
+									`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base
+									}`,
+									2
+								);
+						!newProgress && console.log(`  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base}`);
+					} else if (entity instanceof Movie) {
+						newProgress &&
+							commandManager
+								.getWriter()
+								.deepSameLineClear(
+									`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (Movie) ${i + 1} / ${serie.movies.length
+									} - ${entity.primaryName}`,
+									2
+								);
+						!newProgress && console.log(`  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${entity.primaryName}`);
+					}
+					resolve();
+				} catch (error) {
+					reject(error);
+				}
+			}),
+		};
 	}
 }
 
@@ -113,47 +98,39 @@ const generateImages = async (series: Series[], cleanup: () => void = () => { })
 
 	const limit = pLimit(Number(process.env.IMG_CONCURRENT_LIMIT_GENERATION || 5));
 
-	const promises = [];
+	const promises: PromissesJob[] = [];
 
 	for (const serie of series) {
 		const seasons = serie.seasons.flat();
 
-		const episodeImageGeneratingPromises = seasons.map((episode, i) => {
-			return limit(
-				() =>
-					new Promise<void>(async (resolve, _) => {
-						await generateEntityImages(i, serie, episode, seasons);
-						resolve();
-					})
-			);
+		seasons.forEach((episode, i) => {
+			const result = generateEntityImages(i, serie, episode, seasons);
+			if (result != false) {
+				promises.push(result);
+			}
 		});
 
-		// await Promise.all(episodeImageGeneratingPromises);
-
-		const movieImageGeneratingPromises = serie.movies.map((movie, i) => {
-			return limit(
-				() =>
-					new Promise<void>(async (resolve, _) => {
-						await generateEntityImages(i, serie, movie, seasons);
-						resolve();
-					})
-			);
+		serie.movies.forEach((movie, i) => {
+			const result = generateEntityImages(i, serie, movie, seasons);
+			if (result != false) {
+				promises.push(result);
+			}
 		});
-		console.log(serie.title);
-
-		if (episodeImageGeneratingPromises.length > 0 && movieImageGeneratingPromises.length > 0) {
-			newProgress && commandManager.getWriter().deepSameLineClear(`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n `, 2);
-			!newProgress && console.log(`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items and ${episodeImageGeneratingPromises.length + movieImageGeneratingPromises.length} Processes`);
-		}
-
-
-		// await Promise.all(movieImageGeneratingPromises);
-		promises.push(...episodeImageGeneratingPromises, ...movieImageGeneratingPromises);
+		// console.log(serie.title, promises.length);
 	}
 
-	console.log(`Every Series has been checked and there are ${promises.length} Processes Waiting`);
+	console.log(`Every Series has been checked and there are ${promises.length} Processes Waiting!`);
 
-	await Promise.all(promises);
+	await Promise.all(promises.map(p => {
+		return limit(
+			() =>
+				new Promise<void>(async (resolve, _) => {
+					// console.log('  => Started', p.meta.serieID, p.meta.entity.filePath);
+					await p.run();
+					resolve();
+				})
+		);
+	}));
 
 
 	console.log('Finished generateImages()');
