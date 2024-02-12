@@ -34,7 +34,7 @@ async function generateEntityImages(i: number, serie: Series, entity: Episode | 
 				output = path.join(output, 'Movies', `${entity.primaryName}`, lang);
 			}
 			fs.mkdirSync(output, { recursive: true });
-			console.log(output, fs.readdirSync(output).length);
+			// console.log(output, fs.readdirSync(output).length);
 
 			if (fs.readdirSync(output).length == 0) {
 				const { dir, name, ext } = path.parse(entity.filePath);

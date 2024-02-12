@@ -77,7 +77,7 @@ router.get('/job/img/generate', (req: AuthenticatedRequest, res: Response, next:
 					(s) => {
 						s.emit(callpointToEvent(LOOKUP[id].callpoint));
 					},
-					(s) => s.auth.type == 'client'
+					(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
 				);
 			});
 		} catch (error) {
