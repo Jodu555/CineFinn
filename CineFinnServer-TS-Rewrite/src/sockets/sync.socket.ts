@@ -16,6 +16,8 @@ const initialize = (socket: ExtendedSocket) => {
     socket.on('sync-create', async (obj) => {
         console.log('SOCKET with auth', auth.user.username, 'sync-create', obj);
 
+        socket.sync = obj;
+
         //Check if room ID is unique
         const room = getSyncRoom(obj.ID);
         if (!room) {
@@ -86,7 +88,7 @@ const initialize = (socket: ExtendedSocket) => {
             (s) => {
                 s.emit('sync-update-rooms');
             },
-            (s) => s.auth.type == 'client' && s.id != socket.id
+            (s) => s.auth.type == 'client'
         );
     });
 

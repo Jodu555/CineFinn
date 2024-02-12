@@ -48,7 +48,7 @@
 			<div>
 				<button @click="leaveRoom()" type="button" class="btn btn-outline-danger">Leave Room</button>
 			</div>
-			<div class="card" style="width: 12rem">
+			<div v-if="currentRoom != null" class="card" style="width: 12rem">
 				<div class="card-body text-center">
 					<h5 class="card-title text-center">
 						<div class="spinner-grow text-danger" role="info">
@@ -58,7 +58,7 @@
 					<p class="card-text text-center">
 						<span> Active Sync Session... </span>
 						<br />
-						<span class="text-muted">5 Participants</span>
+						<span class="text-muted">{{ currentRoom.members.length }} Participants</span>
 					</p>
 					<button @click="showSyncModal = true" class="btn btn-outline-info">Manage</button>
 				</div>
@@ -299,6 +299,7 @@ export default {
 					parseInt(this.currentRoom?.entityInfos?.movie)
 				);
 			if (this.currentLanguage == this.currentRoom?.entityInfos?.lang) {
+				console.log('handleVideoChange', 1);
 				this.handleVideoChange(
 					parseInt(this.currentRoom?.entityInfos?.season),
 					parseInt(this.currentRoom?.entityInfos?.episode),
@@ -308,6 +309,7 @@ export default {
 					true
 				);
 			} else {
+				console.log('handleVideoChange', 2);
 				this.handleVideoChange(
 					parseInt(this.currentRoom?.entityInfos?.season),
 					parseInt(this.currentRoom?.entityInfos?.episode),
@@ -318,14 +320,16 @@ export default {
 				);
 			}
 			if (this.isOwner == false) {
+				console.log('Performing Headsup');
 				const response = await this.$networking.get(`/room/${this.currentRoom.ID}/headsup`);
 				if (response.success == true) {
 					setTimeout(() => {
+						console.log('Setting headsup', this.entityObject);
 						this.$refs.extendedVideoChild?.trigger('sync-playback', response.json.isPlaying, response.json.currentTime);
-					}, 500);
+					}, 900);
 				}
 			}
-		}, 500);
+		}, 800);
 		this.$socket.on('sync-video-action', ({ action, value, time }) => {
 			if (action == 'sync-playback') {
 				// value = true = Play
