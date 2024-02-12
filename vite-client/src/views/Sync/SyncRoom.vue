@@ -18,8 +18,51 @@
 				isOwner: {{ isOwner }}
 		</pre
 		>
+		<Modal v-if="currentRoom != null" size="xl" v-model:show="showSyncModal">
+			<template #title> Sync Room {{ currentRoom.ID }} Manager</template>
+			<template #body>
+				<h5 v-if="isOwner" class="text-danger text-center">If you promote a person you will automatically get demoted</h5>
+				<div class="table-responsive-md">
+					<table class="table">
+						<thead>
+							<tr>
+								<th scope="col">Username</th>
+								<th scope="col">Role</th>
+								<th scope="col">Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="member in currentRoom.members" class="">
+								<td scope="row">{{ member.name }}</td>
+								<td>{{ toReadableRole(member.role) }}</td>
+								<td>
+									<button v-if="member.role == 0 && isOwner" @click="promote(member.UUID)" type="button" class="btn btn-primary me-3">Promote</button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</template>
+		</Modal>
 		<div class="mb-3 d-flex justify-content-between">
-			<button @click="leaveRoom()" type="button" class="btn btn-outline-danger">Leave Room</button>
+			<div>
+				<button @click="leaveRoom()" type="button" class="btn btn-outline-danger">Leave Room</button>
+			</div>
+			<div class="card" style="width: 12rem">
+				<div class="card-body text-center">
+					<h5 class="card-title text-center">
+						<div class="spinner-grow text-danger" role="info">
+							<span class="visually-hidden">Live Indicator</span>
+						</div>
+					</h5>
+					<p class="card-text text-center">
+						<span> Active Sync Session... </span>
+						<br />
+						<span class="text-muted">5 Participants</span>
+					</p>
+					<button @click="showSyncModal = true" class="btn btn-outline-info">Manage</button>
+				</div>
+			</div>
 			<AutoComplete
 				v-if="isOwner"
 				:options="{ placeholder: 'Select a Series...', clearAfterSelect: true }"
@@ -85,9 +128,15 @@ import EntityActionsInformation from '../../components/Watch/EntityActionsInform
 import EntityListView from '../../components/Watch/EntityListView.vue';
 import ExtendedVideo from '@/components/Watch/ExtendedVideo.vue';
 import { deepswitchTo } from '@/plugins/switcher';
+import Modal from '../../components/Modal.vue';
 
 export default {
-	components: { AutoComplete, EntityActionsInformation, EntityListView, ExtendedVideo },
+	components: { AutoComplete, EntityActionsInformation, EntityListView, ExtendedVideo, Modal },
+	data() {
+		return {
+			showSyncModal: false,
+		};
+	},
 	computed: {
 		...mapState(['series']),
 		...mapState('sync', { syncLoading: 'loading', roomList: 'roomList' }),
@@ -125,6 +174,21 @@ export default {
 		...mapActions('sync', ['leaveRoom', 'loadRooms', 'joinRoom', 'loadRoomInfo']),
 		...mapActions('watch', ['loadSeriesInfo']),
 		...mapMutations('watch', ['setCurrentMovie', 'setCurrentSeason', 'setCurrentEpisode', 'setCurrentLanguage', 'setWatchList']),
+		toReadableRole(role) {
+			return role == 1 ? 'Owner' : 'Viewer';
+		},
+		promote() {
+			console.log('This Function is currently unsupported');
+			this.$swal({
+				toast: true,
+				position: 'top-end',
+				showConfirmButton: false,
+				timer: 3000,
+				icon: 'error',
+				title: `This Function is currently unsupported`,
+				timerProgressBar: true,
+			});
+		},
 		deepPlayback(state, time) {
 			if (!this.isOwner) return;
 			console.log('deepPlayback() Emitting sync-video-action: "sync-playback" with value:', state);
