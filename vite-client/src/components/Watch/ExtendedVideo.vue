@@ -719,7 +719,10 @@ export default {
 			video.addEventListener('pointerdown', (ev) => {
 				console.log(ev.pointerType);
 				if (ev.pointerType == 'mouse') {
-					togglePlay();
+					//Only Left click should pause / play
+					if (ev.button == 0) {
+						togglePlay();
+					}
 				} else {
 					if (!videoContainer.classList.contains('paused')) {
 						//Triggere the paused state shortly so the icons get shown
