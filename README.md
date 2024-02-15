@@ -119,7 +119,6 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 ```
 
 - [ ] Add a Setting to toggle the card images (for lower bandwidth)
-- [ ] Add a Setting to toggle auto intro skip
 - [x] Update the preview images to be language specific (preview images for every language an episode is in) cause if the episode is longer or shorter
 - [x] Implement the update check for EngDub Series
 - [x] Implement the update check for sto series
@@ -155,7 +154,17 @@ although the general permission system and therefore the account restrictions
 - [ ] implement a cron job which automatically checks all downloaded series for updates and writes them to a list
 - [x] Add the downloader and scraping service into ext. services
 - [ ] Implement a way to sync watch animes smth. like SyncTube for YT or Watchtogether
-- [ ] Think about a somehow ForYou Page instead of the basic list **Where xy is shown:**
+- [ ] **ForYou Page** instead of the basic list with dropdown
   - [ ] Last Watched
+    - [ ] Not currently possible cause there is no timestamp in the watchList
   - [ ] Newly Added
+    - [ ] Not currently possible since there is no tracking for updated series
   - [ ] You Might Like
+    - [ ] For the start this can just be a simple tag ranking system no biggie
+- [ ] **Adaptive Bitrate Streaming** and Choosable Quality (Yes i said it a pretty big deal for me to learn and wrap my head around) (maybe with a fallback to the normal streaming)
+  - [ ] No Pre transcoding Necessary cause it would use more space and to be honest it's just too easy to implement
+  - [ ] So **Live Transcoding** it is using ffmpeg which we already use for the image generation and later for the intro detection
+    - [ ] No Librarys at least for core functionality so parser or something is okay but not a lib that just does the stuff
+- [ ] **Intro Detection** a reliable fast pipeline to process intros and outros in the episodes
+  - [ ] There are some libs in python that do this farely well and it would be interesting to implement those libraries into node with rest (has a bit from microservices)
+  - [ ] Add a Setting to toggle auto intro/outro (segment) skip
