@@ -147,7 +147,7 @@ This Version introduces the RMVC (Remote Video Control) System the Upgraded Vide
 ## v4
 
 This Version introduces the account restriction idea
-although the general permission system and therefore the account restrictions and the ToDo Setting
+although the general permission system and therefore the account restrictions and the ToDo Page and functionallity
 
 ## v5 (TODO)
 
