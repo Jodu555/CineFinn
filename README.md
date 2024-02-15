@@ -169,6 +169,6 @@ This version should introduce the Sync System and the new HomePage
   - [ ] No Pre transcoding Necessary cause it would use more space and to be honest it's just too easy to implement
   - [ ] So **Live Transcoding** it is using ffmpeg which we already use for the image generation and later for the intro detection
     - [ ] No Librarys at least for core functionality so parser or something is okay but not a lib that just does the stuff
-- [ ] **Intro Detection** a reliable fast pipeline to process intros and outros in the episodes
+- [ ] **Intro/Outro Detection** a reliable fast pipeline to process intros and outros in the episodes
   - [ ] There are some libs in python that do this farely well and it would be interesting to implement those libraries into node with rest (has a bit from microservices)
   - [ ] Add a Setting to toggle auto intro/outro (segment) skip
