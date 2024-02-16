@@ -55,6 +55,11 @@ export type SettingsObject = {
 		value: boolean;
 		type: string;
 	};
+	enableBetaFeatures: {
+		title: string;
+		value: boolean;
+		type: string;
+	}
 	volume: {
 		type: 'hide';
 		value: number;

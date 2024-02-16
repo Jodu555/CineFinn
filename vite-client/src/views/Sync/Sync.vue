@@ -1,8 +1,7 @@
 <template>
 	<div v-auto-animate>
-		<h1 v-if="!settings.developerMode.value" class="text-center mt-4 text-danger-emphasis">Work in Progress...</h1>
-		<router-view v-if="settings.developerMode.value"> </router-view>
-		<!-- <router-view> </router-view> -->
+		<h1 v-if="!settings.enableBetaFeatures?.value" class="text-center mt-4 text-danger-emphasis">Work in Progress...</h1>
+		<router-view v-if="settings.enableBetaFeatures?.value"> </router-view>
 	</div>
 </template>
 <script>

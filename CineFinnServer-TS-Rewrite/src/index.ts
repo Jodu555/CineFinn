@@ -114,13 +114,14 @@ authHelper.install(
 	},
 	async (req, userobj) => {
 		//onAuthenticated
+		const outSettings = compareSettings(userobj.settings as SettingsObject);
 		const details: ActivityDetails = {
 			lastIP: req.headers['x-forwarded-for'] as string,
 			lastHandshake: new Date().toLocaleString('de'),
 			lastLogin: typeof userobj.activityDetails == 'string' ? (JSON.parse(userobj.activityDetails) as ActivityDetails)?.lastLogin : userobj.activityDetails?.lastLogin
 		}
 
-		await database.get<Partial<User>>('accounts').update({ UUID: userobj.UUID }, { activityDetails: JSON.stringify(details) });
+		await database.get<Partial<User>>('accounts').update({ UUID: userobj.UUID }, { settings: JSON.stringify(outSettings), activityDetails: JSON.stringify(details) });
 	}
 );
 
