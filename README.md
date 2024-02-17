@@ -158,13 +158,15 @@ This version should introduce the Sync System and the new HomePage
 - [ ] implement a cron job which automatically checks all downloaded series for updates and writes them to a list
 - [x] Add the downloader and scraping service into ext. services
 - [ ] Implement a way to sync watch animes smth. like SyncTube for YT or Watchtogether
-- [ ] **ForYou Page** instead of the basic list with dropdown
+- [ ] **Browse Page** instead of the basic list with dropdown
   - [ ] Last Watched
     - [ ] Not currently possible cause there is no timestamp in the watchList
   - [ ] Newly Added
     - [ ] Not currently possible since there is no tracking for updated series
   - [ ] You Might Like
     - [ ] For the start this can just be a simple tag ranking system no biggie
+  - [ ] Enjoy Again
+    - [ ] Series the user has almost continued or continued and possibly want to watch again
 - [ ] **Adaptive Bitrate Streaming** and Choosable Quality (Yes i said it a pretty big deal for me to learn and wrap my head around) (maybe with a fallback to the normal streaming)
   - [ ] No Pre transcoding Necessary cause it would use more space and to be honest it's just too easy to implement
   - [ ] So **Live Transcoding** it is using ffmpeg which we already use for the image generation and later for the intro detection
