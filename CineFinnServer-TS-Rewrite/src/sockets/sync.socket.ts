@@ -2,15 +2,67 @@ import { toAllSockets } from "../utils/utils";
 import { ExtendedSocket } from "../types/session";
 import { Database } from '@jodu555/mysqlapi';
 import { DatabaseParsedSyncRoomItem, DatabaseSyncRoomItem, DatabaseSyncRoomMember } from "../types/database";
-import { fullObjectToDatabase, getRoomCheckIfExistsAndOwner, getSyncRoom } from "../utils/room.utils";
+import { fullObjectToDatabase, getRoomCheckIfExists, getRoomCheckIfExistsAndOwner, getSyncRoom } from "../utils/room.utils";
 const database = Database.getDatabase();
+
 
 const initialize = (socket: ExtendedSocket) => {
     const auth = socket.auth;
     console.log('Socket-Sync Connection:', auth.type.toUpperCase(), auth.user.username, socket.id);
 
-    socket.on('disconnect', () => {
+    const leave = async () => {
+        console.log('SOCKET with auth', auth.user.username, 'sync-leave', socket.sync);
+        const room = await getRoomCheckIfExists(socket?.sync?.ID, socket);
+        if (room == false) return;
+
+        //Filter leaving socket out of members
+        room.members = room.members.filter(x => x.UUID != auth.user.UUID);
+
+
+        if (room.members.length == 0) {
+            //Delete Room
+            await database.get<Partial<DatabaseSyncRoomItem>>('sync_rooms').delete({ ID: room.ID });
+
+            //Update Room list for other sockets
+            await toAllSockets(
+                (s) => {
+                    s.emit('sync-update-rooms');
+                },
+                (s) => s.auth.type == 'client'
+            );
+            return;
+        }
+
+        //Check if Owner is still present
+        if (!room.members.find(x => x.role == 1)) {
+            //Adding next on list to be Owner
+            room.members[0].role = 1;
+        }
+
+        //Update Database with updated room object
+        await database.get<Partial<DatabaseSyncRoomItem>>('sync_rooms').update({ ID: room.ID }, { members: JSON.stringify(room.members) });
+
+        //Update Room list for other sockets
+        await toAllSockets(
+            (s) => {
+                s.emit('sync-update-rooms');
+            },
+            (s) => s.auth.type == 'client'
+        );
+    }
+
+    socket.on('disconnect', async () => {
         console.log('Socket-Sync DisConnection:', auth.type.toUpperCase());
+        await leave();
+    });
+
+    socket.on('sync-leave', async (obj) => {
+        if (obj.ID !== socket?.sync?.ID) {
+            console.log('SOCKET with auth', auth.user.username, 'tried to leave room', obj.ID, 'but was not in it');
+            socket.emit('sync-message', { type: 'error', message: 'You tried to leave a room that your ID is not enlisted in' })
+            return;
+        }
+        await leave();
     });
 
     socket.on('sync-create', async (obj) => {
@@ -59,11 +111,10 @@ const initialize = (socket: ExtendedSocket) => {
         socket.sync = obj;
 
         //Get Current Room
-        const room = await getSyncRoom(socket.sync?.ID);
+        const room = await getRoomCheckIfExists(socket.sync?.ID, socket);
 
         if (!room) {
-            socket.emit('sync-message', { type: 'error', message: 'The Room ID does not exist!' })
-            return;
+            return false;
         }
 
         //Check if user is already in room

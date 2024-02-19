@@ -154,6 +154,7 @@ export default {
 		},
 		showVideo() {
 			console.log(
+				'showVideo',
 				'this.currentSeries',
 				this.currentSeries,
 				'this.currentMovie',
@@ -223,7 +224,11 @@ export default {
 				await this.$socket.emit('sync-selectSeries', { ID });
 			}
 			await this.loadSeriesInfo(ID);
-			this.handleVideoChange(-1, -1, -1);
+			try {
+				await this.handleVideoChange(-1, -1, -1);
+			} catch (error) {
+				console.error('selectSeries()', error);
+			}
 		},
 		switchTo(vel) {
 			deepswitchTo(vel, this);
@@ -241,45 +246,48 @@ export default {
 		 */
 		//silent = false not send back to server (so user based switch)
 		handleVideoChange(season = -1, episode = -1, movie = -1, langchange = false, lang, silent = false) {
-			console.log('Came', 0);
-			if (!silent && !this.isOwner) return;
-			console.log('Came', 1);
-			if (langchange && this.currentLanguage == lang) return;
-			const video = document.querySelector('video');
-			if (!video) return;
-			console.log('Came', 2);
+			return new Promise((resolve, reject) => {
+				console.log('Came', 0);
+				if (!silent && !this.isOwner) return reject('!silent && !this.isOwner');
+				console.log('Came', 1);
+				if (langchange && this.currentLanguage == lang) return reject('langchange && this.currentLanguage == lang');
+				const video = document.querySelector('video');
+				if (!video) return reject('!video');
+				console.log('Came', 2);
 
-			//TODO: Maybe add here default language from user prefered settings
-			let defaultLanguage = 'GerDub';
+				//TODO: Maybe add here default language from user prefered settings
+				let defaultLanguage = 'GerDub';
 
-			const wasPaused = video.paused;
-			const prevTime = video.currentTime;
+				const wasPaused = video.paused;
+				const prevTime = video.currentTime;
 
-			console.log('GOT handleVideoChange() EMIT to Server', { season, episode, movie, langchange, lang: langchange ? lang : defaultLanguage });
-			!silent && this.$socket.emit('sync-video-change', { season, episode, movie, langchange, lang: langchange ? lang : defaultLanguage });
-			video.pause();
+				console.log('GOT handleVideoChange() EMIT to Server', { season, episode, movie, langchange, lang: langchange ? lang : defaultLanguage });
+				!silent && this.$socket.emit('sync-video-change', { season, episode, movie, langchange, lang: langchange ? lang : defaultLanguage });
+				video.pause();
 
-			setTimeout(() => {
-				this.setCurrentSeason(season);
-				this.setCurrentEpisode(episode);
-				this.setCurrentMovie(movie);
-
-				//Ensure that the selected language exists on the entity
-				if (this.entityObject && !this.entityObject.langs.includes(defaultLanguage) && !langchange) {
-					defaultLanguage = this.entityObject.langs[0];
-				}
-
-				this.setCurrentLanguage(langchange ? lang : defaultLanguage);
 				setTimeout(() => {
-					video.load();
-					langchange ? (video.currentTime = prevTime) : (video.currentTime = 0);
-					!wasPaused && video.play();
-				}, 100);
-			}, 200);
+					this.setCurrentSeason(season);
+					this.setCurrentEpisode(episode);
+					this.setCurrentMovie(movie);
+
+					//Ensure that the selected language exists on the entity
+					if (this.entityObject && !this.entityObject.langs.includes(defaultLanguage) && !langchange) {
+						defaultLanguage = this.entityObject.langs[0];
+					}
+
+					this.setCurrentLanguage(langchange ? lang : defaultLanguage);
+					setTimeout(() => {
+						video.load();
+						langchange ? (video.currentTime = prevTime) : (video.currentTime = 0);
+						!wasPaused && video.play();
+						return resolve();
+					}, 100);
+				}, 200);
+			});
 		},
 	},
 	async mounted() {
-		const debug = false;
+		const debug = true;
 		debug && console.log('mounted() SyncRoom', JSON.stringify(this.currentRoom, null, 3));
 		if (this.currentRoom == undefined) {
 			await this.loadRooms();
@@ -300,24 +308,32 @@ export default {
 				);
 			if (this.currentLanguage == this.currentRoom?.entityInfos?.lang) {
 				console.log('handleVideoChange', 1);
-				this.handleVideoChange(
-					parseInt(this.currentRoom?.entityInfos?.season),
-					parseInt(this.currentRoom?.entityInfos?.episode),
-					parseInt(this.currentRoom?.entityInfos?.movie),
-					false,
-					undefined,
-					true
-				);
+				try {
+					await this.handleVideoChange(
+						parseInt(this.currentRoom?.entityInfos?.season),
+						parseInt(this.currentRoom?.entityInfos?.episode),
+						parseInt(this.currentRoom?.entityInfos?.movie),
+						false,
+						undefined,
+						true
+					);
+				} catch (error) {
+					console.error('handleVideoChange', 1, error);
+				}
 			} else {
 				console.log('handleVideoChange', 2);
-				this.handleVideoChange(
-					parseInt(this.currentRoom?.entityInfos?.season),
-					parseInt(this.currentRoom?.entityInfos?.episode),
-					parseInt(this.currentRoom?.entityInfos?.movie),
-					true,
-					this.currentRoom?.entityInfos?.lang,
-					true
-				);
+				try {
+					await this.handleVideoChange(
+						parseInt(this.currentRoom?.entityInfos?.season),
+						parseInt(this.currentRoom?.entityInfos?.episode),
+						parseInt(this.currentRoom?.entityInfos?.movie),
+						true,
+						this.currentRoom?.entityInfos?.lang,
+						true
+					);
+				} catch (error) {
+					console.error('handleVideoChange', 2, error);
+				}
 			}
 			if (this.isOwner == false) {
 				console.log('Performing Headsup');
@@ -366,6 +382,7 @@ export default {
 		this.$socket.off('sync-selectSeries');
 		this.$socket.off('sync-video-change');
 		this.$socket.off('sync-video-info');
+		await this.leaveRoom();
 	},
 };
 </script>

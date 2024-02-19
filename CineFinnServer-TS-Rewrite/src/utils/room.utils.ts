@@ -5,6 +5,8 @@ import { ExtendedSocket } from '../types/session';
 const database = Database.getDatabase();
 
 async function getSyncRoom(ID: number) {
+    if (ID == -1 || ID == undefined || isNaN(ID)) return false;
+
     const room = await database.get<DatabaseSyncRoomItem>('sync_rooms').getOne({ ID });
 
     return room != undefined ? roomToFullObject(room) : false;
@@ -34,14 +36,29 @@ function fullObjectToDatabase(room: DatabaseParsedSyncRoomItem): DatabaseSyncRoo
 
 async function getRoomCheckIfExistsAndOwner(roomID: number, socket: ExtendedSocket): Promise<false | DatabaseParsedSyncRoomItem> {
     //Check if Owner
+    // const room = await getSyncRoom(socket.sync?.ID);
+
+    // if (!room) {
+    //     socket.emit('sync-message', { type: 'error', message: 'The Room ID does not exist!' })
+    //     return false;
+    // }
+    const room = await getRoomCheckIfExists(roomID, socket);
+    if (room == false)
+        return false;
+
+    if (room.members.find(x => x.UUID == socket.auth.user.UUID).role != 1) return false;
+
+    return room;
+}
+
+async function getRoomCheckIfExists(roomID: number, socket: ExtendedSocket): Promise<false | DatabaseParsedSyncRoomItem> {
+    //Check if Owner
     const room = await getSyncRoom(socket.sync?.ID);
 
     if (!room) {
         socket.emit('sync-message', { type: 'error', message: 'The Room ID does not exist!' })
         return false;
     }
-
-    if (room.members.find(x => x.UUID == socket.auth.user.UUID).role != 1) return false;
 
     return room;
 }
@@ -50,5 +67,6 @@ export {
     getSyncRoom,
     roomToFullObject,
     fullObjectToDatabase,
-    getRoomCheckIfExistsAndOwner
+    getRoomCheckIfExists,
+    getRoomCheckIfExistsAndOwner,
 }

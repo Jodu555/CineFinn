@@ -45,6 +45,6 @@ export interface DatabaseParsedSyncRoomItem {
 	ID: string;
 	seriesID: string;
 	entityInfos?: DatabaseSyncRoomEntityInfos;
-	members?: [DatabaseSyncRoomMember];
+	members?: DatabaseSyncRoomMember[];
 	created_at: number;
 }

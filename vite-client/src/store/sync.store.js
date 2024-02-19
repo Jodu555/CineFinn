@@ -81,6 +81,10 @@ export default {
 				// 	],
 				// });
 				commit('setRoomList', json);
+
+				if (state.currentRoomID != -1) {
+					await dispatch('loadRoomInfo');
+				}
 			}
 
 			commit('setLoading', false);
