@@ -287,7 +287,7 @@ export default {
 		},
 	},
 	async mounted() {
-		const debug = true;
+		const debug = false;
 		debug && console.log('mounted() SyncRoom', JSON.stringify(this.currentRoom, null, 3));
 		if (this.currentRoom == undefined) {
 			await this.loadRooms();
@@ -307,7 +307,7 @@ export default {
 					parseInt(this.currentRoom?.entityInfos?.movie)
 				);
 			if (this.currentLanguage == this.currentRoom?.entityInfos?.lang) {
-				console.log('handleVideoChange', 1);
+				debug && console.log('handleVideoChange', 1);
 				try {
 					await this.handleVideoChange(
 						parseInt(this.currentRoom?.entityInfos?.season),
@@ -321,7 +321,7 @@ export default {
 					console.error('handleVideoChange', 1, error);
 				}
 			} else {
-				console.log('handleVideoChange', 2);
+				debug && console.log('handleVideoChange', 2);
 				try {
 					await this.handleVideoChange(
 						parseInt(this.currentRoom?.entityInfos?.season),
