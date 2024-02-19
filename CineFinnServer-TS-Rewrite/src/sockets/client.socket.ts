@@ -35,6 +35,7 @@ const initialize = (socket: ExtendedSocket) => {
 
 	socket.on('updateSettings', async (settings) => {
 		const outSettings = compareSettings(settings);
+
 		await database.get('accounts').update({ UUID: auth.user.UUID }, { settings: JSON.stringify(outSettings) });
 		await toAllSockets(
 			(s) => {

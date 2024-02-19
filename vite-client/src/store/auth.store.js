@@ -117,6 +117,7 @@ export default {
 					// deleteCookie('auth-token');
 				}
 			} catch (error) {
+				console.error(error);
 				// deleteCookie('auth-token');
 				await dispatch('logout');
 			}

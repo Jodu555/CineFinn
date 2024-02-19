@@ -17,6 +17,7 @@ const initialize = (socket: ExtendedSocket) => {
 
         //Filter leaving socket out of members
         room.members = room.members.filter(x => x.UUID != auth.user.UUID);
+        socket.sync = undefined;
 
 
         if (room.members.length == 0) {
