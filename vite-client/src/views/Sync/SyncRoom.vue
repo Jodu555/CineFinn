@@ -5,7 +5,7 @@
 				<span class="visually-hidden">Loading...</span>
 			</div>
 		</div>
-		<pre>
+		<pre v-if="userInfo.role == 3">
 				syncLoading: {{ syncLoading }}
 				watchLoading: {{ watchLoading }}
 				currentMovie: {{ currentMovie }}
@@ -142,7 +142,7 @@ export default {
 		...mapState('sync', { syncLoading: 'loading', roomList: 'roomList' }),
 		...mapState('watch', { watchLoading: 'loading' }),
 		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode', 'currentLanguage', 'watchList']),
-		...mapState('auth', ['authToken', 'settings']),
+		...mapState('auth', ['authToken', 'settings', 'userInfo']),
 		...mapGetters('watch', ['videoSrc', 'entityObject']),
 		...mapGetters('sync', ['currentRoom', 'isOwner']),
 		autoCompleteSeries() {
