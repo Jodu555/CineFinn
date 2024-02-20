@@ -101,7 +101,6 @@ router.get('/index/recommendations', async (req, res) => {
 				return;
 
 			const totalEntitys = remoteSerie.seasons.flat().length + remoteSerie.movies.length;
-			console.log(remoteSerie.title, remoteSerie.seasons.flat().length, remoteSerie.movies.length, totalEntitys);
 
 			let percent = parseFloat(String(group[x] / totalEntitys * 100))
 			if (percent > 100)
@@ -119,8 +118,6 @@ router.get('/index/recommendations', async (req, res) => {
 
 	const out = groupit(group);
 
-	console.log(out);
-
 
 	let foryou = [];
 	let newest = [];
@@ -128,7 +125,7 @@ router.get('/index/recommendations', async (req, res) => {
 	let continueWatching = [];
 
 	const series = remoteSeries
-		// .filter((x) => x.categorie == 'Aniworld')
+		.filter((x) => x.categorie == 'Aniworld')
 		.map((x) => ({
 			ID: x.ID,
 			url: `http://cinema-api.jodu555.de/images/${x.ID}/cover.jpg?auth-token=${process.env.TEST_AUTH_TOKEN_FROM_PUBLIC_API}`,
@@ -143,13 +140,16 @@ router.get('/index/recommendations', async (req, res) => {
 
 	newest = series.reverse().slice(0, newestItems);
 
-	watchagain = out.sort((a, b) => b.percent - a.percent).slice(0, watchAgainItems * 3).sort((a, b) => 0.5 - Math.random()).slice(0, watchAgainItems);
+	watchagain = out.sort((a, b) => b.percent - a.percent).map(x => {
+		const serie = series.find(n => n.ID == x.ID);
+		return serie ? serie : null;
+	}).filter(x => x != null).slice(0, watchAgainItems * 3).sort((a, b) => 0.5 - Math.random()).slice(0, watchAgainItems);
 
 	res.json({
-		foryou: { title: 'For You:', data: foryou },
-		newest: { title: 'newest:', data: newest },
-		watchagain: { title: 'Watch Again:', data: watchagain },
-		continue: { title: 'Continue Watching:', data: continueWatching },
+		foryou: { title: 'For You', data: foryou },
+		newest: { title: 'Newest', data: newest },
+		watchagain: { title: 'Watch Again', data: watchagain },
+		continue: { title: 'Continue Watching', data: continueWatching },
 	});
 });
 
