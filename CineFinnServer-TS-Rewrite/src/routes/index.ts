@@ -71,10 +71,11 @@ router.post('/', roleAuthorization(Role.Admin), async (req: AuthenticatedRequest
 let cached: Series[] = [];
 
 router.get('/index/recommendations', async (req, res) => {
+	console.time('complete')
 	const forYouItems = 20;
 	const newestItems = 15;
-	const watchAgainItems = 15;
-	const continueWatchingItems = 15;
+	const watchAgainItems = 18;
+	const continueWatchingItems = 18;
 
 	console.time('mockRequest')
 	if (cached.length == 0) {
@@ -136,7 +137,7 @@ router.get('/index/recommendations', async (req, res) => {
 
 	console.time('prepareSeries')
 	const series = remoteSeries
-		.filter((x) => x.categorie == 'Aniworld')
+		.filter((x) => x.categorie == 'Aniworld' && !x.title.includes('Redo of Healer'))
 		.map((x) => ({
 			ID: x.ID,
 			url: `http://cinema-api.jodu555.de/images/${x.ID}/cover.jpg?auth-token=${process.env.TEST_AUTH_TOKEN_FROM_PUBLIC_API}`,
@@ -158,23 +159,31 @@ router.get('/index/recommendations', async (req, res) => {
 
 
 	console.time('watchagain')
-	watchagain = out.slice().sort((a, b) => b.percent - a.percent).map(x => {
-		const serie = series.find(n => n.ID == x.ID);
-		return serie ? serie : null;
-	}).filter(x => x != null).slice(0, watchAgainItems * 3).sort((a, b) => 0.5 - Math.random()).slice(0, watchAgainItems);
+	watchagain = out.slice()
+		// .sort((a, b) => b.percent - a.percent)
+		.filter(a => a.percent > 99)
+		.map(x => {
+			const serie = series.find(n => n.ID == x.ID);
+			return serie ? serie : null;
+		}).filter(x => x != null).slice(0, watchAgainItems * 3)
+		.sort((a, b) => 0.5 - Math.random()).slice(0, watchAgainItems);
 	console.timeEnd('watchagain')
 
-	const continueBound = [40, 70];
+	const continueBound = [30, 80];
 
 	console.time('continueWatching')
-	continueWatching = out.slice().filter((a) => a.percent < continueBound[1] && a.percent > continueBound[0]).map(x => {
-		const serie = series.find(n => n.ID == x.ID);
-		return serie ? serie : null;
-	}).filter(x => x != null).slice(0, continueWatchingItems * 3).sort((a, b) => 0.5 - Math.random()).slice(0, continueWatchingItems);
+	continueWatching = out.slice()
+		.filter((a) => a.percent < continueBound[1] && a.percent > continueBound[0])
+		.map(x => {
+			const serie = series.find(n => n.ID == x.ID);
+			return serie ? serie : null;
+		}).filter(x => x != null).slice(0, continueWatchingItems * 3)
+		.sort((a, b) => 0.5 - Math.random()).slice(0, continueWatchingItems);
 	console.timeEnd('continueWatching')
 
+	console.timeEnd('complete')
 	res.json({
-		foryou: { title: 'For You', data: foryou },
+		// foryou: { title: 'For You', data: foryou },
 		newest: { title: 'Newest', data: newest },
 		watchagain: { title: 'Watch Again', data: watchagain },
 		continueWatching: { title: 'Continue Watching', data: continueWatching },
