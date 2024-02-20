@@ -68,14 +68,22 @@ router.post('/', roleAuthorization(Role.Admin), async (req: AuthenticatedRequest
 	res.json(serie);
 });
 
+let cached: Series[] = [];
+
 router.get('/index/recommendations', async (req, res) => {
-	const response = await axios.get<Series[]>(`http://cinema-api.jodu555.de/index/all?auth-token=${process.env.TEST_AUTH_TOKEN_FROM_PUBLIC_API}`);
-
-	const remoteSeries = response.data;
-
 	const forYouItems = 20;
 	const newestItems = 15;
 	const watchAgainItems = 15;
+	const continueWatchingItems = 15;
+
+	console.time('mockRequest')
+	if (cached.length == 0) {
+		const response = await axios.get<Series[]>(`http://cinema-api.jodu555.de/index/all?auth-token=${process.env.TEST_AUTH_TOKEN_FROM_PUBLIC_API}`);
+		cached = response.data;
+	}
+
+	const remoteSeries = cached;
+	console.timeEnd('mockRequest')
 
 
 	console.time('LoadParse')
@@ -116,7 +124,9 @@ router.get('/index/recommendations', async (req, res) => {
 		return out;
 	}
 
+	console.time('groupit')
 	const out = groupit(group);
+	console.timeEnd('groupit')
 
 
 	let foryou = [];
@@ -124,6 +134,7 @@ router.get('/index/recommendations', async (req, res) => {
 	let watchagain = [];
 	let continueWatching = [];
 
+	console.time('prepareSeries')
 	const series = remoteSeries
 		.filter((x) => x.categorie == 'Aniworld')
 		.map((x) => ({
@@ -132,24 +143,41 @@ router.get('/index/recommendations', async (req, res) => {
 			title: x.title,
 			infos: x.infos,
 		}));
+	console.timeEnd('prepareSeries')
 
+	console.time('foryou')
 	foryou = series
 		.slice()
 		.sort((a, b) => 0.5 - Math.random())
 		.slice(0, forYouItems);
+	console.timeEnd('foryou')
 
+	console.time('newest')
 	newest = series.reverse().slice(0, newestItems);
+	console.timeEnd('newest')
 
-	watchagain = out.sort((a, b) => b.percent - a.percent).map(x => {
+
+	console.time('watchagain')
+	watchagain = out.slice().sort((a, b) => b.percent - a.percent).map(x => {
 		const serie = series.find(n => n.ID == x.ID);
 		return serie ? serie : null;
 	}).filter(x => x != null).slice(0, watchAgainItems * 3).sort((a, b) => 0.5 - Math.random()).slice(0, watchAgainItems);
+	console.timeEnd('watchagain')
+
+	const continueBound = [40, 70];
+
+	console.time('continueWatching')
+	continueWatching = out.slice().filter((a) => a.percent < continueBound[1] && a.percent > continueBound[0]).map(x => {
+		const serie = series.find(n => n.ID == x.ID);
+		return serie ? serie : null;
+	}).filter(x => x != null).slice(0, continueWatchingItems * 3).sort((a, b) => 0.5 - Math.random()).slice(0, continueWatchingItems);
+	console.timeEnd('continueWatching')
 
 	res.json({
 		foryou: { title: 'For You', data: foryou },
 		newest: { title: 'Newest', data: newest },
 		watchagain: { title: 'Watch Again', data: watchagain },
-		continue: { title: 'Continue Watching', data: continueWatching },
+		continueWatching: { title: 'Continue Watching', data: continueWatching },
 	});
 });
 
