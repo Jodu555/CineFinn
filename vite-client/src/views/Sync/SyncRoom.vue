@@ -229,6 +229,7 @@ export default {
 			} catch (error) {
 				console.error('selectSeries()', error);
 			}
+			await this.loadRoomInfo();
 		},
 		switchTo(vel) {
 			deepswitchTo(vel, this);
@@ -280,6 +281,8 @@ export default {
 						video.load();
 						langchange ? (video.currentTime = prevTime) : (video.currentTime = 0);
 						!wasPaused && video.play();
+
+						this.loadRoomInfo();
 						return resolve();
 					}, 100);
 				}, 200);
