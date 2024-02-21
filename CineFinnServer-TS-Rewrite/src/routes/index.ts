@@ -88,7 +88,8 @@ router.get('/index/recommendations', async (req, res) => {
 
 
 	console.time('LoadParse')
-	const list = parse(await load('ad733837-b2cf-47a2-b968-abaa70edbffe'));
+	const list = parse(await load('c2f5c833-c3e4-45a6-87b5-05103ff274ff'));
+	// const list = parse(await load('ad733837-b2cf-47a2-b968-abaa70edbffe'));
 	console.timeEnd('LoadParse')
 
 
@@ -184,9 +185,9 @@ router.get('/index/recommendations', async (req, res) => {
 	console.timeEnd('complete')
 	res.json({
 		// foryou: { title: 'For You', data: foryou },
-		newest: { title: 'Newest', data: newest },
-		watchagain: { title: 'Watch Again', data: watchagain },
-		continueWatching: { title: 'Continue Watching', data: continueWatching },
+		newest: { title: 'Newest', data: newest.map(x => x.ID) },
+		watchagain: { title: 'Watch Again', data: watchagain.map(x => x.ID) },
+		continueWatching: { title: 'Continue Watching', data: continueWatching.map(x => x.ID) },
 	});
 });
 
