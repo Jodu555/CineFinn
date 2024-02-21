@@ -44,7 +44,7 @@ function generateEntityImages(i: number, serie: Series, entity: Episode | Movie,
 		// console.log(output, fs.readdirSync(output).length);
 
 		if (fs.readdirSync(output).length != 0)
-			return false;
+			continue;
 
 		return {
 			meta: {
