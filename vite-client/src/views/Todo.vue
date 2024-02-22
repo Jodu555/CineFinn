@@ -46,7 +46,10 @@
 							<button v-if="element.edited" type="button" @click="element.edited = false" class="btn btn-close"></button>
 						</div>
 					</div>
-					<h5>Infos</h5>
+					<!-- <h5>Infos</h5> -->
+					<span v-if="state.permittedAccounts.find((x) => x.UUID == element.creator) != null"
+						>- {{ state.permittedAccounts.find((x) => x.UUID == element.creator)?.username }}</span
+					>
 					<div style="width: 15%" class="d-flex justify-content-around">
 						<span v-if="element.references.aniworld" class="h6">A</span>
 						<span v-if="element.references.zoro" class="h6">Z</span>

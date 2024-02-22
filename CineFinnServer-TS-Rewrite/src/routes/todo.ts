@@ -27,9 +27,8 @@ router.get('/', async (req: AuthenticatedRequest, res: Response) => {
 
 router.get('/permittedAccounts', roleAuthorization(Role.Mod), async (req: AuthenticatedRequest, res: Response) => {
 	const accounts = await database.get<User>('accounts').get();
-	accounts.filter(x => x.role == Role.Mod || x.role == Role.Admin);
 
-	res.json(accounts.map(x => {
+	res.json(accounts.filter(x => x.role >= Role.Mod).map(x => {
 		return {
 			UUID: x.UUID,
 			username: x.username,
