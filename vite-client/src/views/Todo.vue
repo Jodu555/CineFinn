@@ -67,15 +67,50 @@
 								<label for="name" class="form-label">Name:</label>
 							</div>
 							<div class="col-7">
-								<input type="text" class="form-control" id="name" v-model="element.name" />
+								<input
+									type="text"
+									:disabled="userInfo.UUID != element.creator && userInfo.role == 2"
+									class="form-control"
+									id="name"
+									v-model="element.name"
+								/>
 							</div>
 						</div>
+						<template v-if="userInfo.role == 2">
+							<div class="row text-center mt-2 mb-2 align-items-center">
+								<div class="col-2">
+									<label for="name" class="form-label">Creator:</label>
+								</div>
+								<div class="col-1 h5">
+									<span>{{ state.permittedAccounts.find((x) => x.UUID == element.creator)?.username }}</span>
+								</div>
+							</div>
+						</template>
+						<template v-else>
+							<div class="row text-center mt-2 mb-2 align-items-center">
+								<div class="col-2">
+									<label for="name" class="form-label">Creator:</label>
+								</div>
+								<div class="col-3">
+									<select v-model="element.creator" style="width: 100%" class="form-select" aria-label="Default select example">
+										<option selected disabled>From</option>
+										<option v-for="account in state.permittedAccounts" :value="account.UUID">{{ account.username }}</option>
+									</select>
+								</div>
+							</div>
+						</template>
 						<div class="row text-center mt-2 mb-2 align-items-center">
 							<div class="col-2">
 								<label for="name" class="form-label">Kategorie:</label>
 							</div>
 							<div class="col-3">
-								<select v-model="element.categorie" style="width: 100%" class="form-select" aria-label="Default select example">
+								<select
+									v-model="element.categorie"
+									style="width: 100%"
+									:disabled="userInfo.UUID != element.creator && userInfo.role == 2"
+									class="form-select"
+									aria-label="Default select example"
+								>
 									<option selected disabled>Kategorie</option>
 									<option>Aniworld</option>
 									<option>STO</option>
@@ -83,18 +118,6 @@
 								</select>
 							</div>
 						</div>
-						<!-- <div class="row text-center mt-2 mb-2 align-items-center">
-								<div class="col-2">
-									<label for="name" class="form-label">From:</label>
-								</div>
-								<div class="col-3">
-									<select v-model="element.from" style="width: 100%" class="form-select" aria-label="Default select example">
-										<option selected disabled>From</option>
-										<option value="UUID">Jodu555</option>
-										<option value="UUID">Svenja</option>
-									</select>
-								</div>
-							</div> -->
 						<hr />
 						<h5>References</h5>
 						<h6>Anime</h6>
@@ -103,7 +126,13 @@
 								<label for="url" class="form-label">Aniworld:</label>
 							</div>
 							<div class="col-7">
-								<input type="text" class="form-control" id="url" v-model="element.references.aniworld" />
+								<input
+									type="text"
+									:disabled="userInfo.UUID != element.creator && userInfo.role == 2"
+									class="form-control"
+									id="url"
+									v-model="element.references.aniworld"
+								/>
 							</div>
 						</div>
 						<div class="row text-center align-items-center">
@@ -111,7 +140,13 @@
 								<label for="url" class="form-label">Zoro:</label>
 							</div>
 							<div class="col-7">
-								<input type="text" class="form-control" id="url" v-model="element.references.zoro" />
+								<input
+									type="text"
+									:disabled="userInfo.UUID != element.creator && userInfo.role == 2"
+									class="form-control"
+									id="url"
+									v-model="element.references.zoro"
+								/>
 							</div>
 						</div>
 						<hr />
@@ -121,7 +156,13 @@
 								<label for="url" class="form-label">STO:</label>
 							</div>
 							<div class="col-7">
-								<input type="text" class="form-control" id="url" v-model="element.references.sto" />
+								<input
+									type="text"
+									:disabled="userInfo.UUID != element.creator && userInfo.role == 2"
+									class="form-control"
+									id="url"
+									v-model="element.references.sto"
+								/>
 							</div>
 						</div>
 
@@ -163,6 +204,7 @@ const loading = ref(false);
 
 const state = reactive({
 	list: [],
+	permittedAccounts: [],
 });
 
 onMounted(async () => {
@@ -175,8 +217,13 @@ onMounted(async () => {
 	const response = await instance.$networking.get('/todo/');
 	if (response.success) {
 		state.list = response.json;
-		console.log(state.list);
 	}
+
+	const accResponse = await instance.$networking.get('/todo/permittedAccounts');
+	if (accResponse.success) {
+		state.permittedAccounts = accResponse.json;
+	}
+
 	loading.value = false;
 });
 
@@ -196,7 +243,15 @@ const change = (event) => {
 
 const addEmptyItem = () => {
 	const ID = Math.round(Math.random() * 10 ** 6);
-	const item = { name: '', edited: false, categorie: '', references: { aniworld: '', zoro: '', sto: '' }, order: -1, ID };
+	const item = {
+		name: '',
+		creator: userInfo.value.UUID,
+		edited: false,
+		categorie: '',
+		references: { aniworld: '', zoro: '', sto: '' },
+		order: -1,
+		ID,
+	};
 	state.list.push(item);
 	change();
 };

@@ -1,11 +1,14 @@
 import express, { Response } from 'express';
 import { Database } from '@jodu555/mysqlapi';
 import { DatabaseParsedTodoItem, DatabaseTodoItem } from '../types/database';
-import { AuthenticatedRequest } from '../types/session';
+import { AuthenticatedRequest, Role, User } from '../types/session';
 import { getAniworldInfos, isScraperSocketConnected } from '../sockets/scraper.socket';
+import { roleAuthorization } from '../utils/roleManager';
 const database = Database.getDatabase();
 
-export default async (req: AuthenticatedRequest, res: Response) => {
+const router = express.Router();
+
+router.get('/', async (req: AuthenticatedRequest, res: Response) => {
 	const todosDB = await database.get<DatabaseTodoItem>('todos').get();
 	const todos: DatabaseParsedTodoItem[] = todosDB.map((t) => JSON.parse(t.content));
 
@@ -20,4 +23,19 @@ export default async (req: AuthenticatedRequest, res: Response) => {
 	}
 
 	res.json(todos.sort((a, b) => a.order - b.order));
-};
+});
+
+router.get('/permittedAccounts', roleAuthorization(Role.Mod), async (req: AuthenticatedRequest, res: Response) => {
+	const accounts = await database.get<User>('accounts').get();
+	accounts.filter(x => x.role == Role.Mod || x.role == Role.Admin);
+
+	res.json(accounts.map(x => {
+		return {
+			UUID: x.UUID,
+			username: x.username,
+			role: x.role,
+		}
+	}))
+});
+
+export { router };

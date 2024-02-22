@@ -24,6 +24,7 @@ export interface DatabaseParsedTodoItem {
 	ID: string;
 	order: number;
 	name: string;
+	creator?: string;
 	categorie: 'Aniworld' | 'STO' | 'KDrama';
 	references: References;
 	scraped?: AniWorldSeriesInformations;

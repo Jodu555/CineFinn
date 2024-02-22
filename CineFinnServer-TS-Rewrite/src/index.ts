@@ -168,8 +168,8 @@ import { router as watch_router } from './routes/watch';
 import { router as news_router } from './routes/news';
 import { router as index_router } from './routes/index';
 import { router as room_router } from './routes/room';
+import { router as todo_router } from './routes/todo';
 import video from './routes/video';
-import todo from './routes/todo';
 import { DatabaseSyncRoomItem } from './types/database';
 import { roleAuthorization } from './utils/roleManager';
 
@@ -184,10 +184,10 @@ app.use('/watch', authHelper.authentication(), watch_router);
 app.use('/news', authHelper.authentication(), news_router);
 app.use('/index', authHelper.authentication(), index_router);
 app.use('/room', authHelper.authentication(), room_router);
+app.use('/todo', authHelper.authentication(), todo_router);
 
 //Your direct routing stuff here
 app.get('/video', authHelper.authentication(), video);
-app.get('/todo', authHelper.authentication(), todo);
 
 const errorHelper = new ErrorHelper();
 app.use(errorHelper.install());
