@@ -1,3 +1,4 @@
+import { AniWorldSeriesInformations } from '../sockets/scraper.socket';
 import { Langs } from './classes';
 
 export interface DatabaseWatchStringItem {
@@ -19,6 +20,16 @@ export interface DatabaseTodoItem {
 	ID: string;
 	content: string;
 }
+export interface DatabaseParsedTodoItem {
+	ID: string;
+	order: number;
+	name: string;
+	categorie: 'Aniworld' | 'STO' | 'KDrama';
+	references: References;
+	scraped?: AniWorldSeriesInformations;
+}
+
+export type References = Record<'aniworld' | 'zoro' | 'sto', string>;
 
 export interface DatabaseSyncRoomEntityInfos {
 	season: number;

@@ -4,7 +4,7 @@ import { writeWatchInfoToDatabase } from '../utils/watchManager';
 import { parse, load, Segment, searchObject } from '../utils/watchString';
 import { defaultSettings, compareSettings } from '../utils/settings';
 import { cleanupSeriesBeforeFrontResponse } from '../classes/series';
-import { DatabaseTodoItem } from '../types/database';
+import { DatabaseParsedTodoItem, DatabaseTodoItem } from '../types/database';
 import { ExtendedSocket, ExtendedRemoteSocket, Role } from '../types/session';
 import { isPermitted } from '../utils/roleManager';
 
@@ -89,8 +89,8 @@ const initialize = (socket: ExtendedSocket) => {
 	socket.on('todoListUpdate', async (list) => {
 		if (!isPermitted(auth.user, Role.Mod)) {
 			const todosDB = await database.get<DatabaseTodoItem>('todos').get();
-			const todos = todosDB.map((t) => JSON.parse(t.content));
-			socket.emit('todoListUpdate', todos);
+			const todos: DatabaseParsedTodoItem[] = todosDB.map((t) => JSON.parse(t.content));
+			socket.emit('todoListUpdate', todos.sort((a, b) => a.order - b.order));
 			return;
 		}
 		const didID: string[] = [];
@@ -106,8 +106,10 @@ const initialize = (socket: ExtendedSocket) => {
 		const items = await database.get<DatabaseTodoItem>('todos').get();
 		const deleted = items.filter((x) => !didID.find((y) => y == x.ID));
 
-		for (const deletedItem of deleted) {
-			await database.get('todos').delete({ ID: deletedItem.ID, content: deletedItem.content });
+		if (isPermitted(auth.user, Role.Admin)) {
+			for (const deletedItem of deleted) {
+				await database.get('todos').delete({ ID: deletedItem.ID, content: deletedItem.content });
+			}
 		}
 
 		await toAllSockets(

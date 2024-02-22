@@ -7,14 +7,6 @@ export interface timeUpdateObject {
 	force: boolean;
 }
 
-export interface TodoItem {
-	ID: string;
-	categorie: string;
-	name: string;
-	order: number;
-	references: SerieReference;
-}
-
 export interface ActiveJob {
 	id: string;
 	name: string;

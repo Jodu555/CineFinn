@@ -1,7 +1,8 @@
 import { Request } from 'express';
 import { RemoteSocket, Socket } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-import { Langs, TodoItem, timeUpdateObject } from './classes';
+import { Langs, timeUpdateObject } from './classes';
+import { DatabaseParsedTodoItem } from './database';
 
 export enum Role {
 	Admin = 3,
@@ -105,7 +106,7 @@ interface ClientToServerEvents {
 	'rmvc-send-videoStateChange': (arg0: videoStateChangeArg) => void;
 	'rmvc-connect': (arg0: rmvcConnectArg) => void;
 	'rmvc-send-action': (arg0: rmvcSendActionArg) => void;
-	todoListUpdate: (list: TodoItem[]) => void;
+	todoListUpdate: (list: DatabaseParsedTodoItem[]) => void;
 	'sync-create': (obj: { ID: number }) => void;
 	'sync-join': (obj: { ID: number }) => void;
 	'sync-leave': (obj: { ID: number }) => void;
