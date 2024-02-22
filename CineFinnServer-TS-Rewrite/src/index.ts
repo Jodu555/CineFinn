@@ -129,8 +129,13 @@ authHelper.install(
 			lastHandshake: new Date().toLocaleString('de'),
 			lastLogin: typeof userobj.activityDetails == 'string' ? (JSON.parse(userobj.activityDetails) as ActivityDetails)?.lastLogin : userobj.activityDetails?.lastLogin
 		}
-
-		await database.get<Partial<User>>('accounts').update({ UUID: userobj.UUID }, { settings: JSON.stringify(outSettings), activityDetails: JSON.stringify(details) });
+		try {
+			await database.get<Partial<User>>('accounts').update({ UUID: userobj.UUID }, { settings: JSON.stringify(outSettings), activityDetails: JSON.stringify(details) });
+		} catch (error) {
+			console.error('This Could possibly fail if the db connection is still waking up but idk actually why this would happen IDK kill me plllzzz');
+			console.error(error);
+			console.error('This Could possibly fail if the db connection is still waking up but idk actually why this would happen IDK kill me plllzzz');
+		}
 	}
 );
 
