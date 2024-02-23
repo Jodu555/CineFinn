@@ -32,7 +32,8 @@ async function deepExecPromisify(command: string, cwd: string = undefined) {
 	});
 }
 
-function generateEntityImages(i: number, serie: Series, entity: Episode | Movie, seasons: Episode[]): PromissesJob | false {
+function generateEntityImages(i: number, serie: Series, entity: Episode | Movie, seasons: Episode[]): PromissesJob[] {
+	const returnArr: PromissesJob[] = [];
 	for (const lang of entity.langs) {
 		let output = path.join(process.env.PREVIEW_IMGS_PATH, String(serie.ID), 'previewImages');
 		if (entity instanceof Episode) {
@@ -43,10 +44,12 @@ function generateEntityImages(i: number, serie: Series, entity: Episode | Movie,
 		fs.mkdirSync(output, { recursive: true });
 		// console.log(output, fs.readdirSync(output).length);
 
-		if (fs.readdirSync(output).length != 0)
+		if (fs.readdirSync(output).length != 0) {
+			// console.log('Images Present skipping', lang);
 			continue;
+		}
 
-		return {
+		returnArr.push({
 			meta: {
 				serieID: serie.ID,
 				entity,
@@ -89,8 +92,9 @@ function generateEntityImages(i: number, serie: Series, entity: Episode | Movie,
 					reject(error);
 				}
 			}),
-		};
+		});
 	}
+	return returnArr;
 }
 
 const generateImages = async (series: Series[], cleanup: () => void = () => { }) => {
@@ -105,16 +109,12 @@ const generateImages = async (series: Series[], cleanup: () => void = () => { })
 
 		seasons.forEach((episode, i) => {
 			const result = generateEntityImages(i, serie, episode, seasons);
-			if (result != false) {
-				promises.push(result);
-			}
+			promises.push(...result);
 		});
 
 		serie.movies.forEach((movie, i) => {
 			const result = generateEntityImages(i, serie, movie, seasons);
-			if (result != false) {
-				promises.push(result);
-			}
+			promises.push(...result);
 		});
 		// console.log(serie.title, promises.length);
 	}
@@ -125,8 +125,9 @@ const generateImages = async (series: Series[], cleanup: () => void = () => { })
 		return limit(
 			() =>
 				new Promise<void>(async (resolve, _) => {
-					// console.log('  => Started', p.meta.serieID, p.meta.entity.filePath);
+					console.log('  => Started', p.meta.serieID, p.meta.entity.filePath);
 					await p.run();
+					console.log('  => Finished', p.meta.serieID, p.meta.entity.filePath);
 					resolve();
 				})
 		);
