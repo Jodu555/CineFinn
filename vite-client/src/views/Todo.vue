@@ -56,12 +56,14 @@
 						<span v-if="element.references.sto" class="h6">S</span>
 					</div>
 					<ul v-if="element.scraped">
-						<li>Episodes: {{ element?.scraped?.informations?.seasons.flat().length }}</li>
+						<li>Episodes: {{ element?.scraped?.informations?.seasons.flat()?.length }}</li>
 						<li>
-							&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk: {{ Math.round((element?.scraped?.informations?.seasons.flat().length * 260) / 1024) }}GB
+							&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk: {{ Math.round((element?.scraped?.informations?.seasons.flat()?.length * 260) / 1024) }}GB
 						</li>
-						<li>Movies: {{ element?.scraped?.informations?.movies.length }}</li>
-						<li>&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk: {{ Math.round((element?.scraped?.informations?.movies.length * 2000) / 1024) }}GB</li>
+						<template v-if="element?.scraped?.informations?.movies != undefined">
+							<li>Movies: {{ element?.scraped?.informations?.movies?.length }}</li>
+							<li>&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk: {{ Math.round((element?.scraped?.informations?.movies?.length * 1500) / 1024) }}GB</li>
+						</template>
 					</ul>
 
 					<div v-if="element.edited">
