@@ -18,7 +18,7 @@ async function writeWatchInfoToDatabase(socket: ExtendedSocket, obj: timeUpdateO
 	let update = false;
 	let updatedSegmentList: Segment[];
 
-	const updateFunction = (seg) => {
+	const updateFunction = (seg: Segment) => {
 		if (seg.time < time) {
 			update = true;
 			seg.time = time;

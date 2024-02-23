@@ -3,7 +3,7 @@ import fs from 'fs';
 import { Response } from 'express';
 import { getSeries } from '../utils/utils';
 import { AuthenticatedRequest } from '../types/session';
-import { getVideoMovie, getVideoEntity } from '../classes/series';
+import { getVideoMovie, getVideoEntity, Episode, Movie } from '../classes/series';
 
 export = (req: AuthenticatedRequest, res: Response) => {
 	const { series: seriesID, season, episode, movie, language, debug: rmtDebug } = req.query;
@@ -40,7 +40,7 @@ export = (req: AuthenticatedRequest, res: Response) => {
 	const isMovie = Boolean(movie);
 
 	// let videoEntity = isMovie ? serie.movies[movie] : serie.seasons[season][episode];
-	let videoEntity = null;
+	let videoEntity: Movie | Episode = null;
 	if (isMovie) {
 		videoEntity = getVideoMovie(serie.ID, Number(movie));
 	} else {
