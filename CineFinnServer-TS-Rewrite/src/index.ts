@@ -167,6 +167,7 @@ import { router as managment_router } from './routes/managment';
 import { router as watch_router } from './routes/watch';
 import { router as news_router } from './routes/news';
 import { router as index_router } from './routes/index';
+import { router as recommendation_router } from './routes/recommmendation';
 import { router as room_router } from './routes/room';
 import { router as todo_router } from './routes/todo';
 import video from './routes/video';
@@ -183,6 +184,7 @@ app.use('/managment', authHelper.authentication(), managment_router);
 app.use('/watch', authHelper.authentication(), watch_router);
 app.use('/news', authHelper.authentication(), news_router);
 app.use('/index', authHelper.authentication(), index_router);
+app.use('/recommendation', authHelper.authentication(), recommendation_router);
 app.use('/room', authHelper.authentication(), room_router);
 app.use('/todo', authHelper.authentication(), todo_router);
 
