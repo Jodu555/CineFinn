@@ -9,6 +9,31 @@ const router = express.Router();
 
 let cached: Series[] = [];
 
+function groupit(remoteSeries: Series[], group: { [key: string]: number }): { ID: string, name: string, watched: number, total: number, percent: number }[] {
+    const out = new Array(Object.keys(group).length);
+
+    Object.keys(group).forEach(x => {
+        const remoteSerie = remoteSeries.find(s => s.ID == x);
+        if (!remoteSerie)
+            return;
+
+        const totalEntitys = remoteSerie.seasons.flat().length + remoteSerie.movies.length;
+
+        let percent = parseFloat(String(group[x] / totalEntitys * 100))
+        if (percent > 100)
+            percent = 100;
+        out.push({
+            ID: x,
+            name: remoteSerie.title,
+            watched: group[x],
+            total: totalEntitys,
+            percent: parseFloat(percent.toFixed(2)),
+        });
+    });
+    return out;
+}
+
+
 router.get('/', async (req, res) => {
     console.time('complete')
 
@@ -41,34 +66,8 @@ router.get('/', async (req, res) => {
     })
     console.timeEnd('map')
 
-
-
-    function groupit(group: { [key: string]: number }): { ID: string, name: string, watched: number, total: number, percent: number }[] {
-        const out = new Array(Object.keys(group).length);
-
-        Object.keys(group).forEach(x => {
-            const remoteSerie = remoteSeries.find(s => s.ID == x);
-            if (!remoteSerie)
-                return;
-
-            const totalEntitys = remoteSerie.seasons.flat().length + remoteSerie.movies.length;
-
-            let percent = parseFloat(String(group[x] / totalEntitys * 100))
-            if (percent > 100)
-                percent = 100;
-            out.push({
-                ID: x,
-                name: remoteSerie.title,
-                watched: group[x],
-                total: totalEntitys,
-                percent: parseFloat(percent.toFixed(2)),
-            });
-        });
-        return out;
-    }
-
     console.time('groupit')
-    const out = groupit(group);
+    const out = groupit(remoteSeries, group);
     console.timeEnd('groupit')
 
 
