@@ -12,12 +12,11 @@ let cached: Series[] = [];
 router.get('/', async (req, res) => {
     console.time('complete')
 
-    const categorieSharePercentInclude = 10;
-
-    const forYouItems = 20;
-    const newestItems = 15;
-    const watchAgainItems = 18;
-    const continueWatchingItems = 18;
+    const categorieSharePercentInclude = 10 as const;
+    const forYouItems = 20 as const;
+    const newestItems = 15 as const;
+    const watchAgainItems = 18 as const;
+    const continueWatchingItems = 18 as const;
 
     console.time('mockRequest')
     if (cached.length == 0) {
