@@ -9,6 +9,8 @@ const router = express.Router();
 
 let cached: Series[] = [];
 
+const hasImageCache: string[] = [];
+
 function groupit(remoteSeries: Series[], group: { [key: string]: number }): { ID: string, name: string, watched: number, total: number, percent: number }[] {
     const out = new Array(Object.keys(group).length);
 
@@ -39,7 +41,7 @@ function groupit(remoteSeries: Series[], group: { [key: string]: number }): { ID
 router.get('/', async (req, res) => {
     console.time('complete')
 
-    const categorieSharePercentInclude = 10 as const;
+    const categorieSharePercentInclude = 5 as const;
     const forYouItems = 20 as const;
     const newestItems = 15 as const;
     const watchAgainItems = 18 as const;
@@ -104,15 +106,38 @@ router.get('/', async (req, res) => {
 
 
     console.time('prepareSeries')
-    const series = remoteSeries
-        .filter((x) => categorieShare[x.categorie].percent >= categorieSharePercentInclude && !x.title.includes('Redo of Healer'))
+
+    const asyncFilter = async <T>(list: T[], predicate: (t: T) => Promise<boolean>) => {
+        const resolvedPredicates = await Promise.all(list.map(predicate));
+        return list.filter((item, idx) => resolvedPredicates[idx]);
+    };
+
+    const series = await asyncFilter(remoteSeries
+        .filter((x) => !x.title.includes('Redo of Healer'))
         .map((x) => ({
             ID: x.ID,
             url: `http://cinema-api.jodu555.de/images/${x.ID}/cover.jpg?auth-token=${process.env.TEST_AUTH_TOKEN_FROM_PUBLIC_API}`,
             title: x.title,
             infos: x.infos,
-        }));
+        })), async (serie) => {
+            const imageUrl = serie.url;
+            try {
+                if (hasImageCache.find(x => x == serie.ID))
+                    return true;
+                const response = await axios.head(imageUrl);
+                if (response.status == 200) {
+                    hasImageCache.push(serie.ID);
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (error) {
+                return false;
+            }
+        });
+
     console.timeEnd('prepareSeries')
+
 
     console.time('foryou')
     foryou = series
