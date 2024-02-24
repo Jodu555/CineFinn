@@ -11,6 +11,9 @@ let cached: Series[] = [];
 
 router.get('/', async (req, res) => {
     console.time('complete')
+
+    const categorieSharePercentInclude = 10;
+
     const forYouItems = 20;
     const newestItems = 15;
     const watchAgainItems = 18;
@@ -102,7 +105,7 @@ router.get('/', async (req, res) => {
 
     console.time('prepareSeries')
     const series = remoteSeries
-        .filter((x) => categorieShare[x.categorie].percent >= 10 && !x.title.includes('Redo of Healer'))
+        .filter((x) => categorieShare[x.categorie].percent >= categorieSharePercentInclude && !x.title.includes('Redo of Healer'))
         .map((x) => ({
             ID: x.ID,
             url: `http://cinema-api.jodu555.de/images/${x.ID}/cover.jpg?auth-token=${process.env.TEST_AUTH_TOKEN_FROM_PUBLIC_API}`,
