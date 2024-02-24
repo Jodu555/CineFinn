@@ -34,6 +34,8 @@ function groupit(remoteSeries: Series[], group: { [key: string]: number }): { ID
 }
 
 
+//TODO: IMPORTANT the mapping to find extra series informations is done almost everywhere it would be beneficial if we do this just once 
+
 router.get('/', async (req, res) => {
     console.time('complete')
 
