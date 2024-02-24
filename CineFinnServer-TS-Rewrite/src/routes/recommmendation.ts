@@ -7,8 +7,10 @@ const database = Database.getDatabase();
 
 const router = express.Router();
 
+//This one is only in the dev environment so that i can test on prod data without interference
 let cached: Series[] = [];
 
+//This will remain in prod and would be good to store in redis or some kind of in memory cache since this does in fact only change very rarely
 const hasImageCache: string[] = [];
 
 function groupit(remoteSeries: Series[], group: { [key: string]: number }): { ID: string, name: string, watched: number, total: number, percent: number }[] {
