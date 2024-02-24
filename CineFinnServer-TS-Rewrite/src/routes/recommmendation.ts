@@ -27,8 +27,8 @@ router.get('/', async (req, res) => {
 
 
     console.time('LoadParse')
-    const list = parse(await load('c2f5c833-c3e4-45a6-87b5-05103ff274ff'));
-    // const list = parse(await load('ad733837-b2cf-47a2-b968-abaa70edbffe'));
+    // const list = parse(await load('c2f5c833-c3e4-45a6-87b5-05103ff274ff'));
+    const list = parse(await load('ad733837-b2cf-47a2-b968-abaa70edbffe'));
     console.timeEnd('LoadParse')
 
 
@@ -75,9 +75,34 @@ router.get('/', async (req, res) => {
     let watchagain = [];
     let continueWatching = [];
 
+
+    type Categorie = string;
+
+    const categorieShare: Record<Categorie, { value: number, percent: number }> = {};
+    const catMap: Record<Categorie, number> = {};
+    console.time('categorieShare')
+    out.forEach((c) => {
+        const serie = remoteSeries.find(n => n.ID == c.ID);
+        if (isNaN(catMap[serie.categorie])) {
+            catMap[serie.categorie] = 1;
+        } else {
+            catMap[serie.categorie] += 1;
+        }
+    });
+
+    const total = Object.keys(catMap).reduce((p, c) => p + catMap[c], 0);
+    Object.keys(catMap).forEach((cat) => {
+        categorieShare[cat] = { value: catMap[cat], percent: (catMap[cat] / total) * 100 };
+    });
+
+    console.timeEnd('categorieShare')
+    console.log('categorieShare', categorieShare);
+
+
+
     console.time('prepareSeries')
     const series = remoteSeries
-        .filter((x) => x.categorie == 'Aniworld' && !x.title.includes('Redo of Healer'))
+        .filter((x) => categorieShare[x.categorie].percent >= 10 && !x.title.includes('Redo of Healer'))
         .map((x) => ({
             ID: x.ID,
             url: `http://cinema-api.jodu555.de/images/${x.ID}/cover.jpg?auth-token=${process.env.TEST_AUTH_TOKEN_FROM_PUBLIC_API}`,
