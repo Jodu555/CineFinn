@@ -287,7 +287,7 @@ export default {
 		},
 		async loadIntroData() {
 			this.alreadySkipped = [];
-			if (false) {
+			if (true) {
 				try {
 					const response = await fetch(
 						`http://localhost:4897/intro/${this.currentSeries.ID}/${this.entityObject.season}/${this.entityObject.episode}`
@@ -600,10 +600,12 @@ export default {
 					video.currentTime >= this.introData.startms &&
 					video.currentTime <= this.introData.endms
 				) {
-					//Add 2 so the function does not loop itself
-					console.log('Skipped Intro: AutoSkip');
-					this.alreadySkipped.push('intro');
-					skip(this.introData.endms + 2, true);
+					if (this.settings?.autoSkipIntro?.value == true) {
+						//Add 2 so the function does not loop itself
+						console.log('Skipped Intro: AutoSkip');
+						this.alreadySkipped.push('intro');
+						skip(this.introData.endms + 2, true);
+					}
 				}
 			});
 			const leadingZeroFormatter = new Intl.NumberFormat(undefined, {
