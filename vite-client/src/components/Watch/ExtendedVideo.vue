@@ -30,20 +30,22 @@
 			<div
 				:class="{
 					'btn-intro-skip-container': true,
-					enabled: isInterceptingWithIntro,
+					enabled: isInterceptingWithIntro || isInterceptingWithOutro,
 				}"
 			>
-				<button type="button" @click="skipIntro" class="btn btn-light">Skip Intro <font-awesome-icon size="lg" icon="fa-solid fa-forward" /></button>
+				<button type="button" @click="skipSegment" class="btn btn-light">
+					Skip {{ isInterceptingWithIntro ? 'Intro' : 'Outro' }} <font-awesome-icon size="lg" icon="fa-solid fa-forward" />
+				</button>
 			</div>
 			<div v-show="!dataLoading" class="video-controls-container">
 				<div class="timeline-container">
 					<div class="timeline">
 						<div
-							v-if="introData && introData?.type == 'intro'"
+							v-for="segment in segmentData"
 							class="timeline-intro-skip"
 							:style="{
-								'--intro-skip-start': introData.startms / videoData.duration,
-								'--intro-skip-end': introData.endms / videoData.duration,
+								'--intro-skip-start': segment.startms / videoData.duration,
+								'--intro-skip-end': segment.endms / videoData.duration,
 							}"
 						></div>
 
@@ -165,7 +167,8 @@
 				Progress: {{ videoData.duration - videoData.currentTime }}ms
 				Volume: {{ videoData.volume }}
 				Quality: T{{ videoData.quality?.totalVideoFrames }} / D{{ videoData.quality?.droppedVideoFrames }} / C{{ videoData.quality?.corruptedVideoFrames }}
-				IntroData: {{ JSON.stringify(introData) }}
+				IntroData: {{ JSON.stringify(segmentData) }}
+				AlreadySkipped: {{ JSON.stringify(alreadySkipped) }}
 				Buffers: 
 					{{ videoData.bufferedPercentage }}% / 100%
 					<div class="internal-video-devinfos-child">
@@ -217,7 +220,7 @@ export default {
 				seekable: undefined,
 			},
 			screenWidth: window.innerWidth,
-			introData: {},
+			segmentData: [],
 			alreadySkipped: [],
 		};
 	},
@@ -226,12 +229,12 @@ export default {
 		...mapState('auth', ['authToken', 'settings']),
 		...mapGetters('watch', ['videoSrc', 'entityObject']),
 		isInterceptingWithIntro() {
-			return (
-				this.introData &&
-				this.introData?.type == 'intro' &&
-				this.videoData?.currentTime >= this.introData?.startms &&
-				this.videoData?.currentTime <= this.introData?.endms
-			);
+			const introSegment = this.segmentData.find((x) => x.type == 'intro');
+			return introSegment && this.videoData?.currentTime >= introSegment?.startms && this.videoData?.currentTime <= introSegment?.endms;
+		},
+		isInterceptingWithOutro() {
+			const outroSegment = this.segmentData.find((x) => x.type == 'outro');
+			return outroSegment && this.videoData?.currentTime >= outroSegment?.startms && this.videoData?.currentTime <= outroSegment?.endms;
 		},
 	},
 	async mounted() {
@@ -279,10 +282,14 @@ export default {
 			}
 			return previewImgSrc;
 		},
-		skipIntro() {
+		skipSegment() {
 			if (this.isInterceptingWithIntro) {
 				console.log('Skipped Intro: ButtonSkip');
-				this.skip(this.introData?.endms + 2, true);
+				this.skip(this.segmentData.find((x) => x.type == 'intro')?.endms + 2, true);
+			}
+			if (this.isInterceptingWithOutro) {
+				console.log('Skipped Outro: ButtonSkip');
+				this.skip(this.segmentData.find((x) => x.type == 'outro')?.endms + 2, true);
 			}
 		},
 		async loadIntroData() {
@@ -293,7 +300,7 @@ export default {
 						`http://localhost:4897/intro/${this.currentSeries.ID}/${this.entityObject.season}/${this.entityObject.episode}`
 					);
 					const json = await response.json();
-					this.introData = json;
+					this.segmentData = json;
 				} catch (error) {
 					console.error('It was not possible to load any intro data maybe because the system is not available');
 				}
@@ -594,17 +601,15 @@ export default {
 				}
 
 				if (
-					this.introData &&
-					this.introData.type == 'intro' &&
-					!this.alreadySkipped.find((x) => 'intro') &&
-					video.currentTime >= this.introData.startms &&
-					video.currentTime <= this.introData.endms
+					(this.isInterceptingWithIntro && !this.alreadySkipped.find((x) => 'intro')) ||
+					(this.isInterceptingWithOutro && !this.alreadySkipped.find((x) => 'outro'))
 				) {
-					if (this.settings?.autoSkipIntro?.value == true) {
+					if (this.settings?.autoSkipSegments?.value == true) {
+						const segment = this.segmentData.segments.find((x) => (x.type == this.isInterceptingWithIntro ? 'intro' : 'outro'));
 						//Add 2 so the function does not loop itself
-						console.log('Skipped Intro: AutoSkip');
-						this.alreadySkipped.push('intro');
-						skip(this.introData.endms + 2, true);
+						console.log('Skipped ', segment.type.toUpperCase(), ': AutoSkip');
+						this.alreadySkipped.push(segment.type);
+						skip(this.segment.endms + 2, true);
 					}
 				}
 			});
