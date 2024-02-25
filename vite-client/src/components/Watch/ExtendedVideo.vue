@@ -254,6 +254,7 @@ export default {
 			video.volume = newValue;
 		},
 		async videoSrc() {
+			this.segmentData = [];
 			await this.loadIntroData();
 		},
 	},
@@ -294,7 +295,7 @@ export default {
 		},
 		async loadIntroData() {
 			this.alreadySkipped = [];
-			if (true) {
+			if (false) {
 				try {
 					const response = await fetch(
 						`http://localhost:4897/intro/${this.currentSeries.ID}/${this.entityObject.season}/${this.entityObject.episode}`
