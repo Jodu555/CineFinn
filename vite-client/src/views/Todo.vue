@@ -51,9 +51,9 @@
 						>- {{ state.permittedAccounts.find((x) => x.UUID == element.creator)?.username }}</span
 					>
 					<div style="width: 15%" class="d-flex justify-content-around">
-						<span v-if="element.references.aniworld" class="h6">A</span>
+						<a v-if="element.references.aniworld" target="_blank" :href="element.references.aniworld" class="h6">A</a>
 						<span v-if="element.references.zoro" class="h6">Z</span>
-						<span v-if="element.references.sto" class="h6">S</span>
+						<span v-if="element.references.sto" target="_blank" :href="element.references.aniworld" class="h6">S</span>
 					</div>
 					<ul v-if="element.scraped">
 						<li>Episodes: {{ element?.scraped?.informations?.seasons.flat()?.length }}</li>
@@ -188,6 +188,8 @@
 				</li>
 			</template>
 		</draggable>
+
+		<button v-if="state.list.length >= 8" class="btn btn-outline-primary mt-5 mb-5" @click="addEmptyItem">Add Item</button>
 
 		<div v-if="settings.developerMode.value" class="mt-5">
 			<pre>{{ state.list }}</pre>
