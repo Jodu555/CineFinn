@@ -51,10 +51,27 @@ async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceIt
 	}
 
 	if (providerCheck.aniworld) {
-		console.log('------ Compare Aniworld ------');
-		aniworld = await compareForNewReleasesAniWorld(series, ignoranceList);
-		console.log('------ Compare Aniworld ------');
-		fs.writeFileSync('dlListAniworld.json', JSON.stringify(aniworld, null, 3));
+		let stats: fs.Stats | null;
+		try {
+			stats = fs.statSync('dlListAniworld.json');
+		} catch (error) {
+			stats = null;
+		}
+		const lastAlteredFileMin = (Date.now() - stats?.mtimeMs) / 1000 / 60
+		if (stats != null && lastAlteredFileMin < 50) {
+			//Use the previous list maybe the user re ran cause there was an error
+			console.log('------ Compare Aniworld ------');
+			console.log('A Previous run from', lastAlteredFileMin, 'minutes ago was found!');
+			aniworld = JSON.parse(fs.readFileSync('dlListAniworld.json', 'utf-8'));
+			console.log('------ Compare Aniworld ------');
+			fs.writeFileSync('dlListAniworld.json', JSON.stringify(aniworld, null, 3));
+		} else {
+			//LETS CHECK IT
+			console.log('------ Compare Aniworld ------');
+			aniworld = await compareForNewReleasesAniWorld(series, ignoranceList);
+			console.log('------ Compare Aniworld ------');
+			fs.writeFileSync('dlListAniworld.json', JSON.stringify(aniworld, null, 3));
+		}
 	}
 
 	if (providerCheck.zoro) {

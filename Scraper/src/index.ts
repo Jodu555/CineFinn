@@ -159,6 +159,9 @@ async function checkForUpdates() {
 	const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: false, zoro: false });
 	console.timeEnd('Compare');
 
+	if (output.aniworld.length == 0)
+		return;
+
 	await kickOffAniDl(output.aniworld);
 
 	// const data: ExtendedEpisodeDownload[] = JSON.parse(fs.readFileSync('dlListAniworld.json', 'utf-8'));
