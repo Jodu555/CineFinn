@@ -75,7 +75,7 @@ function registerCommands() {
 				if (serie.references.aniworld == undefined) {
 					return 'The Series has no reference point for aniworld';
 				}
-				getAniworldInfos(serie.references.aniworld as string);
+				getAniworldInfos({ url: serie.references.aniworld as string });
 			}
 			return '';
 		})

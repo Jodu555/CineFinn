@@ -91,7 +91,7 @@ socket.on('connect', async () => {
 
 	// console.log(infos.seasons[0][16]);
 
-	await checkForUpdates();
+	// await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
@@ -351,7 +351,7 @@ async function manuallyCraftTheList() {
 	fs.writeFileSync('dlList.json', JSON.stringify(output, null, 3));
 }
 
-function buildFunction(method, cb) {
+function buildFunction(method: string, cb: (any: any) => any) {
 	socket.on(`call${method}`, async (data) => {
 		const returnValue = await cb(data);
 		socket.emit(`return${method}`, returnValue);

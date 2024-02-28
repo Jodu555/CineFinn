@@ -66,7 +66,7 @@ export interface ZoroReturn {
 	episodes: ExtendedZoroEpisode[];
 }
 
-const getAniworldInfos = buildAwaitSocketReturn<AniWorldSeriesInformations, any>('AniworldData');
+const getAniworldInfos = buildAwaitSocketReturn<AniWorldSeriesInformations, { url: string }>('AniworldData');
 const getZoroInfos = buildAwaitSocketReturn<ZoroReturn, string | number>('ZoroData');
 
 const manageTitle = buildAwaitSocketReturn('manageTitle');
@@ -75,7 +75,7 @@ function buildAwaitSocketReturn<R, T>(method: string): (arg0: T) => Promise<R> {
 	return (input: T) => {
 		return new Promise<R>((resolve, reject) => {
 			if (!$socket) return reject();
-			const timeout = setTimeout(() => reject(), 1000 * 5);
+			const timeout = setTimeout(() => reject('Timeout reached'), 1000 * 60 * 2);
 			// TODO: Why is this failing
 			// @ts-ignore:next-line
 			$socket.once(`return${method}`, (data: R) => {
