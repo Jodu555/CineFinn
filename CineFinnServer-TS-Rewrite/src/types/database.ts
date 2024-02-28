@@ -27,7 +27,7 @@ export interface DatabaseParsedTodoItem {
 	creator?: string;
 	categorie: 'Aniworld' | 'STO' | 'KDrama';
 	references: References;
-	scraped?: AniWorldSeriesInformations;
+	scraped?: AniWorldSeriesInformations | true;
 }
 
 export type References = Record<'aniworld' | 'zoro' | 'sto', string>;

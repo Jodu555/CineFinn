@@ -100,6 +100,7 @@ const initialize = (socket: ExtendedSocket) => {
 			if (item) {
 				console.log('Updating Todo', todo.ID, 'with', todo.name,);
 				if (isScraperSocketConnected() && !todo.scraped && todo.references.aniworld !== '') {
+					todo.scraped = true;
 					new Promise<void>(async (resolve, reject) => {
 						try {
 							console.log('Kick off scraper');
@@ -115,6 +116,8 @@ const initialize = (socket: ExtendedSocket) => {
 							resolve()
 						} catch (error) {
 							console.log('Error while firing of scraper aniworld infos:', error);
+							todo.scraped = null;
+							await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
 							reject(error);
 						}
 					})
