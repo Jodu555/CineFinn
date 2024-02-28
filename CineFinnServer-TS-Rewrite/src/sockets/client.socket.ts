@@ -98,12 +98,12 @@ const initialize = (socket: ExtendedSocket) => {
 		for (const todo of list) {
 			const item = await database.get<DatabaseTodoItem>('todos').getOne({ ID: todo.ID });
 			if (item) {
-				console.log('Updating Todo', todo.ID, 'with', todo.name,);
 				if (isScraperSocketConnected() && !todo.scraped && todo.references.aniworld !== '') {
+					console.log('Updating Todo', todo.ID, 'with', todo.name,);
 					todo.scraped = true;
 					new Promise<void>(async (resolve, reject) => {
 						try {
-							console.log('Kick off scraper');
+							console.log('Kicking off scraper');
 							const infos = await getAniworldInfos({ url: todo.references.aniworld });
 							todo.scraped = infos;
 							await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
