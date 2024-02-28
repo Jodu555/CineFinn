@@ -4,6 +4,8 @@ import { Episode, Movie, Series, filenameParser } from '../classes/series';
 import child_process from 'child_process';
 import pLimit from 'p-limit';
 import { CommandManager } from '@jodu555/commandmanager';
+import { getIORedis } from './utils';
+import { Queue, QueueEvents } from 'bullmq';
 const commandManager = CommandManager.getCommandManager();
 const { getVideoDurationInSeconds } = require('get-video-duration');
 
@@ -16,6 +18,7 @@ interface PromissesJob {
 		serieID: string;
 		entity: Episode | Movie;
 		lang: string;
+		filePath: string,
 	}
 	run: () => Promise<void>;
 }
@@ -49,16 +52,18 @@ function generateEntityImages(i: number, serie: Series, entity: Episode | Movie,
 			continue;
 		}
 
+		const { dir, name, ext } = path.parse(entity.filePath);
+		const filePath = entity.langs.length > 1 ? path.join(dir, `${name.split('_')[0]}_${lang}${ext}`) : entity.filePath;
+
 		returnArr.push({
 			meta: {
 				serieID: serie.ID,
 				entity,
 				lang,
+				filePath,
 			},
 			run: () => new Promise<void>(async (resolve, reject) => {
 				try {
-					const { dir, name, ext } = path.parse(entity.filePath);
-					const filePath = entity.langs.length > 1 ? path.join(dir, `${name.split('_')[0]}_${lang}${ext}`) : entity.filePath;
 
 					const command = `ffmpeg -i "${filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
 					// console.log(command);
@@ -121,6 +126,26 @@ const generateImages = async (series: Series[], cleanup: () => void = () => { })
 
 	console.log(`Every Series has been checked and there are ${promises.length} Processes Waiting!`);
 
+	// const connection = getIORedis();
+	// const previewImageQueue = 'previewImageQueue'
+	// const queue = new Queue(previewImageQueue, { connection });
+
+
+	// const queueEvents = new QueueEvents(previewImageQueue, { connection });
+
+	// promises.forEach(p => {
+	// 	queue.add(p.meta.serieID, p.meta, {
+	// 		removeOnComplete: true,
+	// 	})
+	// })
+
+	// await new Promise<void>((resolve, reject) => {
+	// 	queueEvents.once('drained', async () => {
+	// 		console.log('Queue drained');
+	// 		queue.drain();
+	// 		resolve();
+	// 	});
+	// });
 	await Promise.all(promises.map(p => {
 		return limit(
 			() =>

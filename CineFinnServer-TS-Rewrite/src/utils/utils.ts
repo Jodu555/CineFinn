@@ -1,5 +1,6 @@
 import fs from 'fs';
 import { RemoteSocket, Server, Socket } from 'socket.io';
+import IORedis from 'ioredis';
 import { Series } from '../classes/series';
 import { crawlAndIndex, mergeSeriesArrays } from './crawler';
 import { ActiveJob, SerieObject } from '../types/classes';
@@ -11,6 +12,7 @@ let series: Series[] = null;
 let activeJobs: ActiveJob[] = [];
 let io: Server = null;
 let authHelper: AuthenticationHelper<User> = null;
+let redisConn: IORedis = null;
 
 function debounce(cb: Function, delay = 1000) {
 	let timeout: NodeJS.Timeout;
@@ -59,6 +61,9 @@ const setAuthHelper = (_authHelper: AuthenticationHelper<User>) => (authHelper =
 const getIO = () => io;
 const setIO = (_io: Server) => (io = _io);
 
+const getIORedis = (): IORedis => redisConn;
+const setIORedis = (_redisConn: IORedis) => (redisConn = _redisConn);
+
 type toAllSocketsFunctionCB = (socket: ExtendedRemoteSocket) => void;
 type toAllSocketsFunctionFilter = (socket: ExtendedRemoteSocket) => boolean;
 
@@ -77,4 +82,4 @@ function deepMerge<T>(current: T, updates: T): T {
 	return current;
 }
 
-export { getSeries, setSeries, getActiveJobs, setActiveJobs, getAuthHelper, setAuthHelper, getIO, setIO, debounce, toAllSockets, deepMerge };
+export { getSeries, setSeries, getActiveJobs, setActiveJobs, getAuthHelper, setAuthHelper, getIO, setIO, getIORedis, setIORedis, debounce, toAllSockets, deepMerge };
