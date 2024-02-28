@@ -1,4 +1,3 @@
-import { SerieEntity } from './../../Scraper/src/utils/types';
 import fs from 'fs';
 import path from 'path';
 import getVideoDurationInSeconds from 'get-video-duration';
