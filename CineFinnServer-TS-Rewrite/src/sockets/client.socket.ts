@@ -87,6 +87,8 @@ const initialize = (socket: ExtendedSocket) => {
 		);
 	});
 
+
+
 	socket.on('todoListUpdate', async (list) => {
 		if (!isPermitted(auth.user, Role.Mod)) {
 			const todosDB = await database.get<DatabaseTodoItem>('todos').get();
@@ -95,34 +97,16 @@ const initialize = (socket: ExtendedSocket) => {
 			return;
 		}
 		const didID: string[] = [];
+		const scrapeJobs = [];
 		for (const todo of list) {
 			const item = await database.get<DatabaseTodoItem>('todos').getOne({ ID: todo.ID });
 			if (item) {
 				if (isScraperSocketConnected() && !todo.scraped && todo.references.aniworld !== '') {
-					console.log('Updating Todo', todo.ID, 'with', todo.name,);
 					todo.scraped = true;
-					new Promise<void>(async (resolve, reject) => {
-						try {
-							console.log('Kicking off scraper');
-							const infos = await getAniworldInfos({ url: todo.references.aniworld });
-							todo.scraped = infos;
-							await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
-							await toAllSockets(
-								(s) => {
-									s.emit('todoListUpdate', list);
-								},
-								(s) => s.auth.type == 'client'
-							);
-							resolve()
-						} catch (error) {
-							console.log('Error while firing of scraper aniworld infos:', error);
-							todo.scraped = null;
-							await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
-							reject(error);
-						}
-					})
+					scrapeJobs.push(() => {
+						backgroundScrapeTodo(todo)
+					});
 				}
-
 				await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
 			} else {
 				await database.get('todos').create({ ID: todo.ID, content: JSON.stringify(todo) });
@@ -144,6 +128,8 @@ const initialize = (socket: ExtendedSocket) => {
 			},
 			(s) => s.auth.type == 'client' && s.id != socket.id
 		);
+
+		scrapeJobs.forEach(f => f());
 	});
 
 	socket.on('disconnect', () => {
@@ -152,6 +138,41 @@ const initialize = (socket: ExtendedSocket) => {
 
 	// socket.emit('reloadSeries', cleanupSeriesBeforeFrontResponse(getSeries()));
 };
+
+async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
+	//Create an Independent Copy of todo
+	todo = JSON.parse(JSON.stringify(todo));
+
+	console.log('Updating Todo', todo.ID, 'with', todo.name,);
+	new Promise<void>(async (resolve, reject) => {
+		try {
+
+			console.log('Kicking off scraper');
+			const infos = await getAniworldInfos({ url: todo.references.aniworld });
+			todo.scraped = infos;
+			//Updating db todo
+			await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
+
+			//getting full db todo list
+			const todosDBList = await database.get<DatabaseTodoItem>('todos').get();
+			const list: DatabaseParsedTodoItem[] = todosDBList.map((t) => JSON.parse(t.content));
+
+			//sending out full todo list as update
+			await toAllSockets(
+				(s) => {
+					s.emit('todoListUpdate', list);
+				},
+				(s) => s.auth.type == 'client'
+			);
+			resolve()
+		} catch (error) {
+			console.log('Error while firing of scraper aniworld infos:', error);
+			todo.scraped = null;
+			await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
+			reject(error);
+		}
+	})
+}
 
 async function sendSiteReload() {
 	await toAllSockets(
@@ -188,4 +209,4 @@ async function sendWatchListChange(
 	}
 }
 
-export { initialize, sendSiteReload, sendWatchListChange, sendSeriesReloadToAll };
+export { initialize, sendSiteReload, sendWatchListChange, sendSeriesReloadToAll, backgroundScrapeTodo };
