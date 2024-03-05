@@ -249,11 +249,11 @@ export default {
 		handleVideoChange(season = -1, episode = -1, movie = -1, langchange = false, lang, silent = false) {
 			return new Promise((resolve, reject) => {
 				console.log('Came', 0);
-				if (!silent && !this.isOwner) return reject('!silent && !this.isOwner');
+				if (!silent && !this.isOwner) return reject(new Error('!silent && !this.isOwner'));
 				console.log('Came', 1);
-				if (langchange && this.currentLanguage == lang) return reject('langchange && this.currentLanguage == lang');
+				if (langchange && this.currentLanguage == lang) return reject(new Error('langchange && this.currentLanguage == lang'));
 				const video = document.querySelector('video');
-				if (!video) return reject('!video');
+				if (!video) return reject(new Error('!video'));
 				console.log('Came', 2);
 
 				//TODO: Maybe add here default language from user prefered settings

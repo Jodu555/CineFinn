@@ -215,3 +215,11 @@ server.listen(PORT, async () => {
 	// 	]),
 	// });
 });
+
+process.on('unhandledRejection', (reason: string, p: Promise<any>) => {
+	console.error('Unhandled Rejection at:', p, 'reason:', reason);
+});
+
+process.on('uncaughtException', (error: Error) => {
+	console.error(`Caught exception: ${error}\n` + `Exception origin: ${error.stack}`);
+});
