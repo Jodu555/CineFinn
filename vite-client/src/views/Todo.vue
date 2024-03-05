@@ -59,11 +59,15 @@
 					<ul v-if="element.scraped">
 						<li>Episodes: {{ element?.scraped?.informations?.seasons.flat()?.length }}</li>
 						<li>
-							&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk: {{ Math.round((element?.scraped?.informations?.seasons.flat()?.length * 260) / 1024) }}GB
+							&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk:
+							{{ parseFloat(parseFloat((element?.scraped?.informations?.seasons.flat()?.length * constants.mbperEpisode) / 1024).toFixed(1)) }}GB
 						</li>
 						<template v-if="element?.scraped?.informations?.movies != undefined">
 							<li>Movies: {{ element?.scraped?.informations?.movies?.length }}</li>
-							<li>&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk: {{ Math.round((element?.scraped?.informations?.movies?.length * 1500) / 1024) }}GB</li>
+							<li>
+								&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk:
+								{{ parseFloat(parseFloat((element?.scraped?.informations?.movies?.length * constants.mbperMovie) / 1024).toFixed(1)) }}GB
+							</li>
 						</template>
 						<li>
 							<em>
@@ -218,6 +222,11 @@ const settings = computed(() => store.state.auth.settings);
 const userInfo = computed(() => store.state.auth.userInfo);
 
 const loading = ref(false);
+
+const constants = reactive({
+	mbperEpisode: 260,
+	mbperMovie: 1024,
+});
 
 const state = reactive({
 	list: [],
