@@ -351,29 +351,29 @@ async function manuallyCraftTheList() {
 	fs.writeFileSync('dlList.json', JSON.stringify(output, null, 3));
 }
 
-function buildFunction(method: string, cb: (any: any) => any) {
-	socket.on(`call${method}`, async (data) => {
+function buildFunction<R, T>(method: string, cb: (any: T) => Promise<R>) {
+	socket.on(`call${method}`, async (data: T & { __refID: string }) => {
 		const __refID = data.__refID;
 		delete data.__refID;
-		const returnValue = await cb(data);
+		const returnValue = await cb(data as T);
 		socket.emit(`return${method}`, { ...returnValue, __refID });
 	});
 }
 
-buildFunction('AniworldData', async ({ url }) => {
+buildFunction<any, { url: string }>('AniworldData', async ({ url }) => {
 	const anime = new Aniworld(url);
 	const informations = await anime.parseInformations();
 	return { informations };
 });
 
-buildFunction('ZoroData', async ({ ID }) => {
-	const zoro = new Zoro(ID);
+buildFunction<any, { ID: string | number }>('ZoroData', async ({ ID }) => {
+	const zoro = new Zoro(String(ID));
 	const informations = await zoro.getExtendedEpisodeList();
 	return { informations };
 });
 
-buildFunction('manageTitle', async ({ title, aniworld }) => {
-	function doStuff(input, aniworld = true) {
+buildFunction<any, { title: string, aniworld: boolean }>('manageTitle', async ({ title, aniworld }) => {
+	function doStuff(input: string, aniworld = true) {
 		input = input
 			.replaceAll('!', '')
 			.replaceAll('+', '')
