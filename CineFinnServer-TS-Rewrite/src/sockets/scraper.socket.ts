@@ -67,7 +67,7 @@ export interface ZoroReturn {
 	episodes: ExtendedZoroEpisode[];
 }
 
-const getAniworldInfos = buildAwaitSocketReturn<AniWorldSeriesInformations, { url: string }>('AniworldData');
+const getAniworldInfos = buildAwaitSocketReturn<AniWorldSeriesInformations | undefined, { url: string }>('AniworldData');
 const getZoroInfos = buildAwaitSocketReturn<ZoroReturn, { ID: string | number }>('ZoroData');
 
 const manageTitle = buildAwaitSocketReturn('manageTitle');
