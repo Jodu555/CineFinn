@@ -11,6 +11,7 @@
 		</div>
 
 		<draggable
+			v-if="!loading"
 			v-auto-animate
 			class="list-group"
 			tag="ul"
@@ -56,7 +57,7 @@
 						<span v-if="element.references.sto" target="_blank" :href="element.references.aniworld" class="h6">S</span>
 					</div>
 
-					<ul v-if="element.scraped">
+					<ul v-if="element.scraped != undefined && element.scraped != true && element.scraped.informations?.informations != undefined">
 						<li>Episodes: {{ element?.scraped?.informations?.seasons.flat()?.length }}</li>
 						<li>
 							&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk:
@@ -237,7 +238,14 @@ onMounted(async () => {
 	document.title = `Cinema | Todo`;
 
 	instance.$socket.on('todoListUpdate', (list) => {
+		const editedIDs = state.list.filter((x) => x.edited == true).map((x) => x.ID);
 		state.list = list;
+		state.list = state.list.map((x) => {
+			if (editedIDs.find((y) => y == x.ID)) {
+				x.edited = true;
+			}
+			return x;
+		});
 	});
 	loading.value = true;
 	const response = await instance.$networking.get('/todo/');
