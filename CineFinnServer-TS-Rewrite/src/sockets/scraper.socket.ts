@@ -1,5 +1,6 @@
 import { ExtendedSocket } from '../types/session';
 import { Langs } from '../types/classes';
+import { randomUUID } from 'node:crypto';
 
 let $socket: ExtendedSocket;
 
@@ -74,15 +75,21 @@ const manageTitle = buildAwaitSocketReturn('manageTitle');
 function buildAwaitSocketReturn<R, T>(method: string): (arg0: T) => Promise<R> {
 	return (input: T) => {
 		return new Promise<R>((resolve, reject) => {
-			if (!$socket) return reject();
+			const __refID = randomUUID().split('-')[0];
+			if (!$socket) return reject('Socket not reachable');
 			const timeout = setTimeout(() => reject('Timeout reached'), 1000 * 60 * 2);
+			const listener = (data: R & { __refID: string }) => {
+				if (data.__refID == __refID) {
+					delete data.__refID;
+					resolve(data);
+					clearTimeout(timeout);
+					$socket.off(`return${method}`, listener);
+				}
+			}
 			// TODO: Why is this failing
 			// @ts-ignore:next-line
-			$socket.once(`return${method}`, (data: R) => {
-				resolve(data);
-				clearTimeout(timeout);
-			});
-			$socket.emit(`call${method}`, input);
+			$socket.on(`return${method}`, listener);
+			$socket.emit(`call${method}`, { ...input, __refID });
 		});
 	};
 }

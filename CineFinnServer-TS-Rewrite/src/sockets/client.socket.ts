@@ -141,13 +141,10 @@ const initialize = (socket: ExtendedSocket) => {
 
 async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 	//Create an Independent Copy of todo
-	todo = JSON.parse(JSON.stringify(todo));
 
-	console.log('Updating Todo', todo.ID, 'with', todo.name,);
+	todo = JSON.parse(JSON.stringify(todo));
 	new Promise<void>(async (resolve, reject) => {
 		try {
-
-			console.log('Kicking off scraper');
 			const infos = await getAniworldInfos({ url: todo.references.aniworld });
 			todo.scraped = infos;
 			//Updating db todo

@@ -55,6 +55,7 @@
 						<span v-if="element.references.zoro" class="h6">Z</span>
 						<span v-if="element.references.sto" target="_blank" :href="element.references.aniworld" class="h6">S</span>
 					</div>
+
 					<ul v-if="element.scraped">
 						<li>Episodes: {{ element?.scraped?.informations?.seasons.flat()?.length }}</li>
 						<li>
@@ -64,6 +65,15 @@
 							<li>Movies: {{ element?.scraped?.informations?.movies?.length }}</li>
 							<li>&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk: {{ Math.round((element?.scraped?.informations?.movies?.length * 1500) / 1024) }}GB</li>
 						</template>
+						<li>
+							<em>
+								Source: {{ element?.scraped.informations.informations.infos }}
+								<br />
+								<a :href="element?.scraped.informations.url">{{ element?.scraped.informations.url }}</a>
+								<br />
+								<p style="cursor: pointer" @click="deleteParsedInfos(element.ID)"><u>Delete Scraped infos</u></p>
+							</em>
+						</li>
 					</ul>
 
 					<div v-if="element.edited">
@@ -325,6 +335,18 @@ const useTodo = async (ID) => {
 };
 
 const save = () => {
+	pushTodoListUpdate();
+};
+
+const deleteParsedInfos = (ID) => {
+	state.list = state.list.map((x) => {
+		if (x.ID == ID) {
+			delete x?.scraped;
+			return x;
+		} else {
+			return x;
+		}
+	});
 	pushTodoListUpdate();
 };
 

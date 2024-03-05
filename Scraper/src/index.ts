@@ -91,7 +91,7 @@ socket.on('connect', async () => {
 
 	// console.log(infos.seasons[0][16]);
 
-	await checkForUpdates();
+	// await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
@@ -353,8 +353,10 @@ async function manuallyCraftTheList() {
 
 function buildFunction(method: string, cb: (any: any) => any) {
 	socket.on(`call${method}`, async (data) => {
+		const __refID = data.__refID;
+		delete data.__refID;
 		const returnValue = await cb(data);
-		socket.emit(`return${method}`, returnValue);
+		socket.emit(`return${method}`, { ...returnValue, __refID });
 	});
 }
 
