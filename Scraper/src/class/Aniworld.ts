@@ -33,35 +33,39 @@ class Aniworld {
 		this.imageSRCPrefix = 'https://aniworld.to';
 	}
 
-	async parseInformations(): Promise<AniWorldSeriesInformations> {
-		const response = await axios.get(this.url, {
-			headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36' },
-		});
+	async parseInformations(): Promise<null | AniWorldSeriesInformations> {
+		try {
+			const response = await axios.get(this.url, {
+				headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36' },
+			});
 
-		const additional = this.parseAdditionalInformations(response.data);
+			const additional = this.parseAdditionalInformations(response.data);
 
-		const { numberOfSeasons, hasMovies } = this.parseEntityInformations(response.data);
+			const { numberOfSeasons, hasMovies } = this.parseEntityInformations(response.data);
 
-		const output: AniWorldSeriesInformations = { url: this.url, informations: additional, hasMovies, seasons: new Array(numberOfSeasons) };
+			const output: AniWorldSeriesInformations = { url: this.url, informations: additional, hasMovies, seasons: new Array(numberOfSeasons) };
 
-		console.log('Parsed: ');
-		console.log(' ' + this.url);
-		console.log(`   => Seasons: ${numberOfSeasons} - Movies: ${hasMovies}`);
+			console.log('Parsed: ');
+			console.log(' ' + this.url);
+			console.log(`   => Seasons: ${numberOfSeasons} - Movies: ${hasMovies}`);
 
-		if (hasMovies) {
-			const movResponse = await axios.get(`${this.url}/filme`);
-			output.movies = this.getListInformations(movResponse.data);
-			console.log(`    => Got ${output.movies.length} Movies`);
+			if (hasMovies) {
+				const movResponse = await axios.get(`${this.url}/filme`);
+				output.movies = this.getListInformations(movResponse.data);
+				console.log(`    => Got ${output.movies.length} Movies`);
+			}
+
+			output.seasons[0] = this.getListInformations(response.data);
+			console.log(`    => Got Season ${0} with ${output.seasons[0].length} Episodes`);
+			for (let i = 1; i < numberOfSeasons; i++) {
+				const seaResponse = await axios.get(`${this.url}/staffel-${i + 1}`);
+				output.seasons[i] = this.getListInformations(seaResponse.data);
+				console.log(`    => Got Season ${i} with ${output.seasons[i].length} Episodes`);
+			}
+			return output;
+		} catch (error) {
+			return null;
 		}
-
-		output.seasons[0] = this.getListInformations(response.data);
-		console.log(`    => Got Season ${0} with ${output.seasons[0].length} Episodes`);
-		for (let i = 1; i < numberOfSeasons; i++) {
-			const seaResponse = await axios.get(`${this.url}/staffel-${i + 1}`);
-			output.seasons[i] = this.getListInformations(seaResponse.data);
-			console.log(`    => Got Season ${i} with ${output.seasons[i].length} Episodes`);
-		}
-		return output;
 	}
 
 	parseEntityInformations(data: string): { numberOfSeasons: number; hasMovies: boolean } {
