@@ -239,18 +239,19 @@ onMounted(async () => {
 
 	instance.$socket.on('todoListUpdate', (list) => {
 		const editedIDs = state.list.filter((x) => x.edited == true).map((x) => x.ID);
-		state.list = list;
-		state.list = state.list.map((x) => {
-			if (editedIDs.find((y) => y == x.ID)) {
-				x.edited = true;
-			}
-			return x;
-		});
+		state.list = state.list
+			.map((x) => {
+				if (editedIDs.find((y) => y == x.ID)) {
+					x.edited = true;
+				}
+				return x;
+			})
+			.sort((a, b) => a.order - b.order);
 	});
 	loading.value = true;
 	const response = await instance.$networking.get('/todo/');
 	if (response.success) {
-		state.list = response.json;
+		state.list = response?.json?.sort((a, b) => a.order - b.order);
 	}
 
 	const accResponse = await instance.$networking.get('/todo/permittedAccounts');
