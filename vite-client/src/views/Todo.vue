@@ -57,31 +57,44 @@
 						<span v-if="element.references.sto" target="_blank" :href="element.references.aniworld" class="h6">S</span>
 					</div>
 
-					<ul v-if="element.scraped != undefined && element.scraped != true && element.scraped.informations?.informations != undefined">
-						<li>Episodes: {{ element?.scraped?.informations?.seasons.flat()?.length }}</li>
+					<ul v-if="element.scraped != undefined && element.scraped != true && element.scraped != undefined">
+						<li>Episodes: {{ element?.scraped?.seasons?.flat()?.length }}</li>
 						<li>
 							&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk:
-							{{ parseFloat(parseFloat((element?.scraped?.informations?.seasons.flat()?.length * constants.mbperEpisode) / 1024).toFixed(1)) }}GB
+							{{ parseFloat(parseFloat((element?.scraped?.seasons?.flat()?.length * constants.mbperEpisode) / 1024).toFixed(1)) }}GB
 						</li>
-						<template v-if="element?.scraped?.informations?.movies != undefined">
-							<li>Movies: {{ element?.scraped?.informations?.movies?.length }}</li>
+						<template v-if="element?.scraped?.movies != undefined">
+							<li>Movies: {{ element?.scraped?.movies?.length }}</li>
 							<li>
 								&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk:
-								{{ parseFloat(parseFloat((element?.scraped?.informations?.movies?.length * constants.mbperMovie) / 1024).toFixed(1)) }}GB
+								{{ parseFloat(parseFloat((element?.scraped?.movies?.length * constants.mbperMovie) / 1024).toFixed(1)) }}GB
 							</li>
 						</template>
 						<li>
 							<em>
-								Source: {{ element?.scraped.informations.informations.infos }}
+								Source: {{ element?.scraped?.infos }}
 								<br />
-								<a :href="element?.scraped.informations.url">{{ element?.scraped.informations.url }}</a>
+								<a :href="element?.scrape?.url">{{ element?.scraped?.url }}</a>
 								<br />
 								<p style="cursor: pointer" @click="deleteParsedInfos(element.ID)"><u>Delete Scraped infos</u></p>
 							</em>
 						</li>
 					</ul>
 
-					<p v-if="element.scrapingError" class="h6 text-danger">!!! {{ element.scrapingError }} !!!</p>
+					<div v-if="element.scraped == true" class="m-3 d-flex justify-content-between">
+						<div class="spinner-border text-warning spinner-border-xs" role="status">
+							<span class="visually-hidden">Loading...</span>
+						</div>
+						<small class="text-danger" style="cursor: pointer" @click="retryScrapeTodo(element.ID)"><u>Retry</u></small>
+					</div>
+
+					<span v-if="element.scrapingError" class="h6 text-danger">
+						<span v-if="element.scrapingError"
+							>!!! {{ element.scrapingError }} !!! &nbsp;&nbsp;&nbsp;&nbsp;<small style="cursor: pointer" @click="retryScrapeTodo(element.ID)"
+								><u>Retry</u></small
+							></span
+						>
+					</span>
 
 					<div v-if="element.edited">
 						<div class="row text-center mt-2 mb-2 align-items-center">
@@ -363,6 +376,19 @@ const deleteParsedInfos = (ID) => {
 	state.list = state.list.map((x) => {
 		if (x.ID == ID) {
 			delete x?.scraped;
+			return x;
+		} else {
+			return x;
+		}
+	});
+	pushTodoListUpdate();
+};
+
+const retryScrapeTodo = (ID) => {
+	state.list = state.list.map((x) => {
+		if (x.ID == ID) {
+			delete x?.scraped;
+			delete x?.scrapingError;
 			return x;
 		} else {
 			return x;

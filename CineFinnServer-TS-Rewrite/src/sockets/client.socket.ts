@@ -142,9 +142,16 @@ const initialize = (socket: ExtendedSocket) => {
 async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 	//Create an Independent Copy of todo
 
-	todo = JSON.parse(JSON.stringify(todo));
+
+	todo = JSON.parse(JSON.stringify(todo)) as DatabaseParsedTodoItem;
 	new Promise<void>(async (resolve, reject) => {
 		try {
+			if (todo.scrapingError != undefined && todo.scrapingError?.trim() != '') {
+				throw new Error('Got Scraping error and waiting for user to intervene and retry');
+			}
+			const time = Date.now();
+			console.log('Kicked off scraper', todo.references.aniworld);
+
 			const infos = await getAniworldInfos({ url: todo.references.aniworld });
 			if (!infos) {
 				console.log('Got Bad Infos', infos, 'for url', todo.references.aniworld);
@@ -162,6 +169,9 @@ async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 			const todosDBList = await database.get<DatabaseTodoItem>('todos').get();
 			const list: DatabaseParsedTodoItem[] = todosDBList.map((t) => JSON.parse(t.content));
 
+			console.log('Scrape and update for', todo.references.aniworld, 'took', Date.now() - time, 'ms');
+
+
 			//sending out full todo list as update
 			await toAllSockets(
 				(s) => {
@@ -171,7 +181,8 @@ async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 			);
 			resolve()
 		} catch (error) {
-			console.log('Error while firing of scraper aniworld infos:', error);
+			console.log('Error while backgroundScrapeTodo:', error);
+			todo.scraped = undefined;
 			delete todo.scraped;
 			todo.scrapingError = 'Error while issuing Scraper';
 			await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
