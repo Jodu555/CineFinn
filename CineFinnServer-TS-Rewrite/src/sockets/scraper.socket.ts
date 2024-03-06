@@ -13,6 +13,15 @@ const initialize = async (socket: ExtendedSocket) => {
 		console.log('Socket DisConnection:', auth.type.toUpperCase());
 		$socket = null;
 	});
+
+	// const i = await getAniworldInfos({ url: 'aaaaaaaaaaaaa' })
+
+	// if (!i) {
+	// 	console.log('i bad', i);
+	// 	return;
+	// }
+
+	// console.log(`i`, i);
 };
 
 export interface AniWorldEntity {
@@ -67,20 +76,25 @@ export interface ZoroReturn {
 	episodes: ExtendedZoroEpisode[];
 }
 
-const getAniworldInfos = buildAwaitSocketReturn<AniWorldSeriesInformations | void, { url: string }>('AniworldData');
-const getZoroInfos = buildAwaitSocketReturn<ZoroReturn | void, { ID: string | number }>('ZoroData');
+const getAniworldInfos = buildAwaitSocketReturn<AniWorldSeriesInformations, { url: string }>('AniworldData');
+const getZoroInfos = buildAwaitSocketReturn<ZoroReturn, { ID: string | number }>('ZoroData');
 
 const manageTitle = buildAwaitSocketReturn('manageTitle');
 
-function buildAwaitSocketReturn<R, T>(method: string): (arg0: T) => Promise<R> {
+function buildAwaitSocketReturn<R, T>(method: string): (arg0: T) => Promise<R | void> {
 	return (input: T) => {
-		return new Promise<R>((resolve, reject) => {
+		return new Promise<R | void>((resolve, reject) => {
 			const __refID = randomUUID().split('-')[0];
 			if (!$socket) return reject(new Error('Socket not reachable'));
 			const timeout = setTimeout(() => reject(new Error('Timeout reached')), 1000 * 60 * 2);
-			const listener = (data: R & { __refID: string }) => {
+			const listener = (data: R & { __returnValue: boolean, __refID: string }) => {
 				if (data.__refID == __refID) {
 					delete data.__refID;
+					const __returnValue = data.__returnValue;
+					delete data.__returnValue;
+					if (__returnValue == false) {
+						resolve(null);
+					}
 					resolve(data);
 					clearTimeout(timeout);
 					$socket.off(`return${method}`, listener);

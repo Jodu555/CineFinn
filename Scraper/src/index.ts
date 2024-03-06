@@ -3,7 +3,7 @@ const crypto = require('crypto');
 require('dotenv').config();
 import axios from 'axios';
 import io from 'socket.io-client';
-import Aniworld from './class/Aniworld';
+import Aniworld, { AniWorldSeriesInformations } from './class/Aniworld';
 import { compareForNewReleases, compareForNewReleasesAniWorld, compareForNewReleasesZoro } from './utils/compare';
 const { similar } = require('./utils/utils');
 import Zoro from './class/Zoro';
@@ -361,19 +361,20 @@ async function manuallyCraftTheList() {
 	fs.writeFileSync('dlList.json', JSON.stringify(output, null, 3));
 }
 
-function buildFunction<R, T>(method: string, cb: (any: T) => Promise<R>) {
+function buildFunction<R, T>(method: string, cb: (arg: T) => Promise<R | void>) {
 	socket.on(`call${method}`, async (data: T & { __refID: string }) => {
 		const __refID = data.__refID;
 		delete data.__refID;
 		const returnValue = await cb(data as T);
-		socket.emit(`return${method}`, { ...returnValue, __refID });
+		socket.emit(`return${method}`, { ...returnValue, __refID, __returnValue: Boolean(returnValue) });
 	});
 }
 
-buildFunction<any, { url: string }>('AniworldData', async ({ url }) => {
+buildFunction<AniWorldSeriesInformations, { url: string }>('AniworldData', async ({ url }) => {
+	console.log('Recieved AniworldData', url);
 	const anime = new Aniworld(url);
 	const informations = await anime.parseInformations();
-	return { informations };
+	return informations;
 });
 
 buildFunction<any, { ID: string | number }>('ZoroData', async ({ ID }) => {

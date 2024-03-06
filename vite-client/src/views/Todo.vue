@@ -81,6 +81,8 @@
 						</li>
 					</ul>
 
+					<p v-if="element.scrapingError" class="h6 text-danger">!!! {{ element.scrapingError }} !!!</p>
+
 					<div v-if="element.edited">
 						<div class="row text-center mt-2 mb-2 align-items-center">
 							<div class="col-2">
@@ -239,7 +241,8 @@ onMounted(async () => {
 
 	instance.$socket.on('todoListUpdate', (list) => {
 		const editedIDs = state.list.filter((x) => x.edited == true).map((x) => x.ID);
-		state.list = state.list
+
+		state.list = list
 			.map((x) => {
 				if (editedIDs.find((y) => y == x.ID)) {
 					x.edited = true;

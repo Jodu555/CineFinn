@@ -147,8 +147,13 @@ async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 		try {
 			const infos = await getAniworldInfos({ url: todo.references.aniworld });
 			if (!infos) {
+				console.log('Got Bad Infos', infos, 'for url', todo.references.aniworld);
 				throw new Error('No Aniworld infos found');
 			}
+
+			if (todo.scrapingError)
+				delete todo.scrapingError;
+
 			todo.scraped = infos;
 			//Updating db todo
 			await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
@@ -167,10 +172,21 @@ async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 			resolve()
 		} catch (error) {
 			console.log('Error while firing of scraper aniworld infos:', error);
-			todo.scraped = null;
+			delete todo.scraped;
 			todo.scrapingError = 'Error while issuing Scraper';
 			await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
-			reject(error);
+			// reject(error);
+			const todosDBList = await database.get<DatabaseTodoItem>('todos').get();
+			const list: DatabaseParsedTodoItem[] = todosDBList.map((t) => JSON.parse(t.content));
+
+			//sending out full todo list as update
+			await toAllSockets(
+				(s) => {
+					s.emit('todoListUpdate', list);
+				},
+				(s) => s.auth.type == 'client'
+			);
+			resolve();
 		}
 	})
 }
