@@ -146,6 +146,9 @@ async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 	new Promise<void>(async (resolve, reject) => {
 		try {
 			const infos = await getAniworldInfos({ url: todo.references.aniworld });
+			if (!infos) {
+				throw new Error('No Aniworld infos found');
+			}
 			todo.scraped = infos;
 			//Updating db todo
 			await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
@@ -165,6 +168,7 @@ async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 		} catch (error) {
 			console.log('Error while firing of scraper aniworld infos:', error);
 			todo.scraped = null;
+			todo.scrapingError = 'Error while issuing Scraper';
 			await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
 			reject(error);
 		}

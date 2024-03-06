@@ -33,7 +33,7 @@ class Aniworld {
 		this.imageSRCPrefix = 'https://aniworld.to';
 	}
 
-	async parseInformations(): Promise<null | AniWorldSeriesInformations> {
+	async parseInformations(): Promise<void | AniWorldSeriesInformations> {
 		try {
 			const response = await axios.get(this.url, {
 				headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36' },

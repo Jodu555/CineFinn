@@ -270,7 +270,12 @@ async function generateNewDownloadList() {
 
 async function manuallyPrintTheInfosOut(refUrl: string) {
 	const anime = !refUrl ? new Aniworld('https://aniworld.to/anime/stream/reincarnated-as-a-sword') : new Aniworld(refUrl);
-	const { url, informations } = await anime.parseInformations();
+	const infos = await anime.parseInformations();
+	if (!infos) {
+		console.log('no infos from ', refUrl);
+		return;
+	}
+	const { url, informations } = infos;
 
 	const output = {
 		references: { aniworld: url },
@@ -298,7 +303,12 @@ async function programmaticallyInsertTheInfos() {
 
 	for (const series of res.data) {
 		const anime = new Aniworld(series.references.aniworld as string);
-		const { url, informations } = await anime.parseInformations();
+		const infos = await anime.parseInformations();
+		if (!infos) {
+			console.log(`Could not parse ${series.title}`);
+			continue;
+		}
+		const { informations } = infos;
 
 		const img = informations.image;
 		delete informations.image;
