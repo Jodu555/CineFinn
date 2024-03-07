@@ -41,7 +41,7 @@ function registerCommands() {
 			const output = ['Current socket sessions:'];
 			const sockets = (await getIO().fetchSockets()) as ExtendedRemoteSocket[];
 			for (const socket of sockets) {
-				output.push(` - ${socket.auth.type.toUpperCase()} => ${socket.auth.user.username} ${socket.sync ? socket.sync?.ID : ''} `);
+				output.push(` - ${socket.auth.type.toUpperCase()} => ${socket.auth.user?.username || ''} ${socket.sync ? socket.sync?.ID : ''} `);
 			}
 			output.push('', '------------------------------------');
 			return output;
