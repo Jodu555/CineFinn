@@ -1,7 +1,7 @@
 import { ExtendedSocket } from '../types/session';
 import { getIO, getAuthHelper } from '../utils/utils';
 
-import { initialize as socketInitScraper } from './scraper.socket';
+import { isScraperSocketConnected, initialize as socketInitScraper } from './scraper.socket';
 import { initialize as socketInitClient } from './client.socket';
 import { initialize as socketInitSync } from './sync.socket';
 import { initialize as socketInitRMVCEmitter } from './rmvcEmitter.socket';
@@ -28,6 +28,10 @@ const initialize = () => {
 		if (type === 'scraper') {
 			const authToken = socket.handshake.auth.token;
 			if (authToken && authToken === process.env.SCRAPER_AUTH_TOKEN) {
+				if (isScraperSocketConnected()) {
+					next(new Error('There is already a scraper connected'));
+					return;
+				}
 				socket.auth = { token: authToken, type };
 				return next();
 			} else {
