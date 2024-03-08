@@ -1,8 +1,10 @@
 import { Database } from '@jodu555/mysqlapi';
 import axios from 'axios';
-import express from 'express';
+import express, { Response } from 'express';
 import { Series } from '../classes/series';
 import { load, parse } from '../utils/watchString';
+import { getSeries } from '../utils/utils';
+import { AuthenticatedRequest } from '../types/session';
 const database = Database.getDatabase();
 
 const router = express.Router();
@@ -40,7 +42,7 @@ function groupit(remoteSeries: Series[], group: { [key: string]: number }): { ID
 
 //TODO: IMPORTANT the mapping to find extra series informations is done almost everywhere it would be beneficial if we do this just once 
 
-router.get('/', async (req, res) => {
+router.get('/', async (req: AuthenticatedRequest, res: Response) => {
     console.time('complete')
 
     const categorieSharePercentInclude = 5 as const;
@@ -48,20 +50,25 @@ router.get('/', async (req, res) => {
     const newestItems = 15 as const;
     const watchAgainItems = 18 as const;
     const continueWatchingItems = 18 as const;
+    const continueBound = [30, 80] as const;
 
-    console.time('mockRequest')
-    if (cached.length == 0) {
-        const response = await axios.get<Series[]>(`http://cinema-api.jodu555.de/index/all?auth-token=${process.env.TEST_AUTH_TOKEN_FROM_PUBLIC_API}`);
-        cached = response.data;
-    }
+    // console.time('mockRequest')
+    // if (cached.length == 0) {
+    //     const response = await axios.get<Series[]>(`http://cinema-api.jodu555.de/index/all?auth-token=${process.env.TEST_AUTH_TOKEN_FROM_PUBLIC_API}`);
+    //     cached = response.data;
+    // }
+    // const remoteSeries = cached;
+    // console.timeEnd('mockRequest')
 
-    const remoteSeries = cached;
-    console.timeEnd('mockRequest')
+    const remoteSeries = getSeries();
 
 
     console.time('LoadParse')
     // const list = parse(await load('c2f5c833-c3e4-45a6-87b5-05103ff274ff'));
-    const list = parse(await load('ad733837-b2cf-47a2-b968-abaa70edbffe'));
+    // const list = parse(await load('ad733837-b2cf-47a2-b968-abaa70edbffe'));
+    const list = parse(await load(req.credentials.user.UUID));
+    console.log(list.length);
+
     console.timeEnd('LoadParse')
 
 
@@ -122,20 +129,28 @@ router.get('/', async (req, res) => {
             title: x.title,
             infos: x.infos,
         })), async (serie) => {
-            const imageUrl = serie.url;
-            try {
-                if (hasImageCache.find(x => x == serie.ID))
-                    return true;
-                const response = await axios.head(imageUrl);
-                if (response.status == 200) {
-                    hasImageCache.push(serie.ID);
-                    return true;
-                } else {
-                    return false;
-                }
-            } catch (error) {
-                return false;
-            }
+
+            //TODO: Remove all the PG Content such as Redo of Healer and Rin but not hardcoded but rather dynamic
+
+
+            return Boolean(Boolean(serie.infos.image) || Boolean(serie.infos.imageURL));
+
+            // const imageUrl = serie.url;
+
+            // try {
+            //     if (hasImageCache.find(x => x == serie.ID))
+            //         return true;
+            //     const response = await axios.head(imageUrl);
+            //     if (response.status == 200) {
+            //         hasImageCache.push(serie.ID);
+            //         return true;
+            //     } else {
+            //         return false;
+            //     }
+            // } catch (error) {
+            //     return false;
+            // }
+            // return true;
         });
 
     console.timeEnd('prepareSeries')
@@ -163,8 +178,6 @@ router.get('/', async (req, res) => {
         }).filter(x => x != null).slice(0, watchAgainItems * 3)
         .sort((a, b) => 0.5 - Math.random()).slice(0, watchAgainItems);
     console.timeEnd('watchagain')
-
-    const continueBound = [30, 80];
 
     console.time('continueWatching')
     continueWatching = out.slice()

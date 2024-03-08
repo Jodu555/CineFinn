@@ -40,7 +40,8 @@ export interface SerieMovieObject {
 }
 
 export interface SerieInfo {
-	image?: string | boolean;
+	image?: boolean;
+	imageURL?: string;
 	infos?: string;
 	title?: string;
 	startDate?: string;

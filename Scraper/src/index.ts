@@ -95,7 +95,7 @@ socket.on('connect', async () => {
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
-	// await programmaticallyInsertTheInfos();
+	await programmaticallyInsertTheInfos();
 	// await addReference();
 });
 
@@ -291,8 +291,8 @@ async function manuallyPrintTheInfosOut(refUrl: string) {
 }
 
 async function programmaticallyInsertTheInfos() {
-	// const res = await axios.get('http://localhost:3100/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
-	const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
+	const res = await axios.get<Serie[]>('http://localhost:3100/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
+	// const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 
 	res.data = res.data.filter((x) => x.references?.aniworld);
 	res.data = res.data.filter((x) => !(x.infos.title || x.infos.description));
@@ -315,14 +315,15 @@ async function programmaticallyInsertTheInfos() {
 		const patchBody = {
 			infos: {
 				...informations,
-				// imageURL: img,
-				image: true, //This is here because no on local i would download the images to disk
+				imageURL: img,
+				// image: true, //This is here because no on local i would download the images to disk
 			},
 		};
 
-		imageList.push(img);
+		// imageList.push(img);
 
-		const response = await axios.patch(`http://cinema-api.jodu555.de/index/${series.ID}?auth-token=${process.env.AUTH_TOKEN_REST}`, patchBody);
+		// const response = await axios.patch(`http://cinema-api.jodu555.de/index/${series.ID}?auth-token=${process.env.AUTH_TOKEN_REST}`, patchBody);
+		const response = await axios.patch(`http://localhost:3100/index/${series.ID}?auth-token=${process.env.AUTH_TOKEN_REST}`, patchBody);
 
 		// console.log(response.status, { ID: series.ID, title: series.title, infos: series.infos, references: series.references }, patchBody);
 
