@@ -24,7 +24,7 @@ const parse = (str: string): Segment[] => {
 	const list = [];
 
 	// const str = '2491:1-1.570;2491:1-2.5555;2491:1.0;';
-	var outp;
+	var outp: RegExpExecArray;
 	while ((outp = re.exec(str)) !== null) {
 		// console.log(outp);
 		let isMovie = false;
@@ -41,7 +41,7 @@ class Segment {
 	movie: number;
 	time: number;
 	watched: boolean;
-	constructor(ID: string, season: number, episode: number, movie: number, time: number) {
+	constructor(ID: string, season: number | string, episode: number | string, movie: number | string, time: number | string) {
 		this.ID = ID;
 		this.season = Number(season); // 1 based (number)
 		this.episode = Number(episode); // 1 based (number)
