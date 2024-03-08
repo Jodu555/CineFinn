@@ -21,7 +21,7 @@ const generateStr = (segmentList: Segment[]): string => {
 const parse = (str: string): Segment[] => {
 	const re = /(\w+):(?:(\d+)-(\d+)|(\d+))\.(\d+);/gim;
 
-	const list = [];
+	const list: Segment[] = [];
 
 	// const str = '2491:1-1.570;2491:1-2.5555;2491:1.0;';
 	var outp: RegExpExecArray;

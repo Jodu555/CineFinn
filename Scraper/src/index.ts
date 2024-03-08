@@ -95,7 +95,7 @@ socket.on('connect', async () => {
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
-	await programmaticallyInsertTheInfos();
+	// await programmaticallyInsertTheInfos();
 	// await addReference();
 });
 
