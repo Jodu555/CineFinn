@@ -18,6 +18,14 @@ const routes = [
 		meta: { requiresLogin: true },
 	},
 	{
+		path: '/browse',
+		name: 'Browse',
+		component: function () {
+			return import(/* webpackChunkName: "browse" */ '../views/Browse.vue');
+		},
+		meta: { requiresLogin: true },
+	},
+	{
 		path: '/watch',
 		name: 'Watch',
 		component: function () {

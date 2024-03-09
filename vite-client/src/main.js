@@ -80,6 +80,8 @@ import {
 	faNetworkWired,
 	faTrash,
 	faCheck,
+	faChevronLeft,
+	faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { faKeyboard } from '@fortawesome/free-regular-svg-icons';
 
@@ -100,7 +102,9 @@ library.add(
 	faPlay,
 	faPause,
 	faTrash,
-	faCheck
+	faCheck,
+	faChevronLeft,
+	faChevronRight
 ); // solid
 library.add(faKeyboard); // regular
 
