@@ -55,8 +55,9 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [x] Implement the command manager and some basic command (session = to list current sockets, info = to show series infos and space infos, reload = to reload the series from their file)
 - [x] IMPORTANT: **Finally Upgrade to TypeScript so i do not have this fucking pain in my ass!!!**
 - [ ] IMPORTANT: **Finally Upgrade the client to TypeScript so adding new features gets easier!!!**
-- [x] Rewrite the crawler to remove some stupid old stuff
+- [ ] Port vuex to pinia
 - [ ] Remove my Networking library cause it lags some stuff, and replace it with axios
+- [x] Rewrite the crawler to remove some stupid old stuff
 - [x] Implement the sharing also with movies
 - [x] Implement the sharing to include the language
 - [ ] Use a vue integrated modal instead of the bootstrap javascript one (get's confused on HMR)
@@ -94,7 +95,6 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [x] Update the Client Navigation Search to use native vue for better data updates
 - [x] Port the client application to vite for faster builds and better HMR
 - [x] Add a PATCH /index/ID route to update single anime informations
-- [ ] Port vuex to pinia
 - [x] Think about how to display if only movies are present for example for (Rush Hour/Star Wars)
 - [ ] Add better mobile accessbillity for scrubbing
 - [x] Add Loading Indicators
