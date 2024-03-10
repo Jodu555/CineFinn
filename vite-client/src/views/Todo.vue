@@ -2,7 +2,11 @@
 	<div class="container" v-auto-animate>
 		<br />
 
-		<button class="btn btn-outline-primary mb-5" @click="addEmptyItem">Add Item</button>
+		<div class="d-flex justify-content-between">
+			<button class="btn btn-outline-primary mb-5" @click="addEmptyItem">Add Item</button>
+
+			<button class="btn btn-outline-danger mb-5" @click="rescrapeAllItems">Rescrape All Items</button>
+		</div>
 
 		<div v-if="loading" class="d-flex justify-content-center">
 			<div class="spinner-border" role="status">
@@ -343,7 +347,7 @@ const useTodo = async (ID) => {
 		};
 
 		if (todoObject.scraped) {
-			seriesObject.infos = JSON.parse(JSON.stringify(todoObject?.scraped?.informations?.informations));
+			seriesObject.infos = JSON.parse(JSON.stringify(todoObject?.scraped?.informations));
 			delete seriesObject.infos.image;
 		}
 		const response = await instance.$networking.post('/index/', JSON.stringify(seriesObject));
@@ -393,6 +397,15 @@ const retryScrapeTodo = (ID) => {
 		} else {
 			return x;
 		}
+	});
+	pushTodoListUpdate();
+};
+
+const rescrapeAllItems = () => {
+	state.list = state.list.map((x) => {
+		delete x?.scraped;
+		delete x?.scrapingError;
+		return x;
 	});
 	pushTodoListUpdate();
 };

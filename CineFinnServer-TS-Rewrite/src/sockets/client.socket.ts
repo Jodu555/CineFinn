@@ -126,7 +126,8 @@ const initialize = (socket: ExtendedSocket) => {
 			(s) => {
 				s.emit('todoListUpdate', list);
 			},
-			(s) => s.auth.type == 'client' && s.id != socket.id
+			(s) => s.auth.type == 'client'
+			// && s.id != socket.id
 		);
 
 		scrapeJobs.forEach(f => f());
