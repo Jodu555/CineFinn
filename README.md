@@ -155,6 +155,11 @@ although the general permission system and therefore the account restrictions an
 
 This version should introduce the Sync System and the new HomePage
 
+## v6 (Next Big Update)
+
+This version is more focused on ease of use and Backend Improvements with a full client rewrite in typescript with perfect type hints
+and the distributed Image generation System which later can lead to way more stuff done in a distributed manner
+
 ## Stretch
 
 - [ ] implement a cron job which automatically checks all downloaded series for updates and writes them to a list
