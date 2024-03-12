@@ -269,12 +269,12 @@ onMounted(async () => {
 			.sort((a, b) => a.order - b.order);
 	});
 	loading.value = true;
-	const response = await instance.$networking.get('/todo/');
+
+	const [response, accResponse] = await Promise.all([instance.$networking.get('/todo/'), instance.$networking.get('/todo/permittedAccounts')]);
+
 	if (response.success) {
 		state.list = response?.json?.sort((a, b) => a.order - b.order);
 	}
-
-	const accResponse = await instance.$networking.get('/todo/permittedAccounts');
 	if (accResponse.success) {
 		state.permittedAccounts = accResponse.json;
 	}
