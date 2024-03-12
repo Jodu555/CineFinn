@@ -150,9 +150,9 @@ const generateImages = async (series: Series[], cleanup: () => void = () => { })
 		return limit(
 			() =>
 				new Promise<void>(async (resolve, _) => {
-					console.log('  => Started', p.meta.serieID, series.find(x => x.ID == p.meta.serieID)?.title, p.meta.lang);
+					console.log('  => Started', p.meta.serieID, series.find(x => x.ID == p.meta.serieID)?.title, path.parse(p.meta.entity.filePath).base, p.meta.lang);
 					await p.run();
-					console.log('  => Finished', p.meta.serieID, series.find(x => x.ID == p.meta.serieID)?.title, p.meta.lang);
+					console.log('  => Finished', p.meta.serieID, series.find(x => x.ID == p.meta.serieID)?.title, path.parse(p.meta.entity.filePath).base, p.meta.lang);
 					resolve();
 				})
 		);
