@@ -1,28 +1,40 @@
 <template>
-	<div style="overflow-x: hidden">
-		<div v-for="item of list">
-			<!-- {{ item.title }}
-			{{ item.data.length }}
-			{{ item.data.length > 1 }} -->
-			<VideoCarousel v-if="item.data.length > 2" class="pb-4 pt-10" :category="item.title" :wrapAround="true" :list="item.data" />
+	<div v-auto-animate>
+		<div v-if="settings.enableBetaFeatures?.value == false">
+			<h1 class="text-danger text-center">Work in Progress</h1>
+		</div>
+		<div v-else style="overflow-x: hidden">
+			<div v-for="item of list">
+				<pre v-if="settings.developerMode?.value == true">
+					{{ item.title }}
+					{{ item.data.length }}
+				</pre
+				>
+				<VideoCarousel v-if="item.data.length > 2" class="pb-4 pt-10" :category="item.title" :wrapAround="true" :list="item.data" />
+			</div>
 		</div>
 	</div>
 </template>
 <script setup>
-import { onMounted, reactive } from 'vue';
+import { onMounted, reactive, getCurrentInstance, computed } from 'vue';
 import { useStore } from 'vuex';
 
 import VideoCarousel from '@/components/Home/VideoCarousel.vue';
+
+const instance = getCurrentInstance().appContext.config.globalProperties;
 
 const store = useStore();
 
 const list = reactive({});
 
+const settings = computed(() => store.state.auth.settings);
+
 onMounted(async () => {
 	const series = store.state.series;
 
-	const response = await fetch(`http://localhost:3100/recommendation?auth-token=SECR-DEV`);
-	const json = await response.json();
+	const response = await instance.$networking.get('/recommendation');
+	if (!response.success) return;
+	const json = response.json;
 	Object.keys(json).forEach((k) => {
 		list[k] = {
 			title: json[k].title,
