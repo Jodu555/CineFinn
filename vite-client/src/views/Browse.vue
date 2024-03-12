@@ -40,7 +40,7 @@ onMounted(async () => {
 			title: json[k].title,
 			data: json[k].data.map((ID) => {
 				const f = series.find((z) => z.ID == ID);
-				if (f.image == true) {
+				if (f.infos?.image == true) {
 					f.url = `http://cinema-api.jodu555.de/images/${f.ID}/cover.jpg?auth-token=${'SECR-DEV'}`;
 				} else {
 					f.url = f.infos.imageURL;
