@@ -39,13 +39,19 @@ onMounted(async () => {
 		list[k] = {
 			title: json[k].title,
 			data: json[k].data.map((ID) => {
-				const f = series.find((z) => z.ID == ID);
-				if (f.infos?.image == true) {
-					f.url = `http://cinema-api.jodu555.de/images/${f.ID}/cover.jpg?auth-token=${'SECR-DEV'}`;
-				} else {
-					f.url = f.infos.imageURL;
+				const entity = series.find((z) => z.ID == ID);
+				if (entity == undefined) {
+					console.log('Not found entity', k, ID, entity);
 				}
-				return f;
+				if (entity?.infos?.image == true) {
+					const url = new URL(instance.$networking.API_URL + `/images/${entity.ID}/cover.jpg`);
+					url.searchParams.append('auth-token', instance.$networking.auth_token);
+					entity.url = url.href;
+					// f.url = `http://cinema-api.jodu555.de/images/${f.ID}/cover.jpg?auth-token=${'SECR-DEV'}`;
+				} else {
+					entity.url = entity?.infos?.imageURL;
+				}
+				return entity;
 			}),
 		};
 	});
