@@ -37,6 +37,7 @@ export default {
 		current: { type: Number },
 		changeFN: { type: Function },
 		currentSeason: { type: Number, default: -1 },
+		currentSeriesID: { type: String, default: -1 },
 		watchList: { type: Array, default: [] },
 		season: { type: Boolean, default: false },
 	},
@@ -52,7 +53,9 @@ export default {
 		},
 		checkWatched(index) {
 			if (this.season) {
-				const filteredList = this.watchList.filter((seg) => seg.ID == this.$route.query.id && seg.watched && seg.season == index);
+				const filteredList = this.watchList.filter(
+					(seg) => (seg.ID == this.$route.query.id || seg.ID == this.currentSeriesID) && seg.watched && seg.season == index
+				);
 				const idx = this.array.findIndex((s) => s[0].season == index);
 				return this.array[idx].length <= filteredList.length;
 			} else {
@@ -60,7 +63,7 @@ export default {
 					return Boolean(
 						this.watchList.find((segment) => {
 							return (
-								segment.ID == this.$route.query.id &&
+								(segment.ID == this.$route.query.id || segment.ID == this.currentSeriesID) &&
 								segment.watched &&
 								((segment.season == this.currentSeason && segment.episode == index) || (this.currentSeason == -1 && segment.movie == index))
 							);

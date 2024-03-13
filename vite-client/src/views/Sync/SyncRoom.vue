@@ -82,8 +82,9 @@
 					title="Movies:"
 					:array="currentSeries.movies"
 					:current="currentMovie"
+					:currentSeriesID="currentSeries.ID"
 					:changeFN="changeMovie"
-					:watchList="[]"
+					:watchList="watchList"
 				/>
 				<!-- Seasons -->
 				<EntityListView
@@ -91,9 +92,10 @@
 					v-if="currentSeries.seasons.length >= 1"
 					:array="currentSeries.seasons"
 					:current="currentSeason"
+					:currentSeriesID="currentSeries.ID"
 					:changeFN="changeSeason"
 					:season="true"
-					:watchList="[]"
+					:watchList="watchList"
 				/>
 				<!-- Episodes -->
 				<EntityListView
@@ -102,8 +104,9 @@
 					:array="currentSeries.seasons.find((x) => x[0].season == entityObject.season)"
 					:current="currentEpisode"
 					:currentSeason="currentSeason"
+					:currentSeriesID="currentSeries.ID"
 					:changeFN="changeEpisode"
-					:watchList="[]"
+					:watchList="watchList"
 				/>
 
 				<EntityActionsInformation :switch-to="switchTo" :change-language="changeLanguage" />
@@ -173,7 +176,7 @@ export default {
 	},
 	methods: {
 		...mapActions('sync', ['leaveRoom', 'loadRooms', 'joinRoom', 'loadRoomInfo']),
-		...mapActions('watch', ['loadSeriesInfo']),
+		...mapActions('watch', ['loadSeriesInfo', 'loadWatchList']),
 		...mapMutations('watch', ['setCurrentMovie', 'setCurrentSeason', 'setCurrentEpisode', 'setCurrentLanguage', 'setWatchList']),
 		toReadableRole(role) {
 			return role == 1 ? 'Owner' : 'Viewer';
@@ -224,6 +227,9 @@ export default {
 				await this.$socket.emit('sync-selectSeries', { ID });
 			}
 			await this.loadSeriesInfo(ID);
+			if (this.isOwner) {
+				this.$socket.emit('getWatchList', { ID });
+			}
 			try {
 				await this.handleVideoChange(-1, -1, -1);
 			} catch (error) {
@@ -379,6 +385,14 @@ export default {
 				isPlaying: this.$refs.extendedVideoChild?.videoData?.isPlaying || false,
 			});
 		});
+
+		if (this.isOwner) {
+			console.log('Came');
+			this.$socket.on('watchListChange', ({ watchList }) => {
+				console.log('GOT watchListChange', watchList);
+				this.setWatchList(watchList.filter((e) => e.ID == this.currentSeries.ID));
+			});
+		}
 	},
 	async unmounted() {
 		this.$socket.off('sync-video-action');
