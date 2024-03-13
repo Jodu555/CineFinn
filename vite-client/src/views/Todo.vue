@@ -297,7 +297,7 @@ const languageDevision = (element) => {
 	element.scraped.seasons.flat().forEach((x) => x.langs.forEach((l) => (!out[l] ? (out[l] = 1) : (out[l] += 1))));
 
 	for (const [key, value] of Object.entries(out)) {
-		out[key] = (value / total) * 100;
+		out[key] = parseFloat((value / total) * 100).toFixed(2);
 	}
 
 	if (out['GerDub'] == 100) {
