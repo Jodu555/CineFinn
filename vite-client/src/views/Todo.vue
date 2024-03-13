@@ -67,6 +67,7 @@
 							&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk:
 							{{ parseFloat(parseFloat((element?.scraped?.seasons?.flat()?.length * constants.mbperEpisode) / 1024).toFixed(1)) }}GB
 						</li>
+						<li v-for="[key, value] in Object.entries(languageDevision(element))">&nbsp;&nbsp;&nbsp;&nbsp;{{ key }}: {{ value }}%</li>
 						<template v-if="element?.scraped?.movies != undefined">
 							<li>Movies: {{ element?.scraped?.movies?.length }}</li>
 							<li>
@@ -288,6 +289,25 @@ onUnmounted(() => {
 });
 
 const drag = ref(false);
+
+const languageDevision = (element) => {
+	const out = {};
+	const total = element.scraped.seasons.flat().length;
+
+	element.scraped.seasons.flat().forEach((x) => x.langs.forEach((l) => (!out[l] ? (out[l] = 1) : (out[l] += 1))));
+
+	for (const [key, value] of Object.entries(out)) {
+		out[key] = (value / total) * 100;
+	}
+
+	if (out['GerDub'] == 100) {
+		return { GerDub: 100 };
+	} else if (out['GerSub'] == 100 && out['EngSub']) {
+		delete out['EngSub'];
+	}
+
+	return out;
+};
 
 const change = (event) => {
 	state.list = state.list.map((name, index) => {
