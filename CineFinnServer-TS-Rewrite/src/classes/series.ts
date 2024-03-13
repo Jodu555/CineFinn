@@ -10,7 +10,7 @@ class Series {
 	seasons: Episode[][];
 	references: SerieReference;
 	infos: SerieInfo;
-	constructor(ID: string, categorie: string, title: string, movies = [], seasons = [], references = {}, infos = {}) {
+	constructor(ID: string, categorie: string, title: string, movies: Movie[] = [], seasons: Episode[][] = [], references = {}, infos = {}) {
 		this.ID = ID;
 		this.categorie = categorie;
 		this.title = title;

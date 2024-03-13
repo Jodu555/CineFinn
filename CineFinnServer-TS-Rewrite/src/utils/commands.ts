@@ -22,6 +22,19 @@ function registerCommands() {
 		)
 	);
 	commandManager.registerCommand(
+		new Command(
+			['reloadDel', 'rld'],
+			'reload',
+			'Rescrapes the archive with being agressive when a series does not exist',
+			async (command, [...args], scope) => {
+				getSeries(true, false, false);
+				await sendSeriesReloadToAll();
+
+				return 'Reloaded the series config successfully';
+			}
+		)
+	);
+	commandManager.registerCommand(
 		new Command(['authsession', 'as'], 'authsession [list]', 'Lists the current authenticated session', (command, [...args], scope) => {
 			if (args[1] == 'list') {
 				const output = ['Current authsessions:'];

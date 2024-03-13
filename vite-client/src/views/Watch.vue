@@ -23,6 +23,14 @@ v-if
 			<h1 class="text-truncate" :title="displayTitle">
 				{{ displayTitle }}
 			</h1>
+
+			<div class="text-center" v-if="currentSeries.movies.length == 0 && currentSeries.seasons.length == 0">
+				<h2 class="text-danger">It Seems there is currently no data for this Series</h2>
+				<p class="text-danger mb-0">It either got removed, or is on a node which is currently un reachable, or is currently being transcoded</p>
+				<p class="text-danger">Please check back later and if this issue persists please contact the Administrator</p>
+				<router-link type="button" to="/" class="mt-3 mb-4 btn btn-outline-primary btn-lg">Go Watch something else</router-link>
+			</div>
+
 			<pre v-if="settings.developerMode.value">
 				Watch Information:
 				{{ JSON.stringify(watchList.find((segment) => segment.season == this.currentSeason && segment.episode == this.currentEpisode)) }}
@@ -134,9 +142,15 @@ export default {
 
 			if (this.currentSeries.movies.length >= 1) {
 				str += `${this.currentSeries.movies.length} ` + (this.currentSeries.movies.length > 1 ? 'Movies' : 'Movie');
+			}
+
+			if (this.currentSeries.movies.length >= 1 && this.currentSeries.seasons.length >= 1) {
 				str += ' | ';
 			}
-			str += `${this.currentSeries.seasons.length} ` + (this.currentSeries.seasons.length > 1 ? 'Seasons' : 'Season');
+
+			if (this.currentSeries.seasons.length >= 1) {
+				str += `${this.currentSeries.seasons.length} ` + (this.currentSeries.seasons.length > 1 ? 'Seasons' : 'Season');
+			}
 
 			return str;
 		},

@@ -24,15 +24,15 @@ function debounce(cb: Function, delay = 1000) {
 		}, delay);
 	};
 }
-const getSeries = (forceLoad: boolean = false, forceFile: boolean = false): Series[] => {
+const getSeries = (forceLoad: boolean = false, forceFile: boolean = false, keepCurrentlyNotPresent = true): Series[] => {
 	if (forceLoad || !series || forceFile) {
 		if ((fs.existsSync(outputFileName) && !forceLoad) || forceFile) {
 			console.log('Loaded series from file!');
 			const fileObject = JSON.parse(fs.readFileSync(outputFileName, 'utf8')) as SerieObject[];
-			setSeries(fileObject.map((e) => Series.fromObject(e)));
+			setSeries(fileObject.map((e) => Series.fromObject(e)), keepCurrentlyNotPresent);
 		} else {
 			console.log('Crawled the series!');
-			setSeries(crawlAndIndex());
+			setSeries(crawlAndIndex(), keepCurrentlyNotPresent);
 
 			fs.writeFileSync(outputFileName, JSON.stringify(series, null, 3), 'utf8');
 		}
@@ -40,15 +40,13 @@ const getSeries = (forceLoad: boolean = false, forceFile: boolean = false): Seri
 	return series;
 };
 
-const setSeries = (_series: Series[]) => {
+const setSeries = (_series: Series[], keepCurrentlyNotPresent = true) => {
 	console.log('Loaded or Setted & merged new Series!');
 	if (series != null) {
-		series = mergeSeriesArrays(series, _series);
+		series = mergeSeriesArrays(series, _series, keepCurrentlyNotPresent);
 	} else {
 		series = _series;
 	}
-	//TODO: Series have changed OR loaded
-	// Check if there are new init images to be loaded or other stuff
 	fs.writeFileSync(outputFileName, JSON.stringify(series, null, 3), 'utf8');
 };
 
