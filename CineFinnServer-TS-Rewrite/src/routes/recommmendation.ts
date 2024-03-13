@@ -122,7 +122,7 @@ router.get('/', async (req: AuthenticatedRequest, res: Response) => {
     };
 
     const series = await asyncFilter(remoteSeries
-        .filter((x) => !x.title.includes('Redo of Healer') && categorieShare[x.categorie].percent >= categorieSharePercentInclude)
+        .filter((x) => !x.title.includes('Redo of Healer') && categorieShare[x.categorie]?.percent >= categorieSharePercentInclude)
         .map((x) => ({
             ID: x.ID,
             url: `http://cinema-api.jodu555.de/images/${x.ID}/cover.jpg?auth-token=${process.env.TEST_AUTH_TOKEN_FROM_PUBLIC_API}`,
