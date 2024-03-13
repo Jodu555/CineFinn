@@ -29,9 +29,9 @@ const list = reactive({});
 
 const settings = computed(() => store.state.auth.settings);
 
-onMounted(async () => {
-	const series = store.state.series;
+const series = computed(() => store.state.series);
 
+onMounted(async () => {
 	const response = await instance.$networking.get('/recommendation');
 	if (!response.success) return;
 	const json = response.json;
@@ -39,7 +39,7 @@ onMounted(async () => {
 		list[k] = {
 			title: json[k].title,
 			data: json[k].data.map((ID) => {
-				const entity = series.find((z) => z.ID == ID);
+				const entity = series.value.find((z) => z.ID == ID);
 				if (entity == undefined) {
 					console.log('Not found entity', k, ID, entity);
 				}
