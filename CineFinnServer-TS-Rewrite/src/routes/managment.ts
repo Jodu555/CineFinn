@@ -166,5 +166,5 @@ router.get('/job/crawl', (req: AuthenticatedRequest, res: Response, next: NextFu
 	}
 });
 
-export { router };
+export { router, LOOKUP, callpointToEvent };
 

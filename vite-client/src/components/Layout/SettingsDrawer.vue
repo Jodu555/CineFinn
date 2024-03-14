@@ -124,6 +124,7 @@ export default {
 			this.jobs.forEach((job) => {
 				const socketEvent = `${job.callpoint.replace('/', '').replaceAll('/', '_')}-end`;
 				this.$socket.on(socketEvent, () => {
+					if (!job.running) return;
 					job.running = false;
 					this.$swal({
 						toast: true,

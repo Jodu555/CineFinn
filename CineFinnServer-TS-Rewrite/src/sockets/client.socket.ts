@@ -8,6 +8,7 @@ import { DatabaseParsedTodoItem, DatabaseTodoItem } from '../types/database';
 import { ExtendedSocket, ExtendedRemoteSocket, Role } from '../types/session';
 import { isPermitted } from '../utils/roleManager';
 import { getAniworldInfos, isScraperSocketConnected } from './scraper.socket';
+import { LOOKUP, callpointToEvent } from '../routes/managment';
 
 const database = Database.getDatabase();
 
@@ -141,6 +142,15 @@ const initialize = (socket: ExtendedSocket) => {
 	});
 
 	// socket.emit('reloadSeries', cleanupSeriesBeforeFrontResponse(getSeries()));
+
+
+	Object.values(LOOKUP).forEach(v => {
+		if (auth.user.role >= v.role) {
+			socket.emit(callpointToEvent(v.callpoint));
+		}
+	})
+
+
 };
 
 async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
