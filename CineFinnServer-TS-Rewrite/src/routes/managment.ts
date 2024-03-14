@@ -1,12 +1,13 @@
-import express, { NextFunction, Response } from 'express';
+import { AuthenticationError } from '@jodu555/express-helpers';
 import { Database } from '@jodu555/mysqlapi';
+import express, { NextFunction, Response } from 'express';
+import { checkForUpdates, isScraperSocketConnected } from '../sockets/scraper.socket';
 import { sendSeriesReloadToAll } from '../sockets/client.socket';
-import { crawlAndIndex } from '../utils/crawler';
-import { generateImages } from '../utils/images';
-import { getActiveJobs, getSeries, setActiveJobs, toAllSockets, setSeries } from '../utils/utils';
 import { DatabaseJobItem } from '../types/database';
 import { AuthenticatedRequest, Role } from '../types/session';
-import { AuthenticationError } from '@jodu555/express-helpers';
+import { crawlAndIndex } from '../utils/crawler';
+import { generateImages } from '../utils/images';
+import { getActiveJobs, getSeries, setActiveJobs, setSeries, toAllSockets } from '../utils/utils';
 const database = Database.getDatabase();
 const router = express.Router();
 
@@ -14,7 +15,8 @@ const LOOKUP = {
 	crawl: { name: 'Recrawl the archive', callpoint: '/job/crawl', role: Role.Mod },
 	generate: { name: 'Generating Preview-Images', callpoint: '/job/img/generate', role: Role.Admin },
 	// validator: { name: 'Validating Preview-Images', callpoint: '/job/img/validate' },
-};
+	checkForUpdates: { name: 'Check for Updates', callpoint: '/job/checkForUpdates', role: Role.Admin }
+} as const;
 
 const callpointToEvent = (callpoint: string) => `${callpoint.replace('/', '').replaceAll('/', '_')}-end`;
 
@@ -87,6 +89,36 @@ router.get('/job/img/generate', (req: AuthenticatedRequest, res: Response, next:
 	}
 });
 
+router.get('/job/checkForUpdates', (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+	const id = 'checkForUpdates';
+	const job = getActiveJobs().find((x) => x.id == id);
+	if (job) {
+		const error = new Error('Job is already running!');
+		next(error);
+		return;
+	}
+
+	if (!isScraperSocketConnected()) {
+		const error = new Error('There is currently no scraper socket connected!');
+		next(error);
+		return;
+	}
+
+	getActiveJobs().push({
+		id,
+		name: LOOKUP[id].name,
+		startTime: Date.now(),
+		data: {},
+	});
+	try {
+		checkForUpdates();
+	} catch (error) {
+		setActiveJobs(getActiveJobs().filter((x) => x.id !== id));
+	}
+	res.json(getActiveJobs());
+
+});
+
 // router.get('/job/img/validate', (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 //     const id = 'validator';
 //     const job = getActiveJobs().find(x => x.id == id);
@@ -135,3 +167,4 @@ router.get('/job/crawl', (req: AuthenticatedRequest, res: Response, next: NextFu
 });
 
 export { router };
+

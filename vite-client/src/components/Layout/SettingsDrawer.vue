@@ -137,11 +137,23 @@ export default {
 				});
 			});
 		},
-		start(id) {
+		async start(id) {
 			const job = this.jobs.find((j) => j.id == id);
+			const response = await this.$networking.get(`/managment${job.callpoint}`);
+			if (!response.success) {
+				this.$swal({
+					toast: true,
+					position: 'top-end',
+					showConfirmButton: false,
+					timer: 5500,
+					icon: 'error',
+					title: `${job.name} - ${response.error}`,
+					timerProgressBar: true,
+				});
+				return;
+			}
 			job.running = true;
 			job.lastRun = Date.now();
-			this.$networking.get(`/managment${job.callpoint}`);
 			this.$swal({
 				toast: true,
 				position: 'top-end',

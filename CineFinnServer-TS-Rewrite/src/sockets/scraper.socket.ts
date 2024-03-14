@@ -78,6 +78,7 @@ export interface ZoroReturn {
 
 const getAniworldInfos = buildAwaitSocketReturn<AniWorldSeriesInformations, { url: string }>('AniworldData');
 const getZoroInfos = buildAwaitSocketReturn<ZoroReturn, { ID: string | number }>('ZoroData');
+const checkForUpdates = buildAwaitSocketReturn<void, void>('checkForUpdates');
 
 const manageTitle = buildAwaitSocketReturn('manageTitle');
 
@@ -86,7 +87,7 @@ function buildAwaitSocketReturn<R, T>(method: string): (arg0: T) => Promise<R | 
 		return new Promise<R | void>((resolve, reject) => {
 			const __refID = randomUUID().split('-')[0];
 			if (!$socket) return reject(new Error('Socket not reachable'));
-			const timeout = setTimeout(() => reject(new Error('Timeout reached')), 1000 * 60 * 2);
+			const timeout = setTimeout(() => reject(new Error('Timeout reached')), 1000 * 60 * 15);
 			const listener = (data: R & { __returnValue: boolean, __refID: string }) => {
 				if (data.__refID == __refID) {
 					delete data.__refID;
@@ -112,4 +113,4 @@ function isScraperSocketConnected() {
 	return Boolean($socket);
 }
 
-export { initialize, getAniworldInfos, manageTitle, isScraperSocketConnected };
+export { initialize, getAniworldInfos, checkForUpdates, manageTitle, isScraperSocketConnected };
