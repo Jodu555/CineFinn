@@ -140,8 +140,22 @@ export default {
 		},
 		async start(id) {
 			const job = this.jobs.find((j) => j.id == id);
+
+			job.running = true;
+
+			this.$swal({
+				toast: true,
+				position: 'top-end',
+				showConfirmButton: false,
+				timer: 2500,
+				icon: 'warning',
+				title: `${job.name} - Started!`,
+				timerProgressBar: true,
+			});
+
 			const response = await this.$networking.get(`/managment${job.callpoint}`);
 			if (!response.success) {
+				job.running = false;
 				this.$swal({
 					toast: true,
 					position: 'top-end',
@@ -153,17 +167,7 @@ export default {
 				});
 				return;
 			}
-			job.running = true;
 			job.lastRun = Date.now();
-			this.$swal({
-				toast: true,
-				position: 'top-end',
-				showConfirmButton: false,
-				timer: 2500,
-				icon: 'warning',
-				title: `${job.name} - Started!`,
-				timerProgressBar: true,
-			});
 		},
 	},
 };
