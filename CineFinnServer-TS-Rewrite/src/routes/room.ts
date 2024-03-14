@@ -36,7 +36,7 @@ router.get('/:id/headsup', async (req: AuthenticatedRequest, res: Response, next
 	}
 	console.log('Performing Room Headsup', room.ID);
 
-	if (room.members.find(x => x.UUID == req.credentials.user.UUID).role != 0) {
+	if (room.members.find(x => x.UUID == req.credentials.user.UUID)?.role != 0) {
 		next(new Error('You are either not in the room or the owner!'));
 		return;
 	}

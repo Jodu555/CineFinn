@@ -13,6 +13,9 @@ const database = Database.getDatabase();
 
 const timeDebug = false;
 
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+
 const initialize = (socket: ExtendedSocket) => {
 	const auth = socket.auth;
 	console.log('Socket Connection:', auth.type.toUpperCase(), auth.user.username, socket.id);
@@ -166,9 +169,26 @@ async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 			//Updating db todo
 			await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
 
-			//getting full db todo list
-			const todosDBList = await database.get<DatabaseTodoItem>('todos').get();
-			const list: DatabaseParsedTodoItem[] = todosDBList.map((t) => JSON.parse(t.content));
+			let run = true
+			let exitCon = 0;
+			let list: DatabaseParsedTodoItem[] = [];
+			while (run) {
+				exitCon++;
+				const todosDBList = await database.get<DatabaseTodoItem>('todos').get();
+				list = todosDBList.map((t) => JSON.parse(t.content));
+
+				if (exitCon > 50) {
+					run = false;
+					console.log('Met Exit condition');
+				}
+
+				if (list.find(x => x.ID == todo.ID).scraped == true) {
+					console.log('Impossible....');
+					await wait(42);
+				} else {
+					run = false;
+				}
+			}
 
 			console.log('Scrape and update for', todo.references.aniworld, 'took', Date.now() - time, 'ms');
 
