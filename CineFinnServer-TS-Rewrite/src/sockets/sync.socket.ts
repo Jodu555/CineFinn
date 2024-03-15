@@ -11,6 +11,7 @@ const initialize = (socket: ExtendedSocket) => {
     console.log('Socket-Sync Connection:', auth.type.toUpperCase(), auth.user.username, socket.id);
 
     const leave = async () => {
+        if (socket.sync == undefined) return;
         console.log('SOCKET with auth', auth.user.username, 'sync-leave', socket.sync);
         const room = await getRoomCheckIfExists(socket?.sync?.ID, socket);
         if (room == false) return;
@@ -53,6 +54,7 @@ const initialize = (socket: ExtendedSocket) => {
     }
 
     socket.on('disconnect', async () => {
+        if (socket.sync == undefined) return;
         console.log('Socket-Sync DisConnection:', auth.type.toUpperCase());
         await leave();
     });
