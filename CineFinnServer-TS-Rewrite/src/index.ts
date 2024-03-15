@@ -8,6 +8,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { Database } from '@jodu555/mysqlapi';
+import IORedis from 'ioredis';
 import { User, SettingsObject, Role, ActivityDetails } from './types/session';
 dotenv.config();
 
@@ -25,7 +26,7 @@ databaseSetupFunction();
 
 import { initialize as socket_initialize } from './sockets';
 
-import { getSeries, setIO, setAuthHelper } from './utils/utils';
+import { getSeries, setIO, setAuthHelper, setIORedis } from './utils/utils';
 import { compareSettings, defaultSettings } from './utils/settings';
 
 const app = express();
@@ -160,6 +161,18 @@ setIO(
 		},
 	})
 );
+
+if (process.env.USE_REDIS == 'true') {
+	setIORedis(new IORedis({
+		port: Number(process.env.REDIS_PORT) | 6379,
+		host: process.env.REDIS_HOST,
+		password: process.env.REDIS_PASSWORD,
+		maxRetriesPerRequest: null,
+	}));
+} else {
+	setIORedis(null);
+}
+
 
 socket_initialize();
 

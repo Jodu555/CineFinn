@@ -12,7 +12,7 @@ let series: Series[] = null;
 let activeJobs: ActiveJob[] = [];
 let io: Server = null;
 let authHelper: AuthenticationHelper<User> = null;
-let redisConn: IORedis = null;
+let redisConn: IORedis | void = null;
 
 function debounce(cb: Function, delay = 1000) {
 	let timeout: NodeJS.Timeout;
@@ -59,8 +59,8 @@ const setAuthHelper = (_authHelper: AuthenticationHelper<User>) => (authHelper =
 const getIO = () => io;
 const setIO = (_io: Server) => (io = _io);
 
-const getIORedis = (): IORedis => redisConn;
-const setIORedis = (_redisConn: IORedis) => (redisConn = _redisConn);
+const getIORedis = (): IORedis | void => redisConn;
+const setIORedis = (_redisConn: IORedis | void) => (redisConn = _redisConn);
 
 type toAllSocketsFunctionCB = (socket: ExtendedRemoteSocket) => void;
 type toAllSocketsFunctionFilter = (socket: ExtendedRemoteSocket) => boolean;

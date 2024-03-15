@@ -19,6 +19,7 @@ interface PromissesJob {
 		entity: Episode | Movie;
 		lang: string;
 		filePath: string,
+		output: string,
 	}
 	run: () => Promise<void>;
 }
@@ -60,6 +61,7 @@ function generateEntityImages(i: number, serie: Series, entity: Episode | Movie,
 				serieID: serie.ID,
 				entity,
 				lang,
+				output,
 				filePath,
 			},
 			run: () => new Promise<void>(async (resolve, reject) => {
@@ -126,37 +128,41 @@ const generateImages = async (series: Series[], cleanup: () => void = () => { })
 
 	console.log(`Every Series has been checked and there are ${promises.length} Processes Waiting!`);
 
-	// const connection = getIORedis();
-	// const previewImageQueue = 'previewImageQueue'
-	// const queue = new Queue(previewImageQueue, { connection });
+	const connection = getIORedis();
+	if (connection) {
+		const previewImageQueue = 'previewImageQueue'
+		const queue = new Queue(previewImageQueue, { connection });
 
 
-	// const queueEvents = new QueueEvents(previewImageQueue, { connection });
+		const queueEvents = new QueueEvents(previewImageQueue, { connection });
 
-	// promises.forEach(p => {
-	// 	queue.add(p.meta.serieID, p.meta, {
-	// 		removeOnComplete: true,
-	// 	})
-	// })
+		promises.forEach(p => {
+			queue.add(p.meta.serieID, p.meta, {
+				removeOnComplete: true,
+			})
+		})
 
-	// await new Promise<void>((resolve, reject) => {
-	// 	queueEvents.once('drained', async () => {
-	// 		console.log('Queue drained');
-	// 		queue.drain();
-	// 		resolve();
-	// 	});
-	// });
-	await Promise.all(promises.map(p => {
-		return limit(
-			() =>
-				new Promise<void>(async (resolve, _) => {
-					console.log('  => Started', p.meta.serieID, series.find(x => x.ID == p.meta.serieID)?.title, path.parse(p.meta.entity.filePath).base, p.meta.lang);
-					await p.run();
-					console.log('  => Finished', p.meta.serieID, series.find(x => x.ID == p.meta.serieID)?.title, path.parse(p.meta.entity.filePath).base, p.meta.lang);
-					resolve();
-				})
-		);
-	}));
+		await new Promise<void>((resolve, reject) => {
+			queueEvents.once('drained', async () => {
+				console.log('Queue drained');
+				queue.drain();
+				resolve();
+			});
+		});
+	} else {
+		await Promise.all(promises.map(p => {
+			return limit(
+				() =>
+					new Promise<void>(async (resolve, _) => {
+						console.log('  => Started', p.meta.serieID, series.find(x => x.ID == p.meta.serieID)?.title, path.parse(p.meta.entity.filePath).base, p.meta.lang);
+						await p.run();
+						console.log('  => Finished', p.meta.serieID, series.find(x => x.ID == p.meta.serieID)?.title, path.parse(p.meta.entity.filePath).base, p.meta.lang);
+						resolve();
+					})
+			);
+		}));
+	}
+
 
 
 	console.log('Finished generateImages()');
