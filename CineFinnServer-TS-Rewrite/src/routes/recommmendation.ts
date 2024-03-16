@@ -45,7 +45,7 @@ function groupit(remoteSeries: Series[], group: { [key: string]: number }): { ID
 router.get('/', async (req: AuthenticatedRequest, res: Response) => {
     console.time('complete')
 
-    const categorieSharePercentInclude = 5 as const;
+    const categorieSharePercentInclude = 7 as const;
     const forYouItems = 20 as const;
     const newestItems = 15 as const;
     const watchAgainItems = 18 as const;
