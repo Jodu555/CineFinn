@@ -77,9 +77,15 @@
 						</template>
 						<li>
 							<em>
-								Source: {{ element?.scraped?.infos }}
-								<br />
-								<a :href="element?.scrape?.url">{{ element?.scraped?.url }}</a>
+								<template v-if="userInfo.role > 2">
+									Source: {{ element?.scraped?.infos }}
+									<br />
+									<a :href="element?.scraped?.url">{{ element?.scraped?.url }}</a>
+									<template v-if="element?.scrapedZoro?.informations">
+										<br />
+										<a :href="element?.scrapedZoro?.informations?.episodes[0]?.url">{{ element?.scrapedZoro?.informations?.episodes[0]?.url }}</a>
+									</template>
+								</template>
 								<br />
 								<p style="cursor: pointer" @click="deleteParsedInfos(element.ID)"><u>Delete Scraped infos</u></p>
 							</em>
