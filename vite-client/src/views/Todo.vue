@@ -311,14 +311,13 @@ const languageDevision = (element) => {
 		});
 	}
 
-	console.log(out);
-
 	for (const [key, value] of Object.entries(out)) {
 		out[key] = parseFloat((value / total) * 100).toFixed(2);
 	}
 
 	if (out['GerDub'] == 100) {
-		return { GerDub: 100 };
+		delete out['GerSub'];
+		delete out['EngSub'];
 	} else if (out['GerSub'] == 100 && out['EngSub']) {
 		delete out['EngSub'];
 	}
