@@ -119,7 +119,7 @@
 				:inSyncRoom="true"
 				:canPlay="isOwner"
 				:switchTo="switchTo"
-				:sendVideoTimeUpdate="() => {}"
+				:sendVideoTimeUpdate="sendVideoTimeUpdate"
 			/>
 		</div>
 	</div>
@@ -240,6 +240,17 @@ export default {
 		switchTo(vel) {
 			deepswitchTo(vel, this);
 		},
+		sendVideoTimeUpdate(time, force = false) {
+			console.log('sendVideoTimeUpdate()', time, force);
+			this.$socket.emit('timeUpdate', {
+				series: this.$route.query.id,
+				movie: this.currentMovie,
+				season: this.currentSeason,
+				episode: this.currentEpisode,
+				time: time,
+				force,
+			});
+		},
 
 		/**
 		 * Handles changing the video that is playing in the sync room.
@@ -269,6 +280,7 @@ export default {
 				const prevTime = video.currentTime;
 
 				console.log('GOT handleVideoChange() EMIT to Server', { season, episode, movie, langchange, lang: langchange ? lang : defaultLanguage });
+				this.sendVideoTimeUpdate(video.currentTime, true);
 				!silent && this.$socket.emit('sync-video-change', { season, episode, movie, langchange, lang: langchange ? lang : defaultLanguage });
 				video.pause();
 
