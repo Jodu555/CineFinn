@@ -418,6 +418,11 @@ buildFunction<any, { title: string, aniworld: boolean }>('manageTitle', async ({
 	return { url: doStuff(title, aniworld) };
 });
 
-buildFunction<void, void>('checkForUpdates', async () => {
-	await checkForUpdates();
+buildFunction<{ success: boolean, error?: Error }, void>('checkForUpdates', async () => {
+	try {
+		await checkForUpdates();
+		return { success: true };
+	} catch (error) {
+		return { success: false, error };
+	}
 });

@@ -167,10 +167,11 @@ async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 			console.log('Kicked off scraper', todo.references.aniworld);
 
 			const [aniInfos, zoroInfos] = await Promise.all([
-				getAniworldInfos({ url: todo.references.aniworld }),
-				getZoroInfos({ ID: todo.references.zoro })
+				todo.references.aniworld ? getAniworldInfos({ url: todo.references.aniworld }) : null,
+				todo.references.zoro ? getZoroInfos({ ID: todo.references.zoro }) : null,
 			]);
-			if (!aniInfos || !zoroInfos) {
+
+			if (todo.references.aniworld && !aniInfos || todo.references.zoro && !zoroInfos) {
 				console.log('Got Bad Infos', aniInfos, 'for url', todo.references.aniworld);
 				console.log('Got Bad Infos', zoroInfos, 'for url', todo.references.zoro);
 				throw new Error('No Aniworld Or Zoro infos found');
@@ -179,8 +180,10 @@ async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 			if (todo.scrapingError)
 				delete todo.scrapingError;
 
-			todo.scraped = aniInfos;
-			todo.scrapedZoro = zoroInfos;
+			if (aniInfos)
+				todo.scraped = aniInfos;
+			if (zoroInfos)
+				todo.scrapedZoro = zoroInfos;
 			//Updating db todo
 			await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
 

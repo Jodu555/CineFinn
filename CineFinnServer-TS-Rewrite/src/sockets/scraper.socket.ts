@@ -4,6 +4,14 @@ import { randomUUID } from 'node:crypto';
 
 let $socket: ExtendedSocket;
 
+
+export interface AbstractSocketCall { __returnValue: boolean, __refID: string }
+
+const waitingForResponse: {
+	__refID: string;
+	listener: (args: AbstractSocketCall) => void;
+}[] = [];
+
 const initialize = async (socket: ExtendedSocket) => {
 	const auth = socket.auth;
 	console.log('Socket Connection:', auth.type.toUpperCase());
@@ -11,6 +19,13 @@ const initialize = async (socket: ExtendedSocket) => {
 
 	socket.on('disconnect', () => {
 		console.log('Socket DisConnection:', auth.type.toUpperCase());
+		if (waitingForResponse.length > 0) {
+			console.log('Scraper Socket Disconnected while the following function\'s where waiting ');
+			waitingForResponse.forEach(e => {
+				console.log(' =>', e.__refID);
+				e.listener({ __refID: e.__refID, __returnValue: false });
+			});
+		}
 		$socket = null;
 	});
 
@@ -78,7 +93,7 @@ export interface ZoroReturn {
 
 const getAniworldInfos = buildAwaitSocketReturn<AniWorldSeriesInformations, { url: string }>('AniworldData');
 const getZoroInfos = buildAwaitSocketReturn<ZoroReturn, { ID: string | number }>('ZoroData');
-const checkForUpdates = buildAwaitSocketReturn<void, void>('checkForUpdates');
+const checkForUpdates = buildAwaitSocketReturn<{ success: boolean, error: Error }, void>('checkForUpdates');
 
 const manageTitle = buildAwaitSocketReturn('manageTitle');
 
@@ -88,7 +103,7 @@ function buildAwaitSocketReturn<R, T>(method: string): (arg0: T) => Promise<R | 
 			const __refID = randomUUID().split('-')[0];
 			if (!$socket) return reject(new Error('Socket not reachable'));
 			const timeout = setTimeout(() => reject(new Error('Timeout reached')), 1000 * 60 * 15);
-			const listener = (data: R & { __returnValue: boolean, __refID: string }) => {
+			const listener = (data: R & AbstractSocketCall) => {
 				if (data.__refID == __refID) {
 					delete data.__refID;
 					const __returnValue = data.__returnValue;
@@ -105,6 +120,10 @@ function buildAwaitSocketReturn<R, T>(method: string): (arg0: T) => Promise<R | 
 			// @ts-ignore:next-line
 			$socket.on(`return${method}`, listener);
 			$socket.emit(`call${method}`, { ...input, __refID });
+			waitingForResponse.push({
+				__refID,
+				listener
+			})
 		});
 	};
 }
