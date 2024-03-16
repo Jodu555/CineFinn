@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import IORedis from 'ioredis';
-import { Queue, Worker } from 'bullmq';
+import { Queue, Worker, tryCatch } from 'bullmq';
 
 
 
@@ -61,11 +61,55 @@ async function main() {
         password: config.redisConnection.password
     });
 
-    const worker = new Worker('previewImageQueue', async (job) => {
-        await wait(500);
-        console.log(job.id, job.data);
-        return;
-    }, { connection, concurrency: config.concurrentGenerators });
+    // const worker = new Worker('previewImageQueue', async (job) => {
+    //     await wait(500);
+    //     console.log(job.id, job.data);
+    //     return;
+    // }, { connection, concurrency: config.concurrentGenerators });
+
+
+    const tmp = {
+        imagePathPrefix: 'X:\\MediaLib\\Application\\images',
+        serieID: 'cfbe03da',
+        entity: {
+            filePath: 'X:\\MediaLib\\Application\\vids\\Aniworld\\That Time I Got Reincarnated as a Slime\\Season-1\\That Time I Got Reincarnated as a Slime St#1 Flg#22.mp4',
+            primaryName: 'That Time I Got Reincarnated as a Slime',
+            secondaryName: '',
+            season: 1,
+            episode: 22,
+            langs: ['GerDub']
+        },
+        lang: 'GerDub',
+        output: 'X:\\MediaLib\\Application\\images\\cfbe03da\\previewImages\\1-22\\GerDub',
+        filePath: 'X:\\MediaLib\\Application\\vids\\Aniworld\\That Time I Got Reincarnated as a Slime\\Season-1\\That Time I Got Reincarnated as a Slime St#1 Flg#22.mp4'
+    }
+
+
+
+    config.pathRemapper['X:\\MediaLib\\Application\\'] = '\\media\\pi\\Seagate Expansion Drive\\MediaLib\\Application\\'
+
+
+    for (const [key, value] of Object.entries(config.pathRemapper)) {
+        if (path.normalize(tmp.filePath).startsWith(path.win32.normalize(key))) {
+
+            const inputFile = path.win32.normalize(path.win32.normalize(tmp.filePath).replace(path.win32.normalize(key), value));
+            const output = path.win32.normalize(path.win32.normalize(tmp.output).replace(path.win32.normalize(key), value));
+
+            console.log('mp4 file', inputFile);
+            console.log('image dir out', output);
+
+            try {
+                console.log(1, fs.statSync(inputFile.replaceAll('\\', '/')));
+                console.log(2, fs.readdirSync(output.replaceAll('\\', '/')));
+
+            } catch (error) {
+                console.error(1);
+            }
+
+        }
+    }
+
+
 
 
 }
