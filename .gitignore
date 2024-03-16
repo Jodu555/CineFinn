@@ -9,6 +9,7 @@ dlList.json
 dlListOther.json
 zorolist.json
 Scraper/*.json
+config.json
 *.mp4
 
 ChromeAnalyze/

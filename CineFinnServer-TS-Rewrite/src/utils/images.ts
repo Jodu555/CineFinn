@@ -20,6 +20,7 @@ interface PromissesJob {
 		lang: string;
 		filePath: string,
 		output: string,
+		imagePathPrefix: string,
 	}
 	run: () => Promise<void>;
 }
@@ -58,6 +59,7 @@ function generateEntityImages(i: number, serie: Series, entity: Episode | Movie,
 
 		returnArr.push({
 			meta: {
+				imagePathPrefix: process.env.PREVIEW_IMGS_PATH,
 				serieID: serie.ID,
 				entity,
 				lang,
