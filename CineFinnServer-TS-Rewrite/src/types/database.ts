@@ -1,4 +1,4 @@
-import { AniWorldSeriesInformations } from '../sockets/scraper.socket';
+import { AniWorldSeriesInformations, ZoroReturn } from '../sockets/scraper.socket';
 import { Langs } from './classes';
 
 export interface DatabaseWatchStringItem {
@@ -28,6 +28,7 @@ export interface DatabaseParsedTodoItem {
 	categorie: 'Aniworld' | 'STO' | 'KDrama';
 	references: References;
 	scraped?: AniWorldSeriesInformations | true;
+	scrapedZoro?: ZoroReturn | true;
 	scrapingError?: string;
 }
 

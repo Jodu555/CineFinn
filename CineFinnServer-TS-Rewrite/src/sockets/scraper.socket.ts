@@ -113,4 +113,4 @@ function isScraperSocketConnected() {
 	return Boolean($socket);
 }
 
-export { initialize, getAniworldInfos, checkForUpdates, manageTitle, isScraperSocketConnected };
+export { initialize, getAniworldInfos, getZoroInfos, checkForUpdates, manageTitle, isScraperSocketConnected };

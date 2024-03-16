@@ -5,16 +5,16 @@ import jsdom from 'jsdom';
  *
  * # Reverse Enginneered:
  * ## To Get all Episodes of the anime ID
- * https://aniwatch.to/ajax/v2/episode/list/17978
+ * https://hianime.to/ajax/v2/episode/list/17978
  *
  * ## To Get Episode Informations (Sub / Dub)
- * https://aniwatch.to/ajax/v2/episode/servers?episodeId=92390
+ * https://hianime.to/ajax/v2/episode/servers?episodeId=92390
  *
  * ## To Get the stream embed iframe
- * https://aniwatch.to/ajax/v2/episode/sources?id=serverid
+ * https://hianime.to/ajax/v2/episode/sources?id=serverid
  *
  * ## To Get a Character List
- * https://aniwatch.to/ajax/character/list/17978
+ * https://hianime.to/ajax/character/list/17978
  *
  */
 
@@ -102,7 +102,7 @@ class Zoro {
 
 	async getEpisodeList(): Promise<{ total: number; episodes: SimpleZoroEpisode[] }> {
 		debug && console.log('Called Zoro.getEpisodeList');
-		const response = await axios.get('https://aniwatch.to/ajax/v2/episode/list/' + this.ID);
+		const response = await axios.get('https://hianime.to/ajax/v2/episode/list/' + this.ID);
 		const total = response.data.totalItems;
 		const { document } = new jsdom.JSDOM(response.data.html).window;
 
@@ -111,7 +111,7 @@ class Zoro {
 				ID: anchor.dataset.id,
 				title: anchor.title,
 				number: anchor.dataset.number,
-				url: 'https://aniwatch.to' + anchor.href,
+				url: 'https://hianime.to' + anchor.href,
 			};
 		});
 		return {
@@ -132,7 +132,7 @@ class Zoro {
 
 		for (const episode of episodes) {
 			const outputEpisode = { ...episode } as ExtendedZoroEpisode;
-			const response = await axios.get('https://aniwatch.to/ajax/v2/episode/servers?episodeId=' + episode.ID);
+			const response = await axios.get('https://hianime.to/ajax/v2/episode/servers?episodeId=' + episode.ID);
 			const { document } = new jsdom.JSDOM(response.data.html).window;
 			const streamingServers: StreamingServers[] = [...document.querySelectorAll('div.server-item')].map((server: HTMLAnchorElement) => {
 				return {
@@ -155,7 +155,7 @@ class Zoro {
 	}
 
 	async getStream(streamID: string): Promise<string> {
-		const response = await axios.get('https://aniwatch.to/ajax/v2/episode/sources?id=' + streamID);
+		const response = await axios.get('https://hianime.to/ajax/v2/episode/sources?id=' + streamID);
 		return response.data.link;
 	}
 }

@@ -379,7 +379,9 @@ buildFunction<AniWorldSeriesInformations, { url: string }>('AniworldData', async
 });
 
 buildFunction<any, { ID: string | number }>('ZoroData', async ({ ID }) => {
+	console.log('Recieved ZoroData', ID);
 	const zoro = new Zoro(String(ID));
+	await zoro.initialize();
 	const informations = await zoro.getExtendedEpisodeList();
 	return { informations };
 });

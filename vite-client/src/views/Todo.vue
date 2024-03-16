@@ -296,6 +296,23 @@ const languageDevision = (element) => {
 
 	element.scraped.seasons.flat().forEach((x) => x.langs.forEach((l) => (!out[l] ? (out[l] = 1) : (out[l] += 1))));
 
+	if (element.scrapedZoro) {
+		const zoroEps = element.scrapedZoro?.informations?.episodes;
+		zoroEps.forEach((e) => {
+			e.langs.forEach((l) => {
+				if (l == 'sub') l = 'EngSub';
+				if (l == 'dub') l = 'EngDub';
+				if (out[l]) {
+					out[l] += 1;
+				} else {
+					out[l] = 1;
+				}
+			});
+		});
+	}
+
+	console.log(out);
+
 	for (const [key, value] of Object.entries(out)) {
 		out[key] = parseFloat((value / total) * 100).toFixed(2);
 	}
