@@ -45,6 +45,8 @@ export interface SeasonInformation {
 
 const debug = false;
 
+const hostname = 'hianime.to';
+
 class Zoro {
 	url: string;
 	ID: string | number;
@@ -102,7 +104,7 @@ class Zoro {
 
 	async getEpisodeList(): Promise<{ total: number; episodes: SimpleZoroEpisode[] }> {
 		debug && console.log('Called Zoro.getEpisodeList');
-		const response = await axios.get('https://hianime.to/ajax/v2/episode/list/' + this.ID);
+		const response = await axios.get(`https://${hostname}/ajax/v2/episode/list/${this.ID}`);
 		const total = response.data.totalItems;
 		const { document } = new jsdom.JSDOM(response.data.html).window;
 
@@ -111,7 +113,7 @@ class Zoro {
 				ID: anchor.dataset.id,
 				title: anchor.title,
 				number: anchor.dataset.number,
-				url: 'https://hianime.to' + anchor.href,
+				url: `https://${hostname}${anchor.href}`,
 			};
 		});
 		return {
@@ -132,7 +134,7 @@ class Zoro {
 
 		for (const episode of episodes) {
 			const outputEpisode = { ...episode } as ExtendedZoroEpisode;
-			const response = await axios.get('https://hianime.to/ajax/v2/episode/servers?episodeId=' + episode.ID);
+			const response = await axios.get(`https://${hostname}/ajax/v2/episode/servers?episodeId=${episode.ID}`);
 			const { document } = new jsdom.JSDOM(response.data.html).window;
 			const streamingServers: StreamingServers[] = [...document.querySelectorAll('div.server-item')].map((server: HTMLAnchorElement) => {
 				return {
@@ -155,7 +157,7 @@ class Zoro {
 	}
 
 	async getStream(streamID: string): Promise<string> {
-		const response = await axios.get('https://hianime.to/ajax/v2/episode/sources?id=' + streamID);
+		const response = await axios.get(`https://${hostname}/ajax/v2/episode/sources?id=${streamID}`);
 		return response.data.link;
 	}
 }
