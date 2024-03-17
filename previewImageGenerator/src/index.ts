@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import child_process from 'child_process';
 import IORedis from 'ioredis';
 import { Queue, Worker, tryCatch } from 'bullmq';
 
@@ -35,7 +36,14 @@ const defaultConfig: Config = {
     }
 };
 
-
+function evalPath(config: Config, evalPath: string) {
+    for (const [key, value] of Object.entries(config.pathRemapper)) {
+        if (path.normalize(evalPath).startsWith(path.win32.normalize(key))) {
+            const mappedPath = path.win32.normalize(path.win32.normalize(evalPath).replace(path.win32.normalize(key), value));
+            return mappedPath.replaceAll('\\', '/')
+        }
+    }
+}
 
 async function main() {
 
@@ -61,57 +69,45 @@ async function main() {
         password: config.redisConnection.password
     });
 
-    // const worker = new Worker('previewImageQueue', async (job) => {
-    //     await wait(500);
-    //     console.log(job.id, job.data);
-    //     return;
-    // }, { connection, concurrency: config.concurrentGenerators });
-
-
-    const tmp = {
-        imagePathPrefix: 'X:\\MediaLib\\Application\\images',
-        serieID: 'cfbe03da',
-        entity: {
-            filePath: 'X:\\MediaLib\\Application\\vids\\Aniworld\\That Time I Got Reincarnated as a Slime\\Season-1\\That Time I Got Reincarnated as a Slime St#1 Flg#22.mp4',
-            primaryName: 'That Time I Got Reincarnated as a Slime',
-            secondaryName: '',
-            season: 1,
-            episode: 22,
-            langs: ['GerDub']
-        },
-        lang: 'GerDub',
-        output: 'X:\\MediaLib\\Application\\images\\cfbe03da\\previewImages\\1-22\\GerDub',
-        filePath: 'X:\\MediaLib\\Application\\vids\\Aniworld\\That Time I Got Reincarnated as a Slime\\Season-1\\That Time I Got Reincarnated as a Slime St#1 Flg#22.mp4'
-    }
-
-
-
     config.pathRemapper['X:\\MediaLib\\Application\\'] = '\\media\\pi\\Seagate Expansion Drive\\MediaLib\\Application\\'
 
+    interface JobMeta {
+        serieID: string;
+        entity: any;
+        lang: string;
+        filePath: string,
+        output: string,
+        imagePathPrefix: string,
+    };
 
-    for (const [key, value] of Object.entries(config.pathRemapper)) {
-        if (path.normalize(tmp.filePath).startsWith(path.win32.normalize(key))) {
+    const worker = new Worker<JobMeta>('previewImageQueue', async (job) => {
+        console.log(job.id, job.data);
+        const vidFile = evalPath(config, job.data.filePath)
+        const imgDir = evalPath(config, job.data.output)
 
-            const inputFile = path.win32.normalize(path.win32.normalize(tmp.filePath).replace(path.win32.normalize(key), value));
-            const output = path.win32.normalize(path.win32.normalize(tmp.output).replace(path.win32.normalize(key), value));
+        console.log(vidFile);
+        console.log(imgDir);
 
-            console.log('mp4 file', inputFile);
-            console.log('image dir out', output);
+        const command = `ffmpeg -i "${vidFile}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
 
-            try {
-                console.log(1, fs.statSync(inputFile.replaceAll('\\', '/')));
-                console.log(2, fs.readdirSync(output.replaceAll('\\', '/')));
+        console.log('=> ', command);
 
-            } catch (error) {
-                console.error(1);
+        await wait(10000);
+        return;
+    }, { connection, concurrency: config.concurrentGenerators });
+
+}
+
+async function deepExecPromisify(command: string, cwd: string = undefined) {
+    return await new Promise((resolve, reject) => {
+        //maxBuffer: Default: 200KB and this sets it to 900KB
+        child_process.exec(command, { encoding: 'utf8', cwd, maxBuffer: 1024 * 900 }, (error, stdout, stderr) => {
+            if (error) {
+                reject(error);
             }
-
-        }
-    }
-
-
-
-
+            resolve([...stdout?.split('\n'), ...stderr?.split('\n')]);
+        });
+    });
 }
 
 main();
