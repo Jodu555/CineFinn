@@ -43,6 +43,7 @@ function evalPath(config: Config, evalPath: string) {
             return mappedPath.replaceAll('\\', '/')
         }
     }
+    return evalPath;
 }
 
 async function main() {
@@ -88,8 +89,12 @@ async function main() {
 
         console.log(vidFile);
         console.log(imgDir);
+        job.log('Evaluated Path Video File: ' + vidFile);
+        job.log('Evaluated Path Image Directory: ' + imgDir);
 
         const command = `ffmpeg -i "${vidFile}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
+
+        job.log('Crafted Command: ' + command);
 
         console.log('=> ', command);
 
@@ -97,7 +102,11 @@ async function main() {
             console.log('Video File Missing', vidFile);
             console.log('This is probably a misconfiguration of the config pathRemapper');
         }
-        await wait(10000);
+        await job.updateProgress(10);
+        await wait(5000);
+        await job.updateProgress(40);
+        await wait(5000);
+        await job.updateProgress(100);
         return;
         try {
             fs.mkdirSync(imgDir, { recursive: true });
