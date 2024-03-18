@@ -130,6 +130,7 @@ async function spawnFFmpegProcess(command: string, cwd: string = undefined, prog
 
         proc.stderr.setEncoding('utf8');
         proc.stderr.on('data', (data: string) => {
+            if (data == undefined) return;
             const lines = data.split('\n');
             lines.forEach(line => {
                 if (line.includes('frame=') && line.includes('fps=') && line.includes('time=')) {

@@ -46,10 +46,8 @@ function generateEntityImages(i: number, serie: Series, entity: Episode | Movie,
 		} else if (entity instanceof Movie) {
 			output = path.join(output, 'Movies', `${entity.primaryName}`, lang);
 		}
-		fs.mkdirSync(output, { recursive: true });
-		// console.log(output, fs.readdirSync(output).length);
 
-		if (fs.readdirSync(output).length != 0) {
+		if (fs.existsSync(output) && fs.readdirSync(output).length != 0) {
 			// console.log('Images Present skipping', lang);
 			continue;
 		}
@@ -68,7 +66,7 @@ function generateEntityImages(i: number, serie: Series, entity: Episode | Movie,
 			},
 			run: () => new Promise<void>(async (resolve, reject) => {
 				try {
-
+					fs.mkdirSync(output, { recursive: true });
 					const command = `ffmpeg -i "${filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
 					// console.log(command);
 					await deepExecPromisify(command);
