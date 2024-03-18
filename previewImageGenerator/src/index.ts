@@ -48,14 +48,15 @@ function evalPath(config: Config, evalPath: string) {
 async function main() {
 
     const previewImageQueue = 'previewImageQueue'
+    const cfgPath = path.join('.', 'config.json');
 
-    if (!fs.existsSync(path.join(__dirname, 'config.json'))) {
-        fs.writeFileSync(path.join(__dirname, 'config.json'), JSON.stringify(defaultConfig, null, 3));
+    if (!fs.existsSync(cfgPath)) {
+        fs.writeFileSync(cfgPath, JSON.stringify(defaultConfig, null, 3));
         console.error('Config file not found, creating default config...');
         process.exit(1);
     }
 
-    const config: Config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8'));
+    const config: Config = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
 
     if (config.version !== defaultConfig.version) {
         console.error('Config version mismatch! It could be that your config is outdated. Exiting...');
@@ -69,7 +70,7 @@ async function main() {
         password: config.redisConnection.password
     });
 
-    config.pathRemapper['X:\\MediaLib\\Application\\'] = '\\media\\pi\\Seagate Expansion Drive\\MediaLib\\Application\\'
+    //config.pathRemapper['X:\\MediaLib\\Application\\'] = '\\media\\pi\\Seagate Expansion Drive\\MediaLib\\Application\\'
 
     interface JobMeta {
         serieID: string;
@@ -91,6 +92,19 @@ async function main() {
         const command = `ffmpeg -i "${vidFile}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
 
         console.log('=> ', command);
+
+        if (!fs.existsSync(vidFile)) {
+            console.log('Video File Missing', vidFile);
+            console.log('This is probably a misconfiguration of the config pathRemapper');
+        }
+        await wait(10000);
+        return;
+        try {
+            fs.mkdirSync(imgDir, { recursive: true });
+            await deepExecPromisify(command, imgDir);
+        } catch (error) {
+            console.error('Error on execution command:', command, 'Error:', error);
+        }
 
         await wait(10000);
         return;
