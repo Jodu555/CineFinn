@@ -106,9 +106,10 @@ async function main() {
             fs.mkdirSync(imgDir, { recursive: true });
             // await deepExecPromisify(command, imgDir);
             await spawnFFmpegProcess(command, imgDir, async (speed, percent) => {
-                await job.log('FFmpeg Tick with speed: ' + speed + 'x and percent: ' + parseFloat(String(percent)).toFixed(2) + '%');
-                await job.updateProgress(parseInt(String(percent)));
-                console.log(job.id, speed + 'x', parseFloat(String(percent)).toFixed(2) + '%');
+                percent = parseFloat(parseFloat(String(percent)).toFixed(2));
+                await job.log('FFmpeg Tick with speed: ' + speed + 'x and percent: ' + percent + '%');
+                await job.updateProgress(percent);
+                console.log(job.id, speed + 'x', percent + '%');
             });
         } catch (error) {
             console.error('Error on execution command:', command, 'Error:', error);
