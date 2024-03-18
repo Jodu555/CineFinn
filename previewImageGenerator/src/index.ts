@@ -83,12 +83,11 @@ async function main() {
     };
 
     const worker = new Worker<JobMeta>('previewImageQueue', async (job) => {
-        console.log(job.id, job.data);
+        job.clearLogs();
+        console.log('Recieve Job: ', job.id);
         const vidFile = evalPath(config, job.data.filePath)
         const imgDir = evalPath(config, job.data.output)
 
-        console.log(vidFile);
-        console.log(imgDir);
         job.log('Evaluated Path Video File: ' + vidFile);
         job.log('Evaluated Path Image Directory: ' + imgDir);
 
@@ -96,7 +95,7 @@ async function main() {
 
         job.log('Crafted Command: ' + command);
 
-        console.log('=> ', command);
+        console.log(job.id, ' => ', command);
 
         if (!fs.existsSync(vidFile)) {
             console.log('Video File Missing', vidFile);
