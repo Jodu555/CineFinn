@@ -135,13 +135,12 @@ async function spawnFFmpegProcess(command: string, cwd: string = undefined, prog
                 if (line.includes('frame=') && line.includes('fps=') && line.includes('time=')) {
 
                     if (duration == null) {
-                        cumOutput.filter(l => l.includes('Duration: ')).forEach(l => {
-                            const [_, rest] = l.split('Duration: ');
-                            const [time, __] = rest.split(',');
-                            const [h, m, sc] = time.split(':')
-                            const s = parseInt(sc);
-                            duration = { h: Number(h), m: Number(m), s };
-                        });
+                        const l = cumOutput.join(' ').trim().replaceAll('\r', '').replaceAll('\n', '').replaceAll('\t', '');
+                        const [_, rest] = l.split('Duration: ');
+                        const [time, __] = rest.split(',');
+                        const [h, m, sc] = time.split(':')
+                        const s = parseInt(sc);
+                        duration = { h: Number(h), m: Number(m), s };
                     }
 
                     const speed = parseFloat(line.split('speed=')[1].split('x')[0]);
