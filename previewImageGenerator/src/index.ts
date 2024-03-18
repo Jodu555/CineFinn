@@ -92,7 +92,7 @@ async function main() {
         job.log('Evaluated Path Video File: ' + vidFile);
         job.log('Evaluated Path Image Directory: ' + imgDir);
 
-        const command = `ffmpeg -i "${vidFile}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
+        const command = `ffmpeg -hide_banner -i "${vidFile}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
 
         job.log('Crafted Command: ' + command);
 
@@ -102,23 +102,77 @@ async function main() {
             console.log('Video File Missing', vidFile);
             console.log('This is probably a misconfiguration of the config pathRemapper');
         }
-        await job.updateProgress(10);
-        await wait(5000);
-        await job.updateProgress(40);
-        await wait(5000);
-        await job.updateProgress(100);
-        return;
         try {
             fs.mkdirSync(imgDir, { recursive: true });
-            await deepExecPromisify(command, imgDir);
+            // await deepExecPromisify(command, imgDir);
+            await spawnFFmpegProcess(command, imgDir, async (speed, percent) => {
+                await job.log('FFmpeg Tick with speed: ' + speed + 'x and percent: ' + parseFloat(String(percent)).toFixed(2) + '%');
+                await job.updateProgress(parseInt(String(percent)));
+                console.log(job.id, speed + 'x', parseFloat(String(percent)).toFixed(2) + '%');
+            });
         } catch (error) {
             console.error('Error on execution command:', command, 'Error:', error);
         }
 
-        await wait(10000);
         return;
     }, { connection, concurrency: config.concurrentGenerators });
+}
 
+
+
+async function spawnFFmpegProcess(command: string, cwd: string = undefined, progress: (speed: number, percent: number) => void) {
+    return new Promise<{ code: number, output: string[], duration: { h: number, m: number, s: number }, highestSpeed: number }>((resolve, reject) => {
+
+        const proc = child_process.spawn(command, { shell: true, cwd: cwd });;
+        let duration: { h: number, m: number, s: number } = null;
+        let highestSpeed: number = 0;
+        let cumOutput = [];
+
+        proc.stderr.setEncoding('utf8');
+        proc.stderr.on('data', (data: string) => {
+            const lines = data.split('\n');
+            lines.forEach(line => {
+                if (line.includes('frame=') && line.includes('fps=') && line.includes('time=')) {
+
+                    if (duration == null) {
+                        cumOutput.filter(l => l.includes('Duration: ')).forEach(l => {
+                            const [_, rest] = l.split('Duration: ');
+                            const [time, __] = rest.split(',');
+                            const [h, m, sc] = time.split(':')
+                            const s = parseInt(sc);
+                            duration = { h: Number(h), m: Number(m), s };
+                        });
+                    }
+
+                    const speed = parseFloat(line.split('speed=')[1].split('x')[0]);
+                    const [time, __] = line.split('time=')[1].split(' ');
+                    const [h, m, sc] = time.split(':');
+
+                    const s = parseInt(sc);
+                    const seconds = s + Number(m) * 60 + Number(h) * 60 * 60;
+                    const maxSeconds = duration.s + duration.m * 60 + duration.h * 60 * 60;
+
+                    const percent = seconds / maxSeconds * 100
+
+                    if (speed > highestSpeed)
+                        highestSpeed = speed;
+                    progress(speed, percent);
+                }
+            })
+            cumOutput.push(...lines);
+            // console.log('stderr: ', lines);
+        });
+
+        proc.on('close', (code) => {
+            console.log('Finished the', duration, 'video with the highest speed of', highestSpeed, 'x');
+            console.log('closing code: ' + code);
+            if (code == 0) {
+                resolve({ code, output: cumOutput, duration, highestSpeed });
+            } else {
+                reject({ code, output: cumOutput, duration, highestSpeed });
+            }
+        });
+    })
 }
 
 async function deepExecPromisify(command: string, cwd: string = undefined) {
