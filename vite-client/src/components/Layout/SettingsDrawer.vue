@@ -46,8 +46,7 @@
 								:key="job.id"
 								:running="job.running"
 								:lastRun="job.lastRun"
-								:click="start"
-							/>
+								:click="start" />
 						</template>
 					</ul>
 				</template>
@@ -72,8 +71,7 @@
 								"
 								v-model="setting.value"
 								class="form-check-input"
-								:id="key"
-							/>
+								:id="key" />
 							<label class="form-check-label" :for="key">{{ setting.title }}</label>
 						</template>
 					</div>

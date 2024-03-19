@@ -39,7 +39,7 @@ const oldCrawlAndIndex = () => {
 
 	Object.keys(obj).forEach((categorie) => {
 		const dirs = obj[categorie];
-		for (let i = 0; i < dirs.length;) {
+		for (let i = 0; i < dirs.length; ) {
 			const title = dirs[i];
 			const seasons = [];
 			const movies = [];
@@ -219,15 +219,9 @@ const mergeSeriesArrays = (before: Series[], after: Series[], keepCurrentlyNotPr
 		} else {
 			if (keepCurrentlyNotPresent) {
 				console.log('Found Non Overlapping or Currently not existing series', beforeSerie.title, beforeSerie.ID);
-				output.push(new Series(
-					beforeSerie.ID,
-					beforeSerie.categorie,
-					beforeSerie.title,
-					[],
-					[],
-					{ ...beforeSerie.references },
-					{ ...beforeSerie.infos }
-				));
+				output.push(
+					new Series(beforeSerie.ID, beforeSerie.categorie, beforeSerie.title, [], [], { ...beforeSerie.references }, { ...beforeSerie.infos })
+				);
 			}
 		}
 	});

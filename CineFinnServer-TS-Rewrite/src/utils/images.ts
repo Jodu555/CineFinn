@@ -18,10 +18,10 @@ interface PromissesJob {
 		serieID: string;
 		entity: Episode | Movie;
 		lang: string;
-		filePath: string,
-		output: string,
-		imagePathPrefix: string,
-	}
+		filePath: string;
+		output: string;
+		imagePathPrefix: string;
+	};
 	run: () => Promise<void>;
 }
 
@@ -64,47 +64,50 @@ function generateEntityImages(i: number, serie: Series, entity: Episode | Movie,
 				output,
 				filePath,
 			},
-			run: () => new Promise<void>(async (resolve, reject) => {
-				try {
-					fs.mkdirSync(output, { recursive: true });
-					const command = `ffmpeg -i "${filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
-					// console.log(command);
-					await deepExecPromisify(command);
-					// await wait(1000 + Math.floor(Math.random() * 100));
+			run: () =>
+				new Promise<void>(async (resolve, reject) => {
+					try {
+						fs.mkdirSync(output, { recursive: true });
+						const command = `ffmpeg -i "${filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
+						// console.log(command);
+						await deepExecPromisify(command);
+						// await wait(1000 + Math.floor(Math.random() * 100));
 
-					//Logging
-					if (entity instanceof Episode) {
-						newProgress &&
-							commandManager
-								.getWriter()
-								.deepSameLineClear(
-									`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base
-									}`,
-									2
-								);
-						!newProgress && console.log(`  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base}`);
-					} else if (entity instanceof Movie) {
-						newProgress &&
-							commandManager
-								.getWriter()
-								.deepSameLineClear(
-									`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (Movie) ${i + 1} / ${serie.movies.length
-									} - ${entity.primaryName}`,
-									2
-								);
-						!newProgress && console.log(`  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${entity.primaryName}`);
+						//Logging
+						if (entity instanceof Episode) {
+							newProgress &&
+								commandManager
+									.getWriter()
+									.deepSameLineClear(
+										`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${
+											path.parse(entity.filePath).base
+										}`,
+										2
+									);
+							!newProgress && console.log(`  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base}`);
+						} else if (entity instanceof Movie) {
+							newProgress &&
+								commandManager
+									.getWriter()
+									.deepSameLineClear(
+										`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (Movie) ${i + 1} / ${
+											serie.movies.length
+										} - ${entity.primaryName}`,
+										2
+									);
+							!newProgress && console.log(`  => Video (Movie) ${i + 1} / ${serie.movies.length} - ${entity.primaryName}`);
+						}
+						resolve();
+					} catch (error) {
+						reject(error);
 					}
-					resolve();
-				} catch (error) {
-					reject(error);
-				}
-			}),
+				}),
 		});
 	}
 	return returnArr;
 }
 
-const generateImages = async (series: Series[], cleanup: () => void = () => { }) => {
+const generateImages = async (series: Series[], cleanup: () => void = () => {}) => {
 	console.log('Started generateImages()');
 
 	const limit = pLimit(Number(process.env.IMG_CONCURRENT_LIMIT_GENERATION || 5));
@@ -130,17 +133,16 @@ const generateImages = async (series: Series[], cleanup: () => void = () => { })
 
 	const connection = getIORedis();
 	if (connection) {
-		const previewImageQueue = 'previewImageQueue'
+		const previewImageQueue = 'previewImageQueue';
 		const queue = new Queue(previewImageQueue, { connection });
-
 
 		const queueEvents = new QueueEvents(previewImageQueue, { connection });
 
-		promises.forEach(p => {
+		promises.forEach((p) => {
 			queue.add(p.meta.serieID, p.meta, {
 				removeOnComplete: true,
-			})
-		})
+			});
+		});
 
 		await new Promise<void>((resolve, reject) => {
 			queueEvents.once('drained', async () => {
@@ -150,20 +152,32 @@ const generateImages = async (series: Series[], cleanup: () => void = () => { })
 			});
 		});
 	} else {
-		await Promise.all(promises.map(p => {
-			return limit(
-				() =>
-					new Promise<void>(async (resolve, _) => {
-						console.log('  => Started', p.meta.serieID, series.find(x => x.ID == p.meta.serieID)?.title, path.parse(p.meta.entity.filePath).base, p.meta.lang);
-						await p.run();
-						console.log('  => Finished', p.meta.serieID, series.find(x => x.ID == p.meta.serieID)?.title, path.parse(p.meta.entity.filePath).base, p.meta.lang);
-						resolve();
-					})
-			);
-		}));
+		await Promise.all(
+			promises.map((p) => {
+				return limit(
+					() =>
+						new Promise<void>(async (resolve, _) => {
+							console.log(
+								'  => Started',
+								p.meta.serieID,
+								series.find((x) => x.ID == p.meta.serieID)?.title,
+								path.parse(p.meta.entity.filePath).base,
+								p.meta.lang
+							);
+							await p.run();
+							console.log(
+								'  => Finished',
+								p.meta.serieID,
+								series.find((x) => x.ID == p.meta.serieID)?.title,
+								path.parse(p.meta.entity.filePath).base,
+								p.meta.lang
+							);
+							resolve();
+						})
+				);
+			})
+		);
 	}
-
-
 
 	console.log('Finished generateImages()');
 	cleanup();

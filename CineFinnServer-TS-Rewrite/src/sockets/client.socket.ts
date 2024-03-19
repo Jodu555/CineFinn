@@ -16,7 +16,6 @@ const timeDebug = false;
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-
 const initialize = (socket: ExtendedSocket) => {
 	const auth = socket.auth;
 	console.log('Socket Connection:', auth.type.toUpperCase(), auth.user.username, socket.id);
@@ -91,13 +90,14 @@ const initialize = (socket: ExtendedSocket) => {
 		);
 	});
 
-
-
 	socket.on('todoListUpdate', async (list) => {
 		if (!isPermitted(auth.user, Role.Mod)) {
 			const todosDB = await database.get<DatabaseTodoItem>('todos').get();
 			const todos: DatabaseParsedTodoItem[] = todosDB.map((t) => JSON.parse(t.content));
-			socket.emit('todoListUpdate', todos.sort((a, b) => a.order - b.order));
+			socket.emit(
+				'todoListUpdate',
+				todos.sort((a, b) => a.order - b.order)
+			);
 			return;
 		}
 		const didID: string[] = [];
@@ -105,10 +105,10 @@ const initialize = (socket: ExtendedSocket) => {
 		for (const todo of list) {
 			const item = await database.get<DatabaseTodoItem>('todos').getOne({ ID: todo.ID });
 			if (item) {
-				if (isScraperSocketConnected() && (!todo.scraped && todo.references.aniworld !== '') || (!todo.scrapedZoro && todo.references.zoro !== '')) {
+				if ((isScraperSocketConnected() && !todo.scraped && todo.references.aniworld !== '') || (!todo.scrapedZoro && todo.references.zoro !== '')) {
 					todo.scraped = true;
 					scrapeJobs.push(() => {
-						backgroundScrapeTodo(todo)
+						backgroundScrapeTodo(todo);
 					});
 				}
 				await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
@@ -134,7 +134,7 @@ const initialize = (socket: ExtendedSocket) => {
 			// && s.id != socket.id
 		);
 
-		scrapeJobs.forEach(f => f());
+		scrapeJobs.forEach((f) => f());
 	});
 
 	socket.on('disconnect', () => {
@@ -143,19 +143,15 @@ const initialize = (socket: ExtendedSocket) => {
 
 	// socket.emit('reloadSeries', cleanupSeriesBeforeFrontResponse(getSeries()));
 
-
-	Object.values(LOOKUP).forEach(v => {
+	Object.values(LOOKUP).forEach((v) => {
 		if (auth.user.role >= v.role) {
 			socket.emit(callpointToEvent(v.callpoint));
 		}
-	})
-
-
+	});
 };
 
 async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 	//Create an Independent Copy of todo
-
 
 	todo = JSON.parse(JSON.stringify(todo)) as DatabaseParsedTodoItem;
 	new Promise<void>(async (resolve, reject) => {
@@ -171,23 +167,20 @@ async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 				todo.references.zoro ? getZoroInfos({ ID: todo.references.zoro }) : null,
 			]);
 
-			if (todo.references.aniworld && !aniInfos || todo.references.zoro && !zoroInfos) {
+			if ((todo.references.aniworld && !aniInfos) || (todo.references.zoro && !zoroInfos)) {
 				console.log('Got Bad Infos', aniInfos, 'for url', todo.references.aniworld);
 				console.log('Got Bad Infos', zoroInfos, 'for url', todo.references.zoro);
 				throw new Error('No Aniworld Or Zoro infos found');
 			}
 
-			if (todo.scrapingError)
-				delete todo.scrapingError;
+			if (todo.scrapingError) delete todo.scrapingError;
 
-			if (aniInfos)
-				todo.scraped = aniInfos;
-			if (zoroInfos)
-				todo.scrapedZoro = zoroInfos;
+			if (aniInfos) todo.scraped = aniInfos;
+			if (zoroInfos) todo.scrapedZoro = zoroInfos;
 			//Updating db todo
 			await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
 
-			let run = true
+			let run = true;
 			let exitCon = 0;
 			let list: DatabaseParsedTodoItem[] = [];
 			while (run) {
@@ -200,7 +193,7 @@ async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 					console.log('Met Exit condition');
 				}
 
-				if (list.find(x => x.ID == todo.ID).scraped == true) {
+				if (list.find((x) => x.ID == todo.ID).scraped == true) {
 					console.log('Impossible....');
 					await wait(42);
 				} else {
@@ -210,7 +203,6 @@ async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 
 			console.log('Scrape and update for', todo.references.aniworld, 'took', Date.now() - time, 'ms');
 
-
 			//sending out full todo list as update
 			await toAllSockets(
 				(s) => {
@@ -218,7 +210,7 @@ async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 				},
 				(s) => s.auth.type == 'client'
 			);
-			resolve()
+			resolve();
 		} catch (error) {
 			console.log('Error while backgroundScrapeTodo:', error);
 			todo.scraped = undefined;
@@ -238,7 +230,7 @@ async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 			);
 			resolve();
 		}
-	})
+	});
 }
 
 async function sendSiteReload() {

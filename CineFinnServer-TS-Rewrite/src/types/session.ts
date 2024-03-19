@@ -7,7 +7,7 @@ import { DatabaseParsedTodoItem } from './database';
 export enum Role {
 	Admin = 3,
 	Mod = 2,
-	User = 1
+	User = 1,
 }
 
 export interface User {
@@ -16,15 +16,15 @@ export interface User {
 	email: string;
 	password?: string;
 	settings: SettingsObject | string;
-	role: Role
+	role: Role;
 	activityDetails: ActivityDetails | string;
 }
 
 export type ActivityDetails = {
-	lastIP?: string,
-	lastHandshake?: string,
-	lastLogin?: string,
-}
+	lastIP?: string;
+	lastHandshake?: string;
+	lastLogin?: string;
+};
 
 export type SettingsObject = {
 	preferredLanguage: {
@@ -60,7 +60,7 @@ export type SettingsObject = {
 		title: string;
 		value: boolean;
 		type: string;
-	}
+	};
 	volume: {
 		type: 'hide';
 		value: number;
@@ -111,11 +111,10 @@ interface ClientToServerEvents {
 	'sync-join': (obj: { ID: number }) => void;
 	'sync-leave': (obj: { ID: number }) => void;
 	'sync-selectSeries': (obj: { ID: number }) => void;
-	'sync-video-change': (obj: { season: number, episode: number, movie: number, langchange: Boolean, lang: Langs }) => void;
-	'sync-video-action': (obj: { action: VideoAction, value: boolean | string, time?: string }) => void;
-	'sync-video-info': (obj: { currentTime: number, isPlaying: boolean }) => void;
+	'sync-video-change': (obj: { season: number; episode: number; movie: number; langchange: Boolean; lang: Langs }) => void;
+	'sync-video-action': (obj: { action: VideoAction; value: boolean | string; time?: string }) => void;
+	'sync-video-info': (obj: { currentTime: number; isPlaying: boolean }) => void;
 }
-
 
 export type VideoAction = 'sync-playback' | 'sync-skip' | 'sync-skipTimeline';
 export interface ExtendedSocket extends Socket<ClientToServerEvents, DefaultEventsMap, any> {

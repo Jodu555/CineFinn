@@ -19,8 +19,7 @@
 						data-bs-toggle="collapse"
 						:data-bs-target="'#flush-' + categorie.title"
 						aria-expanded="false"
-						:aria-controls="'flush-' + categorie.title"
-					>
+						:aria-controls="'flush-' + categorie.title">
 						{{ categorie.title }} / {{ categorie.entitys.length }}
 					</button>
 				</h2>

@@ -35,16 +35,16 @@ const series: SerieObject[] = JSON.parse(fs.readFileSync(process.env.LOCAL_DB_FI
 const wait = (ms: number) => new Promise((rs, _) => setTimeout(rs, ms));
 
 (async () => {
-
-	const remoteSeriesResponse = await axios.get<SerieObject[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.TEST_AUTH_TOKEN_FROM_PUBLIC_API);
+	const remoteSeriesResponse = await axios.get<SerieObject[]>(
+		'http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.TEST_AUTH_TOKEN_FROM_PUBLIC_API
+	);
 
 	const remoteSeries = remoteSeriesResponse.data;
 
 	const episodesWithDubAndSub: Record<string, number> = {};
 
 	for (const serie of remoteSeries) {
-		if (serie.title.includes('Date a Live'))
-			continue;
+		if (serie.title.includes('Date a Live')) continue;
 		for (const season of serie.seasons) {
 			for (const episode of season) {
 				if (episode.langs.includes('GerDub') && episode.langs.includes('GerSub')) {
@@ -58,17 +58,13 @@ const wait = (ms: number) => new Promise((rs, _) => setTimeout(rs, ms));
 		}
 	}
 
-
-
 	console.log(episodesWithDubAndSub);
 
-	let episodesAcc = Object.values(episodesWithDubAndSub).reduce((a, b) => a + b, 0)
+	let episodesAcc = Object.values(episodesWithDubAndSub).reduce((a, b) => a + b, 0);
 
 	console.log(episodesAcc);
 
-	console.log(parseFloat(String(episodesAcc * 300 / 1024)).toFixed(2) + 'GB');
-
-
+	console.log(parseFloat(String((episodesAcc * 300) / 1024)).toFixed(2) + 'GB');
 
 	return;
 	// console.time('parse')
@@ -80,8 +76,6 @@ const wait = (ms: number) => new Promise((rs, _) => setTimeout(rs, ms));
 	// 	group[n] = !group[n] ? 1 : group[n] + 1
 	// })
 	// console.timeEnd('map')
-
-
 
 	// function groupit(group) {
 	// 	const out = new Array(Object.keys(group).length);
@@ -110,14 +104,11 @@ const wait = (ms: number) => new Promise((rs, _) => setTimeout(rs, ms));
 	// 	console.timeEnd('group')
 	// }
 
-
 	// title: remoteSeries.find(s => s.ID == n)?.title,
 
 	// const possiblyVeryEnjoyed = out.filter(x => x.percent >= 90);
 
 	// console.log(possiblyVeryEnjoyed);
-
-
 
 	// await generateImages([serie]);
 	// console.log('Came');

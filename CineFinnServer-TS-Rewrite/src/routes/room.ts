@@ -11,10 +11,12 @@ const router = express.Router();
 router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const rooms = (await database.get<DatabaseSyncRoomItem>('sync_rooms').get()).map((r) => roomToFullObject(r));
 	res.json(
-		rooms.map((r) => {
-			delete r.entityInfos;
-			return r;
-		}).filter(r => parseInt(r.ID) > 0)
+		rooms
+			.map((r) => {
+				delete r.entityInfos;
+				return r;
+			})
+			.filter((r) => parseInt(r.ID) > 0)
 	);
 });
 
@@ -36,7 +38,7 @@ router.get('/:id/headsup', async (req: AuthenticatedRequest, res: Response, next
 	}
 	console.log('Performing Room Headsup', room.ID);
 
-	if (room.members.find(x => x.UUID == req.credentials.user.UUID)?.role != 0) {
+	if (room.members.find((x) => x.UUID == req.credentials.user.UUID)?.role != 0) {
 		next(new Error('You are either not in the room or the owner!'));
 		return;
 	}
@@ -46,9 +48,9 @@ router.get('/:id/headsup', async (req: AuthenticatedRequest, res: Response, next
 	const socket: ExtendedSocket = sockets.find((socket: ExtendedSocket) => {
 		if (socket.sync?.ID == room.ID) {
 			console.log('Found a room with', room.members, 'to the provided socket.sync', socket.sync, 'with the following auth', socket.auth);
-			const owner = room.members.find(x => x.UUID == socket.auth.user.UUID && x.role == 1);
+			const owner = room.members.find((x) => x.UUID == socket.auth.user.UUID && x.role == 1);
 			console.log('Owner Result:', owner);
-			return owner != undefined
+			return owner != undefined;
 		}
 	});
 
@@ -57,22 +59,25 @@ router.get('/:id/headsup', async (req: AuthenticatedRequest, res: Response, next
 		return;
 	}
 
-	const result = await new Promise<false | {
-		currentTime: number;
-		isPlaying: boolean;
-	}>((resolve, reject) => {
+	const result = await new Promise<
+		| false
+		| {
+				currentTime: number;
+				isPlaying: boolean;
+		  }
+	>((resolve, reject) => {
 		const time = Date.now();
 		socket.on('sync-video-info', (obj) => {
 			console.log('Room Headsup Answer took', Date.now() - time, 'ms');
 
 			socket.removeAllListeners('sync-video-info');
 			resolve(obj);
-		})
+		});
 		socket.emit('sync-video-info');
 		setTimeout(() => {
 			console.log('Room Headsup timeout reached after ', Date.now() - time, 'ms');
 			socket.removeAllListeners('sync-video-info');
-			resolve(false)
+			resolve(false);
 		}, 15 * 1000);
 	});
 

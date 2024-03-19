@@ -15,7 +15,7 @@ const LOOKUP = {
 	crawl: { name: 'Recrawl the archive', callpoint: '/job/crawl', role: Role.Mod },
 	generate: { name: 'Generating Preview-Images', callpoint: '/job/img/generate', role: Role.Admin },
 	// validator: { name: 'Validating Preview-Images', callpoint: '/job/img/validate' },
-	checkForUpdates: { name: 'Check for Updates', callpoint: '/job/checkForUpdates', role: Role.Admin }
+	checkForUpdates: { name: 'Check for Updates', callpoint: '/job/checkForUpdates', role: Role.Admin },
 } as const;
 
 const callpointToEvent = (callpoint: string) => `${callpoint.replace('/', '').replaceAll('/', '_')}-end`;
@@ -116,7 +116,6 @@ router.get('/job/checkForUpdates', (req: AuthenticatedRequest, res: Response, ne
 		setActiveJobs(getActiveJobs().filter((x) => x.id !== id));
 	}
 	res.json(getActiveJobs());
-
 });
 
 // router.get('/job/img/validate', (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -167,4 +166,3 @@ router.get('/job/crawl', (req: AuthenticatedRequest, res: Response, next: NextFu
 });
 
 export { router, LOOKUP, callpointToEvent };
-

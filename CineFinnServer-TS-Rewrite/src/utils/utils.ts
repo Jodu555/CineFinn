@@ -29,7 +29,10 @@ const getSeries = (forceLoad: boolean = false, forceFile: boolean = false, keepC
 		if ((fs.existsSync(outputFileName) && !forceLoad) || forceFile) {
 			console.log('Loaded series from file!');
 			const fileObject = JSON.parse(fs.readFileSync(outputFileName, 'utf8')) as SerieObject[];
-			setSeries(fileObject.map((e) => Series.fromObject(e)), keepCurrentlyNotPresent);
+			setSeries(
+				fileObject.map((e) => Series.fromObject(e)),
+				keepCurrentlyNotPresent
+			);
 		} else {
 			console.log('Crawled the series!');
 			setSeries(crawlAndIndex(), keepCurrentlyNotPresent);
@@ -80,4 +83,18 @@ function deepMerge<T>(current: T, updates: T): T {
 	return current;
 }
 
-export { getSeries, setSeries, getActiveJobs, setActiveJobs, getAuthHelper, setAuthHelper, getIO, setIO, getIORedis, setIORedis, debounce, toAllSockets, deepMerge };
+export {
+	getSeries,
+	setSeries,
+	getActiveJobs,
+	setActiveJobs,
+	getAuthHelper,
+	setAuthHelper,
+	getIO,
+	setIO,
+	getIORedis,
+	setIORedis,
+	debounce,
+	toAllSockets,
+	deepMerge,
+};

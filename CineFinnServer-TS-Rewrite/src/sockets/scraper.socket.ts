@@ -4,8 +4,10 @@ import { randomUUID } from 'node:crypto';
 
 let $socket: ExtendedSocket;
 
-
-export interface AbstractSocketCall { __returnValue: boolean, __refID: string }
+export interface AbstractSocketCall {
+	__returnValue: boolean;
+	__refID: string;
+}
 
 const waitingForResponse: {
 	__refID: string;
@@ -20,8 +22,8 @@ const initialize = async (socket: ExtendedSocket) => {
 	socket.on('disconnect', () => {
 		console.log('Socket DisConnection:', auth.type.toUpperCase());
 		if (waitingForResponse.length > 0) {
-			console.log('Scraper Socket Disconnected while the following function\'s where waiting ');
-			waitingForResponse.forEach(e => {
+			console.log("Scraper Socket Disconnected while the following function's where waiting ");
+			waitingForResponse.forEach((e) => {
 				console.log(' =>', e.__refID);
 				e.listener({ __refID: e.__refID, __returnValue: false });
 			});
@@ -93,7 +95,7 @@ export interface ZoroReturn {
 
 const getAniworldInfos = buildAwaitSocketReturn<AniWorldSeriesInformations, { url: string }>('AniworldData');
 const getZoroInfos = buildAwaitSocketReturn<ZoroReturn, { ID: string | number }>('ZoroData');
-const checkForUpdates = buildAwaitSocketReturn<{ success: boolean, error: Error }, void>('checkForUpdates');
+const checkForUpdates = buildAwaitSocketReturn<{ success: boolean; error: Error }, void>('checkForUpdates');
 
 const manageTitle = buildAwaitSocketReturn('manageTitle');
 
@@ -115,15 +117,15 @@ function buildAwaitSocketReturn<R, T>(method: string): (arg0: T) => Promise<R | 
 					clearTimeout(timeout);
 					$socket.off(`return${method}`, listener);
 				}
-			}
+			};
 			// TODO: Why is this failing
 			// @ts-ignore:next-line
 			$socket.on(`return${method}`, listener);
 			$socket.emit(`call${method}`, { ...input, __refID });
 			waitingForResponse.push({
 				__refID,
-				listener
-			})
+				listener,
+			});
 		});
 	};
 }

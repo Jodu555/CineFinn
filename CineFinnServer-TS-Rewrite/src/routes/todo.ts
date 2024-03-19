@@ -27,13 +27,17 @@ router.get('/', async (req: AuthenticatedRequest, res: Response) => {
 router.get('/permittedAccounts', roleAuthorization(Role.Mod), async (req: AuthenticatedRequest, res: Response) => {
 	const accounts = await database.get<User>('accounts').get();
 
-	res.json(accounts.filter(x => x.role >= Role.Mod).map(x => {
-		return {
-			UUID: x.UUID,
-			username: x.username,
-			role: x.role,
-		}
-	}))
+	res.json(
+		accounts
+			.filter((x) => x.role >= Role.Mod)
+			.map((x) => {
+				return {
+					UUID: x.UUID,
+					username: x.username,
+					role: x.role,
+				};
+			})
+	);
 });
 
 export { router };
