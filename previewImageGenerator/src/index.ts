@@ -100,6 +100,8 @@ async function main() {
         if (!fs.existsSync(vidFile)) {
             console.log('Video File Missing', vidFile);
             console.log('This is probably a misconfiguration of the config pathRemapper');
+            throw new Error('Video File Missing' + vidFile);
+            process.exit(1);
         }
         try {
             fs.mkdirSync(imgDir, { recursive: true });
