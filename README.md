@@ -48,10 +48,8 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [x] Show a back to top Button on the List page (or maybe make the navbar sticky)
 - [x] Extract the Video stuff into own component
 - [x] Add the control information modal
-- [ ] Add the series information modal
 - [x] Add the full series watched information dropdown
 - [x] Implement a method to un watch a specific series or season
-- [ ] Anime Preview (10 - 15 sec.)
 - [x] Implement the command manager and some basic command (session = to list current sockets, info = to show series infos and space infos, reload = to reload the series from their file)
 - [x] IMPORTANT: **Finally Upgrade to TypeScript so i do not have this fucking pain in my ass!!!**
 - [ ] IMPORTANT: **Rewrite the client (copy everything and fix errors)**
@@ -83,9 +81,6 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
   - [x] 0 - 9 for video percentage skip
     - [x] Add a nice skip animation
   - [x] . & , for 1 frame more and less
-- [ ] Add an Primy like sidebar with the characters
-- [ ] Add Playlists for users e.g. (Watchlist)
-  - [ ] Let the user create its own playlists with names
 - [x] Think about a way on how to make it work to add an intro skip button
 - [x] Show the Approx. Intro in the timeline
 - [x] Implement a Intro Skip button
@@ -119,7 +114,6 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 <img src="cover.jpg" style="width: 15%; height: auto; margin-right: 0.5rem;" />
 ```
 
-- [ ] Add a Setting to toggle the card images (for lower bandwidth)
 - [x] Update the preview images to be language specific (preview images for every language an episode is in) cause if the episode is longer or shorter
 - [x] Implement the update check for EngDub Series
 - [x] Implement the update check for sto series
@@ -159,6 +153,13 @@ This version should introduce the Sync System and the new HomePage
 This version is more focused on ease of use and Backend Improvements with a full client rewrite in typescript with perfect type hints
 and the distributed Image generation System which later can lead to way more stuff done in a distributed manner
 
+## On Hold
+
+- [ ] Add a Setting to toggle the card images (for lower bandwidth) : I Dont know how necessary this would be
+- [ ] Add the series information modal : I currently have no idea where to put it cause in a modal is probably a bad idea but the button for it is there
+      The question also is waht else to put in it since the only accesible stuff is img description title year that is basically it
+- [ ] Anime Preview (10 - 15 sec.) : I currently have no idea on how to implement that in a good way what snippet of the series to use and where or how to show it
+
 ## Stretch
 
 - [ ] implement a cron job which automatically checks all downloaded series for updates and writes them to a list
@@ -168,6 +169,9 @@ and the distributed Image generation System which later can lead to way more stu
   - [ ] Module: Todo Page
   - [ ] Module: New Browse Page
   - [ ] Module: Mark Season Button
+- [ ] Add an Primy like sidebar with the characters and full data scraping
+- [ ] Add Playlists for users e.g. (Watchlist)
+  - [ ] Let the user create its own playlists with names
 - [x] Add the downloader and scraping service into ext. services
 - [x] Currently Opt In Implement a way to sync watch animes smth. like SyncTube for YT or Watchtogether
 - [ ] **Browse Page** instead of the basic list with dropdown
