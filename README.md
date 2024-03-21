@@ -115,8 +115,7 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 	autocomplete="off"
 	style="width: 20rem;"
 	data-bs-toggle="dropdown"
-	aria-expanded="true"
-/>
+	aria-expanded="true" />
 <img src="cover.jpg" style="width: 15%; height: auto; margin-right: 0.5rem;" />
 ```
 
@@ -163,17 +162,23 @@ and the distributed Image generation System which later can lead to way more stu
 ## Stretch
 
 - [ ] implement a cron job which automatically checks all downloaded series for updates and writes them to a list
+- [ ] A Module System to remotely enable or disable certain features for everyone or a specific user
+  - [ ] Module: Sync System
+  - [ ] Module: Share Function
+  - [ ] Module: Todo Page
+  - [ ] Module: New Browse Page
+  - [ ] Module: Mark Season Button
 - [x] Add the downloader and scraping service into ext. services
-- [ ] Implement a way to sync watch animes smth. like SyncTube for YT or Watchtogether
+- [x] Currently Opt In Implement a way to sync watch animes smth. like SyncTube for YT or Watchtogether
 - [ ] **Browse Page** instead of the basic list with dropdown
-  - [ ] Last Watched
-    - [ ] Not currently possible cause there is no timestamp in the watchList
-  - [ ] Newly Added
-    - [ ] Not currently possible since there is no tracking for updated series
+  - [x] Continue Watching
+    - [x] Series that were watched but never finished
+  - [x] Newly Added
+    - [x] (Not currently possible since there is no tracking for updated series) Possible if i just trust that the server is SSOT Single Source of Trouth
   - [ ] You Might Like
     - [ ] For the start this can just be a simple tag ranking system no biggie
-  - [ ] Enjoy Again
-    - [ ] Series the user has almost continued or continued and possibly want to watch again
+  - [x] Enjoy Again
+    - [x] Series the user has almost continued or continued and possibly want to watch again
 - [ ] **Adaptive Bitrate Streaming** and Choosable Quality (Yes i said it a pretty big deal for me to learn and wrap my head around) (maybe with a fallback to the normal streaming)
   - [ ] No Pre transcoding Necessary cause it would use more space and to be honest it's just too easy to implement
   - [ ] So **Live Transcoding** it is using ffmpeg which we already use for the image generation and later for the intro detection
