@@ -36,7 +36,7 @@ export interface SerieInfo {
 export type SerieReference = Record<'aniworld' | 'zoro' | 'sto' | string, string>;
 // export type SerieReference = Record<'aniworld' | 'zoro' | 'sto' | string, string | Record<string, string>>;
 
-export type Langs = 'GerDub' | 'GerSub' | 'EngDub' | 'EngSub' | 'JapDub';
+export type Langs = '' | 'GerDub' | 'GerSub' | 'EngDub' | 'EngSub' | 'JapDub';
 
 export interface Job {
 	id: string;
@@ -93,3 +93,12 @@ export type SettingsObject = {
 		value: number;
 	};
 };
+
+export interface Segment {
+	ID: string;
+	season: number;
+	episode: number;
+	movie: number;
+	time: number;
+	watched: boolean;
+}

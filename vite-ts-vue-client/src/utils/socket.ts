@@ -1,6 +1,6 @@
 import { Socket, io } from 'socket.io-client';
 import { useBaseURL } from '.';
-import type { Serie, Setting, SettingsObject } from '@/types';
+import type { Segment, Serie, Setting, SettingsObject } from '@/types';
 
 let socket: ExtendedSocket | null = null;
 
@@ -18,6 +18,7 @@ interface ClientToServerEvents {
 	reload: () => void;
 	reloadSeries: (series: Serie[]) => void;
 	updateSettings: (settings: SettingsObject) => void;
+	watchListChange: (obj: { watchList: Segment[]; seriesID: string | undefined }) => void;
 	jobEvent: (...args: any[]) => void;
 }
 

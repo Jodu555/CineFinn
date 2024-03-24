@@ -19,6 +19,14 @@ const router = createRouter({
 			component: Home,
 			meta: { requiresLogin: true },
 		},
+		{
+			path: '/watch',
+			name: 'Watch',
+			component: function () {
+				return import(/* webpackChunkName: "watch" */ '../views/Watch.vue');
+			},
+			meta: { requiresLogin: true },
+		},
 	],
 });
 
