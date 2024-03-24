@@ -143,11 +143,12 @@ const initialize = (socket: ExtendedSocket) => {
 
 	// socket.emit('reloadSeries', cleanupSeriesBeforeFrontResponse(getSeries()));
 
-	Object.values(LOOKUP).forEach((v) => {
-		if (auth.user.role >= v.role) {
-			socket.emit(callpointToEvent(v.callpoint));
-		}
-	});
+	//TODO: This does not care if a job is running or not
+	// Object.values(LOOKUP).forEach((v) => {
+	// 	if (auth.user.role >= v.role) {
+	// 		socket.emit(callpointToEvent(v.callpoint));
+	// 	}
+	// });
 };
 
 async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
