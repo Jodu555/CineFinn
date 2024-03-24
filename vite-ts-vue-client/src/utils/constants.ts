@@ -19,7 +19,7 @@ const langDetails = {
 		title: 'Japanisch/Japanese',
 		alt: 'Japanische Flagge, Flagge, Original, Flag',
 	},
-} as const;
+} as Record<string, { title: string; alt: string }>;
 
 function roleIDToName(id: number) {
 	switch (id) {

@@ -86,26 +86,26 @@
 			<EntityActionsInformation :switchTo="switchTo" :changeLanguage="changeLanguage" />
 		</div>
 
-		<ExtendedVideo v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="sendVideoTimeUpdate" />
+		<h1 v-show="showVideo">VIDEO</h1>
+		<!-- <ExtendedVideo v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="sendVideoTimeUpdate" /> -->
 	</div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
 import { mapWritableState, mapActions, mapState } from 'pinia';
 import type { Langs, SerieEpisode } from '@/types/index';
 import { useAuthStore } from '@/stores/auth.store';
 import { useIndexStore } from '@/stores/index.store';
 import { useWatchStore } from '@/stores/watch.store';
 import { singleDimSwitcher, multiDimSwitcher, deepswitchTo } from '@/utils/switcher';
-// import EntityListView from '@/components/Watch/EntityListView.vue';
+import EntityListView from '@/components/Watch/EntityListView.vue';
 // import ExtendedVideo from '@/components/Watch/ExtendedVideo.vue';
-// import ControlInformationModal from '@/components/Watch/ControlInformationModal.vue';
-// import EntityActionsInformation from '@/components/Watch/EntityActionsInformation.vue';
-// import MarkSeasonDropdown from '@/components/Watch/MarkSeasonDropdown.vue';
-// import EntityListViewMovies from '@/components/Watch/EntityListViewMovies.vue';
+import ControlInformationModal from '@/components/Watch/ControlInformationModal.vue';
+import EntityActionsInformation from '@/components/Watch/EntityActionsInformation.vue';
+import MarkSeasonDropdown from '@/components/Watch/MarkSeasonDropdown.vue';
+import EntityListViewMovies from '@/components/Watch/EntityListViewMovies.vue';
 
 export default {
-	// components: { EntityListView, ExtendedVideo, ControlInformationModal, EntityActionsInformation, MarkSeasonDropdown, EntityListViewMovies },
+	components: { EntityListView, ControlInformationModal, EntityActionsInformation, MarkSeasonDropdown, EntityListViewMovies },
 	data() {
 		return {
 			cleanupFN: null,
@@ -186,6 +186,9 @@ export default {
 			this.handleVideoChange(this.currentSeason, ID);
 		},
 		changeSeason(ID: number) {
+			console.log(ID, 'CAME');
+			console.log(this.currentSeason);
+
 			if (this.currentSeason == ID) return this.handleVideoChange();
 			return this.handleVideoChange(ID, 1);
 		},
@@ -202,18 +205,21 @@ export default {
 		) {
 			if (langchange && this.currentLanguage == lang) return;
 			const video = document.querySelector('video');
-			if (!video) return;
 
 			//TODO: Maybe add here default language from user prefered settings
 			let defaultLanguage = this.currentLanguage || ('GerDub' as Langs);
 
-			const wasPaused = video.paused;
-			const prevTime = video.currentTime;
+			let wasPaused = false;
+			let prevTime = 0;
+			if (video) {
+				wasPaused = video.paused;
+				prevTime = video.currentTime;
 
+				this.sendVideoTimeUpdate(video.currentTime, true);
+
+				video.pause();
+			}
 			console.log('GOT handleVideoChange()', { season, episode, movie, langchange, lang }, { wasPaused, prevTime, defaultLanguage });
-			this.sendVideoTimeUpdate(video.currentTime, true);
-
-			video.pause();
 
 			//Handle the skip to latest watch postion button
 			this.buttonTimer != null && clearTimeout(this.buttonTimer);
@@ -246,6 +252,7 @@ export default {
 
 				this.currentLanguage = langchange ? (lang as Langs) : defaultLanguage;
 				setTimeout(() => {
+					if (!video) return;
 					video.load();
 					langchange ? (video.currentTime = prevTime) : (video.currentTime = 0);
 					!wasPaused && video.play();
@@ -273,7 +280,8 @@ export default {
 			if (seriesID == undefined) return;
 			await this.loadSeriesInfo(seriesID);
 			if (this.currentSeries == undefined || this.currentSeries.ID == '-1') return;
-			const data = JSON.parse(localStorage.getItem('data') || '');
+			const localStorageString = localStorage.getItem('data') || '';
+			const data = localStorageString.trim() != '' ? JSON.parse(localStorageString) : null;
 
 			this.loadWatchList(seriesID);
 			if (this.$route.query?.idx) {
