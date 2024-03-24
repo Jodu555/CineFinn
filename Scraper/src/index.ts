@@ -97,7 +97,38 @@ socket.on('connect', async () => {
 	// await manuallyPrintTheInfosOut();
 	// await programmaticallyInsertTheInfos();
 	// await addReference();
+
+	// await checkAllAnimes();
 });
+
+async function checkAllAnimes() {
+	const data = JSON.parse(fs.readFileSync('allaniworldanimes.json', 'utf8'));
+	let accEpisodes = 0;
+	let accMovies = 0;
+
+	for (let i = 0; i < data.length; i++) {
+		console.log('Parsed ', data[i], i, '/', data.length);
+
+		const scope = {
+			anime: new Aniworld(data[i]),
+			informations: null,
+		} as {
+			anime: Aniworld;
+			informations: AniWorldSeriesInformations | void;
+		};
+		scope.informations = await scope.anime.parseInformations();
+		if (!scope.informations) {
+			continue;
+		}
+		accEpisodes += scope.informations.seasons.flat().length;
+		accMovies += scope.informations.movies?.length || 0;
+		delete scope.anime;
+		delete scope.informations;
+	}
+
+	console.log(accEpisodes);
+	console.log(accMovies);
+}
 
 async function addReference() {
 	const update: { [key: string]: string } = {
@@ -159,8 +190,7 @@ async function checkForUpdates() {
 	const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: false, zoro: false });
 	console.timeEnd('Compare');
 
-	if (output.aniworld.length == 0)
-		return;
+	if (output.aniworld.length == 0) return;
 
 	await kickOffAniDl(output.aniworld);
 
@@ -386,7 +416,7 @@ buildFunction<any, { ID: string | number }>('ZoroData', async ({ ID }) => {
 	return { informations };
 });
 
-buildFunction<any, { title: string, aniworld: boolean }>('manageTitle', async ({ title, aniworld }) => {
+buildFunction<any, { title: string; aniworld: boolean }>('manageTitle', async ({ title, aniworld }) => {
 	function doStuff(input: string, aniworld = true) {
 		input = input
 			.replaceAll('!', '')
@@ -418,7 +448,7 @@ buildFunction<any, { title: string, aniworld: boolean }>('manageTitle', async ({
 	return { url: doStuff(title, aniworld) };
 });
 
-buildFunction<{ success: boolean, error?: Error }, void>('checkForUpdates', async () => {
+buildFunction<{ success: boolean; error?: Error }, void>('checkForUpdates', async () => {
 	try {
 		await checkForUpdates();
 		return { success: true };
