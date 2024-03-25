@@ -1,20 +1,20 @@
 <template>
 	<div class="video-actor-container">
-		<div v-for="group in characters" :key="group[-1]">
+		<div v-for="group in Object.keys(characters)" :key="group">
 			<h2>{{ group[-1] }}</h2>
-			<div v-for="char in group" :key="char.name" class="actress-container">
+			<div v-for="char in characters[group]" :key="char.name" class="actress-container">
 				<div class="row">
 					<img class="actress-image col" :src="char.imageURL" alt="" />
 					<div class="col align-middle" style="margin-top: 2%">
 						<p style="margin-bottom: 0.1rem">{{ char.name }}</p>
-						<!-- <p class="actress-speaker">
+						<p class="actress-speaker">
 							<img class="actress-speaker-flag" src="/flag-langs/gersub.svg" alt="Deutsche Sprache, Flagge" title="Deutsch/German" />
 							Saori HAYAMI
 						</p>
 						<p class="actress-speaker">
 							<img class="actress-speaker-flag" src="/flag-langs/gerdub.svg" alt="Deutsche Sprache, Flagge" title="Deutsch/German" />
 							Mia Diekow
-						</p> -->
+						</p>
 					</div>
 				</div>
 			</div>
@@ -23,6 +23,8 @@
 	</div>
 </template>
 <script lang="ts">
+import axios from 'axios';
+
 interface Character {
 	name: string;
 	imageURL: string;
@@ -32,20 +34,20 @@ export default {
 	data() {
 		return {
 			//TODO: IMPORTANT RETURN HERE AND FIX THIS IDK
-			characters: [] as any,
+			characters: {} as Record<string, Character[]>,
 		};
 	},
 	async created() {
-		const response = await fetch('http://localhost:4896/chars');
-		const json = await response.json();
-		this.characters = [];
-		console.log(json);
-		Object.keys(json).forEach((key) => {
-			const data = json[key];
-			data[-1] = key;
-			this.characters.push(data);
-		});
-		console.log(this.characters);
+		const response = await axios.get<Record<string, Character[]>>('http://localhost:4896/chars');
+		if (response.status == 200) {
+			this.characters = response.data;
+			// Object.keys(json).forEach((key) => {
+			// 	const data = json[key];
+			// 	data[-1] = key;
+			// 	this.characters.push(data);
+			// });
+			console.log(this.characters);
+		}
 	},
 };
 </script>

@@ -18,7 +18,7 @@
 					{{ entityObject.primaryName }}
 				</p>
 			</div>
-			<ActorContainer v-if="false" />
+			<ActorContainer v-if="true" />
 			<font-awesome-icon class="skip skip-left" size="2xl" icon="fa-solid fa-backward" />
 
 			<div class="middle-play">
@@ -200,6 +200,7 @@ interface Segment {
 }
 
 export default defineComponent({
+	components: { ActorContainer, ShareModal, RmvcModal },
 	props: {
 		switchTo: { type: Function as PropType<(vel: number) => void>, required: true },
 		sendVideoTimeUpdate: { type: Function as PropType<(time: number) => void>, required: true },
@@ -845,7 +846,6 @@ export default defineComponent({
 			};
 		},
 	},
-	components: { ActorContainer, ShareModal, RmvcModal },
 });
 </script>
 <style scoped>
