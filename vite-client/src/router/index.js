@@ -45,7 +45,7 @@ const routes = [
 		path: '/todo',
 		name: 'Todo',
 		component: function () {
-			return import(/* webpackChunkName: "news" */ '../views/Todo.vue');
+			return import(/* webpackChunkName: "todo" */ '../views/Todo.vue');
 		},
 		meta: { requiresLogin: true },
 	},
@@ -53,7 +53,7 @@ const routes = [
 		path: '/sync',
 
 		component: function () {
-			return import(/* webpackChunkName: "synclist" */ '../views/Sync/Sync.vue');
+			return import(/* webpackChunkName: "syncmain" */ '../views/Sync/Sync.vue');
 		},
 		meta: { requiresLogin: true },
 		children: [
@@ -61,7 +61,7 @@ const routes = [
 				name: 'Sync',
 				path: '',
 				component: function () {
-					return import(/* webpackChunkName: "syncroom" */ '../views/Sync/SyncList.vue');
+					return import(/* webpackChunkName: "synclist" */ '../views/Sync/SyncList.vue');
 				},
 				meta: { requiresLogin: true },
 			},
@@ -78,7 +78,7 @@ const routes = [
 		path: '/playlists',
 		name: 'Playlists',
 		component: function () {
-			return import(/* webpackChunkName: "news" */ '../views/Playlists.vue');
+			return import(/* webpackChunkName: "playlists" */ '../views/Playlists.vue');
 		},
 		meta: { requiresLogin: true },
 	},
@@ -86,7 +86,7 @@ const routes = [
 		path: '/rmvc',
 		name: 'RemoteVidoeControl',
 		component: function () {
-			return import(/* webpackChunkName: "news" */ '../views/Rmvc.vue');
+			return import(/* webpackChunkName: "rmvc" */ '../views/Rmvc.vue');
 		},
 		meta: { requiresLogin: false },
 	},
