@@ -18,7 +18,7 @@
 					{{ entityObject.primaryName }}
 				</p>
 			</div>
-			<ActorContainer v-if="true" />
+			<ActorContainer v-if="false" />
 			<font-awesome-icon class="skip skip-left" size="2xl" icon="fa-solid fa-backward" />
 
 			<div class="middle-play">
@@ -304,7 +304,7 @@ export default defineComponent({
 		},
 		async loadIntroData() {
 			this.alreadySkipped = [];
-			if (true) {
+			if (false) {
 				try {
 					const response = await fetch(
 						`http://localhost:4897/intro/${this.currentSeries.ID}/${(this.entityObject as SerieEpisode).season}/${
