@@ -27,6 +27,14 @@ const router = createRouter({
 			},
 			meta: { requiresLogin: true },
 		},
+		{
+			path: '/news',
+			name: 'News',
+			component: function () {
+				return import(/* webpackChunkName: "news" */ '../views/News.vue');
+			},
+			meta: { requiresLogin: true },
+		},
 	],
 });
 
