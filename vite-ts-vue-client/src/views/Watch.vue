@@ -85,9 +85,7 @@
 			<!-- Previous & Title & Languages & Next -->
 			<EntityActionsInformation :switchTo="switchTo" :changeLanguage="changeLanguage" />
 		</div>
-
-		<h1 v-show="showVideo">VIDEO</h1>
-		<!-- <ExtendedVideo v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="sendVideoTimeUpdate" /> -->
+		<ExtendedVideo v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="sendVideoTimeUpdate" />
 	</div>
 </template>
 <script lang="ts">
@@ -98,14 +96,14 @@ import { useIndexStore } from '@/stores/index.store';
 import { useWatchStore } from '@/stores/watch.store';
 import { singleDimSwitcher, multiDimSwitcher, deepswitchTo } from '@/utils/switcher';
 import EntityListView from '@/components/Watch/EntityListView.vue';
-// import ExtendedVideo from '@/components/Watch/ExtendedVideo.vue';
+import ExtendedVideo from '@/components/Watch/ExtendedVideo.vue';
 import ControlInformationModal from '@/components/Watch/ControlInformationModal.vue';
 import EntityActionsInformation from '@/components/Watch/EntityActionsInformation.vue';
 import MarkSeasonDropdown from '@/components/Watch/MarkSeasonDropdown.vue';
 import EntityListViewMovies from '@/components/Watch/EntityListViewMovies.vue';
 
 export default {
-	components: { EntityListView, ControlInformationModal, EntityActionsInformation, MarkSeasonDropdown, EntityListViewMovies },
+	components: { EntityListView, ExtendedVideo, ControlInformationModal, EntityActionsInformation, MarkSeasonDropdown, EntityListViewMovies },
 	data() {
 		return {
 			cleanupFN: null,

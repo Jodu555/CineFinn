@@ -7,14 +7,14 @@
 					<img class="actress-image col" :src="char.imageURL" alt="" />
 					<div class="col align-middle" style="margin-top: 2%">
 						<p style="margin-bottom: 0.1rem">{{ char.name }}</p>
-						<p class="actress-speaker">
+						<!-- <p class="actress-speaker">
 							<img class="actress-speaker-flag" src="/flag-langs/gersub.svg" alt="Deutsche Sprache, Flagge" title="Deutsch/German" />
 							Saori HAYAMI
 						</p>
 						<p class="actress-speaker">
 							<img class="actress-speaker-flag" src="/flag-langs/gerdub.svg" alt="Deutsche Sprache, Flagge" title="Deutsch/German" />
 							Mia Diekow
-						</p>
+						</p> -->
 					</div>
 				</div>
 			</div>

@@ -24,6 +24,7 @@ export const useAuthStore = defineStore('auth', {
 				developerMode: { title: 'Show the developer Infos?', type: 'checkbox', value: false } as Setting,
 				showNewsAddForm: { title: 'Show the Add News Form', type: 'checkbox', value: true } as Setting,
 				volume: { type: 'hide', value: 1 } as Setting,
+				autoSkip: { title: 'Auto Skip', type: 'checkbox', value: true } as Setting,
 			},
 		};
 	},
