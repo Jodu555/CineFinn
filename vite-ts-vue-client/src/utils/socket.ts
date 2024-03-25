@@ -24,12 +24,14 @@ interface ClientToServerEvents {
 	'rmvc-sessionCreated': (sessionID: string) => void;
 	'rmvc-sessionDestroyed': () => void;
 	'rmvc-recieve-action': (action: string) => void;
+	'rmvc-connection': (obj: { status: boolean }) => void;
+	'rmvc-recieve-videoStateChange': (obj: { isPlaying: boolean }) => void;
 }
 
 interface ExtendedSocket extends Socket<ClientToServerEvents, DefaultEventsMap> {
 	auth: {
 		type: 'client' | 'rmvc-emitter';
-		token: string;
+		token?: string;
 	};
 	sync?: any;
 }
