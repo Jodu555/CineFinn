@@ -20,6 +20,10 @@ interface ClientToServerEvents {
 	updateSettings: (settings: SettingsObject) => void;
 	watchListChange: (obj: { watchList: Segment[]; seriesID: string | undefined }) => void;
 	jobEvent: (...args: any[]) => void;
+	'rmvc-get-videoState': () => void;
+	'rmvc-sessionCreated': (sessionID: string) => void;
+	'rmvc-sessionDestroyed': () => void;
+	'rmvc-recieve-action': (action: string) => void;
 }
 
 interface ExtendedSocket extends Socket<ClientToServerEvents, DefaultEventsMap> {
