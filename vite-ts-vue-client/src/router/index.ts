@@ -44,14 +44,14 @@ const router = createRouter({
 			},
 			meta: { requiresLogin: true },
 		},
-		// {
-		// 	path: '/todo',
-		// 	name: 'Todo',
-		// 	component: function () {
-		// 		return import(/* webpackChunkName: "todo" */ '@/views/Todo.vue');
-		// 	},
-		// 	meta: { requiresLogin: true },
-		// },
+		{
+			path: '/todo',
+			name: 'Todo',
+			component: function () {
+				return import(/* webpackChunkName: "todo" */ '@/views/Todo.vue');
+			},
+			meta: { requiresLogin: true },
+		},
 		// {
 		// 	path: '/sync',
 

@@ -29,7 +29,7 @@
 			@end="drag = false"
 			@change="change"
 			item-key="ID">
-			<template #item="{ element }">
+			<template #item="{ element }: { element: TodoItem }">
 				<li class="list-group-item" v-auto-animate>
 					<div class="d-flex justify-content-between">
 						<div>
@@ -61,28 +61,28 @@
 					</div>
 
 					<ul v-if="element.scraped != undefined && element.scraped != true && element.scraped != undefined">
-						<li>Episodes: {{ element?.scraped?.seasons?.flat()?.length }}</li>
+						<li>Episodes: {{ element.scraped?.seasons?.flat()?.length }}</li>
 						<li>
 							&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk:
-							{{ parseFloat(parseFloat((element?.scraped?.seasons?.flat()?.length * constants.mbperEpisode) / 1024).toFixed(1)) }}GB
+							{{ numWithFP((element.scraped?.seasons?.flat()?.length * constants.mbperEpisode) / 1024, 1) }}GB
 						</li>
 						<li v-for="[key, value] in Object.entries(languageDevision(element))">&nbsp;&nbsp;&nbsp;&nbsp;{{ key }}: {{ value }}%</li>
-						<template v-if="element?.scraped?.movies != undefined">
-							<li>Movies: {{ element?.scraped?.movies?.length }}</li>
+						<template v-if="element.scraped?.movies != undefined">
+							<li>Movies: {{ element.scraped?.movies?.length }}</li>
 							<li>
 								&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk:
-								{{ parseFloat(parseFloat((element?.scraped?.movies?.length * constants.mbperMovie) / 1024).toFixed(1)) }}GB
+								{{ numWithFP((element.scraped?.movies?.length * constants.mbperMovie) / 1024, 1) }}GB
 							</li>
 						</template>
 						<li>
 							<em>
-								<template v-if="userInfo.role > 2">
+								<template v-if="auth.userInfo.role > 2">
 									Source:
 									<br />
-									<a :href="element?.scraped?.url">{{ element?.scraped?.url }}</a>
-									<template v-if="element?.scrapedZoro">
+									<a :href="element.scraped?.url">{{ element.scraped?.url }}</a>
+									<template v-if="element.scrapedZoro !== undefined && element.scrapedZoro !== true">
 										<br />
-										<a :href="element?.scrapedZoro?.episodes[0]?.url">{{ element?.scrapedZoro?.episodes[0]?.url }}</a>
+										<a :href="element.scrapedZoro.episodes[0]?.url">{{ element.scrapedZoro.episodes[0]?.url }}</a>
 									</template>
 								</template>
 								<br />
@@ -114,13 +114,13 @@
 							<div class="col-7">
 								<input
 									type="text"
-									:disabled="userInfo.UUID != element.creator && userInfo.role == 2"
+									:disabled="auth.userInfo.UUID != element.creator && auth.userInfo.role == 2"
 									class="form-control"
 									id="name"
 									v-model="element.name" />
 							</div>
 						</div>
-						<template v-if="userInfo.role == 2">
+						<template v-if="auth.userInfo.role == 2">
 							<div class="row text-center mt-2 mb-2 align-items-center">
 								<div class="col-2">
 									<label for="name" class="form-label">Creator:</label>
@@ -151,7 +151,7 @@
 								<select
 									v-model="element.categorie"
 									style="width: 100%"
-									:disabled="userInfo.UUID != element.creator && userInfo.role == 2"
+									:disabled="auth.userInfo.UUID != element.creator && auth.userInfo.role == 2"
 									class="form-select"
 									aria-label="Default select example">
 									<option selected disabled>Kategorie</option>
@@ -171,7 +171,7 @@
 							<div class="col-7">
 								<input
 									type="text"
-									:disabled="userInfo.UUID != element.creator && userInfo.role == 2"
+									:disabled="auth.userInfo.UUID != element.creator && auth.userInfo.role == 2"
 									class="form-control"
 									id="url"
 									v-model="element.references.aniworld" />
@@ -184,7 +184,7 @@
 							<div class="col-7">
 								<input
 									type="text"
-									:disabled="userInfo.UUID != element.creator && userInfo.role == 2"
+									:disabled="auth.userInfo.UUID != element.creator && auth.userInfo.role == 2"
 									class="form-control"
 									id="url"
 									v-model="element.references.zoro" />
@@ -199,7 +199,7 @@
 							<div class="col-7">
 								<input
 									type="text"
-									:disabled="userInfo.UUID != element.creator && userInfo.role == 2"
+									:disabled="auth.userInfo.UUID != element.creator && auth.userInfo.role == 2"
 									class="form-control"
 									id="url"
 									v-model="element.references.sto" />
@@ -225,23 +225,31 @@
 
 		<button v-if="state.list.length >= 8" class="btn btn-outline-primary mt-5 mb-5" @click="addEmptyItem">Add Item</button>
 
-		<div v-if="settings.developerMode.value" class="mt-5">
+		<div v-if="auth.settings.developerMode.value" class="mt-5">
 			<pre>{{ state.list }}</pre>
 		</div>
 	</div>
 </template>
-<script setup>
+<script setup lang="ts">
+import { useAuthStore } from '@/stores/auth.store';
+import { useAxios } from '@/utils';
+import { useSocket } from '@/utils/socket';
 import { reactive, computed, ref, onMounted, getCurrentInstance, onUnmounted } from 'vue';
+
+import type { NewsItem, TodoItem } from '@/types/index';
+import type { AniWorldAdditionalSeriesInformations } from '@/types/scraper';
 import draggable from 'vuedraggable';
-import { useStore } from 'vuex';
 
-const instance = getCurrentInstance().appContext.config.globalProperties;
-const store = useStore();
-
-const settings = computed(() => store.state.auth.settings);
-const userInfo = computed(() => store.state.auth.userInfo);
+const instance = getCurrentInstance()!.appContext.config.globalProperties;
+const auth = useAuthStore();
+const $socket = useSocket();
 
 const loading = ref(false);
+
+const numWithFP = (num: string | number, pts: number): number => {
+	if (typeof num == 'number') num = String(num);
+	return parseFloat(parseFloat(num).toFixed(pts));
+};
 
 const constants = reactive({
 	mbperEpisode: 260,
@@ -249,14 +257,20 @@ const constants = reactive({
 });
 
 const state = reactive({
-	list: [],
-	permittedAccounts: [],
+	list: [] as TodoItem[],
+	permittedAccounts: [] as permAcc[],
 });
+
+interface permAcc {
+	UUID: string;
+	username: string;
+	role: number;
+}
 
 onMounted(async () => {
 	document.title = `Cinema | Todo`;
 
-	instance.$socket.on('todoListUpdate', (list) => {
+	$socket.on('todoListUpdate', (list) => {
 		const editedIDs = state.list.filter((x) => x.edited == true).map((x) => x.ID);
 
 		state.list = list
@@ -270,32 +284,33 @@ onMounted(async () => {
 	});
 	loading.value = true;
 
-	const [response, accResponse] = await Promise.all([instance.$networking.get('/todo/'), instance.$networking.get('/todo/permittedAccounts')]);
+	const [response, accResponse] = await Promise.all([useAxios().get<TodoItem[]>('/todo/'), useAxios().get<permAcc[]>('/todo/permittedAccounts')]);
 
-	if (response.success) {
-		state.list = response?.json?.sort((a, b) => a.order - b.order);
+	if (response.status == 200) {
+		state.list = response?.data?.sort((a, b) => a.order - b.order);
 	}
-	if (accResponse.success) {
-		state.permittedAccounts = accResponse.json;
+	if (accResponse.status == 200) {
+		state.permittedAccounts = accResponse.data;
 	}
 
 	loading.value = false;
 });
 
 onUnmounted(() => {
-	instance.$socket.off('todoListUpdate');
+	$socket.off('todoListUpdate');
 	document.title = `Cinema | Jodu555`;
 });
 
 const drag = ref(false);
 
-const languageDevision = (element) => {
-	const out = {};
+const languageDevision = (element: TodoItem) => {
+	const out: Record<string, number> = {};
+	if (element.scraped == undefined || element.scraped == true) return out;
 	const total = element.scraped.seasons.flat().length;
 
 	element.scraped.seasons.flat().forEach((x) => x.langs.forEach((l) => (!out[l] ? (out[l] = 1) : (out[l] += 1))));
 
-	if (element.scrapedZoro) {
+	if (element.scrapedZoro != undefined && element.scrapedZoro !== true) {
 		const zoroEps = element.scrapedZoro?.episodes;
 		zoroEps.forEach((e) => {
 			e.langs.forEach((l) => {
@@ -311,7 +326,7 @@ const languageDevision = (element) => {
 	}
 
 	for (const [key, value] of Object.entries(out)) {
-		out[key] = parseFloat((value / total) * 100).toFixed(2);
+		out[key] = parseFloat(parseFloat(String((value / total) * 100)).toFixed(2));
 	}
 
 	if (out['GerDub'] == 100) {
@@ -324,7 +339,7 @@ const languageDevision = (element) => {
 	return out;
 };
 
-const change = (event) => {
+const change = (event?: any) => {
 	state.list = state.list.map((name, index) => {
 		return { ...name, order: index + 1 };
 	});
@@ -332,22 +347,22 @@ const change = (event) => {
 };
 
 const addEmptyItem = () => {
-	const ID = Math.round(Math.random() * 10 ** 6);
+	const ID = String(Math.round(Math.random() * 10 ** 6));
 	const item = {
 		name: '',
-		creator: userInfo.value.UUID,
+		creator: auth.userInfo.UUID,
 		edited: false,
 		categorie: '',
 		references: { aniworld: '', zoro: '', sto: '' },
 		order: -1,
 		ID,
-	};
+	} as TodoItem;
 	state.list.push(item);
 	change();
 };
 
-const deleteTodo = async (ID) => {
-	const { isConfirmed: confirmed } = await instance.$swal.fire({
+const deleteTodo = async (ID: string) => {
+	const { isConfirmed: confirmed } = await instance.$swal({
 		title: 'Error!',
 		text: 'Do you really want to DELETE this Todo?',
 		icon: 'warning',
@@ -361,8 +376,8 @@ const deleteTodo = async (ID) => {
 	}
 };
 
-const useTodo = async (ID) => {
-	const { isConfirmed: confirmed } = await instance.$swal.fire({
+const useTodo = async (ID: string) => {
+	const { isConfirmed: confirmed } = await instance.$swal({
 		title: 'Super!',
 		text: 'Do you really want to USE this Todo?',
 		icon: 'success',
@@ -372,37 +387,49 @@ const useTodo = async (ID) => {
 	});
 	if (confirmed) {
 		const todoObject = state.list.find((x) => x.ID == ID);
+		if (!todoObject) {
+			instance.$swal({
+				toast: true,
+				position: 'top-end',
+				showConfirmButton: false,
+				timer: 3000,
+				icon: 'error',
+				title: `Todo Item with ID ${ID} not found`,
+				timerProgressBar: true,
+			});
+			return;
+		}
 		const seriesObject = {
 			categorie: todoObject.categorie,
 			title: todoObject.name,
 			movies: [],
 			seasons: [],
 			references: todoObject.references,
-			infos: {},
+			infos: {} as Partial<AniWorldAdditionalSeriesInformations>,
 		};
 
-		if (todoObject.scraped) {
-			seriesObject.infos = JSON.parse(JSON.stringify(todoObject?.scraped?.informations));
-			delete seriesObject.infos.image;
+		if (todoObject.scraped !== true) {
+			seriesObject.infos = JSON.parse(JSON.stringify(todoObject.scraped?.informations));
+			delete seriesObject?.infos?.image;
 		}
-		const response = await instance.$networking.post('/index/', JSON.stringify(seriesObject));
+		const response = await useAxios().post('/index/', seriesObject);
 
-		if (!response.success) {
-			instance.$swal.fire({
+		if (response.status !== 200) {
+			instance.$swal({
 				toast: true,
 				position: 'top-end',
 				showConfirmButton: false,
 				timer: 3000,
 				icon: 'error',
-				title: `${response.error}`,
+				title: `${response.data.error.message || 'An Error occurd'}`,
 				timerProgressBar: true,
 			});
 		} else {
 			const newsObject = {
 				content: `Added ${seriesObject.title}`,
 				time: Date.now(),
-			};
-			await instance.$networking.post('/news/', JSON.stringify(newsObject));
+			} as NewsItem;
+			await useAxios().post('/news/', JSON.stringify(newsObject));
 		}
 	}
 };
@@ -411,7 +438,7 @@ const save = () => {
 	pushTodoListUpdate();
 };
 
-const deleteParsedInfos = (ID) => {
+const deleteParsedInfos = (ID: string) => {
 	state.list = state.list.map((x) => {
 		if (x.ID == ID) {
 			delete x?.scraped;
@@ -423,7 +450,7 @@ const deleteParsedInfos = (ID) => {
 	pushTodoListUpdate();
 };
 
-const retryScrapeTodo = (ID) => {
+const retryScrapeTodo = (ID: string) => {
 	state.list = state.list.map((x) => {
 		if (x.ID == ID) {
 			delete x?.scraped;
@@ -446,21 +473,21 @@ const rescrapeAllItems = () => {
 };
 
 const pushTodoListUpdate = async () => {
-	console.log(userInfo.value.role, 2, userInfo.value.role >= 2);
-	if (!(userInfo.value.role >= 2)) {
+	console.log(auth.userInfo.role, 2, auth.userInfo.role >= 2);
+	if (!(auth.userInfo.role >= 2)) {
 		console.log('Fire');
-		instance.$swal.fire({
+		instance.$swal({
 			icon: 'error',
 			title: 'Oops...',
 			text: 'Seems Like you do not have enough Permission to do that',
 		});
 	}
-	const saveList = JSON.parse(JSON.stringify(state.list)).map((x) => {
+	const saveList = (JSON.parse(JSON.stringify(state.list)) as TodoItem[]).map((x) => {
 		delete x.edited;
 		// delete x.scraped;
 		return x;
 	});
-	instance.$socket.emit('todoListUpdate', saveList);
+	useSocket().emit('todoListUpdate', saveList);
 };
 
 const dragOptions = computed(() => {

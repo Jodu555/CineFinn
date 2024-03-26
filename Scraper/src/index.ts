@@ -413,7 +413,7 @@ buildFunction<any, { ID: string | number }>('ZoroData', async ({ ID }) => {
 	const zoro = new Zoro(String(ID));
 	await zoro.initialize();
 	const informations = await zoro.getExtendedEpisodeList();
-	return { informations };
+	return { ...informations };
 });
 
 buildFunction<any, { title: string; aniworld: boolean }>('manageTitle', async ({ title, aniworld }) => {

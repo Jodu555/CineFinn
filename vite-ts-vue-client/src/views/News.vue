@@ -39,11 +39,7 @@
 import { mapWritableState } from 'pinia';
 import { useAuthStore } from '@/stores/auth.store';
 import { useAxios } from '@/utils';
-
-interface News {
-	time: number;
-	content: string;
-}
+import type { NewsItem } from '@/types/index';
 
 export default {
 	data() {
@@ -51,7 +47,7 @@ export default {
 			loading: true,
 			newsInput: '',
 			sort: false,
-			news: [] as News[],
+			news: [] as NewsItem[],
 		};
 	},
 	computed: {

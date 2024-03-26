@@ -1,6 +1,6 @@
 import { Socket, io } from 'socket.io-client';
 import { useBaseURL } from '.';
-import type { Segment, Serie, Setting, SettingsObject } from '@/types';
+import type { Segment, Serie, Setting, SettingsObject, TodoItem } from '@/types';
 
 let socket: ExtendedSocket | null = null;
 
@@ -26,6 +26,7 @@ interface ClientToServerEvents {
 	'rmvc-recieve-action': (action: string) => void;
 	'rmvc-connection': (obj: { status: boolean }) => void;
 	'rmvc-recieve-videoStateChange': (obj: { isPlaying: boolean }) => void;
+	todoListUpdate: (list: TodoItem[]) => void;
 }
 
 interface ExtendedSocket extends Socket<ClientToServerEvents, DefaultEventsMap> {

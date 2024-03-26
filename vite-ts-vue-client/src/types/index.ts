@@ -1,3 +1,5 @@
+import type { AniWorldSeriesInformations, ZoroReturn } from './scraper';
+
 export interface Serie {
 	ID: string;
 	categorie: string;
@@ -101,4 +103,24 @@ export interface Segment {
 	movie: number;
 	time: number;
 	watched: boolean;
+}
+
+export interface NewsItem {
+	time: number;
+	content: string;
+}
+
+export type References = Record<'aniworld' | 'zoro' | 'sto', string>;
+
+export interface TodoItem {
+	ID: string;
+	order: number;
+	name: string;
+	creator?: string;
+	categorie: 'Aniworld' | 'STO' | 'KDrama' | '';
+	references: References;
+	scraped?: AniWorldSeriesInformations | true;
+	scrapedZoro?: ZoroReturn | true;
+	scrapingError?: string;
+	edited?: boolean;
 }
