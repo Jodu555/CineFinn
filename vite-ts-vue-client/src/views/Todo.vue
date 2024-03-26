@@ -60,7 +60,7 @@
 						<span v-if="element.references.sto" target="_blank" :href="element.references.aniworld" class="h6">S</span>
 					</div>
 
-					<ul v-if="element.scraped != undefined && element.scraped != true && element.scraped != undefined">
+					<ul v-if="element.scraped != undefined && element.scraped !== true">
 						<li>Episodes: {{ element.scraped?.seasons?.flat()?.length }}</li>
 						<li>
 							&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk:
@@ -99,11 +99,12 @@
 					</div>
 
 					<span v-if="element.scrapingError" class="h6 text-danger">
-						<span v-if="element.scrapingError"
-							>!!! {{ element.scrapingError }} !!! &nbsp;&nbsp;&nbsp;&nbsp;<small style="cursor: pointer" @click="retryScrapeTodo(element.ID)"
-								><u>Retry</u></small
-							></span
-						>
+						<span
+							>!!! {{ element.scrapingError }} !!! &nbsp;&nbsp;&nbsp;&nbsp;
+							<small style="cursor: pointer" @click="retryScrapeTodo(element.ID)">
+								<u>Retry</u>
+							</small>
+						</span>
 					</span>
 
 					<div v-if="element.edited">
@@ -503,13 +504,16 @@ const dragOptions = computed(() => {
 .flip-list-move {
 	transition: transform 0.5s;
 }
+
 .no-move {
 	transition: transform 0s;
 }
+
 .ghost {
 	opacity: 0.5;
 	background: #c8ebfb;
 }
+
 .list-group-item {
 	cursor: move;
 }
