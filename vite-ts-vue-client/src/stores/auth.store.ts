@@ -24,12 +24,13 @@ export const useAuthStore = defineStore('auth', {
 				developerMode: { title: 'Show the developer Infos?', type: 'checkbox', value: false } as Setting,
 				showNewsAddForm: { title: 'Show the Add News Form', type: 'checkbox', value: true } as Setting,
 				volume: { type: 'hide', value: 1 } as Setting,
-				autoSkip: { title: 'Auto Skip', type: 'checkbox', value: true } as Setting,
+				autoSkip: { title: 'Auto Skip to next Episode at the end?', type: 'checkbox', value: true } as Setting,
+				enableBetaFeatures: { title: 'Enable Beta Features?', type: 'checkbox', value: false } as Setting,
 			},
 		};
 	},
 	actions: {
-		setSettings(settings: SettingsObject) {
+		async setSettings(settings: SettingsObject) {
 			this.settings = settings as any;
 			setCookie('account_settings', JSON.stringify(settings), 30);
 		},
@@ -76,7 +77,7 @@ export const useAuthStore = defineStore('auth', {
 							email: json.email,
 							role: json.role,
 						};
-						this.setSettings = JSON.parse(json.settings);
+						this.settings = JSON.parse(json.settings);
 						this.loggedIn = true;
 						this.authToken = authtoken;
 

@@ -59,8 +59,8 @@
 				<hr />
 				<div v-if="showSettings">
 					<pre v-if="settings.developerMode.value">{{ settings }}</pre>
-					<div v-for="(setting, key) of settings" :key="key" class="mb-3 form-check">
-						<template v-if="setting.type === 'checkbox'">
+					<div v-for="(setting, key) of settings" :key="key" class="">
+						<div v-if="setting.type === 'checkbox'" class="mb-3 form-check">
 							<input
 								type="checkbox"
 								@change="
@@ -73,7 +73,7 @@
 								class="form-check-input"
 								:id="key" />
 							<label class="form-check-label" :for="key">{{ setting.title }}</label>
-						</template>
+						</div>
 					</div>
 
 					<div class="d-grid gap-2">

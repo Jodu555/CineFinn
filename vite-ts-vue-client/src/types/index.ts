@@ -124,3 +124,5 @@ export interface TodoItem {
 	scrapingError?: string;
 	edited?: boolean;
 }
+
+export type BrowseSerie = Serie & { url?: string };
