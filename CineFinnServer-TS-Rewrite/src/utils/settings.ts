@@ -12,7 +12,7 @@ const defaultSettings: SettingsObject = {
 };
 
 function compareSettings(settings: SettingsObject) {
-	const outputSettings = {};
+	const outputSettings = { ...settings };
 	for (const setting in defaultSettings) {
 		if (settings?.[setting]) {
 			outputSettings[setting] = settings[setting];
