@@ -110,10 +110,38 @@ router.get('/job/checkForUpdates', (req: AuthenticatedRequest, res: Response, ne
 		startTime: Date.now(),
 		data: {},
 	});
+	//TODO: this is ugly and shittie there is a better way to solve this but i dont have time for it now
 	try {
-		checkForUpdates();
+		new Promise<void>(async (resolve, reject) => {
+			try {
+				await checkForUpdates();
+				setActiveJobs(getActiveJobs().filter((x) => x.id !== id));
+				await toAllSockets(
+					(s) => {
+						s.emit(callpointToEvent(LOOKUP[id].callpoint));
+					},
+					(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
+				);
+				resolve();
+			} catch (error) {
+				setActiveJobs(getActiveJobs().filter((x) => x.id !== id));
+				await toAllSockets(
+					(s) => {
+						s.emit(callpointToEvent(LOOKUP[id].callpoint));
+					},
+					(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
+				);
+				reject(error);
+			}
+		});
 	} catch (error) {
 		setActiveJobs(getActiveJobs().filter((x) => x.id !== id));
+		toAllSockets(
+			(s) => {
+				s.emit(callpointToEvent(LOOKUP[id].callpoint));
+			},
+			(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
+		);
 	}
 	res.json(getActiveJobs());
 });
