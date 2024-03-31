@@ -1,6 +1,6 @@
 import { Socket, io } from 'socket.io-client';
 import { useBaseURL } from '.';
-import type { Segment, Serie, Setting, SettingsObject, TodoItem } from '@/types';
+import type { Langs, Segment, Serie, Setting, SettingsObject, TodoItem } from '@/types';
 
 let socket: ExtendedSocket | null = null;
 
@@ -29,6 +29,10 @@ interface ClientToServerEvents {
 	todoListUpdate: (list: TodoItem[]) => void;
 	'sync-update-rooms': () => void;
 	'sync-message': (obj: { type: 'success' | 'error'; message: string }) => void;
+	'sync-video-action': (obj: { action: string; value: boolean | number; time?: number }) => void;
+	'sync-selectSeries': (obj: { ID: string }) => void;
+	'sync-video-change': (obj: { season: number; episode: number; movie: number; langchange: boolean; lang: Langs }) => void;
+	'sync-video-info': () => void;
 }
 
 interface ExtendedSocket extends Socket<ClientToServerEvents, DefaultEventsMap> {

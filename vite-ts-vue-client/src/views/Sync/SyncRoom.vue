@@ -48,7 +48,7 @@
 			<div>
 				<button @click="leaveRoom()" type="button" class="btn btn-outline-danger">Leave Room</button>
 			</div>
-			<div v-if="currentRoom != null" class="card" style="width: 12rem">
+			<div v-if="currentRoom != null && currentRoom.members != null" class="card" style="width: 12rem">
 				<div class="card-body text-center">
 					<h5 class="card-title text-center">
 						<div class="spinner-grow text-danger" role="info">
@@ -73,7 +73,7 @@
 					}
 				" />
 		</div>
-		<div v-if="currentSeries != undefined && currentSeries.ID != -1">
+		<div v-if="currentSeries != undefined && currentSeries.ID != '-1'">
 			<div v-if="isOwner">
 				<!-- Movies -->
 				<EntityListView
@@ -98,7 +98,7 @@
 				<EntityListView
 					v-if="currentSeason != -1"
 					title="Episodes:"
-					:array="currentSeries.seasons.find((x) => x[0].season == entityObject.season)"
+					:array="currentSeries.seasons.find((x) => x[0].season == (entityObject as SerieEpisode)?.season)"
 					:current="currentEpisode"
 					:currentSeason="currentSeason"
 					:currentSeriesID="currentSeries.ID"
@@ -121,12 +121,18 @@
 </template>
 <script lang="ts">
 import AutoComplete from '@/components/Layout/AutoComplete.vue';
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
+import { mapActions, mapState, mapWritableState } from 'pinia';
 import EntityActionsInformation from '../../components/Watch/EntityActionsInformation.vue';
 import EntityListView from '../../components/Watch/EntityListView.vue';
 import ExtendedVideo from '@/components/Watch/ExtendedVideo.vue';
-import { deepswitchTo } from '@/plugins/switcher';
-import Modal from '../../components/Modal.vue';
+import { deepswitchTo } from '@/utils/switcher';
+import Modal from '@/components/Modal.vue';
+import { useIndexStore } from '@/stores/index.store';
+import { useWatchStore } from '@/stores/watch.store';
+import { useSyncStore } from '@/stores/sync.store';
+import { useAuthStore } from '@/stores/auth.store';
+import type { Langs, SerieEpisode } from '@/types';
+import { useAxios } from '@/utils';
 
 export default {
 	components: { AutoComplete, EntityActionsInformation, EntityListView, ExtendedVideo, Modal },
@@ -136,13 +142,13 @@ export default {
 		};
 	},
 	computed: {
-		...mapState(['series']),
-		...mapState('sync', { syncLoading: 'loading', roomList: 'roomList' }),
-		...mapState('watch', { watchLoading: 'loading' }),
-		...mapState('watch', ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode', 'currentLanguage', 'watchList']),
-		...mapState('auth', ['authToken', 'settings', 'userInfo']),
-		...mapGetters('watch', ['videoSrc', 'entityObject']),
-		...mapGetters('sync', ['currentRoom', 'isOwner']),
+		...mapWritableState(useIndexStore, ['series']),
+		...mapWritableState(useSyncStore, { syncLoading: 'loading', roomList: 'roomList' }),
+		...mapWritableState(useWatchStore, { watchLoading: 'loading' }),
+		...mapWritableState(useWatchStore, ['currentSeries', 'currentMovie', 'currentSeason', 'currentEpisode', 'currentLanguage', 'watchList']),
+		...mapWritableState(useAuthStore, ['authToken', 'settings', 'userInfo']),
+		...mapState(useWatchStore, ['videoSrc', 'entityObject']),
+		...mapState(useSyncStore, ['currentRoom', 'isOwner']),
 		autoCompleteSeries() {
 			if (this.isOwner) {
 				return this.series.map((x) => ({ value: x.title, ID: x.ID }));
@@ -164,19 +170,18 @@ export default {
 			);
 			return (
 				this.currentSeries != undefined &&
-				this.currentSeries.ID != -1 &&
+				this.currentSeries.ID != '-1' &&
 				(this.currentMovie !== -1 || this.currentSeason !== -1 || this.currentEpisode !== -1)
 			);
 		},
 	},
 	methods: {
-		...mapActions('sync', ['leaveRoom', 'loadRooms', 'joinRoom', 'loadRoomInfo']),
-		...mapActions('watch', ['loadSeriesInfo', 'loadWatchList']),
-		...mapMutations('watch', ['setCurrentMovie', 'setCurrentSeason', 'setCurrentEpisode', 'setCurrentLanguage', 'setWatchList']),
-		toReadableRole(role) {
+		...mapActions(useSyncStore, ['leaveRoom', 'loadRooms', 'joinRoom', 'loadRoomInfo']),
+		...mapActions(useWatchStore, ['loadSeriesInfo', 'loadWatchList']),
+		toReadableRole(role: number) {
 			return role == 1 ? 'Owner' : 'Viewer';
 		},
-		promote() {
+		promote(_: string) {
 			console.log('This Function is currently unsupported');
 			this.$swal({
 				toast: true,
@@ -188,36 +193,36 @@ export default {
 				timerProgressBar: true,
 			});
 		},
-		deepPlayback(state, time) {
+		deepPlayback(state: boolean, time: number) {
 			if (!this.isOwner) return;
 			console.log('deepPlayback() Emitting sync-video-action: "sync-playback" with value:', state);
 			this.$socket.emit('sync-video-action', { action: 'sync-playback', value: state, time });
 		},
-		deepSkip(time) {
+		deepSkip(time: number) {
 			if (!this.isOwner) return;
 			console.log('deepSkip() Emitting sync-video-action: "sync-skip" with value:', time);
 			this.$socket.emit('sync-video-action', { action: 'sync-skip', value: time });
 		},
-		deepSkipTimeline(time) {
+		deepSkipTimeline(time: number) {
 			if (!this.isOwner) return;
 			console.log('deepSkipTimeline() Emitting sync-video-action: "sync-skipTimeline" with value:', time);
 			this.$socket.emit('sync-video-action', { action: 'sync-skip', value: time });
 		},
-		changeMovie(ID) {
+		changeMovie(ID: number) {
 			if (this.currentMovie == ID) return this.handleVideoChange();
 			this.handleVideoChange(-1, -1, ID);
 		},
-		changeEpisode(ID) {
+		changeEpisode(ID: number) {
 			this.handleVideoChange(this.currentSeason, ID);
 		},
-		changeSeason(ID) {
+		changeSeason(ID: number) {
 			if (this.currentSeason == ID) return this.handleVideoChange();
 			return this.handleVideoChange(ID, 1);
 		},
-		changeLanguage(lang) {
+		changeLanguage(lang: string) {
 			this.handleVideoChange(this.currentSeason, this.currentEpisode, this.currentMovie, true, lang);
 		},
-		async selectSeries(ID, broadcast = true) {
+		async selectSeries(ID: string, broadcast = true) {
 			if (broadcast) {
 				await this.$socket.emit('sync-selectSeries', { ID });
 			}
@@ -232,10 +237,10 @@ export default {
 			}
 			await this.loadRoomInfo();
 		},
-		switchTo(vel) {
+		switchTo(vel: number) {
 			deepswitchTo(vel, this);
 		},
-		sendVideoTimeUpdate(time, force = false) {
+		sendVideoTimeUpdate(time: number, force = false) {
 			console.log('sendVideoTimeUpdate()', time, force);
 			this.$socket.emit('timeUpdate', {
 				series: this.$route.query.id,
@@ -258,8 +263,8 @@ export default {
 		 * @param {boolean} silent - Whether to suppress emit to server. Default false.
 		 */
 		//silent = false not send back to server (so user based switch)
-		handleVideoChange(season = -1, episode = -1, movie = -1, langchange = false, lang, silent = false) {
-			return new Promise((resolve, reject) => {
+		handleVideoChange(season = -1, episode = -1, movie = -1, langchange = false, lang?: string, silent = false) {
+			return new Promise<void>((resolve, reject) => {
 				console.log('Came', 0);
 				if (!silent && !this.isOwner) return reject(new Error('!silent && !this.isOwner'));
 				console.log('Came', 1);
@@ -269,7 +274,7 @@ export default {
 				console.log('Came', 2);
 
 				//TODO: Maybe add here default language from user prefered settings
-				let defaultLanguage = 'GerDub';
+				let defaultLanguage = 'GerDub' as Langs;
 
 				const wasPaused = video.paused;
 				const prevTime = video.currentTime;
@@ -280,16 +285,16 @@ export default {
 				video.pause();
 
 				setTimeout(() => {
-					this.setCurrentSeason(season);
-					this.setCurrentEpisode(episode);
-					this.setCurrentMovie(movie);
+					this.currentSeason = season;
+					this.currentEpisode = episode;
+					this.currentMovie = movie;
 
 					//Ensure that the selected language exists on the entity
 					if (this.entityObject && !this.entityObject.langs.includes(defaultLanguage) && !langchange) {
 						defaultLanguage = this.entityObject.langs[0];
 					}
 
-					this.setCurrentLanguage(langchange ? lang : defaultLanguage);
+					this.currentLanguage = (langchange ? lang : defaultLanguage) as Langs;
 					setTimeout(() => {
 						video.load();
 						langchange ? (video.currentTime = prevTime) : (video.currentTime = 0);
@@ -307,7 +312,7 @@ export default {
 		debug && console.log('mounted() SyncRoom', JSON.stringify(this.currentRoom, null, 3));
 		if (this.currentRoom == undefined) {
 			await this.loadRooms();
-			const roomID = Number(this.$route.params.key);
+			const roomID = String(this.$route.params.key);
 			debug && console.log(roomID, this.series);
 			await this.joinRoom(roomID);
 		}
@@ -318,17 +323,17 @@ export default {
 			debug &&
 				console.log(
 					'setTimeout() videoChange',
-					parseInt(this.currentRoom?.entityInfos?.season),
-					parseInt(this.currentRoom?.entityInfos?.episode),
-					parseInt(this.currentRoom?.entityInfos?.movie)
+					parseInt(String(this.currentRoom?.entityInfos?.season)),
+					parseInt(String(this.currentRoom?.entityInfos?.episode)),
+					parseInt(String(this.currentRoom?.entityInfos?.movie))
 				);
 			if (this.currentLanguage == this.currentRoom?.entityInfos?.lang) {
 				debug && console.log('handleVideoChange', 1);
 				try {
 					await this.handleVideoChange(
-						parseInt(this.currentRoom?.entityInfos?.season),
-						parseInt(this.currentRoom?.entityInfos?.episode),
-						parseInt(this.currentRoom?.entityInfos?.movie),
+						parseInt(String(this.currentRoom?.entityInfos?.season)),
+						parseInt(String(this.currentRoom?.entityInfos?.episode)),
+						parseInt(String(this.currentRoom?.entityInfos?.movie)),
 						false,
 						undefined,
 						true
@@ -340,9 +345,9 @@ export default {
 				debug && console.log('handleVideoChange', 2);
 				try {
 					await this.handleVideoChange(
-						parseInt(this.currentRoom?.entityInfos?.season),
-						parseInt(this.currentRoom?.entityInfos?.episode),
-						parseInt(this.currentRoom?.entityInfos?.movie),
+						parseInt(String(this.currentRoom?.entityInfos?.season)),
+						parseInt(String(this.currentRoom?.entityInfos?.episode)),
+						parseInt(String(this.currentRoom?.entityInfos?.movie)),
 						true,
 						this.currentRoom?.entityInfos?.lang,
 						true
@@ -353,11 +358,11 @@ export default {
 			}
 			if (this.isOwner == false) {
 				console.log('Performing Headsup');
-				const response = await this.$networking.get(`/room/${this.currentRoom.ID}/headsup`);
-				if (response.success == true) {
+				const response = await useAxios().get(`/room/${this.currentRoom.ID}/headsup`);
+				if (response.status === 200) {
 					setTimeout(() => {
 						console.log('Setting headsup', this.entityObject);
-						this.$refs.extendedVideoChild?.trigger('sync-playback', response.json.isPlaying, response.json.currentTime);
+						(this.$refs.extendedVideoChild as typeof ExtendedVideo)?.trigger('sync-playback', response.data.isPlaying, response.data.currentTime);
 					}, 900);
 				}
 			}
@@ -366,13 +371,13 @@ export default {
 			if (action == 'sync-playback') {
 				// value = true = Play
 				// Value = false = Pause
-				this.$refs.extendedVideoChild?.trigger(action, value, time);
+				(this.$refs.extendedVideoChild as typeof ExtendedVideo)?.trigger(action, value, time);
 			} else if (action == 'sync-skip') {
 				// The Skip if you click the arrow keys or number keys
-				this.$refs.extendedVideoChild?.trigger(action, value);
+				(this.$refs.extendedVideoChild as typeof ExtendedVideo)?.trigger(action, value);
 			} else if (action == 'sync-skipTimeline') {
 				// The skip if you click on the timeline at any position
-				this.$refs.extendedVideoChild?.trigger(action, value);
+				(this.$refs.extendedVideoChild as typeof ExtendedVideo)?.trigger(action, value);
 			}
 		});
 		this.$socket.on('sync-selectSeries', async ({ ID }) => {
@@ -388,8 +393,8 @@ export default {
 		this.$socket.on('sync-video-info', () => {
 			if (!this.isOwner) return;
 			this.$socket.emit('sync-video-info', {
-				currentTime: this.$refs.extendedVideoChild?.videoData?.currentTime || 0,
-				isPlaying: this.$refs.extendedVideoChild?.videoData?.isPlaying || false,
+				currentTime: (this.$refs.extendedVideoChild as typeof ExtendedVideo)?.videoData?.currentTime || 0,
+				isPlaying: (this.$refs.extendedVideoChild as typeof ExtendedVideo)?.videoData?.isPlaying || false,
 			});
 		});
 
@@ -397,7 +402,7 @@ export default {
 			console.log('Came');
 			this.$socket.on('watchListChange', ({ watchList }) => {
 				console.log('GOT watchListChange', watchList);
-				this.setWatchList(watchList.filter((e) => e.ID == this.currentSeries.ID));
+				this.watchList = watchList.filter((e) => e.ID == this.currentSeries.ID);
 			});
 		}
 	},

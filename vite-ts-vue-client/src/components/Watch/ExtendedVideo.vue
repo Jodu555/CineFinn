@@ -208,6 +208,7 @@ export default defineComponent({
 		canPlay: { type: Boolean, default: true },
 		events: { type: Object, default: {} },
 	},
+	expose: ['videoData', 'trigger'],
 	data() {
 		return {
 			cleanupFN: () => {},
