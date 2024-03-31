@@ -27,6 +27,8 @@ interface ClientToServerEvents {
 	'rmvc-connection': (obj: { status: boolean }) => void;
 	'rmvc-recieve-videoStateChange': (obj: { isPlaying: boolean }) => void;
 	todoListUpdate: (list: TodoItem[]) => void;
+	'sync-update-rooms': () => void;
+	'sync-message': (obj: { type: 'success' | 'error'; message: string }) => void;
 }
 
 interface ExtendedSocket extends Socket<ClientToServerEvents, DefaultEventsMap> {

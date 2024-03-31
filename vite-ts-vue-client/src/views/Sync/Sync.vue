@@ -5,7 +5,9 @@
 	</div>
 </template>
 <script lang="ts">
-import { mapState, mapActions } from 'vuex';
+import { useAuthStore } from '@/stores/auth.store';
+import { useSyncStore } from '@/stores/sync.store';
+import { mapWritableState, mapActions } from 'pinia';
 
 //TODO: Make here all the socket stuff. cause it will be persistent over all the sync deep routes
 export default {
@@ -32,10 +34,10 @@ export default {
 		this.$socket.off('sync-message');
 	},
 	computed: {
-		...mapState('auth', ['settings']),
+		...mapWritableState(useAuthStore, ['settings']),
 	},
 	methods: {
-		...mapActions('sync', ['createRoom', 'joinRoom', 'loadRooms']),
+		...mapActions(useSyncStore, ['createRoom', 'joinRoom', 'loadRooms']),
 	},
 };
 </script>

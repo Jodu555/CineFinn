@@ -46,8 +46,9 @@
 	</div>
 </template>
 <script lang="ts">
-import { mapActions, mapMutations, mapState } from 'vuex';
-import RoomCard from '../../components/Sync/RoomCard.vue';
+import { mapActions, mapWritableState } from 'pinia';
+import RoomCard from '@/components/Sync/RoomCard.vue';
+import { useSyncStore } from '@/stores/sync.store';
 
 export default {
 	components: { RoomCard },
@@ -57,10 +58,10 @@ export default {
 		};
 	},
 	computed: {
-		...mapState('sync', ['roomList', 'loading']),
+		...mapWritableState(useSyncStore, ['roomList', 'loading']),
 	},
 	methods: {
-		...mapActions('sync', ['createRoom', 'joinRoom', 'loadRooms']),
+		...mapActions(useSyncStore, ['createRoom', 'joinRoom', 'loadRooms']),
 	},
 	mounted() {
 		this.loadRooms();
