@@ -32,8 +32,8 @@ export const useSyncStore = defineStore('sync', {
 			useSocket().emit('sync-create', { ID });
 			this.currentRoomID = ID;
 
-			this.loadRooms();
-			this.loadRoomInfo();
+			await this.loadRooms();
+			await this.loadRoomInfo();
 
 			if (this.currentRoomID == ID) {
 				const router = (await import('@/router')).default;
@@ -42,7 +42,9 @@ export const useSyncStore = defineStore('sync', {
 		},
 		async joinRoom(ID: string) {
 			this.currentRoomID = ID;
-			this.loadRoomInfo();
+			await this.loadRoomInfo();
+			console.log(this.currentRoomID);
+
 			if (this.currentRoomID == ID) {
 				useSocket().emit('sync-join', { ID });
 				const router = (await import('@/router')).default;
@@ -52,7 +54,7 @@ export const useSyncStore = defineStore('sync', {
 		async leaveRoom() {
 			useSocket().emit('sync-leave', { ID: this.currentRoomID });
 			this.$reset();
-			this.loadRooms();
+			await this.loadRooms();
 			const router = (await import('@/router')).default;
 			await router.push('/sync/');
 		},
@@ -83,10 +85,8 @@ export const useSyncStore = defineStore('sync', {
 		},
 		async loadRoomInfo() {
 			this.loading = true;
-
 			//Load the Series Details
 			const response = await useAxios().get('/room/' + this.currentRoomID);
-			console.log(response);
 			if (response.status === 200) {
 				const json = response.data;
 				this.roomList = this.roomList.map((r) => {

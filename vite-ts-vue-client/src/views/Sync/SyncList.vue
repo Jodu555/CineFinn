@@ -11,21 +11,23 @@
 			<div>
 				<div class="card text-start">
 					<div class="card-body">
-						<h3 class="card-title">Join a Room</h3>
-						<div class="mb-3">
-							<input
-								type="text"
-								v-model="roomInputID"
-								class="form-control"
-								name="roomid"
-								id="roomid"
-								aria-describedby="helpId"
-								placeholder="RoomID" />
-							<small id="helpId" class="form-text text-muted">The ID of the room you want to join</small>
-						</div>
-						<div class="d-grid gap-2">
-							<button @click="joinRoom(roomInputID)" type="button" class="btn btn-success">Join</button>
-						</div>
+						<form @submit.prevent="joinRoom(roomInputID)">
+							<h3 class="card-title">Join a Room</h3>
+							<div class="mb-3">
+								<input
+									type="text"
+									v-model="roomInputID"
+									class="form-control"
+									name="roomid"
+									id="roomid"
+									aria-describedby="helpId"
+									placeholder="RoomID" />
+								<small id="helpId" class="form-text text-muted">The ID of the room you want to join</small>
+							</div>
+							<div class="d-grid gap-2">
+								<button type="submit" class="btn btn-success">Join</button>
+							</div>
+						</form>
 					</div>
 				</div>
 			</div>

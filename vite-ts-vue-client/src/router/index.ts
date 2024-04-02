@@ -52,31 +52,31 @@ const router = createRouter({
 			},
 			meta: { requiresLogin: true },
 		},
-		// {
-		// 	path: '/sync',
+		{
+			path: '/sync',
 
-		// 	component: function () {
-		// 		return import(/* webpackChunkName: "syncmain" */ '@/views/Sync/Sync.vue');
-		// 	},
-		// 	meta: { requiresLogin: true },
-		// 	children: [
-		// 		{
-		// 			name: 'Sync',
-		// 			path: '',
-		// 			component: function () {
-		// 				return import(/* webpackChunkName: "synclist" */ '@/views/Sync/SyncList.vue');
-		// 			},
-		// 			meta: { requiresLogin: true },
-		// 		},
-		// 		{
-		// 			path: ':key',
-		// 			component: function () {
-		// 				return import(/* webpackChunkName: "syncroom" */ '@/views/Sync/SyncRoom.vue');
-		// 			},
-		// 			meta: { requiresLogin: true },
-		// 		},
-		// 	],
-		// },
+			component: function () {
+				return import(/* webpackChunkName: "syncmain" */ '@/views/Sync/Sync.vue');
+			},
+			meta: { requiresLogin: true },
+			children: [
+				{
+					name: 'Sync',
+					path: '',
+					component: function () {
+						return import(/* webpackChunkName: "synclist" */ '@/views/Sync/SyncList.vue');
+					},
+					meta: { requiresLogin: true },
+				},
+				{
+					path: ':key',
+					component: function () {
+						return import(/* webpackChunkName: "syncroom" */ '@/views/Sync/SyncRoom.vue');
+					},
+					meta: { requiresLogin: true },
+				},
+			],
+		},
 		// {
 		// 	path: '/playlists',
 		// 	name: 'Playlists',
