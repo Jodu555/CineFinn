@@ -52,6 +52,7 @@ export const useSyncStore = defineStore('sync', {
 			}
 		},
 		async leaveRoom() {
+			if (this.currentRoomID == '-1') return;
 			useSocket().emit('sync-leave', { ID: this.currentRoomID });
 			this.$reset();
 			await this.loadRooms();

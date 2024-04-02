@@ -360,10 +360,21 @@ export default {
 				console.log('Performing Headsup');
 				const response = await useAxios().get(`/room/${this.currentRoom.ID}/headsup`);
 				if (response.status === 200) {
-					setTimeout(() => {
-						console.log('Setting headsup', this.entityObject);
-						(this.$refs.extendedVideoChild as typeof ExtendedVideo)?.trigger('sync-playback', response.data.isPlaying, response.data.currentTime);
-					}, 900);
+					let i = 0;
+					let inti = setInterval(() => {
+						i += 50;
+						if (!(this.$refs.extendedVideoChild as typeof ExtendedVideo)?.videoLoading) {
+							clearInterval(inti);
+							console.log('Setting headsup with i', i, this.entityObject);
+							setTimeout(() => {
+								(this.$refs.extendedVideoChild as typeof ExtendedVideo)?.trigger('sync-playback', response.data.isPlaying, response.data.currentTime);
+							}, 200);
+						}
+						if (i > 1000 * 60 * 1) {
+							console.log('Headsup Timeout Reached:', i);
+							clearInterval(inti);
+						}
+					}, 50);
 				}
 			}
 		}, 800);

@@ -208,7 +208,7 @@ export default defineComponent({
 		canPlay: { type: Boolean, default: true },
 		events: { type: Object, default: {} },
 	},
-	expose: ['videoData', 'trigger'],
+	expose: ['videoData', 'videoLoading', 'trigger'],
 	data() {
 		return {
 			cleanupFN: () => {},
@@ -324,6 +324,7 @@ export default defineComponent({
 			if (action == 'sync-playback') {
 				const video = document.querySelector('video');
 				if (value) {
+					video!.currentTime = time;
 					video!.play();
 				} else {
 					video!.currentTime = time;
