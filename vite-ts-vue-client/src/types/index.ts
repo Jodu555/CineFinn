@@ -126,3 +126,24 @@ export interface TodoItem {
 }
 
 export type BrowseSerie = Serie & { url?: string };
+
+export interface SyncRoomEntityInfos {
+	season: number;
+	episode: number;
+	movie: number;
+	lang: Langs;
+}
+
+export interface SyncRoomMember {
+	UUID: string;
+	name: string;
+	role: number;
+}
+
+export interface SyncRoomItem {
+	ID: string;
+	seriesID: string;
+	entityInfos?: SyncRoomEntityInfos;
+	members?: SyncRoomMember[];
+	created_at: number;
+}

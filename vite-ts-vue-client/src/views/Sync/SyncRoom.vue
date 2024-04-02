@@ -122,8 +122,8 @@
 <script lang="ts">
 import AutoComplete from '@/components/Layout/AutoComplete.vue';
 import { mapActions, mapState, mapWritableState } from 'pinia';
-import EntityActionsInformation from '../../components/Watch/EntityActionsInformation.vue';
-import EntityListView from '../../components/Watch/EntityListView.vue';
+import EntityActionsInformation from '@/components/Watch/EntityActionsInformation.vue';
+import EntityListView from '@/components/Watch/EntityListView.vue';
 import ExtendedVideo from '@/components/Watch/ExtendedVideo.vue';
 import { deepswitchTo } from '@/utils/switcher';
 import Modal from '@/components/Modal.vue';

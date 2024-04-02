@@ -2,29 +2,8 @@ import { useWatchStore } from './watch.store';
 import { useAxios } from '@/utils';
 import { defineStore } from 'pinia';
 import { useAuthStore } from './auth.store';
-import type { Langs } from '@/types';
+import type { SyncRoomItem } from '@/types';
 import { useSocket } from '@/utils/socket';
-
-export interface SyncRoomEntityInfos {
-	season: number;
-	episode: number;
-	movie: number;
-	lang: Langs;
-}
-
-export interface SyncRoomMember {
-	UUID: string;
-	name: string;
-	role: number;
-}
-
-export interface SyncRoomItem {
-	ID: string;
-	seriesID: string;
-	entityInfos?: SyncRoomEntityInfos;
-	members?: SyncRoomMember[];
-	created_at: number;
-}
 
 export const useSyncStore = defineStore('sync', {
 	state: () => {

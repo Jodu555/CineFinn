@@ -7,7 +7,7 @@
 			>
 			<div class="card-body">
 				<h4 class="card-title">{{ getSeries(room.seriesID)?.title }}</h4>
-				<p class="card-text">Opend: {{ ago }} with {{ room.members.length }} users</p>
+				<p class="card-text">Opend: {{ ago }} with {{ room.members?.length || 0 }} users</p>
 				<button class="btn btn-outline-success" @click="joinRoom(room.ID)">Join</button>
 			</div>
 		</div>
@@ -17,10 +17,15 @@
 import { useAuthStore } from '@/stores/auth.store';
 import { useIndexStore } from '@/stores/index.store';
 import { useSyncStore } from '@/stores/sync.store';
+import type { SyncRoomItem } from '@/types';
 import { mapWritableState, mapActions } from 'pinia';
+import type { PropType } from 'vue';
+import { defineComponent } from 'vue';
 
-export default {
-	props: ['room'],
+export default defineComponent({
+	props: {
+		room: { type: Object as PropType<SyncRoomItem>, required: true },
+	},
 	data() {
 		return {
 			ago: '',
@@ -71,6 +76,6 @@ export default {
 			return this.series.find((x) => x.ID == ID);
 		},
 	},
-};
+});
 </script>
 <style lang=""></style>
