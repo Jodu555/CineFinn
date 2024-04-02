@@ -1,4 +1,6 @@
+import type { SweetAlertOptions } from 'sweetalert2';
 import axios, { type AxiosInstance } from 'axios';
+import type { App } from 'vue';
 
 function setCookie(cname: string, cvalue: string, exdays: number) {
 	var d = new Date();
@@ -59,6 +61,20 @@ function useAxios() {
 		}
 	);
 	return instance;
+}
+
+let app: App<Element> | undefined = undefined;
+
+export function setApp(_app: App<Element>) {
+	app = _app;
+}
+
+export function getApp(): App<Element> {
+	return app as App<Element>;
+}
+
+export function useSwal(opts: SweetAlertOptions) {
+	return getApp()._instance?.appContext.config.globalProperties.$swal(opts);
 }
 
 export { useAxios, useBaseURL, setCookie, getCookie, deleteCookie };

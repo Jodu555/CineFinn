@@ -74,6 +74,7 @@ app.use(VueSweetalert2);
 import { type SweetAlertOptions } from 'sweetalert2';
 import { socketPlugin, useSocket } from './utils/socket';
 import { useAuthStore } from './stores/auth.store';
+import { setApp } from './utils';
 
 declare module 'vue' {
 	interface ComponentCustomProperties {
@@ -99,4 +100,4 @@ socket.on('connect', () => {
 
 app.mount('#app');
 
-export default app;
+setApp(app);

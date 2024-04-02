@@ -1,10 +1,9 @@
 import { useWatchStore } from './watch.store';
-import { useAxios } from '@/utils';
+import { getApp, useAxios, useSwal } from '@/utils';
 import { defineStore } from 'pinia';
 import { useAuthStore } from './auth.store';
 import type { SyncRoomItem } from '@/types';
 import { useSocket } from '@/utils/socket';
-import app from '@/main';
 
 export const useSyncStore = defineStore('sync', {
 	state: () => {
@@ -83,7 +82,7 @@ export const useSyncStore = defineStore('sync', {
 					await this.loadRoomInfo();
 				}
 			} else {
-				app._instance?.appContext.config.globalProperties.$swal({
+				useSwal({
 					toast: true,
 					position: 'top-end',
 					showConfirmButton: false,
@@ -109,7 +108,7 @@ export const useSyncStore = defineStore('sync', {
 				});
 			} else {
 				this.currentRoomID = '-1';
-				app._instance?.appContext.config.globalProperties.$swal({
+				useSwal({
 					toast: true,
 					position: 'top-end',
 					showConfirmButton: false,
