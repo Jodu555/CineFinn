@@ -4,6 +4,7 @@ import { defineStore } from 'pinia';
 import { useAuthStore } from './auth.store';
 import type { SyncRoomItem } from '@/types';
 import { useSocket } from '@/utils/socket';
+import app from '@/main';
 
 export const useSyncStore = defineStore('sync', {
 	state: () => {
@@ -81,6 +82,16 @@ export const useSyncStore = defineStore('sync', {
 				if (this.currentRoomID != '-1') {
 					await this.loadRoomInfo();
 				}
+			} else {
+				app._instance?.appContext.config.globalProperties.$swal({
+					toast: true,
+					position: 'top-end',
+					showConfirmButton: false,
+					timer: 3000,
+					icon: 'error',
+					title: `${response.data.error.message}`,
+					timerProgressBar: true,
+				});
 			}
 			this.loading = false;
 		},
@@ -98,6 +109,15 @@ export const useSyncStore = defineStore('sync', {
 				});
 			} else {
 				this.currentRoomID = '-1';
+				app._instance?.appContext.config.globalProperties.$swal({
+					toast: true,
+					position: 'top-end',
+					showConfirmButton: false,
+					timer: 3000,
+					icon: 'error',
+					title: `${response.data.error.message}`,
+					timerProgressBar: true,
+				});
 				const router = (await import('@/router')).default;
 				await router.push('/sync');
 			}

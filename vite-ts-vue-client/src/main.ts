@@ -98,3 +98,5 @@ socket.on('connect', () => {
 });
 
 app.mount('#app');
+
+export default app;
