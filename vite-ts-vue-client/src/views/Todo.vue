@@ -262,6 +262,31 @@ const state = reactive({
 	permittedAccounts: [] as permAcc[],
 });
 
+const windowWidth = ref(0);
+
+const dragOptions = computed(() => {
+	return {
+		animation: 200,
+		group: 'description',
+		disabled: windowWidth.value < 580,
+		ghostClass: 'ghost',
+	};
+});
+
+onMounted(() => {
+	window.addEventListener('resize', handleWindowSizeChange);
+	handleWindowSizeChange();
+});
+onUnmounted(() => {
+	window.removeEventListener('resize', handleWindowSizeChange);
+});
+const handleWindowSizeChange = () => {
+	windowWidth.value = window.innerWidth;
+	if(windowWidth.value < 580) {
+
+	}
+};
+
 interface permAcc {
 	UUID: string;
 	username: string;
@@ -490,15 +515,6 @@ const pushTodoListUpdate = async () => {
 	});
 	useSocket().emit('todoListUpdate', saveList);
 };
-
-const dragOptions = computed(() => {
-	return {
-		animation: 200,
-		group: 'description',
-		disabled: false,
-		ghostClass: 'ghost',
-	};
-});
 </script>
 <style>
 .flip-list-move {

@@ -29,6 +29,9 @@
 					<li class="nav-item">
 						<router-link class="nav-link" active-class="active" to="/rmvc">RMVC</router-link>
 					</li>
+					<li v-if="settings.enableBetaFeatures.value == true" class="nav-item">
+						<router-link class="nav-link" active-class="active" to="/browse">Browse</router-link>
+					</li>
 				</ul>
 				<div v-if="loggedIn" class="d-flex">
 					<AutoComplete
