@@ -282,8 +282,7 @@ onUnmounted(() => {
 });
 const handleWindowSizeChange = () => {
 	windowWidth.value = window.innerWidth;
-	if(windowWidth.value < 580) {
-
+	if (windowWidth.value < 580) {
 	}
 };
 
@@ -455,7 +454,7 @@ const useTodo = async (ID: string) => {
 				content: `Added ${seriesObject.title}`,
 				time: Date.now(),
 			} as NewsItem;
-			await useAxios().post('/news/', JSON.stringify(newsObject));
+			await useAxios().post('/news/', newsObject);
 		}
 	}
 };
