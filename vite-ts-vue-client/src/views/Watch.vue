@@ -75,7 +75,7 @@
 				<EntityListView
 					v-if="currentSeason != -1"
 					title="Episodes:"
-					:array="currentSeries.seasons.find((x) => x[0].season == (entityObject as SerieEpisode)?.season || -1)"
+					:array="currentSeries.seasons.find((x) => x[0].season == ((entityObject as SerieEpisode)?.season || -1))"
 					:current="currentEpisode"
 					:currentSeason="currentSeason"
 					:changeFN="changeEpisode"
