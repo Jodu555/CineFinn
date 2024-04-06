@@ -583,8 +583,7 @@ export default defineComponent({
 			video.addEventListener('durationchange', () => {
 				updateVueVideoData();
 			});
-
-			video.volume = parseInt(String(v.settings.volume.value));
+			video.volume = parseFloat(String(v.settings.volume.value));
 
 			function updateBuffer() {
 				// let max = -Infinity;
@@ -702,7 +701,9 @@ export default defineComponent({
 				} else {
 					volumeLevel = 'low';
 				}
-				if (v.settings.volume.value !== video.volume) {
+				if (v.settings.volume.value !== video.volume && video.volume != 0) {
+					console.log('KEKW I AM AN IDIOT', Date.now(), v.settings.volume.value, video.volume);
+
 					v.settings.volume.value = video.volume;
 					v.updateSettings();
 				}
