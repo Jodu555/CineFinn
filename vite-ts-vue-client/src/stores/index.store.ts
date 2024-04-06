@@ -1,3 +1,4 @@
+import { useWatchStore } from './watch.store';
 import type { Serie } from '@/types/index';
 import { useAxios } from '@/utils';
 import { defineStore } from 'pinia';
@@ -23,10 +24,10 @@ export const useIndexStore = defineStore('index', {
 		},
 		async reloadSeries(series: Serie[]) {
 			this.series = series;
-			// if (rootState.watch.currentSeries.ID != -1) {
-			//     // dispatch('watch/loadSeriesInfo', series.find((x) => x.ID == rootState.watch.currentSeries.ID).ID);
-			//     dispatch('watch/loadSeriesInfo', rootState.watch.currentSeries.ID);
-			// }
+			const watchStore = useWatchStore();
+			if (watchStore.currentSeries.ID != '-1') {
+				await watchStore.loadSeriesInfo(watchStore.currentSeries.ID);
+			}
 		},
 	},
 });
