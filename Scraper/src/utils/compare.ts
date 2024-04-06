@@ -57,7 +57,7 @@ async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceIt
 		} catch (error) {
 			stats = null;
 		}
-		const lastAlteredFileMin = (Date.now() - stats?.mtimeMs) / 1000 / 60
+		const lastAlteredFileMin = (Date.now() - stats?.mtimeMs) / 1000 / 60;
 		if (stats != null && lastAlteredFileMin < 50) {
 			//Use the previous list maybe the user re ran cause there was an error
 			console.log('------ Compare Aniworld ------');
@@ -512,7 +512,7 @@ async function compareForNewReleasesZoro(
 	ignoranceList: IgnoranceItem[],
 	inherit: boolean = true
 ): Promise<ExtendedEpisodeDownload[]> {
-	const limit = promiseLimit(10);
+	const limit = promiseLimit(2);
 	const data = series.filter((x, i) => x.references?.zoro);
 	// .filter((x, i) => i < 1);
 

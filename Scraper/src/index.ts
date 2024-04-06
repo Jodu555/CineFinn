@@ -152,24 +152,24 @@ async function addReference() {
 
 async function checkForUpdates() {
 	const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
-	// res.data = res.data.filter((x) => x.ID == 'a9f36e78');
+	res.data = res.data.filter((x) => x.ID == 'xxxxxxx');
 	// res.data = res.data.filter((x) => x.title.includes('Honor') || x.title.includes('Grace'));
 	// res.data.length = res.data.length / 0.5;
-	// const res: { data: Serie[] } = {
-	// 	data: [
-	// 		{
-	// 			ID: 'dwddawdwadwd',
-	// 			title: 'Farming Life in Another World',
-	// 			categorie: 'Aniworld',
-	// 			seasons: [],
-	// 			movies: [],
-	// 			infos: {},
-	// 			references: {
-	// 				zoro: '18284',
-	// 			},
-	// 		},
-	// 	],
-	// };
+	res.data.push(
+		...([
+			{
+				ID: 'xxxxxxxxxxx',
+				title: 'Gushing over Magical Girls',
+				categorie: 'Aniworld',
+				seasons: [],
+				movies: [],
+				infos: {},
+				references: {
+					zoro: '18952',
+				},
+			},
+		] as Serie[])
+	);
 	// console.log(res.data);
 
 	//This list should say, that these animes should the new episodes no be included unless they are german dubbed
@@ -187,7 +187,7 @@ async function checkForUpdates() {
 	];
 
 	console.time('Compare');
-	const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: false, zoro: false });
+	const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: false, sto: false, zoro: true });
 	console.timeEnd('Compare');
 
 	if (output.aniworld.length == 0) return;
