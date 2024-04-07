@@ -131,6 +131,12 @@ const generateImages = async (series: Series[], cleanup: () => void = () => {}) 
 
 	console.log(`Every Series has been checked and there are ${promises.length} Processes Waiting!`);
 
+	if (promises.length == 0) {
+		console.log('Finished generateImages()');
+		cleanup();
+		return;
+	}
+
 	const connection = getIORedis();
 	if (connection) {
 		const previewImageQueue = 'previewImageQueue';
