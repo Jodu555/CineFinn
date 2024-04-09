@@ -177,7 +177,7 @@
 						</span>
 					</div>
 			</pre>
-			<video ref="mainVid" preload="auto" oncontextmenu="return false" :src="videoSrc"></video>
+			<video ref="mainVid" preload="auto" oncontextmenu="return false" playsinline :src="videoSrc"></video>
 		</div>
 	</div>
 </template>
