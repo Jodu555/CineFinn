@@ -101,6 +101,17 @@ import { getVideoMovie, getVideoEntity, Episode, Movie } from '../classes/series
 // 	videoStream.pipe(res);
 // };
 
+interface VideoStreamLog {
+	userUUID: string;
+	time: number;
+	path: string;
+	stream: fs.ReadStream;
+	start: number;
+	end: number;
+}
+
+const streams: VideoStreamLog[] = [];
+
 export = (req: AuthenticatedRequest, res: Response) => {
 	const { series: seriesID, season, episode, movie, language, debug: rmtDebug } = req.query;
 
@@ -228,6 +239,23 @@ export = (req: AuthenticatedRequest, res: Response) => {
 		console.log(`Error reading file ${filePath}.`);
 		console.log(error);
 		res.sendStatus(500);
+	});
+
+	streams
+		.filter((x) => x.userUUID == req.credentials.user.UUID && Date.now() - x.time > 5000)
+		.map((old) => {
+			old.stream.destroy();
+			console.log('Destroyed stream for', old.userUUID, Date.now() - old.time, 'ms', old.path);
+			streams.splice(streams.indexOf(old), 1);
+		});
+
+	streams.push({
+		stream: fileStream,
+		userUUID: req.credentials.user.UUID,
+		time: Date.now(),
+		path: filePath,
+		start: start,
+		end: end,
 	});
 
 	fileStream.pipe(res);

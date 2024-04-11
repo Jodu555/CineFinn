@@ -159,13 +159,13 @@ async function checkForUpdates() {
 		...([
 			{
 				ID: 'xxxxxxxxxxx',
-				title: 'Gushing over Magical Girls',
+				title: 'Hetalia - Axis Powers',
 				categorie: 'Aniworld',
 				seasons: [],
 				movies: [],
 				infos: {},
 				references: {
-					zoro: '18952',
+					zoro: '1379',
 				},
 			},
 		] as Serie[])
