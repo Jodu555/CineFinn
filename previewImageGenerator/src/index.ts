@@ -135,26 +135,29 @@ async function spawnFFmpegProcess(command: string, cwd: string = undefined, prog
 			lines.forEach((line) => {
 				if (line.includes('frame=') && line.includes('fps=') && line.includes('time=')) {
 					if (duration == null) {
-						const l = cumOutput.join(' ').trim().replaceAll('\r', '').replaceAll('\n', '').replaceAll('\t', '');
-						const [_, rest] = l.split('Duration: ');
-						const [time, __] = rest.split(',');
-						const [h, m, sc] = time.split(':');
-						const s = parseInt(sc);
-						duration = { h: Number(h), m: Number(m), s };
+						try {
+							const l = cumOutput.join(' ').trim().replaceAll('\r', '').replaceAll('\n', '').replaceAll('\t', '');
+							const [_, rest] = l.split('Duration: ');
+							const [time, __] = rest.split(',');
+							const [h, m, sc] = time.split(':');
+							const s = parseInt(sc);
+							duration = { h: Number(h), m: Number(m), s };
+						} catch (_) {}
 					}
+					try {
+						const speed = parseFloat(line.split('speed=')[1].split('x')[0]);
+						const [time, __] = line.split('time=')[1].split(' ');
+						const [h, m, sc] = time.split(':');
 
-					const speed = parseFloat(line.split('speed=')[1].split('x')[0]);
-					const [time, __] = line.split('time=')[1].split(' ');
-					const [h, m, sc] = time.split(':');
+						const s = parseInt(sc);
+						const seconds = s + Number(m) * 60 + Number(h) * 60 * 60;
+						const maxSeconds = duration.s + duration.m * 60 + duration.h * 60 * 60;
 
-					const s = parseInt(sc);
-					const seconds = s + Number(m) * 60 + Number(h) * 60 * 60;
-					const maxSeconds = duration.s + duration.m * 60 + duration.h * 60 * 60;
+						const percent = (seconds / maxSeconds) * 100;
 
-					const percent = (seconds / maxSeconds) * 100;
-
-					if (speed > highestSpeed) highestSpeed = speed;
-					progress(speed, percent);
+						if (speed > highestSpeed) highestSpeed = speed;
+						progress(speed, percent);
+					} catch (_) {}
 				}
 			});
 			cumOutput.push(...lines);
