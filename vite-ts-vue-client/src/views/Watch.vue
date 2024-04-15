@@ -1,7 +1,7 @@
 <template>
 	<div class="innerdoc">
 		<div v-if="currentSeries == undefined">
-			<h1>No Series with that ID</h1>
+			<h1 class="text-center">No Series with that ID</h1>
 		</div>
 		<div v-if="homeLoading || loading" class="d-flex justify-content-center">
 			<div class="spinner-border" role="status">
