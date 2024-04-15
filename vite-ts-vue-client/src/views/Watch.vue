@@ -146,7 +146,7 @@ export default {
 			);
 		},
 		displayTitle() {
-			let str = `${this.currentSeries.title} - `;
+			let str = `${this.currentSeries.infos?.title || this.currentSeries.infos?.infos || this.currentSeries.title} - `;
 
 			if (this.currentSeries.movies.length >= 1) {
 				str += `${this.currentSeries.movies.length} ` + (this.currentSeries.movies.length > 1 ? 'Movies' : 'Movie');
