@@ -3,13 +3,12 @@ import { RemoteSocket, Server, Socket } from 'socket.io';
 import IORedis from 'ioredis';
 import { Series } from '../classes/series';
 import { crawlAndIndex, mergeSeriesArrays } from './crawler';
-import { ActiveJob, SerieObject } from '../types/classes';
+import { SerieObject } from '../types/classes';
 import { ExtendedRemoteSocket, User } from '../types/session';
 import { AuthenticationHelper } from '@jodu555/express-helpers';
 const outputFileName = process.env.LOCAL_DB_FILE;
 
 let series: Series[] = null;
-let activeJobs: ActiveJob[] = [];
 let io: Server = null;
 let authHelper: AuthenticationHelper<User> = null;
 let redisConn: IORedis | void = null;
@@ -53,9 +52,6 @@ const setSeries = (_series: Series[], keepCurrentlyNotPresent = true) => {
 	fs.writeFileSync(outputFileName, JSON.stringify(series, null, 3), 'utf8');
 };
 
-const getActiveJobs = () => activeJobs;
-const setActiveJobs = (_activeJobs: ActiveJob[]) => (activeJobs = _activeJobs);
-
 const getAuthHelper = () => authHelper;
 const setAuthHelper = (_authHelper: AuthenticationHelper<User>) => (authHelper = _authHelper);
 
@@ -83,18 +79,4 @@ function deepMerge<T>(current: T, updates: T): T {
 	return current;
 }
 
-export {
-	getSeries,
-	setSeries,
-	getActiveJobs,
-	setActiveJobs,
-	getAuthHelper,
-	setAuthHelper,
-	getIO,
-	setIO,
-	getIORedis,
-	setIORedis,
-	debounce,
-	toAllSockets,
-	deepMerge,
-};
+export { getSeries, setSeries, getAuthHelper, setAuthHelper, getIO, setIO, getIORedis, setIORedis, debounce, toAllSockets, deepMerge };

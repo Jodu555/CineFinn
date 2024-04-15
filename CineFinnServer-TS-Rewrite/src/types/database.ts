@@ -9,6 +9,7 @@ export interface DatabaseWatchStringItem {
 export interface DatabaseJobItem {
 	ID: string;
 	lastRun: number;
+	running: 'true' | 'false';
 }
 
 export interface DatabaseNewsItem {

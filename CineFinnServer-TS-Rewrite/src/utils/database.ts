@@ -10,6 +10,9 @@ export default () => {
 		lastRun: {
 			type: 'varchar(64)',
 		},
+		running: {
+			type: 'varchar(64)',
+		},
 	});
 
 	database.createTable('watch_strings', {

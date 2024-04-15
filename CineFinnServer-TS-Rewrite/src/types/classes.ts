@@ -7,13 +7,6 @@ export interface timeUpdateObject {
 	force: boolean;
 }
 
-export interface ActiveJob {
-	id: string;
-	name: string;
-	startTime: number;
-	data: any;
-}
-
 export interface SerieObject {
 	ID: string;
 	categorie: string;

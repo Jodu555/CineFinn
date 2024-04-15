@@ -7,7 +7,7 @@ import { DatabaseJobItem } from '../types/database';
 import { AuthenticatedRequest, Role } from '../types/session';
 import { crawlAndIndex } from '../utils/crawler';
 import { generateImages } from '../utils/images';
-import { getActiveJobs, getSeries, setActiveJobs, setSeries, toAllSockets } from '../utils/utils';
+import { getSeries, setSeries, toAllSockets } from '../utils/utils';
 const database = Database.getDatabase();
 const router = express.Router();
 
@@ -20,26 +20,12 @@ const LOOKUP = {
 
 const callpointToEvent = (callpoint: string) => `${callpoint.replace('/', '').replaceAll('/', '_')}-end`;
 
-Promise.all(
-	Object.keys(LOOKUP).map(async (id) => {
-		const jobDB = await database.get<DatabaseJobItem>('jobs').getOne({ ID: id });
-		if (jobDB) {
-			const lastRun = jobDB.lastRun ? Number(jobDB.lastRun) : undefined;
-			LOOKUP[id] = { ...LOOKUP[id], lastRun };
-		} else {
-			database.get('jobs').create({ ID: id, lastRun: '' });
-		}
-		return id;
-	})
-);
-
 router.use((req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const jobID = Object.keys(LOOKUP).find((v) => LOOKUP[v].callpoint == req.path);
 	if (jobID) {
 		if (req.credentials.user.role >= LOOKUP[jobID].role) {
 			const lastRun = Date.now();
-			database.get('jobs').update({ ID: jobID }, { lastRun });
-			LOOKUP[jobID] = { ...LOOKUP[jobID], lastRun };
+			database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: jobID }, { lastRun });
 		} else {
 			next(new AuthenticationError('Insufficent Permission'));
 		}
@@ -47,34 +33,37 @@ router.use((req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	next();
 });
 
-router.get('/jobs/info', (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-	const response = [];
-	Object.keys(LOOKUP).forEach((id) => {
-		response.push({
-			id,
-			...LOOKUP[id],
-			running: Boolean(getActiveJobs().find((x) => x.id == id)),
-		});
-	});
+router.get('/jobs/info', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+	const response = await assembleJobArray();
 	res.json(response);
 });
 
-router.get('/job/img/generate', (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+async function assembleJobArray() {
+	const response = [];
+	for (const id of Object.keys(LOOKUP)) {
+		const jobDB = await database.get<DatabaseJobItem>('jobs').getOne({ ID: id });
+		delete jobDB.ID;
+		response.push({
+			id,
+			...LOOKUP[id],
+			...jobDB,
+			running: jobDB.running == 'true',
+		});
+	}
+	return response;
+}
+
+router.get('/job/img/generate', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const id = 'generate';
-	const job = getActiveJobs().find((x) => x.id == id);
-	if (job) {
+	const job = await database.get<DatabaseJobItem>('jobs').getOne({ ID: id });
+	if (job.running == 'true') {
 		const error = new Error('Job is already running!');
 		next(error);
 	} else {
-		getActiveJobs().push({
-			id,
-			name: LOOKUP[id].name,
-			startTime: Date.now(),
-			data: {},
-		});
+		database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'true' });
 		try {
 			generateImages(getSeries(), async () => {
-				setActiveJobs(getActiveJobs().filter((x) => x.id !== id));
+				database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
 				toAllSockets(
 					(s) => {
 						s.emit(callpointToEvent(LOOKUP[id].callpoint));
@@ -83,16 +72,16 @@ router.get('/job/img/generate', (req: AuthenticatedRequest, res: Response, next:
 				);
 			});
 		} catch (error) {
-			setActiveJobs(getActiveJobs().filter((x) => x.id !== id));
+			database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
 		}
-		res.json(getActiveJobs());
+		res.json(await assembleJobArray());
 	}
 });
 
-router.get('/job/checkForUpdates', (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+router.get('/job/checkForUpdates', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const id = 'checkForUpdates';
-	const job = getActiveJobs().find((x) => x.id == id);
-	if (job) {
+	const job = await database.get<DatabaseJobItem>('jobs').getOne({ ID: id });
+	if (job.running == 'true') {
 		const error = new Error('Job is already running!');
 		next(error);
 		return;
@@ -104,18 +93,13 @@ router.get('/job/checkForUpdates', (req: AuthenticatedRequest, res: Response, ne
 		return;
 	}
 
-	getActiveJobs().push({
-		id,
-		name: LOOKUP[id].name,
-		startTime: Date.now(),
-		data: {},
-	});
+	database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'true' });
 	//TODO: this is ugly and shittie there is a better way to solve this but i dont have time for it now
 	try {
 		new Promise<void>(async (resolve, reject) => {
 			try {
 				await checkForUpdates();
-				setActiveJobs(getActiveJobs().filter((x) => x.id !== id));
+				database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
 				await toAllSockets(
 					(s) => {
 						s.emit(callpointToEvent(LOOKUP[id].callpoint));
@@ -124,7 +108,7 @@ router.get('/job/checkForUpdates', (req: AuthenticatedRequest, res: Response, ne
 				);
 				resolve();
 			} catch (error) {
-				setActiveJobs(getActiveJobs().filter((x) => x.id !== id));
+				database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
 				await toAllSockets(
 					(s) => {
 						s.emit(callpointToEvent(LOOKUP[id].callpoint));
@@ -135,7 +119,7 @@ router.get('/job/checkForUpdates', (req: AuthenticatedRequest, res: Response, ne
 			}
 		});
 	} catch (error) {
-		setActiveJobs(getActiveJobs().filter((x) => x.id !== id));
+		database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
 		toAllSockets(
 			(s) => {
 				s.emit(callpointToEvent(LOOKUP[id].callpoint));
@@ -143,7 +127,7 @@ router.get('/job/checkForUpdates', (req: AuthenticatedRequest, res: Response, ne
 			(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
 		);
 	}
-	res.json(getActiveJobs());
+	res.json(await assembleJobArray());
 });
 
 // router.get('/job/img/validate', (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -167,28 +151,25 @@ router.get('/job/checkForUpdates', (req: AuthenticatedRequest, res: Response, ne
 //     }
 // });
 
-router.get('/job/crawl', (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+router.get('/job/crawl', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const id = 'crawl';
-	const job = getActiveJobs().find((x) => x.id == id);
-	if (job) {
+	const job = await database.get<DatabaseJobItem>('jobs').getOne({ ID: id });
+	console.log(job);
+
+	if (job.running == 'true') {
 		const error = new Error('Job is already running!');
 		next(error);
 	} else {
 		try {
-			getActiveJobs().push({
-				id,
-				name: LOOKUP[id].name,
-				startTime: Date.now(),
-				data: {},
-			});
+			database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'true' });
 			setSeries(crawlAndIndex());
 			setTimeout(async () => {
-				setActiveJobs(getActiveJobs().filter((x) => x.id !== id));
+				database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
 				sendSeriesReloadToAll((s) => s.emit(callpointToEvent(LOOKUP[id].callpoint)));
 			}, 3600);
-			res.json(getActiveJobs());
+			res.json(await assembleJobArray());
 		} catch (error) {
-			setActiveJobs(getActiveJobs().filter((x) => x.id !== id));
+			database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
 		}
 	}
 });
