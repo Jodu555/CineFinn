@@ -47,6 +47,7 @@ async function assembleJobArray() {
 			id,
 			...LOOKUP[id],
 			...jobDB,
+			lastRun: Number(jobDB.lastRun),
 			running: jobDB.running == 'true',
 		});
 	}
@@ -154,7 +155,6 @@ router.get('/job/checkForUpdates', async (req: AuthenticatedRequest, res: Respon
 router.get('/job/crawl', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const id = 'crawl';
 	const job = await database.get<DatabaseJobItem>('jobs').getOne({ ID: id });
-	console.log(job);
 
 	if (job.running == 'true') {
 		const error = new Error('Job is already running!');
