@@ -15,7 +15,7 @@ const LOOKUP = {
 	crawl: { name: 'Recrawl the archive', callpoint: '/job/crawl', role: Role.Mod },
 	generate: { name: 'Generating Preview-Images', callpoint: '/job/img/generate', role: Role.Admin },
 	// validator: { name: 'Validating Preview-Images', callpoint: '/job/img/validate' },
-	checkForUpdates: { name: 'Check for Updates', callpoint: '/job/checkForUpdates', role: Role.Admin },
+	checkForUpdates: { name: 'Check for Updates', callpoint: '/job/checkForUpdates', role: Role.Mod },
 } as const;
 
 const callpointToEvent = (callpoint: string) => `${callpoint.replace('/', '').replaceAll('/', '_')}-end`;
