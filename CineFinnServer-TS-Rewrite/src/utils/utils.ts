@@ -12,6 +12,16 @@ let series: Series[] = null;
 let io: Server = null;
 let authHelper: AuthenticationHelper<User> = null;
 let redisConn: IORedis | void = null;
+let videoStreamLog: VideoStreamLog[] = [];
+
+interface VideoStreamLog {
+	userUUID: string;
+	time: number;
+	path: string;
+	stream: fs.ReadStream;
+	start: number;
+	end: number;
+}
 
 function debounce(cb: Function, delay = 1000) {
 	let timeout: NodeJS.Timeout;
@@ -61,6 +71,9 @@ const setIO = (_io: Server) => (io = _io);
 const getIORedis = (): IORedis | void => redisConn;
 const setIORedis = (_redisConn: IORedis | void) => (redisConn = _redisConn);
 
+const getVideoStreamLog = () => videoStreamLog;
+const setVideoStreamLog = (_VideoStreamLog: VideoStreamLog[]) => (videoStreamLog = _VideoStreamLog);
+
 type toAllSocketsFunctionCB = (socket: ExtendedRemoteSocket) => void;
 type toAllSocketsFunctionFilter = (socket: ExtendedRemoteSocket) => boolean;
 
@@ -79,4 +92,18 @@ function deepMerge<T>(current: T, updates: T): T {
 	return current;
 }
 
-export { getSeries, setSeries, getAuthHelper, setAuthHelper, getIO, setIO, getIORedis, setIORedis, debounce, toAllSockets, deepMerge };
+export {
+	getSeries,
+	setSeries,
+	getAuthHelper,
+	setAuthHelper,
+	getIO,
+	setIO,
+	getIORedis,
+	setIORedis,
+	getVideoStreamLog,
+	setVideoStreamLog,
+	debounce,
+	toAllSockets,
+	deepMerge,
+};

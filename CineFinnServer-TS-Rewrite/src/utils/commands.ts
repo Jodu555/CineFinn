@@ -1,7 +1,8 @@
 import fs from 'fs';
+import path from 'path';
 import { sendSeriesReloadToAll, sendSiteReload } from '../sockets/client.socket';
 import { getAniworldInfos } from '../sockets/scraper.socket';
-import { getSeries, getAuthHelper, getIO } from './utils';
+import { getSeries, getAuthHelper, getIO, getVideoStreamLog } from './utils';
 import { CommandManager, Command } from '@jodu555/commandmanager';
 import { ExtendedRemoteSocket } from '../types/session';
 
@@ -89,6 +90,27 @@ function registerCommands() {
 					return 'The Series has no reference point for aniworld';
 				}
 				getAniworldInfos({ url: serie.references.aniworld as string });
+			}
+			return '';
+		})
+	);
+
+	commandManager.registerCommand(
+		new Command(['stream', 'streams'], 'stream [list/clear]', 'Manages The File Streams', (command, [...args], scope) => {
+			if (args[1] == 'list') {
+				console.log(`There are currently ${getVideoStreamLog().length} open streams`);
+				for (const streamLog of getVideoStreamLog()) {
+					console.log(
+						` => ${(Date.now() - streamLog.time) / 1000}s Old From: ${streamLog.start} - ${streamLog.end} in File: ${path.parse(streamLog.path).name}`
+					);
+				}
+			} else if (args[1] == 'clear') {
+				console.log('All File Streams are now Cleared end Ended');
+				getVideoStreamLog().forEach((old, idx) => {
+					old.stream.destroy();
+					console.log('Destroyed stream for', old.userUUID, (Date.now() - old.time) / 1000, 's', old.path);
+					getVideoStreamLog().splice(idx, 1);
+				});
 			}
 			return '';
 		})
