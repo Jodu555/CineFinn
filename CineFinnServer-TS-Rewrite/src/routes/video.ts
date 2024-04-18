@@ -190,8 +190,7 @@ export = (req: AuthenticatedRequest, res: Response) => {
 	debug && console.log('Got filePath', filePath);
 
 	const stat = fs.statSync(filePath);
-
-	let contentLength = stat.size;
+	const contentLength = stat.size;
 
 	// Listing 4.
 	if (req.method === 'HEAD') {
@@ -212,6 +211,19 @@ export = (req: AuthenticatedRequest, res: Response) => {
 	} else {
 		retrievedLength = contentLength;
 	}
+
+	// if (end == undefined) {
+	// 	const CHUNK_SIZE = Number(process.env.VIDEO_CHUNK_SIZE);
+	// 	console.log(end, start, contentLength);
+	// 	end = start + CHUNK_SIZE - 1;
+	// 	console.log('tmp end', end);
+
+	// 	if (end > contentLength) {
+	// 		console.log('Bound reached');
+
+	// 		end = contentLength - 1;
+	// 	}
+	// }
 
 	debug && console.log('Calculated contentLength', contentLength);
 	res.statusCode = start !== undefined || end !== undefined ? 206 : 200;

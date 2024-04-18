@@ -155,21 +155,21 @@ async function checkForUpdates() {
 	res.data = res.data.filter((x) => x.ID == 'xxxxxxx');
 	// res.data = res.data.filter((x) => x.title.includes('Honor') || x.title.includes('Grace'));
 	// res.data.length = res.data.length / 0.5;
-	res.data.push(
-		...([
-			{
-				ID: 'xxxxxxxxxxx',
-				title: 'Hetalia - Axis Powers',
-				categorie: 'Aniworld',
-				seasons: [],
-				movies: [],
-				infos: {},
-				references: {
-					zoro: '1379',
-				},
-			},
-		] as Serie[])
-	);
+	// res.data.push(
+	// 	...([
+	// 		{
+	// 			ID: 'xxxxxxxxxxx',
+	// 			title: 'Hetalia - Axis Powers',
+	// 			categorie: 'Aniworld',
+	// 			seasons: [],
+	// 			movies: [],
+	// 			infos: {},
+	// 			references: {
+	// 				zoro: '1379',
+	// 			},
+	// 		},
+	// 	] as Serie[])
+	// );
 	// console.log(res.data);
 
 	//This list should say, that these animes should the new episodes no be included unless they are german dubbed
