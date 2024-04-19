@@ -117,7 +117,7 @@ async function main() {
 
 			return;
 		},
-		{ connection, concurrency: config.concurrentGenerators }
+		{ connection, concurrency: config.concurrentGenerators, removeOnComplete: { count: 1000 }, removeOnFail: { count: 5000 } }
 	);
 }
 
