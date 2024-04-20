@@ -52,11 +52,11 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
 - [x] Implement a method to un watch a specific series or season
 - [x] Implement the command manager and some basic command (session = to list current sockets, info = to show series infos and space infos, reload = to reload the series from their file)
 - [x] IMPORTANT: **Finally Upgrade to TypeScript so i do not have this fucking pain in my ass!!!**
-- [ ] IMPORTANT: **Rewrite the client (copy everything and fix errors)**
+- [x] IMPORTANT: **Rewrite the client (copy everything and fix errors)**
   - This does not get done in one day but after the browse page is finished this should be one of the bigger next steps
-  - [ ] **Finally Upgrade the client to TypeScript so adding new features gets easier!!!**
-  - [ ] Port vuex to pinia cause it has the better upgrade way and very good TS support
-  - [ ] Remove my Networking library cause it lags some stuff, and replace it with axios
+  - [x] **Finally Upgrade the client to TypeScript so adding new features gets easier!!!**
+  - [x] Port vuex to pinia cause it has the better upgrade way and very good TS support
+  - [x] Remove my Networking library cause it lags some stuff, and replace it with axios
 - [x] Rewrite the crawler to remove some stupid old stuff
 - [x] Implement the sharing also with movies
 - [x] Implement the sharing to include the language
