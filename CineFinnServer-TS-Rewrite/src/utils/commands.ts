@@ -2,11 +2,15 @@ import fs from 'fs';
 import path from 'path';
 import { sendSeriesReloadToAll, sendSiteReload } from '../sockets/client.socket';
 import { getAniworldInfos } from '../sockets/scraper.socket';
-import { getSeries, getAuthHelper, getIO, getVideoStreamLog } from './utils';
+import { getSeries, getAuthHelper, getIO, getVideoStreamLog, toAllSockets } from './utils';
 import { CommandManager, Command } from '@jodu555/commandmanager';
 import { ExtendedRemoteSocket } from '../types/session';
+import { getSyncRoom } from './room.utils';
+import { Database } from '@jodu555/mysqlapi';
+import { DatabaseSyncRoomItem } from '../types/database';
 
 const commandManager = CommandManager.getCommandManager();
+const database = Database.getDatabase();
 
 function registerCommands() {
 	commandManager.registerCommand(
@@ -111,6 +115,44 @@ function registerCommands() {
 					console.log('Destroyed stream for', old.userUUID, (Date.now() - old.time) / 1000, 's', old.path);
 					getVideoStreamLog().splice(idx, 1);
 				});
+			}
+			return '';
+		})
+	);
+
+	commandManager.registerCommand(
+		new Command(['sync'], 'sync set owner <RoomID> <UserUUID>', 'Manages The File Streams', async (command, [...args], scope) => {
+			if (args[1] == 'set' && args[2] == 'owner') {
+				const roomID = args[3];
+				const userUUID = args[4];
+				const room = await getSyncRoom(parseInt(roomID));
+				if (!room) {
+					return `Room with ${roomID} ID not found`;
+				}
+
+				if (room.members.find((x) => x.UUID == userUUID) == undefined) {
+					return `User with ${userUUID} UUID not found in Room`;
+				}
+
+				room.members = room.members.map((x) => {
+					if (x.UUID == userUUID) {
+						x.role = 1;
+					} else {
+						x.role = 0;
+					}
+					return x;
+				});
+
+				//Update Database with updated room object
+				await database.get<Partial<DatabaseSyncRoomItem>>('sync_rooms').update({ ID: room.ID }, { members: JSON.stringify(room.members) });
+
+				//Update Room list for other sockets
+				await toAllSockets(
+					(s) => {
+						s.emit('sync-update-rooms');
+					},
+					(s) => s.auth.type == 'client'
+				);
 			}
 			return '';
 		})
