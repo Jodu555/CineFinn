@@ -145,7 +145,7 @@ const generateImages = async (series: Series[], cleanup: () => void = () => {}) 
 		const queueEvents = new QueueEvents(previewImageQueue, { connection });
 
 		promises.forEach((p) => {
-			queue.add(p.meta.serieID, p.meta);
+			queue.add(p.meta.serieID, p.meta, { removeOnComplete: false, removeOnFail: false });
 		});
 
 		await new Promise<void>((resolve, reject) => {
