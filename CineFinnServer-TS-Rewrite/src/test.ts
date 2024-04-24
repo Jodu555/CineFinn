@@ -6,11 +6,12 @@ import { SerieObject } from './types/classes';
 import { generateImages } from './utils/images';
 import { load, parse } from './utils/watchString';
 import axios from 'axios';
+import { DatabaseWatchStringItem } from './types/database';
 dotenv.config();
 
-// const { Database } = require('@jodu555/mysqlapi');
-// const database = Database.createDatabase(process.env.DB_HOST, process.env.DB_USERNAME, process.env.DB_PASSWORD, process.env.DB_DATABASE);
-// database.connect();
+const { Database } = require('@jodu555/mysqlapi');
+const database = Database.createDatabase(process.env.DB_HOST, process.env.DB_USERNAME, process.env.DB_PASSWORD, process.env.DB_DATABASE);
+database.connect();
 
 // require('./utils/database')();
 
@@ -34,7 +35,7 @@ const series: SerieObject[] = JSON.parse(fs.readFileSync(process.env.LOCAL_DB_FI
 
 const wait = (ms: number) => new Promise((rs, _) => setTimeout(rs, ms));
 
-(async () => {
+async function getDuplicateEpisodesWithDubAndSub() {
 	const remoteSeriesResponse = await axios.get<SerieObject[]>(
 		'http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.TEST_AUTH_TOKEN_FROM_PUBLIC_API
 	);
@@ -65,50 +66,39 @@ const wait = (ms: number) => new Promise((rs, _) => setTimeout(rs, ms));
 	console.log(episodesAcc);
 
 	console.log(parseFloat(String((episodesAcc * 300) / 1024)).toFixed(2) + 'GB');
+}
 
+async function findNeverWatchedSeries() {
+	const remoteSeriesResponse = await axios.get<SerieObject[]>(
+		'http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.TEST_AUTH_TOKEN_FROM_PUBLIC_API
+	);
+
+	const serieIDS = new Set(remoteSeriesResponse.data.map((x) => x.ID));
+
+	const watchStringDB: DatabaseWatchStringItem[] = await database.get('watch_strings').get();
+
+	const allWatchedIDs = new Set<string>();
+
+	for (const dbitem of watchStringDB) {
+		const list = parse(dbitem.watch_string);
+		const ids = new Set(list.map((x) => x.ID));
+		ids.forEach((i) => {
+			allWatchedIDs.add(i);
+		});
+	}
+
+	for (const serieID of serieIDS) {
+		if (!allWatchedIDs.has(serieID)) {
+			console.log('Has never been watched', remoteSeriesResponse.data.find((x) => x.ID == serieID).title);
+		}
+	}
+
+	console.log(allWatchedIDs.size, serieIDS.size);
+}
+
+(async () => {
 	return;
-	// console.time('parse')
 	// const list = parse(str);
-	// console.timeEnd('parse')
-	// console.time('map')
-	// const group = {};
-	// list.map(x => x?.ID).forEach(n => {
-	// 	group[n] = !group[n] ? 1 : group[n] + 1
-	// })
-	// console.timeEnd('map')
-
-	// function groupit(group) {
-	// 	const out = new Array(Object.keys(group).length);
-
-	// 	Object.keys(group).forEach(x => {
-	// 		const remoteSerie = remoteSeries.find(s => s.ID == x);
-	// 		if (!remoteSerie)
-	// 			return;
-
-	// 		const totalEntitys = remoteSerie.seasons.flat().length + remoteSerie.movies.length;
-	// 		const percent = parseFloat(String(group[x] / totalEntitys * 100))
-	// 		out.push({
-	// 			ID: x,
-	// 			name: remoteSerie.title,
-	// 			watched: group[x],
-	// 			total: totalEntitys,
-	// 			percent: percent.toFixed(2),
-	// 		});
-	// 	});
-	// 	return out;
-	// }
-
-	// for (let i = 0; i < 25; i++) {
-	// 	console.time('group')
-	// 	groupit(group);
-	// 	console.timeEnd('group')
-	// }
-
-	// title: remoteSeries.find(s => s.ID == n)?.title,
-
-	// const possiblyVeryEnjoyed = out.filter(x => x.percent >= 90);
-
-	// console.log(possiblyVeryEnjoyed);
 
 	// await generateImages([serie]);
 	// console.log('Came');
