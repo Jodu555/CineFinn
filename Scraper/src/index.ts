@@ -177,9 +177,21 @@ async function checkForUpdates() {
 		{
 			ID: 'c8001b23', // Detektiv Conan
 		},
-		// {
-		// 	ID: '9d59f7ba', // Family Guy
-		// },
+		{
+			ID: '9d59f7ba', // Family Guy
+		},
+		{
+			ID: '9a7a77e0', // Rick and Morty
+		},
+		{
+			ID: '49322db6', // Star Wars: The Clone Wars
+		},
+		{
+			ID: 'db9fc61c', // Disney's Fillmore
+		},
+		{
+			ID: '792da61e', // South Park
+		},
 		{
 			ID: 'a9f36e78', // Peter Grill and the Philosopher’s Time
 			lang: 'GerDub', // Has only the first episode in GerSub rest in EngSub

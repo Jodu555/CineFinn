@@ -389,15 +389,9 @@ async function compareForNewReleasesSTO(
 			console.log('The ' + lang + ' is missing in Movie:', remoteEntity.secondName, 'IDX:', indexes.aniworldMovieIDX + 1);
 		}
 		if (!isMovie) {
-			addtoOutputList(
-				localSeries.title,
-				localSeries.references.aniworld as string,
-				indexes.aniworldSeasonIDX + 1,
-				indexes.aniworldEpisodeIDX + 1,
-				lang
-			);
+			addtoOutputList(localSeries.title, localSeries.references.sto as string, indexes.aniworldSeasonIDX + 1, indexes.aniworldEpisodeIDX + 1, lang);
 		} else {
-			addtoOutputListMovie(localSeries.title, localSeries.references.aniworld as string, remoteEntity.secondName, indexes.aniworldMovieIDX + 1, lang);
+			addtoOutputListMovie(localSeries.title, localSeries.references.sto as string, remoteEntity.secondName, indexes.aniworldMovieIDX + 1, lang);
 		}
 	};
 
@@ -417,13 +411,13 @@ async function compareForNewReleasesSTO(
 					const episodeIDX = Number(_episodeIDX);
 					const episode = aniworldSeason[episodeIDX];
 					const language = episode.langs.find((e) => {
-						return ['GerDub', 'GerSub', 'EngSub'].find((x) => x.includes(e));
+						return ['GerDub', 'GerSub', 'EngSub', 'EngDub'].find((x) => x.includes(e));
 					});
 					if (ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
 						continue;
 					}
 					ignoranceSkip = false;
-					addtoOutputList(localSeries.title, localSeries.references.aniworld as string, aniworldSeasonIDX + 1, episodeIDX + 1, language);
+					addtoOutputList(localSeries.title, localSeries.references.sto as string, aniworldSeasonIDX + 1, episodeIDX + 1, language);
 				}
 				if (ignoranceSkip) console.log(' => Skipped due to the ignorance Object', ignoranceObject);
 				continue;
@@ -436,14 +430,14 @@ async function compareForNewReleasesSTO(
 				if (!localEpisode) {
 					console.log('The whole Episode is missing Season:', aniworldSeasonIDX + 1, 'Episode:', aniworldEpisodeIDX + 1);
 					const language = aniworldEpisode.langs.find((e) => {
-						return ['GerDub', 'GerSub', 'EngSub'].find((x) => x.includes(e));
+						return ['GerDub', 'GerSub', 'EngSub', 'EngDub'].find((x) => x.includes(e));
 					});
 					console.log('Started the language Decision Process Aniworld Langs:', aniworldEpisode.langs, 'Resulted in', { language });
 					if (ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
 						console.log('Skipped due to the ignorance Object', ignoranceObject);
 						continue;
 					}
-					addtoOutputList(localSeries.title, localSeries.references.aniworld as string, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, language);
+					addtoOutputList(localSeries.title, localSeries.references.sto as string, aniworldSeasonIDX + 1, aniworldEpisodeIDX + 1, language);
 					continue;
 				}
 				existingLanguageDecision(false, aniworldEpisode, localEpisode, localSeries, { aniworldSeasonIDX, aniworldEpisodeIDX });
@@ -464,19 +458,13 @@ async function compareForNewReleasesSTO(
 
 				if (!localMovie) {
 					console.log('Missing Movie:', aniworldMovie.secondName, 'IDX:', aniworldMovieIDX + 1);
-					const language = aniworldMovie.langs.find((e) => ['GerDub', 'GerSub', 'EngSub'].find((x) => x.includes(e)));
+					const language = aniworldMovie.langs.find((e) => ['GerDub', 'GerSub', 'EngSub', 'EngDub'].find((x) => x.includes(e)));
 					console.log('Started the language Decision Process Aniworld Langs:', aniworldMovie.langs, 'Resulted in', { language });
 					if (ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
 						console.log('Skipped due to the ignorance Object', ignoranceObject);
 						continue;
 					}
-					addtoOutputListMovie(
-						localSeries.title,
-						localSeries.references.aniworld as string,
-						aniworldMovie.secondName,
-						aniworldMovieIDX + 1,
-						language
-					);
+					addtoOutputListMovie(localSeries.title, localSeries.references.sto as string, aniworldMovie.secondName, aniworldMovieIDX + 1, language);
 					continue;
 				} else {
 					// console.log('Got Local Compare Movie', localMovie, aniworldMovie);
