@@ -177,12 +177,12 @@ async function checkForUpdates() {
 		{
 			ID: 'c8001b23', // Detektiv Conan
 		},
-		{
-			ID: '9d59f7ba', // Family Guy
-		},
-		{
-			ID: '9a7a77e0', // Rick and Morty
-		},
+		// {
+		// 	ID: '9d59f7ba', // Family Guy
+		// },
+		// {
+		// 	ID: '9a7a77e0', // Rick and Morty
+		// },
 		{
 			ID: '49322db6', // Star Wars: The Clone Wars
 		},
@@ -193,10 +193,28 @@ async function checkForUpdates() {
 			ID: '792da61e', // South Park
 		},
 		{
+			ID: '84b1fb51', // iCarly
+		},
+		{
 			ID: 'a9f36e78', // Peter Grill and the Philosopher’s Time
 			lang: 'GerDub', // Has only the first episode in GerSub rest in EngSub
 		},
 	];
+
+	// console.log(
+	// 	res.data
+	// 		.map((x) => {
+	// 			return {
+	// 				categorie: x.categorie,
+	// 				ID: x.ID,
+	// 				title: x.title,
+	// 				sto: x.references.sto,
+	// 			};
+	// 		})
+	// 		.filter((x) => x.sto != undefined && x.sto != '')
+	// );
+
+	// return;
 
 	console.time('Compare');
 	const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: false, zoro: false });

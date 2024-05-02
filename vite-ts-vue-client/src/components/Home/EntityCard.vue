@@ -144,6 +144,7 @@ export default defineComponent({
 
 		this.editObject.references.aniworld = this.entity.references?.aniworld || '';
 		this.editObject.references.zoro = this.entity.references?.zoro || '';
+		this.editObject.references.sto = this.entity.references?.sto || '';
 	},
 	computed: {
 		...mapWritableState(useAuthStore, ['settings', 'userInfo']),

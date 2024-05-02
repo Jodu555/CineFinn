@@ -397,7 +397,7 @@ async function compareForNewReleasesSTO(
 
 	for (const aniworldSeries of compare) {
 		const localSeries = series.find((e) => e.ID == aniworldSeries.ID);
-		const ignoranceObject = ignoranceList.find((x) => x.ID == aniworldSeries.ID) || ({} as IgnoranceItem);
+		const ignoranceObject = ignoranceList.find((x) => x.ID == aniworldSeries.ID);
 		console.log('-----=====', localSeries.title, '=====-----   START');
 		for (const _aniworldSeasonIDX in aniworldSeries.seasons) {
 			const aniworldSeasonIDX = Number(_aniworldSeasonIDX);
@@ -413,7 +413,7 @@ async function compareForNewReleasesSTO(
 					const language = episode.langs.find((e) => {
 						return ['GerDub', 'GerSub', 'EngSub', 'EngDub'].find((x) => x.includes(e));
 					});
-					if (ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
+					if (ignoranceObject != undefined && ignoranceObject?.lang !== undefined && language !== ignoranceObject?.lang) {
 						continue;
 					}
 					ignoranceSkip = false;
