@@ -177,9 +177,9 @@ async function checkForUpdates() {
 		{
 			ID: 'c8001b23', // Detektiv Conan
 		},
-		// {
-		// 	ID: '9d59f7ba', // Family Guy
-		// },
+		{
+			ID: '9d59f7ba', // Family Guy
+		},
 		// {
 		// 	ID: '9a7a77e0', // Rick and Morty
 		// },
@@ -217,6 +217,7 @@ async function checkForUpdates() {
 	// return;
 
 	console.time('Compare');
+	// const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: false, sto: true, zoro: false });
 	const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: false, zoro: false });
 	console.timeEnd('Compare');
 

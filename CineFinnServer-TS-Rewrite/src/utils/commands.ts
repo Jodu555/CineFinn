@@ -109,7 +109,7 @@ function registerCommands() {
 					);
 				}
 			} else if (args[1] == 'clear') {
-				console.log('All File Streams are now Cleared end Ended');
+				console.log('All File Streams are now Cleared and Ended');
 				getVideoStreamLog().forEach((old, idx) => {
 					old.stream.destroy();
 					console.log('Destroyed stream for', old.userUUID, (Date.now() - old.time) / 1000, 's', old.path);
