@@ -165,7 +165,7 @@ async function checkForUpdates() {
 	// 			movies: [],
 	// 			infos: {},
 	// 			references: {
-	// 				zoro: '18477',
+	// 				zoro: '18584',
 	// 			},
 	// 		},
 	// 	] as Serie[])
@@ -217,7 +217,7 @@ async function checkForUpdates() {
 	// return;
 
 	console.time('Compare');
-	// const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: false, sto: true, zoro: false });
+	// const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: false, sto: true, zoro: true });
 	const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: false, zoro: false });
 	console.timeEnd('Compare');
 
