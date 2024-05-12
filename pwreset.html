@@ -54,7 +54,17 @@
 				</p>
 			</div>
 
-			<form class="row g-3">
+			<div id="successBox" style="display: none">
+				<div class="alert alert-success alert-dismissible fade show" role="alert">
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					<strong>Update / Reset Request successfully transmitted!</strong> Your Password Request got successfully transmitted and can be reviewed
+					<br />
+					Please remember that such a request can take up to 24hrs! Your Request got the Unique ID: '<small id="reqID">---</small>' that can be
+					important for questions on the status
+				</div>
+			</div>
+
+			<form id="formBox" class="row g-3 mt-5">
 				<div class="col-md-6">
 					<label for="inputUsername" class="form-label">Username</label>
 					<input type="email" class="form-control" id="inputUsername" />
@@ -64,7 +74,7 @@
 					<input type="password" class="form-control" id="inputPassword" />
 				</div>
 				<div class="col-12">
-					<button type="button" class="btn btn-info" onclick="updatePassword()">Ask for Update</button>
+					<button type="submit" class="btn btn-info" onclick="updatePassword()">Ask for Update</button>
 				</div>
 			</form>
 		</main>
@@ -79,6 +89,9 @@
 			integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
 			crossorigin="anonymous"></script>
 		<script>
+			const successBox = document.querySelector('#successBox');
+			const formBox = document.querySelector('#formBox');
+			const reqID = document.querySelector('#reqID');
 			async function updatePassword() {
 				const username = document.querySelector('#inputUsername').value;
 				const password = document.querySelector('#inputPassword').value;
@@ -97,6 +110,16 @@
 						message,
 					}),
 				});
+
+				if (!response.ok) {
+					alert('Error while trying to transmit Request');
+				}
+
+				const json = await response.json();
+
+				successBox.style.display = '';
+				formBox.style.display = 'none';
+				reqID.textContent = json.id;
 			}
 		</script>
 	</body>
