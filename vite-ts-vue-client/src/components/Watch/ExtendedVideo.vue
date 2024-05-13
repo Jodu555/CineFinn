@@ -105,7 +105,7 @@
 					<button v-if="!inSyncRoom" title="Share Video" data-bs-toggle="modal" data-bs-target="#shareModal">
 						<font-awesome-icon icon="fa-solid fa-share" size="lg" />
 					</button>
-					<button title="Previous Episode" @click="switchTo(-1)">
+					<button v-if="screenWidth >= 480" title="Previous Episode" @click="switchTo(-1)">
 						<svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path
 								fill-rule="evenodd"
