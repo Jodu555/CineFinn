@@ -117,5 +117,9 @@ export const useWatchStore = defineStore('watch', {
 			console.log(this);
 			await useAxios().get(`/watch/mark/${this.currentSeries.ID}/season/${this.currentSeason}/${marking}`);
 		},
+		async markMovie(marking: boolean) {
+			console.log(this);
+			await useAxios().get(`/watch/mark/${this.currentSeries.ID}/movie/${this.currentMovie}/${marking}`);
+		},
 	},
 });
