@@ -32,7 +32,7 @@ const router = createRouter({
 			path: '/watch',
 			name: 'Watch',
 			component: function () {
-				return import(/* webpackChunkName: "watch" */ '@/views/Watch.vue');
+				return import(/* webpackChunkName: "watch" */ '@/views/WatchNew.vue');
 			},
 			meta: { requiresLogin: true },
 		},

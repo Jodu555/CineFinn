@@ -174,7 +174,7 @@ export default {
 			}
 		},
 		switchTo(vel: number) {
-			deepswitchTo(vel, this);
+			deepswitchTo(vel, this.handleVideoChange);
 		},
 		changeMovie(ID: number) {
 			if (this.currentMovie == ID) return this.handleVideoChange();

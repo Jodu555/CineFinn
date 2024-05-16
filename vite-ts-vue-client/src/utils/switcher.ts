@@ -1,4 +1,8 @@
-function multiDimSwitcher(dimArr: [[]], arrptr: number, idxptr: number, velocity: number) {
+import { useWatchStore } from '@/stores/watch.store';
+import type { Langs, SerieEpisode, SerieMovie } from '@/types';
+import { useSwal } from '.';
+
+function multiDimSwitcher(dimArr: any[][], arrptr: number, idxptr: number, velocity: number) {
 	const debug = false;
 	idxptr += velocity;
 
@@ -42,7 +46,7 @@ function multiDimSwitcher(dimArr: [[]], arrptr: number, idxptr: number, velocity
 	};
 }
 
-function singleDimSwitcher(arr: [], curr: number, velocity: number) {
+function singleDimSwitcher(arr: any[], curr: number, velocity: number) {
 	curr = curr + velocity;
 
 	if (curr >= arr.length) curr = 0;
@@ -51,12 +55,23 @@ function singleDimSwitcher(arr: [], curr: number, velocity: number) {
 	return { value: arr[curr], idxptr: curr };
 }
 
-function deepswitchTo(vel: number, vueInstance: any) {
-	if (vueInstance.currentSeason == -1) {
-		if (vueInstance.currentMovie == -1) {
+function deepswitchTo(
+	vel: number,
+	handleVideoChange: (
+		season?: number,
+		episode?: number,
+		movie?: number,
+		langchange?: boolean,
+		lang?: Langs | undefined,
+		callback?: ((video: HTMLVideoElement) => void) | undefined
+	) => void
+) {
+	const watchStore = useWatchStore();
+	if (watchStore.currentSeason == -1) {
+		if (watchStore.currentMovie == -1) {
 			console.log('Error');
 			const title = `No entry point for '${vel == 1 ? 'Next' : 'Previous'}'`;
-			vueInstance.$swal({
+			useSwal({
 				toast: true,
 				position: 'top-end',
 				showConfirmButton: false,
@@ -68,23 +83,25 @@ function deepswitchTo(vel: number, vueInstance: any) {
 			return;
 		}
 		//Switch in Movies
-		const { idxptr, value } = singleDimSwitcher(vueInstance.currentSeries.movies, vueInstance.currentMovie - 1, vel);
+		const { idxptr, value } = singleDimSwitcher(watchStore.currentSeries.movies, watchStore.currentMovie - 1, vel);
 		// console.log(idxptr, value);
-		vueInstance.handleVideoChange(-1, -1, idxptr + 1);
+		handleVideoChange(-1, -1, idxptr + 1);
 		return;
 	} else {
 		//Switch in Episodes
-		const seasonIdx = vueInstance.currentSeries.seasons.findIndex((x: any) => x[0].season == vueInstance.entityObject.season);
-		const episodeIdx = vueInstance.currentSeries.seasons[seasonIdx].findIndex((x: any) => x.episode == vueInstance.entityObject.episode);
+		const seasonIdx = watchStore.currentSeries.seasons.findIndex((x: any) => x[0].season == (watchStore.entityObject as SerieEpisode)?.season);
+		const episodeIdx = watchStore.currentSeries.seasons[seasonIdx].findIndex(
+			(x: any) => x.episode == (watchStore.entityObject as SerieEpisode)?.episode
+		);
 
-		// console.log({ dimArr: vueInstance.currentSeries.seasons, seasonIdx, episodeIdx });
+		// console.log({ dimArr: watchStore.currentSeries.seasons, seasonIdx, episodeIdx });
 
-		const { arrptr, idxptr, value } = multiDimSwitcher(vueInstance.currentSeries.seasons, seasonIdx, episodeIdx, vel);
+		const { arrptr, idxptr, value } = multiDimSwitcher(watchStore.currentSeries.seasons, seasonIdx, episodeIdx, vel);
 		console.log(arrptr, idxptr, value);
 
-		const entity = vueInstance.currentSeries.seasons[arrptr][idxptr];
+		const entity = watchStore.currentSeries.seasons[arrptr][idxptr];
 
-		vueInstance.handleVideoChange(entity.season, entity.episode);
+		handleVideoChange(entity.season, entity.episode);
 		return;
 	}
 }
