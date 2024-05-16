@@ -51,7 +51,7 @@ export default {
 		...mapWritableState(useWatchStore, ['currentSeason', 'currentMovie']),
 	},
 	methods: {
-		...mapActions(useWatchStore, ['markSeason']),
+		...mapActions(useWatchStore, ['markSeason', 'markMovie']),
 	},
 };
 </script>

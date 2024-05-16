@@ -97,7 +97,43 @@ const updateSegment = async (UUID: string, searchCriteria: searchObject, segment
 	return segmentList;
 };
 
-const markSeason = async (UUID: string, seriesID: string, seasonID: number, bool: string | boolean) => {
+async function markMovie(UUID: string, seriesID: string, movieID: number, bool: string | boolean) {
+	if (bool == 'true') bool = true;
+	if (bool == 'false') bool = false;
+	console.log('Marked Series', seriesID, 'Movie', movieID, 'as', bool, 'watched', 'for', UUID);
+
+	const watchString = await load(UUID);
+	let segmentList = parse(watchString);
+	if (bool) {
+		//Mark as watched
+		let updated = false;
+		segmentList = segmentList.map((segment) => {
+			if (segment.ID == seriesID && segment.movie == movieID) {
+				segment.time = 301;
+				segment.calc();
+				updated = true;
+			}
+			return segment;
+		});
+		if (!updated) {
+			segmentList.push(new Segment(seriesID, -1, -1, movieID, 301));
+		}
+	} else {
+		//Mark as unwatched
+		segmentList = segmentList.map((segment) => {
+			if (segment.ID == seriesID && segment.movie == movieID) {
+				segment.time = 0;
+				segment.calc();
+			}
+			return segment;
+		});
+	}
+
+	await save(UUID, generateStr(segmentList));
+	return segmentList;
+}
+
+async function markSeason(UUID: string, seriesID: string, seasonID: number, bool: string | boolean) {
 	if (bool == 'true') bool = true;
 	if (bool == 'false') bool = false;
 	console.log('Marked Series', seriesID, 'Season', seasonID, 'as', bool, 'watched', 'for', UUID);
@@ -136,6 +172,6 @@ const markSeason = async (UUID: string, seriesID: string, seasonID: number, bool
 
 	await save(UUID, generateStr(segmentList));
 	return segmentList;
-};
+}
 
-export { Segment, generateStr, parse, load, save, updateSegment, markSeason, searchObject };
+export { Segment, generateStr, parse, load, save, updateSegment, markMovie, markSeason, searchObject };
