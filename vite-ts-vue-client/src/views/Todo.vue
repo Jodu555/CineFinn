@@ -79,10 +79,10 @@
 								<template v-if="auth.userInfo.role > 2">
 									Source:
 									<br />
-									<a :href="element.scraped?.url">{{ element.scraped?.url }}</a>
+									<a target="_blank" :href="element.scraped?.url">{{ element.scraped?.url }}</a>
 									<template v-if="element.scrapedZoro !== undefined && element.scrapedZoro !== true">
 										<br />
-										<a :href="element.scrapedZoro.episodes[0]?.url">{{ element.scrapedZoro.episodes[0]?.url }}</a>
+										<a target="_blank" :href="element.scrapedZoro.episodes[0]?.url">{{ element.scrapedZoro.episodes[0]?.url }}</a>
 									</template>
 								</template>
 								<br />

@@ -159,13 +159,13 @@ async function checkForUpdates() {
 	// 	...([
 	// 		{
 	// 			ID: 'xxxxxxxxxxx',
-	// 			title: 'Sugar Apple Fairy Tale',
+	// 			title: 'TenPuru - No One Can Live on Loneliness',
 	// 			categorie: 'Aniworld',
 	// 			seasons: [],
 	// 			movies: [],
 	// 			infos: {},
 	// 			references: {
-	// 				zoro: '18584',
+	// 				zoro: '18473',
 	// 			},
 	// 		},
 	// 	] as Serie[])
@@ -201,23 +201,8 @@ async function checkForUpdates() {
 		},
 	];
 
-	// console.log(
-	// 	res.data
-	// 		.map((x) => {
-	// 			return {
-	// 				categorie: x.categorie,
-	// 				ID: x.ID,
-	// 				title: x.title,
-	// 				sto: x.references.sto,
-	// 			};
-	// 		})
-	// 		.filter((x) => x.sto != undefined && x.sto != '')
-	// );
-
-	// return;
-
 	console.time('Compare');
-	// const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: false, sto: true, zoro: true });
+	// const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: false, sto: false, zoro: true });
 	const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: false, zoro: false });
 	console.timeEnd('Compare');
 
