@@ -56,7 +56,7 @@
 								<font-awesome-icon icon="fa-solid fa-up-long" size="l" />
 							</button>
 							<button
-								v-if="!element.edited && element.order <= state.list.length / 1.2 && auth.userInfo.role > 2"
+								v-if="!element.edited && element.order <= state.list.length / 1.2"
 								title="Bring to Bottom"
 								@click="moveToDoToBottom(element.ID)"
 								type="button"
