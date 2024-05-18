@@ -9,6 +9,7 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 
 import {
 	faUpLong,
+	faDownLong,
 	faInfo,
 	faForwardStep,
 	faBackwardStep,
@@ -45,6 +46,7 @@ app.use(createPinia());
 app.use(router);
 
 library.add(
+	faDownLong,
 	faUpLong,
 	faInfo,
 	faForwardStep,

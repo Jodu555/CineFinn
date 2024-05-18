@@ -47,6 +47,22 @@
 							</button>
 						</div>
 						<div>
+							<button
+								v-if="!element.edited && element.order > 6 && auth.userInfo.role > 2"
+								title="Bring to top"
+								@click="moveToDoToTop(element.ID)"
+								type="button"
+								class="btn btn-outline-info me-2">
+								<font-awesome-icon icon="fa-solid fa-up-long" size="l" />
+							</button>
+							<button
+								v-if="!element.edited && element.order <= state.list.length / 1.2 && auth.userInfo.role > 2"
+								title="Bring to Bottom"
+								@click="moveToDoToBottom(element.ID)"
+								type="button"
+								class="btn btn-outline-warning">
+								<font-awesome-icon icon="fa-solid fa-down-long" size="l" />
+							</button>
 							<button v-if="element.edited" type="button" @click="element.edited = false" class="btn btn-close"></button>
 						</div>
 					</div>
@@ -224,7 +240,7 @@
 			</template>
 		</draggable>
 
-		<button v-if="state.list.length >= 8" class="btn btn-outline-primary mt-5 mb-5" @click="addEmptyItem">Add Item</button>
+		<button v-if="state.list.length >= 7" class="btn btn-outline-primary mt-5 mb-5" @click="addEmptyItem">Add Item</button>
 
 		<div v-if="auth.settings.developerMode.value" class="mt-5">
 			<pre>{{ state.list }}</pre>
@@ -362,6 +378,20 @@ const languageDevision = (element: TodoItem) => {
 	}
 
 	return out;
+};
+
+const moveToDoToTop = (ID: string) => {
+	const index = state.list.findIndex((x) => x.ID == ID);
+	const item = state.list.splice(index, 1)[0];
+	state.list.unshift(item);
+	change();
+};
+
+const moveToDoToBottom = (ID: string) => {
+	const index = state.list.findIndex((x) => x.ID == ID);
+	const item = state.list.splice(index, 1)[0];
+	state.list.push(item);
+	change();
 };
 
 const change = (event?: any) => {
