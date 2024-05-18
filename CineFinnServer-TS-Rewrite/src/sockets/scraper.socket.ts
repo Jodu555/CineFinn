@@ -19,6 +19,8 @@ const initialize = async (socket: ExtendedSocket) => {
 	console.log('Socket Connection:', auth.type.toUpperCase());
 	$socket = socket;
 
+	$socket.setMaxListeners(555);
+
 	socket.on('disconnect', () => {
 		console.log('Socket DisConnection:', auth.type.toUpperCase());
 		if (waitingForResponse.length > 0) {

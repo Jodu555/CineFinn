@@ -159,13 +159,13 @@ async function checkForUpdates() {
 	// 	...([
 	// 		{
 	// 			ID: 'xxxxxxxxxxx',
-	// 			title: 'TenPuru - No One Can Live on Loneliness',
+	// 			title: 'Kakuriyo - Bed and Breakfast for Spirits',
 	// 			categorie: 'Aniworld',
 	// 			seasons: [],
 	// 			movies: [],
 	// 			infos: {},
 	// 			references: {
-	// 				zoro: '18473',
+	// 				zoro: '1520',
 	// 			},
 	// 		},
 	// 	] as Serie[])
@@ -209,10 +209,6 @@ async function checkForUpdates() {
 	if (output.aniworld.length == 0) return;
 
 	await kickOffAniDl(output.aniworld);
-
-	// const data: ExtendedEpisodeDownload[] = JSON.parse(fs.readFileSync('dlListAniworld.json', 'utf-8'));
-	// const data: ExtendedEpisodeDownload[] = JSON.parse(fs.readFileSync('dlListSTO.json', 'utf-8'));
-	// await kickOffAniDl(data);
 
 	await recrawlArchive();
 	await generateImages();
