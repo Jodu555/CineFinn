@@ -238,7 +238,7 @@ export default {
 			await this.loadRoomInfo();
 		},
 		switchTo(vel: number) {
-			deepswitchTo(vel, this);
+			deepswitchTo(vel, this.handleVideoChange);
 		},
 		sendVideoTimeUpdate(time: number, force = false) {
 			console.log('sendVideoTimeUpdate()', time, force);

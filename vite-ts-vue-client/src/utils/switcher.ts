@@ -57,14 +57,16 @@ function singleDimSwitcher(arr: any[], curr: number, velocity: number) {
 
 function deepswitchTo(
 	vel: number,
-	handleVideoChange: (
-		season?: number,
-		episode?: number,
-		movie?: number,
-		langchange?: boolean,
-		lang?: Langs | undefined,
-		callback?: ((video: HTMLVideoElement) => void) | undefined
-	) => void
+	handleVideoChange:
+		| ((
+				season?: number,
+				episode?: number,
+				movie?: number,
+				langchange?: boolean,
+				lang?: Langs | undefined,
+				callback?: ((video: HTMLVideoElement) => void) | undefined
+		  ) => void)
+		| ((season?: number, episode?: number, movie?: number, langchange?: boolean, lang?: Langs | undefined, silent?: boolean) => void)
 ) {
 	const watchStore = useWatchStore();
 	if (watchStore.currentSeason == -1) {
