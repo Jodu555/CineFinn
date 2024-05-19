@@ -89,7 +89,7 @@ const router = createRouter({
 			path: '/rmvc',
 			name: 'RemoteVidoeControl',
 			component: function () {
-				return import(/* webpackChunkName: "rmvc" */ '@/views/Rmvc.vue');
+				return import(/* webpackChunkName: "rmvc" */ '@/views/RmvcNew.vue');
 			},
 			meta: { requiresLogin: false },
 		},
