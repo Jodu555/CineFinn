@@ -5,7 +5,7 @@
 				><font-awesome-icon icon="fa-solid fa-up-long" size="xl"
 			/></a>
 		</div>
-		<div v-if="loading" class="d-flex justify-content-center">
+		<div v-if="useIndexStore().loading" class="d-flex justify-content-center">
 			<div class="spinner-border" role="status">
 				<span class="visually-hidden">Loading...</span>
 			</div>
@@ -34,72 +34,64 @@
 		</div>
 	</div>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 import EntityCard from '@/components/Home/EntityCard.vue';
 import { useIndexStore } from '@/stores/index.store';
 import type { Serie } from '@/types';
-import { mapWritableState } from 'pinia';
-export default {
-	components: { EntityCard },
-	data() {
-		return {
-			backToTop: false,
-		};
-	},
-	created() {
-		window.addEventListener('scroll', this.handleScroll, { passive: true });
-	},
-	beforeUnmount() {
-		window.removeEventListener('scroll', this.handleScroll);
-	},
-	methods: {
-		handleScroll(e: Event) {
-			const height = document.documentElement.offsetHeight;
+import { ref, onBeforeUnmount, computed } from 'vue';
+const backToTop = ref(false);
 
-			const mapping = this.map(
-				document.documentElement.scrollTop,
-				[0, height],
-				[0, window.innerHeight - (document.querySelector('.footer')?.getBoundingClientRect().height || 0) - 25]
-			);
+window.addEventListener('scroll', handleScroll, { passive: true });
 
-			// console.log('SCROLL', height, document.documentElement.scrollTop);
-			// console.log('MAPPING', Math.ceil(mapping));
+onBeforeUnmount(() => {
+	window.removeEventListener('scroll', handleScroll);
+});
 
-			if (document.documentElement.scrollTop > 100) {
-				this.backToTop = true;
-				const backToTopElem = document.querySelector<HTMLDivElement>('#backToTop');
-				if (backToTopElem) backToTopElem.style.top = `${Math.ceil(mapping)}px`;
-			} else {
-				this.backToTop = false;
-			}
-		},
-		map(value: number, oldRange: number[], newRange: number[]) {
-			// console.log(value, oldRange, newRange);
-			var newValue = ((value - oldRange[0]) * (newRange[1] - newRange[0])) / (oldRange[1] - oldRange[0]) + newRange[0];
-			return Math.min(Math.max(newValue, newRange[0]), newRange[1]);
-		},
-		scrollToTop() {
-			window.scrollTo({ top: 0, behavior: 'smooth' });
-		},
-	},
-	computed: {
-		...mapWritableState(useIndexStore, ['series', 'loading']),
-		categories() {
-			const categories: Record<string, { title: string; entitys: Serie[] }> = {};
-			this.series.forEach((i) => {
-				if (categories[i.categorie] == undefined) {
-					categories[i.categorie] = {
-						title: i.categorie,
-						entitys: [i],
-					};
-				} else {
-					categories[i.categorie].entitys.push(i);
-				}
-			});
-			return categories;
-		},
-	},
-};
+function handleScroll(e: Event) {
+	const height = document.documentElement.offsetHeight;
+
+	const mapping = map(
+		document.documentElement.scrollTop,
+		[0, height],
+		[0, window.innerHeight - (document.querySelector('.footer')?.getBoundingClientRect().height || 0) - 25]
+	);
+
+	// console.log('SCROLL', height, document.documentElement.scrollTop);
+	// console.log('MAPPING', Math.ceil(mapping));
+
+	if (document.documentElement.scrollTop > 100) {
+		backToTop.value = true;
+		const backToTopElem = document.querySelector<HTMLDivElement>('#backToTop');
+		if (backToTopElem) backToTopElem.style.top = `${Math.ceil(mapping)}px`;
+	} else {
+		backToTop.value = false;
+	}
+}
+
+function map(value: number, oldRange: number[], newRange: number[]) {
+	// console.log(value, oldRange, newRange);
+	const newValue = ((value - oldRange[0]) * (newRange[1] - newRange[0])) / (oldRange[1] - oldRange[0]) + newRange[0];
+	return Math.min(Math.max(newValue, newRange[0]), newRange[1]);
+}
+
+function scrollToTop() {
+	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+const categories = computed(() => {
+	const categories: Record<string, { title: string; entitys: Serie[] }> = {};
+	useIndexStore().series.forEach((i) => {
+		if (categories[i.categorie] == undefined) {
+			categories[i.categorie] = {
+				title: i.categorie,
+				entitys: [i],
+			};
+		} else {
+			categories[i.categorie].entitys.push(i);
+		}
+	});
+	return categories;
+});
 </script>
 <style lang="css">
 .back-to-top {
