@@ -1,14 +1,14 @@
 <template>
 	<div class="innerdoc">
-		<div v-if="currentSeries == undefined">
+		<div v-if="watchStore.currentSeries == undefined">
 			<h1 class="text-center">No Series with that ID</h1>
 		</div>
-		<div v-if="homeLoading || loading" class="d-flex justify-content-center">
+		<div v-if="indexStore.loading || watchStore.loading" class="d-flex justify-content-center">
 			<div class="spinner-border" role="status">
 				<span class="visually-hidden">Loading...</span>
 			</div>
 		</div>
-		<div v-auto-animate class="container" v-if="currentSeries != undefined && currentSeries.ID != '-1'">
+		<div v-auto-animate class="container" v-if="watchStore.currentSeries != undefined && watchStore.currentSeries.ID != '-1'">
 			<div class="float-end btn-group">
 				<button class="btn btn-outline-info" title="Series Information" data-bs-toggle="modal" data-bs-target="#seriesInformationModal" disabled>
 					<font-awesome-icon icon="fa-solid fa-info" />
@@ -23,63 +23,67 @@
 				{{ displayTitle }}
 			</h1>
 
-			<div class="text-center" v-if="currentSeries.movies.length == 0 && currentSeries.seasons.length == 0">
+			<div class="text-center" v-if="watchStore.currentSeries.movies.length == 0 && watchStore.currentSeries.seasons.length == 0">
 				<h2 class="text-danger">It Seems there is currently no data for this Series</h2>
 				<p class="text-danger mb-0">It either got removed, or is on a node which is currently un reachable, or is currently being transcoded</p>
 				<p class="text-danger">Please check back later and if this issue persists please contact the Administrator</p>
 				<router-link type="button" to="/" class="mt-3 mb-4 btn btn-outline-primary btn-lg">Go Watch something else</router-link>
 			</div>
 
-			<pre v-if="settings.developerMode.value">
+			<pre v-if="authStore.settings.developerMode.value">
 				Watch Information:
-				{{ JSON.stringify(watchList.find((segment) => segment.season == currentSeason && segment.episode == currentEpisode)) }}
+				{{
+					JSON.stringify(
+						watchStore.watchList.find((segment) => segment.season == watchStore.currentSeason && segment.episode == watchStore.currentEpisode)
+					)
+				}}
 			</pre
 			>
 			<div v-auto-animate v-if="showLatestWatchButton" class="text-center mb-2">
 				<button @click="skipToLatestTime" class="btn btn-outline-info">Jump to Latest watch position!</button>
 			</div>
 			<MarkSeasonDropdown />
-			<pre v-if="settings.developerMode.value">
-				currentMovie: {{ currentMovie }}
-				currentSeason: {{ currentSeason }}
-				currentEpisode: {{ currentEpisode }}
-				currentLanguage: {{ currentLanguage }}
-				videoSrc: {{ videoSrc }}
-				entityObject: {{ entityObject }}
+			<pre v-if="authStore.settings.developerMode.value">
+				currentMovie: {{ watchStore.currentMovie }}
+				currentSeason: {{ watchStore.currentSeason }}
+				currentEpisode: {{ watchStore.currentEpisode }}
+				currentLanguage: {{ watchStore.currentLanguage }}
+				videoSrc: {{ watchStore.videoSrc }}
+				entityObject: {{ watchStore.entityObject }}
 			</pre
 			>
 
-			<div v-if="currentSeries.movies.length >= 1 && currentSeries.seasons.length == 0 && currentMovie == -1">
+			<div v-if="watchStore.currentSeries.movies.length >= 1 && watchStore.currentSeries.seasons.length == 0 && watchStore.currentMovie == -1">
 				<EntityListViewMovies :changeMovie="changeMovie" />
 			</div>
 
 			<div v-else>
 				<!-- Movies -->
 				<EntityListView
-					v-if="currentSeries.movies.length >= 1"
+					v-if="watchStore.currentSeries.movies.length >= 1"
 					title="Movies:"
-					:array="currentSeries.movies"
-					:current="currentMovie"
+					:array="watchStore.currentSeries.movies"
+					:current="watchStore.currentMovie"
 					:changeFN="changeMovie"
-					:watchList="watchList" />
+					:watchList="watchStore.watchList" />
 				<!-- Seasons -->
 				<EntityListView
 					title="Seasons:"
-					v-if="currentSeries.seasons.length >= 1"
-					:array="currentSeries.seasons"
-					:current="currentSeason"
+					v-if="watchStore.currentSeries.seasons.length >= 1"
+					:array="watchStore.currentSeries.seasons"
+					:current="watchStore.currentSeason"
 					:changeFN="changeSeason"
 					:season="true"
-					:watchList="watchList" />
+					:watchList="watchStore.watchList" />
 				<!-- Episodes -->
 				<EntityListView
-					v-if="currentSeason != -1"
+					v-if="watchStore.currentSeason != -1"
 					title="Episodes:"
-					:array="currentSeries.seasons.find((x) => x[0].season == ((entityObject as SerieEpisode)?.season || -1))"
-					:current="currentEpisode"
-					:currentSeason="currentSeason"
+					:array="watchStore.currentSeries.seasons.find((x) => x[0].season == ((watchStore.entityObject as SerieEpisode)?.season || -1))"
+					:current="watchStore.currentEpisode"
+					:currentSeason="watchStore.currentSeason"
 					:changeFN="changeEpisode"
-					:watchList="watchList" />
+					:watchList="watchStore.watchList" />
 			</div>
 
 			<!-- Previous & Title & Languages & Next -->
@@ -88,8 +92,7 @@
 		<ExtendedVideo v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="sendVideoTimeUpdate" />
 	</div>
 </template>
-<script lang="ts">
-import { mapWritableState, mapActions, mapState } from 'pinia';
+<script setup lang="ts">
 import type { Langs, SerieEpisode } from '@/types/index';
 import { useAuthStore } from '@/stores/auth.store';
 import { useIndexStore } from '@/stores/index.store';
@@ -101,241 +104,231 @@ import ControlInformationModal from '@/components/Watch/ControlInformationModal.
 import EntityActionsInformation from '@/components/Watch/EntityActionsInformation.vue';
 import MarkSeasonDropdown from '@/components/Watch/MarkSeasonDropdown.vue';
 import EntityListViewMovies from '@/components/Watch/EntityListViewMovies.vue';
+import { ref, computed, onMounted, onBeforeUnmount, onUnmounted } from 'vue';
+import { useSocket } from '@/utils/socket';
+import { useRoute } from 'vue-router';
 
-export default {
-	components: { EntityListView, ExtendedVideo, ControlInformationModal, EntityActionsInformation, MarkSeasonDropdown, EntityListViewMovies },
-	data() {
-		return {
-			cleanupFN: null,
-			buttonTimer: null as unknown as NodeJS.Timeout,
-			forceHideButton: false,
-		};
-	},
-	computed: {
-		...mapWritableState(useIndexStore, { homeLoading: 'loading' }),
-		...mapWritableState(useWatchStore, [
-			'loading',
-			'currentSeries',
-			'currentMovie',
-			'currentSeason',
-			'currentEpisode',
-			'currentLanguage',
-			'watchList',
-		]),
-		...mapState(useWatchStore, ['entityObject', 'videoSrc']),
-		...mapWritableState(useAuthStore, ['authToken', 'settings']),
-		// ...mapGetters(useWatchStore, ['videoSrc', 'entityObject']),
-		showLatestWatchButton() {
-			if (this.forceHideButton) return false;
-			const info = Boolean(this.currentMovie !== -1 || this.currentSeason !== -1 || this.currentEpisode !== -1);
-			if (info) {
-				const segment = this.watchList.find(
-					(segment) => segment.ID == this.$route.query.id && segment.season == this.currentSeason && segment.episode == this.currentEpisode
-				);
-				if (segment == undefined) return false;
-				if (segment.time > 100) return true;
+const cleanupFN = ref(null);
+const buttonTimer = ref<NodeJS.Timeout>(null as unknown as NodeJS.Timeout);
+const forceHideButton = ref(false);
+
+const indexStore = useIndexStore();
+const authStore = useAuthStore();
+const watchStore = useWatchStore();
+
+const route = useRoute();
+
+onMounted(async () => {
+	useSocket().on('watchListChange', ({ watchList, seriesID }) => {
+		console.log('GOT watchListChange');
+		if (seriesID == undefined) watchStore.watchList = watchList.filter((e) => e.ID == route.query.id);
+		if (seriesID == route.query.id) watchStore.watchList = watchList.filter((e) => e.ID == route.query.id);
+	});
+
+	try {
+		useSocket().emit('getWatchList', { ID: route.query.id });
+		const seriesID = route.query.id?.toString();
+		if (seriesID == undefined) return;
+		await watchStore.loadSeriesInfo(seriesID);
+		if (watchStore.currentSeries == undefined || watchStore.currentSeries.ID == '-1') return;
+		const localStorageString = localStorage.getItem('data') || '';
+		const data = localStorageString.trim() != '' ? JSON.parse(localStorageString) : null;
+
+		watchStore.loadWatchList(seriesID);
+		const queryIdx = route.query?.idx?.toString();
+		if (queryIdx) {
+			const language: Langs = (route.query?.lang?.toString() as Langs) || 'GerDub';
+
+			const queryTimeString = route.query?.time?.toString();
+			const queryTime = queryTimeString ? parseInt(queryTimeString) : -55;
+
+			if (queryIdx.includes('x')) {
+				//SeasonxEpisode
+				const [se, ep] = queryIdx.split('x').map((x) => Number(x));
+
+				handleVideoChange(se, ep, -1, language != undefined, language, (video) => {
+					if (queryTime != -55) video.currentTime = queryTime;
+				});
 			} else {
-				return false;
+				//Movie
+				const movieID = parseInt(queryIdx);
+				handleVideoChange(-1, -1, movieID, language != undefined, language, (video) => {
+					if (queryTime != -55) video.currentTime = queryTime;
+				});
 			}
-		},
-		showVideo() {
-			return (
-				this.currentSeries != undefined &&
-				this.currentSeries.ID != '-1' &&
-				(this.currentMovie !== -1 || this.currentSeason !== -1 || this.currentEpisode !== -1)
-			);
-		},
-		displayTitle() {
-			let str = `${this.currentSeries.infos?.title || this.currentSeries.infos?.infos || this.currentSeries.title} - `;
+		} else if (data && data.ID == seriesID) {
+			handleVideoChange(data.season || -1, data.episode || -1, data.movie || -1, undefined, undefined, undefined);
+		} else {
+			localStorage.removeItem('data');
 
-			if (this.currentSeries.movies.length >= 1) {
-				str += `${this.currentSeries.movies.length} ` + (this.currentSeries.movies.length > 1 ? 'Movies' : 'Movie');
-			}
-
-			if (this.currentSeries.movies.length >= 1 && this.currentSeries.seasons.length >= 1) {
-				str += ' | ';
-			}
-
-			if (this.currentSeries.seasons.length >= 1) {
-				str += `${this.currentSeries.seasons.length} ` + (this.currentSeries.seasons.length > 1 ? 'Seasons' : 'Season');
-			}
-
-			return str;
-		},
-	},
-	methods: {
-		...mapActions(useWatchStore, ['loadSeriesInfo', 'loadWatchList', 'markSeason']),
-		skipToLatestTime() {
-			const segment = this.watchList.find((segment) => segment.season == this.currentSeason && segment.episode == this.currentEpisode);
-			const video = document.querySelector('video');
-			if (video && segment) {
-				video.currentTime = segment.time;
-				this.forceHideButton = true;
-			}
-		},
-		switchTo(vel: number) {
-			deepswitchTo(vel, this.handleVideoChange);
-		},
-		changeMovie(ID: number) {
-			if (this.currentMovie == ID) return this.handleVideoChange();
-			this.handleVideoChange(-1, -1, ID);
-		},
-		changeEpisode(ID: number) {
-			this.handleVideoChange(this.currentSeason, ID);
-		},
-		changeSeason(ID: number) {
-			console.log(ID, 'CAME');
-			console.log(this.currentSeason);
-
-			if (this.currentSeason == ID) return this.handleVideoChange();
-			return this.handleVideoChange(ID, 1);
-		},
-		changeLanguage(lang: Langs) {
-			this.handleVideoChange(this.currentSeason, this.currentEpisode, this.currentMovie, true, lang, undefined);
-		},
-		handleVideoChange(
-			season = -1,
-			episode = -1,
-			movie = -1,
-			langchange = false,
-			lang?: Langs | undefined,
-			callback?: ((video: HTMLVideoElement) => void) | undefined
-		) {
-			if (langchange && this.currentLanguage == lang) return;
-			const video = document.querySelector('video');
-
-			//TODO: Maybe add here default language from user prefered settings
-			let defaultLanguage = this.currentLanguage || ('GerDub' as Langs);
-
-			let wasPaused = false;
-			let prevTime = 0;
-			if (video) {
-				wasPaused = video.paused;
-				prevTime = video.currentTime;
-
-				this.sendVideoTimeUpdate(video.currentTime, true);
-
-				video.pause();
-			}
-			console.log('GOT handleVideoChange()', { season, episode, movie, langchange, lang }, { wasPaused, prevTime, defaultLanguage });
-
-			//Handle the skip to latest watch postion button
-			this.buttonTimer != null && clearTimeout(this.buttonTimer);
-			this.forceHideButton = false;
-			this.buttonTimer = setTimeout(() => {
-				this.forceHideButton = true;
-			}, 10000);
-
-			//Save The Current infos in localstorage
-			localStorage.setItem(
-				'data',
-				JSON.stringify({
-					ID: this.$route.query.id,
-					season,
-					episode,
-					movie,
-				})
-			);
-
-			setTimeout(() => {
-				this.currentSeason = season;
-				this.currentEpisode = episode;
-				this.currentMovie = movie;
-
-				//Ensure that the selected language exists on the entity
-				if (this.entityObject && !this.entityObject.langs.includes(defaultLanguage) && !langchange) {
-					console.log('The Requestes Language does not exist on the Entity');
-					defaultLanguage = this.entityObject.langs[0] as Langs;
-				}
-
-				this.currentLanguage = langchange ? (lang as Langs) : defaultLanguage;
-				setTimeout(() => {
-					if (!video) return;
-					video.load();
-					langchange ? (video.currentTime = prevTime) : (video.currentTime = 0);
-					!wasPaused && video.play();
-					if (callback && typeof callback == 'function') {
-						callback(video);
-					}
-				}, 100);
-			}, 200);
-		},
-		sendVideoTimeUpdate(time: number, force = false) {
-			console.log('sendVideoTimeUpdate()', time, force);
-			this.$socket.emit('timeUpdate', {
-				series: this.$route.query.id,
-				movie: this.currentMovie,
-				season: this.currentSeason,
-				episode: this.currentEpisode,
-				time: time,
-				force,
-			});
-		},
-	},
-	async created() {
-		try {
-			const seriesID = this.$route.query.id?.toString();
-			if (seriesID == undefined) return;
-			await this.loadSeriesInfo(seriesID);
-			if (this.currentSeries == undefined || this.currentSeries.ID == '-1') return;
-			const localStorageString = localStorage.getItem('data') || '';
-			const data = localStorageString.trim() != '' ? JSON.parse(localStorageString) : null;
-
-			this.loadWatchList(seriesID);
-			if (this.$route.query?.idx) {
-				const queryIdx = this.$route.query?.idx.toString();
-				const language: Langs = (this.$route.query?.lang?.toString() as Langs) || 'GerDub';
-				if (queryIdx.includes('x')) {
-					//SeasonxEpisode
-					const [se, ep] = queryIdx.split('x').map((x) => Number(x));
-
-					this.handleVideoChange(se, ep, -1, language != undefined, language, (video) => {
-						if (this.$route.query?.time != undefined && parseInt(this.$route.query?.time.toString())) {
-							video.currentTime = parseInt(this.$route.query?.time.toString());
-						}
-					});
-				} else {
-					//Movie
-					const movieID = parseInt(queryIdx);
-					this.handleVideoChange(-1, -1, movieID, language != undefined, language, (video) => {
-						if (this.$route.query?.time != undefined && parseInt(this.$route.query?.time.toString())) {
-							video.currentTime = parseInt(this.$route.query?.time.toString());
-						}
-					});
-				}
-			} else if (data && data.ID == seriesID) {
-				this.handleVideoChange(data.season || -1, data.episode || -1, data.movie || -1, undefined, undefined, undefined);
-			} else {
-				localStorage.removeItem('data');
-
-				this.handleVideoChange(-1, -1, -1, undefined, undefined, undefined);
-			}
-
-			document.title = `Cinema | ${this.currentSeries.title}`;
-		} catch (error) {
-			console.error('Error in Watch.vue Created Hook', error);
+			handleVideoChange(-1, -1, -1, undefined, undefined, undefined);
 		}
-	},
-	async mounted() {
-		this.$socket.on('watchListChange', ({ watchList, seriesID }) => {
-			console.log('GOT watchListChange');
-			if (seriesID == undefined) this.watchList = watchList.filter((e) => e.ID == this.$route.query.id);
-			if (seriesID == this.$route.query.id) this.watchList = watchList.filter((e) => e.ID == this.$route.query.id);
-		});
-		this.$socket.emit('getWatchList', { ID: this.$route.query.id });
-	},
-	unmounted() {
-		this.$socket.off('watchListChange');
-	},
-	beforeUnmount() {
-		const video = document.querySelector('video');
-		if (video) {
-			this.sendVideoTimeUpdate(video.currentTime, true);
+
+		document.title = `Cinema | ${watchStore.currentSeries.title}`;
+	} catch (error) {
+		console.error('Error in Watch.vue Created Hook', error);
+	}
+});
+
+onBeforeUnmount(() => {
+	const video = document.querySelector('video');
+	if (video) {
+		sendVideoTimeUpdate(video.currentTime, true);
+	}
+	localStorage.removeItem('data');
+	document.title = `Cinema | Jodu555`;
+});
+
+onUnmounted(() => {
+	useSocket().off('watchListChange');
+});
+
+const showLatestWatchButton = computed(() => {
+	if (forceHideButton.value) return false;
+	const info = Boolean(watchStore.currentMovie !== -1 || watchStore.currentSeason !== -1 || watchStore.currentEpisode !== -1);
+	if (info) {
+		const segment = watchStore.watchList.find(
+			(segment) => segment.ID == route.query.id && segment.season == watchStore.currentSeason && segment.episode == watchStore.currentEpisode
+		);
+		if (segment == undefined) return false;
+		if (segment.time > 100) return true;
+	} else {
+		return false;
+	}
+});
+
+const showVideo = computed(() => {
+	return (
+		watchStore.currentSeries != undefined &&
+		watchStore.currentSeries.ID != '-1' &&
+		(watchStore.currentMovie !== -1 || watchStore.currentSeason !== -1 || watchStore.currentEpisode !== -1)
+	);
+});
+
+const displayTitle = computed(() => {
+	let str = `${watchStore.currentSeries.infos?.title || watchStore.currentSeries.infos?.infos || watchStore.currentSeries.title} - `;
+
+	if (watchStore.currentSeries.movies.length >= 1) {
+		str += `${watchStore.currentSeries.movies.length} ` + (watchStore.currentSeries.movies.length > 1 ? 'Movies' : 'Movie');
+	}
+
+	if (watchStore.currentSeries.movies.length >= 1 && watchStore.currentSeries.seasons.length >= 1) {
+		str += ' | ';
+	}
+
+	if (watchStore.currentSeries.seasons.length >= 1) {
+		str += `${watchStore.currentSeries.seasons.length} ` + (watchStore.currentSeries.seasons.length > 1 ? 'Seasons' : 'Season');
+	}
+
+	return str;
+});
+
+function skipToLatestTime() {
+	const segment = watchStore.watchList.find((segment) => segment.season == watchStore.currentSeason && segment.episode == watchStore.currentEpisode);
+	const video = document.querySelector('video');
+	if (video && segment) {
+		video.currentTime = segment.time;
+		forceHideButton.value = true;
+	}
+}
+function switchTo(vel: number) {
+	deepswitchTo(vel, handleVideoChange);
+}
+function changeMovie(ID: number) {
+	if (watchStore.currentMovie == ID) return handleVideoChange();
+	handleVideoChange(-1, -1, ID);
+}
+function changeEpisode(ID: number) {
+	handleVideoChange(watchStore.currentSeason, ID);
+}
+function changeSeason(ID: number) {
+	console.log(ID, 'CAME');
+	console.log(watchStore.currentSeason);
+
+	if (watchStore.currentSeason == ID) return handleVideoChange();
+	return handleVideoChange(ID, 1);
+}
+function changeLanguage(lang: Langs) {
+	handleVideoChange(watchStore.currentSeason, watchStore.currentEpisode, watchStore.currentMovie, true, lang, undefined);
+}
+function handleVideoChange(
+	season = -1,
+	episode = -1,
+	movie = -1,
+	langchange = false,
+	lang?: Langs | undefined,
+	callback?: ((video: HTMLVideoElement) => void) | undefined
+) {
+	if (langchange && watchStore.currentLanguage == lang) return;
+	const video = document.querySelector('video');
+
+	//TODO: Maybe add here default language from user prefered settings
+	let defaultLanguage = watchStore.currentLanguage || ('GerDub' as Langs);
+
+	let wasPaused = false;
+	let prevTime = 0;
+	if (video) {
+		wasPaused = video.paused;
+		prevTime = video.currentTime;
+
+		sendVideoTimeUpdate(video.currentTime, true);
+
+		video.pause();
+	}
+	console.log('GOT handleVideoChange()', { season, episode, movie, langchange, lang }, { wasPaused, prevTime, defaultLanguage });
+
+	//Handle the skip to latest watch postion button
+	buttonTimer != null && clearTimeout(buttonTimer.value);
+	forceHideButton.value = false;
+	buttonTimer.value = setTimeout(() => {
+		forceHideButton.value = true;
+	}, 10000);
+
+	//Save The Current infos in localstorage
+	localStorage.setItem(
+		'data',
+		JSON.stringify({
+			ID: route.query.id,
+			season,
+			episode,
+			movie,
+		})
+	);
+
+	setTimeout(() => {
+		watchStore.currentSeason = season;
+		watchStore.currentEpisode = episode;
+		watchStore.currentMovie = movie;
+
+		//Ensure that the selected language exists on the entity
+		if (watchStore.entityObject && !watchStore.entityObject.langs.includes(defaultLanguage) && !langchange) {
+			console.log('The Requestes Language does not exist on the Entity');
+			defaultLanguage = watchStore.entityObject.langs[0] as Langs;
 		}
-		localStorage.removeItem('data');
-		document.title = `Cinema | Jodu555`;
-	},
-};
+
+		watchStore.currentLanguage = langchange ? (lang as Langs) : defaultLanguage;
+		setTimeout(() => {
+			if (!video) return;
+			video.load();
+			langchange ? (video.currentTime = prevTime) : (video.currentTime = 0);
+			!wasPaused && video.play();
+			if (callback && typeof callback == 'function') {
+				callback(video);
+			}
+		}, 100);
+	}, 200);
+}
+function sendVideoTimeUpdate(time: number, force = false) {
+	console.log('sendVideoTimeUpdate()', time, force);
+	useSocket().emit('timeUpdate', {
+		series: route.query.id,
+		movie: watchStore.currentMovie,
+		season: watchStore.currentSeason,
+		episode: watchStore.currentEpisode,
+		time: time,
+		force,
+	});
+}
 </script>
 
 <style scoped></style>

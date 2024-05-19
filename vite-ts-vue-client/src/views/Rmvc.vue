@@ -6,7 +6,7 @@
 				<span class="visually-hidden">Loading...</span>
 			</div>
 		</div>
-		<pre v-if="settings.developerMode.value">
+		<pre v-if="useAuthStore().settings.developerMode.value">
 			{{ { loading, isConnected, isPlaying, error, rmvcID, socket: $socket.id, socketExists: $socket != null, url: useBaseURL() } }}
 		</pre
 		>
@@ -83,57 +83,54 @@
 		</div>
 	</div>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 import { useAuthStore } from '@/stores/auth.store';
 import { useBaseURL } from '@/utils';
+import { useSocket } from '@/utils/socket';
 import { mapWritableState } from 'pinia';
+import { ref, onMounted, onUnmounted } from 'vue';
 
-export default {
-	data() {
-		return {
-			loading: false,
-			isConnected: false,
-			isPlaying: true,
-			error: '',
-			rmvcID: '',
-		};
-	},
-	methods: {
-		connect() {
-			this.loading = true;
-			this.error = '';
-			this.$socket.emit('rmvc-connect', { rmvcID: this.rmvcID });
-		},
-		useBaseURL,
-	},
-	computed: {
-		...mapWritableState(useAuthStore, ['loggedIn', 'settings']),
-	},
-	async mounted() {
-		console.log(this.$socket);
+const loading = ref(false);
+const isConnected = ref(false);
+const isPlaying = ref(true);
+const error = ref('');
+const rmvcID = ref('');
 
-		if (!this.loggedIn) {
-			this.$socket.auth = { type: 'rmvc-emitter' };
-			this.$socket.connect();
+function connect() {
+	if (rmvcID.value.length === 0) {
+		error.value = 'Please enter a valid Remote Control ID!';
+		return;
+	}
+	loading.value = true;
+	error.value = '';
+	useSocket().emit('rmvc-connect', { rmvcID: rmvcID.value });
+}
+
+onMounted(() => {
+	console.log(useSocket());
+
+	if (!useAuthStore().loggedIn) {
+		useSocket().auth = { type: 'rmvc-emitter' };
+		useSocket().connect();
+	}
+
+	useSocket().on('rmvc-connection', ({ status }) => {
+		loading.value = false;
+		isConnected.value = status;
+		if (!status) {
+			error.value = 'RMVCID seems to be invalid! Or has been stopped!';
+			rmvcID.value = '';
 		}
+	});
+	useSocket().on('rmvc-recieve-videoStateChange', ({ isPlaying }) => {
+		isPlaying = isPlaying;
+	});
+});
 
-		this.$socket.on('rmvc-connection', ({ status }) => {
-			this.loading = false;
-			this.isConnected = status;
-			if (!status) {
-				this.error = 'RMVCID seems to be invalid! Or has been stopped!';
-				this.rmvcID = '';
-			}
-		});
-		this.$socket.on('rmvc-recieve-videoStateChange', ({ isPlaying }) => {
-			this.isPlaying = isPlaying;
-		});
-	},
-	unmounted() {
-		this.$socket.off('rmvc-recieve-videoStateChange');
-		this.$socket.off('rmvc-connection');
-	},
-};
+onUnmounted(() => {
+	useSocket().off('rmvc-recieve-videoStateChange');
+	useSocket().off('rmvc-connection');
+});
 </script>
 <style scoped>
 .rmvc {

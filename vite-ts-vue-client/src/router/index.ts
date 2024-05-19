@@ -32,7 +32,7 @@ const router = createRouter({
 			path: '/watch',
 			name: 'Watch',
 			component: function () {
-				return import(/* webpackChunkName: "watch" */ '@/views/WatchNew.vue');
+				return import(/* webpackChunkName: "watch" */ '@/views/Watch.vue');
 			},
 			meta: { requiresLogin: true },
 		},
@@ -89,7 +89,7 @@ const router = createRouter({
 			path: '/rmvc',
 			name: 'RemoteVidoeControl',
 			component: function () {
-				return import(/* webpackChunkName: "rmvc" */ '@/views/RmvcNew.vue');
+				return import(/* webpackChunkName: "rmvc" */ '@/views/Rmvc.vue');
 			},
 			meta: { requiresLogin: false },
 		},
