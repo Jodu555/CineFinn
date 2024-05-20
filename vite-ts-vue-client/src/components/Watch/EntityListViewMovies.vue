@@ -17,7 +17,7 @@
 						<img
 							v-for="lang in movie.langs"
 							:key="lang"
-							class="shadow mb-2 mt-3 bg-body"
+							class="shadow mb-2 mt-3 me-2 bg-body"
 							style="width: 40px"
 							:src="`/flag-langs/${lang.toLowerCase()}.svg`"
 							:alt="langDetails[lang.toLowerCase()]?.alt || 'None Alt'"

@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { sendSeriesReloadToAll, sendSiteReload } from '../sockets/client.socket';
 import { getAniworldInfos } from '../sockets/scraper.socket';
-import { getSeries, getAuthHelper, getIO, getVideoStreamLog, toAllSockets } from './utils';
+import { getSeries, getAuthHelper, getIO, getVideoStreamLog, toAllSockets, setSeries } from './utils';
 import { CommandManager, Command } from '@jodu555/commandmanager';
 import { ExtendedRemoteSocket } from '../types/session';
 import { getSyncRoom } from './room.utils';
@@ -33,6 +33,23 @@ function registerCommands() {
 			'Rescrapes the archive with being agressive when a series does not exist',
 			async (command, [...args], scope) => {
 				getSeries(true, false, false);
+				await sendSeriesReloadToAll();
+
+				return 'Reloaded the series config successfully';
+			}
+		)
+	);
+	commandManager.registerCommand(
+		new Command(
+			['disable'],
+			'disable <SeriesID>',
+			"Disables a series temporarily like if the series isn't present",
+			async (command, [...args], scope) => {
+				const id = args[1];
+				if (!id) {
+					return 'You need to specify a series ID!';
+				}
+				setSeries(getSeries().filter((x) => x.ID != id));
 				await sendSeriesReloadToAll();
 
 				return 'Reloaded the series config successfully';
