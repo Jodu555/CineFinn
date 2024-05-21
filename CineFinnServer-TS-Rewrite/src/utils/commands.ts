@@ -1,13 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 import { sendSeriesReloadToAll, sendSiteReload } from '../sockets/client.socket';
-import { getAniworldInfos } from '../sockets/scraper.socket';
+import { getAniworldInfos, waitingForResponse } from '../sockets/scraper.socket';
 import { getSeries, getAuthHelper, getIO, getVideoStreamLog, toAllSockets, setSeries } from './utils';
 import { CommandManager, Command } from '@jodu555/commandmanager';
 import { ExtendedRemoteSocket } from '../types/session';
 import { getSyncRoom } from './room.utils';
 import { Database } from '@jodu555/mysqlapi';
 import { DatabaseSyncRoomItem } from '../types/database';
+import { subSocketMap } from '../sockets/sub.socket';
 
 const commandManager = CommandManager.getCommandManager();
 const database = Database.getDatabase();
@@ -76,7 +77,19 @@ function registerCommands() {
 			const output = ['Current socket sessions:'];
 			const sockets = (await getIO().fetchSockets()) as ExtendedRemoteSocket[];
 			for (const socket of sockets) {
-				output.push(` - ${socket.auth.type.toUpperCase()} => ${socket.auth.user?.username || ''} ${socket.sync ? socket.sync?.ID : ''} `);
+				if (socket.auth.type == 'sub') {
+					output.push(` - ${socket.auth.type.toUpperCase()} => ${socket.auth.id} ${socket.auth.ptoken ? socket.auth?.ptoken : ''} `);
+				}
+				if (socket.auth.type == 'client') {
+					output.push(
+						` - ${socket.auth.type.toUpperCase()} => ${socket.auth.user?.username || socket.auth.id || ''} ${socket.sync ? socket.sync?.ID : ''}${
+							socket.auth.ptoken ? socket.auth?.ptoken : ''
+						} `
+					);
+				}
+				if (socket.auth.type == 'scraper') {
+					output.push(` - ${socket.auth.type.toUpperCase()} => Function waiting: ${waitingForResponse.length}`);
+				}
 			}
 			output.push('', '------------------------------------');
 			return output;
@@ -172,6 +185,32 @@ function registerCommands() {
 				);
 			}
 			return '';
+		})
+	);
+
+	commandManager.registerCommand(
+		new Command(['test'], 'test', 'Just a simple test command', async (command, [...args], scope) => {
+			const allFiles = await new Promise((resolve, reject) => {
+				let waitFor = [];
+				const allFilesInner = [];
+				subSocketMap.forEach((socket) => {
+					socket.once('files', ({ files }) => {
+						allFilesInner.push(...files.map((x) => ({ path: x, subID: socket.auth.id })));
+						waitFor = waitFor.filter((k) => k == socket.auth.id);
+
+						console.log('Response from:', socket.auth.id, 'waitFor:', waitFor);
+						if (waitFor.length == 0) {
+							resolve(allFilesInner);
+						}
+					});
+					waitFor.push(socket.auth.id);
+					socket.emit('listFiles');
+				});
+			});
+
+			console.log(allFiles);
+
+			return 'Exectued test command successfully';
 		})
 	);
 }

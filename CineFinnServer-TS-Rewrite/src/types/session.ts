@@ -76,8 +76,10 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export interface SocketAuthObject {
-	type: 'client' | 'scraper' | 'rmvc-emitter';
+	type: 'client' | 'scraper' | 'sub' | 'rmvc-emitter';
 	token?: string;
+	id?: string;
+	ptoken?: string;
 	user?: User;
 	debounce?: any;
 	RMVCSessionID?: string;
@@ -114,6 +116,8 @@ interface ClientToServerEvents {
 	'sync-video-change': (obj: { season: number; episode: number; movie: number; langchange: Boolean; lang: Langs }) => void;
 	'sync-video-action': (obj: { action: VideoAction; value: boolean | string; time?: string }) => void;
 	'sync-video-info': (obj: { currentTime: number; isPlaying: boolean }) => void;
+
+	files: (obj: { files: string[] }) => void;
 }
 
 export type VideoAction = 'sync-playback' | 'sync-skip' | 'sync-skipTimeline';
