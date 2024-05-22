@@ -155,7 +155,7 @@ const crawlAndIndex = async () => {
 			item = serie;
 		}
 		if (parsedData.movie == true) {
-			const existMovie = item.movies.find((x) => x.primaryName.includes(parsedData.movieTitle));
+			const existMovie = item.movies.find((x) => x.primaryName == parsedData.movieTitle);
 			if (existMovie) {
 				existMovie.langs.push(parsedData.language);
 			} else {

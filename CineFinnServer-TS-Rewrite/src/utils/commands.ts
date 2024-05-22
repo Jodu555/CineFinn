@@ -78,7 +78,9 @@ function registerCommands() {
 			const sockets = (await getIO().fetchSockets()) as ExtendedRemoteSocket[];
 			for (const socket of sockets) {
 				if (socket.auth.type == 'sub') {
-					output.push(` - ${socket.auth.type.toUpperCase()} => ${socket.auth.id} ${socket.auth.ptoken ? socket.auth?.ptoken : ''} `);
+					output.push(
+						` - ${socket.auth.type.toUpperCase()} => ${socket.auth.id} ${socket.auth.endpoint} - ${socket.auth.ptoken ? socket.auth?.ptoken : ''} `
+					);
 				}
 				if (socket.auth.type == 'client') {
 					output.push(

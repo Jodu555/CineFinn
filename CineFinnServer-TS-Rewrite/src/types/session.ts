@@ -80,6 +80,7 @@ export interface SocketAuthObject {
 	token?: string;
 	id?: string;
 	ptoken?: string;
+	endpoint?: string;
 	user?: User;
 	debounce?: any;
 	RMVCSessionID?: string;

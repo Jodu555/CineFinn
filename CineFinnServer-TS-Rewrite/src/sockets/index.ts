@@ -42,7 +42,13 @@ const initialize = () => {
 		if (type === 'sub') {
 			const authToken = socket.handshake.auth.token;
 			if (authToken && authToken === 'dioanoadnosadnsdaonadofvndgpagdmn0gtef') {
-				socket.auth = { token: authToken, id: socket.handshake.auth.id, ptoken: socket.handshake.auth.ptoken, type };
+				socket.auth = {
+					token: authToken,
+					id: socket.handshake.auth.id,
+					ptoken: socket.handshake.auth.ptoken,
+					endpoint: socket.handshake.auth.endpoint,
+					type,
+				};
 				return next();
 			} else {
 				next(new Error('Authentication error'));
