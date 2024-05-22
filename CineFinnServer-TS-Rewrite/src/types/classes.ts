@@ -24,6 +24,7 @@ export interface SerieEpisodeObject {
 	season: number;
 	episode: number;
 	langs: Langs[];
+	subID: string;
 }
 export interface SerieMovieObject {
 	filePath: string;

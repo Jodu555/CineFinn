@@ -40,7 +40,6 @@ const initialize = () => {
 			}
 		}
 		if (type === 'sub') {
-			console.log(socket.handshake.auth);
 			const authToken = socket.handshake.auth.token;
 			if (authToken && authToken === 'dioanoadnosadnsdaonadofvndgpagdmn0gtef') {
 				socket.auth = { token: authToken, id: socket.handshake.auth.id, ptoken: socket.handshake.auth.ptoken, type };

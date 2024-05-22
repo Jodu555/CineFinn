@@ -34,17 +34,19 @@ class Episode {
 	season: number;
 	episode: number;
 	langs: Langs[];
-	constructor(filePath: string, primaryName: string, secondaryName: string, season: number, episode: number, langs: Langs[]) {
+	subID: string;
+	constructor(filePath: string, primaryName: string, secondaryName: string, season: number, episode: number, langs: Langs[], subID: string = 'main') {
 		this.filePath = filePath;
 		this.primaryName = primaryName;
 		this.secondaryName = secondaryName;
 		this.season = season;
 		this.episode = episode;
 		this.langs = langs;
+		this.subID = subID;
 	}
 
 	static fromObject(o: SerieEpisodeObject) {
-		return new Episode(o.filePath, o.primaryName, o.secondaryName, o.season, o.episode, o.langs);
+		return new Episode(o.filePath, o.primaryName, o.secondaryName, o.season, o.episode, o.langs, o.subID);
 	}
 }
 
@@ -159,8 +161,8 @@ const filenameParser = (filepath: string, filename: string): ParsedInformation |
 	return output as ParsedInformation;
 };
 
-function getVideoEntity(seriesID: string, season: number, episode: number): Episode {
-	const serie = getSeries().find((x) => x.ID == seriesID);
+async function getVideoEntity(seriesID: string, season: number, episode: number): Promise<Episode> {
+	const serie = (await getSeries()).find((x) => x.ID == seriesID);
 	// Long (Especially when there are 50 seasons with 100 episodes each)
 	// const entity = serie.seasons.flat().find(x => x.season == season && x.episode == episode);
 	let entity: Episode;
@@ -169,8 +171,8 @@ function getVideoEntity(seriesID: string, season: number, episode: number): Epis
 	return entity;
 }
 
-function getVideoMovie(seriesID: string, movieID: number): Movie {
-	const serie = getSeries().find((x) => x.ID == seriesID);
+async function getVideoMovie(seriesID: string, movieID: number): Promise<Movie> {
+	const serie = (await getSeries()).find((x) => x.ID == seriesID);
 	return serie.movies[movieID - 1];
 }
 

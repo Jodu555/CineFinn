@@ -8,7 +8,7 @@ import { ExtendedRemoteSocket } from '../types/session';
 import { getSyncRoom } from './room.utils';
 import { Database } from '@jodu555/mysqlapi';
 import { DatabaseSyncRoomItem } from '../types/database';
-import { subSocketMap } from '../sockets/sub.socket';
+import { getAllFilesFromAllSubs, subSocketMap } from '../sockets/sub.socket';
 
 const commandManager = CommandManager.getCommandManager();
 const database = Database.getDatabase();
@@ -50,7 +50,7 @@ function registerCommands() {
 				if (!id) {
 					return 'You need to specify a series ID!';
 				}
-				setSeries(getSeries().filter((x) => x.ID != id));
+				setSeries((await getSeries()).filter((x) => x.ID != id));
 				await sendSeriesReloadToAll();
 
 				return 'Reloaded the series config successfully';
@@ -111,22 +111,27 @@ function registerCommands() {
 	);
 
 	commandManager.registerCommand(
-		new Command(['fetchInfos', 'fi'], 'fetchInfos [all/seriesID]', 'Fetches the informations for a secified series', (command, [...args], scope) => {
-			if (args[1] == 'all') {
-				console.log('Started to fetch all Series Informations!');
-			} else {
-				console.log(`Started to fetch the Informations for ${args[1]}!`);
-				const serie = getSeries().find((x) => x.ID == args[1]);
-				if (serie == undefined) {
-					return 'Cant find series with that ID';
+		new Command(
+			['fetchInfos', 'fi'],
+			'fetchInfos [all/seriesID]',
+			'Fetches the informations for a secified series',
+			async (command, [...args], scope) => {
+				if (args[1] == 'all') {
+					console.log('Started to fetch all Series Informations!');
+				} else {
+					console.log(`Started to fetch the Informations for ${args[1]}!`);
+					const serie = (await getSeries()).find((x) => x.ID == args[1]);
+					if (serie == undefined) {
+						return 'Cant find series with that ID';
+					}
+					if (serie.references.aniworld == undefined) {
+						return 'The Series has no reference point for aniworld';
+					}
+					getAniworldInfos({ url: serie.references.aniworld as string });
 				}
-				if (serie.references.aniworld == undefined) {
-					return 'The Series has no reference point for aniworld';
-				}
-				getAniworldInfos({ url: serie.references.aniworld as string });
+				return '';
 			}
-			return '';
-		})
+		)
 	);
 
 	commandManager.registerCommand(
@@ -190,25 +195,7 @@ function registerCommands() {
 
 	commandManager.registerCommand(
 		new Command(['test'], 'test', 'Just a simple test command', async (command, [...args], scope) => {
-			const allFiles = await new Promise((resolve, reject) => {
-				let waitFor = [];
-				const allFilesInner = [];
-				subSocketMap.forEach((socket) => {
-					socket.once('files', ({ files }) => {
-						allFilesInner.push(...files.map((x) => ({ path: x, subID: socket.auth.id })));
-						waitFor = waitFor.filter((k) => k == socket.auth.id);
-
-						console.log('Response from:', socket.auth.id, 'waitFor:', waitFor);
-						if (waitFor.length == 0) {
-							resolve(allFilesInner);
-						}
-					});
-					waitFor.push(socket.auth.id);
-					socket.emit('listFiles');
-				});
-			});
-
-			console.log(allFiles);
+			console.log(await getAllFilesFromAllSubs());
 
 			return 'Exectued test command successfully';
 		})

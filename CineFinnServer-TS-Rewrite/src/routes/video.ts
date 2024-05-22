@@ -101,7 +101,7 @@ import { getVideoMovie, getVideoEntity, Episode, Movie } from '../classes/series
 // 	videoStream.pipe(res);
 // };
 
-export = (req: AuthenticatedRequest, res: Response) => {
+export = async (req: AuthenticatedRequest, res: Response) => {
 	const { series: seriesID, season, episode, movie, language, debug: rmtDebug } = req.query;
 
 	const debug = false;
@@ -139,7 +139,7 @@ export = (req: AuthenticatedRequest, res: Response) => {
 	debug && console.log('Got Video');
 
 	//TODO: This is duplicate cause im doing this in getVideoEntity but still there for error
-	const serie = getSeries().find((x) => x.ID == seriesID);
+	const serie = (await getSeries()).find((x) => x.ID == seriesID);
 
 	debug && console.log('Tried to find serie');
 
@@ -155,9 +155,9 @@ export = (req: AuthenticatedRequest, res: Response) => {
 	// let videoEntity = isMovie ? serie.movies[movie] : serie.seasons[season][episode];
 	let videoEntity: Movie | Episode = null;
 	if (isMovie) {
-		videoEntity = getVideoMovie(serie.ID, Number(movie));
+		videoEntity = await getVideoMovie(serie.ID, Number(movie));
 	} else {
-		videoEntity = getVideoEntity(serie.ID, Number(season), Number(episode));
+		videoEntity = await getVideoEntity(serie.ID, Number(season), Number(episode));
 	}
 	if (videoEntity == null || videoEntity == undefined) {
 		res.status(400).send('Season or Episode does not exists');

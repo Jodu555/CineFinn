@@ -60,7 +60,7 @@ router.get('/', async (req: AuthenticatedRequest, res: Response) => {
 	// const remoteSeries = cached;
 	// console.timeEnd('mockRequest')
 
-	const remoteSeries = getSeries();
+	const remoteSeries = await getSeries();
 
 	console.time('LoadParse');
 	// const list = parse(await load('c2f5c833-c3e4-45a6-87b5-05103ff274ff'));

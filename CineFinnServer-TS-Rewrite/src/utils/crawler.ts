@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { listFiles } from './fileutils';
 import { Episode, Movie, Series, filenameParser } from '../classes/series';
 import { SerieEpisodeObject, SerieObject } from '../types/classes';
+import { SubFile, getAllFilesFromAllSubs } from '../sockets/sub.socket';
 
 const generateID = () => {
 	return uuidv4().split('-')[0];
@@ -110,30 +111,39 @@ const oldCrawlAndIndex = () => {
 	return series;
 };
 
-const crawlAndIndex = () => {
+interface idFile {
+	id: string;
+	file: string;
+}
+
+const crawlAndIndex = async () => {
 	const pathEntries = [process.env.VIDEO_PATH];
 
-	let files: string[] = [];
+	let files: SubFile[] = [];
 
-	for (const pathEntry of pathEntries) {
-		let { files: tmp_files } = listFiles(pathEntry);
-		files.push(...tmp_files);
-		tmp_files = null;
-	}
+	const subFiles = await getAllFilesFromAllSubs();
+
+	files.push(...subFiles);
+
+	// for (const pathEntry of pathEntries) {
+	// 	let { files: tmp_files } = listFiles(pathEntry);
+	// 	files.push(...tmp_files);
+	// 	tmp_files = null;
+	// }
 
 	// let { files: tmp2_files } = listFiles('Z:\\home\\laterIntegrate');
 	// files.push(...tmp2_files);
 	// tmp_files = null;
 
 	//Strip all non mp4 files from the files
-	files = files.filter((f) => path.parse(f).ext == '.mp4');
+	files = files.filter((f) => path.parse(f.path).ext == '.mp4');
 
 	// console.log(categorieMap);
 
 	// Strip the dirs down and seperate between season or movie dirs or series dirs
 	let series: SerieObject[] = [];
 
-	files.forEach((e) => {
+	files.forEach(({ path: e, subID }) => {
 		const base = path.parse(e).base;
 		const parsedData = filenameParser(e, base);
 
@@ -155,7 +165,7 @@ const crawlAndIndex = () => {
 		} else {
 			const currentArr = item.seasons[parsedData.season - 1];
 
-			const episode = new Episode(e, parsedData.title, '', parsedData.season, parsedData.episode, [parsedData.language]);
+			const episode = new Episode(e, parsedData.title, '', parsedData.season, parsedData.episode, [parsedData.language], subID);
 
 			if (Array.isArray(currentArr)) {
 				const existEpisode = currentArr.find((eps) => eps.season == parsedData.season && eps.episode == parsedData.episode);

@@ -218,7 +218,7 @@ app.use(errorHelper.install());
 const PORT = process.env.PORT || 3100;
 server.listen(PORT, async () => {
 	console.log(`Express & Socket App Listening ${process.env.https ? 'with SSL ' : ''}on ${PORT}`);
-	console.log(getSeries().length);
+	console.log((await getSeries()).length);
 
 	// database.get<DatabaseSyncRoomItem>('sync_rooms').create({
 	// 	ID: '58932',

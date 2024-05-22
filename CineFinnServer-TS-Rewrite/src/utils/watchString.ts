@@ -145,7 +145,7 @@ async function markSeason(UUID: string, seriesID: string, seasonID: number, bool
 		//Mark as watched
 		//Get all episodes for the given seriesID and seasonID
 		//IN case of watched either Update or add to the segment list time over 301
-		const serie = getSeries().find((x) => x.ID == seriesID);
+		const serie = (await getSeries()).find((x) => x.ID == seriesID);
 
 		const season = serie.seasons[seasonID - 1];
 

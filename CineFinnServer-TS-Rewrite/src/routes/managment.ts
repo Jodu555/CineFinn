@@ -63,7 +63,7 @@ router.get('/job/img/generate', async (req: AuthenticatedRequest, res: Response,
 	} else {
 		database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'true' });
 		try {
-			generateImages(getSeries(), async () => {
+			generateImages(await getSeries(), async () => {
 				database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
 				toAllSockets(
 					(s) => {
@@ -162,7 +162,7 @@ router.get('/job/crawl', async (req: AuthenticatedRequest, res: Response, next: 
 	} else {
 		try {
 			database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'true' });
-			setSeries(crawlAndIndex());
+			setSeries(await crawlAndIndex());
 			setTimeout(async () => {
 				database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
 				sendSeriesReloadToAll((s) => s.emit(callpointToEvent(LOOKUP[id].callpoint)));

@@ -245,9 +245,9 @@ async function sendSiteReload() {
 
 async function sendSeriesReloadToAll(cb?: (socket: ExtendedRemoteSocket) => void) {
 	toAllSockets(
-		(s) => {
+		async (s) => {
 			if (typeof cb === 'function') cb(s);
-			s.emit('reloadSeries', cleanupSeriesBeforeFrontResponse(getSeries()));
+			s.emit('reloadSeries', cleanupSeriesBeforeFrontResponse(await getSeries()));
 		},
 		(s) => s.auth.type == 'client'
 	);

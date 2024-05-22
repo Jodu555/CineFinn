@@ -33,7 +33,7 @@ function debounce(cb: Function, delay = 1000) {
 		}, delay);
 	};
 }
-const getSeries = (forceLoad: boolean = false, forceFile: boolean = false, keepCurrentlyNotPresent = true): Series[] => {
+const getSeries = async (forceLoad: boolean = false, forceFile: boolean = false, keepCurrentlyNotPresent = true): Promise<Series[]> => {
 	if (forceLoad || !series || forceFile) {
 		if ((fs.existsSync(outputFileName) && !forceLoad) || forceFile) {
 			console.log('Loaded series from file!');
@@ -44,7 +44,7 @@ const getSeries = (forceLoad: boolean = false, forceFile: boolean = false, keepC
 			);
 		} else {
 			console.log('Crawled the series!');
-			setSeries(crawlAndIndex(), keepCurrentlyNotPresent);
+			setSeries(await crawlAndIndex(), keepCurrentlyNotPresent);
 
 			fs.writeFileSync(outputFileName, JSON.stringify(series, null, 3), 'utf8');
 		}
