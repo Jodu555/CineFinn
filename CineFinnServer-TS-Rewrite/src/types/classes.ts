@@ -42,6 +42,7 @@ export interface SerieInfo {
 	startDate?: string;
 	endDate?: string;
 	description?: string;
+	disabled?: boolean;
 }
 
 export type SerieReference = Record<'aniworld' | 'zoro' | 'sto' | string, string | Record<string, string>>;

@@ -1,6 +1,8 @@
 import { ExtendedSocket } from '../types/session';
 import { Langs } from '../types/classes';
 import { randomUUID } from 'node:crypto';
+import { getSeries, setSeries } from '../utils/utils';
+import { sendSeriesReloadToAll } from './client.socket';
 
 const subSocketMap = new Map<string, ExtendedSocket>();
 
@@ -13,10 +15,14 @@ const initialize = async (socket: ExtendedSocket) => {
 
 	socket.setMaxListeners(555);
 
-	socket.on('disconnect', () => {
+	socket.on('disconnect', async () => {
 		console.log('Socket DisConnection:', auth.type.toUpperCase());
 		subSocketMap.delete(auth.id);
+
+		await toggleSeriesDisableForSubSystem(auth.id, true);
 	});
+
+	await toggleSeriesDisableForSubSystem(auth.id, false);
 
 	// socket.on('files', ({ files }) => {
 	// 	console.log(files);
@@ -28,8 +34,35 @@ interface SubFile {
 	path: string;
 }
 
-function getSubSocketByID(id: string): ExtendedSocket | undefined {
-	return subSocketMap.get(id);
+async function toggleSeriesDisableForSubSystem(subID: string, disabled: boolean) {
+	const match = await getSeriesBySubID(subID);
+	console.log(match.map((x) => x.ID));
+
+	setSeries(
+		(await getSeries()).map((x) => {
+			if (match.some((y) => y.ID == x.ID)) {
+				x.infos.disabled = disabled;
+			}
+			return x;
+		})
+	);
+	await sendSeriesReloadToAll();
+}
+
+function getSubSocketByID(subID: string): ExtendedSocket | undefined {
+	return subSocketMap.get(subID);
+}
+
+async function getSeriesBySubID(subID: string) {
+	const series = await getSeries();
+
+	const serie = series.filter((x) => x.seasons.flat().some((e) => e.subID == subID) || x.movies.some((e) => e.subID == subID));
+	return serie;
+}
+
+async function checkifSubExists(subID: string) {
+	const series = await getSeriesBySubID(subID);
+	return series.length > 0;
 }
 
 async function getAllFilesFromAllSubs() {
@@ -64,4 +97,4 @@ async function getAllFilesFromAllSubs() {
 	return allFiles;
 }
 
-export { initialize, subSocketMap, getAllFilesFromAllSubs, SubFile, getSubSocketByID };
+export { initialize, subSocketMap, getAllFilesFromAllSubs, SubFile, getSubSocketByID, toggleSeriesDisableForSubSystem, checkifSubExists };

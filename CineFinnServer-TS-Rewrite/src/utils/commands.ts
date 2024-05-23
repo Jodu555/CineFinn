@@ -8,7 +8,7 @@ import { ExtendedRemoteSocket } from '../types/session';
 import { getSyncRoom } from './room.utils';
 import { Database } from '@jodu555/mysqlapi';
 import { DatabaseSyncRoomItem } from '../types/database';
-import { getAllFilesFromAllSubs, subSocketMap } from '../sockets/sub.socket';
+import { checkifSubExists, getAllFilesFromAllSubs, subSocketMap, toggleSeriesDisableForSubSystem } from '../sockets/sub.socket';
 
 const commandManager = CommandManager.getCommandManager();
 const database = Database.getDatabase();
@@ -43,17 +43,30 @@ function registerCommands() {
 	commandManager.registerCommand(
 		new Command(
 			['disable'],
-			'disable <SeriesID>',
+			'disable <subID / SeriesID>',
 			"Disables a series temporarily like if the series isn't present",
 			async (command, [...args], scope) => {
 				const id = args[1];
 				if (!id) {
-					return 'You need to specify a series ID!';
+					return 'You need to specify a series or sub ID!';
 				}
-				setSeries((await getSeries()).filter((x) => x.ID != id));
+
+				if (checkifSubExists(id)) {
+					toggleSeriesDisableForSubSystem(id, true);
+					return 'Disabled the sub system Series for: ' + id;
+				}
+
+				setSeries(
+					(await getSeries()).map((x) => {
+						if (x.ID == id) {
+							x.infos.disabled = true;
+						}
+						return x;
+					})
+				);
 				await sendSeriesReloadToAll();
 
-				return 'Reloaded the series config successfully';
+				return 'Disabled the series for: ' + id;
 			}
 		)
 	);
@@ -197,7 +210,12 @@ function registerCommands() {
 
 	commandManager.registerCommand(
 		new Command(['test'], 'test', 'Just a simple test command', async (command, [...args], scope) => {
-			console.log(await getAllFilesFromAllSubs());
+			// console.log(await getAllFilesFromAllSubs());
+			const series = await getSeries();
+
+			const eps = series.filter((x) => x.seasons.flat().some((e) => e.subID == args[1]));
+
+			console.log(eps);
 
 			return 'Exectued test command successfully';
 		})

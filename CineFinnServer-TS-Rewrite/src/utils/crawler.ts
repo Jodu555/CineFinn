@@ -215,6 +215,7 @@ const mergeSeriesArrays = (before: Series[], after: Series[], keepCurrentlyNotPr
 		const afterSerie = after.find((as) => as.title == beforeSerie.title && as.categorie == beforeSerie.categorie);
 		if (afterSerie) {
 			// console.log('Found Overlapping', beforeSerie.title, afterSerie.title, beforeSerie.ID, afterSerie.ID);
+			if (!afterSerie.infos.disabled) beforeSerie.infos.disabled = false;
 			output.push(
 				new Series(
 					beforeSerie.ID,
@@ -230,7 +231,15 @@ const mergeSeriesArrays = (before: Series[], after: Series[], keepCurrentlyNotPr
 			if (keepCurrentlyNotPresent) {
 				console.log('Found Non Overlapping or Currently not existing series', beforeSerie.title, beforeSerie.ID);
 				output.push(
-					new Series(beforeSerie.ID, beforeSerie.categorie, beforeSerie.title, [], [], { ...beforeSerie.references }, { ...beforeSerie.infos })
+					new Series(
+						beforeSerie.ID,
+						beforeSerie.categorie,
+						beforeSerie.title,
+						beforeSerie.movies,
+						beforeSerie.seasons,
+						{ ...beforeSerie.references },
+						{ ...beforeSerie.infos, disables: true }
+					)
 				);
 			}
 		}

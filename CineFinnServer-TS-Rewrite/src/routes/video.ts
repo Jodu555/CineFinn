@@ -212,7 +212,7 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 				},
 			});
 
-			console.log(response.status, response.headers);
+			// console.log(response.status, response.headers);
 			// res.status(200).json({ ok: true });
 
 			res.status(response.status);
