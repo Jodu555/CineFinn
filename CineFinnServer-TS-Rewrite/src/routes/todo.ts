@@ -4,7 +4,7 @@ import { DatabaseParsedTodoItem, DatabaseTodoItem } from '../types/database';
 import { AuthenticatedRequest, Role, User } from '../types/session';
 import { getAniworldInfos, isScraperSocketConnected } from '../sockets/scraper.socket';
 import { roleAuthorization } from '../utils/roleManager';
-import { backgroundScrapeTodo } from '../sockets/client.socket';
+import { checkIfTodoNeedsScrape, backgroundScrapeTodo } from '../utils/todo';
 const database = Database.getDatabase();
 
 const router = express.Router();
@@ -15,7 +15,7 @@ router.get('/', async (req: AuthenticatedRequest, res: Response) => {
 
 	if (isScraperSocketConnected()) {
 		for (const todo of todos) {
-			if ((!todo.scraped && todo.references.aniworld !== '') || (!todo.scrapedZoro && !todo.scrapednewZoro && todo.references.zoro !== '')) {
+			if (checkIfTodoNeedsScrape(todo)) {
 				backgroundScrapeTodo(todo);
 			}
 		}
