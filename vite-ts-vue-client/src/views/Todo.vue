@@ -117,6 +117,10 @@
 												<br />
 												<a target="_blank" :href="element.scrapedZoro.episodes[0]?.url">{{ element.scrapedZoro.episodes[0]?.url }}</a>
 											</template>
+											<template v-if="element.scrapednewZoro !== undefined && element.scrapednewZoro !== true">
+												<br />
+												<a target="_blank" :href="element.scrapednewZoro.seasons[0][0].url">{{ element.scrapednewZoro.seasons[0][0].url }}</a>
+											</template>
 										</template>
 										<br />
 										<p style="cursor: pointer" @click="deleteParsedInfos(element.ID)"><u>Delete Scraped infos</u></p>

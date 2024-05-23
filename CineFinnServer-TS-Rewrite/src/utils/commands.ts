@@ -33,7 +33,7 @@ function registerCommands() {
 			'reload',
 			'Rescrapes the archive with being agressive when a series does not exist',
 			async (command, [...args], scope) => {
-				getSeries(true, false, false);
+				await getSeries(true, false, false);
 				await sendSeriesReloadToAll();
 
 				return 'Reloaded the series config successfully';
