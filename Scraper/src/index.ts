@@ -4,7 +4,7 @@ require('dotenv').config();
 import axios from 'axios';
 import io from 'socket.io-client';
 import Aniworld, { AniWorldSeriesInformations } from './class/Aniworld';
-import { compareForNewReleases, compareForNewReleasesAniWorld, compareForNewReleasesZoro } from './utils/compare';
+import { changeEpisode, compareForNewReleases, compareForNewReleasesAniWorld, compareForNewReleasesZoro, ChangedZoroEpisode } from './utils/compare';
 const { similar } = require('./utils/utils');
 import Zoro from './class/Zoro';
 import { ExtendedEpisodeDownload, IgnoranceItem, Serie } from './utils/types';
@@ -49,11 +49,12 @@ socket.on('connect', async () => {
 	// const array: ExtendedEpisodeDownload[] = [];
 
 	// const zoro = new Zoro('18244');
-	// const zoro = new Zoro('1560');
+	// const zoro = new Zoro('2945');
 
 	// const ret = await zoro.getSeasons();
 
 	// console.log(ret);
+	// console.log(await zoro.getEpisodeList());
 
 	// const { total, episodes } = await zoro.getExtendedEpisodeList();
 	// console.log(episodes);
@@ -426,6 +427,36 @@ buildFunction<any, { ID: string | number }>('ZoroData', async ({ ID }) => {
 	await zoro.initialize();
 	const informations = await zoro.getExtendedEpisodeList();
 	return { ...informations };
+});
+
+buildFunction<any, { ID: string | number }>('newZoroData', async ({ ID }) => {
+	console.log('Recieved newZoroData', ID);
+
+	const out = {
+		movies: [] as unknown,
+		seasons: [] as ChangedZoroEpisode[][],
+	};
+
+	try {
+		const zoro = new Zoro(ID.toString());
+
+		const seasons = await zoro.getSeasons();
+		if (seasons.length > 0) {
+			for (const seasonObj of seasons) {
+				const tmpZoro = new Zoro(seasonObj.ID);
+				const { episodes } = await tmpZoro.getExtendedEpisodeList();
+				out.seasons[parseInt(seasonObj.IDX) - 1] = episodes.map(changeEpisode);
+			}
+		} else {
+			const { episodes } = await zoro.getExtendedEpisodeList();
+			out.seasons.push(episodes.map(changeEpisode));
+		}
+	} catch (error) {
+		console.log(error);
+		console.log('Error parsing');
+	}
+
+	return { ...out };
 });
 
 buildFunction<any, { title: string; aniworld: boolean }>('manageTitle', async ({ title, aniworld }) => {

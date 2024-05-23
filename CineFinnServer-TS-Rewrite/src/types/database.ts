@@ -1,4 +1,4 @@
-import { AniWorldSeriesInformations, ZoroReturn } from '../sockets/scraper.socket';
+import { AniWorldSeriesInformations, ZoroReturn, newZoroReturn } from '../sockets/scraper.socket';
 import { Langs } from './classes';
 
 export interface DatabaseWatchStringItem {
@@ -30,6 +30,7 @@ export interface DatabaseParsedTodoItem {
 	references: References;
 	scraped?: AniWorldSeriesInformations | true;
 	scrapedZoro?: ZoroReturn | true;
+	scrapednewZoro?: newZoroReturn | true;
 	scrapingError?: string;
 }
 

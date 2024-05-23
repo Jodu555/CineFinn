@@ -26,7 +26,7 @@ interface ZoroSerieCompare {
 	movies: ExtendedZoroEpisode[];
 }
 
-interface ChangedZoroEpisode extends Omit<ExtendedZoroEpisode, 'langs'> {
+export interface ChangedZoroEpisode extends Omit<ExtendedZoroEpisode, 'langs'> {
 	langs: Langs[];
 }
 
@@ -638,4 +638,4 @@ async function compareForNewReleasesZoro(
 	}
 }
 
-export { compareForNewReleases, compareForNewReleasesAniWorld, compareForNewReleasesZoro };
+export { compareForNewReleases, compareForNewReleasesAniWorld, compareForNewReleasesZoro, changeEpisode };

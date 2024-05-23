@@ -7,7 +7,7 @@ import { cleanupSeriesBeforeFrontResponse } from '../classes/series';
 import { DatabaseParsedTodoItem, DatabaseTodoItem } from '../types/database';
 import { ExtendedSocket, ExtendedRemoteSocket, Role } from '../types/session';
 import { isPermitted } from '../utils/roleManager';
-import { getAniworldInfos, getZoroInfos, isScraperSocketConnected } from './scraper.socket';
+import { getAniworldInfos, getNewZoroInfos, getZoroInfos, isScraperSocketConnected } from './scraper.socket';
 import { LOOKUP, callpointToEvent } from '../routes/managment';
 
 const database = Database.getDatabase();
@@ -105,7 +105,10 @@ const initialize = (socket: ExtendedSocket) => {
 		for (const todo of list) {
 			const item = await database.get<DatabaseTodoItem>('todos').getOne({ ID: todo.ID });
 			if (item) {
-				if ((isScraperSocketConnected() && !todo.scraped && todo.references.aniworld !== '') || (!todo.scrapedZoro && todo.references.zoro !== '')) {
+				if (
+					(isScraperSocketConnected() && !todo.scraped && todo.references.aniworld !== '') ||
+					((!todo.scrapedZoro || !todo.scrapednewZoro) && todo.references.zoro !== '')
+				) {
 					todo.scraped = true;
 					scrapeJobs.push(() => {
 						backgroundScrapeTodo(todo);
@@ -165,7 +168,8 @@ async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 
 			const [aniInfos, zoroInfos] = await Promise.all([
 				todo.references.aniworld ? getAniworldInfos({ url: todo.references.aniworld }) : null,
-				todo.references.zoro ? getZoroInfos({ ID: todo.references.zoro }) : null,
+				todo.references.zoro ? getNewZoroInfos({ ID: todo.references.zoro }) : null,
+				// todo.references.zoro ? getZoroInfos({ ID: todo.references.zoro }) : null,
 			]);
 
 			if ((todo.references.aniworld && !aniInfos) || (todo.references.zoro && !zoroInfos)) {
@@ -177,7 +181,7 @@ async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 			if (todo.scrapingError) delete todo.scrapingError;
 
 			if (aniInfos) todo.scraped = aniInfos;
-			if (zoroInfos) todo.scrapedZoro = zoroInfos;
+			if (zoroInfos) todo.scrapednewZoro = zoroInfos;
 			//Updating db todo
 			await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
 

@@ -95,8 +95,13 @@ export interface ZoroReturn {
 	episodes: ExtendedZoroEpisode[];
 }
 
+export interface newZoroReturn {
+	seasons: ExtendedZoroEpisode[][];
+}
+
 const getAniworldInfos = buildAwaitSocketReturn<AniWorldSeriesInformations, { url: string }>('AniworldData');
 const getZoroInfos = buildAwaitSocketReturn<ZoroReturn, { ID: string | number }>('ZoroData');
+const getNewZoroInfos = buildAwaitSocketReturn<newZoroReturn, { ID: string | number }>('newZoroData');
 const checkForUpdates = buildAwaitSocketReturn<{ success: boolean; error: Error }, void>('checkForUpdates');
 
 const manageTitle = buildAwaitSocketReturn('manageTitle');
@@ -136,4 +141,4 @@ function isScraperSocketConnected() {
 	return Boolean($socket);
 }
 
-export { initialize, getAniworldInfos, getZoroInfos, checkForUpdates, manageTitle, isScraperSocketConnected, waitingForResponse };
+export { initialize, getAniworldInfos, getZoroInfos, getNewZoroInfos, checkForUpdates, manageTitle, isScraperSocketConnected, waitingForResponse };

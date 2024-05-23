@@ -65,7 +65,7 @@
 										@click="moveToDoToTop(element.ID)"
 										type="button"
 										class="btn btn-outline-info me-2">
-										<font-awesome-icon icon="fa-solid fa-up-long" size="l" />
+										<font-awesome-icon icon="fa-solid fa-up-long" />
 									</button>
 									<button
 										v-if="!element.edited && element.order <= state.list.length / 1.2"
@@ -73,7 +73,7 @@
 										@click="moveToDoToBottom(element.ID)"
 										type="button"
 										class="btn btn-outline-warning">
-										<font-awesome-icon icon="fa-solid fa-down-long" size="l" />
+										<font-awesome-icon icon="fa-solid fa-down-long" />
 									</button>
 									<button v-if="element.edited" type="button" @click="element.edited = false" class="btn btn-close"></button>
 								</div>
@@ -379,6 +379,20 @@ const languageDevision = (element: TodoItem) => {
 			});
 		});
 	}
+	if (element.scrapednewZoro != undefined && element.scrapednewZoro !== true) {
+		const zoroEps = element.scrapednewZoro?.seasons.flat();
+		zoroEps.forEach((e) => {
+			e.langs.forEach((l) => {
+				if (l == 'sub') l = 'EngSub';
+				if (l == 'dub') l = 'EngDub';
+				if (out[l]) {
+					out[l] += 1;
+				} else {
+					out[l] = 1;
+				}
+			});
+		});
+	}
 
 	for (const [key, value] of Object.entries(out)) {
 		out[key] = parseFloat(parseFloat(String((value / total) * 100)).toFixed(2));
@@ -511,6 +525,8 @@ const deleteParsedInfos = (ID: string) => {
 	state.list = state.list.map((x) => {
 		if (x.ID == ID) {
 			delete x?.scraped;
+			delete x?.scrapedZoro;
+			delete x?.scrapednewZoro;
 			return x;
 		} else {
 			return x;
