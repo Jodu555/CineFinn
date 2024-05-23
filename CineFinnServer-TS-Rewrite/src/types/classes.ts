@@ -31,6 +31,7 @@ export interface SerieMovieObject {
 	primaryName: string;
 	secondaryName: string;
 	langs: Langs[];
+	subID: string;
 }
 
 export interface SerieInfo {

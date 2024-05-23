@@ -55,15 +55,17 @@ class Movie {
 	primaryName: string;
 	secondaryName: string;
 	langs: Langs[];
-	constructor(filePath: string, primaryName: string, secondaryName: string, langs: Langs[]) {
+	subID: string;
+	constructor(filePath: string, primaryName: string, secondaryName: string, langs: Langs[], subID: string = 'main') {
 		this.filePath = filePath;
 		this.primaryName = primaryName;
 		this.secondaryName = secondaryName;
 		this.langs = langs;
+		this.subID = subID;
 	}
 
 	static fromObject(o: SerieMovieObject) {
-		return new Movie(o.filePath, o.primaryName, o.secondaryName, o.langs);
+		return new Movie(o.filePath, o.primaryName, o.secondaryName, o.langs, o.subID);
 	}
 }
 

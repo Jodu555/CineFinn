@@ -159,7 +159,7 @@ const crawlAndIndex = async () => {
 			if (existMovie) {
 				existMovie.langs.push(parsedData.language);
 			} else {
-				const movie = new Movie(e, parsedData.movieTitle, '', [parsedData.language]);
+				const movie = new Movie(e, parsedData.movieTitle, '', [parsedData.language], subID);
 				item.movies.push(movie);
 			}
 		} else {

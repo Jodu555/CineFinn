@@ -28,6 +28,10 @@ interface SubFile {
 	path: string;
 }
 
+function getSubSocketByID(id: string): ExtendedSocket | undefined {
+	return subSocketMap.get(id);
+}
+
 async function getAllFilesFromAllSubs() {
 	const allFiles = await new Promise<SubFile[]>((resolve, reject) => {
 		let waitFor: string[] = [];
@@ -60,4 +64,4 @@ async function getAllFilesFromAllSubs() {
 	return allFiles;
 }
 
-export { initialize, subSocketMap, getAllFilesFromAllSubs, SubFile };
+export { initialize, subSocketMap, getAllFilesFromAllSubs, SubFile, getSubSocketByID };
