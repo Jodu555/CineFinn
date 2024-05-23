@@ -97,7 +97,7 @@
 					</form>
 				</div>
 			</div>
-			<div class="card-footer text-muted">
+			<div class="card-footer" :class="{ 'text-muted': !entity.infos.disabled, 'text-danger': entity.infos.disabled }">
 				{{ entityInfoString }}
 			</div>
 		</div>
@@ -149,6 +149,9 @@ export default defineComponent({
 	computed: {
 		...mapWritableState(useAuthStore, ['settings', 'userInfo']),
 		entityInfoString() {
+			if (this.entity.infos.disabled) {
+				return 'Series Disabled';
+			}
 			const moviePart = this.entity.movies.length >= 1 ? this.entity.movies.length + ' ' + (this.entity.movies.length > 1 ? 'Movies' : 'Movie') : '';
 			const seasonPart =
 				this.entity.seasons.length >= 1 ? this.entity.seasons.length + ' ' + (this.entity.seasons.length > 1 ? 'Seasons' : 'Season') : '';

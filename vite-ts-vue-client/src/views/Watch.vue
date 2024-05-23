@@ -23,7 +23,7 @@
 				{{ displayTitle }}
 			</h1>
 
-			<div class="text-center" v-if="watchStore.currentSeries.movies.length == 0 && watchStore.currentSeries.seasons.length == 0">
+			<div class="text-center" v-if="showDisabled">
 				<h2 class="text-danger">It Seems there is currently no data for this Series</h2>
 				<p class="text-danger mb-0">It either got removed, or is on a node which is currently un reachable, or is currently being transcoded</p>
 				<p class="text-danger">Please check back later and if this issue persists please contact the Administrator</p>
@@ -42,8 +42,9 @@
 			<div v-auto-animate v-if="showLatestWatchButton" class="text-center mb-2">
 				<button @click="skipToLatestTime" class="btn btn-outline-info">Jump to Latest watch position!</button>
 			</div>
-			<MarkSeasonDropdown />
+
 			<pre v-if="authStore.settings.developerMode.value">
+				currentSeries.infos {{ JSON.stringify(watchStore.currentSeries.infos) }}
 				currentMovie: {{ watchStore.currentMovie }}
 				currentSeason: {{ watchStore.currentSeason }}
 				currentEpisode: {{ watchStore.currentEpisode }}
@@ -53,41 +54,45 @@
 			</pre
 			>
 
-			<div v-if="watchStore.currentSeries.movies.length >= 1 && watchStore.currentSeries.seasons.length == 0 && watchStore.currentMovie == -1">
-				<EntityListViewMovies :changeMovie="changeMovie" />
-			</div>
+			<template v-if="!showDisabled">
+				<MarkSeasonDropdown />
 
-			<div v-else>
-				<!-- Movies -->
-				<EntityListView
-					v-if="watchStore.currentSeries.movies.length >= 1"
-					title="Movies:"
-					:array="watchStore.currentSeries.movies"
-					:current="watchStore.currentMovie"
-					:changeFN="changeMovie"
-					:watchList="watchStore.watchList" />
-				<!-- Seasons -->
-				<EntityListView
-					title="Seasons:"
-					v-if="watchStore.currentSeries.seasons.length >= 1"
-					:array="watchStore.currentSeries.seasons"
-					:current="watchStore.currentSeason"
-					:changeFN="changeSeason"
-					:season="true"
-					:watchList="watchStore.watchList" />
-				<!-- Episodes -->
-				<EntityListView
-					v-if="watchStore.currentSeason != -1"
-					title="Episodes:"
-					:array="watchStore.currentSeries.seasons.find((x) => x[0].season == ((watchStore.entityObject as SerieEpisode)?.season || -1))"
-					:current="watchStore.currentEpisode"
-					:currentSeason="watchStore.currentSeason"
-					:changeFN="changeEpisode"
-					:watchList="watchStore.watchList" />
-			</div>
+				<div v-if="watchStore.currentSeries.movies.length >= 1 && watchStore.currentSeries.seasons.length == 0 && watchStore.currentMovie == -1">
+					<EntityListViewMovies :changeMovie="changeMovie" />
+				</div>
 
-			<!-- Previous & Title & Languages & Next -->
-			<EntityActionsInformation :switchTo="switchTo" :changeLanguage="changeLanguage" />
+				<div v-else>
+					<!-- Movies -->
+					<EntityListView
+						v-if="watchStore.currentSeries.movies.length >= 1"
+						title="Movies:"
+						:array="watchStore.currentSeries.movies"
+						:current="watchStore.currentMovie"
+						:changeFN="changeMovie"
+						:watchList="watchStore.watchList" />
+					<!-- Seasons -->
+					<EntityListView
+						title="Seasons:"
+						v-if="watchStore.currentSeries.seasons.length >= 1"
+						:array="watchStore.currentSeries.seasons"
+						:current="watchStore.currentSeason"
+						:changeFN="changeSeason"
+						:season="true"
+						:watchList="watchStore.watchList" />
+					<!-- Episodes -->
+					<EntityListView
+						v-if="watchStore.currentSeason != -1"
+						title="Episodes:"
+						:array="watchStore.currentSeries.seasons.find((x) => x[0].season == ((watchStore.entityObject as SerieEpisode)?.season || -1))"
+						:current="watchStore.currentEpisode"
+						:currentSeason="watchStore.currentSeason"
+						:changeFN="changeEpisode"
+						:watchList="watchStore.watchList" />
+				</div>
+
+				<!-- Previous & Title & Languages & Next -->
+				<EntityActionsInformation :switchTo="switchTo" :changeLanguage="changeLanguage" />
+			</template>
 		</div>
 		<ExtendedVideo v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="sendVideoTimeUpdate" />
 	</div>
@@ -181,6 +186,10 @@ onBeforeUnmount(() => {
 
 onUnmounted(() => {
 	useSocket().off('watchListChange');
+});
+
+const showDisabled = computed(() => {
+	return watchStore.currentSeries.infos.disabled || (watchStore.currentSeries.movies.length == 0 && watchStore.currentSeries.seasons.length == 0);
 });
 
 const showLatestWatchButton = computed(() => {
