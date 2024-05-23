@@ -15,7 +15,7 @@ router.get('/', async (req: AuthenticatedRequest, res: Response) => {
 
 	if (isScraperSocketConnected()) {
 		for (const todo of todos) {
-			if ((todo.references.aniworld && !todo.scraped) || (!todo.scrapedZoro && todo.references.zoro !== '')) {
+			if ((!todo.scraped && todo.references.aniworld !== '') || (!todo.scrapedZoro && !todo.scrapednewZoro && todo.references.zoro !== '')) {
 				backgroundScrapeTodo(todo);
 			}
 		}

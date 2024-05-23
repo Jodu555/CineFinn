@@ -107,7 +107,7 @@ const initialize = (socket: ExtendedSocket) => {
 			if (item) {
 				if (
 					(isScraperSocketConnected() && !todo.scraped && todo.references.aniworld !== '') ||
-					((!todo.scrapedZoro || !todo.scrapednewZoro) && todo.references.zoro !== '')
+					(!todo.scrapedZoro && !todo.scrapednewZoro && todo.references.zoro !== '')
 				) {
 					todo.scraped = true;
 					scrapeJobs.push(() => {
