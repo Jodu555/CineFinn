@@ -125,11 +125,11 @@ const crawlAndIndex = async () => {
 
 	files.push(...subFiles);
 
-	// for (const pathEntry of pathEntries) {
-	// 	let { files: tmp_files } = listFiles(pathEntry);
-	// 	files.push(...tmp_files);
-	// 	tmp_files = null;
-	// }
+	for (const pathEntry of pathEntries) {
+		let { files: tmp_files } = listFiles(pathEntry);
+		files.push(...tmp_files.map((x) => ({ path: x, subID: 'main' })));
+		tmp_files = null;
+	}
 
 	// let { files: tmp2_files } = listFiles('Z:\\home\\laterIntegrate');
 	// files.push(...tmp2_files);

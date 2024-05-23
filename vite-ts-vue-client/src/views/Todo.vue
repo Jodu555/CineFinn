@@ -5,6 +5,8 @@
 		<div class="d-flex justify-content-between">
 			<button class="btn btn-outline-primary mb-5" @click="addEmptyItem">Add Item</button>
 
+			<button class="btn btn-outline-warning mb-5" @click="minimal = !minimal">Minimal View</button>
+
 			<button class="btn btn-outline-danger mb-5" @click="rescrapeAllItems">Rescrape All Items</button>
 		</div>
 
@@ -34,6 +36,7 @@
 					<div class="d-flex" v-auto-animate>
 						<img
 							v-if="
+								!minimal &&
 								element.scraped != undefined &&
 								element.scraped !== true &&
 								element.scraped.informations.image &&
@@ -47,7 +50,7 @@
 								<div>
 									{{ element.name }} -
 									{{ element.categorie }}
-									<span class="badge bg-info mx-2 me-3">{{ element.order }}</span>
+									<span class="badge bg-primary mx-2 me-3">{{ element.order }}</span>
 									<button v-if="!element.edited" title="Edit" type="button" @click="element.edited = true" class="btn btn-outline-primary me-3">
 										<font-awesome-icon :icon="['fa-solid', 'fa-pen']" size="lg" />
 									</button>
@@ -59,6 +62,7 @@
 									</button>
 								</div>
 								<div>
+									<!-- Bring to Top -->
 									<button
 										v-if="!element.edited && element.order > 6 && auth.userInfo.role > 2"
 										title="Bring to top"
@@ -67,6 +71,7 @@
 										class="btn btn-outline-info me-2">
 										<font-awesome-icon icon="fa-solid fa-up-long" />
 									</button>
+									<!-- Bring to Bottom -->
 									<button
 										v-if="!element.edited && element.order <= state.list.length / 1.2"
 										title="Bring to Bottom"
@@ -88,7 +93,7 @@
 								<span v-if="element.references.sto" target="_blank" :href="element.references.aniworld" class="h6">S</span>
 							</div>
 
-							<ul v-if="element.scraped != undefined && element.scraped !== true">
+							<ul v-if="!minimal && element.scraped != undefined && element.scraped !== true">
 								<li>Episodes: {{ element.scraped?.seasons?.flat()?.length }}</li>
 								<li>
 									&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk:
@@ -254,7 +259,13 @@
 			</template>
 		</draggable>
 
-		<button v-if="state.list.length >= 7" class="btn btn-outline-primary mt-5 mb-5" @click="addEmptyItem">Add Item</button>
+		<div v-if="state.list.length >= 7" class="d-flex justify-content-between mt-5 mb-5">
+			<button class="btn btn-outline-primary mb-5" @click="addEmptyItem">Add Item</button>
+
+			<button class="btn btn-outline-warning mb-5" @click="minimal = !minimal">Minimal View</button>
+
+			<button class="btn btn-outline-danger mb-5" @click="rescrapeAllItems">Rescrape All Items</button>
+		</div>
 
 		<div v-if="auth.settings.developerMode.value" class="mt-5">
 			<pre>{{ state.list }}</pre>
@@ -270,6 +281,8 @@ import { reactive, computed, ref, onMounted, getCurrentInstance, onUnmounted } f
 import type { NewsItem, TodoItem } from '@/types/index';
 import type { AniWorldAdditionalSeriesInformations } from '@/types/scraper';
 import draggable from 'vuedraggable';
+
+const minimal = ref(false);
 
 const instance = getCurrentInstance()!.appContext.config.globalProperties;
 const auth = useAuthStore();
