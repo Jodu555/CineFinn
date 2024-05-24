@@ -52,6 +52,12 @@ const getSeries = async (forceLoad: boolean = false, forceFile: boolean = false,
 	return series;
 };
 
+const dangerouslySetSeries = (newSeries: Series[]) => {
+	console.log('Dangerously setted new Series!');
+	series = newSeries;
+	fs.writeFileSync(outputFileName, JSON.stringify(series, null, 3), 'utf8');
+};
+
 const setSeries = (_series: Series[], keepCurrentlyNotPresent = true) => {
 	console.log('Loaded or Setted & merged new Series!');
 	if (series != null) {
@@ -106,4 +112,5 @@ export {
 	debounce,
 	toAllSockets,
 	deepMerge,
+	dangerouslySetSeries,
 };

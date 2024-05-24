@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { sendSeriesReloadToAll, sendSiteReload } from '../sockets/client.socket';
 import { getAniworldInfos, waitingForResponse } from '../sockets/scraper.socket';
-import { getSeries, getAuthHelper, getIO, getVideoStreamLog, toAllSockets, setSeries } from './utils';
+import { getSeries, getAuthHelper, getIO, getVideoStreamLog, toAllSockets, setSeries, dangerouslySetSeries } from './utils';
 import { CommandManager, Command } from '@jodu555/commandmanager';
 import { ExtendedRemoteSocket } from '../types/session';
 import { getSyncRoom } from './room.utils';
@@ -70,6 +70,28 @@ function registerCommands() {
 			}
 		)
 	);
+
+	commandManager.registerCommand(
+		new Command(['delete', 'del'], 'delete <SeriesID>', 'Deletes a series indefinetly with everything to it', async (command, [...args], scope) => {
+			const id = args[1];
+			if (!id) {
+				return 'You need to specify a Series ID!';
+			}
+			const series = await getSeries();
+
+			const serie = series.find((x) => x.ID == id);
+
+			if (!serie) {
+				return 'Series with ID: ' + id + ' does not exist!';
+			}
+
+			dangerouslySetSeries((await getSeries()).filter((x) => x.ID != id));
+			await sendSeriesReloadToAll();
+
+			return 'Deleted the series for: ' + id + ' with title ' + serie.title;
+		})
+	);
+
 	commandManager.registerCommand(
 		new Command(['authsession', 'as'], 'authsession [list]', 'Lists the current authenticated session', (command, [...args], scope) => {
 			if (args[1] == 'list') {

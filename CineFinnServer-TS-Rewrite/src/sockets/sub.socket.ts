@@ -8,8 +8,7 @@ const subSocketMap = new Map<string, ExtendedSocket>();
 
 const initialize = async (socket: ExtendedSocket) => {
 	const auth = socket.auth;
-	console.log('Socket Connection:', auth.type.toUpperCase());
-	console.log(socket.handshake.auth);
+	console.log('Socket Connection:', auth.type.toUpperCase(), auth.id, auth.ptoken);
 
 	subSocketMap.set(auth.id, socket);
 
@@ -23,10 +22,6 @@ const initialize = async (socket: ExtendedSocket) => {
 	});
 
 	await toggleSeriesDisableForSubSystem(auth.id, false);
-
-	// socket.on('files', ({ files }) => {
-	// 	console.log(files);
-	// });
 };
 
 interface SubFile {
@@ -36,7 +31,8 @@ interface SubFile {
 
 async function toggleSeriesDisableForSubSystem(subID: string, disabled: boolean) {
 	const match = await getSeriesBySubID(subID);
-	console.log(match.map((x) => x.ID));
+
+	console.log(`${disabled ? 'Disabling' : 'Enabling'} sub system for: ${subID} affected ${match.length} Series`);
 
 	setSeries(
 		(await getSeries()).map((x) => {
@@ -69,27 +65,23 @@ async function getAllFilesFromAllSubs() {
 	const allFiles = await new Promise<SubFile[]>((resolve, reject) => {
 		let waitFor: string[] = [];
 		const allFilesInner: SubFile[] = [];
-		console.log(subSocketMap.keys());
+
+		setTimeout(() => {
+			reject(new Error('Timeout Reached with: ' + waitFor.join(', ')));
+		}, 1000 * 60 * 1);
 
 		subSocketMap.forEach((socket) => {
 			socket.once('files', ({ files }) => {
 				allFilesInner.push(...files.map((x) => ({ path: x, subID: socket.auth.id })));
 				waitFor = waitFor.filter((k) => k !== socket.auth.id);
 
-				console.log(
-					'Response from:',
-					`"${socket.auth.id}"`,
-					'waitFor:',
-					waitFor,
-					'other:',
-					waitFor.filter((k) => k == socket.auth.id)
-				);
+				console.log('Response from:', `"${socket.auth.id}"`, 'waiting for:', waitFor.join(', '));
 				if (waitFor.length == 0) {
 					resolve(allFilesInner);
 				}
 			});
 			waitFor.push(socket.auth.id);
-			console.log('Requesting from:', socket.auth.id, 'waitFor:', waitFor);
+			console.log('Requesting from:', socket.auth.id, 'waiting for:', waitFor.join(', '));
 
 			socket.emit('listFiles');
 		});
