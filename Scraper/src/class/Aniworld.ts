@@ -30,7 +30,7 @@ class Aniworld {
 	imageSRCPrefix: string;
 	constructor(url: string) {
 		this.url = url;
-		this.imageSRCPrefix = 'https://aniworld.to';
+		this.imageSRCPrefix = new URL(url).origin;
 	}
 
 	async parseInformations(): Promise<void | AniWorldSeriesInformations> {

@@ -90,7 +90,7 @@
 							<div style="width: 15%" class="d-flex justify-content-around">
 								<a v-if="element.references.aniworld" target="_blank" :href="element.references.aniworld" class="h6">A</a>
 								<span v-if="element.references.zoro" class="h6">Z</span>
-								<span v-if="element.references.sto" target="_blank" :href="element.references.aniworld" class="h6">S</span>
+								<a v-if="element.references.sto" target="_blank" :href="element.references.sto" class="h6">S</a>
 							</div>
 
 							<ul v-if="!minimal && element.scraped != undefined && element.scraped !== true">

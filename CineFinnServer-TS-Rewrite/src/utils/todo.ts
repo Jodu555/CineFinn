@@ -9,8 +9,9 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export function checkIfTodoNeedsScrape(todo: DatabaseParsedTodoItem) {
 	const needsAniworld = !todo.scraped && todo.references.aniworld !== '';
+	const needsSTO = !todo.scraped && todo.references.sto !== '';
 	const needsZoro = !todo.scrapedZoro && !todo.scrapednewZoro && todo.references.zoro !== '';
-	return needsAniworld || needsZoro;
+	return needsAniworld || needsSTO || needsZoro;
 }
 
 export async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
@@ -25,22 +26,25 @@ export async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 			const time = Date.now();
 			console.log('Kicked off scraper', todo.references.aniworld);
 
-			const [aniInfos, zoroInfos] = await Promise.all([
+			const [aniInfos, zoroInfos, stoInfos] = await Promise.all([
 				todo.references.aniworld ? getAniworldInfos({ url: todo.references.aniworld }) : null,
 				todo.references.zoro ? getNewZoroInfos({ ID: todo.references.zoro }) : null,
+				todo.references.sto ? getAniworldInfos({ url: todo.references.sto }) : null,
 				// todo.references.zoro ? getZoroInfos({ ID: todo.references.zoro }) : null,
 			]);
 
-			if ((todo.references.aniworld && !aniInfos) || (todo.references.zoro && !zoroInfos)) {
+			if ((todo.references.aniworld && !aniInfos) || (todo.references.zoro && !zoroInfos) || (todo.references.sto && !stoInfos)) {
 				console.log('Got Bad Infos', aniInfos, 'for url', todo.references.aniworld);
 				console.log('Got Bad Infos', zoroInfos, 'for url', todo.references.zoro);
-				throw new Error('No Aniworld Or Zoro infos found');
+				console.log('Got Bad Infos', stoInfos, 'for url', todo.references.sto);
+				throw new Error('No Aniworld, Zoro or STO infos found');
 			}
 
 			if (todo.scrapingError) delete todo.scrapingError;
 
 			if (aniInfos) todo.scraped = aniInfos;
 			if (zoroInfos) todo.scrapednewZoro = zoroInfos;
+			if (stoInfos) todo.scraped = stoInfos;
 			//Updating db todo
 			await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
 
