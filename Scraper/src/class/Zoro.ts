@@ -47,6 +47,23 @@ const debug = false;
 
 const hostname = 'hianime.to';
 
+const headers = {
+	accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+	'accept-language': 'en-GB,en;q=0.8',
+	'cache-control': 'no-cache',
+	pragma: 'no-cache',
+	priority: 'u=0, i',
+	'sec-ch-ua': '"Brave";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
+	'sec-ch-ua-mobile': '?0',
+	'sec-ch-ua-platform': '"Windows"',
+	'sec-fetch-dest': 'document',
+	'sec-fetch-mode': 'navigate',
+	'sec-fetch-site': 'none',
+	'sec-fetch-user': '?1',
+	'sec-gpc': '1',
+	'upgrade-insecure-requests': '1',
+};
+
 class Zoro {
 	url: string;
 	ID: string | number;
@@ -80,7 +97,9 @@ class Zoro {
 			await this.initialize();
 		}
 		try {
-			const response = await axios.get(this.url);
+			const response = await axios.get(this.url, {
+				headers,
+			});
 			const { document } = new jsdom.JSDOM(response.data).window;
 
 			const infos = [...document.querySelectorAll('.os-item')]
@@ -104,7 +123,9 @@ class Zoro {
 
 	async getEpisodeList(): Promise<{ total: number; episodes: SimpleZoroEpisode[] }> {
 		debug && console.log('Called Zoro.getEpisodeList');
-		const response = await axios.get(`https://${hostname}/ajax/v2/episode/list/${this.ID}`);
+		const response = await axios.get(`https://${hostname}/ajax/v2/episode/list/${this.ID}`, {
+			headers,
+		});
 		const total = response.data.totalItems;
 		const { document } = new jsdom.JSDOM(response.data.html).window;
 
@@ -132,9 +153,15 @@ class Zoro {
 
 		const extendedEpisodes: ExtendedZoroEpisode[] = [];
 
+		let i = 0;
 		for (const episode of episodes) {
+			i++;
+			console.log('Fetching infos for', episode.ID, episode.number, episodes.length, '/', i);
+
 			const outputEpisode = { ...episode } as ExtendedZoroEpisode;
-			const response = await axios.get(`https://${hostname}/ajax/v2/episode/servers?episodeId=${episode.ID}`);
+			const response = await axios.get(`https://${hostname}/ajax/v2/episode/servers?episodeId=${episode.ID}`, {
+				headers,
+			});
 			const { document } = new jsdom.JSDOM(response.data.html).window;
 			const streamingServers: StreamingServers[] = [...document.querySelectorAll('div.server-item')].map((server: HTMLAnchorElement) => {
 				return {

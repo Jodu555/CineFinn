@@ -529,7 +529,7 @@ async function compareForNewReleasesZoro(
 							}
 						} catch (error) {
 							console.log(error);
-							console.log('Error parsing', serie);
+							console.log('Error parsing', JSON.stringify(serie, null, 3));
 						}
 					} else {
 						for (const [key, value] of Object.entries(serie.references.zoro)) {

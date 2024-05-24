@@ -93,7 +93,7 @@ function registerCommands() {
 	);
 
 	commandManager.registerCommand(
-		new Command(['authsession', 'as'], 'authsession [list]', 'Lists the current authenticated session', async (command, [...args], scope) => {
+		new Command(['authsession', 'as'], 'authsession [list/pool]', 'Lists the current authenticated session', async (command, [...args], scope) => {
 			const accounts = await database.get<User>('accounts').get();
 			const tokens = await database.get<AuthToken>('authtokens').get();
 			if (args[1] == 'list') {
