@@ -4,7 +4,7 @@ import { sendSeriesReloadToAll, sendSiteReload } from '../sockets/client.socket'
 import { getAniworldInfos, waitingForResponse } from '../sockets/scraper.socket';
 import { getSeries, getAuthHelper, getIO, getVideoStreamLog, toAllSockets, setSeries, dangerouslySetSeries } from './utils';
 import { CommandManager, Command } from '@jodu555/commandmanager';
-import { ExtendedRemoteSocket } from '../types/session';
+import { AuthToken, ExtendedRemoteSocket, User } from '../types/session';
 import { getSyncRoom } from './room.utils';
 import { Database } from '@jodu555/mysqlapi';
 import { DatabaseSyncRoomItem } from '../types/database';
@@ -93,11 +93,29 @@ function registerCommands() {
 	);
 
 	commandManager.registerCommand(
-		new Command(['authsession', 'as'], 'authsession [list]', 'Lists the current authenticated session', (command, [...args], scope) => {
+		new Command(['authsession', 'as'], 'authsession [list]', 'Lists the current authenticated session', async (command, [...args], scope) => {
+			const accounts = await database.get<User>('accounts').get();
+			const tokens = await database.get<AuthToken>('authtokens').get();
 			if (args[1] == 'list') {
 				const output = ['Current authsessions:'];
-				for (const [token, obj] of getAuthHelper().tokens) {
-					output.push(` - ${token} => ${obj.username}`);
+				for (const token of tokens) {
+					output.push(` - ${token.TOKEN} => ${accounts.find((x) => x.UUID === token.UUID)?.username}`);
+				}
+				output.push('', '------------------------------------');
+				return output;
+			} else if (args[1] == 'pool') {
+				const aggregatedTokensbyUUID = tokens.reduce<Record<string, AuthToken[]>>((acc, cur) => {
+					if (acc[cur.UUID]) {
+						acc[cur.UUID].push(cur);
+					} else {
+						acc[cur.UUID] = [cur];
+					}
+					return acc;
+				}, {});
+
+				const output = ['Current Pooled authsessions by UUID:'];
+				for (const UUID in aggregatedTokensbyUUID) {
+					output.push(` - ${UUID} => ${accounts.find((x) => x.UUID === UUID)?.username} : ${aggregatedTokensbyUUID[UUID].length}`);
 				}
 				output.push('', '------------------------------------');
 				return output;

@@ -20,6 +20,11 @@ export interface User {
 	activityDetails: ActivityDetails | string;
 }
 
+export interface AuthToken {
+	TOKEN: string;
+	UUID: string;
+}
+
 export type ActivityDetails = {
 	lastIP?: string;
 	lastHandshake?: string;
