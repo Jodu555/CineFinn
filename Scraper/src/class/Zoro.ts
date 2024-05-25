@@ -152,8 +152,6 @@ class Zoro {
 				}
 			}
 
-			console.log(subCount, dubCount, episodeCount);
-
 			return {
 				title,
 				image: imageSrc,

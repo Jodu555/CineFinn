@@ -83,14 +83,14 @@
 								<a v-if="element.references.sto" target="_blank" :href="element.references.sto" class="h6">S</a>
 							</div>
 
-							<ul v-if="!minimal && element.scraped != undefined && element.scraped !== true">
-								<li>Episodes: {{ element.scraped?.seasons?.flat()?.length }}</li>
+							<ul v-if="!minimal && languageDevision(element).total != -1">
+								<li>Episodes: {{ languageDevision(element).total }}</li>
 								<li>
 									&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk:
-									{{ numWithFP((element.scraped?.seasons?.flat()?.length * constants.mbperEpisode) / 1024, 1) }}GB
+									{{ numWithFP((languageDevision(element).total * constants.mbperEpisode) / 1024, 1) }}GB
 								</li>
-								<li v-for="[key, value] in Object.entries(languageDevision(element))">&nbsp;&nbsp;&nbsp;&nbsp;{{ key }}: {{ value }}%</li>
-								<template v-if="element.scraped?.movies != undefined">
+								<li v-for="[key, value] in Object.entries(languageDevision(element).devision)">&nbsp;&nbsp;&nbsp;&nbsp;{{ key }}: {{ value }}%</li>
+								<template v-if="element.scraped != undefined && element.scraped !== true && element.scraped?.movies != undefined">
 									<li>Movies: {{ element.scraped?.movies?.length }}</li>
 									<li>
 										&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk:
@@ -101,8 +101,10 @@
 									<em>
 										<template v-if="auth.userInfo.role > 2">
 											Source:
-											<br />
-											<a target="_blank" :href="element.scraped?.url">{{ element.scraped?.url }}</a>
+											<template v-if="element.scraped !== undefined && element.scraped !== true">
+												<br />
+												<a target="_blank" :href="element.scraped?.url">{{ element.scraped?.url }}</a>
+											</template>
 											<template v-if="element.scrapedZoro !== undefined && element.scrapedZoro !== true">
 												<br />
 												<a target="_blank" :href="element.scrapedZoro.episodes[0]?.url">{{ element.scrapedZoro.episodes[0]?.url }}</a>
@@ -389,12 +391,13 @@ const drag = ref(false);
 
 const languageDevision = (element: TodoItem) => {
 	const out: Record<string, number> = {};
-	if (element.scraped == undefined || element.scraped == true) return out;
-	const total = element.scraped.seasons.flat().length;
-
-	element.scraped.seasons.flat().forEach((x) => x.langs.forEach((l) => (!out[l] ? (out[l] = 1) : (out[l] += 1))));
-
+	let total = -1;
+	if (element.scraped != undefined && element.scraped !== true) {
+		total = element.scraped.seasons.flat().length;
+		element.scraped.seasons.flat().forEach((x) => x.langs.forEach((l) => (!out[l] ? (out[l] = 1) : (out[l] += 1))));
+	}
 	if (element.scrapedZoro != undefined && element.scrapedZoro !== true) {
+		if (total == -1) total = element.scrapedZoro.episodes.length;
 		const zoroEps = element.scrapedZoro?.episodes;
 		zoroEps.forEach((e) => {
 			e.langs.forEach((l) => {
@@ -409,6 +412,7 @@ const languageDevision = (element: TodoItem) => {
 		});
 	}
 	if (element.scrapednewZoro != undefined && element.scrapednewZoro !== true) {
+		if (total == -1) total = element.scrapednewZoro?.seasons.flat().length;
 		const zoroEps = element.scrapednewZoro?.seasons.flat();
 		zoroEps.forEach((e) => {
 			e.langs.forEach((l) => {
@@ -434,7 +438,7 @@ const languageDevision = (element: TodoItem) => {
 		delete out['EngSub'];
 	}
 
-	return out;
+	return { total, devision: out };
 };
 
 const moveToDoToTop = (ID: string) => {
