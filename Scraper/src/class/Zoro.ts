@@ -43,7 +43,7 @@ export interface SeasonInformation {
 	title: string;
 }
 
-const debug = false;
+const debug = true;
 
 const hostname = 'hianime.to';
 
@@ -64,6 +64,15 @@ const headers = {
 	'upgrade-insecure-requests': '1',
 };
 
+interface ZoroSeriesInformation {
+	title: string;
+	image: string;
+	subCount: number;
+	dubCount: number;
+	episodeCount: number;
+	seasons: ExtendedZoroEpisode[][];
+}
+
 class Zoro {
 	url: string;
 	ID: string | number;
@@ -73,6 +82,7 @@ class Zoro {
 		if (url.includes('/')) {
 			this.url = url;
 			this.ID = this.url?.split('/')?.pop()?.split('-').pop();
+			this.initialized = true;
 		} else {
 			this.ID = url;
 			// this.initialize();
@@ -84,11 +94,81 @@ class Zoro {
 
 		const list = await this.getEpisodeList();
 
-		this.url = list.episodes[0].url;
+		this.url = list.episodes[0].url.replace('/watch', '').split('?')[0];
 		this.initialized = true;
 		console.log('Parsed: ');
 		console.log(' ' + this.url);
 		await new Promise((res, _) => setTimeout(res, 100));
+	}
+
+	async parseInformations(): Promise<void | ZoroSeriesInformation> {
+		debug && console.log('Called Zoro.parseInformations');
+		if (!this.initialized) {
+			await this.initialize();
+		}
+
+		try {
+			const response = await axios.get(this.url, {
+				headers,
+			});
+			const { document } = new jsdom.JSDOM(response.data).window;
+
+			const title = document.querySelector('.film-name.dynamic-name').textContent.trim();
+
+			const imageSrc = document.querySelector<HTMLImageElement>('img.film-poster-img')?.src;
+
+			const tickContainer = document.querySelector('.tick');
+
+			const subCount = tickContainer.querySelector('.tick-item.tick-sub').textContent.trim();
+			const dubCount = tickContainer.querySelector('.tick-item.tick-dub').textContent.trim();
+			const episodeCount = tickContainer.querySelector('.tick-item.tick-eps').textContent.trim();
+
+			const seasonInfo = [...document.querySelectorAll('.os-item')]
+				.map((anchor: HTMLAnchorElement) => {
+					return {
+						ID: anchor.href.split('-')[anchor.href.split('-').length - 1] as string,
+						IDX: anchor.querySelector('.title').textContent.trim().replaceAll('Season ', ''),
+						title: anchor.querySelector('.title').textContent.trim() as string,
+					} as SeasonInformation;
+				})
+				.filter((x) => !x.title.includes('(') && x.title.includes('Season'));
+
+			const seasons: ExtendedZoroEpisode[][] = [];
+
+			if (seasonInfo.length === 0) {
+				console.log('Seems like the Season div does not yet exists');
+				const interEps = await this.getEpisodeList();
+				if (subCount == dubCount && subCount === episodeCount) {
+					seasons.push(
+						interEps.episodes.map((x) => {
+							return {
+								...x,
+								langs: ['sub', 'dub'],
+							} as ExtendedZoroEpisode;
+						})
+					);
+				} else {
+					seasons.push((await this.getExtendedEpisodeList(interEps)).episodes);
+				}
+			}
+
+			console.log(subCount, dubCount, episodeCount);
+
+			return {
+				title,
+				image: imageSrc,
+				subCount: parseInt(subCount),
+				dubCount: parseInt(dubCount),
+				episodeCount: parseInt(episodeCount),
+				seasons,
+			};
+		} catch (error) {
+			debug && console.log(error);
+
+			console.log('Seems like the Season div does not yet exists');
+
+			return null;
+		}
 	}
 
 	async getSeasons(): Promise<SeasonInformation[]> {
@@ -143,13 +223,25 @@ class Zoro {
 		};
 	}
 
-	async getExtendedEpisodeList(): Promise<{ total: number; episodes: ExtendedZoroEpisode[] }> {
+	async getExtendedEpisodeList(preData?: {
+		total: number;
+		episodes: SimpleZoroEpisode[];
+	}): Promise<{ total: number; episodes: ExtendedZoroEpisode[] }> {
 		debug && console.log('Called Zoro.getExtendedEpisodeList');
 
 		if (!this.initialized) {
 			await this.initialize();
 		}
-		const { total, episodes } = await this.getEpisodeList();
+		let total = 0;
+		let episodes: SimpleZoroEpisode[] = [];
+		if (!preData) {
+			const res = await this.getEpisodeList();
+			total = res.total;
+			episodes = res.episodes;
+		} else {
+			total = preData.total;
+			episodes = preData.episodes;
+		}
 
 		const extendedEpisodes: ExtendedZoroEpisode[] = [];
 

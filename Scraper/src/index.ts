@@ -49,11 +49,13 @@ socket.on('connect', async () => {
 	// const array: ExtendedEpisodeDownload[] = [];
 
 	// const zoro = new Zoro('18244');
-	// const zoro = new Zoro('2945');
+	// const zoro = new Zoro('https://hianime.to/a-returners-magic-should-be-special-18600?ep=107911');
+	// const zoro = new Zoro('https://hianime.to/a-returners-magic-should-be-special-18600');
+	// const zoro = new Zoro('18600');
 
-	// const ret = await zoro.getSeasons();
+	// const ret = await zoro.parseInformations();
 
-	// console.log(ret);
+	// console.log(JSON.stringify(ret, null, 3));
 	// console.log(await zoro.getEpisodeList());
 
 	// const { total, episodes } = await zoro.getExtendedEpisodeList();
@@ -433,31 +435,9 @@ buildFunction<any, { ID: string | number }>('ZoroData', async ({ ID }) => {
 buildFunction<any, { ID: string | number }>('newZoroData', async ({ ID }) => {
 	console.log('Recieved newZoroData', ID);
 
-	const out = {
-		movies: [] as unknown,
-		seasons: [] as ChangedZoroEpisode[][],
-	};
-
-	try {
-		const zoro = new Zoro(ID.toString());
-
-		const seasons = await zoro.getSeasons();
-		if (seasons.length > 0) {
-			for (const seasonObj of seasons) {
-				const tmpZoro = new Zoro(seasonObj.ID);
-				const { episodes } = await tmpZoro.getExtendedEpisodeList();
-				out.seasons[parseInt(seasonObj.IDX) - 1] = episodes.map(changeEpisode);
-			}
-		} else {
-			const { episodes } = await zoro.getExtendedEpisodeList();
-			out.seasons.push(episodes.map(changeEpisode));
-		}
-	} catch (error) {
-		console.log(error);
-		console.log('Error parsing');
-	}
-
-	return { ...out };
+	const anime = new Zoro(ID.toString());
+	const informations = await anime.parseInformations();
+	return informations;
 });
 
 buildFunction<any, { title: string; aniworld: boolean }>('manageTitle', async ({ title, aniworld }) => {

@@ -34,17 +34,7 @@
 			<template #item="{ element }: { element: TodoItem }">
 				<li class="list-group-item" v-auto-animate>
 					<div class="d-flex" v-auto-animate>
-						<img
-							v-if="
-								!minimal &&
-								element.scraped != undefined &&
-								element.scraped !== true &&
-								element.scraped.informations.image &&
-								typeof element.scraped.informations.image == 'string'
-							"
-							:src="element.scraped.informations.image"
-							class="img-fluid rounded-top me-4 dp-img"
-							alt="" />
+						<img v-if="decideImageURL(element).length > 0" :src="decideImageURL(element)" class="img-fluid rounded-top me-4 dp-img" alt="" />
 						<div style="width: 100%" v-auto-animate>
 							<div class="d-flex justify-content-between">
 								<div>
@@ -283,7 +273,7 @@ import { useSocket } from '@/utils/socket';
 import { reactive, computed, ref, onMounted, getCurrentInstance, onUnmounted } from 'vue';
 
 import type { NewsItem, TodoItem } from '@/types/index';
-import type { AniWorldAdditionalSeriesInformations } from '@/types/scraper';
+import type { AniWorldAdditionalSeriesInformations, AniWorldSeriesInformations, ZoroSeriesInformation } from '@/types/scraper';
 import draggable from 'vuedraggable';
 
 const minimal = ref(false);
@@ -319,6 +309,28 @@ const dragOptions = computed(() => {
 		ghostClass: 'ghost',
 	};
 });
+
+function decideImageURL(element: TodoItem) {
+	if (minimal.value) return '';
+
+	if (
+		element.scraped != undefined &&
+		element.scraped !== true &&
+		element.scraped.informations.image &&
+		typeof element.scraped.informations.image == 'string'
+	) {
+		return element.scraped.informations.image;
+	}
+	if (
+		element.scrapednewZoro != undefined &&
+		element.scrapednewZoro !== true &&
+		element.scrapednewZoro.image &&
+		typeof element.scrapednewZoro.image == 'string'
+	) {
+		return element.scrapednewZoro.image;
+	}
+	return '';
+}
 
 onMounted(() => {
 	window.addEventListener('resize', handleWindowSizeChange);

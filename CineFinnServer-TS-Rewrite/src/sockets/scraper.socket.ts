@@ -95,13 +95,18 @@ export interface ZoroReturn {
 	episodes: ExtendedZoroEpisode[];
 }
 
-export interface newZoroReturn {
+export interface ZoroSeriesInformation {
+	title: string;
+	image: string;
+	subCount: number;
+	dubCount: number;
+	episodeCount: number;
 	seasons: ExtendedZoroEpisode[][];
 }
 
 const getAniworldInfos = buildAwaitSocketReturn<AniWorldSeriesInformations, { url: string }>('AniworldData');
 const getZoroInfos = buildAwaitSocketReturn<ZoroReturn, { ID: string | number }>('ZoroData');
-const getNewZoroInfos = buildAwaitSocketReturn<newZoroReturn, { ID: string | number }>('newZoroData');
+const getNewZoroInfos = buildAwaitSocketReturn<ZoroSeriesInformation, { ID: string | number }>('newZoroData');
 const checkForUpdates = buildAwaitSocketReturn<{ success: boolean; error: Error }, void>('checkForUpdates');
 
 const manageTitle = buildAwaitSocketReturn('manageTitle');

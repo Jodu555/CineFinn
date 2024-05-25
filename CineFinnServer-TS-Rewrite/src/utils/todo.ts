@@ -45,6 +45,9 @@ export async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 			if (aniInfos) todo.scraped = aniInfos;
 			if (zoroInfos) todo.scrapednewZoro = zoroInfos;
 			if (stoInfos) todo.scraped = stoInfos;
+
+			if (!aniInfos) todo.scraped = undefined;
+
 			//Updating db todo
 			await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
 

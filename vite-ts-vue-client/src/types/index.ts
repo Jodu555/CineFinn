@@ -1,4 +1,4 @@
-import type { AniWorldSeriesInformations, ZoroReturn, newZoroReturn } from './scraper';
+import type { AniWorldSeriesInformations, ZoroReturn, ZoroSeriesInformation } from './scraper';
 
 export interface Serie {
 	ID: string;
@@ -122,7 +122,7 @@ export interface TodoItem {
 	references: References;
 	scraped?: AniWorldSeriesInformations | true;
 	scrapedZoro?: ZoroReturn | true;
-	scrapednewZoro?: newZoroReturn | true;
+	scrapednewZoro?: ZoroSeriesInformation | true;
 	scrapingError?: string;
 	edited?: boolean;
 }
