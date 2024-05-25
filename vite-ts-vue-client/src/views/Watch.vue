@@ -1,6 +1,6 @@
 <template>
 	<div class="innerdoc">
-		<div v-if="watchStore.currentSeries == undefined">
+		<div v-if="watchStore.currentSeries == undefined || watchStore.currentSeries.ID == '-1'">
 			<h1 class="text-center">No Series with that ID</h1>
 		</div>
 		<div v-if="indexStore.loading || watchStore.loading" class="d-flex justify-content-center">
@@ -111,7 +111,7 @@ import MarkSeasonDropdown from '@/components/Watch/MarkSeasonDropdown.vue';
 import EntityListViewMovies from '@/components/Watch/EntityListViewMovies.vue';
 import { ref, computed, onMounted, onBeforeUnmount, onUnmounted } from 'vue';
 import { useSocket } from '@/utils/socket';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const cleanupFN = ref(null);
 const buttonTimer = ref<NodeJS.Timeout>(null as unknown as NodeJS.Timeout);
@@ -189,7 +189,8 @@ onUnmounted(() => {
 });
 
 const showDisabled = computed(() => {
-	return watchStore.currentSeries.infos.disabled || (watchStore.currentSeries.movies.length == 0 && watchStore.currentSeries.seasons.length == 0);
+	if (watchStore.currentSeries == undefined || watchStore.currentSeries.ID == '-1') return true;
+	return watchStore.currentSeries.infos?.disabled || (watchStore.currentSeries.movies.length == 0 && watchStore.currentSeries.seasons.length == 0);
 });
 
 const showLatestWatchButton = computed(() => {
@@ -260,6 +261,9 @@ function changeSeason(ID: number) {
 function changeLanguage(lang: Langs) {
 	handleVideoChange(watchStore.currentSeason, watchStore.currentEpisode, watchStore.currentMovie, true, lang, undefined);
 }
+
+const router = useRouter();
+
 function handleVideoChange(
 	season = -1,
 	episode = -1,
@@ -308,6 +312,19 @@ function handleVideoChange(
 		watchStore.currentSeason = season;
 		watchStore.currentEpisode = episode;
 		watchStore.currentMovie = movie;
+
+		// router.replace({
+		// 	query: {
+		// 		id: watchStore.currentSeries.ID,
+		// 		idx: `${watchStore.currentSeason}x${watchStore.currentEpisode}`,
+		// 	},
+		// });
+
+		window.history.replaceState(
+			{},
+			document.title,
+			`/watch?id=${watchStore.currentSeries.ID}&idx=${watchStore.currentSeason}x${watchStore.currentEpisode}`
+		);
 
 		//Ensure that the selected language exists on the entity
 		if (watchStore.entityObject && !watchStore.entityObject.langs.includes(defaultLanguage) && !langchange) {

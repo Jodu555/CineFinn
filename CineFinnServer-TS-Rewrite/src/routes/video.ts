@@ -208,7 +208,7 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 				timeout: 5000,
 				decompress: true,
 				onDownloadProgress(progressEvent) {
-					console.log(progressEvent.loaded, progressEvent.total);
+					// console.log((progressEvent.loaded / progressEvent.total) * 100);
 				},
 			});
 
