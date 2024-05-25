@@ -319,12 +319,17 @@ function handleVideoChange(
 		// 		idx: `${watchStore.currentSeason}x${watchStore.currentEpisode}`,
 		// 	},
 		// });
-
-		window.history.replaceState(
-			{},
-			document.title,
-			`/watch?id=${watchStore.currentSeries.ID}&idx=${watchStore.currentSeason}x${watchStore.currentEpisode}`
-		);
+		let ref = `/watch?id=${watchStore.currentSeries.ID}`;
+		let changed = false;
+		if (watchStore.currentSeason == -1 && watchStore.currentEpisode == -1) {
+			if (watchStore.currentMovie != -1) {
+				ref += `&idx=${watchStore.currentMovie}`;
+				changed = true;
+			}
+		} else {
+			ref += `&idx=${watchStore.currentSeason}x${watchStore.currentEpisode}`;
+			changed = true;
+		}
 
 		//Ensure that the selected language exists on the entity
 		if (watchStore.entityObject && !watchStore.entityObject.langs.includes(defaultLanguage) && !langchange) {
@@ -333,6 +338,11 @@ function handleVideoChange(
 		}
 
 		watchStore.currentLanguage = langchange ? (lang as Langs) : defaultLanguage;
+
+		if (changed) ref += `&lang=${watchStore.currentLanguage}`;
+
+		window.history.replaceState({}, document.title, ref);
+
 		setTimeout(() => {
 			if (!video) return;
 			video.load();
