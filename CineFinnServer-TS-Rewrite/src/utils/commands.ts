@@ -51,7 +51,7 @@ function registerCommands() {
 					return 'You need to specify a series or sub ID!';
 				}
 
-				if (checkifSubExists(id)) {
+				if (await checkifSubExists(id)) {
 					toggleSeriesDisableForSubSystem(id, true);
 					return 'Disabled the sub system Series for: ' + id;
 				}
@@ -69,6 +69,31 @@ function registerCommands() {
 				return 'Disabled the series for: ' + id;
 			}
 		)
+	);
+	commandManager.registerCommand(
+		new Command(['enable'], 'enable <subID / SeriesID>', 'Enables a series back again if previously disabled', async (command, [...args], scope) => {
+			const id = args[1];
+			if (!id) {
+				return 'You need to specify a series or sub ID!';
+			}
+
+			if (await checkifSubExists(id)) {
+				toggleSeriesDisableForSubSystem(id, false);
+				return 'Enables the sub system Series for: ' + id;
+			}
+
+			setSeries(
+				(await getSeries()).map((x) => {
+					if (x.ID == id) {
+						x.infos.disabled = false;
+					}
+					return x;
+				})
+			);
+			await sendSeriesReloadToAll();
+
+			return 'Enabled the series for: ' + id;
+		})
 	);
 
 	commandManager.registerCommand(
