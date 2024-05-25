@@ -70,6 +70,7 @@ function registerCommands() {
 			}
 		)
 	);
+
 	commandManager.registerCommand(
 		new Command(['enable'], 'enable <subID / SeriesID>', 'Enables a series back again if previously disabled', async (command, [...args], scope) => {
 			const id = args[1];

@@ -94,7 +94,7 @@
 				<EntityActionsInformation :switchTo="switchTo" :changeLanguage="changeLanguage" />
 			</template>
 		</div>
-		<ExtendedVideo v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="sendVideoTimeUpdate" />
+		<ExtendedVideo v-if="!showDisabled" v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="sendVideoTimeUpdate" />
 	</div>
 </template>
 <script setup lang="ts">
