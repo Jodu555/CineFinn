@@ -28,22 +28,52 @@ export interface SeasonInformation {
 	title: string;
 }
 
+const vrf = 'QytQVDtrVFg2PVJM';
+
 class Anix {
 	url: string;
 	ID: string;
+	slug: string;
+	cache: Map<string, any>;
 	constructor(slug: string) {
 		// https://anix.to/anime/
+		this.slug = slug;
 		this.url = `https://${hostname}/anime/${slug}`;
+		this.cache = new Map();
 	}
 
-	async parseInformations(): Promise<void | any> {
-		debug && console.log('Called Zoro.parseInformations');
-
-		try {
+	async initialize() {
+		debug && console.log('Called Anix.initialize');
+		let data: string;
+		if (this.cache.get('homepage-res-data')) {
+			data = this.cache.get('homepage-res-data');
+		} else {
 			const response = await axios.get(this.url, {
 				headers,
 			});
-			const { document } = new jsdom.JSDOM(response.data).window;
+			data = response.data;
+		}
+		const { document } = new jsdom.JSDOM(data).window;
+
+		const ID = document.querySelector('.container[itemprop="mainEntity"]').getAttribute('data-id');
+
+		this.ID = ID;
+	}
+
+	async parseInformations(): Promise<void | any> {
+		debug && console.log('Called Anix.parseInformations');
+
+		try {
+			let data: string;
+			if (this.cache.get('homepage-res-data')) {
+				data = this.cache.get('homepage-res-data');
+			} else {
+				const response = await axios.get(this.url, {
+					headers,
+				});
+				data = response.data;
+			}
+			const { document } = new jsdom.JSDOM(data).window;
 
 			const ID = document.querySelector('.container[itemprop="mainEntity"]').getAttribute('data-id');
 
@@ -61,11 +91,7 @@ class Anix {
 
 			const seasonBody = document.querySelector('.ani-season-body');
 
-			console.log(seasonBody.innerHTML);
-
 			const seasonInfo = [...seasonBody.querySelectorAll('a.swiper-slide')].map((anchor: HTMLAnchorElement) => {
-				console.log(anchor, anchor.href, anchor.querySelector('span').innerHTML);
-
 				return {
 					slug: anchor.href.replace(/.*\/anime\//gi, ''),
 					IDX: anchor.querySelector('span').textContent.trim().replaceAll('Season ', ''),
@@ -75,24 +101,34 @@ class Anix {
 
 			console.log(seasonInfo);
 
-			// const seasons: any[][] = [];
+			const seasons: any[][] = [];
 
-			// if (seasonInfo.length === 0) {
-			// 	console.log('Seems like the Season div does not yet exists');
-			// 	const interEps = await this.getEpisodeList();
-			// 	if (subCount == dubCount && subCount === episodeCount) {
-			// 		seasons.push(
-			// 			interEps.episodes.map((x) => {
-			// 				return {
-			// 					...x,
-			// 					langs: ['sub', 'dub'],
-			// 				} as any;
-			// 			})
-			// 		);
-			// 	} else {
-			// 		seasons.push((await this.getExtendedEpisodeList(interEps)).episodes);
-			// 	}
-			// }
+			if (seasonInfo.length == 0) {
+				console.log('Seems like the Season div does not yet exists, assuming the provided ID is the first season');
+				seasonInfo.push({
+					slug: this.slug,
+					IDX: '1',
+					title: 'Season 1',
+				});
+			}
+
+			for (const si of seasonInfo) {
+				console.log('Parsing Season: ' + si.title);
+				let inst = si.slug == this.slug ? this : new Anix(si.slug);
+				const interEps = await inst.getEpisodeList();
+				if (subCount == dubCount && subCount === episodeCount) {
+					seasons.push(
+						interEps.episodes.map((x) => {
+							return {
+								...x,
+								langs: ['sub', 'dub'],
+							} as any;
+						})
+					);
+				} else {
+					// seasons.push((await inst.getExtendedEpisodeList(interEps)).episodes);
+				}
+			}
 
 			return {
 				ID,
@@ -112,30 +148,41 @@ class Anix {
 		}
 	}
 
-	// async getEpisodeList(): Promise<{ total: number; episodes: any[] }> {
-	// 	debug && console.log('Called Zoro.getEpisodeList');
-	// 	const response = await axios.get(`https://${hostname}/ajax/v2/episode/list/${this.ID}`, {
-	// 		headers,
-	// 	});
-	// 	const total = response.data.totalItems;
-	// 	const { document } = new jsdom.JSDOM(response.data.html).window;
+	async getEpisodeList(): Promise<{ total: number; episodes: any[] }> {
+		await this.initialize();
+		debug && console.log('Called Anix.getEpisodeList');
+		// const url = `https://${hostname}/ajax/episode/list/${this.ID}?vrf=${vrf}`;
+		// console.log(url);
+		// return;
 
-	// 	const episodes = [...document.querySelectorAll('a.ep-item')].map((anchor: HTMLAnchorElement) => {
-	// 		return {
-	// 			ID: anchor.dataset.id,
-	// 			title: anchor.title,
-	// 			number: anchor.dataset.number,
-	// 			url: `https://${hostname}${anchor.href}`,
-	// 		};
-	// 	});
-	// 	return {
-	// 		total,
-	// 		episodes,
-	// 	};
-	// }
+		const response = await axios.get(`https://${hostname}/ajax/episode/list/${this.ID}?vrf=${vrf}`, {
+			// headers: {
+			// 	...headers,
+			// 	cookie: `_ga=GA1.1.1675990185.1716811273; usertype=guest; dom3ic8zudi28v8lr6fgphwffqoz0j6c=f1994769-8308-4826-a53a-08fde95d4942%3A2%3A1; __pf=1; pp_main_13a2cc546d58c4e8026278f34cba6491=1; pp_sub_13a2cc546d58c4e8026278f34cba6491=1; pp_delay_13a2cc546d58c4e8026278f34cba6491=1; _ga_EMMQD7K482=GS1.1.1716818532.2.1.1716818532.0.0.0`,
+			// },
+		});
+		const total = response.data.totalItems;
+		const { document } = new jsdom.JSDOM(response.data.html).window;
+
+		const episodes = [...document.querySelectorAll('a')].map((anchor: HTMLAnchorElement) => {
+			return {
+				ID: anchor.dataset.id,
+				title: anchor.title,
+				sub: anchor.getAttribute('data-sub'),
+				dub: anchor.getAttribute('data-dub'),
+				slug: anchor.getAttribute('data-slug'),
+				number: anchor.getAttribute('data-num'),
+				ids: anchor.getAttribute('data-ids'),
+			};
+		});
+		return {
+			total,
+			episodes,
+		};
+	}
 
 	// async getExtendedEpisodeList(preData?: { total: number; episodes: any[] }): Promise<{ total: number; episodes: any[] }> {
-	// 	debug && console.log('Called Zoro.getExtendedEpisodeList');
+	// 	debug && console.log('Called Anix.getExtendedEpisodeList');
 
 	// 	let total = 0;
 	// 	let episodes: any[] = [];

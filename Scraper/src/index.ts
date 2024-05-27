@@ -49,12 +49,12 @@ socket.on('connect', async () => {
 
 	// const array: ExtendedEpisodeDownload[] = [];
 
-	const zoro = new Zoro('2945');
+	// const zoro = new Zoro('2945');
 
-	console.log(JSON.stringify(await zoro.parseInformations(), null, 3));
+	// console.log(JSON.stringify(await zoro.parseInformations(), null, 3));
 
-	// const anix = new Anix('tsukimichi-moonlit-fantasy-m067');
-	// console.log(await anix.parseInformations());
+	const anix = new Anix('tsukimichi-moonlit-fantasy-m067');
+	console.log(await anix.parseInformations());
 
 	// for (const episode of episodes) {
 	// 	if (episode.langs.includes('dub')) {
