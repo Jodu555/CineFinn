@@ -8,6 +8,7 @@ import { changeEpisode, compareForNewReleases, compareForNewReleasesAniWorld, co
 const { similar } = require('./utils/utils');
 import Zoro from './class/Zoro';
 import { ExtendedEpisodeDownload, IgnoranceItem, Serie } from './utils/types';
+import Anix from './class/Anix';
 
 const socket = io(process.env.CORE_URL, { auth: { type: 'scraper', token: process.env.AUTH_TOKEN } });
 
@@ -48,18 +49,12 @@ socket.on('connect', async () => {
 
 	// const array: ExtendedEpisodeDownload[] = [];
 
-	// const zoro = new Zoro('18244');
-	// const zoro = new Zoro('https://hianime.to/a-returners-magic-should-be-special-18600?ep=107911');
-	// const zoro = new Zoro('https://hianime.to/a-returners-magic-should-be-special-18600');
-	// const zoro = new Zoro('18600');
+	const zoro = new Zoro('2945');
 
-	// const ret = await zoro.parseInformations();
+	console.log(JSON.stringify(await zoro.parseInformations(), null, 3));
 
-	// console.log(JSON.stringify(ret, null, 3));
-	// console.log(await zoro.getEpisodeList());
-
-	// const { total, episodes } = await zoro.getExtendedEpisodeList();
-	// console.log(episodes);
+	// const anix = new Anix('tsukimichi-moonlit-fantasy-m067');
+	// console.log(await anix.parseInformations());
 
 	// for (const episode of episodes) {
 	// 	if (episode.langs.includes('dub')) {

@@ -77,8 +77,10 @@ class Zoro {
 	url: string;
 	ID: string | number;
 	initialized: boolean;
+	cache: Map<string, any>;
 	constructor(url: string) {
 		this.initialized = false;
+		this.cache = new Map();
 		if (url.includes('/')) {
 			this.url = url;
 			this.ID = this.url?.split('/')?.pop()?.split('-').pop();
@@ -135,9 +137,19 @@ class Zoro {
 
 			const seasons: ExtendedZoroEpisode[][] = [];
 
-			if (seasonInfo.length === 0) {
-				console.log('Seems like the Season div does not yet exists');
-				const interEps = await this.getEpisodeList();
+			if (seasonInfo.length == 0) {
+				console.log('Seems like the Season div does not yet exists, assuming the provided ID is the first season');
+				seasonInfo.push({
+					ID: this.ID.toString(),
+					IDX: '1',
+					title: 'Season 1',
+				});
+			}
+
+			for (const si of seasonInfo) {
+				console.log('Parsing: ' + si.title);
+				let inst = si.ID == this.ID ? this : new Zoro(si.ID);
+				const interEps = await inst.getEpisodeList();
 				if (subCount == dubCount && subCount === episodeCount) {
 					seasons.push(
 						interEps.episodes.map((x) => {
@@ -148,7 +160,7 @@ class Zoro {
 						})
 					);
 				} else {
-					seasons.push((await this.getExtendedEpisodeList(interEps)).episodes);
+					seasons.push((await inst.getExtendedEpisodeList(interEps)).episodes);
 				}
 			}
 
@@ -201,6 +213,13 @@ class Zoro {
 
 	async getEpisodeList(): Promise<{ total: number; episodes: SimpleZoroEpisode[] }> {
 		debug && console.log('Called Zoro.getEpisodeList');
+
+		if (this.cache.get('getEpisodeList')) {
+			debug && console.log('Cache Hit');
+			return this.cache.get('getEpisodeList');
+		}
+		debug && console.log('Cache Miss');
+
 		const response = await axios.get(`https://${hostname}/ajax/v2/episode/list/${this.ID}`, {
 			headers,
 		});
@@ -215,10 +234,15 @@ class Zoro {
 				url: `https://${hostname}${anchor.href}`,
 			};
 		});
-		return {
+
+		const returnObj = {
 			total,
 			episodes,
 		};
+
+		this.cache.set('getEpisodeList', returnObj);
+
+		return returnObj;
 	}
 
 	async getExtendedEpisodeList(preData?: {
@@ -230,6 +254,13 @@ class Zoro {
 		if (!this.initialized) {
 			await this.initialize();
 		}
+
+		if (this.cache.get('getExtendedEpisodeList')) {
+			debug && console.log('Cache Hit');
+			return this.cache.get('getExtendedEpisodeList');
+		}
+		debug && console.log('Cache Miss');
+
 		let total = 0;
 		let episodes: SimpleZoroEpisode[] = [];
 		if (!preData) {
@@ -267,10 +298,14 @@ class Zoro {
 			extendedEpisodes.push(outputEpisode);
 		}
 
-		return {
+		const returnObj = {
 			total,
 			episodes: extendedEpisodes,
 		};
+
+		this.cache.set('getExtendedEpisodeList', returnObj);
+
+		return returnObj;
 	}
 
 	async getStream(streamID: string): Promise<string> {

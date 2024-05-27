@@ -111,7 +111,7 @@
 											</template>
 											<template v-if="element.scrapednewZoro !== undefined && element.scrapednewZoro !== true">
 												<br />
-												<a target="_blank" :href="element.scrapednewZoro.seasons[0][0].url">{{ element.scrapednewZoro.seasons[0][0].url }}</a>
+												<a target="_blank" :href="element.scrapednewZoro.seasons[0]?.[0]?.url">{{ element.scrapednewZoro.seasons[0]?.[0]?.url }}</a>
 											</template>
 										</template>
 										<br />
