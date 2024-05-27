@@ -21,6 +21,7 @@ interface PromissesJob {
 		filePath: string;
 		output: string;
 		imagePathPrefix: string;
+		publicStreamURL: string;
 	};
 	run: () => Promise<void>;
 }
@@ -55,6 +56,21 @@ function generateEntityImages(i: number, serie: Series, entity: Episode | Movie,
 		const { dir, name, ext } = path.parse(entity.filePath);
 		const filePath = entity.langs.length > 1 ? path.join(dir, `${name.split('_')[0]}_${lang}${ext}`) : entity.filePath;
 
+		const url = new URL(`${process.env.PUBLIC_API_ENDPOINT}/video`);
+
+		url.searchParams.append('auth-token', process.env.PUBLIC_API_AUTHTOKEN);
+
+		url.searchParams.append('series', serie.ID);
+		url.searchParams.append('language', lang);
+		if (entity instanceof Episode) {
+			url.searchParams.append('season', entity.season.toString());
+			url.searchParams.append('episode', entity.episode.toString());
+		} else {
+			url.searchParams.append('movie', (i + 1).toString());
+		}
+
+		const publicStreamURL = url.href;
+
 		returnArr.push({
 			meta: {
 				imagePathPrefix: process.env.PREVIEW_IMGS_PATH,
@@ -63,12 +79,13 @@ function generateEntityImages(i: number, serie: Series, entity: Episode | Movie,
 				lang,
 				output,
 				filePath,
+				publicStreamURL,
 			},
 			run: () =>
 				new Promise<void>(async (resolve, reject) => {
 					try {
 						fs.mkdirSync(output, { recursive: true });
-						const command = `ffmpeg -i "${filePath}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
+						const command = `ffmpeg -i "${publicStreamURL}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
 						// console.log(command);
 						await deepExecPromisify(command);
 						// await wait(1000 + Math.floor(Math.random() * 100));

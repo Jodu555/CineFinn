@@ -77,6 +77,7 @@ async function main() {
 		filePath: string;
 		output: string;
 		imagePathPrefix: string;
+		publicStreamURL: string;
 	}
 
 	const worker = new Worker<JobMeta>(
@@ -90,7 +91,12 @@ async function main() {
 			job.log('Evaluated Path Video File: ' + vidFile);
 			job.log('Evaluated Path Image Directory: ' + imgDir);
 
-			const command = `ffmpeg -hide_banner -i "${vidFile}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
+			let command = '';
+			if (job.data.publicStreamURL) {
+				command = `ffmpeg -hide_banner -i "${job.data.publicStreamURL}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
+			} else {
+				command = `ffmpeg -hide_banner -i "${vidFile}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
+			}
 
 			job.log('Crafted Command: ' + command);
 
