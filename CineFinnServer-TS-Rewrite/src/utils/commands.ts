@@ -155,6 +155,10 @@ function registerCommands() {
 		new Command(['socketsessions', 'ss'], 'socketsessions', 'Lists the current active socket sessions', async (command, [...args], scope) => {
 			const output = ['Current socket sessions:'];
 			const sockets = (await getIO().fetchSockets()) as ExtendedRemoteSocket[];
+			sockets.sort((a, b) => {
+				const priorities = { scraper: 2, sub: 1, default: 0 };
+				return (priorities[b.auth.type] || priorities.default) - (priorities[a.auth.type] || priorities.default);
+			});
 			for (const socket of sockets) {
 				if (socket.auth.type == 'sub') {
 					output.push(
