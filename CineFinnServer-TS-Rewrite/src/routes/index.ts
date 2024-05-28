@@ -27,7 +27,7 @@ router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunct
 });
 
 router.get('/all', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-	const series = getSeries();
+	const series = await getSeries();
 	res.json(series);
 });
 
