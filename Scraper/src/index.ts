@@ -54,7 +54,7 @@ socket.on('connect', async () => {
 	// console.log(JSON.stringify(await zoro.parseInformations(), null, 3));
 
 	const anix = new Anix('tsukimichi-moonlit-fantasy-m067');
-	console.log(await anix.parseInformations());
+	console.log(JSON.stringify(await anix.parseInformations(), null, 3));
 
 	// for (const episode of episodes) {
 	// 	if (episode.langs.includes('dub')) {
@@ -474,4 +474,12 @@ buildFunction<{ success: boolean; error?: Error }, void>('checkForUpdates', asyn
 	} catch (error) {
 		return { success: false, error };
 	}
+});
+
+process.on('unhandledRejection', (reason: string, p: Promise<any>) => {
+	// console.error('Unhandled Rejection at:', p, 'reason:', reason);
+});
+
+process.on('uncaughtException', (error: Error) => {
+	// console.error(`Caught exception: ${error}\n` + `Exception origin: ${error.stack}`);
 });

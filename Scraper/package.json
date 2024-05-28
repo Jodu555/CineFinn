@@ -16,6 +16,7 @@
 		"dotenv": "^16.0.3",
 		"jsdom": "^20.0.3",
 		"promise-limit": "^2.7.0",
+		"puppeteer": "^22.10.0",
 		"sanitize-filename": "^1.6.3",
 		"socket.io-client": "^4.5.4"
 	},

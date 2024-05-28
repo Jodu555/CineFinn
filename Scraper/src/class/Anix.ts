@@ -1,5 +1,29 @@
 import axios from 'axios';
 import jsdom from 'jsdom';
+import puppeteer, { Browser, HTTPRequest, Page } from 'puppeteer';
+
+export interface AnixEpisode {
+	title: string;
+	langs: string[];
+	slug: string;
+	number: string;
+	ids: string;
+}
+
+export interface SeasonInformation {
+	slug: string;
+	IDX: string;
+	title: string;
+}
+
+interface AnixSeriesInformation {
+	title: string;
+	image: string;
+	subCount: number;
+	dubCount: number;
+	episodeCount: number;
+	seasons: AnixEpisode[][];
+}
 
 const debug = true;
 
@@ -22,13 +46,7 @@ const headers = {
 	'upgrade-insecure-requests': '1',
 };
 
-export interface SeasonInformation {
-	slug: string;
-	IDX: string;
-	title: string;
-}
-
-const vrf = 'QytQVDtrVFg2PVJM';
+let STATIC_BROWSER: Browser = null;
 
 class Anix {
 	url: string;
@@ -101,7 +119,7 @@ class Anix {
 
 			console.log(seasonInfo);
 
-			const seasons: any[][] = [];
+			const seasons: AnixEpisode[][] = [];
 
 			if (seasonInfo.length == 0) {
 				console.log('Seems like the Season div does not yet exists, assuming the provided ID is the first season');
@@ -116,19 +134,18 @@ class Anix {
 				console.log('Parsing Season: ' + si.title);
 				let inst = si.slug == this.slug ? this : new Anix(si.slug);
 				const interEps = await inst.getEpisodeList();
-				if (subCount == dubCount && subCount === episodeCount) {
-					seasons.push(
-						interEps.episodes.map((x) => {
-							return {
-								...x,
-								langs: ['sub', 'dub'],
-							} as any;
-						})
-					);
-				} else {
-					// seasons.push((await inst.getExtendedEpisodeList(interEps)).episodes);
-				}
+				seasons.push(interEps);
 			}
+
+			try {
+				const pages = await STATIC_BROWSER.pages();
+				for (const page of pages) {
+					console.log(page.isClosed());
+
+					await page.close();
+				}
+				// await STATIC_BROWSER.close();
+			} catch (error) {}
 
 			return {
 				ID,
@@ -137,8 +154,8 @@ class Anix {
 				subCount: parseInt(subCount),
 				dubCount: parseInt(dubCount),
 				episodeCount: parseInt(episodeCount),
-				// seasons,
-			};
+				seasons,
+			} as AnixSeriesInformation;
 		} catch (error) {
 			debug && console.log(error);
 
@@ -148,84 +165,118 @@ class Anix {
 		}
 	}
 
-	async getEpisodeList(): Promise<{ total: number; episodes: any[] }> {
+	async getEpisodeList() {
 		await this.initialize();
 		debug && console.log('Called Anix.getEpisodeList');
-		// const url = `https://${hostname}/ajax/episode/list/${this.ID}?vrf=${vrf}`;
-		// console.log(url);
-		// return;
+		const reqURL = await this._getPuppeteerEpisodeListURL();
 
-		const response = await axios.get(`https://${hostname}/ajax/episode/list/${this.ID}?vrf=${vrf}`, {
+		console.log(reqURL);
+
+		const response = await axios.get(reqURL, {
 			// headers: {
 			// 	...headers,
-			// 	cookie: `_ga=GA1.1.1675990185.1716811273; usertype=guest; dom3ic8zudi28v8lr6fgphwffqoz0j6c=f1994769-8308-4826-a53a-08fde95d4942%3A2%3A1; __pf=1; pp_main_13a2cc546d58c4e8026278f34cba6491=1; pp_sub_13a2cc546d58c4e8026278f34cba6491=1; pp_delay_13a2cc546d58c4e8026278f34cba6491=1; _ga_EMMQD7K482=GS1.1.1716818532.2.1.1716818532.0.0.0`,
-			// },
+			// 	},
 		});
-		const total = response.data.totalItems;
-		const { document } = new jsdom.JSDOM(response.data.html).window;
+		const { document } = new jsdom.JSDOM(response.data.result).window;
 
 		const episodes = [...document.querySelectorAll('a')].map((anchor: HTMLAnchorElement) => {
+			const langs = [];
+			if (anchor.getAttribute('data-dub') == '1') {
+				langs.push('dub');
+			}
+			if (anchor.getAttribute('data-sub') == '1') {
+				langs.push('sub');
+			}
 			return {
-				ID: anchor.dataset.id,
 				title: anchor.title,
-				sub: anchor.getAttribute('data-sub'),
-				dub: anchor.getAttribute('data-dub'),
+				langs,
 				slug: anchor.getAttribute('data-slug'),
 				number: anchor.getAttribute('data-num'),
 				ids: anchor.getAttribute('data-ids'),
-			};
+			} as AnixEpisode;
 		});
-		return {
-			total,
-			episodes,
-		};
+
+		return episodes;
 	}
 
-	// async getExtendedEpisodeList(preData?: { total: number; episodes: any[] }): Promise<{ total: number; episodes: any[] }> {
-	// 	debug && console.log('Called Anix.getExtendedEpisodeList');
+	async getBrowser() {
+		debug && console.log('Called Anix.getBrowser');
+		// return await puppeteer.launch({
+		// 	// defaultViewport: null,
+		// 	headless: false,
+		// 	// devtools: false,
+		// 	ignoreHTTPSErrors: true,
+		// 	executablePath: 'C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe', // Windows
+		// 	args: [
+		// 		// `--disable-extensions-except=${pathToM3Extension}`,
+		// 		// `--load-extension=${pathToM3Extension}`,
+		// 		'--ignore-certificate-errors',
+		// 		'--ignore-certificate-errors-spki-list',
+		// 		// '--disable-features=site-per-process',
+		// 	],
+		// });
+		if (STATIC_BROWSER == null) {
+			STATIC_BROWSER = await puppeteer.launch({
+				// defaultViewport: null,
+				headless: false,
+				// devtools: false,
+				ignoreHTTPSErrors: true,
+				executablePath: 'C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe', // Windows
+				args: [
+					// `--disable-extensions-except=${pathToM3Extension}`,
+					// `--load-extension=${pathToM3Extension}`,
+					'--ignore-certificate-errors',
+					'--ignore-certificate-errors-spki-list',
+					// '--disable-features=site-per-process',
+				],
+			});
+		}
+		return STATIC_BROWSER;
+	}
 
-	// 	let total = 0;
-	// 	let episodes: any[] = [];
-	// 	if (!preData) {
-	// 		const res = await this.getEpisodeList();
-	// 		total = res.total;
-	// 		episodes = res.episodes;
-	// 	} else {
-	// 		total = preData.total;
-	// 		episodes = preData.episodes;
-	// 	}
+	async _getPuppeteerEpisodeListURL() {
+		debug && console.log('Called Anix._getPuppeteerEpisodeListURL');
+		const wait = (ms: number) => new Promise((resolve, reject) => setTimeout(resolve, ms));
+		const browser = await this.getBrowser();
 
-	// 	const extendedEpisodes: any[] = [];
+		let page: Page;
 
-	// 	let i = 0;
-	// 	for (const episode of episodes) {
-	// 		i++;
-	// 		console.log('Fetching infos for', episode.ID, episode.number, episodes.length, '/', i);
+		const url = await new Promise<string>(async (resolve, reject) => {
+			page = await browser.newPage();
 
-	// 		const outputEpisode = { ...episode } as any;
-	// 		const response = await axios.get(`https://${hostname}/ajax/v2/episode/servers?episodeId=${episode.ID}`, {
-	// 			headers,
-	// 		});
-	// 		const { document } = new jsdom.JSDOM(response.data.html).window;
-	// 		const streamingServers: any[] = [...document.querySelectorAll('div.server-item')].map((server: HTMLAnchorElement) => {
-	// 			return {
-	// 				type: server.dataset.type as 'sub' | 'dub',
-	// 				ID: server.dataset.id,
-	// 				serverIndex: server.dataset.serverId,
-	// 				name: server.querySelector('a').text,
-	// 			};
-	// 		});
+			await page.waitForNetworkIdle();
+			await page.setRequestInterception(true);
+			const handle = (interceptedRequest: HTTPRequest) => {
+				const url = interceptedRequest.url();
+				if (url.includes('/episode/list')) {
+					console.log('request', url);
+					page.off('request');
+					interceptedRequest.continue();
+					resolve(url);
+					return;
+				}
+				interceptedRequest.continue();
+			};
+			page.on('request', handle);
 
-	// 		outputEpisode.langs = [...new Set(streamingServers.map((x) => x.type))];
-	// 		outputEpisode.streamingServers = streamingServers;
-	// 		extendedEpisodes.push(outputEpisode);
-	// 	}
+			await page.goto(this.url);
+		});
 
-	// 	return {
-	// 		total,
-	// 		episodes: extendedEpisodes,
-	// 	};
-	// }
+		try {
+			console.log('URL', url, 'waiting....');
+			await wait(500);
+			// const pages = await browser.pages();
+			// for (const page of pages) {
+			// 	console.log(page.isClosed());
+			// 	await page.close();
+			// }
+			// await wait(800);
+		} catch (error) {
+			console.log('IGNORING', error);
+		}
+
+		return url;
+	}
 }
 
 export default Anix;

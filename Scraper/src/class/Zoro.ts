@@ -43,6 +43,15 @@ export interface SeasonInformation {
 	title: string;
 }
 
+interface ZoroSeriesInformation {
+	title: string;
+	image: string;
+	subCount: number;
+	dubCount: number;
+	episodeCount: number;
+	seasons: ExtendedZoroEpisode[][];
+}
+
 const debug = true;
 
 const hostname = 'hianime.to';
@@ -63,15 +72,6 @@ const headers = {
 	'sec-gpc': '1',
 	'upgrade-insecure-requests': '1',
 };
-
-interface ZoroSeriesInformation {
-	title: string;
-	image: string;
-	subCount: number;
-	dubCount: number;
-	episodeCount: number;
-	seasons: ExtendedZoroEpisode[][];
-}
 
 class Zoro {
 	url: string;
