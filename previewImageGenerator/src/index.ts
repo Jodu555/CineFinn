@@ -102,7 +102,7 @@ async function main() {
 
 			console.log(job.id, ' => ', command);
 
-			if (!fs.existsSync(vidFile)) {
+			if (!job.data.publicStreamURL && !fs.existsSync(vidFile)) {
 				console.log('Video File Missing', vidFile);
 				console.log('This is probably a misconfiguration of the config pathRemapper');
 				throw new Error('Video File Missing' + vidFile);
