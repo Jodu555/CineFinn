@@ -113,6 +113,12 @@
 												<br />
 												<a target="_blank" :href="element.scrapednewZoro.seasons[0]?.[0]?.url">{{ element.scrapednewZoro.seasons[0]?.[0]?.url }}</a>
 											</template>
+											<template v-if="element.scrapedAnix !== undefined && element.scrapedAnix !== true">
+												<br />
+												<a target="_blank" :href="`https://anix.to/anime/${element.references.anix}`">{{
+													`https://anix.to/anime/${element.references.anix}`
+												}}</a>
+											</template>
 										</template>
 										<br />
 										<p style="cursor: pointer" @click="deleteParsedInfos(element.ID)"><u>Delete Scraped infos</u></p>
@@ -344,6 +350,10 @@ function decideImageURL(element: TodoItem) {
 	) {
 		return element.scrapednewZoro.image;
 	}
+
+	if (element.scrapedAnix != undefined && element.scrapedAnix !== true && element.scrapedAnix.image && typeof element.scrapedAnix.image == 'string') {
+		return element.scrapedAnix.image;
+	}
 	return '';
 }
 
@@ -428,6 +438,21 @@ const languageDevision = (element: TodoItem) => {
 		if (total == -1) total = element.scrapednewZoro?.seasons.flat().length;
 		const zoroEps = element.scrapednewZoro?.seasons.flat();
 		zoroEps.forEach((e) => {
+			e.langs.forEach((l) => {
+				if (l == 'sub') l = 'EngSub';
+				if (l == 'dub') l = 'EngDub';
+				if (out[l]) {
+					out[l] += 1;
+				} else {
+					out[l] = 1;
+				}
+			});
+		});
+	}
+	if (element.scrapedAnix != undefined && element.scrapedAnix !== true) {
+		if (total == -1) total = element.scrapedAnix?.seasons.flat().length;
+		const anixEps = element.scrapedAnix?.seasons.flat();
+		anixEps.forEach((e) => {
 			e.langs.forEach((l) => {
 				if (l == 'sub') l = 'EngSub';
 				if (l == 'dub') l = 'EngDub';
