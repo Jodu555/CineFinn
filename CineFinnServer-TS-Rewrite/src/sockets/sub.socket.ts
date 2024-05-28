@@ -65,6 +65,10 @@ async function getAllFilesFromAllSubs() {
 	const allFiles = await new Promise<SubFile[]>((resolve, reject) => {
 		let waitFor: string[] = [];
 		const allFilesInner: SubFile[] = [];
+		if (subSocketMap.size == 0) {
+			resolve([]);
+			return;
+		}
 
 		setTimeout(() => {
 			reject(new Error('Timeout Reached with: ' + waitFor.join(', ')));

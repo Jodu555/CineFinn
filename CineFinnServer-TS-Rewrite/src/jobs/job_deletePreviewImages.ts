@@ -16,7 +16,7 @@ export = {
 		options: [],
 	},
 	run: async (options) => {
-		const series = getSeries();
+		const series = await getSeries();
 
 		const paths: string[] = [];
 

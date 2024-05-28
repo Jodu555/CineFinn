@@ -11,7 +11,6 @@ export function checkIfTodoNeedsScrape(todo: DatabaseParsedTodoItem) {
 	const needsAniworld = !todo.scraped && todo.references.aniworld !== '';
 	const needsZoro = !todo.scrapedZoro && !todo.scrapednewZoro && todo.references.zoro !== '';
 	const needsAnix = !todo.scrapedAnix && todo.references.anix !== '' && todo.references.anix !== undefined;
-	console.log(todo.references.anix, needsAnix);
 	const needsSTO = !todo.scraped && todo.references.sto !== '';
 	return needsAniworld || needsZoro || needsAnix || needsSTO;
 }
