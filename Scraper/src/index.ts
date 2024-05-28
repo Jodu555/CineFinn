@@ -53,8 +53,8 @@ socket.on('connect', async () => {
 
 	// console.log(JSON.stringify(await zoro.parseInformations(), null, 3));
 
-	const anix = new Anix('tsukimichi-moonlit-fantasy-m067');
-	console.log(JSON.stringify(await anix.parseInformations(), null, 3));
+	// const anix = new Anix('tsukimichi-moonlit-fantasy-m067');
+	// console.log(JSON.stringify(await anix.parseInformations(), null, 3));
 
 	// for (const episode of episodes) {
 	// 	if (episode.langs.includes('dub')) {
@@ -433,6 +433,14 @@ buildFunction<any, { ID: string | number }>('newZoroData', async ({ ID }) => {
 	const anime = new Zoro(ID.toString());
 	const informations = await anime.parseInformations();
 	return informations;
+});
+
+buildFunction<any, { slug: string }>('AnixData', async ({ slug }) => {
+	console.log('Recieved AnixData', slug);
+	const anix = new Anix(slug);
+	await anix.initialize();
+	const informations = await anix.parseInformations();
+	return { ...informations };
 });
 
 buildFunction<any, { title: string; aniworld: boolean }>('manageTitle', async ({ title, aniworld }) => {

@@ -60,3 +60,19 @@ export interface ZoroSeriesInformation {
 	episodeCount: number;
 	seasons: ExtendedZoroEpisode[][];
 }
+
+export interface AnixEpisode {
+	title: string;
+	langs: string[];
+	slug: string;
+	number: string;
+	ids: string;
+}
+export interface AnixSeriesInformation {
+	title: string;
+	image: string;
+	subCount: number;
+	dubCount: number;
+	episodeCount: number;
+	seasons: AnixEpisode[][];
+}

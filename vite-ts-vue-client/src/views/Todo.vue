@@ -207,7 +207,7 @@
 											v-model="element.references.aniworld" />
 									</div>
 								</div>
-								<div class="row text-center align-items-center">
+								<div class="row text-center align-items-center mb-4">
 									<div class="col-2">
 										<label for="url" class="form-label">Zoro:</label>
 									</div>
@@ -218,6 +218,19 @@
 											class="form-control"
 											id="url"
 											v-model="element.references.zoro" />
+									</div>
+								</div>
+								<div class="row text-center align-items-center">
+									<div class="col-2">
+										<label for="url" class="form-label">Anix:</label>
+									</div>
+									<div class="col-7">
+										<input
+											type="text"
+											:disabled="auth.userInfo.UUID != element.creator && auth.userInfo.role == 2"
+											class="form-control"
+											id="url"
+											v-model="element.references.anix" />
 									</div>
 								</div>
 								<hr />

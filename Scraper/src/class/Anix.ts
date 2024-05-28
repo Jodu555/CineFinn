@@ -78,7 +78,7 @@ class Anix {
 		this.ID = ID;
 	}
 
-	async parseInformations(): Promise<void | any> {
+	async parseInformations(): Promise<void | AnixSeriesInformation> {
 		debug && console.log('Called Anix.parseInformations');
 
 		try {

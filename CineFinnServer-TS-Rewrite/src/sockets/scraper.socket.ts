@@ -84,7 +84,7 @@ export interface StreamingServers {
 	name: string;
 }
 
-export interface SeasonInformation {
+export interface Anix {
 	ID: string;
 	IDX: string;
 	title: string;
@@ -104,8 +104,25 @@ export interface ZoroSeriesInformation {
 	seasons: ExtendedZoroEpisode[][];
 }
 
+export interface AnixEpisode {
+	title: string;
+	langs: string[];
+	slug: string;
+	number: string;
+	ids: string;
+}
+export interface AnixSeriesInformation {
+	title: string;
+	image: string;
+	subCount: number;
+	dubCount: number;
+	episodeCount: number;
+	seasons: AnixEpisode[][];
+}
+
 const getAniworldInfos = buildAwaitSocketReturn<AniWorldSeriesInformations, { url: string }>('AniworldData');
 const getZoroInfos = buildAwaitSocketReturn<ZoroReturn, { ID: string | number }>('ZoroData');
+const getAnixInfos = buildAwaitSocketReturn<AnixSeriesInformation, { slug: string }>('AnixData');
 const getNewZoroInfos = buildAwaitSocketReturn<ZoroSeriesInformation, { ID: string | number }>('newZoroData');
 const checkForUpdates = buildAwaitSocketReturn<{ success: boolean; error: Error }, void>('checkForUpdates');
 
@@ -146,4 +163,14 @@ function isScraperSocketConnected() {
 	return Boolean($socket);
 }
 
-export { initialize, getAniworldInfos, getZoroInfos, getNewZoroInfos, checkForUpdates, manageTitle, isScraperSocketConnected, waitingForResponse };
+export {
+	initialize,
+	getAniworldInfos,
+	getZoroInfos,
+	getNewZoroInfos,
+	getAnixInfos,
+	checkForUpdates,
+	manageTitle,
+	isScraperSocketConnected,
+	waitingForResponse,
+};
