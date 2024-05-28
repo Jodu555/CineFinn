@@ -144,14 +144,19 @@ This Version introduces the RMVC (Remote Video Control) System the Upgraded Vide
 This Version introduces the account restriction idea
 although the general permission system and therefore the account restrictions and the ToDo Page and functionallity
 
-## v5 (TODO)
+## v5
 
 This version should introduce the Sync System and the new HomePage
 
-## v6 (Next Big Update)
+## v6
 
 This version is more focused on ease of use and Backend Improvements with a full client rewrite in typescript with perfect type hints
 and the distributed Image generation System which later can lead to way more stuff done in a distributed manner
+
+## v7 (TODO)
+
+This version introduced the Sub and Main System with distributed proxied video requests so that there can be more than one server holding files
+but rather multiple that get arranged and aggregated together by the main system which intern can also hold files
 
 ## On Hold
 
@@ -163,7 +168,7 @@ and the distributed Image generation System which later can lead to way more stu
 ## Stretch
 
 - [ ] implement a cron job which automatically checks all downloaded series for updates and writes them to a list
-- [ ] A Module System to remotely enable or disable certain features for everyone or a specific user
+- [ ] A Module System to remotely enable or disable certain features for everyone or a specific user i now know that such a system is generally called feature flags
   - [ ] Module: Sync System
   - [ ] Module: Share Function
   - [ ] Module: Todo Page
