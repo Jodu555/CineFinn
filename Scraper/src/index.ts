@@ -53,6 +53,10 @@ socket.on('connect', async () => {
 
 	// console.log(JSON.stringify(await zoro.parseInformations(), null, 3));
 
+	// const anix = new Anix('revue-starlight-1jpp');
+	// const out = await anix.parseInformations();
+	// console.log(JSON.stringify(out, null, 3));
+
 	// const anix = new Anix('tsukimichi-moonlit-fantasy-m067');
 	// console.log(JSON.stringify(await anix.parseInformations(), null, 3));
 

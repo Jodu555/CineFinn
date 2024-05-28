@@ -109,13 +109,15 @@ class Anix {
 
 			const seasonBody = document.querySelector('.ani-season-body');
 
-			const seasonInfo = [...seasonBody.querySelectorAll('a.swiper-slide')].map((anchor: HTMLAnchorElement) => {
-				return {
-					slug: anchor.href.replace(/.*\/anime\//gi, ''),
-					IDX: anchor.querySelector('span').textContent.trim().replaceAll('Season ', ''),
-					title: anchor.querySelector('span').textContent.trim().replaceAll('Season ', ''),
-				} as SeasonInformation;
-			});
+			const seasonInfo = seasonBody
+				? [...seasonBody.querySelectorAll('a.swiper-slide')].map((anchor: HTMLAnchorElement) => {
+						return {
+							slug: anchor.href.replace(/.*\/anime\//gi, ''),
+							IDX: anchor.querySelector('span').textContent.trim().replaceAll('Season ', ''),
+							title: anchor.querySelector('span').textContent.trim().replaceAll('Season ', ''),
+						} as SeasonInformation;
+				  })
+				: [];
 
 			console.log(seasonInfo);
 
@@ -179,22 +181,26 @@ class Anix {
 		});
 		const { document } = new jsdom.JSDOM(response.data.result).window;
 
-		const episodes = [...document.querySelectorAll('a')].map((anchor: HTMLAnchorElement) => {
-			const langs = [];
-			if (anchor.getAttribute('data-dub') == '1') {
-				langs.push('dub');
-			}
-			if (anchor.getAttribute('data-sub') == '1') {
-				langs.push('sub');
-			}
-			return {
-				title: anchor.title,
-				langs,
-				slug: anchor.getAttribute('data-slug'),
-				number: anchor.getAttribute('data-num'),
-				ids: anchor.getAttribute('data-ids'),
-			} as AnixEpisode;
-		});
+		const episodes = [...document.querySelectorAll('a')]
+			.map((anchor: HTMLAnchorElement) => {
+				if (anchor.className.includes('dropdown-item')) return;
+
+				const langs = [];
+				if (anchor.getAttribute('data-dub') == '1') {
+					langs.push('dub');
+				}
+				if (anchor.getAttribute('data-sub') == '1') {
+					langs.push('sub');
+				}
+				return {
+					title: anchor.title,
+					langs,
+					slug: anchor.getAttribute('data-slug'),
+					number: anchor.getAttribute('data-num'),
+					ids: anchor.getAttribute('data-ids'),
+				} as AnixEpisode;
+			})
+			.filter((x) => x != undefined);
 
 		return episodes;
 	}
