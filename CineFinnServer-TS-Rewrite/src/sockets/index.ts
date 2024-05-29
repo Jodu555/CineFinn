@@ -41,7 +41,7 @@ const initialize = () => {
 		}
 		if (type === 'sub') {
 			const authToken = socket.handshake.auth.token;
-			if (authToken && authToken === 'dioanoadnosadnsdaonadofvndgpagdmn0gtef') {
+			if (authToken && authToken === process.env.SUBSYSTEM_AUTH_TOKEN) {
 				socket.auth = {
 					token: authToken,
 					id: socket.handshake.auth.id,
