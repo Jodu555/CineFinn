@@ -1,6 +1,7 @@
+import { PassThrough } from 'stream';
+import { randomUUID } from 'node:crypto';
 import { ExtendedSocket } from '../types/session';
 import { Langs } from '../types/classes';
-import { randomUUID } from 'node:crypto';
 import { getSeries, setSeries } from '../utils/utils';
 import { sendSeriesReloadToAll } from './client.socket';
 
@@ -70,7 +71,7 @@ async function getAllFilesFromAllSubs() {
 			return;
 		}
 
-		setTimeout(() => {
+		const t = setTimeout(() => {
 			reject(new Error('Timeout Reached with: ' + waitFor.join(', ')));
 		}, 1000 * 60 * 1);
 
@@ -81,6 +82,7 @@ async function getAllFilesFromAllSubs() {
 
 				console.log('Response from:', `"${socket.auth.id}"`, 'waiting for:', waitFor.join(', '));
 				if (waitFor.length == 0) {
+					clearTimeout(t);
 					resolve(allFilesInner);
 				}
 			});
@@ -93,4 +95,45 @@ async function getAllFilesFromAllSubs() {
 	return allFiles;
 }
 
-export { initialize, subSocketMap, getAllFilesFromAllSubs, SubFile, getSubSocketByID, toggleSeriesDisableForSubSystem, checkifSubExists };
+async function createVideoStream(subID: string, filePath: string, opts: { start: number; end: number }) {
+	const subSocket = getSubSocketByID(subID);
+	const stream = new PassThrough();
+	subSocket.on('videoChunk', (chunk) => {
+		console.log('Got Chunk', chunk.length);
+
+		stream.write(chunk);
+	});
+
+	subSocket.on('videoEnd', () => {
+		console.log('Got Video End');
+
+		stream.end();
+	});
+
+	subSocket.emit('requestVideo', { filePath, ...opts });
+
+	const size = await new Promise<number>((resolve, reject) => {
+		const t = setTimeout(() => {
+			reject(new Error('Timeout Reached with'));
+		}, 1000 * 60 * 1);
+		subSocket.once('videoMeta', ({ contentLength }) => {
+			console.log('Got Video Meta', contentLength);
+
+			clearTimeout(t);
+			resolve(contentLength);
+		});
+	});
+
+	return { stream, size: size };
+}
+
+export {
+	initialize,
+	subSocketMap,
+	getAllFilesFromAllSubs,
+	SubFile,
+	getSubSocketByID,
+	toggleSeriesDisableForSubSystem,
+	checkifSubExists,
+	createVideoStream,
+};

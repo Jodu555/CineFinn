@@ -123,6 +123,10 @@ interface ClientToServerEvents {
 	'sync-video-action': (obj: { action: VideoAction; value: boolean | string; time?: string }) => void;
 	'sync-video-info': (obj: { currentTime: number; isPlaying: boolean }) => void;
 
+	videoChunk: (chunk: string | Buffer) => void;
+	videoEnd: () => void;
+	videoMeta: (obj: { contentLength: number }) => void;
+
 	files: (obj: { files: string[] }) => void;
 }
 
