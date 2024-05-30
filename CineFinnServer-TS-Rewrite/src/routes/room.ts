@@ -67,18 +67,18 @@ router.get('/:id/headsup', async (req: AuthenticatedRequest, res: Response, next
 		  }
 	>((resolve, reject) => {
 		const time = Date.now();
-		socket.on('sync-video-info', (obj) => {
-			console.log('Room Headsup Answer took', Date.now() - time, 'ms');
-
-			socket.removeAllListeners('sync-video-info');
-			resolve(obj);
-		});
-		socket.emit('sync-video-info');
-		setTimeout(() => {
+		const t = setTimeout(() => {
 			console.log('Room Headsup timeout reached after ', Date.now() - time, 'ms');
 			socket.removeAllListeners('sync-video-info');
 			resolve(false);
 		}, 15 * 1000);
+		socket.on('sync-video-info', (obj) => {
+			console.log('Room Headsup Answer took', Date.now() - time, 'ms');
+			socket.removeAllListeners('sync-video-info');
+			clearTimeout(t);
+			resolve(obj);
+		});
+		socket.emit('sync-video-info');
 	});
 
 	if (result == false) {
