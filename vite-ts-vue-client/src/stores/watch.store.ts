@@ -26,9 +26,9 @@ export const useWatchStore = defineStore('watch', {
 			}
 			url.searchParams.append('series', state.currentSeries.ID);
 			url.searchParams.append('language', state.currentLanguage);
-			if (useAuthStore().settings.developerMode.value) {
-				url.searchParams.append('debug', 'true');
-			}
+			// if (useAuthStore().settings.developerMode.value) {
+			// 	url.searchParams.append('debug', 'true');
+			// }
 			if (state.currentSeason == -1) {
 				if (state.currentMovie == -1) return '';
 				url.searchParams.append('movie', state.currentMovie.toString());

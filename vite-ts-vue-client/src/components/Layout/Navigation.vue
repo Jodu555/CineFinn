@@ -89,18 +89,22 @@ export default {
 	methods: {
 		...mapActions(useAuthStore, ['logout']),
 		handleKeyUp(e: KeyboardEvent) {
-			console.log('UP', e.key);
-			this.pressedKeys[e.key] = false;
+			const key = e.key.toLowerCase();
+			console.log('UP', key);
+			this.pressedKeys[key] = false;
 		},
 		handleKeyDown(e: KeyboardEvent) {
-			console.log('DOWN', e.key);
-			this.pressedKeys[e.key] = true;
+			const key = e.key.toLowerCase();
+			console.log('DOWN', key);
+			this.pressedKeys[key] = true;
 
-			if (this.pressedKeys?.['Shift'] == true && this.pressedKeys?.['D'] == true) {
+			console.log(JSON.stringify(this.pressedKeys));
+
+			if (this.pressedKeys?.['shift'] == true && this.pressedKeys?.['d'] == true) {
 				console.log('Developer Mode Activated');
 				this.settings.developerMode.value = true;
 			}
-			if (this.pressedKeys?.['Shift'] == true && this.pressedKeys?.['Z'] == true) {
+			if (this.pressedKeys?.['shift'] == true && this.pressedKeys?.['z'] == true) {
 				console.log('Normie Mode Activated');
 				this.settings.developerMode.value = false;
 			}
