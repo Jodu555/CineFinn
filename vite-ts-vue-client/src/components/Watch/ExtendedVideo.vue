@@ -563,9 +563,14 @@ export default defineComponent({
 			video.addEventListener('seeking', () => {
 				v.videoLoading = true;
 			});
-			video.addEventListener('stalled', () => {
+			video.addEventListener('stalled', async () => {
 				console.log('stalled, the internet seems to be missing video could not be loaded');
 				v.videoLoading = true;
+				console.log('Attemting Restart');
+				const time = video.currentTime;
+				video.load();
+				await video.play();
+				video.currentTime = time;
 			});
 			video.addEventListener('waiting', () => {
 				console.log('waiting for data (no current data but video still playing cause of buffering)');
