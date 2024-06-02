@@ -130,6 +130,7 @@ async function main() {
 				await job.log('Error on execution command: ' + command);
 				await job.log('Error: ' + error);
 				console.error('Error on execution command:', command, 'Error:', error);
+				await job.moveToFailed(error, job.token);
 			}
 
 			return;
