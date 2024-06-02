@@ -49,8 +49,7 @@ socket.on('connect', async () => {
 
 	// const array: ExtendedEpisodeDownload[] = [];
 
-	// const zoro = new Zoro('2945');
-
+	// const zoro = new Zoro('19130');
 	// console.log(JSON.stringify(await zoro.parseInformations(), null, 3));
 
 	// const anix = new Anix('revue-starlight-1jpp');

@@ -121,9 +121,15 @@ class Zoro {
 
 			const tickContainer = document.querySelector('.tick');
 
-			const subCount = tickContainer.querySelector('.tick-item.tick-sub').textContent.trim();
-			const dubCount = tickContainer.querySelector('.tick-item.tick-dub').textContent.trim();
-			const episodeCount = tickContainer.querySelector('.tick-item.tick-eps').textContent.trim();
+			const subCount = tickContainer.querySelector('.tick-item.tick-sub')?.textContent.trim();
+			const dubCount = tickContainer.querySelector('.tick-item.tick-dub')?.textContent.trim();
+			const episodeCount = tickContainer.querySelector('.tick-item.tick-eps')?.textContent.trim();
+
+			console.log('Information:', {
+				subCount,
+				dubCount,
+				episodeCount,
+			});
 
 			const seasonInfo = [...document.querySelectorAll('.os-item')]
 				.map((anchor: HTMLAnchorElement) => {
