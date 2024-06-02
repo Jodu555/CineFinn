@@ -117,7 +117,8 @@ async function main() {
 					await job.updateProgress(percent);
 					console.log(job.id, speed + 'x', percent + '%');
 				});
-				await job.log(`Finished Command with Exit-Code: ${code} on a ${duration} Video with the highest speed of ${highestSpeed}x`);
+				const durationString = `${duration.h || '00'}:${duration.m || '00'}:${duration.s || '00'}`;
+				await job.log(`Finished Command with Exit-Code: ${code} on a ${durationString} Video with the highest speed of ${highestSpeed}x`);
 			} catch (error) {
 				await job.log('Error on execution command: ' + command);
 				await job.log('Error: ' + error);
