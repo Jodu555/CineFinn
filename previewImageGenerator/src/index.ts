@@ -36,8 +36,8 @@ const defaultConfig: Config = {
 
 function evalPath(config: Config, evalPath: string) {
 	for (const [key, value] of Object.entries(config.pathRemapper)) {
-		if (path.normalize(evalPath).startsWith(path.win32.normalize(key))) {
-			const mappedPath = path.win32.normalize(path.win32.normalize(evalPath).replace(path.win32.normalize(key), value));
+		if (path.normalize(evalPath).startsWith(path.normalize(key))) {
+			const mappedPath = path.normalize(path.normalize(evalPath).replace(path.normalize(key), value));
 			return mappedPath.replaceAll('\\', '/');
 		}
 	}
@@ -111,13 +111,16 @@ async function main() {
 			try {
 				fs.mkdirSync(imgDir, { recursive: true });
 				// await deepExecPromisify(command, imgDir);
-				await spawnFFmpegProcess(command, imgDir, async (speed, percent) => {
+				const { code, duration, highestSpeed } = await spawnFFmpegProcess(command, imgDir, async (speed, percent) => {
 					percent = parseFloat(parseFloat(String(percent)).toFixed(2));
 					await job.log('FFmpeg Tick with speed: ' + speed + 'x and percent: ' + percent + '%');
 					await job.updateProgress(percent);
 					console.log(job.id, speed + 'x', percent + '%');
 				});
+				await job.log(`Finished Command with Exit-Code: ${code} on a ${duration} Video with the highest speed of ${highestSpeed}x`);
 			} catch (error) {
+				await job.log('Error on execution command: ' + command);
+				await job.log('Error: ' + error);
 				console.error('Error on execution command:', command, 'Error:', error);
 			}
 

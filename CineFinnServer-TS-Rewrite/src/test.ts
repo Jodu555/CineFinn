@@ -97,6 +97,7 @@ async function findNeverWatchedSeries() {
 }
 
 (async () => {
+	await getDuplicateEpisodesWithDubAndSub();
 	return;
 	// const list = parse(str);
 

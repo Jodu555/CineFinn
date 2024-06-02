@@ -204,7 +204,7 @@ async function checkForUpdates() {
 	];
 
 	console.time('Compare');
-	// const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: false, sto: false, zoro: true });
+	// const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: false, sto: true, zoro: false });
 	const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: false, zoro: false });
 	console.timeEnd('Compare');
 
