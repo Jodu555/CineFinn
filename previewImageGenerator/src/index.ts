@@ -112,7 +112,7 @@ async function main() {
 				fs.mkdirSync(imgDir, { recursive: true });
 				// await deepExecPromisify(command, imgDir);
 				let lastPercent = 0;
-				const { code, duration, highestSpeed } = await spawnFFmpegProcess(command, imgDir, async (speed, percent) => {
+				const { code, duration, highestSpeed, output } = await spawnFFmpegProcess(command, imgDir, async (speed, percent) => {
 					percent = parseFloat(parseFloat(String(percent)).toFixed(2));
 					lastPercent = percent;
 					await job.log('FFmpeg Tick with speed: ' + speed + 'x and percent: ' + percent + '%');
@@ -120,6 +120,7 @@ async function main() {
 					console.log(job.id, speed + 'x', percent + '%');
 				});
 				if (lastPercent < 100) {
+					await job.log(`Last 25 Lines of ffmpeg output: ${JSON.stringify(output.slice(Math.max(output.length - 15, 1)))}`);
 					await job.log('100 Percent mark not reached lastPercent: ' + lastPercent);
 					await job.moveToFailed(new Error('Somehow the 100 Percent mark was not reached'), job.token);
 					return;
