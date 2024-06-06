@@ -150,6 +150,11 @@ async function spawnFFmpegProcess(command: string, cwd: string = undefined, prog
 		let highestSpeed: number = 0;
 		let cumOutput = [];
 
+		let timeout = setTimeout(() => {
+			const err = new Error('Timeout Reached: ' + JSON.stringify(cumOutput, null, 3));
+			reject(err);
+		}, 1000 * 60 * 1);
+
 		proc.stderr.setEncoding('utf8');
 		proc.stderr.on('data', (data: string) => {
 			if (data == undefined) return;
@@ -179,6 +184,10 @@ async function spawnFFmpegProcess(command: string, cwd: string = undefined, prog
 
 						if (speed > highestSpeed) highestSpeed = speed;
 						progress(speed, percent);
+						if (timeout) {
+							clearTimeout(timeout);
+							timeout = null;
+						}
 					} catch (_) {}
 				}
 			});
