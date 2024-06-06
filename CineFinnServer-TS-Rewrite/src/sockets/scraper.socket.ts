@@ -145,6 +145,7 @@ function buildAwaitSocketReturn<R, T>(method: string): (arg0: T) => Promise<R | 
 					resolve(data);
 					clearTimeout(timeout);
 					$socket.off(`return${method}`, listener);
+					waitingForResponse.splice(waitingForResponse.findIndex((x) => x.__refID == __refID));
 				}
 			};
 			// TODO: Why is this failing

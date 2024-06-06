@@ -93,7 +93,10 @@ async function main() {
 
 			let command = '';
 			if (job.data.publicStreamURL) {
-				command = `ffmpeg -hide_banner -i "${job.data.publicStreamURL}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
+				command = `ffmpeg -hide_banner -timeout 10000000 -i "${job.data.publicStreamURL}" -vf fps=1/10,scale=120:-1 "${path.join(
+					imgDir,
+					'preview%d.jpg'
+				)}"`;
 			} else {
 				command = `ffmpeg -hide_banner -i "${vidFile}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
 			}
@@ -132,6 +135,7 @@ async function main() {
 			} catch (error) {
 				await job.log('Error on execution command: ' + command);
 				await job.log('Error: ' + error);
+				await job.log('Error: ' + JSON.stringify(error, null, 3));
 				console.error('Error on execution command:', command, 'Error:', error);
 				await job.moveToFailed(error, job.token);
 			}
