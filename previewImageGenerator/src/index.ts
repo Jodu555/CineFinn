@@ -123,7 +123,8 @@ async function main() {
 				const durationString = `${duration.h || '00'}:${duration.m || '00'}:${duration.s || '00'}`;
 				if (lastPercent < 99) {
 					await job.log('Video Duration: ' + durationString);
-					await job.log(`Last 25 Lines of ffmpeg output: ${JSON.stringify(output.slice(Math.max(output.length - 25, 1)), null, 3)}`);
+					await job.log(`Lines of ffmpeg output: ${JSON.stringify(output, null, 3)}`);
+					// await job.log(`Last 25 Lines of ffmpeg output: ${JSON.stringify(output.slice(Math.max(output.length - 25, 1)), null, 3)}`);
 					await job.log('99 Percent mark not reached lastPercent: ' + lastPercent);
 					await job.moveToFailed(new Error('Somehow the 99 Percent mark was not reached'), job.token);
 					return;
@@ -150,10 +151,24 @@ async function spawnFFmpegProcess(command: string, cwd: string = undefined, prog
 		let highestSpeed: number = 0;
 		let cumOutput = [];
 
+		let latestUpdate = Date.now();
+
 		let timeout = setTimeout(() => {
 			const err = new Error('Timeout Reached: ' + JSON.stringify(cumOutput, null, 3));
 			reject(err);
 		}, 1000 * 60 * 1);
+
+		let interval = setInterval(() => {
+			const sAgo = (Date.now() - latestUpdate) / 1000;
+			console.log('Last Update ' + sAgo + 's ago');
+
+			if (sAgo > 60 * 5) {
+				console.log('No output for 5 minutes, killing process');
+				proc.kill();
+				clearInterval(interval);
+				reject(new Error('No output for 5 minutes, killing process: ' + JSON.stringify(cumOutput, null, 3)));
+			}
+		}, 1000);
 
 		proc.stderr.setEncoding('utf8');
 		proc.stderr.on('data', (data: string) => {
@@ -183,6 +198,7 @@ async function spawnFFmpegProcess(command: string, cwd: string = undefined, prog
 						const percent = (seconds / maxSeconds) * 100;
 
 						if (speed > highestSpeed) highestSpeed = speed;
+						latestUpdate = Date.now();
 						progress(speed, percent);
 						if (timeout) {
 							clearTimeout(timeout);
