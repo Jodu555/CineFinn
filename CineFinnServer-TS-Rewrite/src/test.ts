@@ -96,8 +96,62 @@ async function findNeverWatchedSeries() {
 	console.log(allWatchedIDs.size, serieIDS.size);
 }
 
+async function showSubID() {
+	interface MovingItem {
+		seriesID: string;
+		fromSubID: string;
+		toSubID: string;
+		filePath: string;
+	}
+
+	const movingArray: MovingItem[] = [];
+
+	const test = series.map((x) => {
+		const obj: Record<string, number> = {};
+		const all = [...x.movies, ...x.seasons.flat()];
+		all.forEach((z) => {
+			obj[z.subID] = obj[z.subID] ? obj[z.subID] + 1 : 1;
+		});
+
+		let prioSub = '';
+		let sortable: Record<string, number> = {};
+
+		if (Object.keys(obj).length == 1) {
+			prioSub = Object.keys(obj)[0];
+			sortable = obj;
+		} else {
+			sortable = Object.entries(obj)
+				.sort(([, a], [, b]) => b - a)
+				.reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
+
+			prioSub = Object.entries(sortable)[0][0];
+
+			all.forEach((z) => {
+				if (z.subID != prioSub) {
+					movingArray.push({
+						seriesID: x.ID,
+						fromSubID: z.subID,
+						toSubID: prioSub,
+						filePath: z.filePath,
+					});
+				}
+			});
+		}
+
+		return {
+			ID: x.ID,
+			title: x.title,
+			obj,
+			sortable,
+			prioSub,
+		};
+	});
+	console.log(test, movingArray);
+}
+
 (async () => {
-	await getDuplicateEpisodesWithDubAndSub();
+	await showSubID();
+	// await getDuplicateEpisodesWithDubAndSub();
 	return;
 	// const list = parse(str);
 

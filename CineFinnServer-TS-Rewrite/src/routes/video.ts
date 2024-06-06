@@ -8,6 +8,7 @@ import { getVideoMovie, getVideoEntity, Episode, Movie } from '../classes/series
 import { getSubSocketByID } from '../sockets/sub.socket';
 
 export = async (req: AuthenticatedRequest, res: Response) => {
+	console.time('total-video');
 	const { series: seriesID, season, episode, movie, language, debug: rmtDebug } = req.query;
 
 	const debug = false;
@@ -184,6 +185,7 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 			res.sendStatus(500);
 		});
 
+		console.time('sub-video');
 		getVideoStreamLog()
 			.filter((x) => x.userUUID == req.credentials.user.UUID && Date.now() - x.time > 5000)
 			.forEach((old, idx) => {
@@ -191,6 +193,7 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 				console.log('Destroyed stream for', old.userUUID, Date.now() - old.time, 'ms', old.path);
 				getVideoStreamLog().splice(idx, 1);
 			});
+		console.timeEnd('sub-video');
 
 		getVideoStreamLog().push({
 			stream: fileStream,
@@ -202,5 +205,6 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 		});
 
 		fileStream.pipe(res);
+		console.timeEnd('total-video');
 	}
 };
