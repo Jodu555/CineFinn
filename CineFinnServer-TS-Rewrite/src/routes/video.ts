@@ -1,14 +1,14 @@
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import axios from 'axios';
 import { Response } from 'express';
 import { getSeries, getVideoStreamLog, setVideoStreamLog } from '../utils/utils';
 import { AuthenticatedRequest } from '../types/session';
 import { getVideoMovie, getVideoEntity, Episode, Movie } from '../classes/series';
-import { getSubSocketByID } from '../sockets/sub.socket';
+import { createVideoStreamOverSocket, getSubSocketByID, getVideoStats } from '../sockets/sub.socket';
 
 export = async (req: AuthenticatedRequest, res: Response) => {
-	console.time('total-video');
 	const { series: seriesID, season, episode, movie, language, debug: rmtDebug } = req.query;
 
 	const debug = false;
@@ -91,93 +91,121 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 			}
 		}
 	}
-
+	let socketTransmit = false;
 	if (videoEntity.subID != 'main') {
 		const subSocket = getSubSocketByID(videoEntity.subID);
 		if (!subSocket) {
 			res.status(404).send('Sub System Currently not reachable');
 			return;
 		}
-		try {
-			const response = await axios({
-				responseType: 'stream',
-				url: `${subSocket.auth.endpoint}/video?ptoken=${subSocket.auth.ptoken}&path=${encodeURIComponent(filePath)}`,
-				headers: {
-					range: req.headers.range,
-					connection: 'keep-alive',
-					'user-agent': req.headers['user-agent'],
-				},
-				method: req.method,
-				maxRedirects: 0,
-				validateStatus: (status: number) => status >= 200 && status < 500,
-				timeout: 5000,
-				decompress: true,
-				onDownloadProgress(progressEvent) {
-					// console.log((progressEvent.loaded / progressEvent.total) * 100);
-				},
-			});
+		console.log(subSocket.auth);
 
-			// console.log(response.status, response.headers);
-			// res.status(200).json({ ok: true });
+		if (subSocket.auth.endpoint !== undefined && subSocket.auth.endpoint !== 'local-0x000') {
+			try {
+				const response = await axios({
+					responseType: 'stream',
+					url: `${subSocket.auth.endpoint}/video?ptoken=${subSocket.auth.ptoken}&path=${encodeURIComponent(filePath)}`,
+					headers: {
+						range: req.headers.range,
+						connection: 'keep-alive',
+						'user-agent': req.headers['user-agent'],
+					},
+					method: req.method,
+					maxRedirects: 0,
+					validateStatus: (status: number) => status >= 200 && status < 500,
+					timeout: 5000,
+					decompress: true,
+					onDownloadProgress(progressEvent) {
+						// console.log((progressEvent.loaded / progressEvent.total) * 100);
+					},
+				});
 
-			res.status(response.status);
-			res.set(response.headers);
+				// console.log(response.status, response.headers);
+				// res.status(200).json({ ok: true });
 
-			response.data.pipe(res);
-		} catch (error) {
-			res.status(500).json(error);
-		}
-	} else {
-		res.setHeader('content-type', 'video/mp4');
+				res.status(response.status);
+				res.set(response.headers);
 
-		debug && console.log('Got filePath', filePath);
-
-		const stat = fs.statSync(filePath);
-		const contentLength = stat.size;
-
-		// Listing 4.
-		if (req.method === 'HEAD') {
-			res.statusCode = 200;
-			res.setHeader('accept-ranges', 'bytes');
-			res.setHeader('content-length', contentLength);
-			res.end();
-			return;
-		}
-
-		let retrievedLength: number;
-		if (start !== undefined && end !== undefined) {
-			retrievedLength = end + 1 - start;
-		} else if (start !== undefined) {
-			retrievedLength = contentLength - start;
-		} else if (end !== undefined) {
-			retrievedLength = end + 1;
+				response.data.pipe(res);
+				return;
+			} catch (error) {
+				res.status(500).json(error);
+				return;
+			}
 		} else {
-			retrievedLength = contentLength;
+			//No Public endpoint proxying unavailable using socket ipc
+			console.log('No Public endpoint proxying unavailable using socket ipc');
+			socketTransmit = true;
+			// console.log();
+			// res.status(200);
+			// return;
 		}
+	}
+	res.setHeader('content-type', 'video/mp4');
 
-		// if (end == undefined) {
-		// 	const CHUNK_SIZE = Number(process.env.VIDEO_CHUNK_SIZE);
-		// 	console.log(end, start, contentLength);
-		// 	end = start + CHUNK_SIZE - 1;
-		// 	console.log('tmp end', end);
+	debug && console.log('Got filePath', filePath);
 
-		// 	if (end > contentLength) {
-		// 		console.log('Bound reached');
+	let contentLength = -1;
+	if (socketTransmit) {
+		const stat = await getVideoStats(videoEntity.subID, filePath);
+		contentLength = stat.size;
+	} else {
+		const stat = fs.statSync(filePath);
+		contentLength = stat.size;
+	}
 
-		// 		end = contentLength - 1;
-		// 	}
-		// }
+	// Listing 4.
+	if (req.method === 'HEAD') {
+		res.statusCode = 200;
+		res.setHeader('accept-ranges', 'bytes');
+		res.setHeader('content-length', contentLength);
+		res.end();
+		return;
+	}
 
-		debug && console.log('Calculated contentLength', contentLength);
-		res.statusCode = start !== undefined || end !== undefined ? 206 : 200;
+	let retrievedLength: number;
+	if (start !== undefined && end !== undefined) {
+		retrievedLength = end + 1 - start;
+	} else if (start !== undefined) {
+		retrievedLength = contentLength - start;
+	} else if (end !== undefined) {
+		retrievedLength = end + 1;
+	} else {
+		retrievedLength = contentLength;
+	}
 
-		res.setHeader('content-length', retrievedLength);
+	// if (end == undefined) {
+	// 	const CHUNK_SIZE = Number(process.env.VIDEO_CHUNK_SIZE);
+	// 	console.log(end, start, contentLength);
+	// 	end = start + CHUNK_SIZE - 1;
+	// 	console.log('tmp end', end);
 
-		if (range !== undefined) {
-			res.setHeader('content-range', `bytes ${start || 0}-${end || contentLength - 1}/${contentLength}`);
-			res.setHeader('accept-ranges', 'bytes');
-		}
+	// 	if (end > contentLength) {
+	// 		console.log('Bound reached');
 
+	// 		end = contentLength - 1;
+	// 	}
+	// }
+
+	debug && console.log('Calculated contentLength', contentLength);
+	res.statusCode = start !== undefined || end !== undefined ? 206 : 200;
+
+	res.setHeader('content-length', retrievedLength);
+
+	if (range !== undefined) {
+		res.setHeader('content-range', `bytes ${start || 0}-${end || contentLength - 1}/${contentLength}`);
+		res.setHeader('accept-ranges', 'bytes');
+	}
+
+	if (socketTransmit) {
+		res.status(206);
+		const requestId = crypto.randomUUID();
+		// ongoingRequests.set(requestId, { res });
+		// io.emit('video-range', { start, end, requestId });
+
+		// handleSocketTransmitVideo(videoEntity.subID, requestId, filePath, start, end, res);
+		createVideoStreamOverSocket(videoEntity.subID, requestId, filePath, { start, end }, res);
+	} else {
 		const fileStream = fs.createReadStream(filePath, { start, end });
 		fileStream.on('error', (error) => {
 			console.log(`Error reading file ${filePath}.`);
@@ -185,7 +213,6 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 			res.sendStatus(500);
 		});
 
-		console.time('sub-video');
 		getVideoStreamLog()
 			.filter((x) => x.userUUID == req.credentials.user.UUID && Date.now() - x.time > 5000)
 			.forEach((old, idx) => {
@@ -193,7 +220,6 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 				console.log('Destroyed stream for', old.userUUID, Date.now() - old.time, 'ms', old.path);
 				getVideoStreamLog().splice(idx, 1);
 			});
-		console.timeEnd('sub-video');
 
 		getVideoStreamLog().push({
 			stream: fileStream,
@@ -205,6 +231,5 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 		});
 
 		fileStream.pipe(res);
-		console.timeEnd('total-video');
 	}
 };

@@ -123,9 +123,9 @@ interface ClientToServerEvents {
 	'sync-video-action': (obj: { action: VideoAction; value: boolean | string; time?: string }) => void;
 	'sync-video-info': (obj: { currentTime: number; isPlaying: boolean }) => void;
 
-	videoChunk: (chunk: string | Buffer) => void;
-	videoEnd: () => void;
-	videoMeta: (obj: { contentLength: number }) => void;
+	'video-chunk': (obj: { chunk: string | Buffer; requestId: string }) => void;
+	'video-chunk-end': (obj: { requestId: string }) => void;
+	'video-chunk-error': (obj: { requestId: string; error: Error }) => void;
 
 	files: (obj: { files: string[] }) => void;
 }

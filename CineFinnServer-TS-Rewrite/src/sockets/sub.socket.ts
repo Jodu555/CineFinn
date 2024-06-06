@@ -4,10 +4,11 @@ import { ExtendedSocket } from '../types/session';
 import { Langs } from '../types/classes';
 import { getSeries, setSeries } from '../utils/utils';
 import { sendSeriesReloadToAll } from './client.socket';
+import { Response } from 'express';
 
-const subSocketMap = new Map<string, ExtendedSocket>();
+export const subSocketMap = new Map<string, ExtendedSocket>();
 
-const initialize = async (socket: ExtendedSocket) => {
+export const initialize = async (socket: ExtendedSocket) => {
 	const auth = socket.auth;
 	console.log('Socket Connection:', auth.type.toUpperCase(), auth.id, auth.ptoken);
 
@@ -25,12 +26,22 @@ const initialize = async (socket: ExtendedSocket) => {
 	await toggleSeriesDisableForSubSystem(auth.id, false);
 };
 
-interface SubFile {
+export interface SubFile {
 	subID: string;
 	path: string;
 }
 
-async function toggleSeriesDisableForSubSystem(subID: string, disabled: boolean) {
+export async function getVideoStats(subID: string, filePath: string) {
+	const subSocket = getSubSocketByID(subID);
+	return new Promise<{ size: number }>((resolve, reject) => {
+		subSocket.emit('video-stats', { filePath: filePath }, ({ size }) => {
+			console.log('Got Size', size);
+			resolve({ size });
+		});
+	});
+}
+
+export async function toggleSeriesDisableForSubSystem(subID: string, disabled: boolean) {
 	const match = await getSeriesBySubID(subID);
 
 	console.log(`${disabled ? 'Disabling' : 'Enabling'} sub system for: ${subID} affected ${match.length} Series`);
@@ -46,23 +57,23 @@ async function toggleSeriesDisableForSubSystem(subID: string, disabled: boolean)
 	await sendSeriesReloadToAll();
 }
 
-function getSubSocketByID(subID: string): ExtendedSocket | undefined {
+export function getSubSocketByID(subID: string): ExtendedSocket | undefined {
 	return subSocketMap.get(subID);
 }
 
-async function getSeriesBySubID(subID: string) {
+export async function getSeriesBySubID(subID: string) {
 	const series = await getSeries();
 
 	const serie = series.filter((x) => x.seasons.flat().some((e) => e.subID == subID) || x.movies.some((e) => e.subID == subID));
 	return serie;
 }
 
-async function checkifSubExists(subID: string) {
+export async function checkifSubExists(subID: string) {
 	const series = await getSeriesBySubID(subID);
 	return series.length > 0;
 }
 
-async function getAllFilesFromAllSubs() {
+export async function getAllFilesFromAllSubs() {
 	const allFiles = await new Promise<SubFile[]>((resolve, reject) => {
 		let waitFor: string[] = [];
 		const allFilesInner: SubFile[] = [];
@@ -95,45 +106,50 @@ async function getAllFilesFromAllSubs() {
 	return allFiles;
 }
 
-async function createVideoStream(subID: string, filePath: string, opts: { start: number; end: number }) {
+// handleSocketTransmitVideo(videoEntity.subID, requestId, filePath, start, end, res);
+
+const ongoingRequests = new Map<string, { res: Response }>();
+
+export async function createVideoStreamOverSocket(
+	subID: string,
+	requestId: string,
+	filePath: string,
+	opts: { start: number; end: number },
+	res: Response
+) {
 	const subSocket = getSubSocketByID(subID);
-	const stream = new PassThrough();
-	subSocket.on('videoChunk', (chunk) => {
-		console.log('Got Chunk', chunk.length);
+	// ongoingRequests.set(requestId, { res });
+	subSocket.emit('video-range', { ...opts, filePath, requestId });
 
-		stream.write(chunk);
-	});
+	const handleData = ({ chunk, requestId: reqID }) => {
+		if (requestId == reqID) {
+			res.write(chunk);
+		}
+	};
 
-	subSocket.on('videoEnd', () => {
-		console.log('Got Video End');
+	const handleError = ({ error, requestId: reqID }) => {
+		if (requestId == reqID) {
+			console.log('Got Error', error);
+			res.status(500).json(error);
+			cleanup();
+		}
+	};
 
-		stream.end();
-	});
+	const handleEnd = ({ requestId: reqID }) => {
+		if (requestId == reqID) {
+			console.log('Got End');
+			res.end();
+			cleanup();
+		}
+	};
 
-	subSocket.emit('requestVideo', { filePath, ...opts });
+	const cleanup = () => {
+		subSocket.off('video-chunk', handleData);
+		subSocket.off('video-chunk-end', handleEnd);
+		subSocket.off('video-chunk-error', handleError);
+	};
 
-	const size = await new Promise<number>((resolve, reject) => {
-		const t = setTimeout(() => {
-			reject(new Error('Timeout Reached with'));
-		}, 1000 * 60 * 1);
-		subSocket.once('videoMeta', ({ contentLength }) => {
-			console.log('Got Video Meta', contentLength);
-
-			clearTimeout(t);
-			resolve(contentLength);
-		});
-	});
-
-	return { stream, size: size };
+	subSocket.on('video-chunk', handleData);
+	subSocket.on('video-chunk-end', handleEnd);
+	subSocket.on('video-chunk-error', handleError);
 }
-
-export {
-	initialize,
-	subSocketMap,
-	getAllFilesFromAllSubs,
-	SubFile,
-	getSubSocketByID,
-	toggleSeriesDisableForSubSystem,
-	checkifSubExists,
-	createVideoStream,
-};

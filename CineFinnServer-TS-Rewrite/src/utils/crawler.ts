@@ -238,7 +238,7 @@ const mergeSeriesArrays = (before: Series[], after: Series[], keepCurrentlyNotPr
 						beforeSerie.movies,
 						beforeSerie.seasons,
 						{ ...beforeSerie.references },
-						{ ...beforeSerie.infos, disables: true }
+						{ ...beforeSerie.infos, disabled: true }
 					)
 				);
 			}
