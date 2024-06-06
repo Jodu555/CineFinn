@@ -119,13 +119,15 @@ async function main() {
 					await job.updateProgress(percent);
 					console.log(job.id, speed + 'x', percent + '%');
 				});
+
+				const durationString = `${duration.h || '00'}:${duration.m || '00'}:${duration.s || '00'}`;
 				if (lastPercent < 100) {
-					await job.log(`Last 25 Lines of ffmpeg output: ${JSON.stringify(output.slice(Math.max(output.length - 15, 1)))}`);
+					await job.log('Video Duration: ' + durationString);
+					await job.log(`Last 25 Lines of ffmpeg output: ${JSON.stringify(output.slice(Math.max(output.length - 25, 1)), null, 3)}`);
 					await job.log('100 Percent mark not reached lastPercent: ' + lastPercent);
 					await job.moveToFailed(new Error('Somehow the 100 Percent mark was not reached'), job.token);
 					return;
 				}
-				const durationString = `${duration.h || '00'}:${duration.m || '00'}:${duration.s || '00'}`;
 				await job.log(`Finished Command with Exit-Code: ${code} on a ${durationString} Video with the highest speed of ${highestSpeed}x`);
 			} catch (error) {
 				await job.log('Error on execution command: ' + command);
