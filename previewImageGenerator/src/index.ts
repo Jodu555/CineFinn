@@ -218,6 +218,8 @@ async function spawnFFmpegProcess(command: string, cwd: string = undefined, prog
 		proc.on('close', (code) => {
 			console.log('Finished the', duration, 'video with the highest speed of', highestSpeed, 'x');
 			console.log('closing code: ' + code);
+			clearInterval(interval);
+			clearTimeout(timeout);
 			if (code == 0) {
 				resolve({ code, output: cumOutput, duration, highestSpeed });
 			} else {
