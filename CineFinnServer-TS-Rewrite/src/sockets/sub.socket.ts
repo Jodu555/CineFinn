@@ -182,4 +182,5 @@ export async function createVideoStreamOverSocket(
 	// subSocket.on('video-chunk-error', handleError);
 
 	subSocket.emit('video-range', { ...opts, filePath, requestId });
+	console.log('Emitting video-range', { ...opts, filePath, requestId });
 }
