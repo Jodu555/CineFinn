@@ -136,9 +136,30 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 			//No Public endpoint proxying unavailable using socket ipc
 			console.log('No Public endpoint proxying unavailable using socket ipc');
 			socketTransmit = true;
+			const stat = await getVideoStats(videoEntity.subID, filePath);
+			const contentLength = stat.size;
+			const Hrange = req.headers.range;
+			const parts = Hrange.replace(/bytes=/, '').split('-');
+			const start = parseInt(parts[0], 10);
+			const end = parts[1] ? parseInt(parts[1], 10) : contentLength - 1;
+			if (start >= contentLength || end >= contentLength) {
+				res.status(416).send(`Requested range not satisfiable\n${start} >= ${contentLength}`);
+				return;
+			}
+			res.setHeader('Content-Range', `bytes ${start}-${end}/${contentLength}`);
+			res.setHeader('Accept-Ranges', 'bytes');
+			res.setHeader('Content-Length', end - start + 1);
+			res.setHeader('Content-Type', 'video/mp4');
+			res.status(206);
+			const requestId = crypto.randomUUID();
+			// ongoingRequests.set(requestId, { res });
+			// io.emit('video-range', { start, end, requestId });
+
+			// handleSocketTransmitVideo(videoEntity.subID, requestId, filePath, start, end, res);
+			createVideoStreamOverSocket(videoEntity.subID, requestId, filePath, { start, end }, res);
 			// console.log();
 			// res.status(200);
-			// return;
+			return;
 		}
 	}
 	res.setHeader('content-type', 'video/mp4');
@@ -198,6 +219,18 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 	}
 
 	if (socketTransmit) {
+		const Hrange = req.headers.range;
+		const parts = Hrange.replace(/bytes=/, '').split('-');
+		const start = parseInt(parts[0], 10);
+		const end = parts[1] ? parseInt(parts[1], 10) : contentLength - 1;
+		if (start >= contentLength || end >= contentLength) {
+			res.status(416).send(`Requested range not satisfiable\n${start} >= ${contentLength}`);
+			return;
+		}
+		res.setHeader('Content-Range', `bytes ${start}-${end}/${contentLength}`);
+		res.setHeader('Accept-Ranges', 'bytes');
+		res.setHeader('Content-Length', end - start + 1);
+		res.setHeader('Content-Type', 'video/mp4');
 		res.status(206);
 		const requestId = crypto.randomUUID();
 		// ongoingRequests.set(requestId, { res });

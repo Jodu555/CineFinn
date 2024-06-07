@@ -24,6 +24,26 @@ export const initialize = async (socket: ExtendedSocket) => {
 	});
 
 	await toggleSeriesDisableForSubSystem(auth.id, false);
+
+	socket.on('video-chunk', ({ chunk, requestId }) => {
+		const ongoingRequest = ongoingRequests.get(requestId);
+		if (ongoingRequest) {
+			ongoingRequest.res.write(chunk);
+		}
+	});
+	socket.on('video-chunk-end', ({ requestId }) => {
+		const ongoingRequest = ongoingRequests.get(requestId);
+		if (ongoingRequest) {
+			ongoingRequest.res.end();
+		}
+	});
+	socket.on('video-chunk-error', ({ error, requestId }) => {
+		const ongoingRequest = ongoingRequests.get(requestId);
+		if (ongoingRequest) {
+			console.log('Got Error', error);
+			ongoingRequest.res.status(500).json(error);
+		}
+	});
 };
 
 export interface SubFile {
@@ -31,11 +51,18 @@ export interface SubFile {
 	path: string;
 }
 
+const cache = new Map<string, { size: number }>();
+
 export async function getVideoStats(subID: string, filePath: string) {
+	if (cache.has(filePath)) {
+		console.log('Got Size from cache', cache.get(filePath).size);
+		return cache.get(filePath);
+	}
 	const subSocket = getSubSocketByID(subID);
 	return new Promise<{ size: number }>((resolve, reject) => {
 		subSocket.emit('video-stats', { filePath: filePath }, ({ size }) => {
 			console.log('Got Size', size);
+			cache.set(filePath, { size });
 			resolve({ size });
 		});
 	});
@@ -109,6 +136,7 @@ export async function getAllFilesFromAllSubs() {
 // handleSocketTransmitVideo(videoEntity.subID, requestId, filePath, start, end, res);
 
 const ongoingRequests = new Map<string, { res: Response }>();
+// const ongoingRequests = new Map<string, { handleData: () => void; handleError: () => void; handleEnd: () => void; res: Response }>();
 
 export async function createVideoStreamOverSocket(
 	subID: string,
@@ -118,39 +146,40 @@ export async function createVideoStreamOverSocket(
 	res: Response
 ) {
 	const subSocket = getSubSocketByID(subID);
-	// ongoingRequests.set(requestId, { res });
+	ongoingRequests.set(requestId, { res });
+	// ongoingRequests.set(requestId, { res, handleData, handleError, handleEnd });
 
-	const handleData = ({ chunk, requestId: reqID }) => {
-		if (requestId == reqID) {
-			res.write(chunk);
-		}
-	};
+	// const handleData = ({ chunk, requestId: reqID }) => {
+	// 	if (requestId == reqID) {
+	// 		res.write(chunk);
+	// 	}
+	// };
 
-	const handleError = ({ error, requestId: reqID }) => {
-		if (requestId == reqID) {
-			console.log('Got Error', error);
-			res.status(500).json(error);
-			cleanup();
-		}
-	};
+	// const handleError = ({ error, requestId: reqID }) => {
+	// 	if (requestId == reqID) {
+	// 		console.log('Got Error', error);
+	// 		res.status(500).json(error);
+	// 		cleanup();
+	// 	}
+	// };
 
-	const handleEnd = ({ requestId: reqID }) => {
-		if (requestId == reqID) {
-			console.log('Got End');
-			res.end();
-			cleanup();
-		}
-	};
+	// const handleEnd = ({ requestId: reqID }) => {
+	// 	if (requestId == reqID) {
+	// 		console.log('Got End');
+	// 		res.end();
+	// 		cleanup();
+	// 	}
+	// };
 
-	const cleanup = () => {
-		subSocket.off('video-chunk', handleData);
-		subSocket.off('video-chunk-end', handleEnd);
-		subSocket.off('video-chunk-error', handleError);
-	};
+	// const cleanup = () => {
+	// 	subSocket.off('video-chunk', handleData);
+	// 	subSocket.off('video-chunk-end', handleEnd);
+	// 	subSocket.off('video-chunk-error', handleError);
+	// };
 
-	subSocket.on('video-chunk', handleData);
-	subSocket.on('video-chunk-end', handleEnd);
-	subSocket.on('video-chunk-error', handleError);
+	// subSocket.on('video-chunk', handleData);
+	// subSocket.on('video-chunk-end', handleEnd);
+	// subSocket.on('video-chunk-error', handleError);
 
 	subSocket.emit('video-range', { ...opts, filePath, requestId });
 }

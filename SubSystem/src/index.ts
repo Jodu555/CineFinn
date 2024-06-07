@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs, { ReadStream } from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import io from 'socket.io-client';
@@ -66,7 +66,7 @@ socket.on('listFiles', async () => {
 	socket.emit('files', { files });
 });
 
-const map = new Map<string, { start: number; end: number; num: number }>();
+const map = new Map<string, { stream: ReadStream; start: number; end: number; num: number }>();
 
 socket.on('video-stats', ({ filePath }, callback) => {
 	console.log('Got Stats for:', filePath);
@@ -83,7 +83,7 @@ interface VideoRangeRequest {
 socket.on('video-range', ({ filePath, start, end, requestId }: VideoRangeRequest) => {
 	const videoStream = fs.createReadStream(filePath, { start, end });
 	if (map.get(requestId) == undefined) {
-		map.set(requestId, { start, end, num: 0 });
+		map.set(requestId, { stream: videoStream, start, end, num: 0 });
 	}
 
 	videoStream.on('data', (chunk) => {
@@ -92,7 +92,10 @@ socket.on('video-range', ({ filePath, start, end, requestId }: VideoRangeRequest
 	});
 
 	videoStream.on('end', () => {
-		console.log('Sent:', requestId, map.get(requestId));
+		const mapObj = map.get(requestId);
+		mapObj.stream.destroy();
+		delete mapObj.stream;
+		console.log('Sent:', requestId, mapObj);
 
 		socket.emit('video-chunk-end', requestId);
 	});
@@ -327,6 +330,10 @@ app.get('/video', async (req, res) => {
 	});
 
 	fileStream.pipe(res);
+});
+
+app.get('/', (_, res) => {
+	res.status(200).json({ success: true, result: map.entries() });
 });
 
 app.listen(PORT, () => {
