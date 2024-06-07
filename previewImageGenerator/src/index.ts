@@ -83,7 +83,7 @@ async function main() {
 	const worker = new Worker<JobMeta>(
 		'previewImageQueue',
 		async (job) => {
-			job.clearLogs();
+			await job.clearLogs();
 			console.log('Recieve Job: ', job.id);
 			const vidFile = evalPath(config, job.data.filePath);
 			const imgDir = evalPath(config, job.data.output);
@@ -135,7 +135,11 @@ async function main() {
 				await job.log('Error: ' + error);
 				await job.log('Error: ' + JSON.stringify(error, null, 3));
 				console.error('Error on execution command:', command, 'Error:', error);
-				await job.moveToFailed(error, job.token);
+				if (job.attemptsMade >= 5) {
+					await job.moveToFailed(error, job.token);
+				} else {
+					await job.retry('failed');
+				}
 			}
 
 			return;

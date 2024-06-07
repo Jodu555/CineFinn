@@ -119,7 +119,6 @@ export async function createVideoStreamOverSocket(
 ) {
 	const subSocket = getSubSocketByID(subID);
 	// ongoingRequests.set(requestId, { res });
-	subSocket.emit('video-range', { ...opts, filePath, requestId });
 
 	const handleData = ({ chunk, requestId: reqID }) => {
 		if (requestId == reqID) {
@@ -152,4 +151,6 @@ export async function createVideoStreamOverSocket(
 	subSocket.on('video-chunk', handleData);
 	subSocket.on('video-chunk-end', handleEnd);
 	subSocket.on('video-chunk-error', handleError);
+
+	subSocket.emit('video-range', { ...opts, filePath, requestId });
 }
