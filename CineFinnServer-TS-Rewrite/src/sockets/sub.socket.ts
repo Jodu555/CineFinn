@@ -25,38 +25,6 @@ export const initialize = async (socket: ExtendedSocket) => {
 	});
 
 	await toggleSeriesDisableForSubSystem(auth.id, false);
-
-	// socket.on('video-chunk', ({ chunk, requestId }) => {
-	// 	if (countMap.has(requestId)) {
-	// 		countMap.set(requestId, countMap.get(requestId) + 1);
-	// 	} else {
-	// 		countMap.set(requestId, 1);
-	// 	}
-	// 	const ongoingRequest = ongoingRequests.get(requestId);
-	// 	if (ongoingRequest) {
-	// 		ongoingRequest.res.write(chunk);
-	// 	}
-	// });
-	// socket.on('video-chunk-end', ({ requestId }) => {
-	// 	if (countMap.has(requestId)) {
-	// 		console.log('Got End', requestId, countMap.get(requestId));
-	// 	}
-	// 	console.log('Got End', requestId);
-	// 	const ongoingRequest = ongoingRequests.get(requestId);
-	// 	if (ongoingRequest) {
-	// 		ongoingRequest.res.end();
-	// 		ongoingRequests.delete(requestId);
-	// 	}
-	// });
-	// socket.on('video-chunk-error', ({ error, requestId }) => {
-	// 	console.log('Got Error', error, requestId);
-	// 	const ongoingRequest = ongoingRequests.get(requestId);
-	// 	if (ongoingRequest) {
-	// 		console.log('Got Error', error);
-	// 		ongoingRequest.res.status(500).json(error);
-	// 		ongoingRequests.delete(requestId);
-	// 	}
-	// });
 };
 
 export interface SubFile {
