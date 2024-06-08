@@ -59,7 +59,6 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 
 	const isMovie = Boolean(movie);
 
-	// let videoEntity = isMovie ? serie.movies[movie] : serie.seasons[season][episode];
 	let videoEntity: Movie | Episode = null;
 	if (isMovie) {
 		videoEntity = await getVideoMovie(serie.ID, Number(movie));
@@ -133,36 +132,8 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 				return;
 			}
 		} else {
-			//No Public endpoint proxying unavailable using socket ipc
-			console.log('No Public endpoint proxying unavailable using socket ipc');
+			console.log('No Public endpoint proxying unavailable using socket streaming');
 			socketTransmit = true;
-			// const Hrange = req.headers.range;
-			// if (!Hrange) {
-			// 	res.status(400).send('Requires Range header');
-			// 	return;
-			// }
-			// const stat = await getVideoStats(videoEntity.subID, filePath);
-			// const contentLength = stat.size;
-			// const parts = Hrange.replace(/bytes=/, '').split('-');
-			// console.log(parts);
-			// const start = parseInt(parts[0], 10);
-			// const end = parts[1] ? parseInt(parts[1], 10) : contentLength - 1;
-			// if (start >= contentLength || end >= contentLength) {
-			// 	res.status(416).send(`Requested range not satisfiable\n${start} >= ${contentLength}`);
-			// 	return;
-			// }
-			// res.setHeader('Content-Range', `bytes ${start}-${end}/${contentLength}`);
-			// res.setHeader('Accept-Ranges', 'bytes');
-			// res.setHeader('Content-Length', end - start + 1);
-			// res.setHeader('Content-Type', 'video/mp4');
-			// res.status(206);
-			// const requestId = crypto.randomUUID();
-			// console.log(start, end);
-
-			// // handleSocketTransmitVideo(videoEntity.subID, requestId, filePath, start, end, res);
-			// createVideoStreamOverSocket(videoEntity.subID, requestId, filePath, { start, end }, res);
-			// // console.log();
-			// // res.status(200);
 		}
 	}
 	res.setHeader('content-type', 'video/mp4');
@@ -198,19 +169,6 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 		retrievedLength = contentLength;
 	}
 
-	// if (end == undefined) {
-	// 	const CHUNK_SIZE = Number(process.env.VIDEO_CHUNK_SIZE);
-	// 	console.log(end, start, contentLength);
-	// 	end = start + CHUNK_SIZE - 1;
-	// 	console.log('tmp end', end);
-
-	// 	if (end > contentLength) {
-	// 		console.log('Bound reached');
-
-	// 		end = contentLength - 1;
-	// 	}
-	// }
-
 	debug && console.log('Calculated contentLength', contentLength);
 	res.statusCode = start !== undefined || end !== undefined ? 206 : 200;
 
@@ -222,24 +180,8 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 	}
 
 	if (socketTransmit) {
-		// const Hrange = req.headers.range;
-		// const parts = Hrange.replace(/bytes=/, '').split('-');
-		// const start = parseInt(parts[0], 10);
-		// const end = parts[1] ? parseInt(parts[1], 10) : contentLength - 1;
-		// if (start >= contentLength || end >= contentLength) {
-		// 	res.status(416).send(`Requested range not satisfiable\n${start} >= ${contentLength}`);
-		// 	return;
-		// }
-		// res.setHeader('Content-Range', `bytes ${start}-${end}/${contentLength}`);
-		// res.setHeader('Accept-Ranges', 'bytes');
-		// res.setHeader('Content-Length', end - start + 1);
-		// res.setHeader('Content-Type', 'video/mp4');
 		res.status(206);
 		const requestId = crypto.randomUUID();
-		// ongoingRequests.set(requestId, { res });
-		// io.emit('video-range', { start, end, requestId });
-
-		// handleSocketTransmitVideo(videoEntity.subID, requestId, filePath, start, end, res);
 		createVideoStreamOverSocket(videoEntity.subID, requestId, filePath, { start, end }, res);
 	} else {
 		const fileStream = fs.createReadStream(filePath, { start, end });
