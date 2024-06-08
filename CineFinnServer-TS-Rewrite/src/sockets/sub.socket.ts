@@ -7,9 +7,7 @@ import { sendSeriesReloadToAll } from './client.socket';
 import { Response } from 'express';
 
 export const subSocketMap = new Map<string, ExtendedSocket>();
-export const ongoingRequests = new Map<string, { res: Response }>();
-
-const countMap = new Map<string, number>();
+// export const ongoingRequests = new Map<string, { res: Response }>();
 
 export const initialize = async (socket: ExtendedSocket) => {
 	const auth = socket.auth;
@@ -28,37 +26,37 @@ export const initialize = async (socket: ExtendedSocket) => {
 
 	await toggleSeriesDisableForSubSystem(auth.id, false);
 
-	socket.on('video-chunk', ({ chunk, requestId }) => {
-		if (countMap.has(requestId)) {
-			countMap.set(requestId, countMap.get(requestId) + 1);
-		} else {
-			countMap.set(requestId, 1);
-		}
-		const ongoingRequest = ongoingRequests.get(requestId);
-		if (ongoingRequest) {
-			ongoingRequest.res.write(chunk);
-		}
-	});
-	socket.on('video-chunk-end', ({ requestId }) => {
-		if (countMap.has(requestId)) {
-			console.log('Got End', requestId, countMap.get(requestId));
-		}
-		console.log('Got End', requestId);
-		const ongoingRequest = ongoingRequests.get(requestId);
-		if (ongoingRequest) {
-			ongoingRequest.res.end();
-			ongoingRequests.delete(requestId);
-		}
-	});
-	socket.on('video-chunk-error', ({ error, requestId }) => {
-		console.log('Got Error', error, requestId);
-		const ongoingRequest = ongoingRequests.get(requestId);
-		if (ongoingRequest) {
-			console.log('Got Error', error);
-			ongoingRequest.res.status(500).json(error);
-			ongoingRequests.delete(requestId);
-		}
-	});
+	// socket.on('video-chunk', ({ chunk, requestId }) => {
+	// 	if (countMap.has(requestId)) {
+	// 		countMap.set(requestId, countMap.get(requestId) + 1);
+	// 	} else {
+	// 		countMap.set(requestId, 1);
+	// 	}
+	// 	const ongoingRequest = ongoingRequests.get(requestId);
+	// 	if (ongoingRequest) {
+	// 		ongoingRequest.res.write(chunk);
+	// 	}
+	// });
+	// socket.on('video-chunk-end', ({ requestId }) => {
+	// 	if (countMap.has(requestId)) {
+	// 		console.log('Got End', requestId, countMap.get(requestId));
+	// 	}
+	// 	console.log('Got End', requestId);
+	// 	const ongoingRequest = ongoingRequests.get(requestId);
+	// 	if (ongoingRequest) {
+	// 		ongoingRequest.res.end();
+	// 		ongoingRequests.delete(requestId);
+	// 	}
+	// });
+	// socket.on('video-chunk-error', ({ error, requestId }) => {
+	// 	console.log('Got Error', error, requestId);
+	// 	const ongoingRequest = ongoingRequests.get(requestId);
+	// 	if (ongoingRequest) {
+	// 		console.log('Got Error', error);
+	// 		ongoingRequest.res.status(500).json(error);
+	// 		ongoingRequests.delete(requestId);
+	// 	}
+	// });
 };
 
 export interface SubFile {
@@ -152,6 +150,8 @@ export async function getAllFilesFromAllSubs() {
 
 // const ongoingRequests = new Map<string, { handleData: () => void; handleError: () => void; handleEnd: () => void; res: Response }>();
 
+const countMap = new Map<string, number>();
+
 export async function createVideoStreamOverSocket(
 	subID: string,
 	requestId: string,
@@ -160,41 +160,51 @@ export async function createVideoStreamOverSocket(
 	res: Response
 ) {
 	const subSocket = getSubSocketByID(subID);
-	ongoingRequests.set(requestId, { res });
-	// ongoingRequests.set(requestId, { res, handleData, handleError, handleEnd });
 
-	// const handleData = ({ chunk, requestId: reqID }) => {
-	// 	if (requestId == reqID) {
-	// 		res.write(chunk);
-	// 	}
-	// };
+	const handleData = ({ chunk, requestId: reqID }) => {
+		if (requestId == reqID) {
+			if (countMap.has(reqID)) {
+				countMap.set(reqID, countMap.get(reqID) + 1);
+			} else {
+				countMap.set(reqID, 1);
+			}
+			res.write(chunk);
+		}
+	};
 
-	// const handleError = ({ error, requestId: reqID }) => {
-	// 	if (requestId == reqID) {
-	// 		console.log('Got Error', error);
-	// 		res.status(500).json(error);
-	// 		cleanup();
-	// 	}
-	// };
+	const handleEnd = ({ error, requestId: reqID }) => {
+		if (requestId == reqID) {
+			if (countMap.has(reqID)) {
+				console.log('Got End', reqID, countMap.get(reqID));
+			} else {
+				console.log('Got End', reqID, -1);
+			}
+			res.end();
+			cleanup();
+		}
+	};
 
-	// const handleEnd = ({ requestId: reqID }) => {
-	// 	if (requestId == reqID) {
-	// 		console.log('Got End');
-	// 		res.end();
-	// 		cleanup();
-	// 	}
-	// };
+	const handleError = ({ error, requestId: reqID }) => {
+		if (requestId == reqID) {
+			if (countMap.has(reqID)) {
+				console.log('Got Error', reqID, error, countMap.get(reqID));
+			} else {
+				console.log('Got Error', reqID, error, -1);
+			}
+			res.status(500).json(error);
+			cleanup();
+		}
+	};
 
-	// const cleanup = () => {
-	// 	subSocket.off('video-chunk', handleData);
-	// 	subSocket.off('video-chunk-end', handleEnd);
-	// 	subSocket.off('video-chunk-error', handleError);
-	// };
+	const cleanup = () => {
+		subSocket.off('video-chunk', handleData);
+		subSocket.off('video-chunk-end', handleEnd);
+		subSocket.off('video-chunk-error', handleError);
+	};
 
-	// subSocket.on('video-chunk', handleData);
-	// subSocket.on('video-chunk-end', handleEnd);
-	// subSocket.on('video-chunk-error', handleError);
+	subSocket.on('video-chunk', handleData);
+	subSocket.on('video-chunk-end', handleEnd);
+	subSocket.on('video-chunk-error', handleError);
 
 	subSocket.emit('video-range', { ...opts, filePath, requestId });
-	console.log('Emitting video-range', { ...opts, filePath, requestId });
 }

@@ -140,14 +140,16 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 
 	debug && console.log('Got filePath', filePath);
 
-	let contentLength = -1;
-	if (socketTransmit) {
-		const stat = await getVideoStats(videoEntity.subID, filePath);
-		contentLength = stat.size;
-	} else {
-		const stat = fs.statSync(filePath);
-		contentLength = stat.size;
-	}
+	// let contentLength = -1;
+	// if (socketTransmit) {
+	// 	const stat = await getVideoStats(videoEntity.subID, filePath);
+	// 	contentLength = stat.size;
+	// } else {
+	// 	const stat = fs.statSync(filePath);
+	// 	contentLength = stat.size;
+	// }
+
+	const contentLength = socketTransmit ? (await getVideoStats(videoEntity.subID, filePath)).size : fs.statSync(filePath).size;
 
 	// Listing 4.
 	if (req.method === 'HEAD') {
