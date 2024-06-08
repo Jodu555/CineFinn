@@ -447,6 +447,8 @@ export default defineComponent({
 
 				const bufferedPercentage = (bufferedTime / video.duration) * 100;
 
+				v.videoLoading = video.readyState < 1;
+
 				v.videoData = {
 					isPlaying: !video.paused,
 					currentTime: video.currentTime,
@@ -566,11 +568,16 @@ export default defineComponent({
 			video.addEventListener('stalled', async () => {
 				console.log('stalled, the internet seems to be missing video could not be loaded');
 				v.videoLoading = true;
-				// console.log('Attemting Restart');
-				// const time = video.currentTime;
-				// video.load();
-				// await video.play();
-				// video.currentTime = time;
+				setTimeout(async () => {
+					if (video.readyState !== 4) {
+						console.log('Attemting Restart');
+						const time = video.currentTime;
+						video.load();
+						await video.play();
+						v.videoLoading = false;
+						video.currentTime = time;
+					}
+				}, 1000 * 15);
 			});
 			video.addEventListener('waiting', () => {
 				console.log('waiting for data (no current data but video still playing cause of buffering)');
