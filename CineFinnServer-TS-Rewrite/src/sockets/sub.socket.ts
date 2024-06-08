@@ -7,6 +7,9 @@ import { sendSeriesReloadToAll } from './client.socket';
 import { Response } from 'express';
 
 export const subSocketMap = new Map<string, ExtendedSocket>();
+export const ongoingRequests = new Map<string, { res: Response }>();
+
+const countMap = new Map<string, number>();
 
 export const initialize = async (socket: ExtendedSocket) => {
 	const auth = socket.auth;
@@ -26,22 +29,34 @@ export const initialize = async (socket: ExtendedSocket) => {
 	await toggleSeriesDisableForSubSystem(auth.id, false);
 
 	socket.on('video-chunk', ({ chunk, requestId }) => {
+		if (countMap.has(requestId)) {
+			countMap.set(requestId, countMap.get(requestId) + 1);
+		} else {
+			countMap.set(requestId, 1);
+		}
 		const ongoingRequest = ongoingRequests.get(requestId);
 		if (ongoingRequest) {
 			ongoingRequest.res.write(chunk);
 		}
 	});
 	socket.on('video-chunk-end', ({ requestId }) => {
+		if (countMap.has(requestId)) {
+			console.log('Got End', requestId, countMap.get(requestId));
+		}
+		console.log('Got End', requestId);
 		const ongoingRequest = ongoingRequests.get(requestId);
 		if (ongoingRequest) {
 			ongoingRequest.res.end();
+			ongoingRequests.delete(requestId);
 		}
 	});
 	socket.on('video-chunk-error', ({ error, requestId }) => {
+		console.log('Got Error', error, requestId);
 		const ongoingRequest = ongoingRequests.get(requestId);
 		if (ongoingRequest) {
 			console.log('Got Error', error);
 			ongoingRequest.res.status(500).json(error);
+			ongoingRequests.delete(requestId);
 		}
 	});
 };
@@ -135,7 +150,6 @@ export async function getAllFilesFromAllSubs() {
 
 // handleSocketTransmitVideo(videoEntity.subID, requestId, filePath, start, end, res);
 
-const ongoingRequests = new Map<string, { res: Response }>();
 // const ongoingRequests = new Map<string, { handleData: () => void; handleError: () => void; handleEnd: () => void; res: Response }>();
 
 export async function createVideoStreamOverSocket(

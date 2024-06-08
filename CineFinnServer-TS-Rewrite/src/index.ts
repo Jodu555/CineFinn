@@ -192,6 +192,7 @@ import { router as recommendation_router } from './routes/recommmendation';
 import { router as room_router } from './routes/room';
 import { router as todo_router } from './routes/todo';
 import video from './routes/video';
+import othervideo from './routes/othervideo';
 import { DatabaseSyncRoomItem } from './types/database';
 import { roleAuthorization } from './utils/roleManager';
 
@@ -211,6 +212,7 @@ app.use('/todo', authHelper.authentication(), todo_router);
 
 //Your direct routing stuff here
 app.get('/video', authHelper.authentication(), video);
+app.get('/othervideo', authHelper.authentication(), othervideo);
 
 const errorHelper = new ErrorHelper();
 app.use(errorHelper.install());

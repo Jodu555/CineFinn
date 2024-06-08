@@ -97,7 +97,7 @@ socket.on('video-range', ({ filePath, start, end, requestId }: VideoRangeRequest
 		delete mapObj.stream;
 		console.log('Sent:', requestId, mapObj);
 
-		socket.emit('video-chunk-end', requestId);
+		socket.emit('video-chunk-end', { requestId });
 	});
 
 	videoStream.on('error', (error) => {
