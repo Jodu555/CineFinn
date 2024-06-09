@@ -35,14 +35,17 @@ export interface SubFile {
 const cache = new Map<string, { size: number }>();
 
 export async function getVideoStats(subID: string, filePath: string) {
+	const stepIn = Date.now();
 	if (cache.has(filePath)) {
 		console.log('Got Size from cache', cache.get(filePath).size);
+		console.log(' => After', Date.now() - stepIn, 'ms');
 		return cache.get(filePath);
 	}
 	const subSocket = getSubSocketByID(subID);
 	return new Promise<{ size: number }>((resolve, reject) => {
 		subSocket.emit('video-stats', { filePath: filePath }, ({ size }) => {
 			console.log('Got Size', size);
+			console.log(' => After', Date.now() - stepIn, 'ms');
 			cache.set(filePath, { size });
 			resolve({ size });
 		});
@@ -118,6 +121,8 @@ export async function getAllFilesFromAllSubs() {
 
 // const ongoingRequests = new Map<string, { handleData: () => void; handleError: () => void; handleEnd: () => void; res: Response }>();
 
+const testMap = new Map<string, { time: number }>();
+
 const countMap = new Map<string, number>();
 
 export async function createVideoStreamOverSocket(
@@ -127,10 +132,16 @@ export async function createVideoStreamOverSocket(
 	opts: { start: number; end: number },
 	res: Response
 ) {
+	console.time('createVideoStreamOverSocket-' + requestId.split('-')[0]);
+	testMap.set(requestId, { time: Date.now() });
 	const subSocket = getSubSocketByID(subID);
 
 	const handleData = ({ chunk, requestId: reqID }) => {
 		if (requestId == reqID) {
+			if (testMap.has(reqID)) {
+				console.log('Got Data from:', reqID, 'after', Date.now() - testMap.get(reqID).time, 'ms');
+				testMap.delete(reqID);
+			}
 			if (countMap.has(reqID)) {
 				countMap.set(reqID, countMap.get(reqID) + 1);
 			} else {
@@ -175,4 +186,5 @@ export async function createVideoStreamOverSocket(
 	subSocket.on('video-chunk-error', handleError);
 
 	subSocket.emit('video-range', { ...opts, filePath, requestId });
+	console.timeEnd('createVideoStreamOverSocket-' + requestId.split('-')[0]);
 }

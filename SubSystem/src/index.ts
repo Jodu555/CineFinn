@@ -66,7 +66,7 @@ socket.on('listFiles', async () => {
 	socket.emit('files', { files });
 });
 
-const map = new Map<string, { stream: ReadStream; start: number; end: number; num: number }>();
+const map = new Map<string, { stream: ReadStream; start: number; end: number; num: number; chunks: (string | Buffer)[] }>();
 
 socket.on('video-stats', ({ filePath }, callback) => {
 	console.log('Got Stats for:', filePath);
@@ -83,19 +83,30 @@ interface VideoRangeRequest {
 socket.on('video-range', ({ filePath, start, end, requestId }: VideoRangeRequest) => {
 	const videoStream = fs.createReadStream(filePath, { start, end });
 	if (map.get(requestId) == undefined) {
-		map.set(requestId, { stream: videoStream, start, end, num: 0 });
+		map.set(requestId, { stream: videoStream, start, end, num: 0, chunks: [] });
 	}
 
 	videoStream.on('data', (chunk) => {
 		map.get(requestId).num += 1;
+		map.get(requestId).chunks.push(chunk);
 		socket.emit('video-chunk', { chunk, requestId });
 	});
 
 	videoStream.on('end', () => {
 		const mapObj = map.get(requestId);
 		mapObj.stream.destroy();
+		const chunks = mapObj.chunks;
 		delete mapObj.stream;
-		console.log('Sent:', requestId, mapObj);
+		delete mapObj.chunks;
+		console.log(
+			'Sent:',
+			requestId,
+			mapObj,
+			chunks.reduce((a, b) => a + b.length, 0) / 1024 / 1024,
+			'MB',
+			'Evrage Chunk length ',
+			chunks.reduce((a, b) => a + b.length, 0) / chunks.length
+		);
 
 		socket.emit('video-chunk-end', { requestId });
 	});
