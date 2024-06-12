@@ -77,14 +77,14 @@ const router = createRouter({
 				},
 			],
 		},
-		// {
-		// 	path: '/playlists',
-		// 	name: 'Playlists',
-		// 	component: function () {
-		// 		return import(/* webpackChunkName: "playlists" */ '@/views/Playlists.vue');
-		// 	},
-		// 	meta: { requiresLogin: true },
-		// },
+		{
+			path: '/playlists',
+			name: 'Playlists',
+			component: function () {
+				return import(/* webpackChunkName: "playlists" */ '@/views/Playlists.vue');
+			},
+			meta: { requiresLogin: true },
+		},
 		{
 			path: '/rmvc',
 			name: 'RemoteVidoeControl',
