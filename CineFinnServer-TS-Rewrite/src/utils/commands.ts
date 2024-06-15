@@ -167,9 +167,9 @@ function registerCommands() {
 				}
 				if (socket.auth.type == 'client') {
 					output.push(
-						` - ${socket.auth.type.toUpperCase()} => ${socket.auth.user?.username || socket.auth.id || ''} ${socket.sync ? socket.sync?.ID : ''}${
-							socket.auth.ptoken ? socket.auth?.ptoken : ''
-						} `
+						` - ${socket.auth.type.toUpperCase()} => ${socket.auth.user?.username || socket.auth.id || ''} ${socket.sync ? socket.sync?.ID : ''} - ${
+							socket.id
+						}`
 					);
 				}
 				if (socket.auth.type == 'scraper') {
@@ -182,10 +182,32 @@ function registerCommands() {
 	);
 
 	commandManager.registerCommand(
-		new Command(['reloadClient', 'rlc'], 'reloadClient', 'Reloads the page for all current connected sockets', (command, [...args], scope) => {
-			sendSiteReload();
-			return '';
-		})
+		new Command(
+			['reloadClient', 'rlc'],
+			'reloadClient <all/Socket-ID/User-UUID>',
+			'Reloads the page for all current connected sockets',
+			async (command, [...args], scope) => {
+				if (args[1] == 'all') {
+					const num = sendSiteReload();
+					return 'Reloaded ' + num + ' socket(s)';
+				} else {
+					const socketIDOrUserUUID = args[1];
+					const sockets = (await getIO().fetchSockets()) as ExtendedRemoteSocket[];
+					let i = 0;
+					sockets.forEach((x) => {
+						if (x.id == socketIDOrUserUUID || x.auth.user?.UUID == args[1]) {
+							i++;
+							x.emit('reload');
+						}
+					});
+					if (i == 0) {
+						return 'No socket found with Socket-ID or User-UUID:' + socketIDOrUserUUID;
+					} else {
+						return 'Reloaded' + i + 'socket(s)';
+					}
+				}
+			}
+		)
 	);
 
 	commandManager.registerCommand(

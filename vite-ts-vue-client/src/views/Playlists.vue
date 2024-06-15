@@ -184,7 +184,7 @@
 		</div>
 	</div>
 </template>
-<script>
+<script lang="ts">
 import { mapWritableState } from 'pinia';
 import { useAuthStore } from '@/stores/auth.store';
 import { useIndexStore } from '@/stores/index.store';

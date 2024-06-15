@@ -151,12 +151,15 @@ const initialize = (socket: ExtendedSocket) => {
 };
 
 async function sendSiteReload() {
+	let i = 0;
 	await toAllSockets(
 		(s) => {
+			i++;
 			s.emit('reload');
 		},
 		(s) => s.auth.type == 'client'
 	);
+	return i;
 }
 
 async function sendSeriesReloadToAll(cb?: (socket: ExtendedRemoteSocket) => void) {
