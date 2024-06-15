@@ -122,8 +122,8 @@ onMounted(() => {
 			rmvcID.value = '';
 		}
 	});
-	useSocket().on('rmvc-recieve-videoStateChange', ({ isPlaying }) => {
-		isPlaying = isPlaying;
+	useSocket().on('rmvc-recieve-videoStateChange', ({ isPlaying: k }) => {
+		isPlaying.value = k;
 	});
 });
 

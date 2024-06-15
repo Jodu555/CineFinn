@@ -99,7 +99,7 @@ export default defineComponent({
 			this.$socket.emit('rmvc-send-videoStateChange', { isPlaying: false });
 		});
 		this.$socket.on('rmvc-get-videoState', () => {
-			this.$socket.emit('rmvc-send-videoStateChange', { isPlaying: video!.paused });
+			this.$socket.emit('rmvc-send-videoStateChange', { isPlaying: !video!.paused });
 		});
 		this.$socket.on('rmvc-sessionCreated', (sessionID) => {
 			this.sessionID = sessionID;

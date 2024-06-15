@@ -303,11 +303,23 @@ function registerCommands() {
 	commandManager.registerCommand(
 		new Command(['test'], 'test', 'Just a simple test command', async (command, [...args], scope) => {
 			// console.log(await getAllFilesFromAllSubs());
-			const series = await getSeries();
+			// const series = await getSeries();
 
-			const eps = series.filter((x) => x.seasons.flat().some((e) => e.subID == args[1]));
+			// const eps = series.filter((x) => x.seasons.flat().some((e) => e.subID == args[1]));
 
-			console.log(eps);
+			// console.log(eps);
+
+			const socketIDOrUserUUID = args[1];
+			const sockets = (await getIO().fetchSockets()) as ExtendedRemoteSocket[];
+			let i = 0;
+			sockets.forEach((socket) => {
+				if (socket.id == socketIDOrUserUUID || socket.auth.user?.UUID == args[1]) {
+					const sessionID = Math.floor(Math.random() * 10 ** 5).toString();
+					console.log('U just forcibly started for', socket.auth.user.username, 'a rmvc Session with ID', sessionID);
+					socket.auth.RMVCSessionID = sessionID;
+					socket.emit('rmvc-sessionCreated', sessionID);
+				}
+			});
 
 			return 'Exectued test command successfully';
 		})

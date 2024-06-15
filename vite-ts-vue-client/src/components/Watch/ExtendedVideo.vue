@@ -156,6 +156,7 @@
 			</div>
 			<pre class="internal-video-devinfos" v-if="settings.developerMode.value">
 				VideoLoading: {{ videoLoading }} 
+				ReadyState: {{ videoData.readyState }} 
 				CurrentTime: {{ videoData.currentTime }}ms
 				Duration: {{ videoData.duration }}ms
 				Progress: {{ videoData.duration - videoData.currentTime }}ms
@@ -451,6 +452,7 @@ export default defineComponent({
 
 				v.videoData = {
 					isPlaying: !video.paused,
+					readyState: video.readyState,
 					currentTime: video.currentTime,
 					duration: video.duration,
 					volume: video.volume,
