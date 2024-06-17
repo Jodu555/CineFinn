@@ -219,6 +219,7 @@ export default defineComponent({
 			videoLoading: false,
 			dataLoading: false,
 			videoData: {
+				readyState: 0,
 				isPlaying: false,
 				currentTime: 0,
 				duration: 0,

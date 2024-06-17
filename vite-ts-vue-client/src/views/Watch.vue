@@ -94,7 +94,8 @@
 				<EntityActionsInformation :switchTo="switchTo" :changeLanguage="changeLanguage" />
 			</template>
 		</div>
-		<ExtendedVideo v-if="!showDisabled" v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="sendVideoTimeUpdate" />
+		<ExtendedVideo ref="videoRef" v-if="!showDisabled" v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="sendVideoTimeUpdate" />
+		<SegmentSubmission :videoRef="videoRef" v-if="!showDisabled" v-show="showVideo" /> <
 	</div>
 </template>
 <script setup lang="ts">
@@ -104,6 +105,7 @@ import { useIndexStore } from '@/stores/index.store';
 import { useWatchStore } from '@/stores/watch.store';
 import { singleDimSwitcher, multiDimSwitcher, deepswitchTo } from '@/utils/switcher';
 import EntityListView from '@/components/Watch/EntityListView.vue';
+import SegmentSubmission from '@/components/Watch/SegmentSubmission.vue';
 import ExtendedVideo from '@/components/Watch/ExtendedVideo.vue';
 import ControlInformationModal from '@/components/Watch/ControlInformationModal.vue';
 import EntityActionsInformation from '@/components/Watch/EntityActionsInformation.vue';
@@ -116,12 +118,17 @@ import { useRoute, useRouter } from 'vue-router';
 const cleanupFN = ref(null);
 const buttonTimer = ref<NodeJS.Timeout>(null as unknown as NodeJS.Timeout);
 const forceHideButton = ref(false);
+const videoRef = ref();
 
 const indexStore = useIndexStore();
 const authStore = useAuthStore();
 const watchStore = useWatchStore();
 
 const route = useRoute();
+
+const test = () => {
+	console.log(videoRef.value!.videoData);
+};
 
 onMounted(async () => {
 	useSocket().on('watchListChange', ({ watchList, seriesID }) => {
