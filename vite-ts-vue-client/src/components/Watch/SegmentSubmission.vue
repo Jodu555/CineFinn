@@ -27,12 +27,27 @@
 			</div>
 		</div>
 	</div>
-	<h4 class="mt-2 text-center">Segment List</h4>
+	<div v-if="state.segment.length > 0" class="container">
+		<div class="d-flex justify-content-center">
+			<button type="button" name="" id="" class="btn btn-outline-primary col-5">
+				Submit Segments<font-awesome-icon class="ms-3" :icon="['fa-solid', 'fa-check']" size="lg" />
+			</button>
+		</div>
+	</div>
+
+	<h4 class="mt-2 text-center">Segment List - ({{ state.segment.length }})</h4>
 	<div class="d-flex justify-content-center">
-		<ul class="list-group list-group-numbered col-3">
+		<ul class="list-group col-4">
 			<li v-for="segment in state.segment" class="list-group-item">
-				{{ segment.type }}: {{ segment.seriesID }} - {{ segment.season }}x{{ segment.episode }} - {{ currentSegment(segment.type).startTime }} -
-				{{ currentSegment(segment.type).endTime }}
+				<div class="d-flex text-center justify-content-between">
+					<span class="mt-1">
+						{{ segment.type }}: {{ segment.seriesID }} - {{ segment.season }}x{{ segment.episode }} - {{ currentSegment(segment.type).startTime }} -
+						{{ currentSegment(segment.type).endTime }}
+					</span>
+					<button type="button" title="Remove Segment" @click="deleteSegment(segment)" class="btn btn-outline-warning">
+						<font-awesome-icon :icon="['fa-solid', 'fa-trash']" size="sm" />
+					</button>
+				</div>
 			</li>
 		</ul>
 	</div>
@@ -67,6 +82,11 @@ const state = reactive({
 const leadingZeroFormatter = new Intl.NumberFormat(undefined, {
 	minimumIntegerDigits: 2,
 });
+
+function deleteSegment(segment: Segment) {
+	const index = state.segment.indexOf(segment);
+	state.segment.splice(index, 1);
+}
 
 function formatDuration(time: number) {
 	const seconds = Math.floor(time % 60);
