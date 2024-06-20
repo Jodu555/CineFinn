@@ -28,6 +28,7 @@ import {
 	faCheck,
 	faChevronLeft,
 	faChevronRight,
+	faHighlighter,
 } from '@fortawesome/free-solid-svg-icons';
 import { faKeyboard } from '@fortawesome/free-regular-svg-icons';
 
@@ -65,7 +66,8 @@ library.add(
 	faTrash,
 	faCheck,
 	faChevronLeft,
-	faChevronRight
+	faChevronRight,
+	faHighlighter
 ); // solid
 library.add(faKeyboard); // regular
 

@@ -10,6 +10,13 @@
 		</div>
 		<div v-auto-animate class="container" v-if="watchStore.currentSeries != undefined && watchStore.currentSeries.ID != '-1'">
 			<div class="float-end btn-group">
+				<button
+					v-if="authStore.userInfo.role >= 2"
+					@click="doSegmentAnnotation = !doSegmentAnnotation"
+					class="btn btn-outline-info"
+					title="Annotate Segments">
+					<font-awesome-icon icon="fa-solid fa-highlighter" />
+				</button>
 				<button class="btn btn-outline-info" title="Series Information" data-bs-toggle="modal" data-bs-target="#seriesInformationModal" disabled>
 					<font-awesome-icon icon="fa-solid fa-info" />
 				</button>
@@ -95,7 +102,7 @@
 			</template>
 		</div>
 		<ExtendedVideo ref="videoRef" v-if="!showDisabled" v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="sendVideoTimeUpdate" />
-		<SegmentSubmission :videoRef="videoRef" v-if="!showDisabled" v-show="showVideo" /> <
+		<SegmentSubmission :videoRef="videoRef" v-if="!showDisabled && showVideo && doSegmentAnnotation" />
 	</div>
 </template>
 <script setup lang="ts">
@@ -119,6 +126,8 @@ const cleanupFN = ref(null);
 const buttonTimer = ref<NodeJS.Timeout>(null as unknown as NodeJS.Timeout);
 const forceHideButton = ref(false);
 const videoRef = ref();
+
+const doSegmentAnnotation = ref(false);
 
 const indexStore = useIndexStore();
 const authStore = useAuthStore();
