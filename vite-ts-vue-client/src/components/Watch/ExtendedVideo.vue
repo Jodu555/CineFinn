@@ -307,10 +307,10 @@ export default defineComponent({
 		},
 		async loadIntroData() {
 			this.alreadySkipped = [];
-			if (false) {
+			if (true) {
 				try {
 					const response = await fetch(
-						`http://localhost:4897/intro/${this.currentSeries.ID}/${(this.entityObject as SerieEpisode).season}/${
+						`http://localhost:4897/segments/info/${this.currentSeries.ID}/${(this.entityObject as SerieEpisode).season}/${
 							(this.entityObject as SerieEpisode).episode
 						}`
 					);
@@ -627,10 +627,9 @@ export default defineComponent({
 						video.play();
 					}, 400);
 				}
-
 				if (
-					(this.isInterceptingWithIntro && !this.alreadySkipped.find((x) => 'intro')) ||
-					(this.isInterceptingWithOutro && !this.alreadySkipped.find((x) => 'outro'))
+					(this.isInterceptingWithIntro && !this.alreadySkipped.find((x) => x == 'intro')) ||
+					(this.isInterceptingWithOutro && !this.alreadySkipped.find((x) => x == 'outro'))
 				) {
 					if (this.settings?.autoSkip?.value == true) {
 						const segment = this.segmentData.find((x) => x.type == (this.isInterceptingWithIntro ? 'intro' : 'outro'));

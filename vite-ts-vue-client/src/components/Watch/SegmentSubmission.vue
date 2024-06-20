@@ -54,7 +54,8 @@
 </template>
 <script setup lang="ts">
 import { useWatchStore } from '@/stores/watch.store';
-import { useAxios } from '@/utils';
+import axios from 'axios';
+import { useAxios, useSwal } from '@/utils';
 import { computed } from 'vue';
 import { reactive } from 'vue';
 import { ref } from 'vue';
@@ -84,8 +85,25 @@ const leadingZeroFormatter = new Intl.NumberFormat(undefined, {
 	minimumIntegerDigits: 2,
 });
 
-function submitSegments() {
-	const response = useAxios().post('/segments/submit', state.segment);
+async function submitSegments() {
+	const response = await axios.post('http://localhost:4897/segments/submit', state.segment);
+
+	if (response.status === 200) {
+		state.segment = [];
+	} else {
+		console.log(response);
+		useSwal({
+			toast: true,
+			position: 'top-end',
+			showConfirmButton: false,
+			timer: 3000,
+			icon: 'error',
+			title: `${response.statusText} - ${response.data}`,
+			timerProgressBar: true,
+		});
+	}
+
+	// const response = useAxios().post('/segments/submit', state.segment);
 }
 
 function deleteSegment(segment: Segment) {
@@ -105,6 +123,7 @@ function formatDuration(time: number) {
 }
 
 function currentSegment(segmentType: string) {
+	segmentType = segmentType.toLowerCase();
 	const seg = state.segment.find((x) => x.type == segmentType && checkIfSegIsEqToWatch(x));
 	if (seg) {
 		return {
@@ -118,8 +137,6 @@ function currentSegment(segmentType: string) {
 	};
 }
 
-console.log('TEST');
-
 // const indexStore = useIndexStore();
 // const authStore = useAuthStore();
 const watchStore = useWatchStore();
@@ -129,7 +146,7 @@ function checkIfSegIsEqToWatch(x: Segment) {
 }
 
 function set(type: string, version: 'start' | 'end') {
-	console.log('SET');
+	type = type.toLowerCase();
 	const segment = state.segment.find((x) => x.type == type && checkIfSegIsEqToWatch(x));
 	if (segment == undefined) {
 		const segment = {
