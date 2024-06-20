@@ -29,7 +29,7 @@
 	</div>
 	<div v-if="state.segment.length > 0" class="container">
 		<div class="d-flex justify-content-center">
-			<button type="button" name="" id="" class="btn btn-outline-primary col-5">
+			<button @click="submitSegments" type="button" name="" id="" class="btn btn-outline-primary col-5">
 				Submit Segments<font-awesome-icon class="ms-3" :icon="['fa-solid', 'fa-check']" size="lg" />
 			</button>
 		</div>
@@ -54,6 +54,7 @@
 </template>
 <script setup lang="ts">
 import { useWatchStore } from '@/stores/watch.store';
+import { useAxios } from '@/utils';
 import { computed } from 'vue';
 import { reactive } from 'vue';
 import { ref } from 'vue';
@@ -82,6 +83,10 @@ const state = reactive({
 const leadingZeroFormatter = new Intl.NumberFormat(undefined, {
 	minimumIntegerDigits: 2,
 });
+
+function submitSegments() {
+	const response = useAxios().post('/segments/submit', state.segment);
+}
 
 function deleteSegment(segment: Segment) {
 	const index = state.segment.indexOf(segment);

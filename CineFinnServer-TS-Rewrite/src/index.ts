@@ -209,6 +209,10 @@ app.use('/recommendation', authHelper.authentication(), recommendation_router);
 app.use('/room', authHelper.authentication(), room_router);
 app.use('/todo', authHelper.authentication(), todo_router);
 
+app.use('/segments', authHelper.authentication(), (req, res, next) => {
+	console.log(req.path, req.method);
+});
+
 //Your direct routing stuff here
 app.get('/video', authHelper.authentication(), video);
 
