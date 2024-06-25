@@ -58,12 +58,12 @@
 									v-for="(child, idx) in playlist.children.slice(start % playlist.children.length, end)"
 									:key="child.ID"
 									@mouseover="selected = child"
-									@click="$router.push({ path: '/watch', query: { id: child } })"
+									@click="$router.push({ path: '/watch', query: { id: child.ID } })"
 									class="playlist-image playlist-bottom-image rounded"
 									style="cursor: pointer"
 									:style="{ 'margin-left': `${idx * 2}rem`, 'z-index': playlist.children.length - idx }"
 									:src="`http://cinema-api.jodu555.de/images/${child}/cover.jpg?auth-token=samytoken`"
-									:alt="child"
+									:alt="child.ID"
 									:text="child" />
 							</div>
 							<div style="margin-top: 15%; margin-right: 5%">
@@ -189,14 +189,25 @@ import { mapWritableState } from 'pinia';
 import { useAuthStore } from '@/stores/auth.store';
 import { useIndexStore } from '@/stores/index.store';
 
+interface PlaylistItem {
+	ID: string;
+	title: string;
+}
+
+interface Playlist {
+	name: string;
+	children: PlaylistItem[];
+}
+
 export default {
 	data() {
 		return {
 			expand: false,
 			start: 0,
 			end: 8,
-			selected: '',
-			playlists: [
+			selected: {} as PlaylistItem,
+			playlists: [] as Playlist[],
+			dummyPlaylists: [
 				{
 					name: 'Legend Tier',
 					children: [
@@ -240,7 +251,7 @@ export default {
 		},
 	},
 	methods: {
-		next(playlist) {
+		next(playlist: Playlist) {
 			this.end += 8;
 			this.start += 8;
 
@@ -266,11 +277,11 @@ export default {
 			if (this.loading == false) this.handleData();
 		},
 		handleData() {
-			this.playlists = this.playlists.map((x) => {
+			this.playlists = this.dummyPlaylists.map((x) => {
 				return {
 					name: x.name,
 					children: x.children.map((y) => {
-						return { ID: y, title: this.series.find((s) => s.ID == y).title };
+						return { ID: y, title: this.series.find((s) => s.ID == y)?.title || 'NOT FOUND' };
 					}),
 				};
 			});
