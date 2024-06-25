@@ -12,6 +12,7 @@ export const wait = (timeout: number) => {
 
 interface Config {
 	version: string;
+	generatorName: string;
 	redisConnection: {
 		host: string;
 		port: number;
@@ -22,7 +23,8 @@ interface Config {
 }
 
 const defaultConfig: Config = {
-	version: '1.0.0',
+	version: '1.0.1',
+	generatorName: 'previewImageGenerator',
 	redisConnection: {
 		host: 'localhost',
 		port: 6379,
@@ -78,11 +80,16 @@ async function main() {
 		output: string;
 		imagePathPrefix: string;
 		publicStreamURL: string;
+		generatorName: string;
 	}
 
 	const worker = new Worker<JobMeta>(
 		'previewImageQueue',
 		async (job) => {
+			await job.updateData({
+				...job.data,
+				generatorName: config.generatorName,
+			});
 			await job.clearLogs();
 			console.log('Recieve Job: ', job.id);
 			const vidFile = evalPath(config, job.data.filePath);
@@ -92,7 +99,13 @@ async function main() {
 			job.log('Evaluated Path Image Directory: ' + imgDir);
 
 			let command = '';
-			if (job.data.publicStreamURL) {
+
+			if (job.data.entity.subID != 'main' && job.data.publicStreamURL == undefined) {
+				await job.moveToFailed(new Error('No publicStreamURL found for subID: ' + job.data.entity.subID), job.token);
+				return;
+			}
+
+			if (job.data.publicStreamURL && job.data.entity.subID != 'main') {
 				command = `ffmpeg -hide_banner -i "${job.data.publicStreamURL}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
 			} else {
 				command = `ffmpeg -hide_banner -i "${vidFile}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
