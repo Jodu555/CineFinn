@@ -9,6 +9,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { Database } from '@jodu555/mysqlapi';
 import IORedis from 'ioredis';
+import axios from 'axios';
 import { User, SettingsObject, Role, ActivityDetails } from './types/session';
 dotenv.config();
 
@@ -209,8 +210,26 @@ app.use('/recommendation', authHelper.authentication(), recommendation_router);
 app.use('/room', authHelper.authentication(), room_router);
 app.use('/todo', authHelper.authentication(), todo_router);
 
-app.use('/segments', authHelper.authentication(), (req, res, next) => {
-	console.log(req.path, req.method);
+app.use('/segments', authHelper.authentication(), async (req, res, next) => {
+	// console.log(req.originalUrl, req.method, req.body);
+	const proxyUrl = `http://localhost:4897${req.originalUrl}`;
+	// console.log('Proxying to', proxyUrl);
+	const proxy = await axios({
+		method: req.method,
+		url: proxyUrl,
+		headers: req.headers,
+		data: req.body,
+		responseType: 'stream',
+		validateStatus: () => true,
+	});
+	// console.log(proxy.status, proxy.headers);
+
+	if (proxy.status != 200) {
+		res.status(proxy.status).json({});
+		return;
+	} else {
+		proxy.data.pipe(res);
+	}
 });
 
 //Your direct routing stuff here

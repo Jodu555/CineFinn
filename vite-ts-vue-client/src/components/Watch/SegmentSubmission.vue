@@ -86,7 +86,8 @@ const leadingZeroFormatter = new Intl.NumberFormat(undefined, {
 });
 
 async function submitSegments() {
-	const response = await axios.post('http://localhost:4897/segments/submit', state.segment);
+	const response = await useAxios().post('/segments/submit', state.segment);
+	// const response = await axios.post('http://localhost:4897/segments/submit', state.segment);
 
 	if (response.status === 200) {
 		state.segment = [];
