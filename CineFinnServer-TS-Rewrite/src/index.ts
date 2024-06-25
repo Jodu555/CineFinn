@@ -214,21 +214,27 @@ app.use('/segments', authHelper.authentication(), async (req, res, next) => {
 	// console.log(req.originalUrl, req.method, req.body);
 	const proxyUrl = `http://localhost:4897${req.originalUrl}`;
 	// console.log('Proxying to', proxyUrl);
-	const proxy = await axios({
-		method: req.method,
-		url: proxyUrl,
-		headers: req.headers,
-		data: req.body,
-		responseType: 'stream',
-		validateStatus: () => true,
-	});
-	// console.log(proxy.status, proxy.headers);
+	try {
+		const proxy = await axios({
+			method: req.method,
+			url: proxyUrl,
+			headers: req.headers,
+			data: req.body,
+			responseType: 'stream',
+			validateStatus: () => true,
+		});
+		// console.log(proxy.status, proxy.headers);
 
-	if (proxy.status != 200) {
-		res.status(proxy.status).json({});
-		return;
-	} else {
-		proxy.data.pipe(res);
+		if (proxy.status != 200) {
+			res.status(proxy.status).json({});
+			return;
+		} else {
+			proxy.data.pipe(res);
+		}
+	} catch (error) {
+		res.status(500).json({
+			message: 'The Proxied API did not respond with anything',
+		});
 	}
 });
 
