@@ -108,11 +108,11 @@ socket.on('video-range', ({ filePath, start, end, requestId }: VideoRangeRequest
 			'Sent:',
 			requestId,
 			mapObj,
-			mapObj.data.all / 1024 / 1024,
+			mapObj.data.len / 1024 / 1024,
 			// chunks.reduce((a, b) => a + b.length, 0) / 1024 / 1024,
 			'MB',
 			'Evrage Chunk length ',
-			mapObj.data.len / chunks.length
+			mapObj.data.len / mapObj.data.all
 			// chunks.reduce((a, b) => a + b.length, 0) / chunks.length
 		);
 		map.delete(requestId); //This is very important so i dont leak memory all over the place
@@ -153,7 +153,8 @@ async function listFilesAsync(lcPath: string) {
 	const items = await fs.promises.readdir(lcPath, { withFileTypes: true });
 	const promises = items.map(async (item) => {
 		const fullPath = path.join(lcPath, item.name);
-		if (item.isDirectory()) {
+		//TODO: This is not foolproff maybe... cause if the file is a symlink this would trigger as well i guess
+		if (item.isDirectory() || item.isSymbolicLink()) {
 			dirs.push(fullPath);
 			const { files: subFiles, dirs: subDirs } = await listFilesAsync(fullPath);
 			files.push(...subFiles);
