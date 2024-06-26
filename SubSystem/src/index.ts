@@ -66,7 +66,10 @@ socket.on('listFiles', async () => {
 	socket.emit('files', { files });
 });
 
-const map = new Map<string, { stream: ReadStream; start: number; end: number; num: number; chunks: (string | Buffer)[] }>();
+const map = new Map<
+	string,
+	{ stream: ReadStream; start: number; end: number; num: number; chunks: (string | Buffer)[]; data: { len: number; all: number } }
+>();
 
 socket.on('video-stats', ({ filePath }, callback) => {
 	console.log('Got Stats for:', filePath);
@@ -83,12 +86,15 @@ interface VideoRangeRequest {
 socket.on('video-range', ({ filePath, start, end, requestId }: VideoRangeRequest) => {
 	const videoStream = fs.createReadStream(filePath, { start, end });
 	if (map.get(requestId) == undefined) {
-		map.set(requestId, { stream: videoStream, start, end, num: 0, chunks: [] });
+		map.set(requestId, { stream: videoStream, start, end, num: 0, chunks: [], data: { len: 0, all: 0 } });
 	}
 
 	videoStream.on('data', (chunk) => {
 		map.get(requestId).num += 1;
-		map.get(requestId).chunks.push(chunk);
+		// map.get(requestId).chunks.push(chunk);
+		map.get(requestId).data.all += 1;
+		map.get(requestId).data.len += chunk.length;
+
 		socket.emit('video-chunk', { chunk, requestId });
 	});
 
@@ -102,11 +108,14 @@ socket.on('video-range', ({ filePath, start, end, requestId }: VideoRangeRequest
 			'Sent:',
 			requestId,
 			mapObj,
-			chunks.reduce((a, b) => a + b.length, 0) / 1024 / 1024,
+			mapObj.data.all / 1024 / 1024,
+			// chunks.reduce((a, b) => a + b.length, 0) / 1024 / 1024,
 			'MB',
 			'Evrage Chunk length ',
-			chunks.reduce((a, b) => a + b.length, 0) / chunks.length
+			mapObj.data.len / chunks.length
+			// chunks.reduce((a, b) => a + b.length, 0) / chunks.length
 		);
+		map.delete(requestId); //This is very important so i dont leak memory all over the place
 
 		socket.emit('video-chunk-end', { requestId });
 	});
