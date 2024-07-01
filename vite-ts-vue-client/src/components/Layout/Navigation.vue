@@ -27,6 +27,9 @@
 						<router-link class="nav-link" active-class="active" to="/todo">Todo</router-link>
 					</li>
 					<li class="nav-item">
+						<router-link class="nav-link" active-class="active" to="/vote">Voting</router-link>
+					</li>
+					<li class="nav-item">
 						<router-link class="nav-link" active-class="active" to="/rmvc">RMVC</router-link>
 					</li>
 					<li v-if="settings.enableBetaFeatures.value == true" class="nav-item">

@@ -53,6 +53,14 @@ const router = createRouter({
 			meta: { requiresLogin: true },
 		},
 		{
+			path: '/vote',
+			name: 'Voting',
+			component: function () {
+				return import(/* webpackChunkName: "todo" */ '@/views/Voting.vue');
+			},
+			meta: { requiresLogin: true },
+		},
+		{
 			path: '/sync',
 
 			component: function () {
