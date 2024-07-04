@@ -8,15 +8,9 @@ import { AuthenticatedRequest } from '../types/session';
 import { getVideoMovie, getVideoEntity, Episode, Movie } from '../classes/series';
 import { createVideoStreamOverSocket, getSubSocketByID, getVideoStats } from '../sockets/sub.socket';
 
-export = async (req: AuthenticatedRequest, res: Response) => {
-	const { series: seriesID, season, episode, movie, language, debug: rmtDebug } = req.query;
-
-	const debug = false;
-	// const debug = Boolean(rmtDebug) || false;
-
+function decodeRangeHeader(range: string) {
 	let start: number;
 	let end: number;
-	const range = req.headers.range;
 	if (range) {
 		const bytesPrefix = 'bytes=';
 		if (range.startsWith(bytesPrefix)) {
@@ -34,6 +28,34 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 			}
 		}
 	}
+	return {
+		start,
+		end,
+	};
+}
+
+function gotRetrievedLength(contentLength: number, start: number, end: number) {
+	let retrievedLength: number;
+	if (start !== undefined && end !== undefined) {
+		retrievedLength = end + 1 - start;
+	} else if (start !== undefined) {
+		retrievedLength = contentLength - start;
+	} else if (end !== undefined) {
+		retrievedLength = end + 1;
+	} else {
+		retrievedLength = contentLength;
+	}
+	return retrievedLength;
+}
+
+export = async (req: AuthenticatedRequest, res: Response) => {
+	const { series: seriesID, season, episode, movie, language, debug: rmtDebug } = req.query;
+
+	const debug = false;
+	// const debug = Boolean(rmtDebug) || false;
+
+	const range = req.headers.range;
+	const { start, end } = decodeRangeHeader(range);
 
 	res.setHeader('content-type', 'video/mp4');
 
@@ -142,15 +164,6 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 
 	debug && console.log('Got filePath', filePath);
 
-	// let contentLength = -1;
-	// if (socketTransmit) {
-	// 	const stat = await getVideoStats(videoEntity.subID, filePath);
-	// 	contentLength = stat.size;
-	// } else {
-	// 	const stat = fs.statSync(filePath);
-	// 	contentLength = stat.size;
-	// }
-
 	const contentLength = socketTransmit ? (await getVideoStats(videoEntity.subID, filePath)).size : fs.statSync(filePath).size;
 
 	// Listing 4.
@@ -162,16 +175,7 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 		return;
 	}
 
-	let retrievedLength: number;
-	if (start !== undefined && end !== undefined) {
-		retrievedLength = end + 1 - start;
-	} else if (start !== undefined) {
-		retrievedLength = contentLength - start;
-	} else if (end !== undefined) {
-		retrievedLength = end + 1;
-	} else {
-		retrievedLength = contentLength;
-	}
+	const retrievedLength = gotRetrievedLength(contentLength, start, end);
 
 	debug && console.log('Calculated contentLength', contentLength);
 	res.statusCode = start !== undefined || end !== undefined ? 206 : 200;
