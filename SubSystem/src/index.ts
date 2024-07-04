@@ -252,6 +252,11 @@ app.get('/video', async (req, res) => {
 		return;
 	}
 
+	if (!fs.existsSync(filePath)) {
+		res.status(404).send('File not found');
+		return;
+	}
+
 	let start: number;
 	let end: number;
 	const range = req.headers.range;
