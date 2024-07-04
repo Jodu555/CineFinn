@@ -2,14 +2,8 @@
 	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 		<div class="container-fluid">
 			<router-link class="navbar-brand" to="/">CineFinn</router-link>
-			<button
-				class="navbar-toggler"
-				type="button"
-				data-bs-toggle="collapse"
-				data-bs-target="#navbarNav"
-				aria-controls="navbarNav"
-				aria-expanded="false"
-				aria-label="Toggle navigation">
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+				aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarNav">
@@ -26,6 +20,9 @@
 					<li class="nav-item">
 						<router-link class="nav-link" active-class="active" to="/todo">Todo</router-link>
 					</li>
+					<li v-if="false" class="nav-item">
+						<router-link class="nav-link" active-class="active" to="/vote">Voting</router-link>
+					</li>
 					<li class="nav-item">
 						<router-link class="nav-link" active-class="active" to="/rmvc">RMVC</router-link>
 					</li>
@@ -34,17 +31,11 @@
 					</li>
 				</ul>
 				<div v-if="loggedIn" class="d-flex">
-					<AutoComplete
-						:options="{ placeholder: 'Search for a series...', clearAfterSelect: true }"
-						:data="autoCompleteSeries"
-						:select-fn="autocompleteSearch" />
+					<AutoComplete :options="{ placeholder: 'Search for a series...', clearAfterSelect: true }"
+						:data="autoCompleteSeries" :select-fn="autocompleteSearch" />
 					<div class="btn-group" style="margin-left: 2rem" role="group" aria-label="Basic outlined example">
-						<button
-							title="Settings"
-							class="btn btn-outline-primary"
-							data-bs-toggle="offcanvas"
-							data-bs-target="#offcanvasSettings"
-							aria-controls="offcanvasSettings">
+						<button title="Settings" class="btn btn-outline-primary" data-bs-toggle="offcanvas"
+							data-bs-target="#offcanvasSettings" aria-controls="offcanvasSettings">
 							<font-awesome-icon icon="fa-solid fa-gears" />
 						</button>
 						<button class="btn btn-outline-danger" title="Logout" @click="logout()">
