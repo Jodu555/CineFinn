@@ -25,6 +25,7 @@ export const useAuthStore = defineStore('auth', {
 				showNewsAddForm: { title: 'Show the Add News Form', type: 'checkbox', value: true } as Setting,
 				volume: { type: 'hide', value: 1 } as Setting,
 				autoSkip: { title: 'Auto Skip to next Episode at the end?', type: 'checkbox', value: true } as Setting,
+				skipSegments: { title: 'Skip Segments?', type: 'checkbox', value: false } as Setting,
 				enableBetaFeatures: { title: 'Enable Beta Features?', type: 'checkbox', value: false } as Setting,
 			},
 		};

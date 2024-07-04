@@ -10,7 +10,8 @@
 			<img class="thumbnail-img" />
 			<div v-if="entityObject && settings.showVideoTitleContainer.value" class="video-title-container">
 				<p v-if="currentMovie == -1">
-					{{ entityObject.primaryName }} - {{ String((entityObject as SerieEpisode).season).padStart(2, '0') }}x{{
+					{{ entityObject.primaryName }} - {{ String((entityObject as SerieEpisode).season).padStart(2, '0')
+					}}x{{
 						String((entityObject as SerieEpisode).episode).padStart(2, '0')
 					}}
 				</p>
@@ -29,31 +30,26 @@
 			</div>
 
 			<font-awesome-icon class="skip skip-right" size="2xl" icon="fa-solid fa-forward" />
-			<div
-				:class="{
-					'btn-intro-skip-container': true,
-					enabled: isInterceptingWithIntro || isInterceptingWithOutro,
-				}">
+			<div :class="{
+				'btn-intro-skip-container': true,
+				enabled: isInterceptingWithIntro || isInterceptingWithOutro,
+			}">
 				<button type="button" @click="skipSegment" class="btn btn-light">
-					Skip {{ isInterceptingWithIntro ? 'Intro' : 'Outro' }} <font-awesome-icon size="lg" icon="fa-solid fa-forward" />
+					Skip {{ isInterceptingWithIntro ? 'Intro' : 'Outro' }} <font-awesome-icon size="lg"
+						icon="fa-solid fa-forward" />
 				</button>
 			</div>
 			<div v-show="!dataLoading" class="video-controls-container">
 				<div class="timeline-container">
 					<div class="timeline">
-						<div
-							v-for="segment in segmentData"
-							class="timeline-intro-skip"
-							:style="{
-								'--intro-skip-start': segment.startms / videoData.duration,
-								'--intro-skip-end': segment.endms / videoData.duration,
-							}"></div>
+						<div v-for="segment in segmentData" class="timeline-intro-skip" :style="{
+							'--intro-skip-start': segment.startms / videoData.duration,
+							'--intro-skip-end': segment.endms / videoData.duration,
+						}"></div>
 
-						<div
-							v-for="i in videoData.buffered?.length"
+						<div v-for="i in videoData.buffered?.length"
 							v-show="Math.round(Math.abs(videoData.buffered?.start(i - 1) - videoData.buffered?.end(i - 1))) > 10"
-							class="timeline-buffer"
-							:style="{
+							class="timeline-buffer" :style="{
 								'--buffer-start': videoData.buffered?.start(i - 1) / videoData.duration,
 								'--buffer-end': videoData.buffered?.end(i - 1) / videoData.duration,
 								// '--length': Math.round(Math.abs($refs.mainVid.buffered?.start(i - 1) - $refs.mainVid.buffered?.end(i - 1))),
@@ -79,16 +75,15 @@
 					<div class="volume-container">
 						<button class="mute-btn">
 							<svg class="volume-high-icon" viewBox="0 0 24 24">
-								<path
-									fill="currentColor"
+								<path fill="currentColor"
 									d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" />
 							</svg>
 							<svg class="volume-low-icon" viewBox="0 0 24 24">
-								<path fill="currentColor" d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
+								<path fill="currentColor"
+									d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
 							</svg>
 							<svg class="volume-muted-icon" viewBox="0 0 24 24">
-								<path
-									fill="currentColor"
+								<path fill="currentColor"
 									d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z" />
 							</svg>
 						</button>
@@ -99,7 +94,8 @@
 						/
 						<div class="total-time"></div>
 					</div>
-					<button v-if="!inSyncRoom && screenWidth >= 470" title="RMVC Controls" data-bs-toggle="modal" data-bs-target="#rmvcModal">
+					<button v-if="!inSyncRoom && screenWidth >= 470" title="RMVC Controls" data-bs-toggle="modal"
+						data-bs-target="#rmvcModal">
 						<font-awesome-icon icon="fa-solid fa-network-wired" />
 					</button>
 					<button v-if="!inSyncRoom" title="Share Video" data-bs-toggle="modal" data-bs-target="#shareModal">
@@ -107,18 +103,15 @@
 					</button>
 					<button v-if="screenWidth >= 480" title="Previous Episode" @click="switchTo(-1)">
 						<svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path
-								fill-rule="evenodd"
-								clip-rule="evenodd"
+							<path fill-rule="evenodd" clip-rule="evenodd"
 								d="M0 18H2L2 0H0L0 18ZM17.7139 17.3827C18.7133 17.9977 20 17.2787 20 16.1052L20 1.8948C20 0.7213 18.7133 0.00230002 17.7139 0.6173L6.1679 7.7225C5.2161 8.3082 5.2161 9.6918 6.1679 10.2775L17.7139 17.3827ZM18 2.7896V15.2104L7.908 9L18 2.7896Z"
 								fill="currentColor" />
 						</svg>
 					</button>
 					<button title="Next Episode" @click="switchTo(1)">
-						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="Hawkins-Icon Hawkins-Icon-Standard">
-							<path
-								fill-rule="evenodd"
-								clip-rule="evenodd"
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+							class="Hawkins-Icon Hawkins-Icon-Standard">
+							<path fill-rule="evenodd" clip-rule="evenodd"
 								d="M22 3H20V21H22V3ZM4.28615 3.61729C3.28674 3.00228 2 3.7213 2 4.89478V19.1052C2 20.2787 3.28674 20.9977 4.28615 20.3827L15.8321 13.2775C16.7839 12.6918 16.7839 11.3082 15.8321 10.7225L4.28615 3.61729ZM4 18.2104V5.78956L14.092 12L4 18.2104Z"
 								fill="currentColor"></path>
 						</svg>
@@ -126,25 +119,28 @@
 					<button v-if="screenWidth >= 380" title="Toggle Video Speed" class="speed-btn wide-btn">1x</button>
 					<button title="Toggle Mini Player" class="mini-player-btn">
 						<svg viewBox="0 0 24 24">
-							<path
-								fill="currentColor"
+							<path fill="currentColor"
 								d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-10-7h9v6h-9z" />
 						</svg>
 					</button>
 					<button v-if="screenWidth >= 450" title="Toggle Theatre Player" class="theater-btn">
 						<svg class="tall" viewBox="0 0 24 24">
-							<path fill="currentColor" d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z" />
+							<path fill="currentColor"
+								d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z" />
 						</svg>
 						<svg class="wide" viewBox="0 0 24 24">
-							<path fill="currentColor" d="M19 7H5c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 8H5V9h14v6z" />
+							<path fill="currentColor"
+								d="M19 7H5c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 8H5V9h14v6z" />
 						</svg>
 					</button>
 					<button title="Toggle Fullscreen Player" class="full-screen-btn">
 						<svg class="open" viewBox="0 0 24 24">
-							<path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
+							<path fill="currentColor"
+								d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
 						</svg>
 						<svg class="close" viewBox="0 0 24 24">
-							<path fill="currentColor" d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
+							<path fill="currentColor"
+								d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
 						</svg>
 					</button>
 				</div>
@@ -168,13 +164,13 @@
 					{{ videoData.bufferedPercentage }}% / 100%
 					<div class="internal-video-devinfos-child">
 						<span v-for="i in videoData.buffered?.length">
-							{{ videoData.buffered?.start(i - 1)  }}ms - {{ videoData.buffered?.end(i -1) }}ms = {{ Math.round(Math.abs(videoData.buffered?.start(i - 1) - videoData.buffered?.end(i -1))) }}ms
+							{{ videoData.buffered?.start(i - 1) }}ms - {{ videoData.buffered?.end(i - 1) }}ms = {{ Math.round(Math.abs(videoData.buffered?.start(i - 1) - videoData.buffered?.end(i - 1))) }}ms
 						</span>
 					</div>
 				Seekable: 
 					<div class="internal-video-devinfos-child">
 						<span v-for="i in videoData.seekable?.length">
-							{{ ($refs.mainVid as HTMLVideoElement).seekable?.start(i - 1)  }}ms - {{ ($refs.mainVid as HTMLVideoElement).seekable?.end(i -1) }}ms = {{ Math.round(Math.abs(($refs.mainVid as HTMLVideoElement).seekable?.start(i - 1) - ($refs.mainVid as HTMLVideoElement).seekable?.end(i -1))) }}ms
+							{{ ($refs.mainVid as HTMLVideoElement).seekable?.start(i - 1) }}ms - {{ ($refs.mainVid as HTMLVideoElement).seekable?.end(i - 1) }}ms = {{ Math.round(Math.abs(($refs.mainVid as HTMLVideoElement).seekable?.start(i - 1) - ($refs.mainVid as HTMLVideoElement).seekable?.end(i - 1))) }}ms
 						</span>
 					</div>
 			</pre>
@@ -212,10 +208,10 @@ export default defineComponent({
 	expose: ['videoData', 'videoLoading', 'trigger'],
 	data() {
 		return {
-			cleanupFN: () => {},
-			skip: (num: number, set?: boolean, server?: boolean) => {},
-			skipPercent: (num: number) => {},
-			togglePlay: () => {},
+			cleanupFN: () => { },
+			skip: (num: number, set?: boolean, server?: boolean) => { },
+			skipPercent: (num: number) => { },
+			togglePlay: () => { },
 			videoLoading: false,
 			dataLoading: false,
 			videoData: {
@@ -413,13 +409,13 @@ export default defineComponent({
 						e.preventDefault();
 						try {
 							video.volume += 0.1;
-						} catch (_) {}
+						} catch (_) { }
 						break;
 					case 'arrowdown':
 						e.preventDefault();
 						try {
 							video.volume -= 0.1;
-						} catch (_) {}
+						} catch (_) { }
 						break;
 					case 'n':
 						v.switchTo(1);
@@ -450,7 +446,7 @@ export default defineComponent({
 				for (let i = 0; i < video.buffered.length; i++) {
 					try {
 						bufferedTime += video.buffered.end(i) - video.buffered.start(i);
-					} catch (error) {}
+					} catch (error) { }
 				}
 
 				const bufferedPercentage = (bufferedTime / video.duration) * 100;
@@ -637,12 +633,12 @@ export default defineComponent({
 					(this.isInterceptingWithIntro && !this.alreadySkipped.find((x) => x == 'intro')) ||
 					(this.isInterceptingWithOutro && !this.alreadySkipped.find((x) => x == 'outro'))
 				) {
-					if (this.settings?.autoSkip?.value == true) {
+					if (this.settings?.skipSegments?.value == true) {
 						const segment = this.segmentData.find((x) => x.type == (this.isInterceptingWithIntro ? 'intro' : 'outro'));
 						if (!segment) return;
-						//Add 2 so the function does not loop itself
 						console.log('Skipped ', segment.type.toUpperCase(), ': AutoSkip');
 						this.alreadySkipped.push(segment.type);
+						//Add 2 so the function does not loop itself
 						skip(segment.endms + 2, true);
 					}
 				}
@@ -880,6 +876,7 @@ export default defineComponent({
 	opacity: 0;
 	transition: opacity 300ms ease-in-out;
 }
+
 .btn-intro-skip-container.enabled {
 	pointer-events: auto;
 	opacity: 1;
@@ -893,6 +890,7 @@ export default defineComponent({
 	margin-top: -3%;
 	margin-bottom: -3%;
 }
+
 .internal-video-devinfos {
 	position: absolute;
 	top: 10%;
@@ -915,6 +913,7 @@ export default defineComponent({
 	width: 5rem;
 	height: 5rem;
 }
+
 .skip {
 	position: absolute;
 	top: 50%;
@@ -928,6 +927,7 @@ export default defineComponent({
 	border: none;
 	color: white;
 }
+
 .middle-play {
 	z-index: 100;
 	background: none;
@@ -952,6 +952,7 @@ export default defineComponent({
 		transform: rotate(0deg);
 		opacity: 1;
 	}
+
 	100% {
 		transform: rotate(360deg);
 	}
@@ -964,6 +965,7 @@ export default defineComponent({
 .skip-left {
 	left: 20%;
 }
+
 .skip-right {
 	left: 80%;
 }
@@ -991,6 +993,7 @@ export default defineComponent({
 	transition: opacity 300ms ease-in-out;
 	text-shadow: 2px 2px 10px #000000;
 }
+
 /* This was changed */
 .video-container.hovered .video-title-container,
 .video-container:focus-within .video-title-container,
@@ -1057,6 +1060,7 @@ video {
 	z-index: -1;
 	pointer-events: none;
 }
+
 /* This was changed */
 .video-container.hovered .video-controls-container,
 .video-container:focus-within .video-controls-container,

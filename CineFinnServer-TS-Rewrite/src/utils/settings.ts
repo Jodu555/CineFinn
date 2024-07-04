@@ -7,6 +7,7 @@ const defaultSettings: SettingsObject = {
 	developerMode: { title: 'Show the developer Infos?', type: 'checkbox', value: false },
 	showNewsAddForm: { title: 'Show the Add News Form', type: 'checkbox', value: false },
 	autoSkip: { title: 'Auto Skip to next Episode at the end?', type: 'checkbox', value: true },
+	skipSegments: { title: 'Skip Segments?', type: 'checkbox', value: false },
 	enableBetaFeatures: { title: 'Enable Beta Features?', type: 'checkbox', value: false },
 	volume: { type: 'hide', value: 1 },
 };
