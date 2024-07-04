@@ -86,6 +86,11 @@ export type SettingsObject = {
 		value: boolean;
 		type: string;
 	};
+	skipSegments: {
+		title: string;
+		value: boolean;
+		type: string;
+	};
 	enableBetaFeatures: {
 		title: string;
 		value: boolean;

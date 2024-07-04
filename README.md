@@ -194,4 +194,5 @@ but rather multiple that get arranged and aggregated together by the main system
     - [ ] No Librarys at least for core functionality so parser or something is okay but not a lib that just does the stuff
 - [ ] **Intro/Outro Detection** a reliable fast pipeline to process intros and outros in the episodes
   - [ ] There are some libs in python that do this farely well and it would be interesting to implement those libraries into node with rest (has a bit from microservices)
-  - [ ] Add a Setting to toggle auto intro/outro (segment) skip
+  - [x] Add a Setting to toggle auto intro/outro (segment) skip
+  - [x] Show an actual Skip Button and add a seperate api for storing all that shit
