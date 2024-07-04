@@ -78,8 +78,10 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 
 	let filePath: string;
 	//The Birthday stuff
+	let translatedToLocalPath = false;
 	if (settings?.isBirthday != undefined && settings?.isBirthday) {
 		filePath = path.join(process.cwd(), 'test.mp4');
+		translatedToLocalPath = true;
 	} else {
 		filePath = videoEntity.filePath;
 
@@ -91,7 +93,7 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 		}
 	}
 	let socketTransmit = false;
-	if (videoEntity.subID != 'main') {
+	if (videoEntity.subID != 'main' && translatedToLocalPath == false) {
 		const subSocket = getSubSocketByID(videoEntity.subID);
 		if (!subSocket) {
 			res.status(404).send('Sub System Currently not reachable');
