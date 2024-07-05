@@ -1,14 +1,15 @@
 import * as fs from 'fs';
-const crypto = require('crypto');
-require('dotenv').config();
+import * as crypto from 'crypto';
+import dotenv from 'dotenv';
+dotenv.config();
 import axios from 'axios';
 import io from 'socket.io-client';
-import Aniworld, { AniWorldSeriesInformations } from './class/Aniworld';
 import { changeEpisode, compareForNewReleases, compareForNewReleasesAniWorld, compareForNewReleasesZoro, ChangedZoroEpisode } from './utils/compare';
-const { similar } = require('./utils/utils');
+import Aniworld, { AniWorldSeriesInformations } from './class/Aniworld';
 import Zoro from './class/Zoro';
-import { ExtendedEpisodeDownload, IgnoranceItem, Serie } from './utils/types';
 import Anix from './class/Anix';
+const { similar } = require('./utils/utils');
+import { ExtendedEpisodeDownload, IgnoranceItem, Serie } from './utils/types';
 
 const socket = io(process.env.CORE_URL, { auth: { type: 'scraper', token: process.env.AUTH_TOKEN } });
 
