@@ -101,10 +101,12 @@ const initialize = (socket: ExtendedSocket) => {
 		}
 		const didID: string[] = [];
 		const scrapeJobs = [];
+		let hadToScrape = false;
 		for (const todo of list) {
 			const item = await database.get<DatabaseTodoItem>('todos').getOne({ ID: todo.ID });
 			if (item) {
 				if (isScraperSocketConnected() && checkIfTodoNeedsScrape(todo)) {
+					hadToScrape = true;
 					todo.scraped = true;
 					scrapeJobs.push(() => {
 						backgroundScrapeTodo(todo);
@@ -129,8 +131,14 @@ const initialize = (socket: ExtendedSocket) => {
 			(s) => {
 				s.emit('todoListUpdate', list);
 			},
-			(s) => s.auth.type == 'client'
-			// && s.id != socket.id
+			(s) => {
+				if (s.auth.type == 'client') {
+					if (hadToScrape && s.id == socket.id) return true;
+
+					if (!hadToScrape && s.id != socket.id) return true;
+				}
+				return false;
+			}
 		);
 
 		scrapeJobs.forEach((f) => f());
