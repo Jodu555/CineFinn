@@ -167,6 +167,37 @@ const initialize = (socket: ExtendedSocket) => {
 		);
 	});
 
+	socket.on('sync-promote', async ({ userUUID }) => {
+		const room = await getRoomCheckIfExistsAndOwner(socket.sync?.ID, socket);
+		if (room == false) {
+			return;
+		}
+
+		if (room.members.find((x) => x.UUID == userUUID) == undefined) {
+			socket.emit('sync-message', { type: 'error', message: 'The User you want to promote is not in this room!' });
+		}
+
+		room.members = room.members.map((x) => {
+			if (x.UUID == userUUID) {
+				x.role = 1;
+			} else {
+				x.role = 0;
+			}
+			return x;
+		});
+
+		//Update Database with updated room object
+		await database.get<Partial<DatabaseSyncRoomItem>>('sync_rooms').update({ ID: room.ID }, { members: JSON.stringify(room.members) });
+
+		//Update Room list for other sockets
+		await toAllSockets(
+			(s) => {
+				s.emit('sync-update-rooms');
+			},
+			(s) => s.auth.type == 'client'
+		);
+	});
+
 	socket.on('sync-video-change', async (obj) => {
 		const room = await getRoomCheckIfExistsAndOwner(socket.sync?.ID, socket);
 		if (room == false) {

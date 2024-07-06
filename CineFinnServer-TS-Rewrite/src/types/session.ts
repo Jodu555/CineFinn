@@ -124,6 +124,7 @@ interface ClientToServerEvents {
 	'sync-join': (obj: { ID: number }) => void;
 	'sync-leave': (obj: { ID: number }) => void;
 	'sync-selectSeries': (obj: { ID: number }) => void;
+	'sync-promote': (obj: { userUUID: string }) => void;
 	'sync-video-change': (obj: { season: number; episode: number; movie: number; langchange: Boolean; lang: Langs }) => void;
 	'sync-video-action': (obj: { action: VideoAction; value: boolean | string; time?: string }) => void;
 	'sync-video-info': (obj: { currentTime: number; isPlaying: boolean }) => void;
