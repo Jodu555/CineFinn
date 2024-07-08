@@ -121,7 +121,7 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 			res.status(404).send('Sub System Currently not reachable');
 			return;
 		}
-		console.log(subSocket.auth);
+		console.log(`Using Sub-System: ${subSocket.auth.id}`);
 
 		if (subSocket.auth.endpoint !== undefined && subSocket.auth.endpoint !== 'local-0x000') {
 			try {
