@@ -255,6 +255,9 @@
 							</div>
 						</div>
 					</div>
+					<div class="mt-2 d-flex justify-content-end">
+						<small>- {{ element.ID }}</small>
+					</div>
 				</li>
 			</template>
 		</draggable>
