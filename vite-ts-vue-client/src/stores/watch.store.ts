@@ -25,7 +25,12 @@ export const useWatchStore = defineStore('watch', {
 				url.searchParams.append('auth-token', axios.defaults.headers.common['auth-token']);
 			}
 			url.searchParams.append('series', state.currentSeries.ID);
-			url.searchParams.append('language', state.currentLanguage);
+
+			if (this.entityObject.langs.includes(state.currentLanguage)) {
+				url.searchParams.append('language', state.currentLanguage);
+			} else {
+				url.searchParams.append('language', this.entityObject.langs[0]);
+			}
 			// if (useAuthStore().settings.developerMode.value) {
 			// 	url.searchParams.append('debug', 'true');
 			// }
