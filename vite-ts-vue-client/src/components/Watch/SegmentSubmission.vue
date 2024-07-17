@@ -61,6 +61,21 @@ import { computed } from 'vue';
 import { reactive } from 'vue';
 import { ref } from 'vue';
 
+/**
+ * TODO: Think on setting intro / outro with key controls (g/b and z/h) where:
+ *
+ * g => I/s
+ * b => I/e
+ *
+ * z => O/s
+ * h => O/e
+ *
+ * with this it would be both diagonal so easy to remember and g/b would be first
+ *
+ * z => is on my german keyboard where on the us one is the y so just think of something for that, so that it still makes mentally sense
+ *
+ */
+
 // const indexStore = useIndexStore();
 // const authStore = useAuthStore();
 const watchStore = useWatchStore();
