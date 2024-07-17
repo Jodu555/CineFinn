@@ -41,8 +41,9 @@
 			<li v-for="segment in state.segment" class="list-group-item">
 				<div class="d-flex text-center justify-content-between">
 					<span class="mt-1">
-						{{ segment.type }}: {{ segment.seriesID }} - {{ segment.season }}x{{ segment.episode }} - {{ currentSegment(segment.type).startTime }} -
-						{{ currentSegment(segment.type).endTime }}
+						{{ segment.type }}: {{ segment.seriesID }} - {{ segment.season }}x{{ segment.episode }} -
+						{{ getFormattedSegmentTime(segment).startTime }} -
+						{{ getFormattedSegmentTime(segment).endTime }}
 					</span>
 					<button type="button" title="Remove Segment" @click="deleteSegment(segment)" class="btn btn-outline-warning">
 						<font-awesome-icon :icon="['fa-solid', 'fa-trash']" size="sm" />
@@ -59,6 +60,10 @@ import { useAxios, useSwal } from '@/utils';
 import { computed } from 'vue';
 import { reactive } from 'vue';
 import { ref } from 'vue';
+
+// const indexStore = useIndexStore();
+// const authStore = useAuthStore();
+const watchStore = useWatchStore();
 
 const sgementTypes = ['Intro', 'Outro'];
 
@@ -91,6 +96,15 @@ async function submitSegments() {
 
 	if (response.status === 200) {
 		state.segment = [];
+		useSwal({
+			toast: true,
+			position: 'top-end',
+			showConfirmButton: false,
+			timer: 3000,
+			icon: 'success',
+			title: `Submitted new Segments!! Thank You :)`,
+			timerProgressBar: true,
+		});
 	} else {
 		console.log(response);
 		useSwal({
@@ -99,7 +113,7 @@ async function submitSegments() {
 			showConfirmButton: false,
 			timer: 3000,
 			icon: 'error',
-			title: `${response.statusText} - ${response.data}`,
+			title: `${response.statusText} - ${response.data.message}`,
 			timerProgressBar: true,
 		});
 	}
@@ -126,10 +140,24 @@ function formatDuration(time: number) {
 function currentSegment(segmentType: string) {
 	segmentType = segmentType.toLowerCase();
 	const seg = state.segment.find((x) => x.type == segmentType && checkIfSegIsEqToWatch(x));
-	if (seg) {
+	// if (seg) {
+	// 	return {
+	// 		startTime: formatDuration(seg.startms),
+	// 		endTime: formatDuration(seg.endms),
+	// 	};
+	// }
+	// return {
+	// 	startTime: '00:00:00',
+	// 	endTime: '00:00:00',
+	// };
+	return getFormattedSegmentTime(seg);
+}
+
+function getFormattedSegmentTime(segment?: Segment) {
+	if (segment) {
 		return {
-			startTime: formatDuration(seg.startms),
-			endTime: formatDuration(seg.endms),
+			startTime: formatDuration(segment.startms),
+			endTime: formatDuration(segment.endms),
 		};
 	}
 	return {
@@ -137,10 +165,6 @@ function currentSegment(segmentType: string) {
 		endTime: '00:00:00',
 	};
 }
-
-// const indexStore = useIndexStore();
-// const authStore = useAuthStore();
-const watchStore = useWatchStore();
 
 function checkIfSegIsEqToWatch(x: Segment) {
 	return x.seriesID == watchStore.currentSeries.ID && x.season == watchStore.currentSeason && x.episode == watchStore.currentEpisode;
@@ -173,8 +197,4 @@ function set(type: string, version: 'start' | 'end') {
 		}
 	}
 }
-
-const test = () => {
-	console.log(props.videoRef!.videoData);
-};
 </script>
