@@ -94,7 +94,7 @@ export const useWatchStore = defineStore('watch', {
 			//Series array is empty cause the user got direct to the /watch route
 			const index = useIndexStore();
 			if (index.series.length == 0) {
-				useIndexStore().loadSeries();
+				await index.loadSeries();
 			}
 
 			//Load the Series Details
