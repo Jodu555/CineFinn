@@ -91,11 +91,11 @@ async function main() {
 				generatorName: config.generatorName,
 			});
 
-			await job.log('---------------------===---------------------');
+			await job.log('--------------------- ' + new Array(config.generatorName.length).fill('=').join('') + ' ---------------------');
 			for (let i = 0; i < 5; i++) {
 				await job.log('--------------------- ' + config.generatorName + ' ---------------------');
 			}
-			await job.log('---------------------===---------------------');
+			await job.log('--------------------- ' + new Array(config.generatorName.length).fill('=').join('') + ' ---------------------');
 
 			console.log('Recieve Job: ', job.id);
 			const vidFile = evalPath(config, job.data.filePath);
