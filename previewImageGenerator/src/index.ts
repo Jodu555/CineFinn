@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import child_process from 'child_process';
 import IORedis from 'ioredis';
-import { Queue, Worker, tryCatch } from 'bullmq';
+import { Job, Queue, Worker, tryCatch } from 'bullmq';
 
 export const wait = (timeout: number) => {
 	return new Promise((resolve) => {
@@ -46,6 +46,17 @@ function evalPath(config: Config, evalPath: string) {
 	return evalPath;
 }
 
+interface JobMeta {
+	serieID: string;
+	entity: any;
+	lang: string;
+	filePath: string;
+	output: string;
+	imagePathPrefix: string;
+	publicStreamURL: string;
+	generatorName: string;
+}
+
 async function main() {
 	const previewImageQueue = 'previewImageQueue';
 	const cfgPath = path.join('.', 'config.json');
@@ -72,17 +83,6 @@ async function main() {
 
 	//config.pathRemapper['X:\\MediaLib\\Application\\'] = '\\media\\pi\\Seagate Expansion Drive\\MediaLib\\Application\\'
 
-	interface JobMeta {
-		serieID: string;
-		entity: any;
-		lang: string;
-		filePath: string;
-		output: string;
-		imagePathPrefix: string;
-		publicStreamURL: string;
-		generatorName: string;
-	}
-
 	const worker = new Worker<JobMeta>(
 		'previewImageQueue',
 		async (job) => {
@@ -90,7 +90,13 @@ async function main() {
 				...job.data,
 				generatorName: config.generatorName,
 			});
-			await job.clearLogs();
+
+			await job.log('---------------------===---------------------');
+			for (let i = 0; i < 5; i++) {
+				await job.log('--------------------- ' + config.generatorName + ' ---------------------');
+			}
+			await job.log('---------------------===---------------------');
+
 			console.log('Recieve Job: ', job.id);
 			const vidFile = evalPath(config, job.data.filePath);
 			const imgDir = evalPath(config, job.data.output);
@@ -121,44 +127,98 @@ async function main() {
 				throw new Error('Video File Missing' + vidFile);
 				process.exit(1);
 			}
-			try {
-				fs.mkdirSync(imgDir, { recursive: true });
-				// await deepExecPromisify(command, imgDir);
-				let lastPercent = 0;
-				const { code, duration, highestSpeed, output } = await spawnFFmpegProcess(command, imgDir, async (speed, percent) => {
-					percent = parseFloat(parseFloat(String(percent)).toFixed(2));
-					lastPercent = percent;
-					await job.log('FFmpeg Tick with speed: ' + speed + 'x and percent: ' + percent + '%');
-					await job.updateProgress(percent);
-					console.log(job.id, speed + 'x', percent + '%');
-				});
 
-				const durationString = `${duration.h || '00'}:${duration.m || '00'}:${duration.s || '00'}`;
-				if (lastPercent < 99) {
-					await job.log('Video Duration: ' + durationString);
-					await job.log(`Lines of ffmpeg output: ${JSON.stringify(output, null, 3)}`);
-					// await job.log(`Last 25 Lines of ffmpeg output: ${JSON.stringify(output.slice(Math.max(output.length - 25, 1)), null, 3)}`);
-					await job.log('99 Percent mark not reached lastPercent: ' + lastPercent);
-					await job.moveToFailed(new Error('Somehow the 99 Percent mark was not reached'), job.token);
-					return;
-				}
-				await job.log(`Finished Command with Exit-Code: ${code} on a ${durationString} Video with the highest speed of ${highestSpeed}x`);
-			} catch (error) {
-				await job.log('Error on execution command: ' + command);
-				await job.log('Error: ' + error);
-				await job.log('Error: ' + JSON.stringify(error, null, 3));
-				console.error('Error on execution command:', command, 'Error:', error);
-				if (job.attemptsMade >= 5) {
-					await job.moveToFailed(error, job.token);
-				} else {
-					await job.retry('failed');
+			let failCount = 1;
+			let success = false;
+
+			while (failCount < 3 && success == false) {
+				failCount++;
+				await job.log('Attempt: #' + failCount + ' with Command: ' + command);
+				const result = await tryCommand(job, imgDir, command);
+				if (result) {
+					success = true;
+					break;
 				}
 			}
+
+			if (success == true) {
+				await job.log('Job Finished Successfully! After #' + failCount + ' Times!');
+			} else {
+				await job.log('Job Finished Failed! After #' + failCount + ' Times!');
+				await job.log('See Log on why this happend!');
+			}
+
+			// try {
+			// 	fs.mkdirSync(imgDir, { recursive: true });
+			// 	// await deepExecPromisify(command, imgDir);
+			// 	let lastPercent = 0;
+			// 	const { code, duration, highestSpeed, output } = await spawnFFmpegProcess(command, imgDir, async (speed, percent) => {
+			// 		percent = parseFloat(parseFloat(String(percent)).toFixed(2));
+			// 		lastPercent = percent;
+			// 		await job.log('FFmpeg Tick with speed: ' + speed + 'x and percent: ' + percent + '%');
+			// 		await job.updateProgress(percent);
+			// 		console.log(job.id, speed + 'x', percent + '%');
+			// 	});
+
+			// 	const durationString = `${duration.h || '00'}:${duration.m || '00'}:${duration.s || '00'}`;
+			// 	if (lastPercent < 99) {
+			// 		await job.log('Video Duration: ' + durationString);
+			// 		await job.log(`Lines of ffmpeg output: ${JSON.stringify(output, null, 3)}`);
+			// 		// await job.log(`Last 25 Lines of ffmpeg output: ${JSON.stringify(output.slice(Math.max(output.length - 25, 1)), null, 3)}`);
+			// 		await job.log('99 Percent mark not reached lastPercent: ' + lastPercent);
+			// 		await job.moveToFailed(new Error('Somehow the 99 Percent mark was not reached'), job.token);
+			// 		return;
+			// 	}
+			// 	await job.log(`Finished Command with Exit-Code: ${code} on a ${durationString} Video with the highest speed of ${highestSpeed}x`);
+			// } catch (error) {
+			// 	await job.log('Error on execution command: ' + command);
+			// 	await job.log('Error: ' + error);
+			// 	await job.log('Error: ' + JSON.stringify(error, null, 3));
+			// 	console.error('Error on execution command:', command, 'Error:', error);
+			// 	if (job.attemptsMade >= 5) {
+			// 		await job.moveToFailed(error, job.token);
+			// 	} else {
+			// 		await job.retry('failed');
+			// 	}
+			// }
 
 			return;
 		},
 		{ connection, concurrency: config.concurrentGenerators, removeOnComplete: { count: 1000 }, removeOnFail: { count: 5000 } }
 	);
+}
+
+async function tryCommand(job: Job<JobMeta, any, string>, imgDir: string, command: string) {
+	try {
+		fs.mkdirSync(imgDir, { recursive: true });
+		// await deepExecPromisify(command, imgDir);
+		let lastPercent = 0;
+		const { code, duration, highestSpeed, output } = await spawnFFmpegProcess(command, imgDir, async (speed, percent) => {
+			percent = parseFloat(parseFloat(String(percent)).toFixed(2));
+			lastPercent = percent;
+			await job.log('FFmpeg Tick with speed: ' + speed + 'x and percent: ' + percent + '%');
+			await job.updateProgress(percent);
+			console.log(job.id, speed + 'x', percent + '%');
+		});
+
+		const durationString = `${duration.h || '00'}:${duration.m || '00'}:${duration.s || '00'}`;
+		if (lastPercent < 99) {
+			await job.log('Video Duration: ' + durationString);
+			await job.log(`Lines of ffmpeg output: ${JSON.stringify(output, null, 3)}`);
+			// await job.log(`Last 25 Lines of ffmpeg output: ${JSON.stringify(output.slice(Math.max(output.length - 25, 1)), null, 3)}`);
+			await job.log('99 Percent mark not reached lastPercent: ' + lastPercent);
+			await job.moveToFailed(new Error('Somehow the 99 Percent mark was not reached'), job.token);
+			return false;
+		}
+		await job.log(`Finished Command with Exit-Code: ${code} on a ${durationString} Video with the highest speed of ${highestSpeed}x`);
+		return true;
+	} catch (error) {
+		await job.log('Error on execution command: ' + command);
+		await job.log('Error: ' + error);
+		await job.log('Error: ' + JSON.stringify(error, null, 3));
+		console.error('Error on execution command:', command, 'Error:', error);
+		return false;
+	}
 }
 
 async function spawnFFmpegProcess(command: string, cwd: string = undefined, progress: (speed: number, percent: number) => void) {
@@ -179,11 +239,11 @@ async function spawnFFmpegProcess(command: string, cwd: string = undefined, prog
 			const sAgo = (Date.now() - latestUpdate) / 1000;
 			console.log('Last Update ' + sAgo + 's ago');
 
-			if (sAgo > 60 * 5) {
-				console.log('No output for 5 minutes, killing process');
+			if (sAgo > 60 * 7) {
+				console.log('No output for 7 minutes, killing process');
 				proc.kill();
 				clearInterval(interval);
-				reject(new Error('No output for 5 minutes, killing process: ' + JSON.stringify(cumOutput, null, 3)));
+				reject(new Error('No output for 7 minutes, killing process: ' + JSON.stringify(cumOutput, null, 3)));
 			}
 		}, 1000);
 
