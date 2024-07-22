@@ -57,6 +57,8 @@ export async function toggleSeriesDisableForSubSystem(subID: string, disabled: b
 
 	console.log(`${disabled ? 'Disabling' : 'Enabling'} sub system for: ${subID} affected ${match.length} Series`);
 
+	if (match.length == 0) return;
+
 	setSeries(
 		(await getSeries()).map((x) => {
 			if (match.some((y) => y.ID == x.ID)) {
