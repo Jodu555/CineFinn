@@ -127,6 +127,13 @@ npm run job -- --name propsToSeries --model model.json --input in.json --output 
   - [x] Implement User Settings to toggle specific infos
     - [x] the stuff thats always hardcoded in the state
       - [x] Bring it also to the Settings Drawer
+- [ ] Update Every MicroService System to have the same Config system so it is linear throughout the entire systems
+  - [ ] CineFinnServer
+  - [ ] Scraper
+  - [ ] previewImageGenerator
+  - [x] SubSystem
+- [ ] Remove BullMQ and build my own lib using mysql i guess cause simple
+  - [ ] BullMQ lacks some stuff that i in this specific case need and probably would be possible to integrate but not feasable in the long term
 
 ## v2
 
