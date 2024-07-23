@@ -4,22 +4,50 @@ import crypto from 'crypto';
 import io from 'socket.io-client';
 import express from 'express';
 import zlib from 'zlib';
+import { setupConfigurationManagment } from './configurationmanager';
 
 const ptoken = crypto.randomUUID().replaceAll('-', '');
-// const ptoken = 'secure-test';
 
-const IDENTIFIER = process.argv[2] || 'local-0x000';
-const ENTRYPOINT = process.argv[3] || 'local-0x000';
-const PORT = process.argv[4] || 9999;
-const SUBENDPOINT = process.argv[5] || 'local-0x000';
-const CORE_URL = 'http://localhost:3100';
-// const CORE_URL = 'http://cinema-api.jodu555.de:3100';
-const CORE_TOKEN = 'dioanoadnosadnsdaonadofvndgpagdmn0gtef';
+const cliOptions = [['identifier', 'I'], ['entrypoint', 'E'], ['port', 'P'], ['endpoint'], ['core-url'], ['core-token']];
+
+interface Config {
+	version: string;
+	identifier: string;
+	entrypoint: string;
+	port: number;
+	endpoint: string | boolean;
+	core: {
+		url: string;
+		token: string;
+	};
+}
+
+const defaultConfig: Config = {
+	version: '1.0.0',
+	identifier: 'local-kdrama',
+	entrypoint: '/home/Media/K-Drama',
+	port: 9999,
+	endpoint: false, //Means enable Socket Transmission
+	core: {
+		url: 'http://localhost:3100',
+		token: 'SUPER-SECURE-CORE-TOKEN',
+	},
+};
+
+const config = setupConfigurationManagment(defaultConfig, cliOptions);
+
+// const IDENTIFIER = process.argv[2] || 'local-0x000'; //local-kdrama
+// const ENTRYPOINT = process.argv[3] || 'local-0x000'; // /home/Media/K-Drama
+// const PORT = process.argv[4] || 9999;
+// const SUBENDPOINT = process.argv[5] || 'local-0x000'; // http://127.0.0.1:9999
+// const CORE_URL = 'http://localhost:3100';
+// // const CORE_URL = 'http://cinema-api.jodu555.de:3100';
+// const CORE_TOKEN = 'dioanoadnosadnsdaonadofvndgpagdmn0gtef';
 
 const app = express();
 app.use(express.json());
 
-const socket = io(CORE_URL, { auth: { type: 'sub', id: IDENTIFIER, token: CORE_TOKEN, ptoken, endpoint: SUBENDPOINT } });
+const socket = io(config.core.url, { auth: { type: 'sub', id: config.identifier, token: config.core.token, ptoken, endpoint: config.endpoint } });
 
 interface VideoStreamLog {
 	// userUUID: string;
@@ -44,9 +72,9 @@ socket.on('disconnect', () => {
 });
 
 socket.on('connect', async () => {
-	console.log('Socket Connection: Connected', IDENTIFIER);
-	const { files, dirs } = await listFilesAsync(ENTRYPOINT);
-	console.log('Loaded', files.length, 'files from:', ENTRYPOINT);
+	console.log('Socket Connection: Connected', config.identifier);
+	const { files, dirs } = await listFilesAsync(config.entrypoint);
+	console.log('Loaded', files.length, 'files from:', config.entrypoint);
 
 	// const raw = JSON.stringify(files);
 	// const compressed = zlib.deflateSync(Buffer.from(raw));
@@ -61,8 +89,8 @@ socket.on('connect', async () => {
 
 socket.on('listFiles', async () => {
 	console.log('Request for List of Files');
-	const { files, dirs } = await listFilesAsync(ENTRYPOINT);
-	console.log('Sending Files', files.length, 'from Disk from:', ENTRYPOINT);
+	const { files, dirs } = await listFilesAsync(config.entrypoint);
+	console.log('Sending Files', files.length, 'from Disk from:', config.entrypoint);
 	socket.emit('files', { files });
 });
 
@@ -175,7 +203,7 @@ app.get('/files', async (req, res) => {
 		return;
 	}
 
-	const { files, dirs } = await listFilesAsync(ENTRYPOINT);
+	const { files, dirs } = await listFilesAsync(config.entrypoint);
 
 	// const raw = JSON.stringify(files);
 	// const compressed = zlib.deflateSync(Buffer.from(raw));
@@ -362,6 +390,6 @@ app.get('/', (_, res) => {
 	res.status(200).json({ success: true, result: map.entries() });
 });
 
-app.listen(PORT, () => {
-	console.log('Sub System listening on port http://localhost:' + PORT);
+app.listen(config.port, () => {
+	console.log('Sub System listening on port http://localhost:' + config.port);
 });
