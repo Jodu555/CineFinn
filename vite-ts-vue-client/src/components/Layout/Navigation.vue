@@ -2,8 +2,14 @@
 	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 		<div class="container-fluid">
 			<router-link class="navbar-brand" to="/">CineFinn</router-link>
-			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-				aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+			<button
+				class="navbar-toggler"
+				type="button"
+				data-bs-toggle="collapse"
+				data-bs-target="#navbarNav"
+				aria-controls="navbarNav"
+				aria-expanded="false"
+				aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarNav">
@@ -29,13 +35,22 @@
 					<li v-if="settings.enableBetaFeatures.value == true" class="nav-item">
 						<router-link class="nav-link" active-class="active" to="/browse">Browse</router-link>
 					</li>
+					<li v-if="userInfo.role >= 2" class="nav-item">
+						<router-link class="nav-link" active-class="active" to="/admin">Admin</router-link>
+					</li>
 				</ul>
 				<div v-if="loggedIn" class="d-flex">
-					<AutoComplete :options="{ placeholder: 'Search for a series...', clearAfterSelect: true }"
-						:data="autoCompleteSeries" :select-fn="autocompleteSearch" />
+					<AutoComplete
+						:options="{ placeholder: 'Search for a series...', clearAfterSelect: true }"
+						:data="autoCompleteSeries"
+						:select-fn="autocompleteSearch" />
 					<div class="btn-group" style="margin-left: 2rem" role="group" aria-label="Basic outlined example">
-						<button title="Settings" class="btn btn-outline-primary" data-bs-toggle="offcanvas"
-							data-bs-target="#offcanvasSettings" aria-controls="offcanvasSettings">
+						<button
+							title="Settings"
+							class="btn btn-outline-primary"
+							data-bs-toggle="offcanvas"
+							data-bs-target="#offcanvasSettings"
+							aria-controls="offcanvasSettings">
 							<font-awesome-icon icon="fa-solid fa-gears" />
 						</button>
 						<button class="btn btn-outline-danger" title="Logout" @click="logout()">
@@ -64,7 +79,7 @@ export default {
 	},
 	computed: {
 		...mapWritableState(useIndexStore, ['series']),
-		...mapWritableState(useAuthStore, ['loggedIn', 'settings']),
+		...mapWritableState(useAuthStore, ['loggedIn', 'settings', 'userInfo']),
 		autoCompleteSeries() {
 			return this.series.map((x) => ({ value: x.title, ID: x.ID })).filter((x) => x.value);
 		},

@@ -66,7 +66,7 @@ const router = createRouter({
 			component: function () {
 				return import(/* webpackChunkName: "adminmain" */ '@/views/Admin/Admin.vue');
 			},
-			meta: { requiresLogin: true },
+			meta: { requiresLogin: true, requiresTeam: true },
 			children: [
 				{
 					name: 'Admin',
@@ -132,6 +132,12 @@ router.beforeEach(async (to, from, next) => {
 			next('/login');
 		} else {
 			next();
+		}
+	} else if (to.matched.some((record) => record.meta.requiresTeam)) {
+		if (auth.userInfo.role >= 2) {
+			next();
+		} else {
+			next(from);
 		}
 	} else {
 		next();

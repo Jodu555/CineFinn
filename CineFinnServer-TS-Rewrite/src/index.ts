@@ -238,6 +238,23 @@ app.use('/segments', authHelper.authentication(), async (req, res, next) => {
 	}
 });
 
+app.get(
+	'/admin/accounts',
+	authHelper.authenticationFull((u) => u.role >= 2),
+	async (req, res, next) => {
+		const accounts = await database.get<User>('accounts').get({});
+		res.json(
+			accounts.map((x) => {
+				delete x.password;
+				if (typeof x.activityDetails == 'string') {
+					x.activityDetails = JSON.parse(x.activityDetails);
+				}
+				return x;
+			})
+		);
+	}
+);
+
 //Your direct routing stuff here
 app.get('/video', authHelper.authentication(), video);
 
