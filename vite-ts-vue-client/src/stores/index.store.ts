@@ -23,10 +23,13 @@ export const useIndexStore = defineStore('index', {
 			}
 		},
 		async reloadSeries(series: Serie[]) {
+			const prev = this.series;
 			this.series = series;
 			const watchStore = useWatchStore();
 			if (watchStore.currentSeries.ID != '-1') {
-				await watchStore.loadSeriesInfo(watchStore.currentSeries.ID);
+				const oldCurrSerie = JSON.stringify(prev.find((x) => x.ID == watchStore.currentSeries.ID));
+				const newCurrSerie = JSON.stringify(this.series.find((x) => x.ID == watchStore.currentSeries.ID));
+				if (oldCurrSerie !== newCurrSerie) await watchStore.loadSeriesInfo(watchStore.currentSeries.ID);
 			}
 		},
 	},
