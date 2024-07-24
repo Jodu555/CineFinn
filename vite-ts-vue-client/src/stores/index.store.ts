@@ -27,9 +27,12 @@ export const useIndexStore = defineStore('index', {
 			this.series = series;
 			const watchStore = useWatchStore();
 			if (watchStore.currentSeries.ID != '-1') {
-				const oldCurrSerie = JSON.stringify(prev.find((x) => x.ID == watchStore.currentSeries.ID));
-				const newCurrSerie = JSON.stringify(this.series.find((x) => x.ID == watchStore.currentSeries.ID));
-				if (oldCurrSerie !== newCurrSerie) await watchStore.loadSeriesInfo(watchStore.currentSeries.ID);
+				// const oldCurrSerie = JSON.stringify(prev.find((x) => x.ID == watchStore.currentSeries.ID));
+				// const newCurrSerie = JSON.stringify(this.series.find((x) => x.ID == watchStore.currentSeries.ID));
+				// if (oldCurrSerie !== newCurrSerie) {
+				// 	await watchStore.loadSeriesInfo(watchStore.currentSeries.ID);
+				// }
+				await watchStore.loadSeriesInfo(watchStore.currentSeries.ID);
 			}
 		},
 	},

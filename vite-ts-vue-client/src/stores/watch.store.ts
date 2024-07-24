@@ -89,8 +89,8 @@ export const useWatchStore = defineStore('watch', {
 		},
 	},
 	actions: {
-		async loadSeriesInfo(ID: string) {
-			this.loading = true;
+		async loadSeriesInfo(ID: string, showLoading = true) {
+			if (showLoading) this.loading = true;
 			//Series array is empty cause the user got direct to the /watch route
 			const index = useIndexStore();
 			if (index.series.length == 0) {
@@ -112,7 +112,7 @@ export const useWatchStore = defineStore('watch', {
 
 			//Update The Series
 			this.currentSeries = index.series.find((x) => x.ID == ID) as Serie;
-			this.loading = false;
+			if (showLoading) this.loading = false;
 		},
 		async loadWatchList(ID: string) {
 			const response = await useAxios().get(`/watch/info?series=${ID}`);
