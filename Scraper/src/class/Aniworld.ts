@@ -110,22 +110,25 @@ class Aniworld {
 				langs.push(lang.src);
 			});
 
-			langs = langs.map((l) => {
-				switch (l) {
-					case '/public/img/german.svg':
-					case '/public/svg/german.svg':
-						return 'GerDub';
-					case '/public/img/japanese-german.svg':
-						return 'GerSub';
-					case '/public/img/japanese-english.svg':
-						return 'EngSub';
-					case '/public/svg/english.svg':
-					case '/public/img/english.svg':
-						return 'EngDub';
-					default:
-						break;
-				}
-			});
+			langs = langs
+				.map((l) => {
+					switch (l) {
+						case '/public/img/german.svg':
+						case '/public/svg/german.svg':
+							return 'GerDub';
+						case '/public/img/japanese-german.svg':
+							return 'GerSub';
+						case '/public/img/japanese-english.svg':
+							return 'EngSub';
+						case '/public/svg/english.svg':
+						case '/public/img/english.svg':
+							return 'EngDub';
+						default:
+							return null;
+							break;
+					}
+				})
+				.filter((x) => x != null);
 
 			const mainName = ep.querySelector('.seasonEpisodeTitle strong').textContent;
 			const secondName = ep.querySelector('.seasonEpisodeTitle span').textContent;
