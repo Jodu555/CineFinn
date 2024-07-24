@@ -61,6 +61,24 @@ const router = createRouter({
 			meta: { requiresLogin: true },
 		},
 		{
+			path: '/admin',
+			name: 'Admin',
+			component: function () {
+				return import(/* webpackChunkName: "adminmain" */ '@/views/Admin/Admin.vue');
+			},
+			meta: { requiresLogin: true },
+			children: [
+				{
+					name: 'Admin',
+					path: 'accounts',
+					component: function () {
+						return import(/* webpackChunkName: "accounts" */ '@/views/Admin/Accounts.vue');
+					},
+					meta: { requiresLogin: true },
+				},
+			],
+		},
+		{
 			path: '/sync',
 
 			component: function () {
