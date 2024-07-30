@@ -370,7 +370,7 @@ app.get('/video', async (req, res) => {
 	videoStreamLog
 		.filter((x) => Date.now() - x.time > 5000)
 		.forEach((old, idx) => {
-			old.stream.destroy();
+			old.stream?.destroy();
 			console.log('Destroyed stream from', Date.now() - old.time, 'ms', old.path);
 			videoStreamLog.splice(idx, 1);
 		});
