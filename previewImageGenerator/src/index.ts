@@ -144,8 +144,9 @@ async function main() {
 			if (success == true) {
 				await job.log('Job Finished Successfully! After #' + failCount + ' Times!');
 			} else {
-				await job.log('Job Finished Failed! After #' + failCount + ' Times!');
+				await job.log('Job Failed! After #' + failCount + ' Times!');
 				await job.log('See Log on why this happend!');
+				throw new Error('Job Failed! After #' + failCount + ' Times!');
 			}
 
 			// try {
