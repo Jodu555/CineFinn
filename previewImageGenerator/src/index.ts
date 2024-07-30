@@ -238,7 +238,9 @@ async function spawnFFmpegProcess(command: string, cwd: string = undefined, prog
 
 		let interval = setInterval(() => {
 			const sAgo = (Date.now() - latestUpdate) / 1000;
-			console.log('Last Update ' + sAgo + 's ago');
+			if (sAgo > 5) {
+				console.log('Last Update ' + sAgo + 's ago');
+			}
 
 			if (sAgo > 60 * 7) {
 				console.log('No output for 7 minutes, killing process');
