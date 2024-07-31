@@ -69,6 +69,14 @@ const router = createRouter({
 			meta: { requiresLogin: true, requiresTeam: true },
 			children: [
 				{
+					name: 'Overview',
+					path: '',
+					component: function () {
+						return import(/* webpackChunkName: "accounts" */ '@/views/Admin/Overview.vue');
+					},
+					meta: { requiresLogin: true },
+				},
+				{
 					name: 'Admin',
 					path: 'accounts',
 					component: function () {

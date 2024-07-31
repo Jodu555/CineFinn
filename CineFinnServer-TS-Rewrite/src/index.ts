@@ -27,7 +27,7 @@ databaseSetupFunction();
 
 import { initialize as socket_initialize } from './sockets';
 
-import { getSeries, setIO, setAuthHelper, setIORedis } from './utils/utils';
+import { getSeries, setIO, setAuthHelper, setIORedis, getVideoStreamLog, getIO } from './utils/utils';
 import { compareSettings, defaultSettings } from './utils/settings';
 
 const app = express();
@@ -195,6 +195,8 @@ import { router as todo_router } from './routes/todo';
 import video from './routes/video';
 import { DatabaseSyncRoomItem } from './types/database';
 import { roleAuthorization } from './utils/roleManager';
+import { subSocketMap } from './sockets/sub.socket';
+import { isScraperSocketConnected } from './sockets/scraper.socket';
 
 // Your Middleware handlers here
 app.use('/images', authHelper.authentication(), express.static(path.join(process.env.PREVIEW_IMGS_PATH)));
@@ -252,6 +254,40 @@ app.get(
 				return x;
 			})
 		);
+	}
+);
+
+app.get(
+	'/admin/overview',
+	authHelper.authenticationFull((u) => u.role >= 2),
+	async (req, res, next) => {
+		const accounts = await database.get<User>('accounts').get({});
+		const series = await getSeries();
+
+		const possibleSubSystems = new Set();
+
+		let episodes = 0;
+		let movies = 0;
+		series.map((x) => {
+			episodes += x.seasons.flat().length;
+			movies += x.movies.length;
+			[...x.movies, ...x.seasons.flat()].forEach((y) => {
+				possibleSubSystems.add(y.subID);
+			});
+		});
+		console.log(possibleSubSystems);
+
+		res.json({
+			accounts: accounts.length,
+			series: series.length,
+			episodes,
+			movies,
+			connectedSubSystems: subSocketMap.size,
+			possibleSubSystems: possibleSubSystems.size - 1, //Necessary to subtract the main subID since it technically isn't a SubSystem
+			streams: getVideoStreamLog().length,
+			sockets: (await getIO().fetchSockets()).length,
+			scraper: isScraperSocketConnected(),
+		});
 	}
 );
 
