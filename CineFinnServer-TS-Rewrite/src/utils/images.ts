@@ -130,23 +130,46 @@ const generateImages = async (series: Series[], cleanup: () => void = () => {}) 
 	const limit = pLimit(Number(process.env.IMG_CONCURRENT_LIMIT_GENERATION || 5));
 
 	const promises: PromissesJob[] = [];
-
+	// let start = Date.now();
 	for (const serie of series) {
 		const seasons = serie.seasons.flat();
 
-		seasons.forEach((episode, i) => {
-			const result = generateEntityImages(i, serie, episode, seasons);
-			promises.push(...result);
+		await new Promise<void>((resolve, reject) => {
+			forEachNonBlocking(
+				seasons,
+				1,
+				(episode, i) => {
+					const result = generateEntityImages(i, serie, episode, seasons);
+					promises.push(...result);
+				},
+				resolve
+			);
 		});
 
-		serie.movies.forEach((movie, i) => {
-			const result = generateEntityImages(i, serie, movie, seasons);
-			promises.push(...result);
+		// seasons.forEach((episode, i) => {
+		// 	const result = generateEntityImages(i, serie, episode, seasons);
+		// 	promises.push(...result);
+		// });
+		await new Promise<void>((resolve, reject) => {
+			forEachNonBlocking(
+				serie.movies,
+				1,
+				(movie, i) => {
+					const result = generateEntityImages(i, serie, movie, seasons);
+					promises.push(...result);
+				},
+				resolve
+			);
 		});
+		// serie.movies.forEach((movie, i) => {
+		// 	const result = generateEntityImages(i, serie, movie, seasons);
+		// 	promises.push(...result);
+		// });
 		// console.log(serie.title, promises.length);
 	}
 
 	console.log(`Every Series has been checked and there are ${promises.length} Processes Waiting!`);
+	// console.log('Took:', Date.now() - start, 'ms');
 
 	if (promises.length == 0) {
 		console.log('Finished generateImages()');
@@ -230,6 +253,24 @@ const generateImages = async (series: Series[], cleanup: () => void = () => {}) 
 // 	console.log('Finished');
 // 	cleanup();
 // };
+
+function forEachNonBlocking<T>(array: T[], chunkSize: number, cb: (element: T, index: number) => void, finished?: () => void) {
+	let index = 0;
+
+	function processChunk() {
+		const end = Math.min(index + chunkSize, array.length);
+		for (let i = index; i < end; i++) {
+			cb(array[i], i);
+		}
+		index = end;
+		if (index < array.length) {
+			setImmediate(processChunk);
+		} else {
+			if (finished) finished();
+		}
+	}
+	processChunk();
+}
 
 export {
 	generateImages,
