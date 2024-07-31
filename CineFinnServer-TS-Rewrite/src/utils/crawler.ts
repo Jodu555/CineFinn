@@ -125,11 +125,14 @@ const crawlAndIndex = async () => {
 
 	files.push(...subFiles);
 
+	//TODO this is not good takes abt 3s on 800
+	// console.time('getting Files');
 	for (const pathEntry of pathEntries) {
 		let { files: tmp_files } = listFiles(pathEntry);
 		files.push(...tmp_files.map((x) => ({ path: x, subID: 'main' })));
 		tmp_files = null;
 	}
+	// console.timeEnd('getting Files');
 
 	// let { files: tmp2_files } = listFiles('Z:\\home\\laterIntegrate');
 	// files.push(...tmp2_files);
@@ -143,6 +146,7 @@ const crawlAndIndex = async () => {
 	// Strip the dirs down and seperate between season or movie dirs or series dirs
 	let series: SerieObject[] = [];
 
+	// console.time('File Loop');
 	files.forEach(({ path: e, subID }) => {
 		const base = path.parse(e).base;
 		const parsedData = filenameParser(e, base);
@@ -180,6 +184,7 @@ const crawlAndIndex = async () => {
 			}
 		}
 	});
+	// console.timeEnd('File Loop');
 
 	const sorterFunction = (a: SerieEpisodeObject, b: SerieEpisodeObject) => {
 		return a.episode - b.episode;
