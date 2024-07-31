@@ -134,37 +134,23 @@ const generateImages = async (series: Series[], cleanup: () => void = () => {}) 
 	for (const serie of series) {
 		const seasons = serie.seasons.flat();
 
+		const fn = (item: Episode | Movie, index: number) => {
+			const result = generateEntityImages(index, serie, item, seasons);
+			promises.push(...result);
+		};
+
+		// Non Blocking GOOD
 		await new Promise<void>((resolve, reject) => {
-			forEachNonBlocking(
-				seasons,
-				1,
-				(episode, i) => {
-					const result = generateEntityImages(i, serie, episode, seasons);
-					promises.push(...result);
-				},
-				resolve
-			);
+			forEachNonBlocking(seasons, 1, fn, resolve);
+		});
+		await new Promise<void>((resolve, reject) => {
+			forEachNonBlocking(serie.movies, 1, fn, resolve);
 		});
 
-		// seasons.forEach((episode, i) => {
-		// 	const result = generateEntityImages(i, serie, episode, seasons);
-		// 	promises.push(...result);
-		// });
-		await new Promise<void>((resolve, reject) => {
-			forEachNonBlocking(
-				serie.movies,
-				1,
-				(movie, i) => {
-					const result = generateEntityImages(i, serie, movie, seasons);
-					promises.push(...result);
-				},
-				resolve
-			);
-		});
-		// serie.movies.forEach((movie, i) => {
-		// 	const result = generateEntityImages(i, serie, movie, seasons);
-		// 	promises.push(...result);
-		// });
+		// Blocking BAD
+		// seasons.forEach(fn);
+		// serie.movies.forEach(fn);
+
 		// console.log(serie.title, promises.length);
 	}
 
