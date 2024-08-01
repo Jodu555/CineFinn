@@ -463,7 +463,7 @@ socket.on('dataStream', ({ transmitID, fd, data }) => {
 	obj.stream.write(data);
 });
 
-socket.on('closeStream', async ({ transmitID, fd, packetCount, fingerprint }) => {
+socket.on('closeStream', async ({ transmitID, fd, packetCount, fingerprint }, callback) => {
 	console.log('Finished, Recieving Packets', transmitID, fd);
 
 	const obj = streamMap.get(transmitID);
@@ -479,16 +479,27 @@ socket.on('closeStream', async ({ transmitID, fd, packetCount, fingerprint }) =>
 	console.log('Expect:', fingerprint);
 	console.log('Actual:', localPrint);
 
+	let valid = false;
+	const elapsedTimeMS = Date.now() - obj.startTime;
+
 	if (fingerprint != localPrint) {
 		console.error('ERROR: Fingerprint mismatch!!!');
+		callback({
+			fingerprintValidation: valid,
+			elapsedTimeMS: elapsedTimeMS,
+		});
 		return;
 	}
-
 	if (obj.packetCount == packetCount && fingerprint == localPrint) {
+		valid = true;
 		console.log('Theoretical Count:', obj.size, packetCount);
 		console.log('Actual Count:     ', stats.size, obj.packetCount);
-		console.log('Took:', (Date.now() - obj.startTime) / 1000, 's');
+		console.log('Took:', elapsedTimeMS / 1000, 's');
 	}
+	callback({
+		fingerprintValidation: valid,
+		elapsedTimeMS: elapsedTimeMS,
+	});
 });
 
 app.listen(config.port, () => {

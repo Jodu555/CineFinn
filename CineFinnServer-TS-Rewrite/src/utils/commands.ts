@@ -336,9 +336,9 @@ function registerCommands() {
 			const remotePath = path.join(serie.title, `Season-${episode.season}`, `${parsed.name}${parsed.ext}`);
 			console.log(episode, remotePath);
 
-			await new Promise<void>((resolve, reject) => {
-				uploadFileToSubSystem(episode.filePath, 'local-kdrama', remotePath, resolve);
-			});
+			const result = await uploadFileToSubSystem(episode.filePath, 'local-kdrama', remotePath);
+
+			console.log(result);
 
 			episode.subID = 'local-kdrama';
 			await sendSeriesReloadToAll();
@@ -348,38 +348,45 @@ function registerCommands() {
 	);
 }
 
-function uploadFileToSubSystem(filePath: string, subID: string, remotePath: string, callback?: () => void) {
-	const transmitID = crypto.randomUUID();
+function uploadFileToSubSystem(filePath: string, subID: string, remotePath: string) {
+	return new Promise<{ fingerprintValidation: boolean; elapsedTimeMS: number }>((resolve, reject) => {
+		const transmitID = crypto.randomUUID();
 
-	const subSocket = getSubSocketByID(subID);
+		const subSocket = getSubSocketByID(subID);
 
-	if (subSocket == undefined) {
-		console.log('SubSocket not reachable!');
-		return;
-	}
+		if (subSocket == undefined) {
+			console.log('SubSocket not reachable!');
+			reject(new Error('SubSocket not reachable!'));
+		}
 
-	const stats = fs.statSync(filePath);
-	const stream = fs.createReadStream(filePath);
+		const stats = fs.statSync(filePath);
+		const stream = fs.createReadStream(filePath);
 
-	const hash = crypto.createHash('md5');
+		const hash = crypto.createHash('md5');
 
-	let packetCount = 0;
-	let fd: number;
-	stream.on('data', (data) => {
-		packetCount++;
-		hash.update(data);
-		subSocket.emit('dataStream', { transmitID, fd, data });
-	});
-	stream.on('close', () => {
-		const fingerprint = hash.digest('hex');
-		console.log('Finished sending Packets', transmitID, fd, packetCount, fingerprint);
-		subSocket.emit('closeStream', { transmitID, fd, packetCount, fingerprint });
-		callback();
-	});
-	stream.on('open', (_fd) => {
-		fd = _fd;
-		console.log('Starting sending Packets', transmitID, fd);
-		subSocket.emit('openStream', { transmitID, fd: _fd, size: stats.size, remotePath });
+		let packetCount = 0;
+		let fd: number;
+		stream.on('data', (data) => {
+			packetCount++;
+			hash.update(data);
+			subSocket.emit('dataStream', { transmitID, fd, data });
+		});
+		stream.on('close', () => {
+			const fingerprint = hash.digest('hex');
+			console.log('Finished sending Packets', transmitID, fd, packetCount, fingerprint);
+			subSocket.emit('closeStream', { transmitID, fd, packetCount, fingerprint }, ({ fingerprintValidation, elapsedTimeMS }) => {
+				if (fingerprintValidation === false) {
+					reject(new Error('Fingerprint Invalid!! File might be broken at Destination'));
+				} else {
+					resolve({ fingerprintValidation, elapsedTimeMS });
+				}
+			});
+		});
+		stream.on('open', (_fd) => {
+			fd = _fd;
+			console.log('Starting sending Packets', transmitID, fd);
+			subSocket.emit('openStream', { transmitID, fd: _fd, size: stats.size, remotePath });
+		});
 	});
 }
 
