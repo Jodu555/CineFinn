@@ -133,11 +133,15 @@ async function main() {
 
 			while (failCount < 3 && success == false) {
 				failCount++;
-				await job.log('Attempt: #' + failCount + ' with Command: ' + command);
-				const result = await tryCommand(job, imgDir, command);
-				if (result) {
-					success = true;
-					break;
+				try {
+					await job.log('Attempt: #' + failCount + ' with Command: ' + command);
+					const result = await tryCommand(job, imgDir, command);
+					if (result) {
+						success = true;
+						break;
+					}
+				} catch (error) {
+					await job.log('Attempt Failed! ' + failCount);
 				}
 			}
 
