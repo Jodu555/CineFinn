@@ -275,7 +275,6 @@ app.get(
 				possibleSubSystems.add(y.subID);
 			});
 		});
-		console.log(possibleSubSystems);
 
 		res.json({
 			accounts: accounts.length,

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import { sendSeriesReloadToAll, sendSiteReload } from '../sockets/client.socket';
 import { getAniworldInfos, waitingForResponse } from '../sockets/scraper.socket';
 import { getSeries, getAuthHelper, getIO, getVideoStreamLog, toAllSockets, setSeries, dangerouslySetSeries } from './utils';
@@ -8,7 +9,7 @@ import { AuthToken, ExtendedRemoteSocket, User } from '../types/session';
 import { getSyncRoom } from './room.utils';
 import { Database } from '@jodu555/mysqlapi';
 import { DatabaseSyncRoomItem } from '../types/database';
-import { checkifSubExists, getAllFilesFromAllSubs, subSocketMap, toggleSeriesDisableForSubSystem } from '../sockets/sub.socket';
+import { checkifSubExists, getAllFilesFromAllSubs, getSubSocketByID, subSocketMap, toggleSeriesDisableForSubSystem } from '../sockets/sub.socket';
 
 const commandManager = CommandManager.getCommandManager();
 const database = Database.getDatabase();
@@ -303,27 +304,83 @@ function registerCommands() {
 	commandManager.registerCommand(
 		new Command(['test'], 'test', 'Just a simple test command', async (command, [...args], scope) => {
 			// console.log(await getAllFilesFromAllSubs());
-			// const series = await getSeries();
+			const series = await getSeries();
 
 			// const eps = series.filter((x) => x.seasons.flat().some((e) => e.subID == args[1]));
 
 			// console.log(eps);
 
-			const socketIDOrUserUUID = args[1];
-			const sockets = (await getIO().fetchSockets()) as ExtendedRemoteSocket[];
-			let i = 0;
-			sockets.forEach((socket) => {
-				if (socket.id == socketIDOrUserUUID || socket.auth.user?.UUID == args[1]) {
-					const sessionID = Math.floor(Math.random() * 10 ** 5).toString();
-					console.log('U just forcibly started for', socket.auth.user.username, 'a rmvc Session with ID', sessionID);
-					socket.auth.RMVCSessionID = sessionID;
-					socket.emit('rmvc-sessionCreated', sessionID);
-				}
+			// const socketIDOrUserUUID = args[1];
+			// const sockets = (await getIO().fetchSockets()) as ExtendedRemoteSocket[];
+			// let i = 0;
+			// sockets.forEach((socket) => {
+			// 	if (socket.id == socketIDOrUserUUID || socket.auth.user?.UUID == args[1]) {
+			// 		const sessionID = Math.floor(Math.random() * 10 ** 5).toString();
+			// 		console.log('U just forcibly started for', socket.auth.user.username, 'a rmvc Session with ID', sessionID);
+			// 		socket.auth.RMVCSessionID = sessionID;
+			// 		socket.emit('rmvc-sessionCreated', sessionID);
+			// 	}
+			// });
+
+			//Upload from Server to SubSystem
+			const serie = series.find((x) => x.ID == '5844324f');
+
+			if (serie == undefined) return;
+
+			const episode = serie.seasons.at(0).at(0);
+
+			if (episode == undefined) return;
+
+			const parsed = path.parse(episode.filePath);
+
+			const remotePath = path.join(serie.title, `Season-${episode.season}`, `${parsed.name}${parsed.ext}`);
+			console.log(episode, remotePath);
+
+			await new Promise<void>((resolve, reject) => {
+				uploadFileToSubSystem(episode.filePath, 'local-kdrama', remotePath, resolve);
 			});
+
+			episode.subID = 'local-kdrama';
+			await sendSeriesReloadToAll();
 
 			return 'Exectued test command successfully';
 		})
 	);
+}
+
+function uploadFileToSubSystem(filePath: string, subID: string, remotePath: string, callback?: () => void) {
+	const transmitID = crypto.randomUUID();
+
+	const subSocket = getSubSocketByID(subID);
+
+	if (subSocket == undefined) {
+		console.log('SubSocket not reachable!');
+		return;
+	}
+
+	const stats = fs.statSync(filePath);
+	const stream = fs.createReadStream(filePath);
+
+	const hash = crypto.createHash('md5');
+
+	let packetCount = 0;
+	let fd: number;
+	stream.on('data', (data) => {
+		packetCount++;
+		hash.update(data);
+		subSocket.emit('dataStream', { transmitID, fd, data });
+	});
+	stream.on('close', () => {
+		const fingerprint = hash.digest('hex');
+		console.log('Finished sending Packets', transmitID, fd, packetCount, fingerprint);
+		subSocket.emit('closeStream', { transmitID, fd, packetCount, fingerprint });
+		callback();
+	});
+	stream.on('open', (_fd) => {
+		fd = _fd;
+		console.log('Starting sending Packets', transmitID, fd);
+		subSocket.emit('openStream', { transmitID, fd: _fd, size: stats.size, remotePath });
+	});
 }
 
 export { registerCommands };

@@ -47,7 +47,15 @@ const config = setupConfigurationManagment(defaultConfig, cliOptions);
 const app = express();
 app.use(express.json());
 
-const socket = io(config.core.url, { auth: { type: 'sub', id: config.identifier, token: config.core.token, ptoken, endpoint: config.endpoint } });
+const socket = io(config.core.url, {
+	auth: {
+		type: 'sub',
+		id: config.identifier,
+		token: config.core.token,
+		ptoken,
+		endpoint: config.endpoint.toString() == 'false' ? undefined : config.endpoint,
+	},
+});
 
 interface VideoStreamLog {
 	// userUUID: string;
@@ -112,6 +120,8 @@ interface VideoRangeRequest {
 }
 
 socket.on('video-range', ({ filePath, start, end, requestId }: VideoRangeRequest) => {
+	console.log(filePath);
+
 	const videoStream = fs.createReadStream(filePath, { start, end });
 	if (map.get(requestId) == undefined) {
 		map.set(requestId, { stream: videoStream, start, end, num: 0, chunks: [], data: { len: 0, all: 0 } });
@@ -388,6 +398,97 @@ app.get('/video', async (req, res) => {
 
 app.get('/', (_, res) => {
 	res.status(200).json({ success: true, result: map.entries() });
+});
+
+// stream.on('data', (data) => {
+// 	packetCount++;
+// 	hash.update(data);
+// 	subSocket.emit('dataStream', { transmitID, fd, data });
+// });
+// stream.on('close', () => {
+// 	const fingerprint = hash.digest('hex');
+// 	console.log('Finished sending Packets', transmitID, fd, packetCount, fingerprint);
+// 	subSocket.emit('closeStream', { transmitID, fd, packetCount, fingerprint });
+// });
+// stream.on('open', (_fd) => {
+// 	fd = _fd;
+// 	console.log('Starting sending Packets', transmitID, fd);
+// 	subSocket.emit('openStream', { transmitID, fd: _fd, size: stats.size, remotePath });
+// });
+
+interface TransmitData {
+	fd: number;
+	transmitID: string;
+	path: string;
+	size: number;
+	packetCount: number;
+	cumSize: number;
+	stream: fs.WriteStream;
+	hash: crypto.Hash;
+	startTime: number;
+}
+
+const streamMap = new Map<string, TransmitData>();
+
+socket.on('openStream', ({ transmitID, fd, size, remotePath }) => {
+	const alteredPath = path.join(config.entrypoint, remotePath);
+	console.log('Started Recieving Packets', transmitID, fd, size);
+	fs.mkdirSync(path.join(alteredPath, '..'), { recursive: true });
+	const stream = fs.createWriteStream(alteredPath);
+
+	const hash = crypto.createHash('md5');
+	streamMap.set(transmitID, {
+		transmitID,
+		fd,
+		path: alteredPath,
+		size,
+		packetCount: 0,
+		cumSize: 0,
+		stream,
+		hash,
+		startTime: Date.now(),
+	} satisfies TransmitData);
+});
+
+socket.on('dataStream', ({ transmitID, fd, data }) => {
+	const obj = streamMap.get(transmitID);
+	if (obj.fd !== fd) {
+		console.log('We somehow fucked up really bad');
+		return;
+	}
+	obj.packetCount++;
+	obj.cumSize += data.length;
+	// console.log(((obj.cumSize / obj.size) * 100).toFixed(2) + '%');
+	obj.hash.update(data);
+	obj.stream.write(data);
+});
+
+socket.on('closeStream', async ({ transmitID, fd, packetCount, fingerprint }) => {
+	console.log('Finished, Recieving Packets', transmitID, fd);
+
+	const obj = streamMap.get(transmitID);
+	if (obj.fd !== fd) {
+		console.log('We somehow fucked up really bad');
+		return;
+	}
+	const localPrint = obj.hash.digest('hex');
+	obj.stream.close();
+	const stats = fs.statSync(obj.path);
+
+	console.log('Validating fingerprint!');
+	console.log('Expect:', fingerprint);
+	console.log('Actual:', localPrint);
+
+	if (fingerprint != localPrint) {
+		console.error('ERROR: Fingerprint mismatch!!!');
+		return;
+	}
+
+	if (obj.packetCount == packetCount && fingerprint == localPrint) {
+		console.log('Theoretical Count:', obj.size, packetCount);
+		console.log('Actual Count:     ', stats.size, obj.packetCount);
+		console.log('Took:', (Date.now() - obj.startTime) / 1000, 's');
+	}
 });
 
 app.listen(config.port, () => {
