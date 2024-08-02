@@ -227,7 +227,7 @@ class Anix {
 				headless: false,
 				// devtools: false,
 				ignoreHTTPSErrors: true,
-				executablePath: 'C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe', // Windows
+				executablePath: process.env.PATH_TO_BRAVE_EXE || 'C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe', // Windows
 				args: [
 					// `--disable-extensions-except=${pathToM3Extension}`,
 					// `--load-extension=${pathToM3Extension}`,
