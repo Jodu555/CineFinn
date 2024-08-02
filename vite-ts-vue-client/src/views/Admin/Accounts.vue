@@ -21,11 +21,11 @@
 				<tbody>
 					<tr v-for="account in accounts" class="">
 						<td scope="row">{{ account.UUID }}</td>
-						<td>{{ account.username }}</td>
-						<td>{{ account.role }}</td>
-						<td>{{ account.activityDetails.lastHandshake }}</td>
-						<td>{{ account.activityDetails.lastLogin }}</td>
-						<td>{{ account.activityDetails.lastIP }}</td>
+						<td>{{ account?.username }}</td>
+						<td>{{ account?.role }}</td>
+						<td>{{ account?.activityDetails?.lastHandshake }}</td>
+						<td>{{ account?.activityDetails?.lastLogin }}</td>
+						<td>{{ account?.activityDetails?.lastIP }}</td>
 					</tr>
 				</tbody>
 			</table>

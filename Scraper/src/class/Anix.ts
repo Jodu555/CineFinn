@@ -221,22 +221,22 @@ class Anix {
 		// 		// '--disable-features=site-per-process',
 		// 	],
 		// });
-		if (STATIC_BROWSER == null) {
-			STATIC_BROWSER = await puppeteer.launch({
-				// defaultViewport: null,
-				headless: false,
-				// devtools: false,
-				ignoreHTTPSErrors: true,
-				executablePath: process.env.PATH_TO_BRAVE_EXE || 'C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe', // Windows
-				args: [
-					// `--disable-extensions-except=${pathToM3Extension}`,
-					// `--load-extension=${pathToM3Extension}`,
-					'--ignore-certificate-errors',
-					'--ignore-certificate-errors-spki-list',
-					// '--disable-features=site-per-process',
-				],
-			});
-		}
+		// if (STATIC_BROWSER == null) {
+		STATIC_BROWSER = await puppeteer.launch({
+			// defaultViewport: null,
+			headless: false,
+			// devtools: false,
+			ignoreHTTPSErrors: true,
+			executablePath: process.env.PATH_TO_BRAVE_EXE || 'C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe', // Windows
+			args: [
+				// `--disable-extensions-except=${pathToM3Extension}`,
+				// `--load-extension=${pathToM3Extension}`,
+				'--ignore-certificate-errors',
+				'--ignore-certificate-errors-spki-list',
+				// '--disable-features=site-per-process',
+			],
+		});
+		// }
 		return STATIC_BROWSER;
 	}
 

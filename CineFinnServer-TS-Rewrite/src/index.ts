@@ -249,7 +249,7 @@ app.get(
 			accounts.map((x) => {
 				delete x.password;
 				if (typeof x.activityDetails == 'string') {
-					x.activityDetails = JSON.parse(x.activityDetails);
+					x.activityDetails = x.activityDetails ? JSON.parse(x.activityDetails) : {};
 				}
 				return x;
 			})
