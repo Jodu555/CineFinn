@@ -7,6 +7,7 @@ import { getSeries, getVideoStreamLog, setVideoStreamLog } from '../utils/utils'
 import { AuthenticatedRequest } from '../types/session';
 import { getVideoMovie, getVideoEntity, Episode, Movie } from '../classes/series';
 import { createVideoStreamOverSocket, getSubSocketByID, getVideoStats } from '../sockets/sub.socket';
+import { Langs } from '../types/classes';
 
 function decodeRangeHeader(range: string) {
 	let start: number;
@@ -109,8 +110,13 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 
 		if (videoEntity.langs.length > 1) {
 			if (language) {
-				const { dir, name, ext } = path.parse(filePath);
-				filePath = path.join(dir, `${name.split('_')[0]}_${language}${ext}`);
+				if (videoEntity.langs.includes(language as Langs)) {
+					const { dir, name, ext } = path.parse(filePath);
+					filePath = path.join(dir, `${name.split('_')[0]}_${language}${ext}`);
+				} else {
+					res.status(404).send('Video with that language doe not exist');
+					return;
+				}
 			}
 		}
 	}
