@@ -10,6 +10,7 @@ import { isPermitted } from '../utils/roleManager';
 import { getAniworldInfos, getNewZoroInfos, getZoroInfos, isScraperSocketConnected } from './scraper.socket';
 import { LOOKUP, callpointToEvent } from '../routes/managment';
 import { backgroundScrapeTodo, checkIfTodoNeedsScrape } from '../utils/todo';
+import { sendSocketAdminUpdate } from '../utils/admin';
 
 const database = Database.getDatabase();
 
@@ -178,6 +179,8 @@ async function sendSeriesReloadToAll(cb?: (socket: ExtendedRemoteSocket) => void
 		},
 		(s) => s.auth.type == 'client'
 	);
+
+	sendSocketAdminUpdate();
 }
 
 export interface WatchListChangeSearchObject {

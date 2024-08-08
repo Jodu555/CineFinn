@@ -6,6 +6,7 @@ import { initialize as socketInitSub } from './sub.socket';
 import { initialize as socketInitClient } from './client.socket';
 import { initialize as socketInitSync } from './sync.socket';
 import { initialize as socketInitRMVCEmitter } from './rmvcEmitter.socket';
+import { sendSocketAdminUpdate } from '../utils/admin';
 
 const initialize = () => {
 	const io = getIO();
@@ -72,6 +73,12 @@ const initialize = () => {
 		if (auth.type == 'rmvc-emitter') socketInitRMVCEmitter(socket);
 		if (auth.type == 'scraper') socketInitScraper(socket);
 		if (auth.type == 'sub') socketInitSub(socket);
+
+		await sendSocketAdminUpdate();
+
+		socket.on('disconnect', async () => {
+			await sendSocketAdminUpdate();
+		});
 	});
 };
 

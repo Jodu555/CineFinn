@@ -8,6 +8,7 @@ import { AuthenticatedRequest } from '../types/session';
 import { getVideoMovie, getVideoEntity, Episode, Movie } from '../classes/series';
 import { createVideoStreamOverSocket, getSubSocketByID, getVideoStats } from '../sockets/sub.socket';
 import { Langs } from '../types/classes';
+import { sendSocketAdminUpdate } from '../utils/admin';
 
 function decodeRangeHeader(range: string) {
 	let start: number;
@@ -211,6 +212,7 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 				old.stream.destroy();
 				console.log('Destroyed stream for', old.userUUID, Date.now() - old.time, 'ms', old.path);
 				getVideoStreamLog().splice(idx, 1);
+				sendSocketAdminUpdate();
 			});
 
 		getVideoStreamLog().push({
@@ -221,6 +223,7 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 			start: start,
 			end: end,
 		});
+		sendSocketAdminUpdate();
 
 		fileStream.pipe(res);
 	}

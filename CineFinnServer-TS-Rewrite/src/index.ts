@@ -140,6 +140,8 @@ authHelper.install(
 			await database
 				.get<Partial<User>>('accounts')
 				.update({ UUID: userobj.UUID }, { settings: JSON.stringify(outSettings), activityDetails: JSON.stringify(details) });
+
+			sendSocketAdminUpdate();
 		} catch (error) {
 			console.error('This Could possibly fail if the db connection is still waking up but idk actually why this would happen IDK kill me plllzzz');
 			console.error(error);
@@ -197,6 +199,7 @@ import { DatabaseSyncRoomItem } from './types/database';
 import { roleAuthorization } from './utils/roleManager';
 import { subSocketMap } from './sockets/sub.socket';
 import { isScraperSocketConnected } from './sockets/scraper.socket';
+import { sendSocketAdminUpdate } from './utils/admin';
 
 // Your Middleware handlers here
 app.use('/images', authHelper.authentication(), express.static(path.join(process.env.PREVIEW_IMGS_PATH)));

@@ -10,6 +10,7 @@ import { getSyncRoom } from './room.utils';
 import { Database } from '@jodu555/mysqlapi';
 import { DatabaseSyncRoomItem } from '../types/database';
 import { checkifSubExists, getAllFilesFromAllSubs, getSubSocketByID, subSocketMap, toggleSeriesDisableForSubSystem } from '../sockets/sub.socket';
+import { sendSocketAdminUpdate } from './admin';
 
 const commandManager = CommandManager.getCommandManager();
 const database = Database.getDatabase();
@@ -114,7 +115,7 @@ function registerCommands() {
 
 			dangerouslySetSeries((await getSeries()).filter((x) => x.ID != id));
 			await sendSeriesReloadToAll();
-
+			await sendSocketAdminUpdate();
 			return 'Deleted the series for: ' + id + ' with title ' + serie.title;
 		})
 	);
@@ -214,6 +215,7 @@ function registerCommands() {
 	commandManager.registerCommand(
 		new Command(['save'], 'save', 'Saves the current series data to the file', (command, [...args], scope) => {
 			fs.writeFileSync(process.env.LOCAL_DB_FILE, JSON.stringify(getSeries(), null, 3), 'utf8');
+			sendSocketAdminUpdate();
 			return '';
 		})
 	);
@@ -259,6 +261,7 @@ function registerCommands() {
 					getVideoStreamLog().splice(idx, 1);
 				});
 			}
+			sendSocketAdminUpdate();
 			return '';
 		})
 	);
