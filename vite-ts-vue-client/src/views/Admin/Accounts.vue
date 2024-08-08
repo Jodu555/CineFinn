@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
 		<h1 class="text-center">Accounts</h1>
-		<div v-if="loading" class="d-flex justify-content-center">
+		<div v-if="adminStore.loading" class="d-flex justify-content-center">
 			<div class="spinner-border" role="status">
 				<span class="visually-hidden">Loading...</span>
 			</div>
@@ -19,7 +19,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr v-for="account in accounts" class="">
+					<tr v-for="account in adminStore.accounts" class="">
 						<td scope="row">{{ account.UUID }}</td>
 						<td>{{ account?.username }}</td>
 						<td>{{ account?.role }}</td>
@@ -34,38 +34,13 @@
 </template>
 
 <script lang="ts" setup>
-import { useAxios } from '@/utils';
+import { useAdminStore } from '@/stores/admin.store';
 import { onMounted, ref } from 'vue';
 
-const loading = ref(false);
-
-const accounts = ref<DBAccount[]>([]);
-
-interface DBAccount {
-	UUID: string;
-	username: string;
-	email: string;
-	role: number;
-	settings: object;
-	activityDetails: {
-		lastIP: string;
-		lastHandshake: string;
-		lastLogin: string;
-	};
-}
+const adminStore = useAdminStore();
 
 onMounted(async () => {
 	document.title = `Cinema | Admin-Accounts`;
-
-	loading.value = true;
-
-	const response = await useAxios().get<DBAccount[]>('/admin/accounts');
-
-	if (response.status == 200) {
-		accounts.value = response?.data;
-	}
-
-	loading.value = false;
 });
 </script>
 

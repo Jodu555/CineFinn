@@ -37,7 +37,27 @@
 	</div>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { useAdminStore } from '@/stores/admin.store';
+import { useSocket } from '@/utils/socket';
+import { onMounted } from 'vue';
+
+const adminStore = useAdminStore();
+
+onMounted(async () => {
+	await Promise.all([adminStore.loadOverview(), adminStore.loadAccounts()]);
+	// await adminStore.loadOverview();
+	// await adminStore.loadAccounts();
+});
+useSocket().on('admin-update', ({ context, data }) => {
+	if (context == 'overview') {
+		adminStore.overview = data;
+	}
+	if (context == 'accounts') {
+		adminStore.accounts = data;
+	}
+});
+</script>
 
 <style scoped>
 .nav-link.active {
