@@ -117,7 +117,7 @@ async function main() {
 				command = `ffmpeg -hide_banner -i "${vidFile}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
 			}
 
-			job.log('Crafted Command: ' + command);
+			await job.log('Crafted Command: ' + command);
 
 			console.log(job.id, ' => ', command);
 
@@ -193,6 +193,8 @@ async function main() {
 	);
 }
 
+const DEBUG = false;
+
 async function tryCommand(job: Job<JobMeta, any, string>, imgDir: string, command: string) {
 	try {
 		fs.mkdirSync(imgDir, { recursive: true });
@@ -203,7 +205,7 @@ async function tryCommand(job: Job<JobMeta, any, string>, imgDir: string, comman
 			lastPercent = percent;
 			await job.log('FFmpeg Tick with speed: ' + speed + 'x and percent: ' + percent + '%');
 			await job.updateProgress(percent);
-			console.log(job.id, speed + 'x', percent + '%');
+			DEBUG && console.log(job.id, speed + 'x', percent + '%');
 		});
 
 		const durationString = `${duration.h || '00'}:${duration.m || '00'}:${duration.s || '00'}`;
@@ -243,11 +245,11 @@ async function spawnFFmpegProcess(command: string, cwd: string = undefined, prog
 		let interval = setInterval(() => {
 			const sAgo = (Date.now() - latestUpdate) / 1000;
 			if (sAgo > 5) {
-				console.log('Last Update ' + sAgo + 's ago');
+				DEBUG && console.log('Last Update ' + sAgo + 's ago');
 			}
 
 			if (sAgo > 60 * 7) {
-				console.log('No output for 7 minutes, killing process');
+				console.log('No output for 7 minutes, killing process', sAgo);
 				proc.kill();
 				clearInterval(interval);
 				reject(new Error('No output for 7 minutes, killing process: ' + JSON.stringify(cumOutput, null, 3)));
