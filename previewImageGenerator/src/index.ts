@@ -134,6 +134,7 @@ async function main() {
 			while (failCount < 3 && success == false) {
 				failCount++;
 				try {
+					console.log(job.id, ' => Attempt: #' + failCount + ' with Command: ' + command);
 					await job.log('Attempt: #' + failCount + ' with Command: ' + command);
 					const result = await tryCommand(job, imgDir, command);
 					if (result) {
@@ -208,13 +209,16 @@ async function tryCommand(job: Job<JobMeta, any, string>, imgDir: string, comman
 			DEBUG && console.log(job.id, speed + 'x', percent + '%');
 		});
 
+		console.log(job.id, ' => Finished the', duration, 'video with the highest speed of', highestSpeed, 'x');
+		console.log(job.id, ' => closing code: ', code, 'Percent:', lastPercent);
+
 		const durationString = `${duration.h || '00'}:${duration.m || '00'}:${duration.s || '00'}`;
 		if (lastPercent < 99) {
 			await job.log('Video Duration: ' + durationString);
 			await job.log(`Lines of ffmpeg output: ${JSON.stringify(output, null, 3)}`);
 			// await job.log(`Last 25 Lines of ffmpeg output: ${JSON.stringify(output.slice(Math.max(output.length - 25, 1)), null, 3)}`);
 			await job.log('99 Percent mark not reached lastPercent: ' + lastPercent);
-			await job.moveToFailed(new Error('Somehow the 99 Percent mark was not reached'), job.token);
+			// await job.moveToFailed(new Error('Somehow the 99 Percent mark was not reached'), job.token);
 			return false;
 		}
 		await job.log(`Finished Command with Exit-Code: ${code} on a ${durationString} Video with the highest speed of ${highestSpeed}x`);
@@ -298,8 +302,6 @@ async function spawnFFmpegProcess(command: string, cwd: string = undefined, prog
 		});
 
 		proc.on('close', (code) => {
-			console.log('Finished the', duration, 'video with the highest speed of', highestSpeed, 'x');
-			console.log('closing code: ' + code);
 			clearInterval(interval);
 			clearTimeout(timeout);
 			if (code == 0) {
