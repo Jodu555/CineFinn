@@ -208,11 +208,13 @@ async function tryCommand(job: Job<JobMeta, any, string>, imgDir: string, comman
 			await job.updateProgress(percent);
 			DEBUG && console.log(job.id, speed + 'x', percent + '%');
 		});
-
-		console.log(job.id, ' => Finished the', duration, 'video with the highest speed of', highestSpeed, 'x');
-		console.log(job.id, ' => closing code: ', code, 'Percent:', lastPercent);
-
 		const durationString = `${duration.h || '00'}:${duration.m || '00'}:${duration.s || '00'}`;
+
+		console.log(
+			job.id,
+			` => Finished Command with Exit-Code: ${code} on a ${durationString} Video with the highest speed of ${highestSpeed}x and the lastPercent: ${lastPercent}%`
+		);
+
 		if (lastPercent < 99) {
 			await job.log('Video Duration: ' + durationString);
 			await job.log(`Lines of ffmpeg output: ${JSON.stringify(output, null, 3)}`);
@@ -221,7 +223,9 @@ async function tryCommand(job: Job<JobMeta, any, string>, imgDir: string, comman
 			// await job.moveToFailed(new Error('Somehow the 99 Percent mark was not reached'), job.token);
 			return false;
 		}
-		await job.log(`Finished Command with Exit-Code: ${code} on a ${durationString} Video with the highest speed of ${highestSpeed}x`);
+		await job.log(
+			`Finished Command with Exit-Code: ${code} on a ${durationString} Video with the highest speed of ${highestSpeed}x and the lastPercent: ${lastPercent}%`
+		);
 		return true;
 	} catch (error) {
 		await job.log('Error on execution command: ' + command);
