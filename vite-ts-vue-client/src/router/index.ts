@@ -84,6 +84,14 @@ const router = createRouter({
 					},
 					meta: { requiresLogin: true },
 				},
+				{
+					name: 'Admin',
+					path: 'jobs',
+					component: function () {
+						return import(/* webpackChunkName: "accounts" */ '@/views/Admin/Jobs.vue');
+					},
+					meta: { requiresLogin: true },
+				},
 			],
 		},
 		{

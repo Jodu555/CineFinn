@@ -42,7 +42,6 @@
 
 <script lang="ts" setup>
 import { useAdminStore } from '@/stores/admin.store';
-import { useAxios } from '@/utils';
 import { onMounted, ref } from 'vue';
 
 const adminStore = useAdminStore();
@@ -51,5 +50,3 @@ onMounted(async () => {
 	document.title = `Cinema | Admin-Overview`;
 });
 </script>
-
-<style></style>

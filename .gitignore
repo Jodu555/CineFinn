@@ -11,6 +11,7 @@ zorolist.json
 Scraper/*.json
 config.json
 *.mp4
+__nogit.ts
 
 ChromeAnalyze/
 
