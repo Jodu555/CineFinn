@@ -1,7 +1,15 @@
 <template>
-	<div>
+	<div v-auto-animate>
 		<h2 class="text-center">Preview Image Generation</h2>
-		<div v-for="job in jobs" :key="job.id" class="row">
+		<ul class="mt-3 nav justify-content-evenly nav-underline">
+			<li style="cursor: pointer" v-for="queue in queues" class="nav-item me-5" @click="activeTab = queue.name">
+				<a class="nav-link position-relative" :class="{ active: activeTab == queue.name }" aria-current="page">
+					<h5>{{ upperCaseFirstLetter(queue.name) }}</h5>
+					<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-success">{{ queue.jobs.length }}</span>
+				</a>
+			</li>
+		</ul>
+		<div v-auto-animate v-for="job in queues.find((x) => x.name == activeTab)?.jobs" :key="job.id" class="row">
 			<div class="col-auto ms-5 me-auto">
 				<h4 class="text-center align-middle h-100" style="transform: translate(0px, 35%)">{{ job.name }} - Series Name</h4>
 			</div>
@@ -32,6 +40,10 @@ import { useAxios } from '@/utils';
 import { BULLBOARDAPIURL } from '@/utils/__nogit';
 import { onMounted, onUnmounted, ref } from 'vue';
 
+function upperCaseFirstLetter(str: string) {
+	return str.at(0)?.toUpperCase() + str.split('').slice(1).join('');
+}
+
 interface Job {
 	id: number;
 	timestamp: number;
@@ -42,14 +54,17 @@ interface Job {
 
 const lastUpdate = ref<string>();
 const jobs = ref<Job[]>([]);
+const queues = ref<{ name: string; jobs: Job[] }[]>([]);
 
-async function loadJobs() {
+const activeTab = ref('active');
+
+async function loadJobsForQueue(queueType: string) {
 	const response = await useAxios().get<{
 		queues: {
 			name: string;
 			jobs: Job[];
 		}[];
-	}>(BULLBOARDAPIURL, {
+	}>(BULLBOARDAPIURL + '&status=' + queueType, {
 		headers: {
 			token: 'testtokenLULW',
 		},
@@ -60,33 +75,45 @@ async function loadJobs() {
 	const previewImageQueue = response.data.queues.find((x) => (x.name = 'previewImageQueue'));
 	if (!previewImageQueue) return;
 
-	previewImageQueue.jobs.push(
-		{
-			id: 123,
-			name: '479fd',
-			progress: 45,
-			timestamp: 1523,
-			data: null,
-		},
-		{
-			id: 123,
-			name: '479fd',
-			progress: 29,
-			timestamp: 1523,
-			data: null,
-		}
-	);
+	// previewImageQueue.jobs.push(
+	// 	{
+	// 		id: 123,
+	// 		name: '479fd' + queueType,
+	// 		progress: Math.round(Math.random() * 100),
+	// 		timestamp: 1523,
+	// 		data: null,
+	// 	},
+	// 	{
+	// 		id: 123,
+	// 		name: '479fd' + queueType,
+	// 		progress: Math.round(Math.random() * 100),
+	// 		timestamp: 1523,
+	// 		data: null,
+	// 	}
+	// );
 
-	jobs.value = previewImageQueue.jobs;
+	const queue = queues.value.find((x) => x.name == queueType);
+
+	if (queue) {
+		queue.jobs = previewImageQueue.jobs;
+	} else {
+		queues.value.push({
+			name: queueType,
+			jobs: previewImageQueue.jobs,
+		});
+	}
+
+	queues.value.sort();
 	lastUpdate.value = new Date().toLocaleTimeString();
 }
 
 let interval: NodeJS.Timeout;
 
 onMounted(async () => {
-	await loadJobs();
+	await Promise.all([loadJobsForQueue('active'), loadJobsForQueue('waiting'), loadJobsForQueue('completed')]);
+
 	interval = setInterval(async () => {
-		await loadJobs();
+		await Promise.all([loadJobsForQueue('active'), loadJobsForQueue('waiting'), loadJobsForQueue('completed')]);
 	}, 1500);
 });
 
