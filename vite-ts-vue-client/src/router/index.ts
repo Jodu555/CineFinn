@@ -72,12 +72,12 @@ const router = createRouter({
 					name: 'Overview',
 					path: '',
 					component: function () {
-						return import(/* webpackChunkName: "accounts" */ '@/views/Admin/Overview.vue');
+						return import(/* webpackChunkName: "overview" */ '@/views/Admin/Overview.vue');
 					},
 					meta: { requiresLogin: true },
 				},
 				{
-					name: 'Admin',
+					name: 'Accounts',
 					path: 'accounts',
 					component: function () {
 						return import(/* webpackChunkName: "accounts" */ '@/views/Admin/Accounts.vue');
@@ -85,10 +85,10 @@ const router = createRouter({
 					meta: { requiresLogin: true },
 				},
 				{
-					name: 'Admin',
+					name: 'Jobs',
 					path: 'jobs',
 					component: function () {
-						return import(/* webpackChunkName: "accounts" */ '@/views/Admin/Jobs.vue');
+						return import(/* webpackChunkName: "jobs" */ '@/views/Admin/Jobs.vue');
 					},
 					meta: { requiresLogin: true },
 				},
