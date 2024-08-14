@@ -26,7 +26,7 @@
 			:stroke-dashoffset="svgPercentage"
 			fill="transparent"
 			:stroke-dasharray="circumference"></circle>
-		<text x="42px" y="87px" fill="#6bdba7" font-size="36px" font-weight="bold" style="transform: rotate(90deg) translate(0px, -146px)">
+		<text x="42px" y="87px" fill="#6bdba7" font-size="30px" font-weight="bold" style="transform: rotate(90deg) translate(-15px, -146px)">
 			{{ percentage }}%
 		</text>
 	</svg>

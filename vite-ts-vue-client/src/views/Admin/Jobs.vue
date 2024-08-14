@@ -5,13 +5,24 @@
 			<li style="cursor: pointer" v-for="queue in queues" class="nav-item me-5" @click="activeTab = queue.name">
 				<a class="nav-link position-relative" :class="{ active: activeTab == queue.name }" aria-current="page">
 					<h5>{{ upperCaseFirstLetter(queue.name) }}</h5>
-					<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-success">{{ queue.jobs.length }}</span>
+					<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success-subtle text-success-emphasis">{{
+						queue.jobs.length
+					}}</span>
 				</a>
 			</li>
 		</ul>
 		<div v-auto-animate v-for="job in queues.find((x) => x.name == activeTab)?.jobs" :key="job.id" class="row">
 			<div class="col-auto ms-5 me-auto">
-				<h4 class="text-center align-middle h-100" style="transform: translate(0px, 35%)">{{ job.name }} - Series Name</h4>
+				<div class="align-middle h-100" style="transform: translate(0px, 35%)">
+					<h3 class="mb-3">#{{ job.id }} - {{ job.name }}</h3>
+					<h4>
+						"{{ job.data?.entity?.primaryName ? job.data?.entity?.primaryName : '-' }}"{{ job.data?.entity ? job.data?.entity.season : -1 }}x{{
+							job.data?.entity ? job.data?.entity.episode : -1
+						}}
+						On: {{ job.data?.generatorName ? job.data.generatorName : 'TBD' }} Language: {{ job.data?.lang ? job.data.lang : '- -' }} SUB:
+						{{ job.data?.entity?.subID ? job.data?.entity?.subID : 'main' }}
+					</h4>
+				</div>
 			</div>
 			<div class="col-auto" style="border-left: 3px solid rgb(222, 226, 230); opacity: 0.05; transform: translate(0px, 25px); height: 100px"></div>
 			<div class="col-auto">
