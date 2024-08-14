@@ -75,7 +75,7 @@ async function loadJobsForQueue(queueType: string) {
 			name: string;
 			jobs: Job[];
 		}[];
-	}>(BULLBOARDAPIURL + '&status=' + queueType, {
+	}>(`${BULLBOARDAPIURL}queues?activeQueue=previewImageQueue&page=1&jobsPerPage=100&status=${queueType}`, {
 		headers: {
 			token: 'testtokenLULW',
 		},
@@ -114,19 +114,60 @@ async function loadJobsForQueue(queueType: string) {
 		});
 	}
 
-	queues.value.sort();
+	const typetonum = (type: string) => {
+		switch (type) {
+			case 'active':
+				return 1;
+			case 'waiting':
+				return 2;
+			case 'failed':
+				return 3;
+			case 'completed':
+				return 4;
+
+			default:
+				return -1;
+		}
+	};
+
+	queues.value.sort((a, b) => typetonum(a.name) - typetonum(b.name));
 	lastUpdate.value = new Date().toLocaleTimeString();
 }
 
 let interval: NodeJS.Timeout;
 
 onMounted(async () => {
-	await Promise.all([loadJobsForQueue('active'), loadJobsForQueue('waiting'), loadJobsForQueue('completed')]);
+	await Promise.all([loadJobsForQueue('active'), loadJobsForQueue('waiting'), loadJobsForQueue('completed'), loadJobsForQueue('failed')]);
 
 	interval = setInterval(async () => {
-		await Promise.all([loadJobsForQueue('active'), loadJobsForQueue('waiting'), loadJobsForQueue('completed')]);
+		await Promise.all([loadJobsForQueue('active'), loadJobsForQueue('waiting'), loadJobsForQueue('completed'), loadJobsForQueue('failed')]);
 	}, 1500);
 });
+
+async function retry(queueType: string = 'failed') {
+	const response = await useAxios().put(`${BULLBOARDAPIURL}queues/previewImageQueue/retry/${queueType}`, {
+		headers: {
+			token: 'testtokenLULW',
+		},
+	});
+	if (response.status !== 200) return;
+}
+async function pause() {
+	const response = await useAxios().put(`${BULLBOARDAPIURL}queues/previewImageQueue/pause`, {
+		headers: {
+			token: 'testtokenLULW',
+		},
+	});
+	if (response.status !== 200) return;
+}
+async function resume() {
+	const response = await useAxios().put(`${BULLBOARDAPIURL}queues/previewImageQueue/pause`, {
+		headers: {
+			token: 'testtokenLULW',
+		},
+	});
+	if (response.status !== 200) return;
+}
 
 onUnmounted(() => {
 	clearInterval(interval);
