@@ -43,9 +43,9 @@
 			<hr />
 		</div> -->
 
-		<Progress :percentage="testProgress" />
+		<!-- <Progress :percentage="testProgress" />
 		<Progress :percentage="104.5" />
-		<Progress :percentage="104.55" />
+		<Progress :percentage="104.55" /> -->
 	</div>
 </template>
 
