@@ -1,6 +1,14 @@
 <template>
 	<div v-auto-animate>
 		<h2 class="text-center">Preview Image Generation</h2>
+
+		<div class="mt-3 mb-5 d-flex justify-content-evenly">
+			<button @click="toggleQueueStatus()" type="button" class="btn" :class="{ 'btn-outline-success': isPaused, 'btn-outline-danger': !isPaused }">
+				{{ isPaused ? 'Resume' : 'Pause' }}
+			</button>
+			<button type="button" @click="retry('failed')" class="btn btn-outline-warning">Retry Failed</button>
+		</div>
+
 		<ul class="mt-3 nav justify-content-evenly nav-underline">
 			<li style="cursor: pointer" v-for="queue in queues" class="nav-item me-5" @click="activeTab = queue.name">
 				<a class="nav-link position-relative" :class="{ active: activeTab == queue.name }" aria-current="page">
@@ -68,17 +76,18 @@ interface Job {
 }
 
 const lastUpdate = ref<string>();
-const jobs = ref<Job[]>([]);
+const isPaused = ref<boolean>(false);
 const queues = ref<{ name: string; jobs: Job[] }[]>([]);
 
 const activeTab = ref('active');
 
-const testProgress = ref(0);
+// const testProgress = ref(0);
 
 async function loadJobsForQueue(queueType: string) {
 	const response = await useAxios().get<{
 		queues: {
 			name: string;
+			isPaused: boolean;
 			jobs: Job[];
 		}[];
 	}>(`${BULLBOARDAPIURL}queues?activeQueue=previewImageQueue&page=1&jobsPerPage=100&status=${queueType}`, {
@@ -92,23 +101,6 @@ async function loadJobsForQueue(queueType: string) {
 	const previewImageQueue = response.data.queues.find((x) => (x.name = 'previewImageQueue'));
 	if (!previewImageQueue) return;
 
-	// previewImageQueue.jobs.push(
-	// 	{
-	// 		id: 123,
-	// 		name: '479fd' + queueType,
-	// 		progress: Math.round(Math.random() * 100),
-	// 		timestamp: 1523,
-	// 		data: null,
-	// 	},
-	// 	{
-	// 		id: 123,
-	// 		name: '479fd' + queueType,
-	// 		progress: Math.round(Math.random() * 100),
-	// 		timestamp: 1523,
-	// 		data: null,
-	// 	}
-	// );
-
 	const queue = queues.value.find((x) => x.name == queueType);
 
 	if (queue) {
@@ -119,6 +111,7 @@ async function loadJobsForQueue(queueType: string) {
 			jobs: previewImageQueue.jobs,
 		});
 	}
+	isPaused.value = previewImageQueue.isPaused;
 
 	const typetonum = (type: string) => {
 		switch (type) {
@@ -146,34 +139,55 @@ onMounted(async () => {
 	await Promise.all([loadJobsForQueue('active'), loadJobsForQueue('waiting'), loadJobsForQueue('completed'), loadJobsForQueue('failed')]);
 
 	interval = setInterval(async () => {
-		testProgress.value += 0.5;
+		// testProgress.value += 0.5;
 		await Promise.all([loadJobsForQueue('active'), loadJobsForQueue('waiting'), loadJobsForQueue('completed'), loadJobsForQueue('failed')]);
 	}, 1500);
 });
 
 async function retry(queueType: string = 'failed') {
-	const response = await useAxios().put(`${BULLBOARDAPIURL}queues/previewImageQueue/retry/${queueType}`, {
-		headers: {
-			token: 'testtokenLULW',
-		},
-	});
+	const response = await useAxios().put(
+		`${BULLBOARDAPIURL}queues/previewImageQueue/retry/${queueType}`,
+		{},
+		{
+			headers: {
+				token: 'testtokenLULW',
+			},
+		}
+	);
 	if (response.status !== 200) return;
 }
 async function pause() {
-	const response = await useAxios().put(`${BULLBOARDAPIURL}queues/previewImageQueue/pause`, {
-		headers: {
-			token: 'testtokenLULW',
-		},
-	});
+	const response = await useAxios().put(
+		`${BULLBOARDAPIURL}queues/previewImageQueue/pause`,
+		{},
+		{
+			headers: {
+				token: 'testtokenLULW',
+			},
+		}
+	);
 	if (response.status !== 200) return;
 }
 async function resume() {
-	const response = await useAxios().put(`${BULLBOARDAPIURL}queues/previewImageQueue/pause`, {
-		headers: {
-			token: 'testtokenLULW',
-		},
-	});
+	const response = await useAxios().put(
+		`${BULLBOARDAPIURL}queues/previewImageQueue/resume`,
+		{},
+		{
+			headers: {
+				token: 'testtokenLULW',
+			},
+		}
+	);
 	if (response.status !== 200) return;
+}
+
+async function toggleQueueStatus() {
+	if (isPaused.value) {
+		await resume();
+	} else {
+		await pause();
+	}
+	await Promise.all([loadJobsForQueue('active'), loadJobsForQueue('waiting'), loadJobsForQueue('completed'), loadJobsForQueue('failed')]);
 }
 
 onUnmounted(() => {
