@@ -42,6 +42,10 @@
 			</div>
 			<hr />
 		</div> -->
+
+		<Progress :percentage="testProgress" />
+		<Progress :percentage="104.5" />
+		<Progress :percentage="104.55" />
 	</div>
 </template>
 
@@ -68,6 +72,8 @@ const jobs = ref<Job[]>([]);
 const queues = ref<{ name: string; jobs: Job[] }[]>([]);
 
 const activeTab = ref('active');
+
+const testProgress = ref(0);
 
 async function loadJobsForQueue(queueType: string) {
 	const response = await useAxios().get<{
@@ -140,6 +146,7 @@ onMounted(async () => {
 	await Promise.all([loadJobsForQueue('active'), loadJobsForQueue('waiting'), loadJobsForQueue('completed'), loadJobsForQueue('failed')]);
 
 	interval = setInterval(async () => {
+		testProgress.value += 0.5;
 		await Promise.all([loadJobsForQueue('active'), loadJobsForQueue('waiting'), loadJobsForQueue('completed'), loadJobsForQueue('failed')]);
 	}, 1500);
 });

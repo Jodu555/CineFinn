@@ -51,15 +51,20 @@ const radius = size / 2 - 10;
 const circumference = 3.14 * radius * 2;
 
 const textX = computed(() => {
-	if (props.percentage < 10) {
+	const isInt = Number.isInteger(props.percentage);
+
+	let len = props.percentage.toString().length;
+	if (!isInt) len--;
+
+	if (len == 1) {
 		return 55;
-	} else if (props.percentage < 100) {
+	} else if (len == 2) {
 		return 47;
-	} else if (props.percentage === 100) {
+	} else if (len == 3) {
 		return 40;
-	} else if (props.percentage.toString().length == 5) {
+	} else if (len == 4) {
 		return 25;
-	} else if (props.percentage.toString().length == 6) {
+	} else if (len == 5) {
 		return 14;
 	}
 	return;

@@ -61,6 +61,14 @@ const router = createRouter({
 			meta: { requiresLogin: true },
 		},
 		{
+			path: '/test',
+			name: 'Test',
+			component: function () {
+				return import(/* webpackChunkName: "todo" */ '@/views/Test.vue');
+			},
+			meta: { requiresLogin: true },
+		},
+		{
 			path: '/admin',
 			name: 'Admin',
 			component: function () {
