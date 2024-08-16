@@ -26,7 +26,7 @@
 			:stroke-dashoffset="svgPercentage"
 			fill="transparent"
 			:stroke-dasharray="circumference"></circle>
-		<text x="42px" y="87px" fill="#6bdba7" font-size="30px" font-weight="bold" style="transform: rotate(90deg) translate(-15px, -146px)">
+		<text :x="textX + 'px'" y="85px" fill="#6bdba7" font-size="30px" font-weight="bold" style="transform: rotate(90deg) translate(0px, -146px)">
 			{{ percentage }}%
 		</text>
 	</svg>
@@ -49,6 +49,21 @@ const progressWidth = 10;
 
 const radius = size / 2 - 10;
 const circumference = 3.14 * radius * 2;
+
+const textX = computed(() => {
+	if (props.percentage < 10) {
+		return 55;
+	} else if (props.percentage < 100) {
+		return 47;
+	} else if (props.percentage === 100) {
+		return 40;
+	} else if (props.percentage.toString().length == 5) {
+		return 25;
+	} else if (props.percentage.toString().length == 6) {
+		return 14;
+	}
+	return;
+});
 
 const svgPercentage = computed(() => {
 	return Math.round(circumference * ((100 - props.percentage) / 100)) + 'px';
