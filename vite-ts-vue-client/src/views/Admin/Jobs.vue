@@ -130,17 +130,21 @@ async function loadJobsForQueue(queueType: string) {
 	};
 
 	queues.value.sort((a, b) => typetonum(a.name) - typetonum(b.name));
+}
+
+async function loadAllJobs() {
+	await Promise.all([loadJobsForQueue('active'), loadJobsForQueue('waiting'), loadJobsForQueue('completed'), loadJobsForQueue('failed')]);
 	lastUpdate.value = new Date().toLocaleTimeString();
 }
 
 let interval: NodeJS.Timeout;
 
 onMounted(async () => {
-	await Promise.all([loadJobsForQueue('active'), loadJobsForQueue('waiting'), loadJobsForQueue('completed'), loadJobsForQueue('failed')]);
+	await loadAllJobs();
 
 	interval = setInterval(async () => {
 		// testProgress.value += 0.5;
-		await Promise.all([loadJobsForQueue('active'), loadJobsForQueue('waiting'), loadJobsForQueue('completed'), loadJobsForQueue('failed')]);
+		await loadAllJobs();
 	}, 1500);
 });
 
@@ -187,7 +191,7 @@ async function toggleQueueStatus() {
 	} else {
 		await pause();
 	}
-	await Promise.all([loadJobsForQueue('active'), loadJobsForQueue('waiting'), loadJobsForQueue('completed'), loadJobsForQueue('failed')]);
+	await loadAllJobs();
 }
 
 onUnmounted(() => {
