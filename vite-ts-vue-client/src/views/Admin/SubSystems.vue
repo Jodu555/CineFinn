@@ -34,15 +34,40 @@
 				</div>
 			</div>
 
-			<h2 class="text-center mt-3 mb-5">MovingList</h2>
+			<h2 class="text-center mt-3 mb-5">MovingList ({{ adminStore.subsystems.movingItems.length }})</h2>
+			<div class="d-flex justify-content-center">
+				<!-- This Could show a modal where either a whole series a single season or some episodes can be made to a moving -->
+				<button type="button" class="btn btn-outline-primary">Add Item</button>
+			</div>
+
 			<hr />
 			<div v-auto-animate v-for="item in adminStore.subsystems.movingItems" :key="item.filePath" class="row">
 				<div class="col-auto ms-5 me-auto mb-3">
 					<h4 class="mb-2">#{{ item.seriesID }}</h4>
-					<h5>{{ item.fromSubID }} => {{ item.toSubID }}</h5>
-					<h6>
-						{{ item.filePath }}
-					</h6>
+					<div class="d-flex gap-2">
+						<h5
+							:class="{
+								'text-success': adminStore.subsystems.subSockets.find((x) => x.id == item.fromSubID) || item.fromSubID == 'main',
+								'text-danger': adminStore.subsystems.subSockets.find((x) => x.id == item.fromSubID) == undefined && item.fromSubID != 'main',
+							}">
+							{{ item.fromSubID }}
+						</h5>
+						<h5>=></h5>
+						<h5
+							:class="{
+								'text-success': adminStore.subsystems.subSockets.find((x) => x.id == item.toSubID) || item.toSubID == 'main',
+								'text-danger': adminStore.subsystems.subSockets.find((x) => x.id == item.toSubID) == undefined && item.toSubID != 'main',
+							}">
+							{{ item.toSubID }}
+						</h5>
+					</div>
+					<!-- <h5>{{ item.fromSubID }} => p{{ item.toSubID }}</h5> -->
+					<div class="d-flex gap-3">
+						<h6 class="mt-2">
+							{{ item.filePath }}
+						</h6>
+						<button type="button" class="btn btn-outline-warning">Move</button>
+					</div>
 				</div>
 				<hr />
 			</div>
