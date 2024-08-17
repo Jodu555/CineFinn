@@ -70,6 +70,20 @@ export async function toggleSeriesDisableForSubSystem(subID: string, disabled: b
 	await sendSeriesReloadToAll();
 }
 
+export async function getAllKnownSubSystems(): Promise<string[]> {
+	const list = new Set<string>();
+
+	const series = await getSeries();
+
+	const serie = series.forEach((s) => {
+		[...s.movies, ...s.seasons.flat()].forEach((x) => {
+			list.add(x.subID);
+		});
+	});
+	list.delete('main');
+	return [...list];
+}
+
 export function getSubSocketByID(subID: string): ExtendedSocket | undefined {
 	return subSocketMap.get(subID);
 }

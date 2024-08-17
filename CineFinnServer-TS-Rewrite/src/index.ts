@@ -197,7 +197,7 @@ import { router as todo_router } from './routes/todo';
 import video from './routes/video';
 import { DatabaseSyncRoomItem } from './types/database';
 import { roleAuthorization } from './utils/roleManager';
-import { subSocketMap } from './sockets/sub.socket';
+import { getAllKnownSubSystems, subSocketMap } from './sockets/sub.socket';
 import { isScraperSocketConnected } from './sockets/scraper.socket';
 import { sendSocketAdminUpdate } from './utils/admin';
 
@@ -257,6 +257,31 @@ app.get(
 				return x;
 			})
 		);
+	}
+);
+
+app.get(
+	'/admin/subsystems',
+	authHelper.authenticationFull((u) => u.role >= 2),
+	async (req, res, next) => {
+		const subSockets: {
+			id: string;
+			ptoken: string;
+			endpoint: string;
+			type: 'sub';
+		}[] = [];
+		subSocketMap.forEach((value, key) => {
+			console.log(value.auth, key);
+			subSockets.push({
+				id: value.auth.id,
+				ptoken: value.auth.ptoken,
+				endpoint: value.auth.endpoint,
+				type: value.auth.type == 'sub' ? 'sub' : 'sub',
+			});
+		});
+		const known = await getAllKnownSubSystems();
+
+		res.json({ knownSubSystems: known, subSockets });
 	}
 );
 
