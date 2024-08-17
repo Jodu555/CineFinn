@@ -1,7 +1,7 @@
 import { Database } from '@jodu555/mysqlapi';
 import { ExtendedSocket, User } from '../types/session';
 import { getIO, getSeries, getVideoStreamLog, toAllSockets } from './utils';
-import { getAllKnownSubSystems, getSeriesBySubID, subSocketMap } from '../sockets/sub.socket';
+import { generateMovingItemArray, getAllKnownSubSystems, getSeriesBySubID, subSocketMap } from '../sockets/sub.socket';
 import { isScraperSocketConnected } from '../sockets/scraper.socket';
 const database = Database.getDatabase();
 
@@ -44,7 +44,9 @@ export async function generateSubSystems() {
 	});
 	const known = await getAllKnownSubSystems();
 
-	return { knownSubSystems: known, subSockets };
+	const movingItems = await generateMovingItemArray();
+
+	return { knownSubSystems: known, subSockets, movingItems };
 }
 
 export async function generateAccounts() {

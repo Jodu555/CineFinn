@@ -34,16 +34,26 @@ interface SubSystem {
 	type: 'sub';
 }
 
+export interface MovingItem {
+	seriesID: string;
+	fromSubID: string;
+	toSubID: string;
+	filePath: string;
+}
+
+interface SubSystemsAPIRes {
+	knownSubSystems: string[];
+	subSockets: SubSystem[];
+	movingItems: MovingItem[];
+}
+
 export const useAdminStore = defineStore('admin', {
 	state: () => {
 		return {
 			loading: true,
 			accounts: [] as DBAccount[],
 			overview: {} as Partial<Overview>,
-			subsystems: {} as {
-				knownSubSystems: string[];
-				subSockets: SubSystem[];
-			},
+			subsystems: {} as SubSystemsAPIRes,
 		};
 	},
 	actions: {
@@ -62,10 +72,7 @@ export const useAdminStore = defineStore('admin', {
 			}
 		},
 		async loadSubSystems() {
-			const response = await useAxios().get<{
-				knownSubSystems: string[];
-				subSockets: SubSystem[];
-			}>('/admin/subsystems');
+			const response = await useAxios().get<SubSystemsAPIRes>('/admin/subsystems');
 
 			if (response.status == 200) {
 				this.subsystems = response?.data;

@@ -1,6 +1,6 @@
 <template>
 	<div class="container">
-		<h1 class="text-center">SubSystems</h1>
+		<h2 class="text-center">SubSystems</h2>
 		<div v-if="adminStore.loading" class="d-flex justify-content-center">
 			<div class="spinner-border" role="status">
 				<span class="visually-hidden">Loading...</span>
@@ -9,7 +9,7 @@
 		<div v-else>
 			<p class="text-center display-6">{{ adminStore.subsystems.subSockets.length }} / {{ adminStore.subsystems.knownSubSystems.length }}</p>
 			<div class="d-flex justify-content-between gap-3">
-				<div v-for="subsystemID in adminStore.subsystems.knownSubSystems" class="card mb-3" style="max-width: 540px">
+				<div v-for="subsystemID in adminStore.subsystems.knownSubSystems" :key="subsystemID" class="card mb-3" style="max-width: 540px">
 					<div class="card-body">
 						<h5 class="card-title">{{ subsystemID }}</h5>
 						<div class="card-text">
@@ -32,6 +32,19 @@
 						</div>
 					</div>
 				</div>
+			</div>
+
+			<h2 class="text-center mt-3 mb-5">MovingList</h2>
+			<hr />
+			<div v-auto-animate v-for="item in adminStore.subsystems.movingItems" :key="item.filePath" class="row">
+				<div class="col-auto ms-5 me-auto mb-3">
+					<h4 class="mb-2">#{{ item.seriesID }}</h4>
+					<h5>{{ item.fromSubID }} => {{ item.toSubID }}</h5>
+					<h6>
+						{{ item.filePath }}
+					</h6>
+				</div>
+				<hr />
 			</div>
 		</div>
 	</div>
