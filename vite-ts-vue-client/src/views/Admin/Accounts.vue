@@ -22,7 +22,7 @@
 					<tr v-for="account in adminStore.accounts" class="">
 						<td scope="row">{{ account.UUID }}</td>
 						<td>{{ account?.username }}</td>
-						<td>{{ account?.role }}</td>
+						<td>{{ roleIDToName(account?.role) }}</td>
 						<td>{{ account?.activityDetails?.lastHandshake }}</td>
 						<td>{{ account?.activityDetails?.lastLogin }}</td>
 						<td>{{ account?.activityDetails?.lastIP }}</td>
@@ -35,6 +35,7 @@
 
 <script lang="ts" setup>
 import { useAdminStore } from '@/stores/admin.store';
+import { roleIDToName } from '@/utils/constants';
 import { onMounted, ref } from 'vue';
 
 const adminStore = useAdminStore();
