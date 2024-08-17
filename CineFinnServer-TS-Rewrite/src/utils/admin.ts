@@ -1,25 +1,16 @@
 import { Database } from '@jodu555/mysqlapi';
 import { ExtendedSocket, User } from '../types/session';
 import { getIO, getSeries, getVideoStreamLog, toAllSockets } from './utils';
-import { subSocketMap } from '../sockets/sub.socket';
+import { getAllKnownSubSystems, subSocketMap } from '../sockets/sub.socket';
 import { isScraperSocketConnected } from '../sockets/scraper.socket';
 const database = Database.getDatabase();
 
-async function generateOverview() {
+export async function generateOverview() {
 	const accounts = await database.get<User>('accounts').get({});
 	const series = await getSeries();
 
-	const possibleSubSystems = new Set();
-
 	let episodes = 0;
 	let movies = 0;
-	series.map((x) => {
-		episodes += x.seasons.flat().length;
-		movies += x.movies.length;
-		[...x.movies, ...x.seasons.flat()].forEach((y) => {
-			possibleSubSystems.add(y.subID);
-		});
-	});
 
 	return {
 		accounts: accounts.length,
@@ -27,14 +18,35 @@ async function generateOverview() {
 		episodes,
 		movies,
 		connectedSubSystems: subSocketMap.size,
-		possibleSubSystems: possibleSubSystems.size - 1, //Necessary to subtract the main subID since it technically isn't a SubSystem
+		possibleSubSystems: (await getAllKnownSubSystems()).length, //Necessary to subtract the main subID since it technically isn't a SubSystem
 		streams: getVideoStreamLog().length,
 		sockets: (await getIO().fetchSockets()).length,
 		scraper: isScraperSocketConnected(),
 	};
 }
 
-async function generateAccounts() {
+export async function generateSubSystems() {
+	const subSockets: {
+		id: string;
+		ptoken: string;
+		endpoint: string;
+		type: 'sub';
+	}[] = [];
+	subSocketMap.forEach((value, key) => {
+		console.log(value.auth, key);
+		subSockets.push({
+			id: value.auth.id,
+			ptoken: value.auth.ptoken,
+			endpoint: value.auth.endpoint,
+			type: value.auth.type == 'sub' ? 'sub' : 'sub',
+		});
+	});
+	const known = await getAllKnownSubSystems();
+
+	return { knownSubSystems: known, subSockets };
+}
+
+export async function generateAccounts() {
 	const accounts = await database.get<User>('accounts').get({});
 	return accounts.map((x) => {
 		delete x.password;
