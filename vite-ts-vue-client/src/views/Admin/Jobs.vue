@@ -142,6 +142,8 @@ let interval: NodeJS.Timeout;
 onMounted(async () => {
 	await loadAllJobs();
 
+	document.title = `Cinema | Admin-Jobs`;
+
 	interval = setInterval(async () => {
 		// testProgress.value += 0.5;
 		await loadAllJobs();

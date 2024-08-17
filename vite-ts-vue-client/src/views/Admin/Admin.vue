@@ -45,7 +45,9 @@ import { onMounted, onUnmounted } from 'vue';
 const adminStore = useAdminStore();
 
 onMounted(async () => {
+	adminStore.loading = true;
 	await Promise.all([adminStore.loadOverview(), adminStore.loadAccounts(), adminStore.loadSubSystems()]);
+	adminStore.loading = false;
 	// await adminStore.loadOverview();
 	// await adminStore.loadAccounts();
 	useSocket().on('admin-update', ({ context, data }) => {

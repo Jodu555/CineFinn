@@ -30,13 +30,14 @@ interface SubSystem {
 	id: string;
 	ptoken: string;
 	endpoint: string;
+	affectedSeriesIDs: string[];
 	type: 'sub';
 }
 
 export const useAdminStore = defineStore('admin', {
 	state: () => {
 		return {
-			loading: false,
+			loading: true,
 			accounts: [] as DBAccount[],
 			overview: {} as Partial<Overview>,
 			subsystems: {} as {
@@ -47,30 +48,20 @@ export const useAdminStore = defineStore('admin', {
 	},
 	actions: {
 		async loadOverview() {
-			this.loading = true;
-
 			const response = await useAxios().get<Overview>('/admin/overview');
 
 			if (response.status == 200) {
 				this.overview = response?.data;
 			}
-
-			this.loading = false;
 		},
 		async loadAccounts() {
-			this.loading = true;
-
 			const response = await useAxios().get<DBAccount[]>('/admin/accounts');
 
 			if (response.status == 200) {
 				this.accounts = response?.data;
 			}
-
-			this.loading = false;
 		},
 		async loadSubSystems() {
-			this.loading = true;
-
 			const response = await useAxios().get<{
 				knownSubSystems: string[];
 				subSockets: SubSystem[];
@@ -79,8 +70,6 @@ export const useAdminStore = defineStore('admin', {
 			if (response.status == 200) {
 				this.subsystems = response?.data;
 			}
-
-			this.loading = false;
 		},
 	},
 });

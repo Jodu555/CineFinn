@@ -1,7 +1,7 @@
 import { Database } from '@jodu555/mysqlapi';
 import { ExtendedSocket, User } from '../types/session';
 import { getIO, getSeries, getVideoStreamLog, toAllSockets } from './utils';
-import { getAllKnownSubSystems, subSocketMap } from '../sockets/sub.socket';
+import { getAllKnownSubSystems, getSeriesBySubID, subSocketMap } from '../sockets/sub.socket';
 import { isScraperSocketConnected } from '../sockets/scraper.socket';
 const database = Database.getDatabase();
 
@@ -30,13 +30,15 @@ export async function generateSubSystems() {
 		id: string;
 		ptoken: string;
 		endpoint: string;
+		affectedSeriesIDs: string[];
 		type: 'sub';
 	}[] = [];
-	subSocketMap.forEach((value, key) => {
+	subSocketMap.forEach(async (value, key) => {
 		subSockets.push({
 			id: value.auth.id,
 			ptoken: value.auth.ptoken,
 			endpoint: value.auth.endpoint,
+			affectedSeriesIDs: (await getSeriesBySubID(value.auth.id)).map((x) => x.ID),
 			type: value.auth.type == 'sub' ? 'sub' : 'sub',
 		});
 	});

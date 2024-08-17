@@ -100,6 +100,14 @@ const router = createRouter({
 					},
 					meta: { requiresLogin: true },
 				},
+				{
+					name: 'SubSystems',
+					path: 'subsystems',
+					component: function () {
+						return import(/* webpackChunkName: "jobs" */ '@/views/Admin/SubSystems.vue');
+					},
+					meta: { requiresLogin: true },
+				},
 			],
 		},
 		{
