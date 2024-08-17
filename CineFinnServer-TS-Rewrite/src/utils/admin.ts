@@ -33,7 +33,6 @@ export async function generateSubSystems() {
 		type: 'sub';
 	}[] = [];
 	subSocketMap.forEach((value, key) => {
-		console.log(value.auth, key);
 		subSockets.push({
 			id: value.auth.id,
 			ptoken: value.auth.ptoken,
@@ -62,6 +61,7 @@ export async function sendSocketAdminUpdate() {
 		async (socket) => {
 			socket.emit('admin-update', { context: 'overview', data: await generateOverview() });
 			socket.emit('admin-update', { context: 'accounts', data: await generateAccounts() });
+			socket.emit('admin-update', { context: 'subsystem', data: await generateSubSystems() });
 		},
 		(s) => s.auth.user?.role >= 2
 	);
