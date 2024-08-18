@@ -12,6 +12,12 @@
 		<div class="col-auto text-center">
 			<h2 class="text-center">Series</h2>
 			<h4 class="text-center">{{ adminStore.overview?.series }}</h4>
+			<span
+				v-if="indexStore.series.filter((x) => x.infos.disabled).length !== 0"
+				style="left: 28% !important; top: 30% !important"
+				class="position-absolute translate-middle badge rounded-pill bg-danger-subtle text-danger-emphasis"
+				>{{ indexStore.series.filter((x) => x.infos.disabled).length }}</span
+			>
 		</div>
 		<div class="col-auto text-center">
 			<h2 class="text-center">Episodes</h2>
@@ -42,9 +48,11 @@
 
 <script lang="ts" setup>
 import { useAdminStore } from '@/stores/admin.store';
+import { useIndexStore } from '@/stores/index.store';
 import { onMounted, ref } from 'vue';
 
 const adminStore = useAdminStore();
+const indexStore = useIndexStore();
 
 onMounted(async () => {
 	document.title = `Cinema | Admin-Overview`;

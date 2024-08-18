@@ -380,7 +380,7 @@ function registerCommands() {
 	);
 }
 
-function downloadFileFromSubSystem(subPath: string, subID: string, localPath: string) {
+function downloadFileFromSubSystem(subPath: string, subID: string, localPath: string, percentCb?: (percent: number) => void) {
 	return new Promise<{ fingerprintValidation: boolean; elapsedTimeMS: number }>((resolve, reject) => {
 		const subSocket = getSubSocketByID(subID);
 		const transID = crypto.randomUUID();

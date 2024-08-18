@@ -1,5 +1,5 @@
 import { PassThrough } from 'stream';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, createHash } from 'node:crypto';
 import { ExtendedSocket } from '../types/session';
 import { Langs } from '../types/classes';
 import { getSeries, setSeries } from '../utils/utils';
@@ -101,6 +101,7 @@ export async function checkifSubExists(subID: string) {
 }
 
 export interface MovingItem {
+	ID: string;
 	seriesID: string;
 	fromSubID: string;
 	toSubID: string;
@@ -134,6 +135,7 @@ export async function generateMovingItemArray() {
 			all.forEach((z) => {
 				if (z.subID != prioSub) {
 					movingArray.push({
+						ID: createHash('md5').update(`${x.ID}${z.subID}${prioSub}${z.filePath}`).digest('base64'),
 						seriesID: x.ID,
 						fromSubID: z.subID,
 						toSubID: prioSub,

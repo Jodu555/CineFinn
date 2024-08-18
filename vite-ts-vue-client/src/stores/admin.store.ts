@@ -35,6 +35,7 @@ interface SubSystem {
 }
 
 export interface MovingItem {
+	ID: string;
 	seriesID: string;
 	fromSubID: string;
 	toSubID: string;

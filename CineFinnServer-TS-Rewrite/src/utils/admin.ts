@@ -46,7 +46,7 @@ export async function generateSubSystems() {
 
 	const movingItems = await generateMovingItemArray();
 
-	return { knownSubSystems: known, subSockets, movingItems };
+	return { knownSubSystems: known, subSockets, movingItems: movingItems };
 }
 
 export async function generateAccounts() {
