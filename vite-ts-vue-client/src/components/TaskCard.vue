@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<div class="card mb-3 px-3 pt-3 pb-5 border-primary">
+		<div class="card mb-3 px-3 pt-3 pb-3 border-primary">
 			<div class="row g-0">
 				<div class="col-md-4">
 					<img :src="decideImageURL(element)" class="img-fluid rounded-start dp-img" :alt="decideImageURL(element)" />

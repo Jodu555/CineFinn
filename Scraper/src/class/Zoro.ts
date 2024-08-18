@@ -156,7 +156,7 @@ class Zoro {
 				console.log('Parsing: ' + si.title);
 				let inst = si.ID == this.ID ? this : new Zoro(si.ID);
 				const interEps = await inst.getEpisodeList();
-				if (subCount == dubCount && subCount === episodeCount) {
+				if (dubCount == undefined || (subCount == dubCount && subCount === episodeCount)) {
 					seasons.push(
 						interEps.episodes.map((x) => {
 							return {

@@ -351,6 +351,17 @@ function registerCommands() {
 	);
 }
 
+function downloadFileFromSubSystem(subPath: string, subID: string, localPath: string) {
+	return new Promise<{ fingerprintValidation: boolean; elapsedTimeMS: number }>((resolve, reject) => {
+		const subSocket = getSubSocketByID(subID);
+
+		if (subSocket == undefined) {
+			console.log('SubSocket not reachable!');
+			reject(new Error('SubSocket not reachable!'));
+		}
+	});
+}
+
 function uploadFileToSubSystem(filePath: string, subID: string, remotePath: string) {
 	return new Promise<{ fingerprintValidation: boolean; elapsedTimeMS: number }>((resolve, reject) => {
 		const transmitID = crypto.randomUUID();
