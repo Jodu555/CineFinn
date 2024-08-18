@@ -305,7 +305,7 @@ function registerCommands() {
 	);
 
 	commandManager.registerCommand(
-		new Command(['test'], 'test', 'Just a simple test command', async (command, [...args], scope) => {
+		new Command(['testupload'], 'testupload', 'Just a simple test command', async (command, [...args], scope) => {
 			// console.log(await getAllFilesFromAllSubs());
 			const series = await getSeries();
 
@@ -349,16 +349,128 @@ function registerCommands() {
 			return 'Exectued test command successfully';
 		})
 	);
+	commandManager.registerCommand(
+		new Command(['testdownload'], 'testdownload', 'Just a simple test command', async (command, [...args], scope) => {
+			// console.log(await getAllFilesFromAllSubs());
+			const series = await getSeries();
+
+			//Download from SubSystem to Server
+			const serie = series.find((x) => x.ID == 'e905317f');
+
+			if (serie == undefined) return;
+
+			const episode = serie.seasons.at(0).at(0);
+
+			if (episode == undefined) return;
+
+			const parsed = path.parse(episode.filePath);
+
+			const remotePath = path.join(process.env.VIDEO_PATH, serie.categorie, serie.title, `Season-${episode.season}`, `${parsed.name}${parsed.ext}`);
+			console.log(episode, remotePath);
+
+			const result = await downloadFileFromSubSystem(episode.filePath, 'local-kdrama', remotePath);
+
+			console.log(result);
+
+			episode.subID = 'main';
+			await sendSeriesReloadToAll();
+
+			return 'Exectued test command successfully';
+		})
+	);
 }
 
 function downloadFileFromSubSystem(subPath: string, subID: string, localPath: string) {
 	return new Promise<{ fingerprintValidation: boolean; elapsedTimeMS: number }>((resolve, reject) => {
 		const subSocket = getSubSocketByID(subID);
-
+		const transID = crypto.randomUUID();
 		if (subSocket == undefined) {
 			console.log('SubSocket not reachable!');
 			reject(new Error('SubSocket not reachable!'));
 		}
+
+		// subSocket.emit('requestFile', { transmitID: transID, subPath }, ({ error, message, fingerprintValidation, elapsedTimeMS }) => {
+		// 	console.log('requestFile RESULT', error, message, fingerprintValidation, elapsedTimeMS);
+		// });
+
+		interface TransmitData {
+			fd: number;
+			transmitID: string;
+			path: string;
+			size: number;
+			packetCount: number;
+			cumSize: number;
+			stream: fs.WriteStream;
+			hash: crypto.Hash;
+			startTime: number;
+		}
+
+		const state = {} as TransmitData;
+
+		subSocket.on('openStream', ({ transmitID, fd, size }) => {
+			if (transID == transmitID) {
+				console.log('Started Recieving Packets', transmitID, fd, size);
+				fs.mkdirSync(path.join(localPath, '..'), { recursive: true });
+				const stream = fs.createWriteStream(localPath);
+				const hash = crypto.createHash('md5');
+				state.stream = stream;
+				state.hash = hash;
+				state.fd = fd;
+				state.size = size;
+				state.startTime = Date.now();
+			}
+		});
+
+		subSocket.on('dataStream', ({ transmitID, fd, data }) => {
+			if (state.fd !== fd) {
+				console.log('We somehow fucked up really bad');
+				return;
+			}
+			state.packetCount++;
+			state.cumSize += data.length;
+			// console.log(((state.cumSize / state.size) * 100).toFixed(2) + '%');
+			state.hash.update(data);
+			state.stream.write(data);
+		});
+
+		subSocket.on('closeStream', async ({ transmitID, fd, packetCount, fingerprint }) => {
+			console.log('Finished, Recieving Packets', transmitID, fd);
+			if (state.fd !== fd) {
+				console.log('We somehow fucked up really bad');
+				return;
+			}
+			const localPrint = state.hash.digest('hex');
+			state.stream.close();
+			const stats = fs.statSync(localPath);
+
+			console.log('Validating fingerprint!');
+			console.log('Expect:', fingerprint);
+			console.log('Actual:', localPrint);
+
+			let valid = false;
+			const elapsedTimeMS = Date.now() - state.startTime;
+
+			if (fingerprint != localPrint) {
+				console.error('ERROR: Fingerprint mismatch!!!');
+				reject({
+					fingerprintValidation: valid,
+					elapsedTimeMS: elapsedTimeMS,
+				});
+				return;
+			}
+			if (state.packetCount == packetCount && fingerprint == localPrint) {
+				valid = true;
+				console.log('Theoretical Count:', state.size, packetCount);
+				console.log('Actual Count:     ', stats.size, state.packetCount);
+				console.log('Took:', elapsedTimeMS / 1000, 's');
+			}
+			resolve({
+				fingerprintValidation: valid,
+				elapsedTimeMS: elapsedTimeMS,
+			});
+		});
+
+		subSocket.emit('requestFile', { transmitID: transID, subPath });
 	});
 }
 

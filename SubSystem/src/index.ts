@@ -502,6 +502,31 @@ socket.on('closeStream', async ({ transmitID, fd, packetCount, fingerprint }, ca
 	});
 });
 
+socket.on('requestFile', ({ transmitID, subPath }, cb) => {
+	const stats = fs.statSync(subPath);
+	const stream = fs.createReadStream(subPath);
+
+	const hash = crypto.createHash('md5');
+
+	let packetCount = 0;
+	let fd: number;
+	stream.on('data', (data) => {
+		packetCount++;
+		hash.update(data);
+		socket.emit('dataStream', { transmitID, fd, data });
+	});
+	stream.on('close', () => {
+		const fingerprint = hash.digest('hex');
+		console.log('Finished sending Packets', transmitID, fd, packetCount, fingerprint);
+		socket.emit('closeStream', { transmitID, fd, packetCount, fingerprint });
+	});
+	stream.on('open', (_fd) => {
+		fd = _fd;
+		console.log('Starting sending Packets', transmitID, fd);
+		socket.emit('openStream', { transmitID, fd: _fd, size: stats.size, subPath });
+	});
+});
+
 app.listen(config.port, () => {
 	console.log('Sub System listening on port http://localhost:' + config.port);
 });

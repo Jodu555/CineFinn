@@ -133,6 +133,10 @@ interface ClientToServerEvents {
 	'video-chunk-end': (obj: { requestId: string }) => void;
 	'video-chunk-error': (obj: { requestId: string; error: Error }) => void;
 
+	openStream: (obj: { transmitID: string; fd: number; size: number; subPath: string }) => void;
+	closeStream: (obj: { transmitID: string; fd: number; packetCount: number; fingerprint: string }) => void;
+	dataStream: (obj: { transmitID: string; fd: number; data: Buffer }) => void;
+
 	files: (obj: { files: string[] }) => void;
 }
 
