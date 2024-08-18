@@ -66,7 +66,23 @@
 						<h6 class="mt-2">
 							{{ item.filePath }}
 						</h6>
-						<button type="button" class="btn btn-outline-warning">Move</button>
+						<button v-if="!item.meta.isMoving" type="button" class="btn btn-outline-warning">Move</button>
+					</div>
+				</div>
+				<div class="ms-5 mb-3" style="width: 95%" v-if="item.meta.isMoving">
+					<div class="progress mt-2 mb-2" style="height: 30px">
+						<div
+							class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+							role="progressbar"
+							:style="{ width: `${item.meta.progress}%` }"
+							:aria-valuenow="item.meta.progress"
+							aria-valuemin="0"
+							aria-valuemax="100">
+							<span class="h5 mt-2">{{ item.meta.progress }}%</span>
+						</div>
+					</div>
+					<div>
+						<span class="text-center text-warning h6">- {{ item.meta.result }}</span>
 					</div>
 				</div>
 				<hr />

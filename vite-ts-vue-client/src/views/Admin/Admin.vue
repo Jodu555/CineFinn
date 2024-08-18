@@ -58,7 +58,30 @@ onMounted(async () => {
 			adminStore.accounts = data;
 		}
 		if (context == 'subsystem') {
+			data.movingItems = data.movingItems.map((x: any) => {
+				x.meta = {
+					isMoving: false,
+					progress: 0,
+					result: '',
+				};
+				return x;
+			});
 			adminStore.subsystems = data;
+		}
+	});
+
+	useSocket().on('admin-movingItem-update', ({ ID, progress }) => {
+		const movingItem = adminStore.subsystems.movingItems.find((x) => x.ID);
+		if (movingItem) {
+			if (!movingItem.meta) {
+				movingItem.meta = {
+					progress: progress,
+					isMoving: true,
+					result: '',
+				};
+			} else {
+				movingItem.meta.progress = progress;
+			}
 		}
 	});
 });

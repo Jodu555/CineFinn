@@ -34,6 +34,7 @@ interface ClientToServerEvents {
 	'sync-video-change': (obj: { season: number; episode: number; movie: number; langchange: boolean; lang: Langs }) => void;
 	'sync-video-info': () => void;
 	'admin-update': (obj: { context: 'overview' | 'accounts' | 'subsystem'; data: any }) => void;
+	'admin-movingItem-update': (obj: { ID: string; progress: number }) => void;
 }
 
 interface ExtendedSocket extends Socket<ClientToServerEvents, DefaultEventsMap> {
