@@ -368,7 +368,14 @@ function registerCommands() {
 			const remotePath = path.join(process.env.VIDEO_PATH, serie.categorie, serie.title, `Season-${episode.season}`, `${parsed.name}${parsed.ext}`);
 			console.log(episode, remotePath);
 
-			const result = await downloadFileFromSubSystem(episode.filePath, 'local-kdrama', remotePath);
+			const result = await downloadFileFromSubSystem(episode.filePath, 'local-kdrama', remotePath, (percent) => {
+				toAllSockets(
+					(socket) => {
+						socket.emit('admin-movingItem-update', { ID: 'XSHxLmvLDPl05nJpVUJbWw==', progress: percent });
+					},
+					(socket) => socket.auth.type == 'client' && socket.auth.user.role >= 2
+				);
+			});
 
 			console.log(result);
 
@@ -417,6 +424,9 @@ function downloadFileFromSubSystem(subPath: string, subID: string, localPath: st
 				state.hash = hash;
 				state.fd = fd;
 				state.size = size;
+
+				state.cumSize = 0;
+				state.packetCount = 0;
 				state.startTime = Date.now();
 			}
 		});
@@ -428,6 +438,8 @@ function downloadFileFromSubSystem(subPath: string, subID: string, localPath: st
 			}
 			state.packetCount++;
 			state.cumSize += data.length;
+			const percent = ((state.cumSize / state.size) * 100).toFixed(2);
+			percentCb(Number(percent));
 			// console.log(((state.cumSize / state.size) * 100).toFixed(2) + '%');
 			state.hash.update(data);
 			state.stream.write(data);

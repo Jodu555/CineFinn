@@ -71,7 +71,8 @@ onMounted(async () => {
 	});
 
 	useSocket().on('admin-movingItem-update', ({ ID, progress }) => {
-		const movingItem = adminStore.subsystems.movingItems.find((x) => x.ID);
+		console.log('Update', ID, progress);
+		const movingItem = adminStore.subsystems.movingItems.find((x) => x.ID == ID);
 		if (movingItem) {
 			if (!movingItem.meta) {
 				movingItem.meta = {
@@ -80,6 +81,8 @@ onMounted(async () => {
 					result: '',
 				};
 			} else {
+				console.log('Update!!!!');
+				movingItem.meta.isMoving = true;
 				movingItem.meta.progress = progress;
 			}
 		}
@@ -88,6 +91,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
 	useSocket().off('admin-update');
+	useSocket().off('admin-movingItem-update');
 });
 </script>
 
