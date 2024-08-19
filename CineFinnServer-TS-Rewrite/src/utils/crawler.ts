@@ -119,13 +119,14 @@ interface idFile {
 const crawlAndIndex = async () => {
 	const pathEntries = [process.env.VIDEO_PATH];
 
+	//TODO: maybe switch this up to first process the main and then the subs so if there are duplicates the main is chosen
 	let files: SubFile[] = [];
 
 	const subFiles = await getAllFilesFromAllSubs();
 
 	files.push(...subFiles);
 
-	//TODO this is not good takes abt 3s on 800
+	//TODO: this is not good takes abt 3s on 800
 	// console.time('getting Files');
 	for (const pathEntry of pathEntries) {
 		let { files: tmp_files } = listFiles(pathEntry);
@@ -174,6 +175,16 @@ const crawlAndIndex = async () => {
 			if (Array.isArray(currentArr)) {
 				const existEpisode = currentArr.find((eps) => eps.season == parsedData.season && eps.episode == parsedData.episode);
 				if (existEpisode) {
+					if (existEpisode.subID != subID) {
+						const error = `Sub System Overlap in ${item.title}(${item.ID}) - ${existEpisode.season}x${existEpisode.episode} Exists in ${existEpisode.subID} at ${existEpisode.filePath} and in ${subID} at ${e}`;
+						console.log(error);
+						return;
+					}
+					if (existEpisode.langs.includes(parsedData.language)) {
+						const error = `Overloading Language Detected in ${item.title}(${item.ID}) - ${existEpisode.season}x${existEpisode.episode} ${parsedData.language}`;
+						console.log(error);
+						return;
+					}
 					existEpisode.langs.push(parsedData.language);
 					return;
 				} else {
