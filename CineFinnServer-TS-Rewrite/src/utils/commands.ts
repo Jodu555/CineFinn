@@ -402,6 +402,26 @@ function registerCommands() {
 			return 'Exectued test command successfully';
 		})
 	);
+	commandManager.registerCommand(
+		new Command(['inspect'], 'inspect [SeasonXEpisode / MovieIdx]', 'A Command to inspect a entity', async (command, [...args], scope) => {
+			const serieID = args[1];
+			const entityPtr = args[2];
+
+			const serie = (await getSeries()).find((x) => x.ID == serieID);
+
+			if (!serie) return 'NO Series with that ID';
+
+			if (entityPtr.includes('x')) {
+				const [seasonId, episodeId] = entityPtr.split('x').map((x) => Number(x));
+				console.log(serie.seasons.find((y) => y.at(0).season == seasonId).find((y) => y.episode == episodeId));
+			} else {
+				const movieIdx = Number(entityPtr);
+				console.log(serie.movies.at(movieIdx));
+			}
+
+			return 'Exectued test command successfully';
+		})
+	);
 }
 
 export { registerCommands };
