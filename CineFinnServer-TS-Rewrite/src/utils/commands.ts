@@ -9,7 +9,16 @@ import { AuthToken, ExtendedRemoteSocket, User } from '../types/session';
 import { getSyncRoom } from './room.utils';
 import { Database } from '@jodu555/mysqlapi';
 import { DatabaseSyncRoomItem } from '../types/database';
-import { checkifSubExists, getAllFilesFromAllSubs, getSubSocketByID, subSocketMap, toggleSeriesDisableForSubSystem } from '../sockets/sub.socket';
+import {
+	checkifSubExists,
+	downloadFileFromSubSystem,
+	getAllFilesFromAllSubs,
+	getSubSocketByID,
+	processMovingItem,
+	subSocketMap,
+	toggleSeriesDisableForSubSystem,
+	uploadFileToSubSystem,
+} from '../sockets/sub.socket';
 import { sendSocketAdminUpdate } from './admin';
 
 const commandManager = CommandManager.getCommandManager();
@@ -385,147 +394,14 @@ function registerCommands() {
 			return 'Exectued test command successfully';
 		})
 	);
-}
+	commandManager.registerCommand(
+		new Command(['test'], 'test', 'Just a simple test command', async (command, [...args], scope) => {
+			// console.log(await getAllFilesFromAllSubs());
+			await processMovingItem(args[1]);
 
-function downloadFileFromSubSystem(subPath: string, subID: string, localPath: string, percentCb?: (percent: number) => void) {
-	return new Promise<{ fingerprintValidation: boolean; elapsedTimeMS: number }>((resolve, reject) => {
-		const subSocket = getSubSocketByID(subID);
-		const transID = crypto.randomUUID();
-		if (subSocket == undefined) {
-			console.log('SubSocket not reachable!');
-			reject(new Error('SubSocket not reachable!'));
-		}
-
-		// subSocket.emit('requestFile', { transmitID: transID, subPath }, ({ error, message, fingerprintValidation, elapsedTimeMS }) => {
-		// 	console.log('requestFile RESULT', error, message, fingerprintValidation, elapsedTimeMS);
-		// });
-
-		interface TransmitData {
-			fd: number;
-			transmitID: string;
-			path: string;
-			size: number;
-			packetCount: number;
-			cumSize: number;
-			stream: fs.WriteStream;
-			hash: crypto.Hash;
-			startTime: number;
-		}
-
-		const state = {} as TransmitData;
-
-		subSocket.on('openStream', ({ transmitID, fd, size }) => {
-			if (transID == transmitID) {
-				console.log('Started Recieving Packets', transmitID, fd, size);
-				fs.mkdirSync(path.join(localPath, '..'), { recursive: true });
-				const stream = fs.createWriteStream(localPath);
-				const hash = crypto.createHash('md5');
-				state.stream = stream;
-				state.hash = hash;
-				state.fd = fd;
-				state.size = size;
-
-				state.cumSize = 0;
-				state.packetCount = 0;
-				state.startTime = Date.now();
-			}
-		});
-
-		subSocket.on('dataStream', ({ transmitID, fd, data }) => {
-			if (state.fd !== fd) {
-				console.log('We somehow fucked up really bad');
-				return;
-			}
-			state.packetCount++;
-			state.cumSize += data.length;
-			const percent = ((state.cumSize / state.size) * 100).toFixed(2);
-			percentCb(Number(percent));
-			// console.log(((state.cumSize / state.size) * 100).toFixed(2) + '%');
-			state.hash.update(data);
-			state.stream.write(data);
-		});
-
-		subSocket.on('closeStream', async ({ transmitID, fd, packetCount, fingerprint }) => {
-			console.log('Finished, Recieving Packets', transmitID, fd);
-			if (state.fd !== fd) {
-				console.log('We somehow fucked up really bad');
-				return;
-			}
-			const localPrint = state.hash.digest('hex');
-			state.stream.close();
-			const stats = fs.statSync(localPath);
-
-			console.log('Validating fingerprint!');
-			console.log('Expect:', fingerprint);
-			console.log('Actual:', localPrint);
-
-			let valid = false;
-			const elapsedTimeMS = Date.now() - state.startTime;
-
-			if (fingerprint != localPrint) {
-				console.error('ERROR: Fingerprint mismatch!!!');
-				reject({
-					fingerprintValidation: valid,
-					elapsedTimeMS: elapsedTimeMS,
-				});
-				return;
-			}
-			if (state.packetCount == packetCount && fingerprint == localPrint) {
-				valid = true;
-				console.log('Theoretical Count:', state.size, packetCount);
-				console.log('Actual Count:     ', stats.size, state.packetCount);
-				console.log('Took:', elapsedTimeMS / 1000, 's');
-			}
-			resolve({
-				fingerprintValidation: valid,
-				elapsedTimeMS: elapsedTimeMS,
-			});
-		});
-
-		subSocket.emit('requestFile', { transmitID: transID, subPath });
-	});
-}
-
-function uploadFileToSubSystem(filePath: string, subID: string, remotePath: string) {
-	return new Promise<{ fingerprintValidation: boolean; elapsedTimeMS: number }>((resolve, reject) => {
-		const transmitID = crypto.randomUUID();
-
-		const subSocket = getSubSocketByID(subID);
-
-		if (subSocket == undefined) {
-			console.log('SubSocket not reachable!');
-			reject(new Error('SubSocket not reachable!'));
-		}
-
-		const stats = fs.statSync(filePath);
-		const stream = fs.createReadStream(filePath);
-
-		const hash = crypto.createHash('md5');
-
-		let packetCount = 0;
-		let fd: number;
-		stream.on('data', (data) => {
-			packetCount++;
-			hash.update(data);
-			subSocket.emit('dataStream', { transmitID, fd, data });
-		});
-		stream.on('close', () => {
-			const fingerprint = hash.digest('hex');
-			console.log('Finished sending Packets', transmitID, fd, packetCount, fingerprint);
-			subSocket.emit('closeStream', { transmitID, fd, packetCount, fingerprint }, ({ fingerprintValidation, elapsedTimeMS }) => {
-				if (fingerprintValidation === false) {
-					reject(new Error('Fingerprint Invalid!! File might be broken at Destination'));
-				} else {
-					resolve({ fingerprintValidation, elapsedTimeMS });
-				}
-			});
-		});
-		stream.on('open', (_fd) => {
-			fd = _fd;
-			console.log('Starting sending Packets', transmitID, fd);
-			subSocket.emit('openStream', { transmitID, fd: _fd, size: stats.size, remotePath });
-		});
-	});
+			return 'Exectued test command successfully';
+		})
+	);
 }
 
 export { registerCommands };

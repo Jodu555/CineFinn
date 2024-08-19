@@ -1,10 +1,14 @@
+import fs from 'fs';
+import path from 'path';
+import crypto from 'crypto';
 import { PassThrough } from 'stream';
 import { randomUUID, createHash } from 'node:crypto';
 import { ExtendedSocket } from '../types/session';
 import { Langs } from '../types/classes';
-import { getSeries, setSeries } from '../utils/utils';
+import { getSeries, setSeries, toAllSockets } from '../utils/utils';
 import { sendSeriesReloadToAll } from './client.socket';
 import { Response } from 'express';
+import { Movie, Episode } from '../classes/series';
 
 export const subSocketMap = new Map<string, ExtendedSocket>();
 // export const ongoingRequests = new Map<string, { res: Response }>();
@@ -106,6 +110,7 @@ export interface MovingItem {
 	fromSubID: string;
 	toSubID: string;
 	filePath: string;
+	entity: Movie | Episode;
 }
 export async function generateMovingItemArray() {
 	const movingArray: MovingItem[] = [];
@@ -140,6 +145,7 @@ export async function generateMovingItemArray() {
 						fromSubID: z.subID,
 						toSubID: prioSub,
 						filePath: z.filePath,
+						entity: z,
 					});
 				}
 			});
@@ -188,6 +194,55 @@ export async function getAllFilesFromAllSubs() {
 		});
 	});
 	return allFiles;
+}
+
+export async function processMovingItem(ID: string) {
+	const movingItems = await generateMovingItemArray();
+	const series = await getSeries();
+	const movingItem = movingItems.find((x) => x.ID == ID);
+
+	if (!movingItem) {
+		console.log('Moving item with ID:', ID, 'not found!');
+		return;
+	}
+
+	console.log(movingItem);
+
+	const serie = series.find((x) => x.ID == movingItem.seriesID);
+
+	if (!serie) {
+		console.log('Serie for moving item ID:', movingItem.ID, 'not found!');
+		return;
+	}
+	const parsed = path.parse(movingItem.filePath);
+
+	let pathGen = '';
+	if (movingItem.entity instanceof Movie) {
+		pathGen = path.join(serie.categorie, serie.title, `Movies`, `${parsed.name}${parsed.ext}`);
+	} else {
+		pathGen = path.join(serie.categorie, serie.title, `Season-${movingItem.entity.season}`, `${parsed.name}${parsed.ext}`);
+	}
+
+	const percentCB: (percent: number) => void = (percent) => {
+		toAllSockets(
+			(socket) => {
+				socket.emit('admin-movingItem-update', { ID, progress: percent });
+			},
+			(socket) => socket.auth.type == 'client' && socket.auth.user.role >= 2
+		);
+	};
+
+	if (movingItem.fromSubID == 'main') {
+		console.log(movingItem.filePath, movingItem.toSubID, pathGen);
+		const { fingerprintValidation, elapsedTimeMS } = await uploadFileToSubSystem(movingItem.filePath, movingItem.toSubID, pathGen, percentCB);
+		console.log({ fingerprintValidation, elapsedTimeMS });
+	}
+
+	if (movingItem.toSubID == 'main') {
+		const localPath = path.join(process.env.VIDEO_PATH, pathGen);
+		const { fingerprintValidation, elapsedTimeMS } = await downloadFileFromSubSystem(movingItem.filePath, movingItem.fromSubID, localPath, percentCB);
+		console.log({ fingerprintValidation, elapsedTimeMS });
+	}
 }
 
 // handleSocketTransmitVideo(videoEntity.subID, requestId, filePath, start, end, res);
@@ -260,4 +315,150 @@ export async function createVideoStreamOverSocket(
 
 	subSocket.emit('video-range', { ...opts, filePath, requestId });
 	console.timeEnd('createVideoStreamOverSocket-' + requestId.split('-')[0]);
+}
+
+export function downloadFileFromSubSystem(subPath: string, subID: string, localPath: string, percentCb?: (percent: number) => void) {
+	return new Promise<{ fingerprintValidation: boolean; elapsedTimeMS: number }>((resolve, reject) => {
+		const subSocket = getSubSocketByID(subID);
+		const transID = crypto.randomUUID();
+		if (subSocket == undefined) {
+			console.log('SubSocket not reachable!');
+			reject(new Error('SubSocket not reachable!'));
+		}
+
+		// subSocket.emit('requestFile', { transmitID: transID, subPath }, ({ error, message, fingerprintValidation, elapsedTimeMS }) => {
+		// 	console.log('requestFile RESULT', error, message, fingerprintValidation, elapsedTimeMS);
+		// });
+
+		interface TransmitData {
+			fd: number;
+			transmitID: string;
+			path: string;
+			size: number;
+			packetCount: number;
+			cumSize: number;
+			stream: fs.WriteStream;
+			hash: crypto.Hash;
+			startTime: number;
+		}
+
+		const state = {} as TransmitData;
+
+		subSocket.on('openStream', ({ transmitID, fd, size }) => {
+			if (transID == transmitID) {
+				console.log('Started Recieving Packets', transmitID, fd, size);
+				fs.mkdirSync(path.join(localPath, '..'), { recursive: true });
+				const stream = fs.createWriteStream(localPath);
+				const hash = crypto.createHash('md5');
+				state.stream = stream;
+				state.hash = hash;
+				state.fd = fd;
+				state.size = size;
+
+				state.cumSize = 0;
+				state.packetCount = 0;
+				state.startTime = Date.now();
+			}
+		});
+
+		subSocket.on('dataStream', ({ transmitID, fd, data }) => {
+			if (state.fd !== fd) {
+				console.log('We somehow fucked up really bad');
+				return;
+			}
+			state.packetCount++;
+			state.cumSize += data.length;
+			const percent = ((state.cumSize / state.size) * 100).toFixed(2);
+			percentCb(Number(percent));
+			// console.log(((state.cumSize / state.size) * 100).toFixed(2) + '%');
+			state.hash.update(data);
+			state.stream.write(data);
+		});
+
+		subSocket.on('closeStream', async ({ transmitID, fd, packetCount, fingerprint }) => {
+			console.log('Finished, Recieving Packets', transmitID, fd);
+			if (state.fd !== fd) {
+				console.log('We somehow fucked up really bad');
+				return;
+			}
+			const localPrint = state.hash.digest('hex');
+			state.stream.close();
+			const stats = fs.statSync(localPath);
+
+			console.log('Validating fingerprint!');
+			console.log('Expect:', fingerprint);
+			console.log('Actual:', localPrint);
+
+			let valid = false;
+			const elapsedTimeMS = Date.now() - state.startTime;
+
+			if (fingerprint != localPrint) {
+				console.error('ERROR: Fingerprint mismatch!!!');
+				reject({
+					fingerprintValidation: valid,
+					elapsedTimeMS: elapsedTimeMS,
+				});
+				return;
+			}
+			if (state.packetCount == packetCount && fingerprint == localPrint) {
+				valid = true;
+				console.log('Theoretical Count:', state.size, packetCount);
+				console.log('Actual Count:     ', stats.size, state.packetCount);
+				console.log('Took:', elapsedTimeMS / 1000, 's');
+			}
+			resolve({
+				fingerprintValidation: valid,
+				elapsedTimeMS: elapsedTimeMS,
+			});
+		});
+
+		subSocket.emit('requestFile', { transmitID: transID, subPath });
+	});
+}
+
+export function uploadFileToSubSystem(filePath: string, subID: string, remotePath: string, percentCb?: (percent: number) => void) {
+	return new Promise<{ fingerprintValidation: boolean; elapsedTimeMS: number }>((resolve, reject) => {
+		const transmitID = crypto.randomUUID();
+
+		const subSocket = getSubSocketByID(subID);
+
+		if (subSocket == undefined) {
+			console.log('SubSocket not reachable!');
+			reject(new Error('SubSocket not reachable!'));
+		}
+
+		const stats = fs.statSync(filePath);
+		const stream = fs.createReadStream(filePath);
+
+		const hash = crypto.createHash('md5');
+
+		let cumSize = 0;
+
+		let packetCount = 0;
+		let fd: number;
+		stream.on('data', (data) => {
+			cumSize += data.length;
+			const percent = ((cumSize / stats.size) * 100).toFixed(2);
+			percentCb(Number(percent));
+			packetCount++;
+			hash.update(data);
+			subSocket.emit('dataStream', { transmitID, fd, data });
+		});
+		stream.on('close', () => {
+			const fingerprint = hash.digest('hex');
+			console.log('Finished sending Packets', transmitID, fd, packetCount, fingerprint);
+			subSocket.emit('closeStream', { transmitID, fd, packetCount, fingerprint }, ({ fingerprintValidation, elapsedTimeMS }) => {
+				if (fingerprintValidation === false) {
+					reject(new Error('Fingerprint Invalid!! File might be broken at Destination'));
+				} else {
+					resolve({ fingerprintValidation, elapsedTimeMS });
+				}
+			});
+		});
+		stream.on('open', (_fd) => {
+			fd = _fd;
+			console.log('Starting sending Packets', transmitID, fd);
+			subSocket.emit('openStream', { transmitID, fd: _fd, size: stats.size, remotePath });
+		});
+	});
 }
