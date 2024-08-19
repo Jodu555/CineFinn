@@ -11,6 +11,7 @@ import { getAniworldInfos, getNewZoroInfos, getZoroInfos, isScraperSocketConnect
 import { LOOKUP, callpointToEvent } from '../routes/managment';
 import { backgroundScrapeTodo, checkIfTodoNeedsScrape } from '../utils/todo';
 import { sendSocketAdminUpdate } from '../utils/admin';
+import { processMovingItem } from './sub.socket';
 
 const database = Database.getDatabase();
 
@@ -147,6 +148,13 @@ const initialize = (socket: ExtendedSocket) => {
 
 	socket.on('disconnect', () => {
 		console.log('Socket DisConnection:', auth.type.toUpperCase(), auth.user.username, socket.id);
+	});
+
+	socket.on('move-moving-item', ({ ID }) => {
+		if (!isPermitted(auth.user, Role.Mod)) {
+			return;
+		}
+		processMovingItem(ID);
 	});
 
 	// socket.emit('reloadSeries', cleanupSeriesBeforeFrontResponse(getSeries()));

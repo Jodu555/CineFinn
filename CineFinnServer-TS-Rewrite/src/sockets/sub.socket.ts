@@ -9,6 +9,7 @@ import { getSeries, setSeries, toAllSockets } from '../utils/utils';
 import { sendSeriesReloadToAll } from './client.socket';
 import { Response } from 'express';
 import { Movie, Episode } from '../classes/series';
+import { crawlAndIndex } from '../utils/crawler';
 
 export const subSocketMap = new Map<string, ExtendedSocket>();
 // export const ongoingRequests = new Map<string, { res: Response }>();
@@ -232,16 +233,54 @@ export async function processMovingItem(ID: string) {
 		);
 	};
 
-	if (movingItem.fromSubID == 'main') {
-		console.log(movingItem.filePath, movingItem.toSubID, pathGen);
-		const { fingerprintValidation, elapsedTimeMS } = await uploadFileToSubSystem(movingItem.filePath, movingItem.toSubID, pathGen, percentCB);
-		console.log({ fingerprintValidation, elapsedTimeMS });
-	}
+	const result = {
+		fingerprintValidation: false,
+		elapsedTimeMS: 0,
+	};
+	try {
+		if (movingItem.fromSubID == 'main') {
+			console.log(movingItem.filePath, movingItem.toSubID, pathGen);
+			const res = await uploadFileToSubSystem(movingItem.filePath, movingItem.toSubID, pathGen, percentCB);
+			console.log(res);
+			result.elapsedTimeMS = res.elapsedTimeMS;
+			result.fingerprintValidation = res.fingerprintValidation;
+		}
 
-	if (movingItem.toSubID == 'main') {
-		const localPath = path.join(process.env.VIDEO_PATH, pathGen);
-		const { fingerprintValidation, elapsedTimeMS } = await downloadFileFromSubSystem(movingItem.filePath, movingItem.fromSubID, localPath, percentCB);
-		console.log({ fingerprintValidation, elapsedTimeMS });
+		if (movingItem.toSubID == 'main') {
+			const localPath = path.join(process.env.VIDEO_PATH, pathGen);
+			const res = await downloadFileFromSubSystem(movingItem.filePath, movingItem.fromSubID, localPath, percentCB);
+			console.log(res);
+			result.elapsedTimeMS = res.elapsedTimeMS;
+			result.fingerprintValidation = res.fingerprintValidation;
+		}
+
+		toAllSockets(
+			(socket) => {
+				socket.emit('admin-movingItem-update', {
+					ID,
+					progress: 100,
+					message: `Took ${result.elapsedTimeMS / 100}s with a ${result.fingerprintValidation ? 'Valid' : 'Invalid'} fingerprint`,
+				});
+			},
+			(socket) => socket.auth.type == 'client' && socket.auth.user.role >= 2
+		);
+		setTimeout(async () => {
+			setSeries(await crawlAndIndex());
+			await sendSeriesReloadToAll();
+		}, 5000);
+	} catch (error) {
+		console.log(movingItem, error);
+
+		toAllSockets(
+			(socket) => {
+				socket.emit('admin-movingItem-update', {
+					ID,
+					progress: 99,
+					message: `Error on ${error.messsage} - ${error.stack}`,
+				});
+			},
+			(socket) => socket.auth.type == 'client' && socket.auth.user.role >= 2
+		);
 	}
 }
 

@@ -137,6 +137,8 @@ interface ClientToServerEvents {
 	closeStream: (obj: { transmitID: string; fd: number; packetCount: number; fingerprint: string }) => void;
 	dataStream: (obj: { transmitID: string; fd: number; data: Buffer }) => void;
 
+	'move-moving-item': (obj: { ID: string }) => void;
+
 	files: (obj: { files: string[] }) => void;
 }
 

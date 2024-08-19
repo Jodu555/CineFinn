@@ -66,7 +66,7 @@
 						<h6 class="mt-2">
 							{{ item.filePath }}
 						</h6>
-						<button v-if="!item.meta.isMoving" type="button" class="btn btn-outline-warning">Move</button>
+						<button v-if="!item.meta.isMoving" @click="moveItem(item.ID)" type="button" class="btn btn-outline-warning">Move</button>
 					</div>
 				</div>
 				<div class="ms-5 mb-3" style="width: 95%" v-if="item.meta.isMoving">
@@ -93,12 +93,17 @@
 
 <script lang="ts" setup>
 import { useAdminStore } from '@/stores/admin.store';
+import { useSocket } from '@/utils/socket';
 import { onMounted, ref } from 'vue';
 
 const adminStore = useAdminStore();
 
-function idtoSock(id: string) {
-	return adminStore.subsystems.subSockets.find((x) => x.id == id);
+function idtoSock(ID: string) {
+	return adminStore.subsystems.subSockets.find((x) => x.id == ID);
+}
+
+function moveItem(ID: string) {
+	useSocket().emit('move-moving-item', { ID });
 }
 
 onMounted(async () => {
