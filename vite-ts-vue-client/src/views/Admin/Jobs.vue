@@ -83,6 +83,8 @@ const activeTab = ref('active');
 
 // const testProgress = ref(0);
 
+const jobCountToLoad = 1024;
+
 async function loadJobsForQueue(queueType: string) {
 	const response = await useAxios().get<{
 		queues: {
@@ -90,7 +92,7 @@ async function loadJobsForQueue(queueType: string) {
 			isPaused: boolean;
 			jobs: Job[];
 		}[];
-	}>(`${BULLBOARDAPIURL}queues?activeQueue=previewImageQueue&page=1&jobsPerPage=100&status=${queueType}`, {
+	}>(`${BULLBOARDAPIURL}queues?activeQueue=previewImageQueue&page=1&jobsPerPage=${jobCountToLoad}&status=${queueType}`, {
 		headers: {
 			token: 'testtokenLULW',
 		},
