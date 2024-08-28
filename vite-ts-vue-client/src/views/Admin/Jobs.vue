@@ -24,10 +24,13 @@
 				<div class="align-middle h-100" style="transform: translate(0px, 35%)">
 					<h3 class="mb-3">#{{ job.id }} - {{ job.name }}</h3>
 					<h4>
-						"{{ job.data?.entity?.primaryName ? job.data?.entity?.primaryName : '-' }}"{{ job.data?.entity ? job.data?.entity.season : -1 }}x{{
-							job.data?.entity ? job.data?.entity.episode : -1
-						}}
-						On: {{ job.data?.generatorName ? job.data.generatorName : 'TBD' }} Language: {{ job.data?.lang ? job.data.lang : '- -' }} SUB:
+						"{{
+							job.data?.entity?.primaryName
+								? job.data?.entity?.primaryName.slice(0, 65).trim() +
+								  String(job.data?.entity?.primaryName.slice(0, 65).length == job.data?.entity?.primaryName.length ? '' : '...')
+								: '-'
+						}}"{{ job.data?.entity ? job.data?.entity.season : -1 }}x{{ job.data?.entity ? job.data?.entity.episode : -1 }} On:
+						{{ job.data?.generatorName ? job.data.generatorName : 'TBD' }} Lang: {{ job.data?.lang ? job.data.lang : '- -' }} Sub:
 						{{ job.data?.entity?.subID ? job.data?.entity?.subID : 'main' }}
 					</h4>
 				</div>
