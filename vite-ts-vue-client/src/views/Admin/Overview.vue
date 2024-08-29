@@ -4,7 +4,7 @@
 			<span class="visually-hidden">Loading...</span>
 		</div>
 	</div>
-	<Modal size="xl" v-model:show="toggleSeriesModal">
+	<Modal id="disabledSeriesModal" size="xl" v-model:show="toggleSeriesModal">
 		<template #title>Detailed Disabled Series Overview</template>
 		<template #body>
 			<h3 class="text-center">List of disabled Series</h3>

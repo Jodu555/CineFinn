@@ -38,9 +38,6 @@ const props = defineProps({
 	show: {
 		type: Boolean,
 	},
-	handleClose: {
-		type: Function,
-	},
 	size: {
 		type: String,
 		default: '',
