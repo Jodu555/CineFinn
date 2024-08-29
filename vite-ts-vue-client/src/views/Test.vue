@@ -3,7 +3,7 @@
 		<h2 class="text-center">Test Route</h2>
 
 		<div class="d-flex justify-content-center">
-			<div class="min-h-screen d-flex overflow-x-scroll py-12">
+			<div class="d-flex overflow-x-scroll pb-2" style="overflow-y: hidden">
 				<div v-for="column in columns" :key="column.title" class="border border-secondary rounded-lg px-3 py-3 me-3 column-width rounded mr-4">
 					<p class="display-6">{{ column.title }}</p>
 					<!-- Draggable component comes from vuedraggable. It provides drag & drop functionality -->
