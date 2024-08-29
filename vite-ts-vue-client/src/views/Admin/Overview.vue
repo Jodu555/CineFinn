@@ -4,7 +4,7 @@
 			<span class="visually-hidden">Loading...</span>
 		</div>
 	</div>
-	<Modal id="disabledSeriesModal" size="xl" v-model:show="toggleSeriesModal">
+	<Modal id="disabledSeriesModal" size="xl" v-model:show="toggleDisabledSeriesModal">
 		<template #title>Detailed Disabled Series Overview</template>
 		<template #body>
 			<h3 class="text-center">List of disabled Series</h3>
@@ -42,7 +42,7 @@
 			<h4 class="text-center">{{ indexStore.series.length }}</h4>
 			<span
 				v-if="indexStore.series.filter((x) => x.infos.disabled).length !== 0"
-				@click="toggleSeriesModal = true"
+				@click="toggleDisabledSeriesModal = true"
 				style="left: 28% !important; top: 30% !important; cursor: pointer"
 				class="position-absolute translate-middle badge rounded-pill bg-danger-subtle text-danger-emphasis"
 				>{{ indexStore.series.filter((x) => x.infos.disabled).length }}</span
@@ -81,7 +81,7 @@ import { useAdminStore } from '@/stores/admin.store';
 import { useIndexStore } from '@/stores/index.store';
 import { onMounted, ref } from 'vue';
 
-const toggleSeriesModal = ref(false);
+const toggleDisabledSeriesModal = ref(false);
 
 const adminStore = useAdminStore();
 const indexStore = useIndexStore();
