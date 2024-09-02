@@ -34,10 +34,75 @@
 				</div>
 			</div>
 
+			<Modal id="selectSeriesToMove" size="xl" v-model:show="toggleSelectEntityToMoveModal">
+				<template #title>Detailed Disabled Series Overview</template>
+				<template #body>
+					<h3 class="text-center">List of Series</h3>
+					<div class="mb-3 ms-5 me-5">
+						<label for="searchTerm" class="form-label">Search</label>
+						<input v-model="searchTerm" type="text" class="form-control" id="searchTerm" aria-describedby="helpId" placeholder="Name or ID" />
+						<small id="helpId" class="form-text text-muted">Name or ID of the Series</small>
+					</div>
+
+					<div v-if="selectedSeries == ''" class="table-responsive-md">
+						<table class="table">
+							<thead>
+								<tr>
+									<th scope="col">ID</th>
+									<th scope="col">Title</th>
+									<th scope="col">Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr
+									v-for="serie in indexStore.series.filter(
+										(x) => x.title.toLowerCase().includes(searchTerm.toLowerCase()) || x.ID.toLowerCase().startsWith(searchTerm.toLowerCase())
+									)">
+									<td scope="row">{{ serie.ID }}</td>
+									<td>{{ serie.title }}</td>
+									<td>
+										<button type="button" class="btn btn-outline-primary me-3" @click="selectSeries(serie.ID)">View</button>
+										<button type="button" class="btn btn-outline-danger me-3">Add Full</button>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div v-if="selectedSeries !== ''" class="d-flex justify-content-center">
+						<table class="table" style="width: 85%">
+							<thead>
+								<tr>
+									<th scope="col">SExEP</th>
+									<th scope="col">Langugages</th>
+									<th scope="col">Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr v-for="episode in indexStore.series.find((x) => x.ID == selectedSeries)?.seasons.flat()">
+									<td scope="row">{{ episode.season }}x{{ episode.episode }}</td>
+									<td>
+										<img
+											v-for="lang in episode.langs"
+											:key="lang"
+											class="flag shadow mb-1 mt-1 bg-body"
+											:src="`/flag-langs/${lang.toLowerCase()}.svg`"
+											:alt="langDetails[lang.toLowerCase()]?.alt || 'None Alt'"
+											:title="langDetails[lang.toLowerCase()]?.title || 'None Title'" />
+									</td>
+									<td>
+										<button type="button" disabled class="btn btn-outline-primary me-3">Select Full EP</button>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</template>
+			</Modal>
+
 			<h2 class="text-center mt-3 mb-5">MovingList ({{ adminStore.subsystems.movingItems.length }})</h2>
 			<div class="d-flex justify-content-center">
 				<!-- This Could show a modal where either a whole series a single season or some episodes can be made to a moving -->
-				<button type="button" disabled class="btn btn-outline-primary">Add Item</button>
+				<button type="button" class="btn btn-outline-primary" @click="toggleSelectEntityToMoveModal = true">Add Item</button>
 			</div>
 
 			<hr />
@@ -92,14 +157,30 @@
 </template>
 
 <script lang="ts" setup>
+import Modal from '@/components/Modal.vue';
 import { useAdminStore } from '@/stores/admin.store';
+import { useIndexStore } from '@/stores/index.store';
+import { useWatchStore } from '@/stores/watch.store';
+import { langDetails } from '@/utils/constants';
 import { useSocket } from '@/utils/socket';
 import { onMounted, ref } from 'vue';
 
+const indexStore = useIndexStore();
+const watchStore = useWatchStore();
 const adminStore = useAdminStore();
+
+const toggleSelectEntityToMoveModal = ref(false);
+
+const searchTerm = ref('');
+const selectedSeries = ref('');
 
 function idtoSock(ID: string) {
 	return adminStore.subsystems.subSockets.find((x) => x.id == ID);
+}
+
+async function selectSeries(seriesID: string) {
+	selectedSeries.value = seriesID;
+	await watchStore.loadSeriesInfo(seriesID, false);
 }
 
 function moveItem(ID: string) {
@@ -111,4 +192,10 @@ onMounted(async () => {
 });
 </script>
 
-<style></style>
+<style scoped>
+.flag {
+	margin-left: 16px;
+	width: 45px;
+	cursor: pointer;
+}
+</style>
