@@ -37,7 +37,7 @@
 			<h2 class="text-center mt-3 mb-5">MovingList ({{ adminStore.subsystems.movingItems.length }})</h2>
 			<div class="d-flex justify-content-center">
 				<!-- This Could show a modal where either a whole series a single season or some episodes can be made to a moving -->
-				<button type="button" class="btn btn-outline-primary">Add Item</button>
+				<button type="button" disabled class="btn btn-outline-primary">Add Item</button>
 			</div>
 
 			<hr />
