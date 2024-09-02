@@ -224,10 +224,14 @@ export async function processMovingItem(ID: string) {
 		pathGen = path.join(serie.categorie, serie.title, `Season-${movingItem.entity.season}`, `${parsed.name}${parsed.ext}`);
 	}
 
+	let lastPercent = 0;
 	const percentCB: (percent: number) => void = (percent) => {
 		toAllSockets(
 			(socket) => {
-				socket.emit('admin-movingItem-update', { ID, progress: percent });
+				if (percent - lastPercent > 1) {
+					socket.emit('admin-movingItem-update', { ID, progress: percent });
+					lastPercent = percent;
+				}
 			},
 			(socket) => socket.auth.type == 'client' && socket.auth.user.role >= 2
 		);
@@ -379,7 +383,13 @@ export function downloadFileFromSubSystem(subPath: string, subID: string, localP
 
 		const state = {} as TransmitData;
 
-		subSocket.on('openStream', ({ transmitID, fd, size }) => {
+		const cleanup = () => {
+			subSocket.off('openStream', openStream);
+			subSocket.off('dataStream', dataStream);
+			subSocket.off('closeStream', closeStream);
+		};
+
+		const openStream = ({ transmitID, fd, size }: { transmitID: string; fd: number; size: number }) => {
 			if (transID == transmitID) {
 				console.log('Started Recieving Packets', transmitID, fd, size);
 				fs.mkdirSync(path.join(localPath, '..'), { recursive: true });
@@ -394,9 +404,9 @@ export function downloadFileFromSubSystem(subPath: string, subID: string, localP
 				state.packetCount = 0;
 				state.startTime = Date.now();
 			}
-		});
+		};
 
-		subSocket.on('dataStream', ({ transmitID, fd, data }) => {
+		const dataStream = ({ transmitID, fd, data }: { transmitID: string; fd: number; data: Buffer }) => {
 			if (state.fd !== fd) {
 				console.log('We somehow fucked up really bad');
 				return;
@@ -408,9 +418,12 @@ export function downloadFileFromSubSystem(subPath: string, subID: string, localP
 			// console.log(((state.cumSize / state.size) * 100).toFixed(2) + '%');
 			state.hash.update(data);
 			state.stream.write(data);
-		});
+		};
 
-		subSocket.on('closeStream', async ({ transmitID, fd, packetCount, fingerprint }, callback) => {
+		const closeStream = async (
+			{ transmitID, fd, packetCount, fingerprint }: { transmitID: string; fd: number; packetCount: number; fingerprint: string },
+			callback: ({ valid: boolean }) => void
+		) => {
 			console.log('Finished, Recieving Packets', transmitID, fd);
 			if (state.fd !== fd) {
 				console.log('We somehow fucked up really bad');
@@ -429,6 +442,7 @@ export function downloadFileFromSubSystem(subPath: string, subID: string, localP
 
 			if (fingerprint != localPrint) {
 				console.error('ERROR: Fingerprint mismatch!!!');
+				cleanup();
 				reject({
 					fingerprintValidation: valid,
 					elapsedTimeMS: elapsedTimeMS,
@@ -442,11 +456,16 @@ export function downloadFileFromSubSystem(subPath: string, subID: string, localP
 				console.log('Took:', elapsedTimeMS / 1000, 's');
 			}
 			callback({ valid });
+			cleanup();
 			resolve({
 				fingerprintValidation: valid,
 				elapsedTimeMS: elapsedTimeMS,
 			});
-		});
+		};
+
+		subSocket.on('openStream', openStream);
+		subSocket.on('dataStream', dataStream);
+		subSocket.on('closeStream', closeStream);
 
 		subSocket.emit('requestFile', { transmitID: transID, subPath });
 	});

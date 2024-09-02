@@ -482,12 +482,17 @@ socket.on('closeStream', async ({ transmitID, fd, packetCount, fingerprint }, ca
 	let valid = false;
 	const elapsedTimeMS = Date.now() - obj.startTime;
 
+	const cleanup = () => {
+		streamMap.delete(transmitID);
+	};
+
 	if (fingerprint != localPrint) {
 		console.error('ERROR: Fingerprint mismatch!!!');
 		callback({
 			fingerprintValidation: valid,
 			elapsedTimeMS: elapsedTimeMS,
 		});
+		cleanup();
 		return;
 	}
 	if (obj.packetCount == packetCount && fingerprint == localPrint) {
@@ -500,6 +505,7 @@ socket.on('closeStream', async ({ transmitID, fd, packetCount, fingerprint }, ca
 		fingerprintValidation: valid,
 		elapsedTimeMS: elapsedTimeMS,
 	});
+	cleanup();
 });
 
 socket.on('requestFile', ({ transmitID, subPath }) => {
