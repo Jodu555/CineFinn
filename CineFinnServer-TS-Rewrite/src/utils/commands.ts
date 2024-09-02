@@ -199,7 +199,7 @@ function registerCommands() {
 			'Reloads the page for all current connected sockets',
 			async (command, [...args], scope) => {
 				if (args[1] == 'all') {
-					const num = sendSiteReload();
+					const num = await sendSiteReload();
 					return 'Reloaded ' + num + ' socket(s)';
 				} else {
 					const socketIDOrUserUUID = args[1];
