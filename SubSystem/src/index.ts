@@ -502,7 +502,7 @@ socket.on('closeStream', async ({ transmitID, fd, packetCount, fingerprint }, ca
 	});
 });
 
-socket.on('requestFile', ({ transmitID, subPath }, cb) => {
+socket.on('requestFile', ({ transmitID, subPath }) => {
 	const stats = fs.statSync(subPath);
 	const stream = fs.createReadStream(subPath);
 
@@ -518,7 +518,14 @@ socket.on('requestFile', ({ transmitID, subPath }, cb) => {
 	stream.on('close', () => {
 		const fingerprint = hash.digest('hex');
 		console.log('Finished sending Packets', transmitID, fd, packetCount, fingerprint);
-		socket.emit('closeStream', { transmitID, fd, packetCount, fingerprint });
+		// subSocket.emit('video-stats', { filePath: filePath }, ({ size }) => {
+		socket.emit('closeStream', { transmitID, fd, packetCount, fingerprint }, ({ valid }: { valid: boolean }) => {
+			console.log('Main System Returned valid:', valid);
+			if (valid == true) {
+				console.log('Removing File:', subPath);
+				fs.rmSync(subPath);
+			}
+		});
 	});
 	stream.on('open', (_fd) => {
 		fd = _fd;

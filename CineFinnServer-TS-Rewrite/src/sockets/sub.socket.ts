@@ -365,10 +365,6 @@ export function downloadFileFromSubSystem(subPath: string, subID: string, localP
 			reject(new Error('SubSocket not reachable!'));
 		}
 
-		// subSocket.emit('requestFile', { transmitID: transID, subPath }, ({ error, message, fingerprintValidation, elapsedTimeMS }) => {
-		// 	console.log('requestFile RESULT', error, message, fingerprintValidation, elapsedTimeMS);
-		// });
-
 		interface TransmitData {
 			fd: number;
 			transmitID: string;
@@ -414,7 +410,7 @@ export function downloadFileFromSubSystem(subPath: string, subID: string, localP
 			state.stream.write(data);
 		});
 
-		subSocket.on('closeStream', async ({ transmitID, fd, packetCount, fingerprint }) => {
+		subSocket.on('closeStream', async ({ transmitID, fd, packetCount, fingerprint }, callback) => {
 			console.log('Finished, Recieving Packets', transmitID, fd);
 			if (state.fd !== fd) {
 				console.log('We somehow fucked up really bad');
@@ -445,6 +441,7 @@ export function downloadFileFromSubSystem(subPath: string, subID: string, localP
 				console.log('Actual Count:     ', stats.size, state.packetCount);
 				console.log('Took:', elapsedTimeMS / 1000, 's');
 			}
+			callback({ valid });
 			resolve({
 				fingerprintValidation: valid,
 				elapsedTimeMS: elapsedTimeMS,
@@ -491,6 +488,12 @@ export function uploadFileToSubSystem(filePath: string, subID: string, remotePat
 					reject(new Error('Fingerprint Invalid!! File might be broken at Destination'));
 				} else {
 					resolve({ fingerprintValidation, elapsedTimeMS });
+
+					console.log('SubSystem Returned valid:', fingerprintValidation);
+					if (fingerprintValidation == true) {
+						console.log('Removing File:', filePath);
+						fs.rmSync(filePath);
+					}
 				}
 			});
 		});
