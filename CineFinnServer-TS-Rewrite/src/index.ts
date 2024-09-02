@@ -205,6 +205,7 @@ import { roleAuthorization } from './utils/roleManager';
 import { getAllKnownSubSystems, subSocketMap } from './sockets/sub.socket';
 import { isScraperSocketConnected } from './sockets/scraper.socket';
 import { generateAccounts, generateOverview, generateSubSystems, sendSocketAdminUpdate } from './utils/admin';
+import { bullBoardProxy, segmentProxy } from './routes/proxys';
 
 // Your Middleware handlers here
 app.use('/images', authHelper.authentication(), express.static(path.join(process.env.PREVIEW_IMGS_PATH)));
@@ -220,61 +221,9 @@ app.use('/recommendation', authHelper.authentication(), recommendation_router);
 app.use('/room', authHelper.authentication(), room_router);
 app.use('/todo', authHelper.authentication(), todo_router);
 
-app.use('/segments', authHelper.authentication(), async (req, res, next) => {
-	// console.log(req.originalUrl, req.method, req.body);
-	const proxyUrl = `http://localhost:4897${req.originalUrl}`;
-	// console.log('Proxying to', proxyUrl);
-	try {
-		const proxy = await axios({
-			method: req.method,
-			url: proxyUrl,
-			headers: req.headers,
-			data: req.body,
-			responseType: 'stream',
-			validateStatus: () => true,
-		});
-		// console.log(proxy.status, proxy.headers);
-
-		if (proxy.status != 200) {
-			res.status(proxy.status).json({});
-			return;
-		} else {
-			proxy.data.pipe(res);
-		}
-	} catch (error) {
-		res.status(500).json({
-			message: 'The Proxied API did not respond with anything',
-		});
-	}
-});
-app.use('/bullboard', authHelper.authentication(), async (req, res, next) => {
-	// console.log(req.originalUrl, req.method, req.body);
-
-	const proxyUrl = `${process.env.BULLBOARD_API_URL}api${req.originalUrl.replace('/bullboard', '')}`;
-	// console.log('Proxying to', proxyUrl);
-	try {
-		const proxy = await axios({
-			method: req.method,
-			url: proxyUrl,
-			headers: { ...req.headers, token: process.env.BULLBOARD_API_TOKEN },
-			data: req.body,
-			responseType: 'stream',
-			validateStatus: () => true,
-		});
-		// console.log(proxy.status, proxy.headers);
-
-		if (proxy.status != 200) {
-			res.status(proxy.status).json({});
-			return;
-		} else {
-			proxy.data.pipe(res);
-		}
-	} catch (error) {
-		res.status(500).json({
-			message: 'The Proxied API did not respond with anything',
-		});
-	}
-});
+//Proxys
+app.use('/segments', authHelper.authentication(), segmentProxy);
+app.use('/bullboard', authHelper.authentication(), bullBoardProxy);
 
 app.get(
 	'/admin/accounts',
