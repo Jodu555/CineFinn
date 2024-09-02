@@ -86,7 +86,8 @@ const activeTab = ref('active');
 
 // const testProgress = ref(0);
 
-const jobCountToLoad = 1024;
+// const jobCountToLoad = 2048;
+const jobCountToLoad = 10 ** 10;
 
 async function loadJobsForQueue(queueType: string) {
 	const response = await useAxios().get<{
