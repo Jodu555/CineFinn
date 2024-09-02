@@ -422,7 +422,7 @@ export function downloadFileFromSubSystem(subPath: string, subID: string, localP
 
 		const closeStream = async (
 			{ transmitID, fd, packetCount, fingerprint }: { transmitID: string; fd: number; packetCount: number; fingerprint: string },
-			callback: ({ valid: boolean }) => void
+			callback: ({ valid }: { valid: boolean }) => void
 		) => {
 			console.log('Finished, Recieving Packets', transmitID, fd);
 			if (state.fd !== fd) {
