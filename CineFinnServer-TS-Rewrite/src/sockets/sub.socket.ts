@@ -263,7 +263,7 @@ export async function processMovingItem(ID: string) {
 				socket.emit('admin-movingItem-update', {
 					ID,
 					progress: 100,
-					message: `Took ${result.elapsedTimeMS / 100}s with a ${result.fingerprintValidation ? 'Valid' : 'Invalid'} fingerprint`,
+					message: `Took ${result.elapsedTimeMS / 1000}s with a ${result.fingerprintValidation ? 'Valid' : 'Invalid'} fingerprint`,
 				});
 			},
 			(socket) => socket.auth.type == 'client' && socket.auth.user.role >= 2
