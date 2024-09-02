@@ -12,6 +12,11 @@ export async function generateOverview() {
 	let episodes = 0;
 	let movies = 0;
 
+	series.map((x) => {
+		episodes += x.seasons.flat().length;
+		movies += x.movies.length;
+	});
+
 	return {
 		accounts: accounts.length,
 		series: series.length,
