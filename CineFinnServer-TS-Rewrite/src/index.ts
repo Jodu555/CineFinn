@@ -38,7 +38,12 @@ app.use(
 			if (process.env.NODE_ENV == 'development') {
 				return false;
 			}
-			if (req.originalUrl.includes('/images') || req.originalUrl.includes('/video') || req.originalUrl.includes('/status')) {
+			if (
+				req.originalUrl.includes('/images') ||
+				req.originalUrl.includes('/video') ||
+				req.originalUrl.includes('/status') ||
+				req.originalUrl.includes('/bullboard')
+			) {
 				return true;
 			} else {
 				return false;
@@ -224,6 +229,34 @@ app.use('/segments', authHelper.authentication(), async (req, res, next) => {
 			method: req.method,
 			url: proxyUrl,
 			headers: req.headers,
+			data: req.body,
+			responseType: 'stream',
+			validateStatus: () => true,
+		});
+		// console.log(proxy.status, proxy.headers);
+
+		if (proxy.status != 200) {
+			res.status(proxy.status).json({});
+			return;
+		} else {
+			proxy.data.pipe(res);
+		}
+	} catch (error) {
+		res.status(500).json({
+			message: 'The Proxied API did not respond with anything',
+		});
+	}
+});
+app.use('/bullboard', authHelper.authentication(), async (req, res, next) => {
+	// console.log(req.originalUrl, req.method, req.body);
+
+	const proxyUrl = `${process.env.BULLBOARD_API_URL}api${req.originalUrl.replace('/bullboard', '')}`;
+	// console.log('Proxying to', proxyUrl);
+	try {
+		const proxy = await axios({
+			method: req.method,
+			url: proxyUrl,
+			headers: { ...req.headers, token: process.env.BULLBOARD_API_TOKEN },
 			data: req.body,
 			responseType: 'stream',
 			validateStatus: () => true,

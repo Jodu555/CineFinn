@@ -96,11 +96,7 @@ async function loadJobsForQueue(queueType: string) {
 			isPaused: boolean;
 			jobs: Job[];
 		}[];
-	}>(`${BULLBOARDAPIURL}queues?activeQueue=previewImageQueue&page=1&jobsPerPage=${jobCountToLoad}&status=${queueType}`, {
-		headers: {
-			token: 'testtokenLULW',
-		},
-	});
+	}>(`/bullboard/queues?activeQueue=previewImageQueue&page=1&jobsPerPage=${jobCountToLoad}&status=${queueType}`);
 
 	if (response.status !== 200) return;
 
