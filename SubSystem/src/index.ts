@@ -16,6 +16,9 @@ interface Config {
 	entrypoint: string;
 	port: number;
 	endpoint: string | boolean;
+	experimental: {
+		readrate: number;
+	};
 	core: {
 		url: string;
 		token: string;
@@ -23,11 +26,14 @@ interface Config {
 }
 
 const defaultConfig: Config = {
-	version: '1.0.0',
+	version: '1.0.1',
 	identifier: 'local-kdrama',
 	entrypoint: '/home/Media/K-Drama',
 	port: 9999,
 	endpoint: false, //Means enable Socket Transmission
+	experimental: {
+		readrate: 0,
+	},
 	core: {
 		url: 'http://localhost:3100',
 		token: 'SUPER-SECURE-CORE-TOKEN',
@@ -47,6 +53,8 @@ const config = setupConfigurationManagment(defaultConfig, cliOptions);
 const app = express();
 app.use(express.json());
 
+console.log(config.experimental.readrate);
+
 const socket = io(config.core.url, {
 	auth: {
 		type: 'sub',
@@ -54,6 +62,7 @@ const socket = io(config.core.url, {
 		token: config.core.token,
 		ptoken,
 		endpoint: config.endpoint.toString() == 'false' ? undefined : config.endpoint,
+		readrate: config.experimental.readrate || 0,
 	},
 });
 

@@ -172,8 +172,12 @@ function registerCommands() {
 			});
 			for (const socket of sockets) {
 				if (socket.auth.type == 'sub') {
+					console.log(socket.auth);
+
 					output.push(
-						` - ${socket.auth.type.toUpperCase()} => ${socket.auth.id} ${socket.auth.endpoint} - ${socket.auth.ptoken ? socket.auth?.ptoken : ''} `
+						` - ${socket.auth.type.toUpperCase()} => ${socket.auth.id} ${socket.auth.endpoint} - ${
+							socket.auth.ptoken ? socket.auth?.ptoken : ''
+						} RR: ${socket.auth.readrate}`
 					);
 				}
 				if (socket.auth.type == 'client') {

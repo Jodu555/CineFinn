@@ -48,6 +48,7 @@ const initialize = () => {
 					id: socket.handshake.auth.id,
 					ptoken: socket.handshake.auth.ptoken,
 					endpoint: socket.handshake.auth.endpoint,
+					readrate: socket.handshake.auth.readrate,
 					type,
 				};
 				return next();

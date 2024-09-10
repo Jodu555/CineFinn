@@ -17,6 +17,7 @@ export const subSocketMap = new Map<string, ExtendedSocket>();
 export const initialize = async (socket: ExtendedSocket) => {
 	const auth = socket.auth;
 	console.log('Socket Connection:', auth.type.toUpperCase(), auth.id, auth.ptoken);
+	console.log(auth);
 
 	subSocketMap.set(auth.id, socket);
 

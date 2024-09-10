@@ -91,6 +91,7 @@ export interface SocketAuthObject {
 	id?: string;
 	ptoken?: string;
 	endpoint?: string;
+	readrate?: number;
 	user?: User;
 	debounce?: any;
 	RMVCSessionID?: string;
