@@ -119,7 +119,7 @@ async function main() {
 
 			await job.log('Crafted Command: ' + command);
 
-			console.log(job.id, ' => ', command);
+			// console.log(job.id, ' => ', command);
 
 			if (!job.data.publicStreamURL && !fs.existsSync(vidFile)) {
 				console.log('Video File Missing', vidFile);
@@ -128,7 +128,7 @@ async function main() {
 				process.exit(1);
 			}
 
-			let failCount = 1;
+			let failCount = 0;
 			let success = false;
 
 			while (failCount < 3 && success == false) {
