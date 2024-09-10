@@ -6,6 +6,7 @@ import pLimit from 'p-limit';
 import { CommandManager } from '@jodu555/commandmanager';
 import { getIORedis } from './utils';
 import { Queue, QueueEvents } from 'bullmq';
+import { getSubSocketByID } from '../sockets/sub.socket';
 const commandManager = CommandManager.getCommandManager();
 const { getVideoDurationInSeconds } = require('get-video-duration');
 
@@ -22,6 +23,7 @@ interface PromissesJob {
 		output: string;
 		imagePathPrefix: string;
 		publicStreamURL: string;
+		readrate: number;
 	};
 	run: () => Promise<void>;
 }
@@ -71,6 +73,17 @@ function generateEntityImages(i: number, serie: Series, entity: Episode | Movie,
 
 		const publicStreamURL = url.href;
 
+		let readrate = 0;
+
+		if (entity.subID != 'main') {
+			const socket = getSubSocketByID(entity.subID);
+			if (socket) {
+				readrate = socket.auth.readrate;
+			} else {
+				readrate = 15;
+			}
+		}
+
 		returnArr.push({
 			meta: {
 				imagePathPrefix: process.env.PREVIEW_IMGS_PATH,
@@ -80,6 +93,7 @@ function generateEntityImages(i: number, serie: Series, entity: Episode | Movie,
 				output,
 				filePath,
 				publicStreamURL,
+				readrate,
 			},
 			run: () =>
 				new Promise<void>(async (resolve, reject) => {

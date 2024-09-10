@@ -19,11 +19,12 @@ interface Config {
 		password: string;
 	};
 	concurrentGenerators: number;
+	useReadRate: boolean;
 	pathRemapper: Record<string, string>;
 }
 
 const defaultConfig: Config = {
-	version: '1.0.1',
+	version: '1.0.2',
 	generatorName: 'previewImageGenerator',
 	redisConnection: {
 		host: 'localhost',
@@ -31,6 +32,7 @@ const defaultConfig: Config = {
 		password: null,
 	},
 	concurrentGenerators: 5,
+	useReadRate: false,
 	pathRemapper: {
 		'/media/all/CineFinn-data': '/mnt/test',
 	},
@@ -54,6 +56,7 @@ interface JobMeta {
 	output: string;
 	imagePathPrefix: string;
 	publicStreamURL: string;
+	readrate: number;
 	generatorName: string;
 }
 
@@ -112,7 +115,14 @@ async function main() {
 			}
 
 			if (job.data.publicStreamURL && job.data.entity.subID != 'main') {
-				command = `ffmpeg -hide_banner -i "${job.data.publicStreamURL}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
+				if (config.useReadRate) {
+					command = `ffmpeg -hide_banner -readrate ${job.data.readrate || 0} -i "${job.data.publicStreamURL}" -vf fps=1/10,scale=120:-1 "${path.join(
+						imgDir,
+						'preview%d.jpg'
+					)}"`;
+				} else {
+					command = `ffmpeg -hide_banner -i "${job.data.publicStreamURL}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
+				}
 			} else {
 				command = `ffmpeg -hide_banner -i "${vidFile}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
 			}
