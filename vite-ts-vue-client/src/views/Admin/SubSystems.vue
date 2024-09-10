@@ -38,6 +38,36 @@
 				<template #title>Detailed Disabled Series Overview</template>
 				<template #body>
 					<h3 class="text-center">List of Series</h3>
+					<!-- <div class="position-relative m-4">
+						<div
+							class="progress"
+							role="progressbar"
+							aria-label="Progress"
+							aria-valuenow="50"
+							aria-valuemin="0"
+							aria-valuemax="100"
+							style="height: 1px">
+							<div class="progress-bar" style="width: 50%"></div>
+						</div>
+						<div
+							type="button"
+							class="position-absolute top-0 start-0 translate-middle btn btn-sm btn-primary rounded-pill"
+							style="width: 2rem; height: 2rem">
+							1
+						</div>
+						<div
+							type="button"
+							class="position-absolute top-0 start-50 translate-middle btn btn-sm btn-primary rounded-pill"
+							style="width: 2rem; height: 2rem">
+							2
+						</div>
+						<div
+							type="button"
+							class="position-absolute top-0 start-100 translate-middle btn btn-sm btn-secondary rounded-pill"
+							style="width: 2rem; height: 2rem">
+							3
+						</div>
+					</div> -->
 					<div class="mb-3 ms-5 me-5">
 						<label for="searchTerm" class="form-label">Search</label>
 						<input v-model="searchTerm" type="text" class="form-control" id="searchTerm" aria-describedby="helpId" placeholder="Name or ID" />
@@ -102,7 +132,7 @@
 			<h2 class="text-center mt-3 mb-5">MovingList ({{ adminStore.subsystems.movingItems.length }})</h2>
 			<div class="d-flex justify-content-center">
 				<!-- This Could show a modal where either a whole series a single season or some episodes can be made to a moving -->
-				<button type="button" class="btn btn-outline-primary" @click="toggleSelectEntityToMoveModal = true">Add Item</button>
+				<button type="button" disabled class="btn btn-outline-primary" @click="toggleSelectEntityToMoveModal = true">Add Item</button>
 			</div>
 
 			<hr />
