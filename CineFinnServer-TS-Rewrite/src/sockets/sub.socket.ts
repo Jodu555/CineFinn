@@ -136,7 +136,9 @@ export async function generateMovingItemArray() {
 				.sort(([, a], [, b]) => b - a)
 				.reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
 
-			prioSub = Object.entries(sortable)[0][0];
+			prioSub = Object.entries(sortable)?.[0]?.[0] || '0x0';
+
+			if (prioSub == '0x0') return;
 
 			all.forEach((z) => {
 				if (z.subID != prioSub) {
