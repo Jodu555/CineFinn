@@ -25,6 +25,7 @@
 											: '*Socket Transmit*'
 									}}
 								</li>
+								<li v-if="idtoSock(subsystemID) !== undefined" class="list-group-item">Readrate: {{ idtoSock(subsystemID)?.readrate }}</li>
 								<li class="list-group-item">
 									Series: {{ idtoSock(subsystemID) == undefined ? 'Offline' : idtoSock(subsystemID)?.affectedSeriesIDs.length }}
 								</li>

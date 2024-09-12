@@ -35,6 +35,7 @@ export async function generateSubSystems() {
 		id: string;
 		ptoken: string;
 		endpoint: string;
+		readrate: number;
 		affectedSeriesIDs: string[];
 		type: 'sub';
 	}[] = [];
@@ -44,6 +45,7 @@ export async function generateSubSystems() {
 			ptoken: value.auth.ptoken,
 			endpoint: value.auth.endpoint,
 			affectedSeriesIDs: (await getSeriesBySubID(value.auth.id)).map((x) => x.ID),
+			readrate: value.auth.readrate,
 			type: value.auth.type == 'sub' ? 'sub' : 'sub',
 		});
 	});

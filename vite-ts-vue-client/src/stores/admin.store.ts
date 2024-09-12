@@ -30,6 +30,7 @@ interface SubSystem {
 	id: string;
 	ptoken: string;
 	endpoint: string;
+	readrate: number;
 	affectedSeriesIDs: string[];
 	type: 'sub';
 }
