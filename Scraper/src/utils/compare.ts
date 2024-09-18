@@ -255,7 +255,9 @@ async function compareForNewReleasesAniWorld(
 
 				const localMovie = localSeries.movies.find((x) => {
 					// console.log(aniworldMovie.secondName, x.primaryName, similar(aniworldMovie.secondName, x.primaryName));
-					return similar(aniworldMovie.secondName, x.primaryName) > 50;
+					const comparisons = Math.max(similar(aniworldMovie.secondName, x.primaryName), similar(aniworldMovie.mainName, x.primaryName));
+					return comparisons > 50;
+					// return similar(aniworldMovie.secondName, x.primaryName) > 50;
 				});
 
 				if (!localMovie) {
@@ -453,7 +455,8 @@ async function compareForNewReleasesSTO(
 
 				const localMovie = localSeries.movies.find((x) => {
 					// console.log(aniworldMovie.secondName, x.primaryName, similar(aniworldMovie.secondName, x.primaryName));
-					return similar(aniworldMovie.secondName, x.primaryName) > 50;
+					const comparisons = Math.max(similar(aniworldMovie.secondName, x.primaryName), similar(aniworldMovie.mainName, x.primaryName));
+					return comparisons > 50;
 				});
 
 				if (!localMovie) {

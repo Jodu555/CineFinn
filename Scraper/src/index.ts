@@ -133,7 +133,7 @@ async function checkAllAnimes() {
 }
 
 async function addReference() {
-	const update: { [key: string]: string } = {
+	const update: { [key: string]: string; } = {
 		ed0b1eba: '18122', //War God System! I’m Counting On You! --------
 		'2fb85af9': '18161', // Reincarnated as a Sword ------------
 		e26e2bf8: '17372', // Banished From the Heroes' Party !!!!!!!!!!!!!!!!!!!!!!
@@ -180,21 +180,21 @@ async function checkForUpdates() {
 		{
 			ID: 'c8001b23', // Detektiv Conan
 		},
-		{
-			ID: '9d59f7ba', // Family Guy
-		},
+		// {
+		// 	ID: '9d59f7ba', // Family Guy
+		// },
 		// {
 		// 	ID: '9a7a77e0', // Rick and Morty
 		// },
-		{
-			ID: '49322db6', // Star Wars: The Clone Wars
-		},
+		// {
+		// 	ID: '49322db6', // Star Wars: The Clone Wars
+		// },
 		{
 			ID: 'db9fc61c', // Disney's Fillmore
 		},
-		{
-			ID: '792da61e', // South Park
-		},
+		// {
+		// 	ID: '792da61e', // South Park
+		// },
 		{
 			ID: '84b1fb51', // iCarly
 		},
@@ -202,6 +202,9 @@ async function checkForUpdates() {
 			ID: 'a9f36e78', // Peter Grill and the Philosopher’s Time
 			lang: 'GerDub', // Has only the first episode in GerSub rest in EngSub
 		},
+		{
+			ID: '92eeb2bd', // Die fantastische Welt von Gumball
+		}
 	];
 
 	console.time('Compare');
@@ -408,7 +411,7 @@ async function manuallyCraftTheList() {
 }
 
 function buildFunction<R, T>(method: string, cb: (arg: T) => Promise<R | void>) {
-	socket.on(`call${method}`, async (data: T & { __refID: string }) => {
+	socket.on(`call${method}`, async (data: T & { __refID: string; }) => {
 		const __refID = data.__refID;
 		delete data.__refID;
 		const returnValue = await cb(data as T);
@@ -416,14 +419,14 @@ function buildFunction<R, T>(method: string, cb: (arg: T) => Promise<R | void>) 
 	});
 }
 
-buildFunction<AniWorldSeriesInformations, { url: string }>('AniworldData', async ({ url }) => {
+buildFunction<AniWorldSeriesInformations, { url: string; }>('AniworldData', async ({ url }) => {
 	console.log('Recieved AniworldData', url);
 	const anime = new Aniworld(url);
 	const informations = await anime.parseInformations();
 	return informations;
 });
 
-buildFunction<any, { ID: string | number }>('ZoroData', async ({ ID }) => {
+buildFunction<any, { ID: string | number; }>('ZoroData', async ({ ID }) => {
 	console.log('Recieved ZoroData', ID);
 	const zoro = new Zoro(String(ID));
 	await zoro.initialize();
@@ -431,7 +434,7 @@ buildFunction<any, { ID: string | number }>('ZoroData', async ({ ID }) => {
 	return { ...informations };
 });
 
-buildFunction<any, { ID: string | number }>('newZoroData', async ({ ID }) => {
+buildFunction<any, { ID: string | number; }>('newZoroData', async ({ ID }) => {
 	console.log('Recieved newZoroData', ID);
 
 	const anime = new Zoro(ID.toString());
@@ -439,7 +442,7 @@ buildFunction<any, { ID: string | number }>('newZoroData', async ({ ID }) => {
 	return informations;
 });
 
-buildFunction<any, { slug: string }>('AnixData', async ({ slug }) => {
+buildFunction<any, { slug: string; }>('AnixData', async ({ slug }) => {
 	console.log('Recieved AnixData', slug);
 	const anix = new Anix(slug);
 	await anix.initialize();
@@ -447,7 +450,7 @@ buildFunction<any, { slug: string }>('AnixData', async ({ slug }) => {
 	return { ...informations };
 });
 
-buildFunction<any, { title: string; aniworld: boolean }>('manageTitle', async ({ title, aniworld }) => {
+buildFunction<any, { title: string; aniworld: boolean; }>('manageTitle', async ({ title, aniworld }) => {
 	function doStuff(input: string, aniworld = true) {
 		input = input
 			.replaceAll('!', '')
@@ -479,7 +482,7 @@ buildFunction<any, { title: string; aniworld: boolean }>('manageTitle', async ({
 	return { url: doStuff(title, aniworld) };
 });
 
-buildFunction<{ success: boolean; error?: Error }, void>('checkForUpdates', async () => {
+buildFunction<{ success: boolean; error?: Error; }, void>('checkForUpdates', async () => {
 	try {
 		await checkForUpdates();
 		return { success: true };
