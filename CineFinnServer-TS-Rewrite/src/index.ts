@@ -199,12 +199,9 @@ import { router as index_router } from './routes/index';
 import { router as recommendation_router } from './routes/recommmendation';
 import { router as room_router } from './routes/room';
 import { router as todo_router } from './routes/todo';
+import { router as admin_router } from './routes/admin';
 import video from './routes/video';
-import { DatabaseSyncRoomItem } from './types/database';
-import { roleAuthorization } from './utils/roleManager';
-import { getAllKnownSubSystems, subSocketMap } from './sockets/sub.socket';
-import { isScraperSocketConnected } from './sockets/scraper.socket';
-import { generateAccounts, generateOverview, generateSubSystems, sendSocketAdminUpdate } from './utils/admin';
+import { sendSocketAdminUpdate } from './utils/admin';
 import { bullBoardProxy, segmentProxy } from './routes/proxys';
 
 // Your Middleware handlers here
@@ -220,34 +217,11 @@ app.use('/index', authHelper.authentication(), index_router);
 app.use('/recommendation', authHelper.authentication(), recommendation_router);
 app.use('/room', authHelper.authentication(), room_router);
 app.use('/todo', authHelper.authentication(), todo_router);
+app.use('/admin', authHelper.authenticationFull((u) => u.role >= 2), admin_router);
 
 //Proxys
 app.use('/segments', authHelper.authentication(), segmentProxy);
 app.use('/bullboard', authHelper.authentication(), bullBoardProxy);
-
-app.get(
-	'/admin/accounts',
-	authHelper.authenticationFull((u) => u.role >= 2),
-	async (req, res, next) => {
-		res.json(await generateAccounts());
-	}
-);
-
-app.get(
-	'/admin/subsystems',
-	authHelper.authenticationFull((u) => u.role >= 2),
-	async (req, res, next) => {
-		res.json(await generateSubSystems());
-	}
-);
-
-app.get(
-	'/admin/overview',
-	authHelper.authenticationFull((u) => u.role >= 2),
-	async (req, res, next) => {
-		res.json(await generateOverview());
-	}
-);
 
 //Your direct routing stuff here
 app.get('/video', authHelper.authentication(), video);
