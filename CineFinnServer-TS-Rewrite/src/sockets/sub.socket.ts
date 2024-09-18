@@ -37,7 +37,7 @@ export interface SubFile {
 	path: string;
 }
 
-const cache = new Map<string, { size: number }>();
+const cache = new Map<string, { size: number; }>();
 
 export async function getVideoStats(subID: string, filePath: string) {
 	const stepIn = Date.now();
@@ -47,7 +47,7 @@ export async function getVideoStats(subID: string, filePath: string) {
 		return cache.get(filePath);
 	}
 	const subSocket = getSubSocketByID(subID);
-	return new Promise<{ size: number }>((resolve, reject) => {
+	return new Promise<{ size: number; }>((resolve, reject) => {
 		subSocket.emit('video-stats', { filePath: filePath }, ({ size }) => {
 			console.log('Got Size', size);
 			console.log(' => After', Date.now() - stepIn, 'ms');
@@ -228,15 +228,15 @@ export async function processMovingItem(ID: string) {
 
 	let lastPercent = 0;
 	const percentCB: (percent: number) => void = (percent) => {
-		toAllSockets(
-			(socket) => {
-				if (percent - lastPercent > 1) {
+		if (percent - lastPercent > 1) {
+			toAllSockets(
+				(socket) => {
 					socket.emit('admin-movingItem-update', { ID, progress: percent });
 					lastPercent = percent;
-				}
-			},
-			(socket) => socket.auth.type == 'client' && socket.auth.user.role >= 2
-		);
+				},
+				(socket) => socket.auth.type == 'client' && socket.auth.user.role >= 2
+			);
+		}
 	};
 
 	const result = {
@@ -294,7 +294,7 @@ export async function processMovingItem(ID: string) {
 
 // const ongoingRequests = new Map<string, { handleData: () => void; handleError: () => void; handleEnd: () => void; res: Response }>();
 
-const testMap = new Map<string, { time: number }>();
+const testMap = new Map<string, { time: number; }>();
 
 const countMap = new Map<string, number>();
 
@@ -302,7 +302,7 @@ export async function createVideoStreamOverSocket(
 	subID: string,
 	requestId: string,
 	filePath: string,
-	opts: { start: number; end: number },
+	opts: { start: number; end: number; },
 	res: Response
 ) {
 	console.time('createVideoStreamOverSocket-' + requestId.split('-')[0]);
@@ -363,7 +363,7 @@ export async function createVideoStreamOverSocket(
 }
 
 export function downloadFileFromSubSystem(subPath: string, subID: string, localPath: string, percentCb?: (percent: number) => void) {
-	return new Promise<{ fingerprintValidation: boolean; elapsedTimeMS: number }>((resolve, reject) => {
+	return new Promise<{ fingerprintValidation: boolean; elapsedTimeMS: number; }>((resolve, reject) => {
 		const subSocket = getSubSocketByID(subID);
 		const transID = crypto.randomUUID();
 		if (subSocket == undefined) {
@@ -391,7 +391,7 @@ export function downloadFileFromSubSystem(subPath: string, subID: string, localP
 			subSocket.off('closeStream', closeStream);
 		};
 
-		const openStream = ({ transmitID, fd, size }: { transmitID: string; fd: number; size: number }) => {
+		const openStream = ({ transmitID, fd, size }: { transmitID: string; fd: number; size: number; }) => {
 			if (transID == transmitID) {
 				console.log('Started Recieving Packets', transmitID, fd, size);
 				fs.mkdirSync(path.join(localPath, '..'), { recursive: true });
@@ -408,7 +408,7 @@ export function downloadFileFromSubSystem(subPath: string, subID: string, localP
 			}
 		};
 
-		const dataStream = ({ transmitID, fd, data }: { transmitID: string; fd: number; data: Buffer }) => {
+		const dataStream = ({ transmitID, fd, data }: { transmitID: string; fd: number; data: Buffer; }) => {
 			if (state.fd !== fd) {
 				console.log('We somehow fucked up really bad');
 				return;
@@ -423,8 +423,8 @@ export function downloadFileFromSubSystem(subPath: string, subID: string, localP
 		};
 
 		const closeStream = async (
-			{ transmitID, fd, packetCount, fingerprint }: { transmitID: string; fd: number; packetCount: number; fingerprint: string },
-			callback: ({ valid }: { valid: boolean }) => void
+			{ transmitID, fd, packetCount, fingerprint }: { transmitID: string; fd: number; packetCount: number; fingerprint: string; },
+			callback: ({ valid }: { valid: boolean; }) => void
 		) => {
 			console.log('Finished, Recieving Packets', transmitID, fd);
 			if (state.fd !== fd) {
@@ -474,7 +474,7 @@ export function downloadFileFromSubSystem(subPath: string, subID: string, localP
 }
 
 export function uploadFileToSubSystem(filePath: string, subID: string, remotePath: string, percentCb?: (percent: number) => void) {
-	return new Promise<{ fingerprintValidation: boolean; elapsedTimeMS: number }>((resolve, reject) => {
+	return new Promise<{ fingerprintValidation: boolean; elapsedTimeMS: number; }>((resolve, reject) => {
 		const transmitID = crypto.randomUUID();
 
 		const subSocket = getSubSocketByID(subID);
