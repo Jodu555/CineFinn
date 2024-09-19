@@ -31,7 +31,7 @@
 import { ref } from 'vue';
 
 const controls = [
-	{ key: 'k', desc: 'Play/Pause Toggle' },
+	{ key: ['k', '*'], desc: 'Play/Pause Toggle' },
 	{ key: 'f', desc: 'Vollbild Toggle' },
 	{ key: 't', desc: 'Theater Mode Toggle' },
 	{ key: 'i', desc: 'Mini Player Toggle' },
@@ -40,8 +40,8 @@ const controls = [
 	{ key: ['l', 'rechts pfeil'], desc: 'Skip 5 Sekunden vorwärts' },
 	{ key: 'pfeil hoch', desc: 'Lautstärke hoch' },
 	{ key: 'pfeil runter', desc: 'Lautstärke runter' },
-	{ key: 'n', desc: 'nächste episode' },
-	{ key: 'p', desc: 'vorherige episode' },
+	{ key: ['n', '+'], desc: 'nächste episode' },
+	{ key: ['p', '-'], desc: 'vorherige episode' },
 	{ key: '.', desc: 'Skip 1 Frame zurück' },
 	{ key: ',', desc: 'Skip 1 Frame vorwärts' },
 	{ key: '0..9', desc: 'Skippt zu dem jeweilig Prozentualen Video Fortschritt' },
