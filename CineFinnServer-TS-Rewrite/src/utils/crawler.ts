@@ -40,7 +40,7 @@ const oldCrawlAndIndex = () => {
 
 	Object.keys(obj).forEach((categorie) => {
 		const dirs = obj[categorie];
-		for (let i = 0; i < dirs.length; ) {
+		for (let i = 0; i < dirs.length;) {
 			const title = dirs[i];
 			const seasons = [];
 			const movies = [];
@@ -152,7 +152,7 @@ const crawlAndIndex = async () => {
 		const base = path.parse(e).base;
 		const parsedData = filenameParser(e, base);
 
-		let item = series.find((x) => x.title.includes(parsedData.title));
+		let item = series.find((x) => x.title == parsedData.title);
 		if (item == undefined) {
 			const categorie = path.parse(path.join(path.parse(e).dir, '../../')).base;
 			const serie = new Series(generateID(), categorie, parsedData.title, [], []);
@@ -181,6 +181,7 @@ const crawlAndIndex = async () => {
 						return;
 					}
 					if (existEpisode.langs.includes(parsedData.language)) {
+						// console.log(item, existEpisode, parsedData, base, e);
 						const error = `Overloading Language Detected in ${item.title}(${item.ID}) - ${existEpisode.season}x${existEpisode.episode} ${parsedData.language}`;
 						console.log(error);
 						return;
