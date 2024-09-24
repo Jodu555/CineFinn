@@ -90,6 +90,7 @@ export = async (req: AuthenticatedRequest, res: Response) => {
 		videoEntity = await getVideoEntity(serie.ID, Number(season), Number(episode));
 	}
 	if (videoEntity == null || videoEntity == undefined) {
+		console.log(`Video Entity is null!! ${serie.title}(${serie.ID}) ${season}x${episode}`);
 		res.status(400).send('Season or Episode does not exists');
 		return;
 	}

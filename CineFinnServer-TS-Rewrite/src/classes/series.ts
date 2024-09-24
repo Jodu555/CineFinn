@@ -169,6 +169,7 @@ async function getVideoEntity(seriesID: string, season: number, episode: number)
 	// const entity = serie.seasons.flat().find(x => x.season == season && x.episode == episode);
 	let entity: Episode;
 	const seasonIndex = serie.seasons.findIndex((x) => x[0].season == season);
+	if (seasonIndex == -1) return null;
 	entity = serie.seasons[seasonIndex].find((x) => x.episode == episode);
 	return entity;
 }
