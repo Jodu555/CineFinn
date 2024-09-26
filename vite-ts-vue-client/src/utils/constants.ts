@@ -4,7 +4,7 @@ const langDetails = {
 		alt: 'Deutsche Sprache, Deutsche Flagge, Flagge, Flag',
 	},
 	gersub: {
-		title: 'Mit deutschen Untertiteln',
+		title: 'Japanisch mit deutschen Untertiteln',
 		alt: 'Deutsche Flagge, Flagge, Untertitel, Flag',
 	},
 	engdub: {
@@ -12,14 +12,22 @@ const langDetails = {
 		alt: 'Englische Sprache, Englische Flagge, Flagge, Flag',
 	},
 	engsub: {
-		title: 'Mit englischen Untertiteln',
+		title: 'Japanisch mit englischen Untertiteln',
 		alt: 'Englische Flagge, Flagge, Untertitel, Flag',
 	},
 	japdub: {
 		title: 'Japanisch/Japanese',
 		alt: 'Japanische Flagge, Flagge, Original, Flag',
 	},
-} as Record<string, { title: string; alt: string }>;
+	engsubk: {
+		title: 'Koreanisch mit englischen Untertiteln',
+		alt: 'Englische Flagge, Flagge, Untertitel, Flag, Koreanisch, Korean',
+	},
+	gersubk: {
+		title: 'Koreanisch mit deutschen Untertiteln',
+		alt: 'Deutsche Flagge, Flagge, Untertitel, Flag, Koreanisch, Korean',
+	},
+} as Record<string, { title: string; alt: string; }>;
 
 function roleIDToName(id: number) {
 	switch (id) {
