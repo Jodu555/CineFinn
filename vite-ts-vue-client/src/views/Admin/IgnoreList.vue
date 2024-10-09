@@ -97,14 +97,7 @@ onMounted(async () => {
 	document.title = `Cinema | Admin-IgnoreList`;
 
 	const response = await axios.get<{ ID: string; title: string }[]>('http://localhost:3799/ignore');
-	// ignoreList.value = response.data;
-
-	// for (const ignoreItem of ignoreList.value) {
-	// 	const serie = indexStore.series.find((x) => x.ID == ignoreItem.ID);
-	// 	if (serie) {
-	// 		entitys.value.push(serie);
-	// 	}
-	// }
+	ignoreList.value = response.data;
 });
 </script>
 
