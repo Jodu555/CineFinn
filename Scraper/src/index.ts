@@ -199,13 +199,19 @@ async function checkForUpdates() {
 			ID: '84b1fb51', // iCarly
 		},
 		{
-			ID: 'a9f36e78', // Peter Grill and the Philosopher’s Time
-			lang: 'GerDub', // Has only the first episode in GerSub rest in EngSub
-		},
-		{
 			ID: '92eeb2bd', // Die fantastische Welt von Gumball
 		}
 	];
+
+	if (process.env.IGNORE_API_HOST) {
+		const ignoreResponse = await axios.get<{ ID: string, title: string; }[]>(`${process.env.IGNORE_API_HOST}/ignore`);
+		console.log('Loaded', ignoreResponse.data.length, 'Animes to Ignore for now!');
+		for (const item of ignoreResponse.data) {
+			ignoranceList.push({
+				ID: item.ID,
+			});
+		}
+	}
 
 	console.time('Compare');
 	// const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: false, sto: true, zoro: false });
