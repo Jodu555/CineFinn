@@ -27,6 +27,11 @@
 								><span class="ms-1 d-none d-sm-inline">SubSystems</span></router-link
 							>
 						</li>
+						<li>
+							<router-link class="nav-link px-0 align-middle" exact-active-class="active" to="/admin/ignoreList"
+								><span class="ms-1 d-none d-sm-inline">Ignore List</span></router-link
+							>
+						</li>
 					</ul>
 				</div>
 			</div>

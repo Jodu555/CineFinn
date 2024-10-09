@@ -104,7 +104,15 @@ const router = createRouter({
 					name: 'SubSystems',
 					path: 'subsystems',
 					component: function () {
-						return import(/* webpackChunkName: "jobs" */ '@/views/Admin/SubSystems.vue');
+						return import(/* webpackChunkName: "subsystem" */ '@/views/Admin/SubSystems.vue');
+					},
+					meta: { requiresLogin: true },
+				},
+				{
+					name: 'IgnoreList',
+					path: 'ignorelist',
+					component: function () {
+						return import(/* webpackChunkName: "ignorelist" */ '@/views/Admin/IgnoreList.vue');
 					},
 					meta: { requiresLogin: true },
 				},
