@@ -76,7 +76,8 @@ async function addIgnoranceItem(ID: string) {
 			};
 			ignoreList.value.push(obj);
 
-			const response = await axios.put('http://localhost:3799/ignore/item', obj);
+			// const response = await axios.put('http://localhost:3799/ignore/item', obj);
+			const response = await useAxios().put('ignorelist/item', obj);
 
 			console.log(response.status);
 		}
@@ -85,7 +86,7 @@ async function addIgnoranceItem(ID: string) {
 
 async function removeIgnoranceItem(ID: string) {
 	ignoreList.value = ignoreList.value.filter((x) => x.ID != ID);
-	const response = await axios.delete('http://localhost:3799/ignore/item/' + ID);
+	const response = await useAxios().delete('ignorelist/item/' + ID);
 	console.log(response.status);
 }
 
@@ -96,7 +97,7 @@ const entitys = computed(() => {
 onMounted(async () => {
 	document.title = `Cinema | Admin-IgnoreList`;
 
-	const response = await axios.get<{ ID: string; title: string }[]>('http://localhost:3799/ignore');
+	const response = await useAxios().get<{ ID: string; title: string }[]>('ignorelist');
 	ignoreList.value = response.data;
 });
 </script>

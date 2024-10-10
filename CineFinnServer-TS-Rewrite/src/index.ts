@@ -200,6 +200,7 @@ import { router as recommendation_router } from './routes/recommmendation';
 import { router as room_router } from './routes/room';
 import { router as todo_router } from './routes/todo';
 import { router as admin_router } from './routes/admin';
+import { router as ignoreList_router } from './routes/ignorelist';
 import video from './routes/video';
 import { sendSocketAdminUpdate } from './utils/admin';
 import { bullBoardProxy, segmentProxy } from './routes/proxys';
@@ -218,6 +219,7 @@ app.use('/recommendation', authHelper.authentication(), recommendation_router);
 app.use('/room', authHelper.authentication(), room_router);
 app.use('/todo', authHelper.authentication(), todo_router);
 app.use('/admin', authHelper.authenticationFull((u) => u.role >= 2), admin_router);
+app.use('/ignorelist', authHelper.authenticationFull((u) => u.role >= 2), ignoreList_router);
 
 //Proxys
 app.use('/segments', authHelper.authentication(), segmentProxy);
