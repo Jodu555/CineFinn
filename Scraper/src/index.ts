@@ -204,8 +204,8 @@ async function checkForUpdates() {
 	];
 
 	if (process.env.IGNORE_API_HOST) {
-		const ignoreResponse = await axios.get<{ ID: string, title: string; }[]>(`${process.env.IGNORE_API_HOST}/ignore`);
-		console.log('Loaded', ignoreResponse.data.length, 'Animes to Ignore for now!');
+		const ignoreResponse = await axios.get<{ ID: string, title: string; }[]>(`http://cinema-api.jodu555.de/ignoreList/?auth-token=${process.env.AUTH_TOKEN_REST}`);
+		console.log('Loaded', ignoreResponse.data.length, 'Animes/Series to Ignore for now!');
 		for (const item of ignoreResponse.data) {
 			ignoranceList.push({
 				ID: item.ID,
