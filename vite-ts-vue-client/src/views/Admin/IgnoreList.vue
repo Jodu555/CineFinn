@@ -91,7 +91,8 @@ async function removeIgnoranceItem(ID: string) {
 }
 
 const entitys = computed(() => {
-	return indexStore.series.filter((x) => ignoreList.value.find((y) => y.ID == x.ID));
+	return ignoreList.value.map((x) => indexStore.series.find((y) => y.ID == x.ID)).filter((x) => x !== undefined);
+	// return indexStore.series.filter((x) => ignoreList.value.find((y) => y.ID == x.ID));
 });
 
 onMounted(async () => {

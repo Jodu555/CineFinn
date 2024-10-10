@@ -8,7 +8,7 @@ const database = Database.getDatabase();
 
 const router = express.Router();
 
-const filePath = "Z:/home/Work/Notes/NO Update Animes List Local.md";
+const filePath = process.env.IGNORELIST_PATH || 'default.md';
 
 router.get('/', (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     res.json(load());
@@ -20,7 +20,7 @@ router.put('/item', (req: AuthenticatedRequest, res: Response, next: NextFunctio
     const data = load();
     data.push(req.body);
     fs.writeFileSync(filePath, data.map(item => `${item.ID} ${item.title}`).join('\r\n'));
-    res.status(200);
+    res.status(200).send();
 });
 
 router.delete('/item/:ID', (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -31,7 +31,7 @@ router.delete('/item/:ID', (req: AuthenticatedRequest, res: Response, next: Next
     const result = data.filter(item => item.ID !== ID);
     fs.writeFileSync(filePath, result.map(item => `${item.ID} ${item.title}`).join('\r\n'));
 
-    res.status(200);
+    res.status(200).send();
 
 });
 
