@@ -4,7 +4,9 @@ import { sendWatchListChange } from '../sockets/client.socket';
 import { Segment, searchObject, updateSegment } from './watchString';
 
 async function writeWatchInfoToDatabase(socket: ExtendedSocket, obj: timeUpdateObject) {
-	console.log('Write Through:', socket.auth.user.username, obj);
+	if (obj.time != 0) {
+		console.log('Write Through:', socket.auth.user.username, obj);
+	}
 
 	const { movie = -1, season, episode, time } = obj;
 
