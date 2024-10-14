@@ -30,11 +30,13 @@
 						</thead>
 						<tbody class="table-group-divider" v-auto-animate>
 							<tr v-for="entity in entitys">
-								<td scope="row">{{ entity.ID }}</td>
-								<td>{{ entity.title }}</td>
-								<td>
-									<button type="button" class="btn btn-outline-danger" @click="removeIgnoranceItem(entity.ID)">Delete</button>
-								</td>
+								<template v-if="entity != undefined">
+									<td scope="row">{{ entity.ID }}</td>
+									<td>{{ entity.title }}</td>
+									<td>
+										<button type="button" class="btn btn-outline-danger" @click="removeIgnoranceItem(entity.ID)">Delete</button>
+									</td>
+								</template>
 							</tr>
 						</tbody>
 					</table>
