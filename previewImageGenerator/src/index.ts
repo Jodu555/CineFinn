@@ -116,6 +116,14 @@ async function main() {
 
 			if (job.data.publicStreamURL && job.data.entity.subID != 'main') {
 				if (config.useReadRate) {
+					/**
+					 * Read Rate Information:
+					 * 
+					 * - https://stackoverflow.com/questions/70649196/how-to-limit-reading-speed-with-ffmpeg
+					 * - https://www.ffmpeg.org/ffmpeg.html#Advanced-options
+					 * 
+					 */
+
 					command = `ffmpeg -hide_banner -readrate ${job.data.readrate || 0} -i "${job.data.publicStreamURL}" -vf fps=1/10,scale=120:-1 "${path.join(
 						imgDir,
 						'preview%d.jpg'
@@ -247,9 +255,9 @@ async function tryCommand(job: Job<JobMeta, any, string>, imgDir: string, comman
 }
 
 async function spawnFFmpegProcess(command: string, cwd: string = undefined, progress: (speed: number, percent: number) => void) {
-	return new Promise<{ code: number; output: string[]; duration: { h: number; m: number; s: number }; highestSpeed: number }>((resolve, reject) => {
+	return new Promise<{ code: number; output: string[]; duration: { h: number; m: number; s: number; }; highestSpeed: number; }>((resolve, reject) => {
 		const proc = child_process.spawn(command, { shell: true, cwd: cwd });
-		let duration: { h: number; m: number; s: number } = null;
+		let duration: { h: number; m: number; s: number; } = null;
 		let highestSpeed: number = 0;
 		let cumOutput = [];
 
@@ -288,7 +296,7 @@ async function spawnFFmpegProcess(command: string, cwd: string = undefined, prog
 							const [h, m, sc] = time.split(':');
 							const s = parseInt(sc);
 							duration = { h: Number(h), m: Number(m), s };
-						} catch (_) {}
+						} catch (_) { }
 					}
 					try {
 						const speed = parseFloat(line.split('speed=')[1].split('x')[0]);
@@ -308,7 +316,7 @@ async function spawnFFmpegProcess(command: string, cwd: string = undefined, prog
 							clearTimeout(timeout);
 							timeout = null;
 						}
-					} catch (_) {}
+					} catch (_) { }
 				}
 			});
 			cumOutput.push(...lines);
