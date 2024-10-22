@@ -17,6 +17,7 @@ export interface SerieEpisode {
 	season: number;
 	episode: number;
 	langs: Langs[];
+	subID: string;
 }
 export interface SerieMovie {
 	filePath: string;
@@ -133,7 +134,7 @@ export interface TodoItem {
 	edited?: boolean;
 }
 
-export type BrowseSerie = Serie & { url?: string };
+export type BrowseSerie = Serie & { url?: string; };
 
 export interface SyncRoomEntityInfos {
 	season: number;

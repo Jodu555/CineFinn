@@ -20,6 +20,14 @@ router.get(
     }
 );
 
+router.post('/subsystems/movingItem', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+
+    console.log(req.body);
+
+
+    res.status(200).send();
+});
+
 router.get(
     '/overview',
     async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

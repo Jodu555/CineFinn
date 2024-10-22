@@ -39,43 +39,26 @@
 				<template #title>Detailed Disabled Series Overview</template>
 				<template #body>
 					<h3 class="text-center">List of Series</h3>
-					<!-- <div class="position-relative m-4">
-						<div
-							class="progress"
-							role="progressbar"
-							aria-label="Progress"
-							aria-valuenow="50"
-							aria-valuemin="0"
-							aria-valuemax="100"
-							style="height: 1px">
-							<div class="progress-bar" style="width: 50%"></div>
+					<template v-if="movingSerieses.size > 0">
+						<h5>Selected:</h5>
+						<div class="row row-cols-3 row-cols-lg-5 g-2 g-lg-3 d-flex justify-content-between gap-1 mb-3">
+							<div v-for="id in movingSerieses.keys()">
+								<span class="text-primary">
+									{{ id }}
+								</span>
+							</div>
 						</div>
-						<div
-							type="button"
-							class="position-absolute top-0 start-0 translate-middle btn btn-sm btn-primary rounded-pill"
-							style="width: 2rem; height: 2rem">
-							1
+						<div class="d-flex justify-content-center mb-4">
+							<button type="button" @click="selectedSeries = ''" style="width: 60%" class="btn btn-outline-success">Next</button>
 						</div>
-						<div
-							type="button"
-							class="position-absolute top-0 start-50 translate-middle btn btn-sm btn-primary rounded-pill"
-							style="width: 2rem; height: 2rem">
-							2
-						</div>
-						<div
-							type="button"
-							class="position-absolute top-0 start-100 translate-middle btn btn-sm btn-secondary rounded-pill"
-							style="width: 2rem; height: 2rem">
-							3
-						</div>
-					</div> -->
-					<div class="mb-3 ms-5 me-5">
-						<label for="searchTerm" class="form-label">Search</label>
-						<input v-model="searchTerm" type="text" class="form-control" id="searchTerm" aria-describedby="helpId" placeholder="Name or ID" />
-						<small id="helpId" class="form-text text-muted">Name or ID of the Series</small>
-					</div>
+					</template>
 
 					<div v-if="selectedSeries == ''" class="table-responsive-md">
+						<div class="mb-3 ms-5 me-5">
+							<label for="searchTerm" class="form-label">Search</label>
+							<input v-model="searchTerm" type="text" class="form-control" id="searchTerm" aria-describedby="helpId" placeholder="Name or ID" />
+							<small id="helpId" class="form-text text-muted">Name or ID of the Series</small>
+						</div>
 						<table class="table">
 							<thead>
 								<tr>
@@ -93,7 +76,12 @@
 									<td>{{ serie.title }}</td>
 									<td>
 										<button type="button" class="btn btn-outline-primary me-3" @click="selectSeries(serie.ID)">View</button>
-										<button type="button" class="btn btn-outline-danger me-3">Add Full</button>
+										<template v-if="movingSerieses.has(serie.ID)">
+											<button type="button" @click="movingSerieses.delete(serie.ID)" class="btn btn-outline-warning me-3">Remove Full</button>
+										</template>
+										<template v-else>
+											<button type="button" @click="movingSerieses.add(serie.ID)" class="btn btn-outline-danger me-3">Add Full</button>
+										</template>
 									</td>
 								</tr>
 							</tbody>
@@ -126,7 +114,14 @@
 												:title="langDetails[lang.toLowerCase()]?.title || 'None Title'" />
 										</td>
 										<td>
-											<button type="button" disabled class="btn btn-outline-primary me-3">Select Full EP</button>
+											<template v-if="selectedEps.has(uniEp(episode))">
+												<button type="button" @click="selectedEps.delete(uniEp(episode))" class="btn btn-outline-warning me-3">Delete Full EP</button>
+											</template>
+											<template v-else>
+												<button type="button" disabled @click="selectedEps.add(uniEp(episode))" class="btn btn-outline-primary me-3">
+													Select Full EP
+												</button>
+											</template>
 										</td>
 									</tr>
 								</tbody>
@@ -138,7 +133,7 @@
 
 			<h2 class="text-center mt-3 mb-5">MovingList ({{ adminStore.subsystems.movingItems.length }})</h2>
 			<div class="d-flex justify-content-center">
-				<button type="button" disabled class="btn btn-outline-primary" @click="toggleSelectEntityToMoveModal = true">Add Item</button>
+				<button type="button" class="btn btn-outline-primary" @click="toggleSelectEntityToMoveModal = true">Add Item</button>
 			</div>
 
 			<hr />
@@ -197,6 +192,7 @@ import Modal from '@/components/Modal.vue';
 import { useAdminStore } from '@/stores/admin.store';
 import { useIndexStore } from '@/stores/index.store';
 import { useWatchStore } from '@/stores/watch.store';
+import type { SerieEpisode } from '@/types';
 import { langDetails } from '@/utils/constants';
 import { useSocket } from '@/utils/socket';
 import { onMounted, ref } from 'vue';
@@ -209,6 +205,20 @@ const toggleSelectEntityToMoveModal = ref(false);
 
 const searchTerm = ref('');
 const selectedSeries = ref('');
+
+const selectedEps = ref(new Set());
+
+const movingSerieses = ref<Set<string>>(new Set());
+
+function uniEp(episode: SerieEpisode) {
+	return `${episode.filePath}_${episode.langs.join('^')}_${episode.subID}`;
+}
+
+// function addFullEp(episode: SerieEpisode) {
+// 	episode.langs.forEach(l => {
+
+// 	})
+// }
 
 function idtoSock(ID: string) {
 	return adminStore.subsystems.subSockets.find((x) => x.id == ID);

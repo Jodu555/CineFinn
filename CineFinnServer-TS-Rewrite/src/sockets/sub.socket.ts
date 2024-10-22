@@ -113,6 +113,9 @@ export interface MovingItem {
 	filePath: string;
 	entity: Movie | Episode;
 }
+
+export const additionalMovingItems: MovingItem[] = [];
+
 export async function generateMovingItemArray() {
 	const movingArray: MovingItem[] = [];
 
@@ -163,7 +166,7 @@ export async function generateMovingItemArray() {
 		};
 	});
 	// console.log(test, movingArray);
-	return movingArray;
+	return [...additionalMovingItems, ...movingArray];
 }
 
 export async function getAllFilesFromAllSubs() {
