@@ -8,7 +8,7 @@
 		</div>
 		<div v-else>
 			<p class="text-center display-6">{{ adminStore.subsystems.subSockets.length }} / {{ adminStore.subsystems.knownSubSystems.length }}</p>
-			<div class="d-flex justify-content-between gap-3">
+			<div class="row row-cols-2 row-cols-lg-5 g-2 g-lg-3 d-flex justify-content-between gap-3">
 				<div v-for="subsystemID in adminStore.subsystems.knownSubSystems" :key="subsystemID" class="card mb-3" style="max-width: 540px">
 					<div class="card-body">
 						<h5 class="card-title">{{ subsystemID }}</h5>
@@ -99,40 +99,45 @@
 							</tbody>
 						</table>
 					</div>
-					<div v-if="selectedSeries !== ''" class="d-flex justify-content-center">
-						<table class="table" style="width: 85%">
-							<thead>
-								<tr>
-									<th scope="col">SExEP</th>
-									<th scope="col">Langugages</th>
-									<th scope="col">Actions</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr v-for="episode in indexStore.series.find((x) => x.ID == selectedSeries)?.seasons.flat()">
-									<td scope="row">{{ episode.season }}x{{ episode.episode }}</td>
-									<td>
-										<img
-											v-for="lang in episode.langs"
-											:key="lang"
-											class="flag shadow mb-1 mt-1 bg-body"
-											:src="`/flag-langs/${lang.toLowerCase()}.svg`"
-											:alt="langDetails[lang.toLowerCase()]?.alt || 'None Alt'"
-											:title="langDetails[lang.toLowerCase()]?.title || 'None Title'" />
-									</td>
-									<td>
-										<button type="button" disabled class="btn btn-outline-primary me-3">Select Full EP</button>
-									</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
+					<template v-if="selectedSeries !== ''">
+						<div class="d-flex justify-content-center">
+							<button type="button" @click="selectedSeries = ''" style="width: 50%" class="btn btn-outline-secondary">Back</button>
+						</div>
+
+						<div class="d-flex justify-content-center">
+							<table class="table" style="width: 85%">
+								<thead>
+									<tr>
+										<th scope="col">SExEP</th>
+										<th scope="col">Langugages</th>
+										<th scope="col">Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr v-for="episode in indexStore.series.find((x) => x.ID == selectedSeries)?.seasons.flat()">
+										<td scope="row">{{ episode.season }}x{{ episode.episode }}</td>
+										<td>
+											<img
+												v-for="lang in episode.langs"
+												:key="lang"
+												class="flag shadow mb-1 mt-1 bg-body"
+												:src="`/flag-langs/${lang.toLowerCase()}.svg`"
+												:alt="langDetails[lang.toLowerCase()]?.alt || 'None Alt'"
+												:title="langDetails[lang.toLowerCase()]?.title || 'None Title'" />
+										</td>
+										<td>
+											<button type="button" disabled class="btn btn-outline-primary me-3">Select Full EP</button>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</template>
 				</template>
 			</Modal>
 
 			<h2 class="text-center mt-3 mb-5">MovingList ({{ adminStore.subsystems.movingItems.length }})</h2>
 			<div class="d-flex justify-content-center">
-				<!-- This Could show a modal where either a whole series a single season or some episodes can be made to a moving -->
 				<button type="button" disabled class="btn btn-outline-primary" @click="toggleSelectEntityToMoveModal = true">Add Item</button>
 			</div>
 
