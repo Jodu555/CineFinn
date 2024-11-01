@@ -223,7 +223,7 @@ app.use('/ignorelist', authHelper.authenticationFull((u) => u.role >= 2), ignore
 
 //Proxys
 app.use('/segments', authHelper.authentication(), segmentProxy);
-app.use('/bullboard', authHelper.authentication(), bullBoardProxy);
+app.use('/bullboard', authHelper.authenticationFull((u) => u.role >= 2), bullBoardProxy);
 
 //Your direct routing stuff here
 app.get('/video', authHelper.authentication(), video);

@@ -3,11 +3,11 @@
 		<br />
 
 		<div class="d-flex justify-content-between">
-			<button class="btn btn-outline-primary mb-5" @click="addEmptyItem">Add Item</button>
+			<button v-if="auth.userInfo.role >= 2" class="btn btn-outline-primary mb-5" @click="addEmptyItem">Add Item</button>
 
 			<button class="btn btn-outline-warning mb-5" @click="minimal = !minimal">Minimal View</button>
 
-			<button class="btn btn-outline-danger mb-5" @click="rescrapeAllItems">Rescrape All Items</button>
+			<button v-if="auth.userInfo.role >= 2" class="btn btn-outline-danger mb-5" @click="rescrapeAllItems">Rescrape All Items</button>
 		</div>
 
 		<div v-if="loading" class="d-flex justify-content-center">
@@ -41,20 +41,35 @@
 									{{ element.name }} -
 									{{ element.categorie }}
 									<span class="badge bg-primary mx-2 me-3">{{ element.order }}</span>
-									<button v-if="!element.edited" title="Edit" type="button" @click="element.edited = true" class="btn btn-outline-primary me-3">
+									<button
+										v-if="auth.userInfo.role >= 2 && !element.edited"
+										title="Edit"
+										type="button"
+										@click="element.edited = true"
+										class="btn btn-outline-primary me-3">
 										<font-awesome-icon :icon="['fa-solid', 'fa-pen']" size="lg" />
 									</button>
-									<button v-if="!element.edited" title="Use" type="button" @click="useTodo(element.ID)" class="btn btn-outline-success me-3">
+									<button
+										v-if="auth.userInfo.role >= 2 && !element.edited"
+										title="Use"
+										type="button"
+										@click="useTodo(element.ID)"
+										class="btn btn-outline-success me-3">
 										<font-awesome-icon :icon="['fa-solid', 'fa-check']" size="lg" />
 									</button>
-									<button v-if="!element.edited" title="Delete" type="button" @click="deleteTodo(element.ID)" class="btn btn-outline-danger">
+									<button
+										v-if="auth.userInfo.role >= 2 && !element.edited"
+										title="Delete"
+										type="button"
+										@click="deleteTodo(element.ID)"
+										class="btn btn-outline-danger">
 										<font-awesome-icon :icon="['fa-solid', 'fa-trash']" size="lg" />
 									</button>
 								</div>
 								<div>
 									<!-- Bring to Top -->
 									<button
-										v-if="!element.edited && element.order > 6 && auth.userInfo.role > 2"
+										v-if="auth.userInfo.role >= 2 && !element.edited && element.order > 6 && auth.userInfo.role > 2"
 										title="Bring to top"
 										@click="moveToDoToTop(element.ID)"
 										type="button"
@@ -63,7 +78,7 @@
 									</button>
 									<!-- Bring to Bottom -->
 									<button
-										v-if="!element.edited && element.order <= state.list.length / 1.2"
+										v-if="auth.userInfo.role >= 2 && !element.edited && element.order <= state.list.length / 1.2"
 										title="Bring to Bottom"
 										@click="moveToDoToBottom(element.ID)"
 										type="button"
@@ -278,11 +293,11 @@
 		</draggable>
 
 		<div v-if="state.list.length >= 7" class="d-flex justify-content-between mt-5 mb-5">
-			<button class="btn btn-outline-primary mb-5" @click="addEmptyItem">Add Item</button>
+			<button v-if="auth.userInfo.role >= 2" class="btn btn-outline-primary mb-5" @click="addEmptyItem">Add Item</button>
 
 			<button class="btn btn-outline-warning mb-5" @click="minimal = !minimal">Minimal View</button>
 
-			<button class="btn btn-outline-danger mb-5" @click="rescrapeAllItems">Rescrape All Items</button>
+			<button v-if="auth.userInfo.role >= 2" class="btn btn-outline-danger mb-5" @click="rescrapeAllItems">Rescrape All Items</button>
 		</div>
 
 		<div v-if="auth.settings.developerMode.value" class="mt-5">
