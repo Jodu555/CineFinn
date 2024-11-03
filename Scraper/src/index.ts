@@ -215,15 +215,20 @@ async function checkForUpdates() {
 
 	console.time('Compare');
 	// const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: false, sto: true, zoro: false });
-	const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: false, zoro: false });
+	const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: true, zoro: false });
 	console.timeEnd('Compare');
 
 	if (output.aniworld.length == 0 && output.sto.length == 0) return;
 
-	await kickOffAniDl([
+	const condensedArray = [
 		...output.aniworld.map(x => ({ _categorie: 'Aniworld', ...x })),
 		...output.sto.map(x => ({ _categorie: 'STO', ...x }))
-	]);
+	];
+
+	console.log(condensedArray);
+	// return;
+
+	await kickOffAniDl(condensedArray);
 
 	await recrawlArchive();
 	await generateImages();

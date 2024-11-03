@@ -44,41 +44,15 @@ async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceIt
 	let zoro: ExtendedEpisodeDownload[] = [];
 
 	if (providerCheck.sto) {
-		console.log('------ Compare STO ------');
-		sto = await compareForNewReleasesSTO(series, ignoranceList);
-		console.log('------ Compare STO ------');
-		fs.writeFileSync('dlListSTO.json', JSON.stringify(sto, null, 3));
+		sto = await compareForNewReleasesProvider('STO', 'dlListSTO.json', async () => await compareForNewReleasesSTO(series, ignoranceList));
 	}
 
 	if (providerCheck.aniworld) {
-		let stats: fs.Stats | null;
-		try {
-			stats = fs.statSync('dlListAniworld.json');
-		} catch (error) {
-			stats = null;
-		}
-		const lastAlteredFileMin = (Date.now() - stats?.mtimeMs) / 1000 / 60;
-		if (stats != null && lastAlteredFileMin < 50) {
-			//Use the previous list maybe the user re ran cause there was an error
-			console.log('------ Compare Aniworld ------');
-			console.log('A Previous run from', lastAlteredFileMin, 'minutes ago was found!');
-			aniworld = JSON.parse(fs.readFileSync('dlListAniworld.json', 'utf-8'));
-			console.log('------ Compare Aniworld ------');
-			fs.writeFileSync('dlListAniworld.json', JSON.stringify(aniworld, null, 3));
-		} else {
-			//LETS CHECK IT
-			console.log('------ Compare Aniworld ------');
-			aniworld = await compareForNewReleasesAniWorld(series, ignoranceList);
-			console.log('------ Compare Aniworld ------');
-			fs.writeFileSync('dlListAniworld.json', JSON.stringify(aniworld, null, 3));
-		}
+		aniworld = await compareForNewReleasesProvider('Aniworld', 'dlListAniworld.json', async () => await compareForNewReleasesAniWorld(series, ignoranceList));
 	}
 
 	if (providerCheck.zoro) {
-		console.log('------ Compare Zoro ------');
-		zoro = await compareForNewReleasesZoro(series, ignoranceList);
-		console.log('------ Compare Zoro ------');
-		fs.writeFileSync('dlListZoro.json', JSON.stringify(zoro, null, 3));
+		zoro = await compareForNewReleasesProvider('Zoro', 'dlListZoro.json', async () => await compareForNewReleasesZoro(series, ignoranceList));
 	}
 
 	return {
@@ -86,6 +60,32 @@ async function compareForNewReleases(series: Serie[], ignoranceList: IgnoranceIt
 		zoro,
 		sto,
 	};
+}
+
+async function compareForNewReleasesProvider(name: string, filename: string, compareFunction: () => Promise<ExtendedEpisodeDownload[]>) {
+	let output: ExtendedEpisodeDownload[] = [];
+	let stats: fs.Stats | null;
+	try {
+		stats = fs.statSync(filename);
+	} catch (error) {
+		stats = null;
+	}
+	const lastAlteredFileMin = (Date.now() - stats?.mtimeMs) / 1000 / 60;
+	if (stats != null && lastAlteredFileMin < 50) {
+		//Use the previous list maybe the user re ran cause there was an error
+		console.log(`------ Compare ${name} ------`);
+		console.log('A Previous run from', lastAlteredFileMin, 'minutes ago was found!');
+		output = JSON.parse(fs.readFileSync(filename, 'utf-8'));
+		console.log(`------ Compare ${name} ------`);
+		fs.writeFileSync(filename, JSON.stringify(output, null, 3));
+	} else {
+		//LETS CHECK IT
+		console.log(`------ Compare ${name} ------`);
+		output = await compareFunction();
+		console.log(`------ Compare ${name} ------`);
+		fs.writeFileSync(filename, JSON.stringify(output, null, 3));
+	}
+	return output;
 }
 
 async function compareForNewReleasesAniWorld(
