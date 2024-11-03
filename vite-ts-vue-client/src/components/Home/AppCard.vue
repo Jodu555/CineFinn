@@ -1,7 +1,12 @@
 <template>
 	<div class="carousel-card" :class="{ active: isActive }">
 		<div class="carousel-card-image">
-			<img :src="searchItem.url" />
+			<div v-if="imageLoading" class="text-center justify-content-center mt-3">
+				<div class="spinner-border" style="width: 3rem; height: 3rem" role="status">
+					<span class="visually-hidden">Loading...</span>
+				</div>
+			</div>
+			<img ref="image" :src="searchItem.url" />
 		</div>
 
 		<div class="carousel-card-details">
@@ -19,11 +24,21 @@
 
 <script setup lang="ts">
 import type { BrowseSerie } from '@/types';
+import { onMounted, ref } from 'vue';
 
 const props = defineProps<{
 	searchItem: BrowseSerie;
 	isActive: Boolean;
 }>();
+const image = ref<HTMLImageElement | null>(null);
+const imageLoading = ref(true);
+onMounted(() => {
+	if (!image.value) return;
+	image.value.addEventListener('load', () => {
+		imageLoading.value = false;
+	});
+	image.value.addEventListener('error', () => console.log('Error on Loading Image', props.searchItem.ID));
+});
 </script>
 
 <style lang="scss" scoped>

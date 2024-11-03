@@ -43,7 +43,7 @@ onMounted(async () => {
 				.filter((x) => x.infos?.image == true)
 				.map((x) => x.ID)
 				.sort(() => Math.random() - 0.5)
-				.slice(0, 9),
+				.slice(0, 20),
 		};
 	}
 	console.log(json);
