@@ -122,7 +122,9 @@ const crawlAndIndex = async () => {
 	//TODO: maybe switch this up to first process the main and then the subs so if there are duplicates the main is chosen
 	let files: SubFile[] = [];
 
+	console.time('Getting-SubFiles');
 	const subFiles = await getAllFilesFromAllSubs();
+	console.timeEnd('Getting-SubFiles');
 
 	files.push(...subFiles);
 
@@ -175,6 +177,10 @@ const crawlAndIndex = async () => {
 			if (Array.isArray(currentArr)) {
 				const existEpisode = currentArr.find((eps) => eps.season == parsedData.season && eps.episode == parsedData.episode);
 				if (existEpisode) {
+					if (!existEpisode.langs.includes(parsedData.language)) {
+						existEpisode.langs.push(parsedData.language);
+						return;
+					}
 					if (existEpisode.subID != subID) {
 						const error = `Sub System Overlap in ${item.title}(${item.ID}) - ${existEpisode.season}x${existEpisode.episode} Exists in ${existEpisode.subID} at ${existEpisode.filePath} and in ${subID} at ${e}`;
 						console.log(error);
