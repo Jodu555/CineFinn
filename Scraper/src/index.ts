@@ -218,9 +218,12 @@ async function checkForUpdates() {
 	const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: false, zoro: false });
 	console.timeEnd('Compare');
 
-	if (output.aniworld.length == 0) return;
+	if (output.aniworld.length == 0 && output.sto.length == 0) return;
 
-	await kickOffAniDl(output.aniworld);
+	await kickOffAniDl([
+		...output.aniworld.map(x => ({ _categorie: 'Aniworld', ...x })),
+		...output.sto.map(x => ({ _categorie: 'STO', ...x }))
+	]);
 
 	await recrawlArchive();
 	await generateImages();

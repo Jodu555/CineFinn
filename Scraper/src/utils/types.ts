@@ -36,6 +36,7 @@ export interface IgnoranceItem {
 }
 
 export interface ExtendedEpisodeDownload {
+	_categorie?: string;
 	_animeFolder: string;
 	finished: boolean;
 	folder: string;
