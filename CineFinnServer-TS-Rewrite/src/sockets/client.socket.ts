@@ -87,7 +87,7 @@ const initialize = (socket: ExtendedSocket) => {
 			(s) => {
 				s.emit('rmvc-recieve-videoStateChange', { isPlaying });
 			},
-			(s) => s.auth.RMVCEmitterSessionID == socket.auth.RMVCSessionID
+			(s) => s.auth.RMVCEmitterSessionID == socket.auth.RMVCSessionID && s.auth.RMVCEmitterSessionID != ''
 		);
 	});
 
