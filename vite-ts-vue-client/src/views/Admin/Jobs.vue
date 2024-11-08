@@ -63,7 +63,6 @@
 <script lang="ts" setup>
 import Progress from '@/components/Admin/Progress.vue';
 import { useAxios } from '@/utils';
-import { BULLBOARDAPIURL } from '@/utils/__nogit';
 import { onMounted, onUnmounted, ref } from 'vue';
 
 function upperCaseFirstLetter(str: string) {
@@ -153,39 +152,15 @@ onMounted(async () => {
 });
 
 async function retry(queueType: string = 'failed') {
-	const response = await useAxios().put(
-		`${BULLBOARDAPIURL}queues/previewImageQueue/retry/${queueType}`,
-		{},
-		{
-			headers: {
-				token: 'testtokenLULW',
-			},
-		}
-	);
+	const response = await useAxios().put(`/bullboard/queues/previewImageQueue/retry/${queueType}`, {});
 	if (response.status !== 200) return;
 }
 async function pause() {
-	const response = await useAxios().put(
-		`${BULLBOARDAPIURL}queues/previewImageQueue/pause`,
-		{},
-		{
-			headers: {
-				token: 'testtokenLULW',
-			},
-		}
-	);
+	const response = await useAxios().put(`/bullboard/queues/previewImageQueue/pause`, {});
 	if (response.status !== 200) return;
 }
 async function resume() {
-	const response = await useAxios().put(
-		`${BULLBOARDAPIURL}queues/previewImageQueue/resume`,
-		{},
-		{
-			headers: {
-				token: 'testtokenLULW',
-			},
-		}
-	);
+	const response = await useAxios().put(`/bullboard/queues/previewImageQueue/resume`, {});
 	if (response.status !== 200) return;
 }
 
