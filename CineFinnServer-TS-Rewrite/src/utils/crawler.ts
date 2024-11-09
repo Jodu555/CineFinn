@@ -239,6 +239,11 @@ const mergeSeriesArrays = (before: Series[], after: Series[], keepCurrentlyNotPr
 		if (afterSerie) {
 			// console.log('Found Overlapping', beforeSerie.title, afterSerie.title, beforeSerie.ID, afterSerie.ID);
 			if (!afterSerie.infos.disabled) beforeSerie.infos.disabled = false;
+
+			if (JSON.stringify(beforeSerie.movies) != JSON.stringify(afterSerie.movies) || JSON.stringify(beforeSerie.seasons) != JSON.stringify(afterSerie.seasons)) {
+				console.log(`Actual Change in Serie: ${beforeSerie.title} with ${beforeSerie.ID}`);
+				//TODO: update the series latestUpdated and add a property for that
+			}
 			output.push(
 				new Series(
 					beforeSerie.ID,
