@@ -30,10 +30,62 @@
 									Series: {{ idtoSock(subsystemID) == undefined ? 'Offline' : idtoSock(subsystemID)?.affectedSeriesIDs.length }}
 								</li>
 							</ul>
+							<div v-if="idtoSock(subsystemID) !== undefined" class="d-grid gap-2">
+								<button
+									type="button"
+									@click="
+										toggleShowSeries = true;
+										selectedSubSystem = subsystemID;
+									"
+									class="btn btn-outline-primary mt-2">
+									List
+								</button>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
+
+			<Modal id="toggleShowSeries" size="xl" v-model:show="toggleShowSeries">
+				<template #title>Series for {{ selectedSubSystem }}</template>
+				<template #body>
+					<div class="mb-3 ms-5 me-5">
+						<label for="searchTerm" class="form-label">Search</label>
+						<input v-model="searchTerm" type="text" class="form-control" id="searchTerm" aria-describedby="helpId" placeholder="Name or ID" />
+						<small id="helpId" class="form-text text-muted">Name or ID of the Series</small>
+					</div>
+					<div class="d-flex justify-content-center">
+						<table class="table" style="width: 75%; max-width: 85%">
+							<thead>
+								<tr>
+									<th scope="col">ID</th>
+									<th scope="col">Title</th>
+									<th scope="col">Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr
+									v-for="serie in idtoSock(selectedSubSystem)
+										?.affectedSeriesIDs.map((x) => indexStore.series.find((y) => y.ID == x))
+										.filter(
+											(x) => x?.title.toLowerCase().includes(searchTerm.toLowerCase()) || x?.ID.toLowerCase().startsWith(searchTerm.toLowerCase())
+										)">
+									<template v-if="serie !== undefined">
+										<td scope="row">{{ serie.ID }}</td>
+										<td>{{ serie.title }}</td>
+										<td>-</td>
+									</template>
+									<template v-else>
+										<td scope="row">-</td>
+										<td>-</td>
+										<td>-</td>
+									</template>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</template>
+			</Modal>
 
 			<Modal id="selectSeriesToMove" size="xl" v-model:show="toggleSelectEntityToMoveModal">
 				<template #title>Detailed Disabled Series Overview</template>
@@ -202,6 +254,8 @@ const watchStore = useWatchStore();
 const adminStore = useAdminStore();
 
 const toggleSelectEntityToMoveModal = ref(false);
+const toggleShowSeries = ref(false);
+const selectedSubSystem = ref('');
 
 const searchTerm = ref('');
 const selectedSeries = ref('');
