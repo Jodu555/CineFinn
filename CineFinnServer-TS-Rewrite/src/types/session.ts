@@ -121,29 +121,29 @@ interface ClientToServerEvents {
 	'rmvc-connect': (arg0: rmvcConnectArg) => void;
 	'rmvc-send-action': (arg0: rmvcSendActionArg) => void;
 	todoListUpdate: (list: DatabaseParsedTodoItem[]) => void;
-	'sync-create': (obj: { ID: number }) => void;
-	'sync-join': (obj: { ID: number }) => void;
-	'sync-leave': (obj: { ID: number }) => void;
-	'sync-selectSeries': (obj: { ID: number }) => void;
-	'sync-promote': (obj: { userUUID: string }) => void;
-	'sync-video-change': (obj: { season: number; episode: number; movie: number; langchange: Boolean; lang: Langs }) => void;
-	'sync-video-action': (obj: { action: VideoAction; value: boolean | string; time?: string }) => void;
-	'sync-video-info': (obj: { currentTime: number; isPlaying: boolean }) => void;
+	'sync-create': (obj: { ID: number; }) => void;
+	'sync-join': (obj: { ID: number; }) => void;
+	'sync-leave': (obj: { ID: number; }) => void;
+	'sync-selectSeries': (obj: { ID: number; }) => void;
+	'sync-promote': (obj: { userUUID: string; }) => void;
+	'sync-video-change': (obj: { season: number; episode: number; movie: number; langchange: Boolean; lang: Langs; }) => void;
+	'sync-video-action': (obj: { action: VideoAction; value: boolean | string; time?: string; }) => void;
+	'sync-video-info': (obj: { currentTime: number; isPlaying: boolean; }) => void;
 
-	'video-chunk': (obj: { chunk: string | Buffer; requestId: string }) => void;
-	'video-chunk-end': (obj: { requestId: string }) => void;
-	'video-chunk-error': (obj: { requestId: string; error: Error }) => void;
+	'video-chunk': (obj: { chunk: string | Buffer; requestId: string; }) => void;
+	'video-chunk-end': (obj: { requestId: string; }) => void;
+	'video-chunk-error': (obj: { requestId: string; error: Error; }) => void;
 
-	openStream: (obj: { transmitID: string; fd: number; size: number; subPath: string }) => void;
+	openStream: (obj: { transmitID: string; fd: number; size: number; subPath: string; }) => void;
 	closeStream: (
-		obj: { transmitID: string; fd: number; packetCount: number; fingerprint: string },
-		callback: (obj: { valid: boolean }) => void
+		obj: { transmitID: string; fd: number; packetCount: number; fingerprint: string; },
+		callback: (obj: { valid: boolean; }) => void
 	) => void;
-	dataStream: (obj: { transmitID: string; fd: number; data: Buffer }) => void;
+	dataStream: (obj: { transmitID: string; fd: number; data: Buffer; }) => void;
 
-	'move-moving-item': (obj: { ID: string }) => void;
+	'move-moving-item': (obj: { ID: string; }) => void;
 
-	files: (obj: { files: string[] }) => void;
+	files: (obj: { files: string[]; }) => void;
 }
 
 export type VideoAction = 'sync-playback' | 'sync-skip' | 'sync-skipTimeline';
@@ -153,5 +153,5 @@ export interface ExtendedSocket extends Socket<ClientToServerEvents, DefaultEven
 }
 export interface ExtendedRemoteSocket extends RemoteSocket<DefaultEventsMap, any> {
 	auth: SocketAuthObject;
-	sync?: { ID: number | string };
+	sync?: { ID: number | string; };
 }

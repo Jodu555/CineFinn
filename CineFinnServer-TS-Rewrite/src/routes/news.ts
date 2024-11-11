@@ -3,7 +3,6 @@ import { Database } from '@jodu555/mysqlapi';
 import { DatabaseNewsItem, DatabaseJobItem } from '../types/database';
 import { AuthenticatedRequest, Role } from '../types/session';
 import { roleAuthorization } from '../utils/roleManager';
-const { getAniworldInfos } = require('../sockets/scraper.socket');
 const database = Database.getDatabase();
 const router = express.Router();
 

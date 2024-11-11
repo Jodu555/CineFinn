@@ -120,11 +120,11 @@ export interface AnixSeriesInformation {
 	seasons: AnixEpisode[][];
 }
 
-const getAniworldInfos = buildAwaitSocketReturn<AniWorldSeriesInformations, { url: string }>('AniworldData');
-const getZoroInfos = buildAwaitSocketReturn<ZoroReturn, { ID: string | number }>('ZoroData');
-const getAnixInfos = buildAwaitSocketReturn<AnixSeriesInformation, { slug: string }>('AnixData');
-const getNewZoroInfos = buildAwaitSocketReturn<ZoroSeriesInformation, { ID: string | number }>('newZoroData');
-const checkForUpdates = buildAwaitSocketReturn<{ success: boolean; error: Error }, void>('checkForUpdates');
+const getAniworldInfos = buildAwaitSocketReturn<AniWorldSeriesInformations, { url: string; }>('AniworldData');
+const getZoroInfos = buildAwaitSocketReturn<ZoroReturn, { ID: string | number; }>('ZoroData');
+const getAnixInfos = buildAwaitSocketReturn<AnixSeriesInformation, { slug: string; }>('AnixData');
+const getNewZoroInfos = buildAwaitSocketReturn<ZoroSeriesInformation, { ID: string | number; }>('newZoroData');
+const checkForUpdates = buildAwaitSocketReturn<{ success: boolean; error: Error; }, void>('checkForUpdates');
 
 const manageTitle = buildAwaitSocketReturn('manageTitle');
 

@@ -7,7 +7,7 @@ import { cleanupSeriesBeforeFrontResponse } from '../classes/series';
 import { DatabaseParsedTodoItem, DatabaseTodoItem } from '../types/database';
 import { ExtendedSocket, ExtendedRemoteSocket, Role } from '../types/session';
 import { isPermitted } from '../utils/roleManager';
-import { getAniworldInfos, getNewZoroInfos, getZoroInfos, isScraperSocketConnected } from './scraper.socket';
+import { isScraperSocketConnected } from './scraper.socket';
 import { LOOKUP, callpointToEvent } from '../routes/managment';
 import { backgroundScrapeTodo, checkIfTodoNeedsScrape } from '../utils/todo';
 import { sendSocketAdminUpdate } from '../utils/admin';
