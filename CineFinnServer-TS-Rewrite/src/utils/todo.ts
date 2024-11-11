@@ -1,5 +1,5 @@
 import { Database } from '@jodu555/mysqlapi';
-import { AniWorldSeriesInformations, AnixSeriesInformation, getAniworldInfos, getAnixInfos, getNewZoroInfos, ZoroSeriesInformation } from '../sockets/scraper.socket';
+import { AniWorldSeriesInformations, AnixSeriesInformation, getAniworldInfos, getAnixInfos, getMyAsianTVInfos, getNewZoroInfos, MyAsianSeries, ZoroSeriesInformation } from '../sockets/scraper.socket';
 import { DatabaseParsedTodoItem, DatabaseTodoItem, References } from '../types/database';
 import { toAllSockets } from './utils';
 
@@ -36,11 +36,18 @@ const scrapers = [
 		},
 		scrapeKey: 'scraped',
 	},
+	{
+		referenceKey: 'myasiantv',
+		scrapeFunction: async (todo: DatabaseParsedTodoItem) => {
+			return getMyAsianTVInfos({ slug: todo.references.myasiantv });
+		},
+		scrapeKey: 'scrapedMyasiantv',
+	}
 ] satisfies ScraperDefinition[];
 
 interface ScraperDefinition {
 	referenceKey: keyof References;
-	scrapeFunction: (todo: DatabaseParsedTodoItem) => Promise<void | (AniWorldSeriesInformations | ZoroSeriesInformation | AnixSeriesInformation)>;
+	scrapeFunction: (todo: DatabaseParsedTodoItem) => Promise<void | (AniWorldSeriesInformations | ZoroSeriesInformation | AnixSeriesInformation | MyAsianSeries)>;
 	scrapeKey: keyof DatabaseParsedTodoItem;
 }
 
@@ -110,6 +117,9 @@ export async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 				if (todo.scrapingError) delete todo.scrapingError;
 				if (result) {
 					todo[scraper.scrapeKey] = result as any;
+					if (scraper.scrapeKey != 'scraped') {
+						todo.scraped = undefined;
+					}
 				} else {
 					console.log('Got Bad Infos', result, 'for url', todo.references.aniworld, 'scraperID', scraper.referenceKey);
 				}

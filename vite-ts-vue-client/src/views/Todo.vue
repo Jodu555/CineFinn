@@ -255,7 +255,7 @@
 									</div>
 								</div>
 								<hr />
-								<h6>Other</h6>
+								<h6>STO</h6>
 								<div class="row text-center align-items-center mb-4">
 									<div class="col-2">
 										<label for="url" class="form-label">STO:</label>
@@ -267,6 +267,21 @@
 											class="form-control"
 											id="url"
 											v-model="element.references.sto" />
+									</div>
+								</div>
+								<hr />
+								<h6>K-Drama</h6>
+								<div class="row text-center align-items-center mb-4">
+									<div class="col-2">
+										<label for="url" class="form-label">MyAsianTV:</label>
+									</div>
+									<div class="col-7">
+										<input
+											type="text"
+											:disabled="auth.userInfo.UUID != element.creator && auth.userInfo.role == 2"
+											class="form-control"
+											id="url"
+											v-model="element.references.myasiantv" />
 									</div>
 								</div>
 
@@ -311,7 +326,7 @@ import { useAxios } from '@/utils';
 import { useSocket } from '@/utils/socket';
 import { reactive, computed, ref, onMounted, getCurrentInstance, onUnmounted } from 'vue';
 
-import type { NewsItem, TodoItem } from '@/types/index';
+import type { NewsItem, References, TodoItem } from '@/types/index';
 import type { AniWorldAdditionalSeriesInformations, AniWorldSeriesInformations, ZoroSeriesInformation } from '@/types/scraper';
 import draggable from 'vuedraggable';
 
@@ -349,30 +364,102 @@ const dragOptions = computed(() => {
 	};
 });
 
+const scrapers = [
+	{
+		referenceKey: 'aniworld',
+		scrapeKey: 'scraped',
+		imagePath: ['informations', 'image'],
+	},
+	{
+		referenceKey: 'zoro',
+		scrapeKey: 'scrapednewZoro',
+		imagePath: ['image'],
+	},
+	{
+		referenceKey: 'zoro',
+		scrapeKey: 'scrapedZoro',
+		imagePath: ['image'],
+	},
+	{
+		referenceKey: 'anix',
+		scrapeKey: 'scrapedAnix',
+		imagePath: ['image'],
+	},
+	{
+		referenceKey: 'sto',
+		scrapeKey: 'scraped',
+		imagePath: ['informations', 'image'],
+	},
+	{
+		referenceKey: 'myasiantv',
+		scrapeKey: 'scrapedMyasiantv',
+		imagePath: ['informations', 'image'],
+	},
+] satisfies ScraperDefinition[];
+
+interface ScraperDefinition {
+	referenceKey: keyof References;
+	scrapeKey: keyof TodoItem;
+	imagePath: string[];
+}
+
+function lookDeep(obj: any, keys: string[]) {
+	let current = obj;
+	for (const key of keys) {
+		if (current[key] === undefined) {
+			return undefined;
+		}
+		current = current[key];
+	}
+	return current;
+}
+
 function decideImageURL(element: TodoItem) {
 	if (minimal.value) return '';
 
-	if (
-		element.scraped != undefined &&
-		element.scraped !== true &&
-		element.scraped.informations.image &&
-		typeof element.scraped.informations.image == 'string'
-	) {
-		return element.scraped.informations.image;
-	}
-	if (
-		element.scrapednewZoro != undefined &&
-		element.scrapednewZoro !== true &&
-		element.scrapednewZoro.image &&
-		typeof element.scrapednewZoro.image == 'string'
-	) {
-		return element.scrapednewZoro.image;
-	}
-
-	if (element.scrapedAnix != undefined && element.scrapedAnix !== true && element.scrapedAnix.image && typeof element.scrapedAnix.image == 'string') {
-		return element.scrapedAnix.image;
+	for (const scraper of scrapers) {
+		const scrapeInfo = element[scraper.scrapeKey] as any;
+		console.log(element, scraper.scrapeKey, scrapeInfo);
+		if (scrapeInfo != undefined && scrapeInfo !== true) {
+			const img = lookDeep(scrapeInfo, scraper.imagePath);
+			console.log(img);
+			if (img && typeof img == 'string') {
+				return img;
+			}
+		}
 	}
 	return '';
+	// if (
+	// 	element.scraped != undefined &&
+	// 	element.scraped !== true &&
+	// 	element.scraped.informations.image &&
+	// 	typeof element.scraped.informations.image == 'string'
+	// ) {
+	// 	return element.scraped.informations.image;
+	// }
+	// if (
+	// 	element.scrapednewZoro != undefined &&
+	// 	element.scrapednewZoro !== true &&
+	// 	element.scrapednewZoro.image &&
+	// 	typeof element.scrapednewZoro.image == 'string'
+	// ) {
+	// 	return element.scrapednewZoro.image;
+	// }
+
+	// if (element.scrapedAnix != undefined && element.scrapedAnix !== true && element.scrapedAnix.image && typeof element.scrapedAnix.image == 'string') {
+	// 	return element.scrapedAnix.image;
+	// }
+
+	// if (
+	// 	element.scrapedMyasiantv != undefined &&
+	// 	element.scrapedMyasiantv !== true &&
+	// 	element.scrapedMyasiantv.informations.image &&
+	// 	typeof element.scrapedMyasiantv.informations.image == 'string'
+	// ) {
+	// 	return element.scrapedMyasiantv.informations.image;
+	// }
+
+	// return '';
 }
 
 onMounted(() => {

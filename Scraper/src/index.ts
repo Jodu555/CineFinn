@@ -10,6 +10,7 @@ import Zoro from './class/Zoro';
 import Anix from './class/Anix';
 const { similar } = require('./utils/utils');
 import { ExtendedEpisodeDownload, IgnoranceItem, Serie } from './utils/types';
+import MyAsianTV, { MyAsianSeries } from './class/MyAsianTv';
 
 const socket = io(process.env.CORE_URL, { auth: { type: 'scraper', token: process.env.AUTH_TOKEN } });
 
@@ -462,6 +463,15 @@ buildFunction<any, { slug: string; }>('AnixData', async ({ slug }) => {
 	await anix.initialize();
 	const informations = await anix.parseInformations();
 	return { ...informations };
+});
+
+buildFunction<MyAsianSeries, { slug: string; }>('MyAsianTVData', async ({ slug }) => {
+	console.log('Recieved MyAsianTVData', slug);
+	const myAsianTV = new MyAsianTV(slug);
+	const informations = await myAsianTV.parseInformations();
+	console.log(informations);
+
+	return informations;
 });
 
 buildFunction<any, { title: string; aniworld: boolean; }>('manageTitle', async ({ title, aniworld }) => {

@@ -1,4 +1,4 @@
-import { AniWorldSeriesInformations, AnixSeriesInformation, ZoroReturn, ZoroSeriesInformation } from '../sockets/scraper.socket';
+import { AniWorldSeriesInformations, AnixSeriesInformation, MyAsianSeries, ZoroReturn, ZoroSeriesInformation } from '../sockets/scraper.socket';
 import { Langs } from './classes';
 
 export interface DatabaseWatchStringItem {
@@ -32,10 +32,11 @@ export interface DatabaseParsedTodoItem {
 	scrapedZoro?: ZoroReturn | true;
 	scrapednewZoro?: ZoroSeriesInformation | true;
 	scrapedAnix?: AnixSeriesInformation | true;
+	scrapedMyasiantv?: MyAsianSeries | true;
 	scrapingError?: string;
 }
 
-export type References = Record<'aniworld' | 'zoro' | 'anix' | 'sto', string>;
+export type References = Record<'aniworld' | 'zoro' | 'anix' | 'sto' | 'myasiantv', string>;
 
 export interface DatabaseSyncRoomEntityInfos {
 	season: number;

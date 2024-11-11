@@ -117,7 +117,28 @@ export interface NewsItem {
 	content: string;
 }
 
-export type References = Record<'aniworld' | 'zoro' | 'anix' | 'sto', string>;
+export interface MyAsianSeries {
+	url: string;
+	title: string;
+	informations: MyAsianInformations;
+	episodes: MyAsianEpisode[];
+}
+
+interface MyAsianInformations {
+	year: string;
+	status: string;
+	genres: string[];
+	description: string;
+	image: string;
+}
+
+interface MyAsianEpisode {
+	number: number;
+	title: string;
+	url: string;
+}
+
+export type References = Record<'aniworld' | 'zoro' | 'anix' | 'sto' | 'myasiantv', string>;
 
 export interface TodoItem {
 	ID: string;
@@ -130,6 +151,7 @@ export interface TodoItem {
 	scrapedZoro?: ZoroReturn | true;
 	scrapednewZoro?: ZoroSeriesInformation | true;
 	scrapedAnix?: AnixSeriesInformation | true;
+	scrapedMyasiantv?: MyAsianSeries | true;
 	scrapingError?: string;
 	edited?: boolean;
 }

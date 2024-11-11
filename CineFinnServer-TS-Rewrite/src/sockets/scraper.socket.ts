@@ -120,10 +120,32 @@ export interface AnixSeriesInformation {
 	seasons: AnixEpisode[][];
 }
 
+export interface MyAsianSeries {
+	url: string;
+	title: string;
+	informations: MyAsianInformations;
+	episodes: MyAsianEpisode[];
+}
+
+interface MyAsianInformations {
+	year: string;
+	status: string;
+	genres: string[];
+	description: string;
+	image: string;
+}
+
+interface MyAsianEpisode {
+	number: number;
+	title: string;
+	url: string;
+}
+
 const getAniworldInfos = buildAwaitSocketReturn<AniWorldSeriesInformations, { url: string; }>('AniworldData');
 const getZoroInfos = buildAwaitSocketReturn<ZoroReturn, { ID: string | number; }>('ZoroData');
 const getAnixInfos = buildAwaitSocketReturn<AnixSeriesInformation, { slug: string; }>('AnixData');
 const getNewZoroInfos = buildAwaitSocketReturn<ZoroSeriesInformation, { ID: string | number; }>('newZoroData');
+const getMyAsianTVInfos = buildAwaitSocketReturn<MyAsianSeries, { slug: string; }>('MyAsianTVData');
 const checkForUpdates = buildAwaitSocketReturn<{ success: boolean; error: Error; }, void>('checkForUpdates');
 
 const manageTitle = buildAwaitSocketReturn('manageTitle');
@@ -170,6 +192,7 @@ export {
 	getZoroInfos,
 	getNewZoroInfos,
 	getAnixInfos,
+	getMyAsianTVInfos,
 	checkForUpdates,
 	manageTitle,
 	isScraperSocketConnected,
