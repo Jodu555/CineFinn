@@ -1,18 +1,61 @@
 import { Database } from '@jodu555/mysqlapi';
-import { getAniworldInfos, getAnixInfos, getNewZoroInfos } from '../sockets/scraper.socket';
-import { DatabaseParsedTodoItem, DatabaseTodoItem } from '../types/database';
+import { AniWorldSeriesInformations, AnixSeriesInformation, getAniworldInfos, getAnixInfos, getNewZoroInfos, ZoroSeriesInformation } from '../sockets/scraper.socket';
+import { DatabaseParsedTodoItem, DatabaseTodoItem, References } from '../types/database';
 import { toAllSockets } from './utils';
 
 const database = Database.getDatabase();
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const scrapers = [
+	{
+		referenceKey: 'aniworld',
+		scrapeFunction: async (todo: DatabaseParsedTodoItem) => {
+			return getAniworldInfos({ url: todo.references.aniworld });
+		},
+		scrapeKey: 'scraped',
+	},
+	{
+		referenceKey: 'zoro',
+		scrapeFunction: async (todo: DatabaseParsedTodoItem) => {
+			return getNewZoroInfos({ ID: todo.references.zoro });
+		},
+		scrapeKey: 'scrapednewZoro',
+	},
+	{
+		referenceKey: 'anix',
+		scrapeFunction: async (todo: DatabaseParsedTodoItem) => {
+			return getAnixInfos({ slug: todo.references.anix });
+		},
+		scrapeKey: 'scrapedAnix',
+	},
+	{
+		referenceKey: 'sto',
+		scrapeFunction: async (todo: DatabaseParsedTodoItem) => {
+			return getAniworldInfos({ url: todo.references.sto });
+		},
+		scrapeKey: 'scraped',
+	},
+] satisfies ScraperDefinition[];
+
+interface ScraperDefinition {
+	referenceKey: keyof References;
+	scrapeFunction: (todo: DatabaseParsedTodoItem) => Promise<void | (AniWorldSeriesInformations | ZoroSeriesInformation | AnixSeriesInformation)>;
+	scrapeKey: keyof DatabaseParsedTodoItem;
+}
+
 export function checkIfTodoNeedsScrape(todo: DatabaseParsedTodoItem) {
-	const needsAniworld = !todo.scraped && todo.references.aniworld !== '';
-	const needsZoro = !todo.scrapedZoro && !todo.scrapednewZoro && todo.references.zoro !== '';
-	const needsAnix = !todo.scrapedAnix && todo.references.anix !== '' && todo.references.anix !== undefined;
-	const needsSTO = !todo.scraped && todo.references.sto !== '';
-	return needsAniworld || needsZoro || needsAnix || needsSTO;
+	// const needsAniworld = !todo.scraped && todo.references.aniworld !== '';
+	// const needsZoro = !todo.scrapedZoro && !todo.scrapednewZoro && todo.references.zoro !== '';
+	// const needsAnix = !todo.scrapedAnix && todo.references.anix !== '' && todo.references.anix !== undefined;
+	// const needsSTO = !todo.scraped && todo.references.sto !== '';
+	// return needsAniworld || needsZoro || needsAnix || needsSTO;
+	for (const scraper of scrapers) {
+		if (!todo[scraper.scrapeKey] && todo.references[scraper.referenceKey] !== '' && todo.references[scraper.referenceKey] !== undefined) {
+			return true;
+		}
+	}
+	return false;
 }
 
 export async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
@@ -27,35 +70,50 @@ export async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 			const time = Date.now();
 			console.log('Kicked off scraper', todo.references);
 
-			const [aniInfos, zoroInfos, stoInfos, anixInfos] = await Promise.all([
-				todo.references.aniworld ? getAniworldInfos({ url: todo.references.aniworld }) : null,
-				todo.references.zoro ? getNewZoroInfos({ ID: todo.references.zoro }) : null,
-				todo.references.sto ? getAniworldInfos({ url: todo.references.sto }) : null,
-				todo.references.anix ? getAnixInfos({ slug: todo.references.anix }) : null,
-				// todo.references.zoro ? getZoroInfos({ ID: todo.references.zoro }) : null,
-			]);
+			// const [aniInfos, zoroInfos, stoInfos, anixInfos] = await Promise.all([
+			// 	todo.references.aniworld ? getAniworldInfos({ url: todo.references.aniworld }) : null,
+			// 	todo.references.zoro ? getNewZoroInfos({ ID: todo.references.zoro }) : null,
+			// 	todo.references.sto ? getAniworldInfos({ url: todo.references.sto }) : null,
+			// 	todo.references.anix ? getAnixInfos({ slug: todo.references.anix }) : null,
+			// 	// todo.references.zoro ? getZoroInfos({ ID: todo.references.zoro }) : null,
+			// ]);
 
-			if (
-				(todo.references.aniworld && !aniInfos) ||
-				(todo.references.zoro && !zoroInfos) ||
-				(todo.references.anix && !anixInfos) ||
-				(todo.references.sto && !stoInfos)
-			) {
-				console.log('Got Bad Infos', aniInfos, 'for url', todo.references.aniworld);
-				console.log('Got Bad Infos', zoroInfos, 'for url', todo.references.zoro);
-				console.log('Got Bad Infos', stoInfos, 'for url', todo.references.sto);
-				console.log('Got Bad Infos', anixInfos, 'for url', todo.references.anix);
-				throw new Error('No Aniworld, Zoro, Anix or STO infos found');
-			}
+			// if (
+			// 	(todo.references.aniworld && !aniInfos) ||
+			// 	(todo.references.zoro && !zoroInfos) ||
+			// 	(todo.references.anix && !anixInfos) ||
+			// 	(todo.references.sto && !stoInfos)
+			// ) {
+			// 	console.log('Got Bad Infos', aniInfos, 'for url', todo.references.aniworld);
+			// 	console.log('Got Bad Infos', zoroInfos, 'for url', todo.references.zoro);
+			// 	console.log('Got Bad Infos', stoInfos, 'for url', todo.references.sto);
+			// 	console.log('Got Bad Infos', anixInfos, 'for url', todo.references.anix);
+			// 	throw new Error('No Aniworld, Zoro, Anix or STO infos found');
+			// }
 
-			if (todo.scrapingError) delete todo.scrapingError;
+			// if (todo.scrapingError) delete todo.scrapingError;
 
-			if (aniInfos) todo.scraped = aniInfos;
-			if (zoroInfos) todo.scrapednewZoro = zoroInfos;
-			if (anixInfos) todo.scrapedAnix = anixInfos;
-			if (stoInfos) todo.scraped = stoInfos;
+			// if (aniInfos) todo.scraped = aniInfos;
+			// if (zoroInfos) todo.scrapednewZoro = zoroInfos;
+			// if (anixInfos) todo.scrapedAnix = anixInfos;
+			// if (stoInfos) todo.scraped = stoInfos;
 
-			if (!aniInfos && !stoInfos) todo.scraped = undefined;
+			// if (!aniInfos && !stoInfos) todo.scraped = undefined;
+
+			await Promise.all(scrapers.map(async (scraper) => {
+				if (todo.references[scraper.referenceKey] === '' || todo.references[scraper.referenceKey] === undefined) {
+					return null;
+				}
+				console.log('Kicking off Scraper', scraper.referenceKey, 'for todo', todo.ID);
+
+				const result = await scraper.scrapeFunction(todo);
+				if (todo.scrapingError) delete todo.scrapingError;
+				if (result) {
+					todo[scraper.scrapeKey] = result as any;
+				} else {
+					console.log('Got Bad Infos', result, 'for url', todo.references.aniworld, 'scraperID', scraper.referenceKey);
+				}
+			}));
 
 			//Updating db todo
 			await database.get('todos').update({ ID: todo.ID }, { content: JSON.stringify(todo) });
