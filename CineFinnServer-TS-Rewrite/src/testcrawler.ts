@@ -3,8 +3,8 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { listFiles } from './utils/fileutils';
 import dotenv from 'dotenv';
-import { SerieEpisodeObject, SerieObject } from './types/classes';
 import { Series, filenameParser, Episode, Movie } from './classes/series';
+import { SerieEpisodeObject, SerieObject } from '@Types/classes';
 dotenv.config();
 
 const generateID = (): string => {
@@ -41,7 +41,7 @@ const crawlAndIndex = () => {
 
 	Object.keys(obj).forEach((categorie) => {
 		const dirs = obj[categorie];
-		for (let i = 0; i < dirs.length; ) {
+		for (let i = 0; i < dirs.length;) {
 			const title = dirs[i];
 			const seasons = [];
 			const movies = [];

@@ -2,7 +2,7 @@ import fs from 'fs';
 import axios from 'axios';
 import jsdom from 'jsdom';
 import cheerio from 'cheerio';
-import { Langs } from './utils/types';
+import { Langs } from '@Types/classes';
 
 // export interface AniWorldEntity {
 //     mainName: string;

@@ -2,11 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import getVideoDurationInSeconds from 'get-video-duration';
 import dotenv from 'dotenv';
-import { SerieObject } from './types/classes';
 import { generateImages } from './utils/images';
 import { load, parse } from './utils/watchString';
 import axios from 'axios';
 import { DatabaseWatchStringItem } from './types/database';
+import { SerieObject } from '@Types/classes';
 dotenv.config();
 
 const { Database } = require('@jodu555/mysqlapi');

@@ -1,7 +1,8 @@
 import { Database } from '@jodu555/mysqlapi';
-import { AniWorldSeriesInformations, AnixSeriesInformation, getAniworldInfos, getAnixInfos, getMyAsianTVInfos, getNewZoroInfos, MyAsianSeries, ZoroSeriesInformation } from '../sockets/scraper.socket';
+import { getAniworldInfos, getAnixInfos, getMyAsianTVInfos, getNewZoroInfos } from '../sockets/scraper.socket';
 import { DatabaseParsedTodoItem, DatabaseTodoItem, References } from '../types/database';
 import { toAllSockets } from './utils';
+import { AniWorldSeriesInformations, AnixSeriesInformation, MyAsianSeries, ZoroSeriesInformation } from '@Types/scrapers';
 
 const database = Database.getDatabase();
 
