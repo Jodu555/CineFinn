@@ -7,7 +7,7 @@ import { getSeries, getVideoStreamLog, setVideoStreamLog } from '../utils/utils'
 import { AuthenticatedRequest } from '../types/session';
 import { getVideoMovie, getVideoEntity, Episode, Movie } from '../classes/series';
 import { createVideoStreamOverSocket, getSubSocketByID, getVideoStats } from '../sockets/sub.socket';
-import { Langs } from '../types/classes';
+import { Langs } from '@Types/classes';
 import { sendSocketAdminUpdate } from '../utils/admin';
 
 function decodeRangeHeader(range: string) {

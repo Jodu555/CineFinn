@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import { PassThrough } from 'stream';
 import { randomUUID, createHash } from 'node:crypto';
 import { ExtendedSocket } from '../types/session';
-import { Langs } from '../types/classes';
+import { Langs } from '@Types/classes';
 import { getSeries, setSeries, toAllSockets } from '../utils/utils';
 import { sendSeriesReloadToAll } from './client.socket';
 import { Response } from 'express';

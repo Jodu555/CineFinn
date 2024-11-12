@@ -204,6 +204,7 @@ import { router as ignoreList_router } from './routes/ignorelist';
 import video from './routes/video';
 import { sendSocketAdminUpdate } from './utils/admin';
 import { bullBoardProxy, segmentProxy } from './routes/proxys';
+import { SerieMovieObject } from '@Types/classes';
 
 // Your Middleware handlers here
 app.use('/images', authHelper.authentication(), express.static(path.join(process.env.PREVIEW_IMGS_PATH)));

@@ -1,29 +1,8 @@
+import { AnixSeriesInformation, AnixEpisode, AnixSeasonInformation } from '@Types/scrapers';
 import axios from 'axios';
 import jsdom from 'jsdom';
 import puppeteer, { Browser, HTTPRequest, Page } from 'puppeteer';
 
-export interface AnixEpisode {
-	title: string;
-	langs: string[];
-	slug: string;
-	number: string;
-	ids: string;
-}
-
-export interface SeasonInformation {
-	slug: string;
-	IDX: string;
-	title: string;
-}
-
-interface AnixSeriesInformation {
-	title: string;
-	image: string;
-	subCount: number;
-	dubCount: number;
-	episodeCount: number;
-	seasons: AnixEpisode[][];
-}
 
 const debug = true;
 
@@ -111,12 +90,12 @@ class Anix {
 
 			const seasonInfo = seasonBody
 				? [...seasonBody.querySelectorAll('a.swiper-slide')].map((anchor: HTMLAnchorElement) => {
-						return {
-							slug: anchor.href.replace(/.*\/anime\//gi, ''),
-							IDX: anchor.querySelector('span').textContent.trim().replaceAll('Season ', ''),
-							title: anchor.querySelector('span').textContent.trim().replaceAll('Season ', ''),
-						} as SeasonInformation;
-				  })
+					return {
+						slug: anchor.href.replace(/.*\/anime\//gi, ''),
+						IDX: anchor.querySelector('span').textContent.trim().replaceAll('Season ', ''),
+						title: anchor.querySelector('span').textContent.trim().replaceAll('Season ', ''),
+					} as AnixSeasonInformation;
+				})
 				: [];
 
 			console.log(seasonInfo);
@@ -147,7 +126,7 @@ class Anix {
 					await page.close();
 				}
 				// await STATIC_BROWSER.close();
-			} catch (error) {}
+			} catch (error) { }
 
 			return {
 				ID,

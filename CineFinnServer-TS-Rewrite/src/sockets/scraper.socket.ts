@@ -1,5 +1,5 @@
 import { ExtendedSocket } from '../types/session';
-import { Langs } from '../types/classes';
+import { Langs } from '@Types/classes';
 import { randomUUID } from 'node:crypto';
 
 let $socket: ExtendedSocket;

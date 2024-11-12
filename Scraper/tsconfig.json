@@ -13,8 +13,9 @@
 		"skipLibCheck": true,
 		"allowJs": true,
 		"paths": {
-			"*": ["node_modules/*"]
+			"*": ["node_modules/*"],
+			"@Types/*": ["../Types/src/*"]
 		}
 	},
-	"include": ["./src/**/*"]
+	"include": ["./src/**/*", "../**/src/**/*"]
 }

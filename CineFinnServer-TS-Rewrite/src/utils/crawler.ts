@@ -6,7 +6,7 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { listFiles } from './fileutils';
 import { Episode, Movie, Series, filenameParser } from '../classes/series';
-import { SerieEpisodeObject, SerieObject } from '../types/classes';
+import { SerieEpisodeObject, SerieObject } from '@Types/classes';
 import { SubFile, getAllFilesFromAllSubs } from '../sockets/sub.socket';
 
 const generateID = () => {

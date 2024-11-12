@@ -1,29 +1,8 @@
-import { Langs } from '..//utils/types';
+import { AniWorldSeriesInformations, AniWorldAdditionalSeriesInformations, AniWorldEntity } from '@Types/scrapers';
 const axios = require('axios');
 const cheerio = require('cheerio');
 const jsdom = require('jsdom');
 
-export interface AniWorldEntity {
-	mainName: string;
-	secondName: string;
-	langs: Langs[];
-}
-
-export interface AniWorldAdditionalSeriesInformations {
-	infos: string;
-	startDate: string;
-	endDate: string;
-	description: string;
-	image: string | boolean;
-}
-
-export interface AniWorldSeriesInformations {
-	url: string;
-	informations: AniWorldAdditionalSeriesInformations;
-	hasMovies: boolean;
-	movies?: AniWorldEntity[];
-	seasons: AniWorldEntity[][];
-}
 
 class Aniworld {
 	url: string;
@@ -68,7 +47,7 @@ class Aniworld {
 		}
 	}
 
-	parseEntityInformations(data: string): { numberOfSeasons: number; hasMovies: boolean } {
+	parseEntityInformations(data: string): { numberOfSeasons: number; hasMovies: boolean; } {
 		const { document } = new jsdom.JSDOM(data).window;
 		const seasonsUl = [...document.querySelectorAll('span')].find((e) => e.textContent.includes('Staffeln:')).parentElement.parentElement;
 		const seasonsTab = [...seasonsUl.querySelectorAll('li')].map((e) => e.querySelector('a')?.title).filter((e) => e != undefined);

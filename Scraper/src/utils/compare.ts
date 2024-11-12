@@ -1,13 +1,11 @@
-import { ExtendedEpisodeDownload, SerieEntity } from './types';
-import { ExtendedZoroEpisode } from './../class/Zoro';
-import { AniWorldEntity, AniWorldSeriesInformations } from './../class/Aniworld';
 import * as fs from 'fs';
 const promiseLimit = require('promise-limit');
 const sanitizeFilename = require('sanitize-filename');
 import Aniworld from '../class/Aniworld';
 const { similar } = require('./utils');
-import { IgnoranceItem, Langs, Serie, SerieReference } from '../utils/types';
 import Zoro from '../class/Zoro';
+import { SerieReference, Langs, Serie, IgnoranceItem, ExtendedEpisodeDownload, SerieEntity } from '@Types/classes';
+import { AniWorldSeriesInformations, ExtendedZoroEpisode, AniWorldEntity } from '@Types/scrapers';
 
 function sanitizeFileName(str: string): string {
 	return sanitizeFilename(str, { replacement: ' ' }).replace(/  +/g, ' ');

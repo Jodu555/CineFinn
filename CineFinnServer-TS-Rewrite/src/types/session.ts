@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { RemoteSocket, Socket } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-import { Langs, timeUpdateObject } from './classes';
+import { Langs, timeUpdateObject } from '@Types/classes';
 import { DatabaseParsedTodoItem } from './database';
 
 export enum Role {

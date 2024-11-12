@@ -1,6 +1,6 @@
 import path from 'path';
 import { getSeries } from '../utils/utils';
-import { SerieReference, SerieInfo, SerieObject, Langs, SerieEpisodeObject, SerieMovieObject } from '../types/classes';
+import { SerieReference, SerieInfo, SerieObject, Langs, SerieEpisodeObject, SerieMovieObject } from '@Types/classes';
 
 class Series {
 	ID: string;

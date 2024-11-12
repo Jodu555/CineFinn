@@ -5,12 +5,13 @@ dotenv.config();
 import axios from 'axios';
 import io from 'socket.io-client';
 import { changeEpisode, compareForNewReleases, compareForNewReleasesAniWorld, compareForNewReleasesZoro, ChangedZoroEpisode } from './utils/compare';
-import Aniworld, { AniWorldSeriesInformations } from './class/Aniworld';
+import Aniworld from './class/Aniworld';
 import Zoro from './class/Zoro';
 import Anix from './class/Anix';
 const { similar } = require('./utils/utils');
-import { ExtendedEpisodeDownload, IgnoranceItem, Serie } from './utils/types';
-import MyAsianTV, { MyAsianSeries } from './class/MyAsianTv';
+import MyAsianTV from './class/MyAsianTv';
+import { Serie, IgnoranceItem, ExtendedEpisodeDownload } from '@Types/classes';
+import { AniWorldSeriesInformations, MyAsianSeries } from '@Types/scrapers';
 
 const socket = io(process.env.CORE_URL, { auth: { type: 'scraper', token: process.env.AUTH_TOKEN } });
 

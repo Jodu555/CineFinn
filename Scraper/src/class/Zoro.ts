@@ -1,3 +1,4 @@
+import { ZoroSeriesInformation, ExtendedZoroEpisode, SimpleZoroEpisode, StreamingServers, ZoroSeasonInformation } from '@Types/scrapers';
 import axios from 'axios';
 import jsdom from 'jsdom';
 
@@ -18,39 +19,6 @@ import jsdom from 'jsdom';
  *
  */
 
-export interface SimpleZoroEpisode {
-	ID: string;
-	title: string;
-	number: string;
-	url: string;
-}
-
-export interface ExtendedZoroEpisode extends SimpleZoroEpisode {
-	langs: string[];
-	streamingServers: StreamingServers[];
-}
-
-export interface StreamingServers {
-	type: 'sub' | 'dub';
-	ID: string;
-	serverIndex: string;
-	name: string;
-}
-
-export interface SeasonInformation {
-	ID: string;
-	IDX: string;
-	title: string;
-}
-
-interface ZoroSeriesInformation {
-	title: string;
-	image: string;
-	subCount: number;
-	dubCount: number;
-	episodeCount: number;
-	seasons: ExtendedZoroEpisode[][];
-}
 
 const debug = true;
 
@@ -137,7 +105,7 @@ class Zoro {
 						ID: anchor.href.split('-')[anchor.href.split('-').length - 1] as string,
 						IDX: anchor.querySelector('.title').textContent.trim().replaceAll('Season ', ''),
 						title: anchor.querySelector('.title').textContent.trim() as string,
-					} as SeasonInformation;
+					} as ZoroSeasonInformation;
 				})
 				.filter((x) => !x.title.includes('(') && x.title.includes('Season'));
 
@@ -187,7 +155,7 @@ class Zoro {
 		}
 	}
 
-	async getSeasons(): Promise<SeasonInformation[]> {
+	async getSeasons(): Promise<ZoroSeasonInformation[]> {
 		debug && console.log('Called Zoro.getSeasons');
 		if (!this.initialized) {
 			await this.initialize();
@@ -217,7 +185,7 @@ class Zoro {
 		}
 	}
 
-	async getEpisodeList(): Promise<{ total: number; episodes: SimpleZoroEpisode[] }> {
+	async getEpisodeList(): Promise<{ total: number; episodes: SimpleZoroEpisode[]; }> {
 		debug && console.log('Called Zoro.getEpisodeList');
 
 		if (this.cache.get('getEpisodeList')) {
@@ -254,7 +222,7 @@ class Zoro {
 	async getExtendedEpisodeList(preData?: {
 		total: number;
 		episodes: SimpleZoroEpisode[];
-	}): Promise<{ total: number; episodes: ExtendedZoroEpisode[] }> {
+	}): Promise<{ total: number; episodes: ExtendedZoroEpisode[]; }> {
 		debug && console.log('Called Zoro.getExtendedEpisodeList');
 
 		if (!this.initialized) {

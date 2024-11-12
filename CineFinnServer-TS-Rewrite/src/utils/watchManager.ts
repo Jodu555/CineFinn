@@ -1,4 +1,4 @@
-import { timeUpdateObject } from '../types/classes';
+import { timeUpdateObject } from '@Types/classes';
 import { ExtendedSocket } from '../types/session';
 import { sendWatchListChange } from '../sockets/client.socket';
 import { Segment, searchObject, updateSegment } from './watchString';

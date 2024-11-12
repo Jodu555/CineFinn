@@ -1,26 +1,6 @@
+import { MyAsianSeries } from '@Types/scrapers';
 import axios from 'axios';
 import { JSDOM } from 'jsdom';
-
-export interface MyAsianSeries {
-    url: string;
-    title: string;
-    informations: MyAsianInformations;
-    episodes: MyAsianEpisode[];
-}
-
-interface MyAsianInformations {
-    year: string;
-    status: string;
-    genres: string[];
-    description: string;
-    image: string;
-}
-
-interface MyAsianEpisode {
-    number: number;
-    title: string;
-    url: string;
-}
 
 class MyAsianTV {
     readonly baseURL = 'https://www.myasiantv.ms/';
