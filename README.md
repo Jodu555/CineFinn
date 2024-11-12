@@ -203,3 +203,8 @@ but rather multiple that get arranged and aggregated together by the main system
   - [ ] There are some libs in python that do this farely well and it would be interesting to implement those libraries into node with rest (has a bit from microservices)
   - [x] Add a Setting to toggle auto intro/outro (segment) skip
   - [x] Show an actual Skip Button and add a seperate api for storing all that shit
+
+## Scratchpad
+
+The commit where i just deleted all the old stuff can be found here:
+https://github.com/Jodu555/CineFinn/commit/18d3a4dd89e22a2b6db01bc81dd10a2e0c04b2ad
