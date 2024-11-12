@@ -100,3 +100,8 @@ export interface ZoroSeriesInformation {
     episodeCount: number;
     seasons: ExtendedZoroEpisode[][];
 }
+
+export interface ZoroReturn {
+    total: number;
+    episodes: ExtendedZoroEpisode[];
+}

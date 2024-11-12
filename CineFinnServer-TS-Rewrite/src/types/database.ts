@@ -1,5 +1,5 @@
-import { AniWorldSeriesInformations, AnixSeriesInformation, MyAsianSeries, ZoroReturn, ZoroSeriesInformation } from '../sockets/scraper.socket';
 import { Langs } from '@Types/classes';
+import { AniWorldSeriesInformations, ZoroReturn, ZoroSeriesInformation, AnixSeriesInformation, MyAsianSeries } from '@Types/scrapers';
 
 export interface DatabaseWatchStringItem {
 	account_UUID: string;

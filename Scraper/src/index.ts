@@ -11,7 +11,7 @@ import Anix from './class/Anix';
 const { similar } = require('./utils/utils');
 import MyAsianTV from './class/MyAsianTv';
 import { Serie, IgnoranceItem, ExtendedEpisodeDownload } from '@Types/classes';
-import { AniWorldSeriesInformations, MyAsianSeries } from '@Types/scrapers';
+import { AniWorldSeriesInformations, MyAsianSeries, ZoroReturn } from '@Types/scrapers';
 
 const socket = io(process.env.CORE_URL, { auth: { type: 'scraper', token: process.env.AUTH_TOKEN } });
 
@@ -442,7 +442,7 @@ buildFunction<AniWorldSeriesInformations, { url: string; }>('AniworldData', asyn
 	return informations;
 });
 
-buildFunction<any, { ID: string | number; }>('ZoroData', async ({ ID }) => {
+buildFunction<ZoroReturn, { ID: string | number; }>('ZoroData', async ({ ID }) => {
 	console.log('Recieved ZoroData', ID);
 	const zoro = new Zoro(String(ID));
 	await zoro.initialize();

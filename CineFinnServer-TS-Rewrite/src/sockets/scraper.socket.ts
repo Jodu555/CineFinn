@@ -1,5 +1,6 @@
 import { ExtendedSocket } from '../types/session';
 import { Langs } from '@Types/classes';
+import { AniWorldSeriesInformations, AnixSeriesInformation, ZoroSeriesInformation, MyAsianSeries, ZoroReturn } from '@Types/scrapers';
 import { randomUUID } from 'node:crypto';
 
 let $socket: ExtendedSocket;
@@ -43,103 +44,103 @@ const initialize = async (socket: ExtendedSocket) => {
 	// console.log(`i`, i);
 };
 
-export interface AniWorldEntity {
-	mainName: string;
-	secondName: string;
-	langs: Langs[];
-}
+// export interface AniWorldEntity {
+// 	mainName: string;
+// 	secondName: string;
+// 	langs: Langs[];
+// }
 
-export interface AniWorldAdditionalSeriesInformations {
-	infos: string;
-	startDate: string;
-	endDate: string;
-	description: string;
-	image: string | boolean;
-}
+// export interface AniWorldAdditionalSeriesInformations {
+// 	infos: string;
+// 	startDate: string;
+// 	endDate: string;
+// 	description: string;
+// 	image: string | boolean;
+// }
 
-export interface AniWorldSeriesInformations {
-	url: string;
-	informations: AniWorldAdditionalSeriesInformations;
-	hasMovies: boolean;
-	movies?: AniWorldEntity[];
-	seasons: AniWorldEntity[][];
-}
+// export interface AniWorldSeriesInformations {
+// 	url: string;
+// 	informations: AniWorldAdditionalSeriesInformations;
+// 	hasMovies: boolean;
+// 	movies?: AniWorldEntity[];
+// 	seasons: AniWorldEntity[][];
+// }
 
-export interface SimpleZoroEpisode {
-	ID: string;
-	title: string;
-	number: string;
-	url: string;
-}
+// export interface SimpleZoroEpisode {
+// 	ID: string;
+// 	title: string;
+// 	number: string;
+// 	url: string;
+// }
 
-export interface ExtendedZoroEpisode extends SimpleZoroEpisode {
-	langs: string[];
-	streamingServers: StreamingServers[];
-}
+// export interface ExtendedZoroEpisode extends SimpleZoroEpisode {
+// 	langs: string[];
+// 	streamingServers: StreamingServers[];
+// }
 
-export interface StreamingServers {
-	type: 'sub' | 'dub';
-	ID: string;
-	serverIndex: string;
-	name: string;
-}
+// export interface StreamingServers {
+// 	type: 'sub' | 'dub';
+// 	ID: string;
+// 	serverIndex: string;
+// 	name: string;
+// }
 
-export interface Anix {
-	ID: string;
-	IDX: string;
-	title: string;
-}
+// export interface Anix {
+// 	ID: string;
+// 	IDX: string;
+// 	title: string;
+// }
 
-export interface ZoroReturn {
-	total: number;
-	episodes: ExtendedZoroEpisode[];
-}
+// export interface ZoroReturn {
+// 	total: number;
+// 	episodes: ExtendedZoroEpisode[];
+// }
 
-export interface ZoroSeriesInformation {
-	title: string;
-	image: string;
-	subCount: number;
-	dubCount: number;
-	episodeCount: number;
-	seasons: ExtendedZoroEpisode[][];
-}
+// export interface ZoroSeriesInformation {
+// 	title: string;
+// 	image: string;
+// 	subCount: number;
+// 	dubCount: number;
+// 	episodeCount: number;
+// 	seasons: ExtendedZoroEpisode[][];
+// }
 
-export interface AnixEpisode {
-	title: string;
-	langs: string[];
-	slug: string;
-	number: string;
-	ids: string;
-}
-export interface AnixSeriesInformation {
-	title: string;
-	image: string;
-	subCount: number;
-	dubCount: number;
-	episodeCount: number;
-	seasons: AnixEpisode[][];
-}
+// export interface AnixEpisode {
+// 	title: string;
+// 	langs: string[];
+// 	slug: string;
+// 	number: string;
+// 	ids: string;
+// }
+// export interface AnixSeriesInformation {
+// 	title: string;
+// 	image: string;
+// 	subCount: number;
+// 	dubCount: number;
+// 	episodeCount: number;
+// 	seasons: AnixEpisode[][];
+// }
 
-export interface MyAsianSeries {
-	url: string;
-	title: string;
-	informations: MyAsianInformations;
-	episodes: MyAsianEpisode[];
-}
+// export interface MyAsianSeries {
+// 	url: string;
+// 	title: string;
+// 	informations: MyAsianInformations;
+// 	episodes: MyAsianEpisode[];
+// }
 
-interface MyAsianInformations {
-	year: string;
-	status: string;
-	genres: string[];
-	description: string;
-	image: string;
-}
+// interface MyAsianInformations {
+// 	year: string;
+// 	status: string;
+// 	genres: string[];
+// 	description: string;
+// 	image: string;
+// }
 
-interface MyAsianEpisode {
-	number: number;
-	title: string;
-	url: string;
-}
+// interface MyAsianEpisode {
+// 	number: number;
+// 	title: string;
+// 	url: string;
+// }
 
 const getAniworldInfos = buildAwaitSocketReturn<AniWorldSeriesInformations, { url: string; }>('AniworldData');
 const getZoroInfos = buildAwaitSocketReturn<ZoroReturn, { ID: string | number; }>('ZoroData');
