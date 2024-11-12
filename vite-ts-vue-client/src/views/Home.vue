@@ -38,8 +38,12 @@
 import EntityCard from '@/components/Home/EntityCard.vue';
 import { useIndexStore } from '@/stores/index.store';
 import type { Serie } from '@/types';
-import { ref, onBeforeUnmount, computed } from 'vue';
+import { ref, onBeforeUnmount, computed, onMounted } from 'vue';
 const backToTop = ref(false);
+
+onMounted(() => {
+	document.title = `Cinema | Jodu555`;
+});
 
 window.addEventListener('scroll', handleScroll, { passive: true });
 

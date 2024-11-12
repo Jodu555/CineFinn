@@ -16,7 +16,7 @@
 	</div>
 </template>
 <script setup lang="ts">
-import { onMounted, reactive } from 'vue';
+import { onMounted, onUnmounted, reactive } from 'vue';
 import { useAuthStore } from '@/stores/auth.store';
 import { useIndexStore } from '@/stores/index.store';
 import { useAxios, useBaseURL } from '@/utils';
@@ -31,6 +31,7 @@ const index = useIndexStore();
 const list: Record<string, { title: string; data: BrowseSerie[] }> = reactive({});
 
 onMounted(async () => {
+	document.title = `Cinema | Browse`;
 	const response = await useAxios().get<Record<'newest' | 'continueWatching' | 'watchagain' | string, { title: string; data: string[] }>>(
 		'/recommendation'
 	);
@@ -68,6 +69,10 @@ onMounted(async () => {
 			}) as BrowseSerie[],
 		};
 	});
+});
+
+onUnmounted(() => {
+	document.title = `Cinema | Jodu555`;
 });
 </script>
 <style lang=""></style>

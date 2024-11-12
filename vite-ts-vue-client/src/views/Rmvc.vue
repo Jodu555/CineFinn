@@ -107,6 +107,7 @@ function connect() {
 }
 
 onMounted(() => {
+	document.title = `Cinema | RMVC`;
 	console.log(useSocket());
 
 	if (!useAuthStore().loggedIn) {
@@ -128,6 +129,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+	document.title = `Cinema | Jodu555`;
 	useSocket().off('rmvc-recieve-videoStateChange');
 	useSocket().off('rmvc-connection');
 });
