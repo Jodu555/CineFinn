@@ -3,7 +3,11 @@
 		<h2 class="text-center">Preview Image Generation</h2>
 
 		<div class="mt-3 mb-5 d-flex justify-content-evenly">
-			<button @click="toggleQueueStatus()" type="button" class="btn" :class="{ 'btn-outline-success': isPaused, 'btn-outline-danger': !isPaused }">
+			<button
+				@click="toggleQueueStatus()"
+				type="button"
+				class="btn"
+				:class="{ 'btn-outline-success': isPaused, 'btn-outline-danger': !isPaused }">
 				{{ isPaused ? 'Resume' : 'Pause' }}
 			</button>
 			<button type="button" @click="retry('failed')" class="btn btn-outline-warning">Retry Failed</button>
@@ -29,13 +33,17 @@
 								? job.data?.entity?.primaryName.slice(0, 65).trim() +
 								  String(job.data?.entity?.primaryName.slice(0, 65).length == job.data?.entity?.primaryName.length ? '' : '...')
 								: '-'
-						}}"{{ job.data?.entity ? job.data?.entity.season : -1 }}x{{ job.data?.entity ? job.data?.entity.episode : -1 }} On:
-						{{ job.data?.generatorName ? job.data.generatorName : 'TBD' }} Lang: {{ job.data?.lang ? job.data.lang : '- -' }} Sub:
+						}}"{{ job.data?.entity ? (job.data?.entity as SerieEpisodeObject)?.season : -1 }}x{{
+							job.data?.entity ? (job.data?.entity as SerieEpisodeObject)?.episode : -1
+						}}
+						On: {{ job.data?.generatorName ? job.data.generatorName : 'TBD' }} Lang: {{ job.data?.lang ? job.data.lang : '- -' }} Sub:
 						{{ job.data?.entity?.subID ? job.data?.entity?.subID : 'main' }}
 					</h4>
 				</div>
 			</div>
-			<div class="col-auto" style="border-left: 3px solid rgb(222, 226, 230); opacity: 0.05; transform: translate(0px, 25px); height: 100px"></div>
+			<div
+				class="col-auto"
+				style="border-left: 3px solid rgb(222, 226, 230); opacity: 0.05; transform: translate(0px, 25px); height: 100px"></div>
 			<div class="col-auto">
 				<Progress :percentage="job.progress" />
 			</div>
@@ -63,6 +71,8 @@
 <script lang="ts" setup>
 import Progress from '@/components/Admin/Progress.vue';
 import { useAxios } from '@/utils';
+import type { SerieEpisodeObject } from '@Types/classes';
+import type { JobMeta } from '@Types/index';
 import { onMounted, onUnmounted, ref } from 'vue';
 
 function upperCaseFirstLetter(str: string) {
@@ -74,7 +84,7 @@ interface Job {
 	timestamp: number;
 	name: string;
 	progress: number;
-	data: any;
+	data: JobMeta;
 }
 
 const lastUpdate = ref<string>();

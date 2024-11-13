@@ -3,6 +3,7 @@ import path from 'path';
 import child_process from 'child_process';
 import IORedis from 'ioredis';
 import { Job, Queue, Worker, tryCatch } from 'bullmq';
+import { JobMeta } from '@Types/index';
 
 export const wait = (timeout: number) => {
 	return new Promise((resolve) => {
@@ -46,18 +47,6 @@ function evalPath(config: Config, evalPath: string) {
 		}
 	}
 	return evalPath;
-}
-
-interface JobMeta {
-	serieID: string;
-	entity: any;
-	lang: string;
-	filePath: string;
-	output: string;
-	imagePathPrefix: string;
-	publicStreamURL: string;
-	readrate: number;
-	generatorName: string;
 }
 
 async function main() {

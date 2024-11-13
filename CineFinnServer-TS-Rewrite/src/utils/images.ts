@@ -7,6 +7,7 @@ import { CommandManager } from '@jodu555/commandmanager';
 import { getIORedis } from './utils';
 import { Queue, QueueEvents } from 'bullmq';
 import { getSubSocketByID } from '../sockets/sub.socket';
+import { JobMeta } from '@Types/index';
 const commandManager = CommandManager.getCommandManager();
 const { getVideoDurationInSeconds } = require('get-video-duration');
 
@@ -15,16 +16,7 @@ const wait = (ms: number): Promise<void> => new Promise((r, _) => setTimeout(r, 
 const newProgress = false;
 
 interface PromissesJob {
-	meta: {
-		serieID: string;
-		entity: Episode | Movie;
-		lang: string;
-		filePath: string;
-		output: string;
-		imagePathPrefix: string;
-		publicStreamURL: string;
-		readrate: number;
-	};
+	meta: JobMeta;
 	run: () => Promise<void>;
 }
 
@@ -110,8 +102,7 @@ function generateEntityImages(i: number, serie: Series, entity: Episode | Movie,
 								commandManager
 									.getWriter()
 									.deepSameLineClear(
-										`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${
-											path.parse(entity.filePath).base
+										`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (SE-EP) ${i + 1} / ${seasons.length} - ${path.parse(entity.filePath).base
 										}`,
 										2
 									);
@@ -121,8 +112,7 @@ function generateEntityImages(i: number, serie: Series, entity: Episode | Movie,
 								commandManager
 									.getWriter()
 									.deepSameLineClear(
-										`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (Movie) ${i + 1} / ${
-											serie.movies.length
+										`Checked: ${serie.title} with ${seasons.length + serie.movies.length} Items \n  => Video (Movie) ${i + 1} / ${serie.movies.length
 										} - ${entity.primaryName}`,
 										2
 									);
@@ -138,7 +128,7 @@ function generateEntityImages(i: number, serie: Series, entity: Episode | Movie,
 	return returnArr;
 }
 
-const generateImages = async (series: Series[], cleanup: () => void = () => {}) => {
+const generateImages = async (series: Series[], cleanup: () => void = () => { }) => {
 	console.log('Started generateImages()');
 
 	const limit = pLimit(Number(process.env.IMG_CONCURRENT_LIMIT_GENERATION || 5));
