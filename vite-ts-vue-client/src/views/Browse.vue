@@ -20,10 +20,10 @@ import { onMounted, onUnmounted, reactive } from 'vue';
 import { useAuthStore } from '@/stores/auth.store';
 import { useIndexStore } from '@/stores/index.store';
 import { useAxios, useBaseURL } from '@/utils';
-import type { BrowseSerie, Serie } from '@/types';
 
 import VideoCarousel from '@/components/Home/VideoCarousel.vue';
 import { title } from 'process';
+import type { BrowseSerie } from '@/components/Home/AppCard.vue';
 
 const auth = useAuthStore();
 const index = useIndexStore();

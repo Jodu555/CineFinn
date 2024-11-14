@@ -76,7 +76,7 @@
 </template>
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth.store';
-import type { TodoItem } from '@/types';
+import type { DatabaseParsedTodoItem } from '@Types/database';
 import { reactive, ref } from 'vue';
 
 const auth = useAuthStore();
@@ -94,7 +94,7 @@ const numWithFP = (num: string | number, pts: number): number => {
 	return parseFloat(parseFloat(num).toFixed(pts));
 };
 
-function decideImageURL(element: TodoItem) {
+function decideImageURL(element: DatabaseParsedTodoItem) {
 	// if (minimal.value) return '';
 
 	if (
@@ -120,7 +120,7 @@ function decideImageURL(element: TodoItem) {
 	return '';
 }
 
-const languageDevision = (element: TodoItem) => {
+const languageDevision = (element: DatabaseParsedTodoItem) => {
 	const out: Record<string, number> = {};
 	let total = -1;
 	if (element.scraped != undefined && element.scraped !== true) {
@@ -197,7 +197,7 @@ interface permAcc {
 }
 
 const props = defineProps<{
-	element: TodoItem;
+	element: DatabaseParsedTodoItem;
 	permittedAccounts: permAcc[];
 }>();
 </script>

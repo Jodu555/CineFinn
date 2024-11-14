@@ -16,12 +16,18 @@
 						{{
 							showDescription
 								? entity.infos.description
-								: entity.infos.description.slice(0, descriptionLength) + (entity.infos.description.length >= descriptionLength ? '...' : '')
+								: entity.infos.description.slice(0, descriptionLength) +
+								  (entity.infos.description.length >= descriptionLength ? '...' : '')
 						}}
-						<small v-if="!showDescription && entity.infos.description.length >= descriptionLength" class="read-more" @click="showDescription = true"
+						<small
+							v-if="!showDescription && entity.infos.description.length >= descriptionLength"
+							class="read-more"
+							@click="showDescription = true"
 							>More</small
 						>
-						<small v-else-if="entity.infos.description.length >= descriptionLength" class="read-more" @click="showDescription = false">Less</small>
+						<small v-else-if="entity.infos.description.length >= descriptionLength" class="read-more" @click="showDescription = false"
+							>Less</small
+						>
 						<br />
 					</template>
 					<template v-else>
@@ -106,12 +112,12 @@
 <script lang="ts">
 import { mapActions, mapWritableState } from 'pinia';
 import { defineComponent, type PropType } from 'vue';
-import type { Serie, SerieInfo, SerieReference } from '@/types';
 import LazyImage from '@/components/LazyImage.vue';
 import { useAxios } from '@/utils';
 import { AxiosError } from 'axios';
 import { useAuthStore } from '@/stores/auth.store';
 import { useIndexStore } from '@/stores/index.store';
+import type { Serie, SerieInfo, SerieReference } from '@Types/classes';
 
 export default defineComponent({
 	props: {
@@ -152,7 +158,8 @@ export default defineComponent({
 			if (this.entity.infos.disabled) {
 				return 'Series Disabled';
 			}
-			const moviePart = this.entity.movies.length >= 1 ? this.entity.movies.length + ' ' + (this.entity.movies.length > 1 ? 'Movies' : 'Movie') : '';
+			const moviePart =
+				this.entity.movies.length >= 1 ? this.entity.movies.length + ' ' + (this.entity.movies.length > 1 ? 'Movies' : 'Movie') : '';
 			const seasonPart =
 				this.entity.seasons.length >= 1 ? this.entity.seasons.length + ' ' + (this.entity.seasons.length > 1 ? 'Seasons' : 'Season') : '';
 			return this.entity.movies.length >= 1 && this.entity.seasons.length >= 1 ? moviePart + ' | ' + seasonPart : moviePart + seasonPart;

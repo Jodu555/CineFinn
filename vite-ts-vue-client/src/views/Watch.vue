@@ -17,7 +17,12 @@
 					title="Annotate Segments">
 					<font-awesome-icon icon="fa-solid fa-highlighter" />
 				</button>
-				<button class="btn btn-outline-info" title="Series Information" data-bs-toggle="modal" data-bs-target="#seriesInformationModal" disabled>
+				<button
+					class="btn btn-outline-info"
+					title="Series Information"
+					data-bs-toggle="modal"
+					data-bs-target="#seriesInformationModal"
+					disabled>
 					<font-awesome-icon icon="fa-solid fa-info" />
 				</button>
 				<button class="btn btn-outline-info" title="Keyboard Controls" data-bs-toggle="modal" data-bs-target="#controlsModal">
@@ -32,7 +37,9 @@
 
 			<div class="text-center" v-if="showDisabled">
 				<h2 class="text-danger">It Seems there is currently no data for this Series</h2>
-				<p class="text-danger mb-0">It either got removed, or is on a node which is currently un reachable, or is currently being transcoded</p>
+				<p class="text-danger mb-0">
+					It either got removed, or is on a node which is currently un reachable, or is currently being transcoded
+				</p>
 				<p class="text-danger">Please check back later and if this issue persists please contact the Administrator</p>
 				<router-link type="button" to="/" class="mt-3 mb-4 btn btn-outline-primary btn-lg">Go Watch something else</router-link>
 			</div>
@@ -41,7 +48,9 @@
 				Watch Information:
 				{{
 					JSON.stringify(
-						watchStore.watchList.find((segment) => segment.season == watchStore.currentSeason && segment.episode == watchStore.currentEpisode)
+						watchStore.watchList.find(
+							(segment) => segment.season == watchStore.currentSeason && segment.episode == watchStore.currentEpisode
+						)
 					)
 				}}
 			</pre
@@ -64,7 +73,10 @@
 			<template v-if="!showDisabled">
 				<MarkSeasonDropdown />
 
-				<div v-if="watchStore.currentSeries.movies.length >= 1 && watchStore.currentSeries.seasons.length == 0 && watchStore.currentMovie == -1">
+				<div
+					v-if="
+						watchStore.currentSeries.movies.length >= 1 && watchStore.currentSeries.seasons.length == 0 && watchStore.currentMovie == -1
+					">
 					<EntityListViewMovies :changeMovie="changeMovie" />
 				</div>
 
@@ -106,7 +118,6 @@
 	</div>
 </template>
 <script setup lang="ts">
-import type { Langs, SerieEpisode } from '@/types/index';
 import { useAuthStore } from '@/stores/auth.store';
 import { useIndexStore } from '@/stores/index.store';
 import { useWatchStore } from '@/stores/watch.store';
@@ -121,6 +132,7 @@ import EntityListViewMovies from '@/components/Watch/EntityListViewMovies.vue';
 import { ref, computed, onMounted, onBeforeUnmount, onUnmounted } from 'vue';
 import { useSocket } from '@/utils/socket';
 import { useRoute, useRouter } from 'vue-router';
+import type { Langs, SerieEpisode } from '@Types/classes';
 
 const cleanupFN = ref(null);
 const buttonTimer = ref<NodeJS.Timeout>(null as unknown as NodeJS.Timeout);
@@ -250,7 +262,9 @@ const displayTitle = computed(() => {
 });
 
 function skipToLatestTime() {
-	const segment = watchStore.watchList.find((segment) => segment.season == watchStore.currentSeason && segment.episode == watchStore.currentEpisode);
+	const segment = watchStore.watchList.find(
+		(segment) => segment.season == watchStore.currentSeason && segment.episode == watchStore.currentEpisode
+	);
 	const video = document.querySelector('video');
 	if (video && segment) {
 		video.currentTime = segment.time;

@@ -1,6 +1,6 @@
 import { useWatchStore } from './watch.store';
-import type { Serie } from '@/types/index';
 import { useAxios } from '@/utils';
+import type { Serie } from '@Types/classes';
 import { defineStore } from 'pinia';
 
 export const useIndexStore = defineStore('index', {

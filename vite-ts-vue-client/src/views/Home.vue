@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import EntityCard from '@/components/Home/EntityCard.vue';
 import { useIndexStore } from '@/stores/index.store';
-import type { Serie } from '@/types';
+import type { Serie } from '@Types/classes';
 import { ref, onBeforeUnmount, computed, onMounted } from 'vue';
 const backToTop = ref(false);
 

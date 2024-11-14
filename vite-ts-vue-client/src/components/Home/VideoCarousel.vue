@@ -27,9 +27,7 @@
 import { defineComponent, type PropType } from 'vue';
 import { Carousel, Navigation, Slide, Pagination } from 'vue3-carousel';
 import 'vue3-carousel/dist/carousel.css';
-import AppCard from './AppCard.vue';
-
-import type { BrowseSerie } from '@/types';
+import AppCard, { type BrowseSerie } from './AppCard.vue';
 
 export default defineComponent({
 	name: 'Breakpoints',

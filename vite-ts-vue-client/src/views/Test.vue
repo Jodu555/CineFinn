@@ -4,7 +4,10 @@
 
 		<div class="d-flex justify-content-center">
 			<div class="d-flex overflow-x-scroll pb-2" style="overflow-y: hidden">
-				<div v-for="column in columns" :key="column.title" class="border border-secondary rounded-lg px-3 py-3 me-3 column-width rounded mr-4">
+				<div
+					v-for="column in columns"
+					:key="column.title"
+					class="border border-secondary rounded-lg px-3 py-3 me-3 column-width rounded mr-4">
 					<p class="display-6">{{ column.title }}</p>
 					<!-- Draggable component comes from vuedraggable. It provides drag & drop functionality -->
 					<draggable :list="column.todos" :animation="200" class="fully" ghost-class="ghost-card" group="tasks" item-key="id">
@@ -24,10 +27,10 @@
 import { onMounted, ref } from 'vue';
 import draggable from 'vuedraggable';
 import TaskCard from '@/components/TaskCard.vue';
-import type { TodoItem } from '@/types';
 import { useAxios } from '@/utils';
+import type { DatabaseParsedTodoItem } from '@Types/database';
 
-const columns = ref<{ title: string; todos: any[] | TodoItem[] }[]>([
+const columns = ref<{ title: string; todos: any[] | DatabaseParsedTodoItem[] }[]>([
 	{
 		title: 'Releases',
 		todos: [],
@@ -48,7 +51,7 @@ const columns = ref<{ title: string; todos: any[] | TodoItem[] }[]>([
 
 const loading = ref(false);
 
-const list = ref<TodoItem[]>([]);
+const list = ref<DatabaseParsedTodoItem[]>([]);
 const permittedAccounts = ref<permAcc[]>([]);
 
 interface permAcc {
@@ -61,7 +64,10 @@ onMounted(async () => {
 	document.title = `Cinema | Todo`;
 	loading.value = true;
 
-	const [response, accResponse] = await Promise.all([useAxios().get<TodoItem[]>('/todo/'), useAxios().get<permAcc[]>('/todo/permittedAccounts')]);
+	const [response, accResponse] = await Promise.all([
+		useAxios().get<DatabaseParsedTodoItem[]>('/todo/'),
+		useAxios().get<permAcc[]>('/todo/permittedAccounts'),
+	]);
 
 	if (response.status == 200) {
 		list.value = response?.data?.sort((a, b) => a.order - b.order);

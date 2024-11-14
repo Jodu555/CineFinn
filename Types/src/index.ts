@@ -1,4 +1,4 @@
-import { SerieEpisodeObject, SerieMovieObject } from './classes';
+import type { SerieEpisodeObject, SerieMovieObject } from './classes';
 
 export interface JobMeta {
     serieID: string;

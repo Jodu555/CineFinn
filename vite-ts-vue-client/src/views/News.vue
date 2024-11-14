@@ -39,7 +39,7 @@
 import { mapWritableState } from 'pinia';
 import { useAuthStore } from '@/stores/auth.store';
 import { useAxios } from '@/utils';
-import type { NewsItem } from '@/types/index';
+import type { DatabaseNewsItem } from '@Types/database';
 
 export default {
 	data() {
@@ -47,7 +47,7 @@ export default {
 			loading: true,
 			newsInput: '',
 			sort: false,
-			news: [] as NewsItem[],
+			news: [] as DatabaseNewsItem[],
 		};
 	},
 	computed: {

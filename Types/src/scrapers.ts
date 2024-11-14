@@ -1,4 +1,4 @@
-import { Langs } from './classes';
+import type { Langs } from './classes';
 
 export interface AniWorldEntity {
     mainName: string;

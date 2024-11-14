@@ -1,5 +1,5 @@
-import { Langs } from './classes';
-import { AniWorldSeriesInformations, ZoroReturn, ZoroSeriesInformation, AnixSeriesInformation, MyAsianSeries } from './scrapers';
+import type { Langs } from './classes';
+import type { AniWorldSeriesInformations, ZoroReturn, ZoroSeriesInformation, AnixSeriesInformation, MyAsianSeries } from './scrapers';
 
 export interface DatabaseWatchStringItem {
     account_UUID: string;

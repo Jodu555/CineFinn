@@ -1,8 +1,8 @@
 import { useAxios, useBaseURL } from '@/utils';
 import { defineStore } from 'pinia';
 import { useIndexStore } from './index.store';
-import type { Serie, Langs, Segment, SerieEpisode, SerieMovie } from '@/types';
 import { useAuthStore } from './auth.store';
+import type { Langs, Segment, Serie, SerieEpisode, SerieMovie } from '@Types/classes';
 
 export const useWatchStore = defineStore('watch', {
 	state: () => {

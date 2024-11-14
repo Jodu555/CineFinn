@@ -34,7 +34,11 @@
 			<template #item="{ element }: { element: TodoItem }">
 				<li class="list-group-item" v-auto-animate>
 					<div class="d-flex" v-auto-animate>
-						<img v-if="decideImageURL(element).length > 0" :src="decideImageURL(element)" class="img-fluid rounded-top me-4 dp-img" alt="" />
+						<img
+							v-if="decideImageURL(element).length > 0"
+							:src="decideImageURL(element)"
+							class="img-fluid rounded-top me-4 dp-img"
+							alt="" />
 						<div style="width: 100%" v-auto-animate>
 							<div class="d-flex justify-content-between">
 								<div>
@@ -104,7 +108,9 @@
 									&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk:
 									{{ numWithFP((languageDevision(element).total * constants.mbperEpisode) / 1024, 1) }}GB
 								</li>
-								<li v-for="[key, value] in Object.entries(languageDevision(element).devision)">&nbsp;&nbsp;&nbsp;&nbsp;{{ key }}: {{ value }}%</li>
+								<li v-for="[key, value] in Object.entries(languageDevision(element).devision)">
+									&nbsp;&nbsp;&nbsp;&nbsp;{{ key }}: {{ value }}%
+								</li>
 								<template v-if="element.scraped != undefined && element.scraped !== true && element.scraped?.movies != undefined">
 									<li>Movies: {{ element.scraped?.movies?.length }}</li>
 									<li>
@@ -122,11 +128,15 @@
 											</template>
 											<template v-if="element.scrapedZoro !== undefined && element.scrapedZoro !== true">
 												<br />
-												<a target="_blank" :href="element.scrapedZoro.episodes[0]?.url">{{ element.scrapedZoro.episodes[0]?.url }}</a>
+												<a target="_blank" :href="element.scrapedZoro.episodes[0]?.url">{{
+													element.scrapedZoro.episodes[0]?.url
+												}}</a>
 											</template>
 											<template v-if="element.scrapednewZoro !== undefined && element.scrapednewZoro !== true">
 												<br />
-												<a target="_blank" :href="element.scrapednewZoro.seasons[0]?.[0]?.url">{{ element.scrapednewZoro.seasons[0]?.[0]?.url }}</a>
+												<a target="_blank" :href="element.scrapednewZoro.seasons[0]?.[0]?.url">{{
+													element.scrapednewZoro.seasons[0]?.[0]?.url
+												}}</a>
 											</template>
 											<template v-if="element.scrapedAnix !== undefined && element.scrapedAnix !== true">
 												<br />
@@ -187,9 +197,15 @@
 											<label for="name" class="form-label">Creator:</label>
 										</div>
 										<div class="col-3">
-											<select v-model="element.creator" style="width: 100%" class="form-select" aria-label="Default select example">
+											<select
+												v-model="element.creator"
+												style="width: 100%"
+												class="form-select"
+												aria-label="Default select example">
 												<option selected disabled>From</option>
-												<option v-for="account in state.permittedAccounts" :value="account.UUID">{{ account.username }}</option>
+												<option v-for="account in state.permittedAccounts" :value="account.UUID">
+													{{ account.username }}
+												</option>
 											</select>
 										</div>
 									</div>
@@ -326,9 +342,9 @@ import { useAxios } from '@/utils';
 import { useSocket } from '@/utils/socket';
 import { reactive, computed, ref, onMounted, getCurrentInstance, onUnmounted } from 'vue';
 
-import type { NewsItem, References, TodoItem } from '@/types/index';
-import type { AniWorldAdditionalSeriesInformations, AniWorldSeriesInformations, ZoroSeriesInformation } from '@/types/scraper';
 import draggable from 'vuedraggable';
+import type { AniWorldAdditionalSeriesInformations } from '@Types/scrapers';
+import type { DatabaseNewsItem, DatabaseParsedTodoItem, TodoReferences } from '@Types/database';
 
 const minimal = ref(false);
 
@@ -337,6 +353,10 @@ const auth = useAuthStore();
 const $socket = useSocket();
 
 const loading = ref(false);
+
+interface TodoItem extends DatabaseParsedTodoItem {
+	edited?: boolean;
+}
 
 const numWithFP = (num: string | number, pts: number): number => {
 	if (typeof num == 'number') num = String(num);
@@ -398,7 +418,7 @@ const scrapers = [
 ] satisfies ScraperDefinition[];
 
 interface ScraperDefinition {
-	referenceKey: keyof References;
+	referenceKey: keyof TodoReferences;
 	scrapeKey: keyof TodoItem;
 	imagePath: string[];
 }
@@ -489,10 +509,11 @@ onMounted(async () => {
 
 		state.list = list
 			.map((x) => {
-				if (editedIDs.find((y) => y == x.ID)) {
-					x.edited = true;
-				}
-				return x;
+				const newItem = {
+					...x,
+					edited: editedIDs.find((y) => y == x.ID),
+				} as TodoItem;
+				return newItem;
 			})
 			.sort((a, b) => a.order - b.order);
 	});
@@ -612,7 +633,7 @@ const addEmptyItem = () => {
 		name: '',
 		creator: auth.userInfo.UUID,
 		edited: false,
-		categorie: '',
+		categorie: 'Aniworld',
 		references: { aniworld: '', zoro: '', sto: '' },
 		order: -1,
 		ID,
@@ -688,7 +709,7 @@ const useTodo = async (ID: string) => {
 			const newsObject = {
 				content: `Added ${seriesObject.title}`,
 				time: Date.now(),
-			} as NewsItem;
+			} as DatabaseNewsItem;
 			await useAxios().post('/news/', newsObject);
 		}
 	}

@@ -17,14 +17,14 @@
 import { useAuthStore } from '@/stores/auth.store';
 import { useIndexStore } from '@/stores/index.store';
 import { useSyncStore } from '@/stores/sync.store';
-import type { SyncRoomItem } from '@/types';
+import type { DatabaseParsedSyncRoomItem } from '@Types/database';
 import { mapWritableState, mapActions } from 'pinia';
 import type { PropType } from 'vue';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
 	props: {
-		room: { type: Object as PropType<SyncRoomItem>, required: true },
+		room: { type: Object as PropType<DatabaseParsedSyncRoomItem>, required: true },
 	},
 	data() {
 		return {

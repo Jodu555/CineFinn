@@ -37,7 +37,7 @@
 import { mapState, mapWritableState } from 'pinia';
 import { useAuthStore } from '@/stores/auth.store';
 import { useWatchStore } from '@/stores/watch.store';
-import type { SerieEpisode } from '@/types';
+import type { SerieEpisode } from '@Types/classes';
 
 export default {
 	data() {

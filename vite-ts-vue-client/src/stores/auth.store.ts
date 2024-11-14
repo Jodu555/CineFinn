@@ -3,7 +3,7 @@ import { AxiosError } from 'axios';
 import { deleteCookie, getCookie, setCookie, useAxios } from '@/utils';
 import { useSocket } from '@/utils/socket';
 import { useRouter } from 'vue-router';
-import type { Setting, SettingsObject } from '@/types';
+import type { Setting, SettingsObject } from '@Types/session';
 
 export const useAuthStore = defineStore('auth', {
 	state: () => {
@@ -42,7 +42,7 @@ export const useAuthStore = defineStore('auth', {
 		async resetSettings() {
 			useSocket().emit('resetSettings');
 		},
-		async login(credentials: { username: string; password: string }) {
+		async login(credentials: { username: string; password: string; }) {
 			const response = await useAxios().post('/auth/login', credentials);
 			console.log(response);
 
@@ -54,7 +54,7 @@ export const useAuthStore = defineStore('auth', {
 				this.error = response.data?.error?.message;
 			}
 		},
-		async register(credentials: { username: string; password: string; token?: string }) {
+		async register(credentials: { username: string; password: string; token?: string; }) {
 			const response = await useAxios().post('/auth/register', credentials);
 			if (response.status == 200) {
 				delete credentials?.token;

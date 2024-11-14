@@ -2,14 +2,14 @@ import { useWatchStore } from './watch.store';
 import { getApp, useAxios, useSwal } from '@/utils';
 import { defineStore } from 'pinia';
 import { useAuthStore } from './auth.store';
-import type { SyncRoomItem } from '@/types';
 import { useSocket } from '@/utils/socket';
+import type { DatabaseParsedSyncRoomItem } from '@Types/database';
 
 export const useSyncStore = defineStore('sync', {
 	state: () => {
 		return {
 			loading: false,
-			roomList: [] as SyncRoomItem[],
+			roomList: [] as DatabaseParsedSyncRoomItem[],
 			currentRoomID: '-1',
 		};
 	},
@@ -22,8 +22,8 @@ export const useSyncStore = defineStore('sync', {
 			if (memberObject == undefined) return false;
 			return memberObject.role == 1;
 		},
-		currentRoom(state): SyncRoomItem {
-			return state.roomList.find((r) => r.ID == state.currentRoomID) as SyncRoomItem;
+		currentRoom(state): DatabaseParsedSyncRoomItem {
+			return state.roomList.find((r) => r.ID == state.currentRoomID) as DatabaseParsedSyncRoomItem;
 		},
 	},
 	actions: {

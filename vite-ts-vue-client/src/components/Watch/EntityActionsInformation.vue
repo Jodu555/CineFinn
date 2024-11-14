@@ -36,7 +36,7 @@ import { mapWritableState, mapState } from 'pinia';
 import { useAuthStore } from '@/stores/auth.store';
 import { useWatchStore } from '@/stores/watch.store';
 import { langDetails } from '@/utils/constants';
-import type { Langs } from '@/types';
+import type { Langs } from '@Types/classes';
 
 export default defineComponent({
 	props: {

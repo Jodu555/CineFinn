@@ -23,8 +23,10 @@
 </template>
 
 <script setup lang="ts">
-import type { BrowseSerie } from '@/types';
+import type { Serie } from '@Types/classes';
 import { onMounted, ref } from 'vue';
+
+export type BrowseSerie = Serie & { url?: string };
 
 const props = defineProps<{
 	searchItem: BrowseSerie;

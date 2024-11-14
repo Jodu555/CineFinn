@@ -31,7 +31,7 @@ import { mapWritableState } from 'pinia';
 import { useAuthStore } from '@/stores/auth.store';
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
-import type { Segment, SerieEpisode, SerieMovie } from '@/types';
+import type { Segment, SerieEpisode, SerieMovie } from '@Types/classes';
 
 export default defineComponent({
 	props: {
@@ -68,7 +68,8 @@ export default defineComponent({
 							return (
 								(segment.ID == this.$route.query.id || segment.ID == this.currentSeriesID) &&
 								segment.watched &&
-								((segment.season == this.currentSeason && segment.episode == index) || (this.currentSeason == -1 && segment.movie == index))
+								((segment.season == this.currentSeason && segment.episode == index) ||
+									(this.currentSeason == -1 && segment.movie == index))
 							);
 						})
 					);

@@ -11,9 +11,15 @@
 				<!-- Show Results -->
 				<div class="mb-4" v-for="cand in state.candidates">
 					<h4>- {{ state.todoList.find((x) => x.ID == cand.todoID)?.name }} - {{ cand.todoID }}</h4>
-					<div class="progress" role="progressbar" aria-label="Animated striped example" aria-valuenow="75"
-						aria-valuemin="0" aria-valuemax="100">
-						<div class="progress-bar progress-bar-striped progress-bar-animated"
+					<div
+						class="progress"
+						role="progressbar"
+						aria-label="Animated striped example"
+						aria-valuenow="75"
+						aria-valuemin="0"
+						aria-valuemax="100">
+						<div
+							class="progress-bar progress-bar-striped progress-bar-animated"
 							:style="{ width: Math.round((cand.currentVotes / allVotes) * 100) + '%' }"></div>
 					</div>
 					<h5 class="mt-1 text-center">{{ Math.round((cand.currentVotes / allVotes) * 100) }}%</h5>
@@ -24,11 +30,12 @@
 				<div class="row mb-2 row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xxl-4 g-4">
 					<div class="col" v-for="(cand, i) in state.candidates">
 						<div class="card">
-							<img :src="decideImageURL(state.todoList.find((x) => x.ID == cand.todoID))"
-								class="img-fluid rounded-top me-4 dp-img" alt="..." />
+							<img
+								:src="decideImageURL(state.todoList.find((x) => x.ID == cand.todoID))"
+								class="img-fluid rounded-top me-4 dp-img"
+								alt="..." />
 							<div class="card-body">
-								<h5 class="card-title">{{ i + 1 }} - {{ state.todoList.find((x) => x.ID ==
-									cand.todoID)?.name }}</h5>
+								<h5 class="card-title">{{ i + 1 }} - {{ state.todoList.find((x) => x.ID == cand.todoID)?.name }}</h5>
 							</div>
 						</div>
 					</div>
@@ -37,14 +44,18 @@
 				<form @submit.prevent="vote()" class="mt-5">
 					<div class="d-flex justify-content-center">
 						<div v-for="(cand, i) in state.candidates" class="form-check form-check-inline">
-							<input v-model="decision" class="form-check-input" type="radio" name="inlineRadioOptions"
-								id="inlineRadio1" :value="cand.todoID" />
+							<input
+								v-model="decision"
+								class="form-check-input"
+								type="radio"
+								name="inlineRadioOptions"
+								id="inlineRadio1"
+								:value="cand.todoID" />
 							<label class="form-check-label" for="inlineRadio1">{{ i + 1 }}</label>
 						</div>
 					</div>
 					<div class="d-grid gap-3">
-						<button type="submit" :disabled="decision.trim().length == 0"
-							class="btn btn-outline-primary">Vote!</button>
+						<button type="submit" :disabled="decision.trim().length == 0" class="btn btn-outline-primary">Vote!</button>
 					</div>
 					<div class="d-flex justify-content-center mt-3">
 						<small class="text-center">- Note Every User can only vote once</small>
@@ -54,17 +65,19 @@
 		</div>
 		<pre>
 			{{ state.candidates }}
-		</pre>
+		</pre
+		>
 		<pre>
 			Decision: {{ decision }}
 			IsVotingPhase: {{ isVotingPhase }}
 			HasAlreadyVoted: {{ hasAlreadyVoted }}	
-		</pre>
+		</pre
+		>
 	</div>
 </template>
 <script setup lang="ts">
-import type { TodoItem } from '@/types';
 import { useAxios, useSwal } from '@/utils';
+import type { DatabaseParsedTodoItem } from '@Types/database';
 import { computed, onMounted, reactive, ref } from 'vue';
 
 const isVotingPhase = ref(true);
@@ -73,7 +86,7 @@ const hasAlreadyVoted = ref(false);
 const decision = ref('');
 
 const state = reactive({
-	todoList: [] as TodoItem[],
+	todoList: [] as DatabaseParsedTodoItem[],
 	candidates: [
 		{
 			todoID: '985320',
@@ -122,7 +135,7 @@ async function vote() {
 	}
 }
 
-function decideImageURL(element: TodoItem | undefined) {
+function decideImageURL(element: DatabaseParsedTodoItem | undefined) {
 	if (element == undefined) return '';
 	if (
 		element.scraped != undefined &&
@@ -141,14 +154,19 @@ function decideImageURL(element: TodoItem | undefined) {
 		return element.scrapednewZoro.image;
 	}
 
-	if (element.scrapedAnix != undefined && element.scrapedAnix !== true && element.scrapedAnix.image && typeof element.scrapedAnix.image == 'string') {
+	if (
+		element.scrapedAnix != undefined &&
+		element.scrapedAnix !== true &&
+		element.scrapedAnix.image &&
+		typeof element.scrapedAnix.image == 'string'
+	) {
 		return element.scrapedAnix.image;
 	}
 	return '';
 }
 
 onMounted(async () => {
-	const response = await useAxios().get<TodoItem[]>('/todo/');
+	const response = await useAxios().get<DatabaseParsedTodoItem[]>('/todo/');
 	if (response.status == 200) {
 		state.todoList = response?.data?.sort((a, b) => a.order - b.order);
 	}

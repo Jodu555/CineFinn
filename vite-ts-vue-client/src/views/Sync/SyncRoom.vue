@@ -16,12 +16,12 @@
 				entityObject: {{ entityObject }}
 				currentRoom: {{ currentRoom }}
 				isOwner: {{ isOwner }}
-		</pre>
+		</pre
+		>
 		<Modal v-if="currentRoom != null" size="xl" v-model:show="showSyncModal">
 			<template #title> Sync Room {{ currentRoom.ID }} Manager</template>
 			<template #body>
-				<h5 v-if="isOwner" class="text-danger text-center">If you promote a person you will automatically get
-					demoted</h5>
+				<h5 v-if="isOwner" class="text-danger text-center">If you promote a person you will automatically get demoted</h5>
 				<div class="table-responsive-md">
 					<table class="table">
 						<thead>
@@ -36,8 +36,13 @@
 								<td scope="row">{{ member.name }}</td>
 								<td>{{ toReadableRole(member.role) }}</td>
 								<td>
-									<button v-if="member.role == 0 && isOwner" @click="promote(member.UUID)"
-										type="button" class="btn btn-primary me-3">Promote</button>
+									<button
+										v-if="member.role == 0 && isOwner"
+										@click="promote(member.UUID)"
+										type="button"
+										class="btn btn-primary me-3">
+										Promote
+									</button>
 								</td>
 							</tr>
 						</tbody>
@@ -64,34 +69,59 @@
 					<button @click="showSyncModal = true" class="btn btn-outline-info">Manage</button>
 				</div>
 			</div>
-			<AutoComplete v-if="isOwner" :options="{ placeholder: 'Select a Series...', clearAfterSelect: true }"
-				:data="autoCompleteSeries" :select-fn="(id) => {
-					isOwner ? selectSeries(id) : null;
-				}
-					" />
+			<AutoComplete
+				v-if="isOwner"
+				:options="{ placeholder: 'Select a Series...', clearAfterSelect: true }"
+				:data="autoCompleteSeries"
+				:select-fn="
+					(id) => {
+						isOwner ? selectSeries(id) : null;
+					}
+				" />
 		</div>
 		<div v-if="currentSeries != undefined && currentSeries.ID != '-1'">
 			<div v-if="isOwner">
 				<!-- Movies -->
-				<EntityListView v-if="currentSeries.movies.length >= 1" title="Movies:" :array="currentSeries.movies"
-					:current="currentMovie" :currentSeriesID="currentSeries.ID" :changeFN="changeMovie"
+				<EntityListView
+					v-if="currentSeries.movies.length >= 1"
+					title="Movies:"
+					:array="currentSeries.movies"
+					:current="currentMovie"
+					:currentSeriesID="currentSeries.ID"
+					:changeFN="changeMovie"
 					:watchList="watchList" />
 				<!-- Seasons -->
-				<EntityListView title="Seasons:" v-if="currentSeries.seasons.length >= 1" :array="currentSeries.seasons"
-					:current="currentSeason" :currentSeriesID="currentSeries.ID" :changeFN="changeSeason" :season="true"
+				<EntityListView
+					title="Seasons:"
+					v-if="currentSeries.seasons.length >= 1"
+					:array="currentSeries.seasons"
+					:current="currentSeason"
+					:currentSeriesID="currentSeries.ID"
+					:changeFN="changeSeason"
+					:season="true"
 					:watchList="watchList" />
 				<!-- Episodes -->
-				<EntityListView v-if="currentSeason != -1" title="Episodes:"
+				<EntityListView
+					v-if="currentSeason != -1"
+					title="Episodes:"
 					:array="currentSeries.seasons.find((x) => x[0].season == (entityObject as SerieEpisode)?.season)"
-					:current="currentEpisode" :currentSeason="currentSeason" :currentSeriesID="currentSeries.ID"
-					:changeFN="changeEpisode" :watchList="watchList" />
+					:current="currentEpisode"
+					:currentSeason="currentSeason"
+					:currentSeriesID="currentSeries.ID"
+					:changeFN="changeEpisode"
+					:watchList="watchList" />
 
 				<EntityActionsInformation :switch-to="switchTo" :change-language="changeLanguage" />
 			</div>
 
-			<ExtendedVideo ref="extendedVideoChild" v-show="showVideo"
-				:events="{ playback: deepPlayback, skip: deepSkip, skipTimeline: deepSkipTimeline }" :inSyncRoom="true"
-				:canPlay="isOwner" :switchTo="switchTo" :sendVideoTimeUpdate="sendVideoTimeUpdate" />
+			<ExtendedVideo
+				ref="extendedVideoChild"
+				v-show="showVideo"
+				:events="{ playback: deepPlayback, skip: deepSkip, skipTimeline: deepSkipTimeline }"
+				:inSyncRoom="true"
+				:canPlay="isOwner"
+				:switchTo="switchTo"
+				:sendVideoTimeUpdate="sendVideoTimeUpdate" />
 		</div>
 	</div>
 </template>
@@ -107,8 +137,8 @@ import { useIndexStore } from '@/stores/index.store';
 import { useWatchStore } from '@/stores/watch.store';
 import { useSyncStore } from '@/stores/sync.store';
 import { useAuthStore } from '@/stores/auth.store';
-import type { Langs, SerieEpisode } from '@/types';
 import { useAxios } from '@/utils';
+import type { Langs, SerieEpisode } from '@Types/classes';
 
 export default {
 	components: { AutoComplete, EntityActionsInformation, EntityListView, ExtendedVideo, Modal },
@@ -164,7 +194,7 @@ export default {
 				showConfirmButton: false,
 				timer: 3000,
 				icon: 'success',
-				title: `You Promoted ${this.currentRoom.members?.find(x => x.UUID == userUUID)?.name}`,
+				title: `You Promoted ${this.currentRoom.members?.find((x) => x.UUID == userUUID)?.name}`,
 				timerProgressBar: true,
 			});
 			this.$socket.emit('sync-promote', { userUUID });
@@ -255,7 +285,13 @@ export default {
 				const wasPaused = video.paused;
 				const prevTime = video.currentTime;
 
-				console.log('GOT handleVideoChange() EMIT to Server', { season, episode, movie, langchange, lang: langchange ? lang : defaultLanguage });
+				console.log('GOT handleVideoChange() EMIT to Server', {
+					season,
+					episode,
+					movie,
+					langchange,
+					lang: langchange ? lang : defaultLanguage,
+				});
 				this.sendVideoTimeUpdate(video.currentTime, true);
 				!silent && this.$socket.emit('sync-video-change', { season, episode, movie, langchange, lang: langchange ? lang : defaultLanguage });
 				video.pause();
@@ -343,7 +379,11 @@ export default {
 							clearInterval(inti);
 							console.log('Setting headsup with i', i, this.entityObject);
 							setTimeout(() => {
-								(this.$refs.extendedVideoChild as typeof ExtendedVideo)?.trigger('sync-playback', response.data.isPlaying, response.data.currentTime);
+								(this.$refs.extendedVideoChild as typeof ExtendedVideo)?.trigger(
+									'sync-playback',
+									response.data.isPlaying,
+									response.data.currentTime
+								);
 							}, 200);
 						}
 						if (i > 1000 * 60 * 1) {

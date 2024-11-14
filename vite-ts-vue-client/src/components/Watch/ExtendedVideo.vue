@@ -84,7 +84,9 @@
 									d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" />
 							</svg>
 							<svg class="volume-low-icon" viewBox="0 0 24 24">
-								<path fill="currentColor" d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
+								<path
+									fill="currentColor"
+									d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
 							</svg>
 							<svg class="volume-muted-icon" viewBox="0 0 24 24">
 								<path
@@ -115,7 +117,13 @@
 						</svg>
 					</button>
 					<button title="Next Episode" @click="switchTo(1)">
-						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="Hawkins-Icon Hawkins-Icon-Standard">
+						<svg
+							width="24"
+							height="24"
+							viewBox="0 0 24 24"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+							class="Hawkins-Icon Hawkins-Icon-Standard">
 							<path
 								fill-rule="evenodd"
 								clip-rule="evenodd"
@@ -133,7 +141,9 @@
 					</button>
 					<button v-if="screenWidth >= 450" title="Toggle Theatre Player" class="theater-btn">
 						<svg class="tall" viewBox="0 0 24 24">
-							<path fill="currentColor" d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z" />
+							<path
+								fill="currentColor"
+								d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z" />
 						</svg>
 						<svg class="wide" viewBox="0 0 24 24">
 							<path fill="currentColor" d="M19 7H5c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 8H5V9h14v6z" />
@@ -191,8 +201,8 @@ import ShareModal from '@/components/Watch/ShareModal.vue';
 import RmvcModal from '@/components/Watch/RmvcModal.vue';
 import { useAuthStore } from '@/stores/auth.store';
 import { useWatchStore } from '@/stores/watch.store';
-import type { SerieEpisode } from '@/types';
 import { useAxios, useBaseURL } from '@/utils';
+import type { SerieEpisode } from '@Types/classes';
 
 interface Segment {
 	type: 'intro' | 'outro';
@@ -240,11 +250,15 @@ export default defineComponent({
 		...mapState(useWatchStore, ['videoSrc', 'entityObject']),
 		isInterceptingWithIntro(): boolean {
 			const introSegment = this.segmentData.find((x) => x.type == 'intro');
-			return Boolean(introSegment && this.videoData?.currentTime >= introSegment?.startms && this.videoData?.currentTime <= introSegment?.endms);
+			return Boolean(
+				introSegment && this.videoData?.currentTime >= introSegment?.startms && this.videoData?.currentTime <= introSegment?.endms
+			);
 		},
 		isInterceptingWithOutro(): boolean {
 			const outroSegment = this.segmentData.find((x) => x.type == 'outro');
-			return Boolean(outroSegment && this.videoData?.currentTime >= outroSegment?.startms && this.videoData?.currentTime <= outroSegment?.endms);
+			return Boolean(
+				outroSegment && this.videoData?.currentTime >= outroSegment?.startms && this.videoData?.currentTime <= outroSegment?.endms
+			);
 		},
 	},
 	async mounted() {
@@ -310,7 +324,9 @@ export default defineComponent({
 			if (true) {
 				try {
 					const response = await useAxios().get(
-						`/segments/info/${this.currentSeries.ID}/${(this.entityObject as SerieEpisode).season}/${(this.entityObject as SerieEpisode).episode}`
+						`/segments/info/${this.currentSeries.ID}/${(this.entityObject as SerieEpisode).season}/${
+							(this.entityObject as SerieEpisode).episode
+						}`
 					);
 					// const response = await fetch(
 					// 	`http://localhost:4897/segments/info/${this.currentSeries.ID}/${(this.entityObject as SerieEpisode).season}/${

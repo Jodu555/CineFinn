@@ -9,7 +9,10 @@
 		<div v-else>
 			<div class="d-flex justify-content-center">
 				<div class="mb-3 ms-5 me-5">
-					<AutoComplete :options="{ placeholder: 'Add a Series', clearAfterSelect: true }" :data="autoCompleteSeries" :select-fn="addIgnoranceItem" />
+					<AutoComplete
+						:options="{ placeholder: 'Add a Series', clearAfterSelect: true }"
+						:data="autoCompleteSeries"
+						:select-fn="addIgnoranceItem" />
 				</div>
 			</div>
 
@@ -52,7 +55,6 @@ import AutoComplete from '@/components/Layout/AutoComplete.vue';
 import Modal from '@/components/Modal.vue';
 import { useAdminStore } from '@/stores/admin.store';
 import { useIndexStore } from '@/stores/index.store';
-import type { Serie } from '@/types';
 import { useAxios } from '@/utils';
 import { langDetails } from '@/utils/constants';
 import { useSocket } from '@/utils/socket';

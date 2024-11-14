@@ -89,8 +89,8 @@ import { mapActions, mapWritableState } from 'pinia';
 import JobListView from '@/components/Layout/JobListView.vue';
 import { roleIDToName } from '@/utils/constants';
 import { useAuthStore } from '@/stores/auth.store';
-import type { Job } from '@/types';
 import { useAxios } from '@/utils';
+import type { Job } from '@Types/session';
 
 export default {
 	components: { JobListView },

@@ -26,7 +26,23 @@ export interface SerieEpisodeObject {
     langs: Langs[];
     subID: string;
 }
+export interface SerieEpisode {
+    filePath: string;
+    primaryName: string;
+    secondaryName: string;
+    season: number;
+    episode: number;
+    langs: Langs[];
+    subID: string;
+}
 export interface SerieMovieObject {
+    filePath: string;
+    primaryName: string;
+    secondaryName: string;
+    langs: Langs[];
+    subID: string;
+}
+export interface SerieMovie {
     filePath: string;
     primaryName: string;
     secondaryName: string;
@@ -62,6 +78,7 @@ export interface SerieEntity {
     season: number;
     episode: number;
     langs: Langs[];
+    subID: string;
 }
 
 export type SerieReference = Record<'aniworld' | 'zoro' | 'sto' | string, string | Record<string, string>>;
@@ -85,4 +102,11 @@ export interface ExtendedEpisodeDownload {
     m3u8: string;
 }
 
-
+export interface Segment {
+    ID: string;
+    season: number;
+    episode: number;
+    movie: number;
+    time: number;
+    watched: boolean;
+}

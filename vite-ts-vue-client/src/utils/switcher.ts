@@ -1,6 +1,6 @@
 import { useWatchStore } from '@/stores/watch.store';
-import type { Langs, SerieEpisode, SerieMovie } from '@/types';
 import { useSwal } from '.';
+import type { Langs, SerieEpisode } from '@Types/classes';
 
 function multiDimSwitcher(dimArr: any[][], arrptr: number, idxptr: number, velocity: number) {
 	const debug = false;
@@ -59,13 +59,13 @@ function deepswitchTo(
 	vel: number,
 	handleVideoChange:
 		| ((
-				season?: number,
-				episode?: number,
-				movie?: number,
-				langchange?: boolean,
-				lang?: Langs | undefined,
-				callback?: ((video: HTMLVideoElement) => void) | undefined
-		  ) => void)
+			season?: number,
+			episode?: number,
+			movie?: number,
+			langchange?: boolean,
+			lang?: Langs | undefined,
+			callback?: ((video: HTMLVideoElement) => void) | undefined
+		) => void)
 		| ((season?: number, episode?: number, movie?: number, langchange?: boolean, lang?: Langs | undefined, silent?: boolean) => void)
 ) {
 	const watchStore = useWatchStore();

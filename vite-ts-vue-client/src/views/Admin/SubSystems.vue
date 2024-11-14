@@ -14,7 +14,9 @@
 						<h5 class="card-title">{{ subsystemID }}</h5>
 						<div class="card-text">
 							<ul class="list-group list-group-flush">
-								<li class="list-group-item">PToken: {{ idtoSock(subsystemID) == undefined ? 'Offline' : idtoSock(subsystemID)?.ptoken }}</li>
+								<li class="list-group-item">
+									PToken: {{ idtoSock(subsystemID) == undefined ? 'Offline' : idtoSock(subsystemID)?.ptoken }}
+								</li>
 								<li class="list-group-item">
 									Endpoint:
 									{{
@@ -25,7 +27,9 @@
 											: '*Socket Transmit*'
 									}}
 								</li>
-								<li v-if="idtoSock(subsystemID) !== undefined" class="list-group-item">Readrate: {{ idtoSock(subsystemID)?.readrate }}</li>
+								<li v-if="idtoSock(subsystemID) !== undefined" class="list-group-item">
+									Readrate: {{ idtoSock(subsystemID)?.readrate }}
+								</li>
 								<li class="list-group-item">
 									Series: {{ idtoSock(subsystemID) == undefined ? 'Offline' : idtoSock(subsystemID)?.affectedSeriesIDs.length }}
 								</li>
@@ -51,7 +55,13 @@
 				<template #body>
 					<div class="mb-3 ms-5 me-5">
 						<label for="searchTerm" class="form-label">Search</label>
-						<input v-model="searchTerm" type="text" class="form-control" id="searchTerm" aria-describedby="helpId" placeholder="Name or ID" />
+						<input
+							v-model="searchTerm"
+							type="text"
+							class="form-control"
+							id="searchTerm"
+							aria-describedby="helpId"
+							placeholder="Name or ID" />
 						<small id="helpId" class="form-text text-muted">Name or ID of the Series</small>
 					</div>
 					<div class="d-flex justify-content-center">
@@ -68,7 +78,9 @@
 									v-for="serie in idtoSock(selectedSubSystem)
 										?.affectedSeriesIDs.map((x) => indexStore.series.find((y) => y.ID == x))
 										.filter(
-											(x) => x?.title.toLowerCase().includes(searchTerm.toLowerCase()) || x?.ID.toLowerCase().startsWith(searchTerm.toLowerCase())
+											(x) =>
+												x?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+												x?.ID.toLowerCase().startsWith(searchTerm.toLowerCase())
 										)">
 									<template v-if="serie !== undefined">
 										<td scope="row">{{ serie.ID }}</td>
@@ -108,7 +120,13 @@
 					<div v-if="selectedSeries == ''" class="table-responsive-md">
 						<div class="mb-3 ms-5 me-5">
 							<label for="searchTerm" class="form-label">Search</label>
-							<input v-model="searchTerm" type="text" class="form-control" id="searchTerm" aria-describedby="helpId" placeholder="Name or ID" />
+							<input
+								v-model="searchTerm"
+								type="text"
+								class="form-control"
+								id="searchTerm"
+								aria-describedby="helpId"
+								placeholder="Name or ID" />
 							<small id="helpId" class="form-text text-muted">Name or ID of the Series</small>
 						</div>
 						<table class="table">
@@ -122,17 +140,23 @@
 							<tbody>
 								<tr
 									v-for="serie in indexStore.series.filter(
-										(x) => x.title.toLowerCase().includes(searchTerm.toLowerCase()) || x.ID.toLowerCase().startsWith(searchTerm.toLowerCase())
+										(x) =>
+											x.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+											x.ID.toLowerCase().startsWith(searchTerm.toLowerCase())
 									)">
 									<td scope="row">{{ serie.ID }}</td>
 									<td>{{ serie.title }}</td>
 									<td>
 										<button type="button" class="btn btn-outline-primary me-3" @click="selectSeries(serie.ID)">View</button>
 										<template v-if="movingSerieses.has(serie.ID)">
-											<button type="button" @click="movingSerieses.delete(serie.ID)" class="btn btn-outline-warning me-3">Remove Full</button>
+											<button type="button" @click="movingSerieses.delete(serie.ID)" class="btn btn-outline-warning me-3">
+												Remove Full
+											</button>
 										</template>
 										<template v-else>
-											<button type="button" @click="movingSerieses.add(serie.ID)" class="btn btn-outline-danger me-3">Add Full</button>
+											<button type="button" @click="movingSerieses.add(serie.ID)" class="btn btn-outline-danger me-3">
+												Add Full
+											</button>
 										</template>
 									</td>
 								</tr>
@@ -167,10 +191,19 @@
 										</td>
 										<td>
 											<template v-if="selectedEps.has(uniEp(episode))">
-												<button type="button" @click="selectedEps.delete(uniEp(episode))" class="btn btn-outline-warning me-3">Delete Full EP</button>
+												<button
+													type="button"
+													@click="selectedEps.delete(uniEp(episode))"
+													class="btn btn-outline-warning me-3">
+													Delete Full EP
+												</button>
 											</template>
 											<template v-else>
-												<button type="button" disabled @click="selectedEps.add(uniEp(episode))" class="btn btn-outline-primary me-3">
+												<button
+													type="button"
+													disabled
+													@click="selectedEps.add(uniEp(episode))"
+													class="btn btn-outline-primary me-3">
 													Select Full EP
 												</button>
 											</template>
@@ -196,7 +229,8 @@
 						<h5
 							:class="{
 								'text-success': adminStore.subsystems.subSockets.find((x) => x.id == item.fromSubID) || item.fromSubID == 'main',
-								'text-danger': adminStore.subsystems.subSockets.find((x) => x.id == item.fromSubID) == undefined && item.fromSubID != 'main',
+								'text-danger':
+									adminStore.subsystems.subSockets.find((x) => x.id == item.fromSubID) == undefined && item.fromSubID != 'main',
 							}">
 							{{ item.fromSubID }}
 						</h5>
@@ -204,7 +238,8 @@
 						<h5
 							:class="{
 								'text-success': adminStore.subsystems.subSockets.find((x) => x.id == item.toSubID) || item.toSubID == 'main',
-								'text-danger': adminStore.subsystems.subSockets.find((x) => x.id == item.toSubID) == undefined && item.toSubID != 'main',
+								'text-danger':
+									adminStore.subsystems.subSockets.find((x) => x.id == item.toSubID) == undefined && item.toSubID != 'main',
 							}">
 							{{ item.toSubID }}
 						</h5>
@@ -244,9 +279,9 @@ import Modal from '@/components/Modal.vue';
 import { useAdminStore } from '@/stores/admin.store';
 import { useIndexStore } from '@/stores/index.store';
 import { useWatchStore } from '@/stores/watch.store';
-import type { SerieEpisode } from '@/types';
 import { langDetails } from '@/utils/constants';
 import { useSocket } from '@/utils/socket';
+import type { SerieEpisode } from '@Types/classes';
 import { onMounted, ref } from 'vue';
 
 const indexStore = useIndexStore();
