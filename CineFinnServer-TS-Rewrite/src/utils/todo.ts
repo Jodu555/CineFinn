@@ -1,8 +1,8 @@
 import { Database } from '@jodu555/mysqlapi';
 import { getAniworldInfos, getAnixInfos, getMyAsianTVInfos, getNewZoroInfos } from '../sockets/scraper.socket';
-import { DatabaseParsedTodoItem, DatabaseTodoItem, References } from '../types/database';
 import { toAllSockets } from './utils';
 import { AniWorldSeriesInformations, AnixSeriesInformation, MyAsianSeries, ZoroSeriesInformation } from '@Types/scrapers';
+import { DatabaseParsedTodoItem, DatabaseTodoItem, TodoReferences } from '@Types/database';
 
 const database = Database.getDatabase();
 
@@ -47,7 +47,7 @@ const scrapers = [
 ] satisfies ScraperDefinition[];
 
 interface ScraperDefinition {
-	referenceKey: keyof References;
+	referenceKey: keyof TodoReferences;
 	scrapeFunction: (todo: DatabaseParsedTodoItem) => Promise<void | (AniWorldSeriesInformations | ZoroSeriesInformation | AnixSeriesInformation | MyAsianSeries)>;
 	scrapeKey: keyof DatabaseParsedTodoItem;
 }

@@ -1,9 +1,9 @@
 import express, { NextFunction, Response } from 'express';
 import { AuthenticatedRequest, ExtendedRemoteSocket, ExtendedSocket } from '../types/session';
 import { Database } from '@jodu555/mysqlapi';
-import { DatabaseSyncRoomItem } from '../types/database';
 import { getSyncRoom, roomToFullObject } from '../utils/room.utils';
 import { getIO } from '../utils/utils';
+import { DatabaseSyncRoomItem } from '@Types/database';
 const database = Database.getDatabase();
 
 const router = express.Router();
@@ -62,9 +62,9 @@ router.get('/:id/headsup', async (req: AuthenticatedRequest, res: Response, next
 	const result = await new Promise<
 		| false
 		| {
-				currentTime: number;
-				isPlaying: boolean;
-		  }
+			currentTime: number;
+			isPlaying: boolean;
+		}
 	>((resolve, reject) => {
 		const time = Date.now();
 		const t = setTimeout(() => {

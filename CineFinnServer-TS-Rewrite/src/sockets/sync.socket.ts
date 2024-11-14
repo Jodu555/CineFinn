@@ -1,8 +1,8 @@
 import { toAllSockets } from '../utils/utils';
 import { ExtendedSocket } from '../types/session';
 import { Database } from '@jodu555/mysqlapi';
-import { DatabaseParsedSyncRoomItem, DatabaseSyncRoomItem, DatabaseSyncRoomMember } from '../types/database';
 import { fullObjectToDatabase, getRoomCheckIfExists, getRoomCheckIfExistsAndOwner, getSyncRoom } from '../utils/room.utils';
+import { DatabaseParsedSyncRoomItem, DatabaseSyncRoomItem } from '@Types/database';
 const database = Database.getDatabase();
 
 const initialize = (socket: ExtendedSocket) => {

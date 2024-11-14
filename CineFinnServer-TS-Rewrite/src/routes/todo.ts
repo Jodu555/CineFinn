@@ -1,10 +1,10 @@
 import express, { Response } from 'express';
 import { Database } from '@jodu555/mysqlapi';
-import { DatabaseParsedTodoItem, DatabaseTodoItem } from '../types/database';
 import { AuthenticatedRequest, Role, User } from '../types/session';
 import { isScraperSocketConnected } from '../sockets/scraper.socket';
 import { roleAuthorization } from '../utils/roleManager';
 import { checkIfTodoNeedsScrape, backgroundScrapeTodo } from '../utils/todo';
+import { DatabaseParsedTodoItem, DatabaseTodoItem } from '@Types/database';
 const database = Database.getDatabase();
 
 const router = express.Router();

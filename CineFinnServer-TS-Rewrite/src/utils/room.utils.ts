@@ -1,6 +1,6 @@
 import { Database } from '@jodu555/mysqlapi';
-import { DatabaseParsedSyncRoomItem, DatabaseSyncRoomItem, DatabaseSyncRoomMember } from '../types/database';
 import { ExtendedSocket } from '../types/session';
+import { DatabaseParsedSyncRoomItem, DatabaseSyncRoomItem } from '@Types/database';
 const database = Database.getDatabase();
 
 async function getSyncRoom(ID: number) {

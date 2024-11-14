@@ -1,8 +1,8 @@
 import express, { NextFunction, Response } from 'express';
 import { Database } from '@jodu555/mysqlapi';
-import { DatabaseNewsItem, DatabaseJobItem } from '../types/database';
 import { AuthenticatedRequest, Role } from '../types/session';
 import { roleAuthorization } from '../utils/roleManager';
+import { DatabaseJobItem, DatabaseNewsItem } from '@Types/database';
 const database = Database.getDatabase();
 const router = express.Router();
 

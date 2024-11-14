@@ -5,8 +5,8 @@ import dotenv from 'dotenv';
 import { generateImages } from './utils/images';
 import { load, parse } from './utils/watchString';
 import axios from 'axios';
-import { DatabaseWatchStringItem } from './types/database';
 import { SerieObject } from '@Types/classes';
+import { DatabaseWatchStringItem } from '@Types/database';
 dotenv.config();
 
 const { Database } = require('@jodu555/mysqlapi');

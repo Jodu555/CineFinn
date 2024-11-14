@@ -3,11 +3,11 @@ import { Database } from '@jodu555/mysqlapi';
 import express, { NextFunction, Response } from 'express';
 import { checkForUpdates, isScraperSocketConnected } from '../sockets/scraper.socket';
 import { sendSeriesReloadToAll } from '../sockets/client.socket';
-import { DatabaseJobItem } from '../types/database';
 import { AuthenticatedRequest, Role } from '../types/session';
 import { crawlAndIndex } from '../utils/crawler';
 import { generateImages } from '../utils/images';
 import { getSeries, setSeries, toAllSockets } from '../utils/utils';
+import { DatabaseJobItem } from '@Types/database';
 const database = Database.getDatabase();
 const router = express.Router();
 

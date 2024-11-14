@@ -4,7 +4,6 @@ import { writeWatchInfoToDatabase } from '../utils/watchManager';
 import { parse, load, Segment, searchObject } from '../utils/watchString';
 import { defaultSettings, compareSettings } from '../utils/settings';
 import { cleanupSeriesBeforeFrontResponse } from '../classes/series';
-import { DatabaseParsedTodoItem, DatabaseTodoItem } from '../types/database';
 import { ExtendedSocket, ExtendedRemoteSocket, Role } from '../types/session';
 import { isPermitted } from '../utils/roleManager';
 import { isScraperSocketConnected } from './scraper.socket';
@@ -12,6 +11,7 @@ import { LOOKUP, callpointToEvent } from '../routes/managment';
 import { backgroundScrapeTodo, checkIfTodoNeedsScrape } from '../utils/todo';
 import { sendSocketAdminUpdate } from '../utils/admin';
 import { processMovingItem } from './sub.socket';
+import { DatabaseParsedTodoItem, DatabaseTodoItem } from '@Types/database';
 
 const database = Database.getDatabase();
 

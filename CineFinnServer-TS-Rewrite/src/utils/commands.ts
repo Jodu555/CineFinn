@@ -8,7 +8,6 @@ import { CommandManager, Command } from '@jodu555/commandmanager';
 import { AuthToken, ExtendedRemoteSocket, User } from '../types/session';
 import { getSyncRoom } from './room.utils';
 import { Database } from '@jodu555/mysqlapi';
-import { DatabaseSyncRoomItem } from '../types/database';
 import {
 	checkifSubExists,
 	downloadFileFromSubSystem,
@@ -20,6 +19,7 @@ import {
 	uploadFileToSubSystem,
 } from '../sockets/sub.socket';
 import { sendSocketAdminUpdate } from './admin';
+import { DatabaseSyncRoomItem } from '@Types/database';
 
 const commandManager = CommandManager.getCommandManager();
 const database = Database.getDatabase();
@@ -173,15 +173,13 @@ function registerCommands() {
 			for (const socket of sockets) {
 				if (socket.auth.type == 'sub') {
 					output.push(
-						` - ${socket.auth.type.toUpperCase()} => ${socket.auth.id} ${socket.auth.endpoint} - ${
-							socket.auth.ptoken ? socket.auth?.ptoken : ''
+						` - ${socket.auth.type.toUpperCase()} => ${socket.auth.id} ${socket.auth.endpoint} - ${socket.auth.ptoken ? socket.auth?.ptoken : ''
 						} RR: ${socket.auth.readrate}`
 					);
 				}
 				if (socket.auth.type == 'client') {
 					output.push(
-						` - ${socket.auth.type.toUpperCase()} => ${socket.auth.user?.username || socket.auth.id || ''} ${socket.sync ? socket.sync?.ID : ''} - ${
-							socket.id
+						` - ${socket.auth.type.toUpperCase()} => ${socket.auth.user?.username || socket.auth.id || ''} ${socket.sync ? socket.sync?.ID : ''} - ${socket.id
 						}`
 					);
 				}

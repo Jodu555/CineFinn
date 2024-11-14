@@ -1,6 +1,6 @@
 import { Database } from '@jodu555/mysqlapi';
 import { getSeries } from './utils';
-import { DatabaseWatchStringItem } from '../types/database';
+import { DatabaseWatchStringItem } from '@Types/database';
 
 const generateStr = (segmentList: Segment[]): string => {
 	let str = '';
