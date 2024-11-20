@@ -62,8 +62,11 @@ export interface MyAsianInformations {
 
 export interface MyAsianEpisode {
     number: number;
-    title: string;
+    slug: string;
     url: string;
+    title: string;
+    langs: ('Subtitle' | 'Raw')[];
+    year: string;
 }
 
 

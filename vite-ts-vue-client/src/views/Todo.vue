@@ -541,9 +541,18 @@ const drag = ref(false);
 const languageDevision = (element: TodoItem) => {
 	const out: Record<string, number> = {};
 	let total = -1;
+
+	const setOrIncrement = (lang: string) => {
+		if (!out[lang]) {
+			out[lang] = 1;
+		} else {
+			out[lang] += 1;
+		}
+	};
+
 	if (element.scraped != undefined && element.scraped !== true) {
 		total = element.scraped.seasons.flat().length;
-		element.scraped.seasons.flat().forEach((x) => x.langs.forEach((l) => (!out[l] ? (out[l] = 1) : (out[l] += 1))));
+		element.scraped.seasons.flat().forEach((x) => x.langs.forEach((l) => setOrIncrement(l)));
 	}
 	if (element.scrapedZoro != undefined && element.scrapedZoro !== true) {
 		if (total == -1) total = element.scrapedZoro.episodes.length;
@@ -552,11 +561,7 @@ const languageDevision = (element: TodoItem) => {
 			e.langs.forEach((l) => {
 				if (l == 'sub') l = 'EngSub';
 				if (l == 'dub') l = 'EngDub';
-				if (out[l]) {
-					out[l] += 1;
-				} else {
-					out[l] = 1;
-				}
+				setOrIncrement(l);
 			});
 		});
 	}
@@ -568,11 +573,7 @@ const languageDevision = (element: TodoItem) => {
 				if (l == 'sub') l = 'EngSub';
 				if (l == 'dub') l = 'EngDub';
 				if (l == 'raw') l = 'JapDub';
-				if (out[l]) {
-					out[l] += 1;
-				} else {
-					out[l] = 1;
-				}
+				setOrIncrement(l);
 			});
 		});
 	}
@@ -583,10 +584,18 @@ const languageDevision = (element: TodoItem) => {
 			e.langs.forEach((l) => {
 				if (l == 'sub') l = 'EngSub';
 				if (l == 'dub') l = 'EngDub';
-				if (out[l]) {
-					out[l] += 1;
+				setOrIncrement(l);
+			});
+		});
+	}
+	if (element.scrapedMyasiantv != undefined && element.scrapedMyasiantv !== true) {
+		total = element.scrapedMyasiantv.episodes.length;
+		element.scrapedMyasiantv.episodes.forEach((ep) => {
+			ep.langs.forEach((l) => {
+				if (l == 'Subtitle') {
+					setOrIncrement('EngSubK');
 				} else {
-					out[l] = 1;
+					setOrIncrement('RawK');
 				}
 			});
 		});
@@ -602,6 +611,8 @@ const languageDevision = (element: TodoItem) => {
 	} else if (out['GerSub'] == 100 && out['EngSub']) {
 		delete out['EngSub'];
 	}
+
+	console.log(out);
 
 	return { total, devision: out };
 };

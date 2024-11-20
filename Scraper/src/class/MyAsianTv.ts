@@ -1,4 +1,4 @@
-import { MyAsianSeries } from '@Types/scrapers';
+import { MyAsianEpisode, MyAsianInformations, MyAsianSeries } from '@Types/scrapers';
 import axios from 'axios';
 import { JSDOM } from 'jsdom';
 
@@ -35,9 +35,9 @@ class MyAsianTV {
                 slug: slug,
                 url: anchor?.href,
                 title: anchor?.textContent.trim(),
-                langs: [...e.querySelectorAll<HTMLImageElement>('img')].map(e => e.alt),
+                langs: [...e.querySelectorAll<HTMLImageElement>('img')].map(e => e.alt as ('Subtitle' | 'Raw')),
                 year: e.querySelector<HTMLSpanElement>('span')?.textContent?.trim(),
-            };
+            } satisfies MyAsianEpisode;
         });
 
 
@@ -50,9 +50,9 @@ class MyAsianTV {
                 genres: tableInfo.find(x => x[0] == 'Genre')[1].trim().split(',').map(x => x.trim()),
                 description: desciption,
                 image,
-            },
+            } satisfies MyAsianInformations,
             episodes: episodes.sort((a, b) => a.number - b.number),
-        };
+        } satisfies MyAsianSeries;
         return informations;
     }
 }
