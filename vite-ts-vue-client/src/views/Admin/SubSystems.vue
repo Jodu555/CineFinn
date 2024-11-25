@@ -73,7 +73,7 @@
 									<th scope="col">Actions</th>
 								</tr>
 							</thead>
-							<tbody>
+							<tbody v-auto-animate>
 								<tr
 									v-for="serie in idtoSock(selectedSubSystem)
 										?.affectedSeriesIDs.map((x) => indexStore.series.find((y) => y.ID == x))
@@ -105,19 +105,19 @@
 					<h3 class="text-center">List of Series</h3>
 					<template v-if="movingSerieses.size > 0">
 						<h5>Selected:</h5>
-						<div class="row row-cols-3 row-cols-lg-5 g-2 g-lg-3 d-flex justify-content-between gap-1 mb-3">
+						<div v-auto-animate class="row row-cols-3 row-cols-lg-5 g-2 g-lg-3 d-flex justify-content-between gap-1 mb-4">
 							<div v-for="id in movingSerieses.keys()">
 								<span class="text-primary">
 									{{ id }}
 								</span>
 							</div>
 						</div>
-						<div class="d-flex justify-content-center mb-4">
-							<button type="button" @click="selectedSeries = ''" style="width: 60%" class="btn btn-outline-success">Next</button>
+						<div v-if="selectSubSystem === false" class="d-flex justify-content-center mb-4">
+							<button type="button" @click="nextStepSelectSubSystem()" style="width: 60%" class="btn btn-outline-success">Next</button>
 						</div>
 					</template>
 
-					<div v-if="selectedSeries == ''" class="table-responsive-md">
+					<div v-if="selectedSeries == '' && selectSubSystem === false" class="table-responsive-md">
 						<div class="mb-3 ms-5 me-5">
 							<label for="searchTerm" class="form-label">Search</label>
 							<input
@@ -126,7 +126,8 @@
 								class="form-control"
 								id="searchTerm"
 								aria-describedby="helpId"
-								placeholder="Name or ID" />
+								placeholder="Name or ID"
+								autocomplete="off" />
 							<small id="helpId" class="form-text text-muted">Name or ID of the Series</small>
 						</div>
 						<table class="table">
@@ -137,7 +138,7 @@
 									<th scope="col">Actions</th>
 								</tr>
 							</thead>
-							<tbody>
+							<tbody v-auto-animate>
 								<tr
 									v-for="serie in indexStore.series.filter(
 										(x) =>
@@ -164,7 +165,7 @@
 						</table>
 					</div>
 					<template v-if="selectedSeries !== ''">
-						<div class="d-flex justify-content-center">
+						<div class="mb-3 d-flex justify-content-center">
 							<button type="button" @click="selectedSeries = ''" style="width: 50%" class="btn btn-outline-secondary">Back</button>
 						</div>
 
@@ -211,6 +212,33 @@
 									</tr>
 								</tbody>
 							</table>
+						</div>
+					</template>
+					<template v-if="selectSubSystem === true && selectedSeries == '' && selectedSubSystem == ''">
+						<div class="row row-cols-2 row-cols-lg-5 g-2 g-lg-3 gap-3">
+							<div
+								v-for="subsystemID in adminStore.subsystems.knownSubSystems.filter((x) => idtoSock(x) !== undefined)"
+								:key="subsystemID"
+								class="card text-start">
+								<div class="card-body">
+									<h4 class="card-title">{{ subsystemID }}</h4>
+									<div v-if="idtoSock(subsystemID) !== undefined" class="d-grid gap-2">
+										<button type="button" @click="selectedSubSystem = subsystemID" class="btn btn-outline-primary mt-2">
+											Select
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</template>
+					<template v-if="selectSubSystem === true && selectedSubSystem !== ''">
+						<div class="text-center">
+							<h2>Your About to send the above shown Serie/s!</h2>
+							<h2>To The SubSystem:</h2>
+							<h3>{{ selectedSubSystem }}</h3>
+						</div>
+						<div class="d-grid gap-2">
+							<button type="button" class="btn btn-outline-success mt-3 mb-4">Do it</button>
 						</div>
 					</template>
 				</template>
@@ -290,6 +318,7 @@ const adminStore = useAdminStore();
 
 const toggleSelectEntityToMoveModal = ref(false);
 const toggleShowSeries = ref(false);
+const selectSubSystem = ref(false);
 const selectedSubSystem = ref('');
 
 const searchTerm = ref('');
@@ -298,6 +327,12 @@ const selectedSeries = ref('');
 const selectedEps = ref(new Set());
 
 const movingSerieses = ref<Set<string>>(new Set());
+
+function nextStepSelectSubSystem() {
+	selectSubSystem.value = true;
+	selectedSubSystem.value = '';
+	selectedSeries.value = '';
+}
 
 function uniEp(episode: SerieEpisode) {
 	return `${episode.filePath}_${episode.langs.join('^')}_${episode.subID}`;
