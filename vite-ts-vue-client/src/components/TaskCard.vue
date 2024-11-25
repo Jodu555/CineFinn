@@ -3,7 +3,7 @@
 		<div class="card mb-3 px-3 pt-3 pb-3 border-primary">
 			<div class="row g-0">
 				<div class="col-md-4">
-					<img :src="decideImageURL(element)" class="img-fluid rounded-start dp-img" :alt="decideImageURL(element)" />
+					<img :src="decideImageURL(minimal, element)" class="img-fluid rounded-start dp-img" :alt="decideImageURL(minimal, element)" />
 				</div>
 				<div class="col-md-8">
 					<div class="card-body">
@@ -76,6 +76,7 @@
 </template>
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth.store';
+import { decideImageURL, languageDevision } from '@/utils/todo';
 import type { DatabaseParsedTodoItem } from '@Types/database';
 import { reactive, ref } from 'vue';
 
@@ -94,101 +95,73 @@ const numWithFP = (num: string | number, pts: number): number => {
 	return parseFloat(parseFloat(num).toFixed(pts));
 };
 
-function decideImageURL(element: DatabaseParsedTodoItem) {
-	// if (minimal.value) return '';
+// const languageDevision = (element: DatabaseParsedTodoItem) => {
+// 	const out: Record<string, number> = {};
+// 	let total = -1;
+// 	if (element.scraped != undefined && element.scraped !== true) {
+// 		total = element.scraped.seasons.flat().length;
+// 		element.scraped.seasons.flat().forEach((x) => x.langs.forEach((l) => (!out[l] ? (out[l] = 1) : (out[l] += 1))));
+// 	}
+// 	if (element.scrapedZoro != undefined && element.scrapedZoro !== true) {
+// 		if (total == -1) total = element.scrapedZoro.episodes.length;
+// 		const zoroEps = element.scrapedZoro?.episodes;
+// 		zoroEps.forEach((e) => {
+// 			e.langs.forEach((l) => {
+// 				if (l == 'sub') l = 'EngSub';
+// 				if (l == 'dub') l = 'EngDub';
+// 				if (out[l]) {
+// 					out[l] += 1;
+// 				} else {
+// 					out[l] = 1;
+// 				}
+// 			});
+// 		});
+// 	}
+// 	if (element.scrapednewZoro != undefined && element.scrapednewZoro !== true) {
+// 		if (total == -1) total = element.scrapednewZoro?.seasons.flat().length;
+// 		const zoroEps = element.scrapednewZoro?.seasons.flat();
+// 		zoroEps.forEach((e) => {
+// 			e.langs.forEach((l) => {
+// 				if (l == 'sub') l = 'EngSub';
+// 				if (l == 'dub') l = 'EngDub';
+// 				if (l == 'raw') l = 'JapDub';
+// 				if (out[l]) {
+// 					out[l] += 1;
+// 				} else {
+// 					out[l] = 1;
+// 				}
+// 			});
+// 		});
+// 	}
+// 	if (element.scrapedAnix != undefined && element.scrapedAnix !== true) {
+// 		if (total == -1) total = element.scrapedAnix?.seasons.flat().length;
+// 		const anixEps = element.scrapedAnix?.seasons.flat();
+// 		anixEps.forEach((e) => {
+// 			e.langs.forEach((l) => {
+// 				if (l == 'sub') l = 'EngSub';
+// 				if (l == 'dub') l = 'EngDub';
+// 				if (out[l]) {
+// 					out[l] += 1;
+// 				} else {
+// 					out[l] = 1;
+// 				}
+// 			});
+// 		});
+// 	}
 
-	if (
-		element.scraped != undefined &&
-		element.scraped !== true &&
-		element.scraped.informations.image &&
-		typeof element.scraped.informations.image == 'string'
-	) {
-		return element.scraped.informations.image;
-	}
-	if (
-		element.scrapednewZoro != undefined &&
-		element.scrapednewZoro !== true &&
-		element.scrapednewZoro.image &&
-		typeof element.scrapednewZoro.image == 'string'
-	) {
-		return element.scrapednewZoro.image;
-	}
+// 	for (const [key, value] of Object.entries(out)) {
+// 		out[key] = Math.min(100, parseFloat(parseFloat(String((value / total) * 100)).toFixed(2)));
+// 	}
 
-	if (element.scrapedAnix != undefined && element.scrapedAnix !== true && element.scrapedAnix.image && typeof element.scrapedAnix.image == 'string') {
-		return element.scrapedAnix.image;
-	}
-	return '';
-}
+// 	if (out['GerDub'] == 100) {
+// 		delete out['GerSub'];
+// 		delete out['EngSub'];
+// 	} else if (out['GerSub'] == 100 && out['EngSub']) {
+// 		delete out['EngSub'];
+// 	}
 
-const languageDevision = (element: DatabaseParsedTodoItem) => {
-	const out: Record<string, number> = {};
-	let total = -1;
-	if (element.scraped != undefined && element.scraped !== true) {
-		total = element.scraped.seasons.flat().length;
-		element.scraped.seasons.flat().forEach((x) => x.langs.forEach((l) => (!out[l] ? (out[l] = 1) : (out[l] += 1))));
-	}
-	if (element.scrapedZoro != undefined && element.scrapedZoro !== true) {
-		if (total == -1) total = element.scrapedZoro.episodes.length;
-		const zoroEps = element.scrapedZoro?.episodes;
-		zoroEps.forEach((e) => {
-			e.langs.forEach((l) => {
-				if (l == 'sub') l = 'EngSub';
-				if (l == 'dub') l = 'EngDub';
-				if (out[l]) {
-					out[l] += 1;
-				} else {
-					out[l] = 1;
-				}
-			});
-		});
-	}
-	if (element.scrapednewZoro != undefined && element.scrapednewZoro !== true) {
-		if (total == -1) total = element.scrapednewZoro?.seasons.flat().length;
-		const zoroEps = element.scrapednewZoro?.seasons.flat();
-		zoroEps.forEach((e) => {
-			e.langs.forEach((l) => {
-				if (l == 'sub') l = 'EngSub';
-				if (l == 'dub') l = 'EngDub';
-				if (l == 'raw') l = 'JapDub';
-				if (out[l]) {
-					out[l] += 1;
-				} else {
-					out[l] = 1;
-				}
-			});
-		});
-	}
-	if (element.scrapedAnix != undefined && element.scrapedAnix !== true) {
-		if (total == -1) total = element.scrapedAnix?.seasons.flat().length;
-		const anixEps = element.scrapedAnix?.seasons.flat();
-		anixEps.forEach((e) => {
-			e.langs.forEach((l) => {
-				if (l == 'sub') l = 'EngSub';
-				if (l == 'dub') l = 'EngDub';
-				if (out[l]) {
-					out[l] += 1;
-				} else {
-					out[l] = 1;
-				}
-			});
-		});
-	}
-
-	for (const [key, value] of Object.entries(out)) {
-		out[key] = Math.min(100, parseFloat(parseFloat(String((value / total) * 100)).toFixed(2)));
-	}
-
-	if (out['GerDub'] == 100) {
-		delete out['GerSub'];
-		delete out['EngSub'];
-	} else if (out['GerSub'] == 100 && out['EngSub']) {
-		delete out['EngSub'];
-	}
-
-	return { total, devision: out };
-};
-
-
+// 	return { total, devision: out };
+// };
 
 interface permAcc {
 	UUID: string;

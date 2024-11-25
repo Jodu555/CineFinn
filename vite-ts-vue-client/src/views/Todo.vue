@@ -35,8 +35,8 @@
 				<li class="list-group-item" v-auto-animate>
 					<div class="d-flex" v-auto-animate>
 						<img
-							v-if="decideImageURL(element).length > 0"
-							:src="decideImageURL(element)"
+							v-if="decideImageURL(minimal, element).length > 0"
+							:src="decideImageURL(minimal, element)"
 							class="img-fluid rounded-top me-4 dp-img"
 							alt="" />
 						<div style="width: 100%" v-auto-animate>
@@ -345,6 +345,7 @@ import { reactive, computed, ref, onMounted, getCurrentInstance, onUnmounted } f
 import draggable from 'vuedraggable';
 import type { AniWorldAdditionalSeriesInformations } from '@Types/scrapers';
 import type { DatabaseNewsItem, DatabaseParsedTodoItem, TodoReferences } from '@Types/database';
+import { decideImageURL, languageDevision, type TodoItem } from '@/utils/todo';
 
 const minimal = ref(false);
 
@@ -353,10 +354,6 @@ const auth = useAuthStore();
 const $socket = useSocket();
 
 const loading = ref(false);
-
-interface TodoItem extends DatabaseParsedTodoItem {
-	edited?: boolean;
-}
 
 const numWithFP = (num: string | number, pts: number): number => {
 	if (typeof num == 'number') num = String(num);
@@ -384,103 +381,103 @@ const dragOptions = computed(() => {
 	};
 });
 
-const scrapers = [
-	{
-		referenceKey: 'aniworld',
-		scrapeKey: 'scraped',
-		imagePath: ['informations', 'image'],
-	},
-	{
-		referenceKey: 'zoro',
-		scrapeKey: 'scrapednewZoro',
-		imagePath: ['image'],
-	},
-	{
-		referenceKey: 'zoro',
-		scrapeKey: 'scrapedZoro',
-		imagePath: ['image'],
-	},
-	{
-		referenceKey: 'anix',
-		scrapeKey: 'scrapedAnix',
-		imagePath: ['image'],
-	},
-	{
-		referenceKey: 'sto',
-		scrapeKey: 'scraped',
-		imagePath: ['informations', 'image'],
-	},
-	{
-		referenceKey: 'myasiantv',
-		scrapeKey: 'scrapedMyasiantv',
-		imagePath: ['informations', 'image'],
-	},
-] satisfies ScraperDefinition[];
+// const scrapers = [
+// 	{
+// 		referenceKey: 'aniworld',
+// 		scrapeKey: 'scraped',
+// 		imagePath: ['informations', 'image'],
+// 	},
+// 	{
+// 		referenceKey: 'zoro',
+// 		scrapeKey: 'scrapednewZoro',
+// 		imagePath: ['image'],
+// 	},
+// 	{
+// 		referenceKey: 'zoro',
+// 		scrapeKey: 'scrapedZoro',
+// 		imagePath: ['image'],
+// 	},
+// 	{
+// 		referenceKey: 'anix',
+// 		scrapeKey: 'scrapedAnix',
+// 		imagePath: ['image'],
+// 	},
+// 	{
+// 		referenceKey: 'sto',
+// 		scrapeKey: 'scraped',
+// 		imagePath: ['informations', 'image'],
+// 	},
+// 	{
+// 		referenceKey: 'myasiantv',
+// 		scrapeKey: 'scrapedMyasiantv',
+// 		imagePath: ['informations', 'image'],
+// 	},
+// ] satisfies ScraperDefinition[];
 
-interface ScraperDefinition {
-	referenceKey: keyof TodoReferences;
-	scrapeKey: keyof TodoItem;
-	imagePath: string[];
-}
+// interface ScraperDefinition {
+// 	referenceKey: keyof TodoReferences;
+// 	scrapeKey: keyof TodoItem;
+// 	imagePath: string[];
+// }
 
-function lookDeep(obj: any, keys: string[]) {
-	let current = obj;
-	for (const key of keys) {
-		if (current[key] === undefined) {
-			return undefined;
-		}
-		current = current[key];
-	}
-	return current;
-}
+// function lookDeep(obj: any, keys: string[]) {
+// 	let current = obj;
+// 	for (const key of keys) {
+// 		if (current[key] === undefined) {
+// 			return undefined;
+// 		}
+// 		current = current[key];
+// 	}
+// 	return current;
+// }
 
-function decideImageURL(element: TodoItem) {
-	if (minimal.value) return '';
+// function decideImageURL(element: TodoItem) {
+// 	if (minimal.value) return '';
 
-	for (const scraper of scrapers) {
-		const scrapeInfo = element[scraper.scrapeKey] as any;
-		console.log(element, scraper.scrapeKey, scrapeInfo);
-		if (scrapeInfo != undefined && scrapeInfo !== true) {
-			const img = lookDeep(scrapeInfo, scraper.imagePath);
-			console.log(img);
-			if (img && typeof img == 'string') {
-				return img;
-			}
-		}
-	}
-	return '';
-	// if (
-	// 	element.scraped != undefined &&
-	// 	element.scraped !== true &&
-	// 	element.scraped.informations.image &&
-	// 	typeof element.scraped.informations.image == 'string'
-	// ) {
-	// 	return element.scraped.informations.image;
-	// }
-	// if (
-	// 	element.scrapednewZoro != undefined &&
-	// 	element.scrapednewZoro !== true &&
-	// 	element.scrapednewZoro.image &&
-	// 	typeof element.scrapednewZoro.image == 'string'
-	// ) {
-	// 	return element.scrapednewZoro.image;
-	// }
+// 	for (const scraper of scrapers) {
+// 		const scrapeInfo = element[scraper.scrapeKey] as any;
+// 		console.log(element, scraper.scrapeKey, scrapeInfo);
+// 		if (scrapeInfo != undefined && scrapeInfo !== true) {
+// 			const img = lookDeep(scrapeInfo, scraper.imagePath);
+// 			console.log(img);
+// 			if (img && typeof img == 'string') {
+// 				return img;
+// 			}
+// 		}
+// 	}
+// 	return '';
+// 	// if (
+// 	// 	element.scraped != undefined &&
+// 	// 	element.scraped !== true &&
+// 	// 	element.scraped.informations.image &&
+// 	// 	typeof element.scraped.informations.image == 'string'
+// 	// ) {
+// 	// 	return element.scraped.informations.image;
+// 	// }
+// 	// if (
+// 	// 	element.scrapednewZoro != undefined &&
+// 	// 	element.scrapednewZoro !== true &&
+// 	// 	element.scrapednewZoro.image &&
+// 	// 	typeof element.scrapednewZoro.image == 'string'
+// 	// ) {
+// 	// 	return element.scrapednewZoro.image;
+// 	// }
 
-	// if (element.scrapedAnix != undefined && element.scrapedAnix !== true && element.scrapedAnix.image && typeof element.scrapedAnix.image == 'string') {
-	// 	return element.scrapedAnix.image;
-	// }
+// 	// if (element.scrapedAnix != undefined && element.scrapedAnix !== true && element.scrapedAnix.image && typeof element.scrapedAnix.image == 'string') {
+// 	// 	return element.scrapedAnix.image;
+// 	// }
 
-	// if (
-	// 	element.scrapedMyasiantv != undefined &&
-	// 	element.scrapedMyasiantv !== true &&
-	// 	element.scrapedMyasiantv.informations.image &&
-	// 	typeof element.scrapedMyasiantv.informations.image == 'string'
-	// ) {
-	// 	return element.scrapedMyasiantv.informations.image;
-	// }
+// 	// if (
+// 	// 	element.scrapedMyasiantv != undefined &&
+// 	// 	element.scrapedMyasiantv !== true &&
+// 	// 	element.scrapedMyasiantv.informations.image &&
+// 	// 	typeof element.scrapedMyasiantv.informations.image == 'string'
+// 	// ) {
+// 	// 	return element.scrapedMyasiantv.informations.image;
+// 	// }
 
-	// return '';
-}
+// 	// return '';
+// }
 
 onMounted(() => {
 	window.addEventListener('resize', handleWindowSizeChange);
@@ -537,85 +534,6 @@ onUnmounted(() => {
 });
 
 const drag = ref(false);
-
-const languageDevision = (element: TodoItem) => {
-	const out: Record<string, number> = {};
-	let total = -1;
-
-	const setOrIncrement = (lang: string) => {
-		if (!out[lang]) {
-			out[lang] = 1;
-		} else {
-			out[lang] += 1;
-		}
-	};
-
-	if (element.scraped != undefined && element.scraped !== true) {
-		total = element.scraped.seasons.flat().length;
-		element.scraped.seasons.flat().forEach((x) => x.langs.forEach((l) => setOrIncrement(l)));
-	}
-	if (element.scrapedZoro != undefined && element.scrapedZoro !== true) {
-		if (total == -1) total = element.scrapedZoro.episodes.length;
-		const zoroEps = element.scrapedZoro?.episodes;
-		zoroEps.forEach((e) => {
-			e.langs.forEach((l) => {
-				if (l == 'sub') l = 'EngSub';
-				if (l == 'dub') l = 'EngDub';
-				setOrIncrement(l);
-			});
-		});
-	}
-	if (element.scrapednewZoro != undefined && element.scrapednewZoro !== true) {
-		if (total == -1) total = element.scrapednewZoro?.seasons.flat().length;
-		const zoroEps = element.scrapednewZoro?.seasons.flat();
-		zoroEps.forEach((e) => {
-			e.langs.forEach((l) => {
-				if (l == 'sub') l = 'EngSub';
-				if (l == 'dub') l = 'EngDub';
-				if (l == 'raw') l = 'JapDub';
-				setOrIncrement(l);
-			});
-		});
-	}
-	if (element.scrapedAnix != undefined && element.scrapedAnix !== true) {
-		if (total == -1) total = element.scrapedAnix?.seasons.flat().length;
-		const anixEps = element.scrapedAnix?.seasons.flat();
-		anixEps.forEach((e) => {
-			e.langs.forEach((l) => {
-				if (l == 'sub') l = 'EngSub';
-				if (l == 'dub') l = 'EngDub';
-				setOrIncrement(l);
-			});
-		});
-	}
-	if (element.scrapedMyasiantv != undefined && element.scrapedMyasiantv !== true) {
-		total = element.scrapedMyasiantv.episodes.length;
-		element.scrapedMyasiantv.episodes.forEach((ep) => {
-			ep.langs.forEach((l) => {
-				if (l == 'Subtitle') {
-					setOrIncrement('EngSubK');
-				} else {
-					setOrIncrement('RawK');
-				}
-			});
-		});
-	}
-
-	for (const [key, value] of Object.entries(out)) {
-		out[key] = Math.min(100, parseFloat(parseFloat(String((value / total) * 100)).toFixed(2)));
-	}
-
-	if (out['GerDub'] == 100) {
-		delete out['GerSub'];
-		delete out['EngSub'];
-	} else if (out['GerSub'] == 100 && out['EngSub']) {
-		delete out['EngSub'];
-	}
-
-	console.log(out);
-
-	return { total, devision: out };
-};
 
 const moveToDoToTop = (ID: string) => {
 	const index = state.list.findIndex((x) => x.ID == ID);

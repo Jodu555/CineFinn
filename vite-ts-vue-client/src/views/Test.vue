@@ -47,6 +47,10 @@ const columns = ref<{ title: string; todos: any[] | DatabaseParsedTodoItem[] }[]
 		title: 'Waiting',
 		todos: [],
 	},
+	{
+		title: 'K-Drama',
+		todos: [],
+	},
 ]);
 
 const loading = ref(false);
