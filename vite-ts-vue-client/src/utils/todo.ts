@@ -69,12 +69,12 @@ export const scrapers = [
         referenceKey: 'sto',
         scrapeKey: 'scraped',
         imagePath: ['informations', 'image'],
-        seasonsPath: ['seasons'],
-        episodeCallback: (episode: AniWorldEntity) => {
-            return {
-                langs: episode.langs,
-            };
-        },
+        // seasonsPath: ['seasons'],
+        // episodeCallback: (episode: AniWorldEntity) => {
+        //     return {
+        //         langs: episode.langs,
+        //     };
+        // },
     },
     {
         referenceKey: 'myasiantv',
@@ -171,15 +171,16 @@ export function languageDevision(element: TodoItem) {
         console.log('Mismatch', element.ID, newDevision.devision, oldDevision.devision, newDevision.total, oldDevision.total);
     }
 
-    return { total: oldDevision.total, devision: oldDevision.devision };
-    // return {
-    //     total: newDevision.total,
-    //     devision: newDevision.devision,
-    // };
+    // return { total: oldDevision.total, devision: oldDevision.devision };
+    return {
+        total: newDevision.total,
+        devision: newDevision.devision,
+    };
 
 };
 
 function newLanguageDevision(element: TodoItem) {
+
     const out: Record<string, number> = {};
     let total = -1;
 
@@ -193,46 +194,46 @@ function newLanguageDevision(element: TodoItem) {
 
     for (const scraper of scrapers) {
         const scrapeInfo = element[scraper.scrapeKey] as any;
-        if (scrapeInfo == undefined || scrapeInfo == undefined || scrapeInfo === true)
+        if (scrapeInfo == undefined || scrapeInfo === true || scraper.seasonsPath == undefined || scraper.episodeCallback == undefined)
             continue;
         const episodes = lookDeep(scrapeInfo, scraper.seasonsPath);
-        if (element.ID == '833746' || element.ID == '135947' && scraper.scrapeKey == 'scraped') {
-            console.log('LOG', element, scraper, scraper.referenceKey, episodes);
-            console.log(scraper.seasonsPath, scrapeInfo);
-        }
+        // if (element.ID == '29062') {
+        //     console.log('LOG', element, scraper, scraper.referenceKey, episodes);
+        //     console.log(scraper.seasonsPath, scrapeInfo);
+        // }
         if (episodes == undefined) {
             console.log('Early Exit', element.ID, scraper.scrapeKey, scraper.seasonsPath);
             continue;
         }
         if (total == -1) {
-
             total = episodes.flat().length;
         }
 
-        episodes.flat().forEach((x: any) => {
-            const cbOutput = scraper.episodeCallback(x);
-            cbOutput.langs.forEach((l) => setOrIncrement(l));
+        episodes.flat().forEach((episode: any) => {
+            const cbOutput = scraper.episodeCallback(episode);
+            cbOutput.langs.forEach((l) => {
+                setOrIncrement(l);
+            });
         });
     }
 
     for (const [key, value] of Object.entries(out)) {
-        if (element.ID == '833746' || element.ID == '135947') {
-            console.log(element.ID, { key, value, total, eq: (value / total) * 100 });
-        }
+        // if (element.ID == '29062') {
+        //     console.log(element.ID, { key, value: value, total, eq: (value / total) * 100 });
+        // }
         out[key] = Math.min(100, parseFloat(parseFloat(String((value / total) * 100)).toFixed(2)));
     }
 
-    // if (out['GerDub'] == 100) {
-    //     delete out['GerSub'];
-    //     delete out['EngSub'];
-    // } else if (out['GerSub'] == 100 && out['EngSub']) {
-    //     delete out['EngSub'];
-    // }
-
-    if (element.ID == '833746' || element.ID == '135947') {
-        console.log(element.ID, out, total);
+    if (out['GerDub'] == 100) {
+        delete out['GerSub'];
+        delete out['EngSub'];
+    } else if (out['GerSub'] == 100 && out['EngSub']) {
+        delete out['EngSub'];
     }
-    // console.log(out);
+
+    // if (element.ID == '833746' || element.ID == '135947') {
+    //     console.log(element.ID, out, total);
+    // }
 
     return { total, devision: out };
 }
@@ -300,20 +301,23 @@ function oldLanguageDevision(element: TodoItem) {
     }
 
     for (const [key, value] of Object.entries(out)) {
+        // if (element.ID == '29062') {
+        //     console.log('OLD', element.ID, { key, value, total, eq: (value / total) * 100 });
+        // }
         out[key] = Math.min(100, parseFloat(parseFloat(String((value / total) * 100)).toFixed(2)));
     }
 
-    // if (out['GerDub'] == 100) {
-    //     delete out['GerSub'];
-    //     delete out['EngSub'];
-    // } else if (out['GerSub'] == 100 && out['EngSub']) {
-    //     delete out['EngSub'];
-    // }
+    if (out['GerDub'] == 100) {
+        delete out['GerSub'];
+        delete out['EngSub'];
+    } else if (out['GerSub'] == 100 && out['EngSub']) {
+        delete out['EngSub'];
+    }
 
     // console.log(out);
-    if (element.ID == '833746' || element.ID == '135947') {
-        console.log('OLD', element.ID, out, total);
-    }
+    // if (element.ID == '833746' || element.ID == '135947') {
+    //     console.log('OLD', element.ID, out, total);
+    // }
 
     return { total, devision: out };
 }
