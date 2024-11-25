@@ -162,20 +162,26 @@ export function decideImageURL(minimal: boolean, element: TodoItem) {
     // return '';
 }
 
+const cache = new Map<string, any>();
+
 export function languageDevision(element: TodoItem) {
+    if (cache.has(element.ID)) {
+        // console.log('Getting from Cache', element.ID);
+        return cache.get(element.ID);
+    } else {
+        const newDevision = newLanguageDevision(element);
+        const oldDevision = oldLanguageDevision(element);
 
-    const newDevision = newLanguageDevision(element);
-    const oldDevision = oldLanguageDevision(element);
+        if (JSON.stringify(newDevision.devision) !== JSON.stringify(oldDevision.devision)) {
+            console.log('Mismatch', element.ID, newDevision.devision, oldDevision.devision, newDevision.total, oldDevision.total);
+        }
 
-    if (JSON.stringify(newDevision.devision) !== JSON.stringify(oldDevision.devision)) {
-        console.log('Mismatch', element.ID, newDevision.devision, oldDevision.devision, newDevision.total, oldDevision.total);
+        // const out = { total: oldDevision.total, devision: oldDevision.devision };
+        const out = { total: newDevision.total, devision: newDevision.devision };
+        cache.set(element.ID, out);
+        return out;
     }
 
-    // return { total: oldDevision.total, devision: oldDevision.devision };
-    return {
-        total: newDevision.total,
-        devision: newDevision.devision,
-    };
 
 };
 
