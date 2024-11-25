@@ -69,6 +69,12 @@ export const scrapers = [
         referenceKey: 'sto',
         scrapeKey: 'scraped',
         imagePath: ['informations', 'image'],
+        seasonsPath: ['seasons'],
+        episodeCallback: (episode: AniWorldEntity) => {
+            return {
+                langs: episode.langs,
+            };
+        },
     },
     {
         referenceKey: 'myasiantv',
@@ -157,6 +163,23 @@ export function decideImageURL(minimal: boolean, element: TodoItem) {
 }
 
 export function languageDevision(element: TodoItem) {
+
+    const newDevision = newLanguageDevision(element);
+    const oldDevision = oldLanguageDevision(element);
+
+    if (JSON.stringify(newDevision.devision) !== JSON.stringify(oldDevision.devision)) {
+        console.log('Mismatch', element.ID, newDevision.devision, oldDevision.devision, newDevision.total, oldDevision.total);
+    }
+
+    return { total: oldDevision.total, devision: oldDevision.devision };
+    // return {
+    //     total: newDevision.total,
+    //     devision: newDevision.devision,
+    // };
+
+};
+
+function newLanguageDevision(element: TodoItem) {
     const out: Record<string, number> = {};
     let total = -1;
 
@@ -170,15 +193,17 @@ export function languageDevision(element: TodoItem) {
 
     for (const scraper of scrapers) {
         const scrapeInfo = element[scraper.scrapeKey] as any;
-        if (scrapeInfo == undefined) continue;
-        if (scraper.seasonsPath == undefined || scraper.episodeCallback == undefined) continue;
+        if (scrapeInfo == undefined || scrapeInfo == undefined || scrapeInfo === true)
+            continue;
         const episodes = lookDeep(scrapeInfo, scraper.seasonsPath);
-        if (element.ID == '707137' && scraper.scrapeKey == 'scrapednewZoro') {
+        if (element.ID == '833746' || element.ID == '135947' && scraper.scrapeKey == 'scraped') {
             console.log('LOG', element, scraper, scraper.referenceKey, episodes);
             console.log(scraper.seasonsPath, scrapeInfo);
-
         }
-        if (episodes == undefined) continue;
+        if (episodes == undefined) {
+            console.log('Early Exit', element.ID, scraper.scrapeKey, scraper.seasonsPath);
+            continue;
+        }
         if (total == -1) {
 
             total = episodes.flat().length;
@@ -188,72 +213,107 @@ export function languageDevision(element: TodoItem) {
             const cbOutput = scraper.episodeCallback(x);
             cbOutput.langs.forEach((l) => setOrIncrement(l));
         });
-
     }
 
-    // if (element.scraped != undefined && element.scraped !== true) {
-    //     total = element.scraped.seasons.flat().length;
-    //     element.scraped.seasons.flat().forEach((x) => x.langs.forEach((l) => setOrIncrement(l)));
+    for (const [key, value] of Object.entries(out)) {
+        if (element.ID == '833746' || element.ID == '135947') {
+            console.log(element.ID, { key, value, total, eq: (value / total) * 100 });
+        }
+        out[key] = Math.min(100, parseFloat(parseFloat(String((value / total) * 100)).toFixed(2)));
+    }
+
+    // if (out['GerDub'] == 100) {
+    //     delete out['GerSub'];
+    //     delete out['EngSub'];
+    // } else if (out['GerSub'] == 100 && out['EngSub']) {
+    //     delete out['EngSub'];
     // }
-    // if (element.scrapedZoro != undefined && element.scrapedZoro !== true) {
-    //     if (total == -1) total = element.scrapedZoro.episodes.length;
-    //     const zoroEps = element.scrapedZoro?.episodes;
-    //     zoroEps.forEach((e) => {
-    //         e.langs.forEach((l) => {
-    //             if (l == 'sub') l = 'EngSub';
-    //             if (l == 'dub') l = 'EngDub';
-    //             setOrIncrement(l);
-    //         });
-    //     });
-    // }
-    // if (element.scrapednewZoro != undefined && element.scrapednewZoro !== true) {
-    //     if (total == -1) total = element.scrapednewZoro?.seasons.flat().length;
-    //     const zoroEps = element.scrapednewZoro?.seasons.flat();
-    //     zoroEps.forEach((e) => {
-    //         e.langs.forEach((l) => {
-    //             if (l == 'sub') l = 'EngSub';
-    //             if (l == 'dub') l = 'EngDub';
-    //             if (l == 'raw') l = 'JapDub';
-    //             setOrIncrement(l);
-    //         });
-    //     });
-    // }
-    // if (element.scrapedAnix != undefined && element.scrapedAnix !== true) {
-    //     if (total == -1) total = element.scrapedAnix?.seasons.flat().length;
-    //     const anixEps = element.scrapedAnix?.seasons.flat();
-    //     anixEps.forEach((e) => {
-    //         e.langs.forEach((l) => {
-    //             if (l == 'sub') l = 'EngSub';
-    //             if (l == 'dub') l = 'EngDub';
-    //             setOrIncrement(l);
-    //         });
-    //     });
-    // }
-    // if (element.scrapedMyasiantv != undefined && element.scrapedMyasiantv !== true) {
-    //     total = element.scrapedMyasiantv.episodes.length;
-    //     element.scrapedMyasiantv.episodes.forEach((ep) => {
-    //         ep.langs.forEach((l) => {
-    //             if (l == 'Subtitle') {
-    //                 setOrIncrement('EngSubK');
-    //             } else {
-    //                 setOrIncrement('RawK');
-    //             }
-    //         });
-    //     });
-    // }
+
+    if (element.ID == '833746' || element.ID == '135947') {
+        console.log(element.ID, out, total);
+    }
+    // console.log(out);
+
+    return { total, devision: out };
+}
+
+function oldLanguageDevision(element: TodoItem) {
+    const out: Record<string, number> = {};
+    let total = -1;
+
+    const setOrIncrement = (lang: string) => {
+        if (!out[lang]) {
+            out[lang] = 1;
+        } else {
+            out[lang] += 1;
+        }
+    };
+    if (element.scraped != undefined && element.scraped !== true) {
+        total = element.scraped.seasons.flat().length;
+        element.scraped.seasons.flat().forEach((x) => x.langs.forEach((l) => setOrIncrement(l)));
+    }
+    if (element.scrapedZoro != undefined && element.scrapedZoro !== true) {
+        if (total == -1) total = element.scrapedZoro.episodes.length;
+        const zoroEps = element.scrapedZoro?.episodes;
+        zoroEps.forEach((e) => {
+            e.langs.forEach((l) => {
+                if (l == 'sub') l = 'EngSub';
+                if (l == 'dub') l = 'EngDub';
+                setOrIncrement(l);
+            });
+        });
+    }
+    if (element.scrapednewZoro != undefined && element.scrapednewZoro !== true) {
+        if (total == -1) total = element.scrapednewZoro?.seasons.flat().length;
+        const zoroEps = element.scrapednewZoro?.seasons.flat();
+        zoroEps.forEach((e) => {
+            e.langs.forEach((l) => {
+                if (l == 'sub') l = 'EngSub';
+                if (l == 'dub') l = 'EngDub';
+                if (l == 'raw') l = 'JapDub';
+                setOrIncrement(l);
+            });
+        });
+    }
+    if (element.scrapedAnix != undefined && element.scrapedAnix !== true) {
+        if (total == -1) total = element.scrapedAnix?.seasons.flat().length;
+        const anixEps = element.scrapedAnix?.seasons.flat();
+        anixEps.forEach((e) => {
+            e.langs.forEach((l) => {
+                if (l == 'sub') l = 'EngSub';
+                if (l == 'dub') l = 'EngDub';
+                setOrIncrement(l);
+            });
+        });
+    }
+    if (element.scrapedMyasiantv != undefined && element.scrapedMyasiantv !== true) {
+        total = element.scrapedMyasiantv.episodes.length;
+        element.scrapedMyasiantv.episodes.forEach((ep) => {
+            ep.langs.forEach((l) => {
+                if (l == 'Subtitle') {
+                    setOrIncrement('EngSubK');
+                } else {
+                    setOrIncrement('RawK');
+                }
+            });
+        });
+    }
 
     for (const [key, value] of Object.entries(out)) {
         out[key] = Math.min(100, parseFloat(parseFloat(String((value / total) * 100)).toFixed(2)));
     }
 
-    if (out['GerDub'] == 100) {
-        delete out['GerSub'];
-        delete out['EngSub'];
-    } else if (out['GerSub'] == 100 && out['EngSub']) {
-        delete out['EngSub'];
-    }
+    // if (out['GerDub'] == 100) {
+    //     delete out['GerSub'];
+    //     delete out['EngSub'];
+    // } else if (out['GerSub'] == 100 && out['EngSub']) {
+    //     delete out['EngSub'];
+    // }
 
     // console.log(out);
+    if (element.ID == '833746' || element.ID == '135947') {
+        console.log('OLD', element.ID, out, total);
+    }
 
     return { total, devision: out };
-};
+}

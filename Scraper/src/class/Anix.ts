@@ -6,7 +6,7 @@ import puppeteer, { Browser, HTTPRequest, Page } from 'puppeteer';
 
 const debug = true;
 
-const hostname = 'anix.to';
+const hostname = 'anix.com.co';
 
 const headers = {
 	accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
