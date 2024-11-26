@@ -102,7 +102,7 @@
 			<Modal id="selectSeriesToMove" size="xl" v-model:show="toggleSelectEntityToMoveModal">
 				<template #title>Detailed Disabled Series Overview</template>
 				<template #body>
-					<h3 class="text-center">List of Series</h3>
+					<h3 class="text-center">{{ selectedSeries == '' && selectSubSystem === false ? 'List of Series' : 'Select SubSystem' }}</h3>
 					<template v-if="movingSerieses.size > 0">
 						<h5>Selected:</h5>
 						<div v-auto-animate class="row row-cols-3 row-cols-lg-5 g-2 g-lg-3 d-flex justify-content-between gap-1 mb-4">
@@ -215,6 +215,12 @@
 						</div>
 					</template>
 					<template v-if="selectSubSystem === true && selectedSeries == '' && selectedSubSystem == ''">
+						<h2
+							v-if="adminStore.subsystems.knownSubSystems.filter((x) => idtoSock(x) !== undefined).length == 0"
+							class="text-center text-danger mb-5">
+							No Active SubSystems found!
+						</h2>
+
 						<div class="row row-cols-2 row-cols-lg-5 g-2 g-lg-3 gap-3">
 							<div
 								v-for="subsystemID in adminStore.subsystems.knownSubSystems.filter((x) => idtoSock(x) !== undefined)"
@@ -236,9 +242,10 @@
 							<h2>Your About to send the above shown Serie/s!</h2>
 							<h2>To The SubSystem:</h2>
 							<h3>{{ selectedSubSystem }}</h3>
+							<button type="button" class="btn btn-outline-warning mt-3 mb-4" @click="cancleMoving()">Cancel</button>
 						</div>
 						<div class="d-grid gap-2">
-							<button type="button" class="btn btn-outline-success mt-3 mb-4">Do it</button>
+							<button type="button" class="btn btn-outline-success mt-3 mb-4" @click="submitMoving()">Do it</button>
 						</div>
 					</template>
 				</template>
@@ -246,7 +253,11 @@
 
 			<h2 class="text-center mt-3 mb-5">MovingList ({{ adminStore.subsystems.movingItems.length }})</h2>
 			<div class="d-flex justify-content-center">
-				<button type="button" class="btn btn-outline-primary" @click="toggleSelectEntityToMoveModal = true">Add Item</button>
+				<button type="button" class="btn btn-outline-primary me-4" @click="toggleSelectEntityToMoveModal = true">Add Item</button>
+				<button type="button" class="btn btn-outline-warning me-4" @click="processAllMovingItems()">
+					Move All ({{ adminStore.subsystems.movingItems.length }})
+				</button>
+				<button type="button" class="btn btn-outline-danger" @click="removeManualMovingItems()">Remove Manual Items</button>
 			</div>
 
 			<hr />
@@ -307,6 +318,7 @@ import Modal from '@/components/Modal.vue';
 import { useAdminStore } from '@/stores/admin.store';
 import { useIndexStore } from '@/stores/index.store';
 import { useWatchStore } from '@/stores/watch.store';
+import { useAxios, useSwal } from '@/utils';
 import { langDetails } from '@/utils/constants';
 import { useSocket } from '@/utils/socket';
 import type { SerieEpisode } from '@Types/classes';
@@ -332,6 +344,49 @@ function nextStepSelectSubSystem() {
 	selectSubSystem.value = true;
 	selectedSubSystem.value = '';
 	selectedSeries.value = '';
+}
+
+async function submitMoving() {
+	toggleSelectEntityToMoveModal.value = false;
+	const response = await useAxios().post('/admin/subsystems/movingItem', {
+		to: selectedSubSystem.value,
+		series: Array.from(movingSerieses.value),
+	});
+	if (response.status !== 200) {
+		useSwal({
+			title: 'Error',
+			text: 'Something went wrong!',
+			icon: 'error',
+			confirmButtonText: 'Ok',
+		});
+	}
+	cancleMoving();
+}
+
+async function removeManualMovingItems() {
+	const response = await useAxios().delete('/admin/subsystems/movingItem');
+	if (response.status !== 200) {
+		useSwal({
+			title: 'Error',
+			text: 'Something went wrong!',
+			icon: 'error',
+			confirmButtonText: 'Ok',
+		});
+	}
+	cancleMoving();
+}
+
+async function processAllMovingItems() {
+	for (const item of adminStore.subsystems.movingItems) {
+		moveItem(item.ID);
+	}
+}
+
+function cancleMoving() {
+	selectSubSystem.value = false;
+	selectedSubSystem.value = '';
+	searchTerm.value = '';
+	movingSerieses.value = new Set();
 }
 
 function uniEp(episode: SerieEpisode) {
