@@ -37,6 +37,7 @@ export interface AnixSeasonInformation {
 }
 
 export interface AnixSeriesInformation {
+    ID: string;
     title: string;
     image: string;
     subCount: number;

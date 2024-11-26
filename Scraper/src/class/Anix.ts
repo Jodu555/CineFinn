@@ -138,7 +138,7 @@ class Anix {
 				dubCount: parseInt(dubCount),
 				episodeCount: parseInt(episodeCount),
 				seasons,
-			} as AnixSeriesInformation;
+			} satisfies AnixSeriesInformation;
 		} catch (error) {
 			debug && console.log(error);
 
@@ -181,11 +181,11 @@ class Anix {
 					slug: anchor.getAttribute('data-slug'),
 					number: anchor.getAttribute('data-num'),
 					ids: anchor.getAttribute('data-ids'),
-				} as AnixEpisode;
+				} satisfies AnixEpisode;
 			})
 			.filter((x) => x != undefined);
 
-		return episodes;
+		return episodes as AnixEpisode[];
 	}
 
 	async getBrowser() {

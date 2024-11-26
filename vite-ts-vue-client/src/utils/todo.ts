@@ -178,7 +178,7 @@ export function languageDevision(element: TodoItem) {
 
         // const out = { total: oldDevision.total, devision: oldDevision.devision };
         const out = { total: newDevision.total, devision: newDevision.devision };
-        cache.set(element.ID, out);
+        // cache.set(element.ID, out);
         return out;
     }
 
