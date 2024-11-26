@@ -3,6 +3,7 @@ import { ExtendedSocket, User } from '../types/session';
 import { getIO, getSeries, getVideoStreamLog, toAllSockets } from './utils';
 import { generateMovingItemArray, getAllKnownSubSystems, getSeriesBySubID, subSocketMap } from '../sockets/sub.socket';
 import { isScraperSocketConnected } from '../sockets/scraper.socket';
+import { SubSystem } from '@Types/index';
 const database = Database.getDatabase();
 
 export async function generateOverview() {
@@ -30,15 +31,9 @@ export async function generateOverview() {
 	};
 }
 
+
 export async function generateSubSystems() {
-	const subSockets: {
-		id: string;
-		ptoken: string;
-		endpoint: string;
-		readrate: number;
-		affectedSeriesIDs: string[];
-		type: 'sub';
-	}[] = [];
+	const subSockets: SubSystem[] = [];
 	subSocketMap.forEach(async (value, key) => {
 		subSockets.push({
 			id: value.auth.id,
@@ -47,7 +42,7 @@ export async function generateSubSystems() {
 			affectedSeriesIDs: (await getSeriesBySubID(value.auth.id)).map((x) => x.ID),
 			readrate: value.auth.readrate,
 			type: value.auth.type == 'sub' ? 'sub' : 'sub',
-		});
+		} satisfies SubSystem);
 	});
 	const known = await getAllKnownSubSystems();
 

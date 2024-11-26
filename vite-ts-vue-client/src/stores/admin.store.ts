@@ -1,4 +1,5 @@
 import { useAxios } from '@/utils';
+import type { SubSystem } from '@Types/index';
 import { defineStore } from 'pinia';
 
 interface DBAccount {
@@ -24,15 +25,6 @@ interface Overview {
 	sockets: number;
 	streams: number;
 	scraper: boolean;
-}
-
-interface SubSystem {
-	id: string;
-	ptoken: string;
-	endpoint: string;
-	readrate: number;
-	affectedSeriesIDs: string[];
-	type: 'sub';
 }
 
 export interface MovingItem {

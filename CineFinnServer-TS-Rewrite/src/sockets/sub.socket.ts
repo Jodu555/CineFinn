@@ -112,6 +112,11 @@ export interface MovingItem {
 	toSubID: string;
 	filePath: string;
 	entity: Movie | Episode;
+	meta?: {
+		progress: number;
+		isMoving: boolean;
+		result: string;
+	};
 }
 
 export const additionalMovingItems: MovingItem[] = [];

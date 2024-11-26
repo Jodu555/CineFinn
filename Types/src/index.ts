@@ -1,4 +1,4 @@
-import type { SerieEpisodeObject, SerieMovieObject } from './classes';
+import type { SerieEpisode, SerieEpisodeObject, SerieMovie, SerieMovieObject } from './classes';
 
 export interface JobMeta {
     serieID: string;
@@ -10,4 +10,12 @@ export interface JobMeta {
     publicStreamURL: string;
     readrate: number;
     generatorName?: string;
+}
+export interface SubSystem {
+    id: string;
+    ptoken: string;
+    endpoint: string;
+    readrate: number;
+    affectedSeriesIDs: string[];
+    type: 'sub';
 }
