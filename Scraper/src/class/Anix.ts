@@ -35,7 +35,7 @@ class Anix {
 	constructor(slug: string) {
 		// https://anix.to/anime/
 		this.slug = slug;
-		this.url = `https://${hostname}/anime/${slug}`;
+		this.url = `https://${hostname}/watch/${slug}`;
 		this.cache = new Map();
 	}
 
@@ -52,12 +52,13 @@ class Anix {
 		}
 		const { document } = new jsdom.JSDOM(data).window;
 
-		const ID = document.querySelector('.container[itemprop="mainEntity"]').getAttribute('data-id');
+		const ID = document.querySelector('div[itemprop="mainEntity"]').getAttribute('data-id');
 
 		this.ID = ID;
 	}
 
 	async parseInformations(): Promise<void | AnixSeriesInformation> {
+
 		debug && console.log('Called Anix.parseInformations');
 
 		try {
@@ -82,9 +83,9 @@ class Anix {
 
 			const subDubContainer = document.querySelector('.sub-dub-total');
 
-			const subCount = subDubContainer.querySelector('span.sub').textContent.trim();
-			const dubCount = subDubContainer.querySelector('span.dub').textContent.trim();
-			const episodeCount = subDubContainer.querySelector('span.total').textContent.trim();
+			const subCount = subDubContainer.querySelector('span.sub')?.textContent?.trim();
+			const dubCount = subDubContainer.querySelector('span.dub')?.textContent?.trim();
+			const episodeCount = subDubContainer.querySelector('span.total')?.textContent?.trim();
 
 			const seasonBody = document.querySelector('.ani-season-body');
 
@@ -114,6 +115,7 @@ class Anix {
 			for (const si of seasonInfo) {
 				console.log('Parsing Season: ' + si.title);
 				let inst = si.slug == this.slug ? this : new Anix(si.slug);
+
 				const interEps = await inst.getEpisodeList();
 				seasons.push(interEps);
 			}
@@ -149,15 +151,17 @@ class Anix {
 	async getEpisodeList() {
 		await this.initialize();
 		debug && console.log('Called Anix.getEpisodeList');
-		const reqURL = await this._getPuppeteerEpisodeListURL();
+		const { url: reqURL, headers } = await this._getPuppeteerEpisodeListURL();
 
 		console.log(reqURL);
 
 		const response = await axios.get(reqURL, {
-			// headers: {
-			// 	...headers,
-			// 	},
+			headers: {
+				...headers,
+			},
 		});
+		console.log(response.data.result);
+
 		const { document } = new jsdom.JSDOM(response.data.result).window;
 
 		const episodes = [...document.querySelectorAll('a')]
@@ -226,7 +230,7 @@ class Anix {
 
 		let page: Page;
 
-		const url = await new Promise<string>(async (resolve, reject) => {
+		const url = await new Promise<{ url: string, headers: Record<string, string>; }>(async (resolve, reject) => {
 			page = await browser.newPage();
 
 			await page.waitForNetworkIdle();
@@ -234,10 +238,12 @@ class Anix {
 			const handle = (interceptedRequest: HTTPRequest) => {
 				const url = interceptedRequest.url();
 				if (url.includes('/episode/list')) {
+					const headers = interceptedRequest.headers();
+
 					console.log('request', url);
 					page.off('request');
 					interceptedRequest.continue();
-					resolve(url);
+					resolve({ url, headers });
 					return;
 				}
 				interceptedRequest.continue();
