@@ -36,7 +36,7 @@ router.post('/subsystems/movingItem', async (req: AuthenticatedRequest, res: Res
 
     const socket = getSubSocketByID(toSubSystemID);
 
-    if (socket == undefined) {
+    if (toSubSystemID !== 'main' && socket == undefined) {
         res.status(400).send('No SubSystem found!');
         return;
     }
@@ -54,6 +54,7 @@ router.post('/subsystems/movingItem', async (req: AuthenticatedRequest, res: Res
 
         for (const series of serieses) {
             for (const episode of series.seasons.flat()) {
+                if (episode.subID == toSubSystemID) continue;
                 additionalMovingItems.push({
                     ID: series.ID,
                     seriesID: series.ID,

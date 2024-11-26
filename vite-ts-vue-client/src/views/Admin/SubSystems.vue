@@ -222,6 +222,14 @@
 						</h2>
 
 						<div class="row row-cols-2 row-cols-lg-5 g-2 g-lg-3 gap-3">
+							<div class="card text-start">
+								<div class="card-body">
+									<h4 class="card-title">main</h4>
+									<div class="d-grid gap-2">
+										<button type="button" @click="selectedSubSystem = 'main'" class="btn btn-outline-primary mt-2">Select</button>
+									</div>
+								</div>
+							</div>
 							<div
 								v-for="subsystemID in adminStore.subsystems.knownSubSystems.filter((x) => idtoSock(x) !== undefined)"
 								:key="subsystemID"
@@ -354,8 +362,11 @@ async function submitMoving() {
 	});
 	if (response.status !== 200) {
 		useSwal({
+			toast: true,
+			position: 'top-end',
+			timer: 1500,
 			title: 'Error',
-			text: 'Something went wrong!',
+			text: response.data,
 			icon: 'error',
 			confirmButtonText: 'Ok',
 		});
@@ -367,8 +378,11 @@ async function removeManualMovingItems() {
 	const response = await useAxios().delete('/admin/subsystems/movingItem');
 	if (response.status !== 200) {
 		useSwal({
+			toast: true,
+			position: 'top-end',
+			timer: 1500,
 			title: 'Error',
-			text: 'Something went wrong!',
+			text: response.data,
 			icon: 'error',
 			confirmButtonText: 'Ok',
 		});
