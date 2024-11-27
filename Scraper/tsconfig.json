@@ -17,5 +17,5 @@
 			"@Types/*": ["../Types/src/*"]
 		}
 	},
-	"include": ["./src/**/*", "../**/src/**/*"]
+	"include": ["./src/**/*", "../Types/src/**/*"]
 }
