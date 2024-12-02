@@ -166,7 +166,7 @@ router.get('/job/crawl', async (req: AuthenticatedRequest, res: Response, next: 
 			setTimeout(async () => {
 				database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
 				sendSeriesReloadToAll((s) => s.emit(callpointToEvent(LOOKUP[id].callpoint)));
-			}, 3600);
+			}, 500);
 			res.json(await assembleJobArray());
 		} catch (error) {
 			database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
