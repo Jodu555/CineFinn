@@ -10,6 +10,7 @@ import { sendSeriesReloadToAll } from './client.socket';
 import { Response } from 'express';
 import { Movie, Episode } from '../classes/series';
 import { crawlAndIndex } from '../utils/crawler';
+import { sendSocketAdminUpdate } from '../utils/admin';
 
 export const subSocketMap = new Map<string, ExtendedSocket>();
 // export const ongoingRequests = new Map<string, { res: Response }>();
@@ -119,7 +120,7 @@ export interface MovingItem {
 	};
 }
 
-export const additionalMovingItems: MovingItem[] = [];
+export let additionalMovingItems: MovingItem[] = [];
 
 export async function generateMovingItemArray() {
 	const movingArray: MovingItem[] = [];
@@ -279,8 +280,14 @@ export async function processMovingItem(ID: string) {
 			(socket) => socket.auth.type == 'client' && socket.auth.user.role >= 2
 		);
 		setTimeout(async () => {
-			setSeries(await crawlAndIndex());
-			await sendSeriesReloadToAll();
+			const additionalIDX = additionalMovingItems.findIndex(x => x.ID == ID);
+			if (additionalIDX != -1) {
+				additionalMovingItems = additionalMovingItems.splice(additionalIDX, 1);
+				sendSocketAdminUpdate();
+			} else {
+				setSeries(await crawlAndIndex());
+				await sendSeriesReloadToAll();
+			}
 		}, 5000);
 	} catch (error) {
 		console.log(movingItem, error);
