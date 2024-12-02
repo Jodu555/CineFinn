@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import express, { NextFunction, Response } from 'express';
 import { Database } from '@jodu555/mysqlapi';
 import { generateOverview, generateAccounts, generateSubSystems, sendSocketAdminUpdate } from '../utils/admin';
@@ -56,7 +57,7 @@ router.post('/subsystems/movingItem', async (req: AuthenticatedRequest, res: Res
             for (const episode of series.seasons.flat()) {
                 if (episode.subID == toSubSystemID) continue;
                 additionalMovingItems.push({
-                    ID: series.ID,
+                    ID: createHash('md5').update(`${series.ID}${episode.subID}${toSubSystemID}${episode.filePath}`).digest('base64'),
                     seriesID: series.ID,
                     fromSubID: episode.subID,
                     toSubID: toSubSystemID,
