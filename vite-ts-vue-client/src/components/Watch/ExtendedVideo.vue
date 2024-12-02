@@ -321,26 +321,30 @@ export default defineComponent({
 		},
 		async loadIntroData() {
 			this.alreadySkipped = [];
-			if (true) {
-				try {
-					const response = await useAxios().get(
-						`/segments/info/${this.currentSeries.ID}/${(this.entityObject as SerieEpisode).season}/${
-							(this.entityObject as SerieEpisode).episode
-						}`
-					);
-					// const response = await fetch(
-					// 	`http://localhost:4897/segments/info/${this.currentSeries.ID}/${(this.entityObject as SerieEpisode).season}/${
-					// 		(this.entityObject as SerieEpisode).episode
-					// 	}`
-					// );
-					// const json = await response.json();
-					// this.segmentData = json;
-					if (response.status === 200) {
-						this.segmentData = response.data;
-					}
-				} catch (error) {
-					console.error('It was not possible to load any intro data maybe because the system is not available');
+			const season = (this.entityObject as SerieEpisode).season;
+			const episode = (this.entityObject as SerieEpisode).episode;
+			if (season == undefined || episode == undefined) {
+				return;
+			}
+			if (false) return;
+			try {
+				const response = await useAxios().get(
+					`/segments/info/${this.currentSeries.ID}/${(this.entityObject as SerieEpisode).season}/${
+						(this.entityObject as SerieEpisode).episode
+					}`
+				);
+				// const response = await fetch(
+				// 	`http://localhost:4897/segments/info/${this.currentSeries.ID}/${(this.entityObject as SerieEpisode).season}/${
+				// 		(this.entityObject as SerieEpisode).episode
+				// 	}`
+				// );
+				// const json = await response.json();
+				// this.segmentData = json;
+				if (response.status === 200) {
+					this.segmentData = response.data;
 				}
+			} catch (error) {
+				console.error('It was not possible to load any intro data maybe because the system is not available');
 			}
 		},
 		trigger(action: string, value: number | boolean, time: number) {
