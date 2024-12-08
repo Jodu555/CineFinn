@@ -113,7 +113,7 @@ socket.on('listFiles', async () => {
 
 const map = new Map<
 	string,
-	{ stream: ReadStream; start: number; end: number; num: number; chunks: (string | Buffer)[]; data: { len: number; all: number } }
+	{ stream: ReadStream; start: number; end: number; num: number; chunks: (string | Buffer)[]; data: { len: number; all: number; }; }
 >();
 
 socket.on('video-stats', ({ filePath }, callback) => {
@@ -131,6 +131,10 @@ interface VideoRangeRequest {
 socket.on('video-range', ({ filePath, start, end, requestId }: VideoRangeRequest) => {
 	console.log(filePath);
 
+	if (!fs.existsSync(filePath)) {
+		socket.emit('video-chunk-error', { error: 'File not found', requestId });
+		return;
+	}
 	const videoStream = fs.createReadStream(filePath, { start, end });
 	if (map.get(requestId) == undefined) {
 		map.set(requestId, { stream: videoStream, start, end, num: 0, chunks: [], data: { len: 0, all: 0 } });
@@ -534,7 +538,7 @@ socket.on('requestFile', ({ transmitID, subPath }) => {
 		const fingerprint = hash.digest('hex');
 		console.log('Finished sending Packets', transmitID, fd, packetCount, fingerprint);
 		// subSocket.emit('video-stats', { filePath: filePath }, ({ size }) => {
-		socket.emit('closeStream', { transmitID, fd, packetCount, fingerprint }, ({ valid }: { valid: boolean }) => {
+		socket.emit('closeStream', { transmitID, fd, packetCount, fingerprint }, ({ valid }: { valid: boolean; }) => {
 			console.log('Main System Returned valid:', valid);
 			if (valid == true) {
 				console.log('Removing File:', subPath);

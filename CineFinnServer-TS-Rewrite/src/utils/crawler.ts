@@ -1,13 +1,13 @@
 // const path = require('path');
 // const { listFiles } = require('./fileutils');
 // const { v4: uuidv4 } = require('uuid');
-
 import path from 'path';
+import { createHash } from 'node:crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { listFiles } from './fileutils';
 import { Episode, Movie, Series, filenameParser } from '../classes/series';
 import { SerieEpisodeObject, SerieObject } from '@Types/classes';
-import { SubFile, getAllFilesFromAllSubs } from '../sockets/sub.socket';
+import { MovingItem, SubFile, additionalMovingItems, getAllFilesFromAllSubs, getPrioSubIDForSerie, processMovingItem } from '../sockets/sub.socket';
 
 const generateID = () => {
 	return uuidv4().split('-')[0];
@@ -149,6 +149,8 @@ const crawlAndIndex = async () => {
 	// Strip the dirs down and seperate between season or movie dirs or series dirs
 	let series: SerieObject[] = [];
 
+	const toCheck: { ID: string; existEpisode: Episode; newEpisode: Episode; }[] = [];
+
 	// console.time('File Loop');
 	files.forEach(({ path: e, subID }) => {
 		const base = path.parse(e).base;
@@ -179,6 +181,16 @@ const crawlAndIndex = async () => {
 				if (existEpisode) {
 					if (!existEpisode.langs.includes(parsedData.language)) {
 						existEpisode.langs.push(parsedData.language);
+						if (existEpisode.subID != subID) {
+							const error = `Sub System Language Overlap in ${item.title}(${item.ID}) - ${existEpisode.season}x${existEpisode.episode} Exists in ${existEpisode.subID} at ${existEpisode.filePath} and in ${subID} at ${e}`;
+							console.log(error);
+							item.infos.disabled = true;
+							toCheck.push({
+								ID: item.ID,
+								existEpisode,
+								newEpisode: episode
+							});
+						}
 						return;
 					}
 					if (existEpisode.subID != subID) {
@@ -226,6 +238,43 @@ const crawlAndIndex = async () => {
 			seasons: newSeasons,
 		};
 	});
+
+
+	console.log(toCheck);
+
+
+
+	for await (const { ID, existEpisode, newEpisode } of toCheck) {
+		const serie = series.find((x) => x.ID == ID);
+
+		const newPrioSub = getPrioSubIDForSerie(serie);
+		console.log('Major Problem needs immediate moval');
+
+		const error = `Sub System Language Overlap in ${serie.title}(${serie.ID}) - ${existEpisode.season}x${existEpisode.episode} Exists in ${existEpisode.subID} at ${existEpisode.filePath} and in ${newEpisode.subID} at ${newEpisode.filePath}`;
+		console.log(error);
+
+		console.log(
+			newPrioSub,
+		);
+
+		const movingItem = {
+			ID: createHash('md5').update(`${serie.ID}${newEpisode.subID}${newPrioSub}${existEpisode.filePath}`).digest('base64'),
+			seriesID: serie.ID,
+			fromSubID: existEpisode.subID,
+			toSubID: newPrioSub,
+			filePath: existEpisode.filePath,
+			entity: existEpisode,
+		} satisfies MovingItem;
+
+		additionalMovingItems.push(movingItem);
+
+		console.log(movingItem.ID);
+
+		// This sadly does not work cause at that time there is no series with that ID....
+		// This technically should be implemented in some sort of a queue were we can push the item to process at a later stage
+		// This would generally for the movingItems a good idea since i dont like the all at one time idea and would prefere a staggered approach
+		// await processMovingItem(movingItem.ID);
+	}
 
 	return series;
 };

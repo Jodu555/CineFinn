@@ -4,11 +4,11 @@ import crypto from 'crypto';
 import { PassThrough } from 'stream';
 import { randomUUID, createHash } from 'node:crypto';
 import { ExtendedSocket } from '../types/session';
-import { Langs } from '@Types/classes';
+import { Langs, Serie, SerieObject } from '@Types/classes';
 import { getSeries, setSeries, toAllSockets } from '../utils/utils';
 import { sendSeriesReloadToAll } from './client.socket';
 import { Response } from 'express';
-import { Movie, Episode } from '../classes/series';
+import { Movie, Episode, Series } from '../classes/series';
 import { crawlAndIndex } from '../utils/crawler';
 import { sendSocketAdminUpdate } from '../utils/admin';
 
@@ -122,12 +122,37 @@ export interface MovingItem {
 
 export let additionalMovingItems: MovingItem[] = [];
 
+export function getPrioSubIDForSerie(serie: Series | Serie | SerieObject): string | undefined {
+	const obj: Record<string, number> = {};
+	const all = [...serie.movies, ...serie.seasons.flat()];
+	all.forEach((z) => {
+		obj[z.subID] = obj[z.subID] ? obj[z.subID] + 1 : 1;
+	});
+
+	let prioSub = '';
+	let sortable: Record<string, number> = {};
+
+	if (Object.keys(obj).length == 1) {
+		prioSub = Object.keys(obj)[0];
+		sortable = obj;
+	} else {
+		sortable = Object.entries(obj)
+			.sort(([, a], [, b]) => b - a)
+			.reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
+
+		prioSub = Object.entries(sortable)?.[0]?.[0] || '0x0';
+
+		if (prioSub == '0x0') return undefined;
+	}
+	return prioSub;
+}
+
 export async function generateMovingItemArray() {
 	const movingArray: MovingItem[] = [];
 
 	const series = await getSeries();
 
-	const test = series.map((x) => {
+	series.forEach((x) => {
 		const obj: Record<string, number> = {};
 		const all = [...x.movies, ...x.seasons.flat()];
 		all.forEach((z) => {
@@ -163,13 +188,18 @@ export async function generateMovingItemArray() {
 			});
 		}
 
-		return {
-			ID: x.ID,
-			title: x.title,
-			obj,
-			sortable,
-			prioSub,
-		};
+		const newPrioSub = getPrioSubIDForSerie(x);
+		if (newPrioSub != prioSub) {
+			console.log('Mismatch Error getPrioSubIDForSerie()', prioSub, newPrioSub);
+		}
+
+		// return {
+		// 	ID: x.ID,
+		// 	title: x.title,
+		// 	obj,
+		// 	sortable,
+		// 	prioSub,
+		// };
 	});
 	// console.log(test, movingArray);
 	return [...additionalMovingItems, ...movingArray];
