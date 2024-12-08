@@ -314,10 +314,9 @@ export async function processMovingItem(ID: string) {
 			if (additionalIDX != -1) {
 				additionalMovingItems = additionalMovingItems.splice(additionalIDX, 1);
 				sendSocketAdminUpdate();
-			} else {
-				setSeries(await crawlAndIndex());
-				await sendSeriesReloadToAll();
 			}
+			setSeries(await crawlAndIndex());
+			await sendSeriesReloadToAll();
 		}, 5000);
 	} catch (error) {
 		console.log(movingItem, error);

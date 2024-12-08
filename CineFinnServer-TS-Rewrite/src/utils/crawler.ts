@@ -116,7 +116,10 @@ interface idFile {
 	file: string;
 }
 
+let toCheckItems: { title: string; existEpisode: Episode; newEpisode: Episode; }[] = [];
+
 const crawlAndIndex = async () => {
+	toCheckItems = [];
 	const pathEntries = [process.env.VIDEO_PATH];
 
 	//TODO: maybe switch this up to first process the main and then the subs so if there are duplicates the main is chosen
@@ -149,7 +152,7 @@ const crawlAndIndex = async () => {
 	// Strip the dirs down and seperate between season or movie dirs or series dirs
 	let series: SerieObject[] = [];
 
-	const toCheck: { ID: string; existEpisode: Episode; newEpisode: Episode; }[] = [];
+
 
 	// console.time('File Loop');
 	files.forEach(({ path: e, subID }) => {
@@ -185,8 +188,8 @@ const crawlAndIndex = async () => {
 							const error = `Sub System Language Overlap in ${item.title}(${item.ID}) - ${existEpisode.season}x${existEpisode.episode} Exists in ${existEpisode.subID} at ${existEpisode.filePath} and in ${subID} at ${e}`;
 							console.log(error);
 							item.infos.disabled = true;
-							toCheck.push({
-								ID: item.ID,
+							toCheckItems.push({
+								title: item.title,
 								existEpisode,
 								newEpisode: episode
 							});
@@ -238,43 +241,6 @@ const crawlAndIndex = async () => {
 			seasons: newSeasons,
 		};
 	});
-
-
-	console.log(toCheck);
-
-
-
-	for await (const { ID, existEpisode, newEpisode } of toCheck) {
-		const serie = series.find((x) => x.ID == ID);
-
-		const newPrioSub = getPrioSubIDForSerie(serie);
-		console.log('Major Problem needs immediate moval');
-
-		const error = `Sub System Language Overlap in ${serie.title}(${serie.ID}) - ${existEpisode.season}x${existEpisode.episode} Exists in ${existEpisode.subID} at ${existEpisode.filePath} and in ${newEpisode.subID} at ${newEpisode.filePath}`;
-		console.log(error);
-
-		console.log(
-			newPrioSub,
-		);
-
-		const movingItem = {
-			ID: createHash('md5').update(`${serie.ID}${newEpisode.subID}${newPrioSub}${existEpisode.filePath}`).digest('base64'),
-			seriesID: serie.ID,
-			fromSubID: existEpisode.subID,
-			toSubID: newPrioSub,
-			filePath: existEpisode.filePath,
-			entity: existEpisode,
-		} satisfies MovingItem;
-
-		additionalMovingItems.push(movingItem);
-
-		console.log(movingItem.ID);
-
-		// This sadly does not work cause at that time there is no series with that ID....
-		// This technically should be implemented in some sort of a queue were we can push the item to process at a later stage
-		// This would generally for the movingItems a good idea since i dont like the all at one time idea and would prefere a staggered approach
-		// await processMovingItem(movingItem.ID);
-	}
 
 	return series;
 };
@@ -333,6 +299,37 @@ const mergeSeriesArrays = (before: Series[], after: Series[], keepCurrentlyNotPr
 			);
 		}
 	});
+
+	for (const { title, existEpisode, newEpisode } of toCheckItems) {
+		const serie = output.find((x) => x.title === title);
+
+		const newPrioSub = getPrioSubIDForSerie(serie);
+		console.log('Major Problem needs immediate moval');
+
+		const error = `Sub System Language Overlap in ${serie.title}(${serie.ID}) - ${existEpisode.season}x${existEpisode.episode} Exists in ${existEpisode.subID} at ${existEpisode.filePath} and in ${newEpisode.subID} at ${newEpisode.filePath}`;
+		console.log(error);
+
+		console.log(
+			newPrioSub,
+		);
+
+		const movingItem = {
+			ID: createHash('md5').update(`${serie.ID}${newEpisode.subID}${newPrioSub}${existEpisode.filePath}`).digest('base64'),
+			seriesID: serie.ID,
+			fromSubID: newEpisode.subID,
+			toSubID: newPrioSub,
+			filePath: newEpisode.filePath,
+			entity: newEpisode,
+		} satisfies MovingItem;
+
+		additionalMovingItems.push(movingItem);
+
+		console.log(movingItem.ID);
+
+		// This technically should be implemented in some sort of a queue were we can push the item to process at a later stage
+		// This would generally be better for the movingItems a good idea since i dont like the all at one time idea and would prefere a staggered approach
+		// await processMovingItem(movingItem.ID);
+	}
 
 	return output;
 };
