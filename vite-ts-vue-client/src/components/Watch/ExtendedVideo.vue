@@ -321,8 +321,8 @@ export default defineComponent({
 		},
 		async loadIntroData() {
 			this.alreadySkipped = [];
-			const season = (this.entityObject as SerieEpisode).season;
-			const episode = (this.entityObject as SerieEpisode).episode;
+			const season = (this.entityObject as SerieEpisode)?.season;
+			const episode = (this.entityObject as SerieEpisode)?.episode;
 			if (season == undefined || episode == undefined) {
 				return;
 			}

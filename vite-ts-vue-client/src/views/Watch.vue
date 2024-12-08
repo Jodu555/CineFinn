@@ -75,9 +75,11 @@
 
 				<div
 					v-if="
-						watchStore.currentSeries.movies.length >= 1 && watchStore.currentSeries.seasons.length == 0 && watchStore.currentMovie == -1
+						watchStore.currentSeries.movies.length >= 1 &&
+						watchStore.currentSeries.seasons.length == 0 &&
+						(watchStore.currentSeries.movies.length == 1 || watchStore.currentMovie == -1)
 					">
-					<EntityListViewMovies :changeMovie="changeMovie" />
+					<EntityListViewMovies v-if="watchStore.currentSeries.movies.length > 1" :changeMovie="changeMovie" />
 				</div>
 
 				<div v-else>
@@ -198,6 +200,12 @@ onMounted(async () => {
 		}
 
 		document.title = `Cinema | ${watchStore.currentSeries.title}`;
+
+		console.log(watchStore.currentSeries.movies.length, watchStore.currentMovie);
+
+		if (watchStore.currentSeries.movies.length == 1 && watchStore.currentSeries.seasons.length == 0) {
+			handleVideoChange(-1, -1, 1, undefined, undefined, undefined);
+		}
 	} catch (error) {
 		console.error('Error in Watch.vue Created Hook', error);
 	}

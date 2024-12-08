@@ -90,29 +90,35 @@ export const useWatchStore = defineStore('watch', {
 	},
 	actions: {
 		async loadSeriesInfo(ID: string, showLoading = true) {
-			if (showLoading) this.loading = true;
-			//Series array is empty cause the user got direct to the /watch route
-			const index = useIndexStore();
-			if (index.series.length == 0) {
-				await index.loadSeries();
-			}
+			try {
+				if (showLoading) this.loading = true;
+				//Series array is empty cause the user got direct to the /watch route
+				const index = useIndexStore();
+				if (index.series.length == 0) {
+					await index.loadSeries();
+				}
 
-			//Load the Series Details
-			const response = await useAxios().get(`/index/${ID}`);
-			if (response.status === 200) {
-				const data = index.series.map((s) => {
-					if (s.ID === ID) {
-						return response.data;
-					} else {
-						return s;
-					}
-				});
-				index.series = data;
-			}
+				//Load the Series Details
+				const response = await useAxios().get(`/index/${ID}`);
+				if (response.status === 200 || response.status == 304) {
+					const data = index.series.map((s) => {
+						if (s.ID === ID) {
+							return response.data;
+						} else {
+							return s;
+						}
+					});
+					index.series = data;
+				}
 
-			//Update The Series
-			this.currentSeries = index.series.find((x) => x.ID == ID) as Serie;
-			if (showLoading) this.loading = false;
+				//Update The Series
+				this.currentSeries = index.series.find((x) => x.ID == ID) as Serie;
+				if (showLoading) this.loading = false;
+
+			} catch (error) {
+				if (showLoading) this.loading = false;
+				console.error('Error in watch.store.ts', error);
+			}
 		},
 		async loadWatchList(ID: string) {
 			const response = await useAxios().get(`/watch/info?series=${ID}`);
