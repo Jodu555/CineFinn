@@ -346,6 +346,7 @@ import draggable from 'vuedraggable';
 import type { AniWorldAdditionalSeriesInformations } from '@Types/scrapers';
 import type { DatabaseNewsItem, DatabaseParsedTodoItem, TodoReferences } from '@Types/database';
 import { decideImageURL, languageDevision, type TodoItem } from '@/utils/todo';
+import type { SerieEpisode, SerieInfo, SerieMovie } from '@Types/classes';
 
 const minimal = ref(false);
 
@@ -612,14 +613,15 @@ const useTodo = async (ID: string) => {
 		const seriesObject = {
 			categorie: todoObject.categorie,
 			title: todoObject.name,
-			movies: [],
-			seasons: [],
+			movies: [] as SerieMovie[],
+			seasons: [] as SerieEpisode[][],
 			references: todoObject.references,
-			infos: {} as Partial<AniWorldAdditionalSeriesInformations>,
+			infos: {} as SerieInfo,
 		};
 
 		if (todoObject.scraped !== true) {
-			seriesObject.infos = JSON.parse(JSON.stringify(todoObject.scraped?.informations));
+			seriesObject.infos = JSON.parse(JSON.stringify(todoObject.scraped?.informations)) satisfies SerieInfo;
+			//@ts-ignore-next-line
 			delete seriesObject?.infos?.image;
 		}
 		const response = await useAxios().post('/index/', seriesObject);
