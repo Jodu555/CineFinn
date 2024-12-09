@@ -25,6 +25,12 @@
 							<b>Rolle:</b> <span class="text-muted">{{ roleIDToName(userInfo.role) }}</span>
 						</h5>
 					</li>
+					<li class="list-group-item">
+						<h5>
+							<b>Password: </b>
+							<span class="text-muted"><a href="#" @click="togglePasswordResetModal = true">Reset</a></span>
+						</h5>
+					</li>
 				</ul>
 				<template v-if="jobs.some((x) => userInfo.role >= x?.role)">
 					<pre v-if="settings.developerMode.value">{{ { showJobs, showSettings } }}</pre>
@@ -82,6 +88,59 @@
 				</div>
 			</div>
 		</div>
+		<Modal id="toggleShowSeries" size="xl" v-model:show="togglePasswordResetModal">
+			<template #title>Password Reset</template>
+			<template #body>
+				<div class="form-check form-switch">
+					<input v-model="showPasswords" class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked />
+					<label class="form-check-label" for="flexSwitchCheckChecked">Show Passwords</label>
+				</div>
+
+				<form @submit.prevent="" class="card-text" id="loginForm">
+					<fieldset>
+						<div class="form-group">
+							<InputValidator
+								v-model="form.oldPassword"
+								v-model:valid="form.oldPasswordValid"
+								:type="showPasswords ? 'text' : 'password'"
+								id="password"
+								name="Old Password"
+								autocomplete="old-password"
+								placeholder="Enter Old Password"
+								:rules="rules.passwordRules" />
+						</div>
+						<div class="form-group">
+							<InputValidator
+								v-model="form.newPassword"
+								v-model:valid="form.newPasswordValid"
+								:type="showPasswords ? 'text' : 'password'"
+								id="password"
+								name="New Password"
+								autocomplete="current-password"
+								placeholder="Enter Password"
+								:rules="rules.passwordRules" />
+						</div>
+						<div class="form-group">
+							<InputValidator
+								v-model="form.newPasswordAgain"
+								v-model:valid="form.newPasswordAgainValid"
+								:type="showPasswords ? 'text' : 'password'"
+								id="password"
+								name="Password"
+								autocomplete="current-password"
+								placeholder="Enter Password"
+								:rules="computedRules.passwordAgainRules" />
+						</div>
+						<button
+							type="submit"
+							:disabled="!(form.oldPasswordValid && form.newPasswordValid && form.newPasswordAgainValid && !showPasswords)"
+							class="mt-4 btn btn-primary">
+							Reset Password
+						</button>
+					</fieldset>
+				</form>
+			</template>
+		</Modal>
 	</div>
 </template>
 <script lang="ts">
@@ -91,18 +150,45 @@ import { roleIDToName } from '@/utils/constants';
 import { useAuthStore } from '@/stores/auth.store';
 import { useAxios } from '@/utils';
 import type { Job } from '@Types/session';
+import Modal from '@/components/Modal.vue';
+import InputValidator from '@/components/InputValidator.vue';
 
 export default {
-	components: { JobListView },
+	components: { JobListView, Modal, InputValidator },
 	data() {
 		return {
 			jobs: [] as Job[],
 			showJobs: false,
 			showSettings: false,
+			togglePasswordResetModal: false,
+			showPasswords: false,
+			form: {
+				oldPassword: '',
+				oldPasswordValid: false,
+
+				newPassword: '',
+				newPasswordValid: false,
+				newPasswordAgain: '',
+				newPasswordAgainValid: false,
+			},
+			rules: {
+				passwordRules: [
+					(value: string) => !!value || 'Cannot be empty.',
+					(value: string) => (value.length >= 3 && value.length <= 100) || 'Must be at least 3 Characters and can only be 100',
+				],
+			},
 		};
 	},
 	computed: {
 		...mapWritableState(useAuthStore, ['userInfo', 'authToken', 'settings']),
+		computedRules() {
+			return {
+				passwordAgainRules: [
+					...this.rules.passwordRules,
+					(value: string) => value.toString() == this.form.newPassword.toString() || 'Passwords do not match',
+				],
+			};
+		},
 	},
 	mounted() {
 		this.load();
