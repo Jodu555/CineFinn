@@ -1,6 +1,6 @@
 <template>
 	<div class="container">
-		<h1 class="text-center">Accounts</h1>
+		<h1 class="text-center">Accounts ({{ adminStore?.accounts?.length || 0 }})</h1>
 		<div v-if="adminStore.loading" class="d-flex justify-content-center">
 			<div class="spinner-border" role="status">
 				<span class="visually-hidden">Loading...</span>
