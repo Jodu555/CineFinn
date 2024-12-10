@@ -146,7 +146,7 @@
 											</template>
 										</template>
 										<br />
-										<p style="cursor: pointer" @click="deleteParsedInfos(element.ID)"><u>Delete Scraped infos</u></p>
+										<p style="cursor: pointer" @click="deleteOrRetryScrapeTodo(element.ID)"><u>Delete Scraped infos</u></p>
 									</em>
 								</li>
 							</ul>
@@ -155,13 +155,13 @@
 								<div class="spinner-border text-warning spinner-border-xs" role="status">
 									<span class="visually-hidden">Loading...</span>
 								</div>
-								<small class="text-danger" style="cursor: pointer" @click="retryScrapeTodo(element.ID)"><u>Retry</u></small>
+								<small class="text-danger" style="cursor: pointer" @click="deleteOrRetryScrapeTodo(element.ID)"><u>Retry</u></small>
 							</div>
 
 							<span v-if="element.scrapingError" class="h6 text-danger">
 								<span
 									>!!! {{ element.scrapingError }} !!! &nbsp;&nbsp;&nbsp;&nbsp;
-									<small style="cursor: pointer" @click="retryScrapeTodo(element.ID)">
+									<small style="cursor: pointer" @click="deleteOrRetryScrapeTodo(element.ID)">
 										<u>Retry</u>
 									</small>
 								</span>
@@ -345,7 +345,7 @@ import { reactive, computed, ref, onMounted, getCurrentInstance, onUnmounted } f
 import draggable from 'vuedraggable';
 import type { AniWorldAdditionalSeriesInformations } from '@Types/scrapers';
 import type { DatabaseNewsItem, DatabaseParsedTodoItem, TodoReferences } from '@Types/database';
-import { decideImageURL, languageDevision, type TodoItem } from '@/utils/todo';
+import { decideImageURL, languageDevision, scrapers, type TodoItem } from '@/utils/todo';
 import type { Serie, SerieEpisode, SerieInfo, SerieMovie } from '@Types/classes';
 
 const minimal = ref(false);
@@ -362,8 +362,8 @@ const numWithFP = (num: string | number, pts: number): number => {
 };
 
 const constants = reactive({
-	mbperEpisode: 260,
-	mbperMovie: 1024,
+	mbperEpisode: 350,
+	mbperMovie: 2048,
 });
 
 const state = reactive({
@@ -381,104 +381,6 @@ const dragOptions = computed(() => {
 		ghostClass: 'ghost',
 	};
 });
-
-// const scrapers = [
-// 	{
-// 		referenceKey: 'aniworld',
-// 		scrapeKey: 'scraped',
-// 		imagePath: ['informations', 'image'],
-// 	},
-// 	{
-// 		referenceKey: 'zoro',
-// 		scrapeKey: 'scrapednewZoro',
-// 		imagePath: ['image'],
-// 	},
-// 	{
-// 		referenceKey: 'zoro',
-// 		scrapeKey: 'scrapedZoro',
-// 		imagePath: ['image'],
-// 	},
-// 	{
-// 		referenceKey: 'anix',
-// 		scrapeKey: 'scrapedAnix',
-// 		imagePath: ['image'],
-// 	},
-// 	{
-// 		referenceKey: 'sto',
-// 		scrapeKey: 'scraped',
-// 		imagePath: ['informations', 'image'],
-// 	},
-// 	{
-// 		referenceKey: 'myasiantv',
-// 		scrapeKey: 'scrapedMyasiantv',
-// 		imagePath: ['informations', 'image'],
-// 	},
-// ] satisfies ScraperDefinition[];
-
-// interface ScraperDefinition {
-// 	referenceKey: keyof TodoReferences;
-// 	scrapeKey: keyof TodoItem;
-// 	imagePath: string[];
-// }
-
-// function lookDeep(obj: any, keys: string[]) {
-// 	let current = obj;
-// 	for (const key of keys) {
-// 		if (current[key] === undefined) {
-// 			return undefined;
-// 		}
-// 		current = current[key];
-// 	}
-// 	return current;
-// }
-
-// function decideImageURL(element: TodoItem) {
-// 	if (minimal.value) return '';
-
-// 	for (const scraper of scrapers) {
-// 		const scrapeInfo = element[scraper.scrapeKey] as any;
-// 		console.log(element, scraper.scrapeKey, scrapeInfo);
-// 		if (scrapeInfo != undefined && scrapeInfo !== true) {
-// 			const img = lookDeep(scrapeInfo, scraper.imagePath);
-// 			console.log(img);
-// 			if (img && typeof img == 'string') {
-// 				return img;
-// 			}
-// 		}
-// 	}
-// 	return '';
-// 	// if (
-// 	// 	element.scraped != undefined &&
-// 	// 	element.scraped !== true &&
-// 	// 	element.scraped.informations.image &&
-// 	// 	typeof element.scraped.informations.image == 'string'
-// 	// ) {
-// 	// 	return element.scraped.informations.image;
-// 	// }
-// 	// if (
-// 	// 	element.scrapednewZoro != undefined &&
-// 	// 	element.scrapednewZoro !== true &&
-// 	// 	element.scrapednewZoro.image &&
-// 	// 	typeof element.scrapednewZoro.image == 'string'
-// 	// ) {
-// 	// 	return element.scrapednewZoro.image;
-// 	// }
-
-// 	// if (element.scrapedAnix != undefined && element.scrapedAnix !== true && element.scrapedAnix.image && typeof element.scrapedAnix.image == 'string') {
-// 	// 	return element.scrapedAnix.image;
-// 	// }
-
-// 	// if (
-// 	// 	element.scrapedMyasiantv != undefined &&
-// 	// 	element.scrapedMyasiantv !== true &&
-// 	// 	element.scrapedMyasiantv.informations.image &&
-// 	// 	typeof element.scrapedMyasiantv.informations.image == 'string'
-// 	// ) {
-// 	// 	return element.scrapedMyasiantv.informations.image;
-// 	// }
-
-// 	// return '';
-// }
 
 onMounted(() => {
 	window.addEventListener('resize', handleWindowSizeChange);
@@ -669,25 +571,18 @@ const save = () => {
 	pushTodoListUpdate();
 };
 
-const deleteParsedInfos = (ID: string) => {
-	state.list = state.list.map((x) => {
-		if (x.ID == ID) {
-			delete x?.scraped;
-			delete x?.scrapedZoro;
-			delete x?.scrapednewZoro;
-			return x;
-		} else {
-			return x;
-		}
-	});
-	pushTodoListUpdate();
-};
+function deleteScrapeInfos(item: TodoItem) {
+	delete item?.scrapingError;
+	for (const scraper of scrapers) {
+		delete item?.[scraper.scrapeKey];
+	}
+	return item;
+}
 
-const retryScrapeTodo = (ID: string) => {
+const deleteOrRetryScrapeTodo = (ID: string) => {
 	state.list = state.list.map((x) => {
 		if (x.ID == ID) {
-			delete x?.scraped;
-			delete x?.scrapingError;
+			x = deleteScrapeInfos(x);
 			return x;
 		} else {
 			return x;
@@ -698,8 +593,7 @@ const retryScrapeTodo = (ID: string) => {
 
 const rescrapeAllItems = () => {
 	state.list = state.list.map((x) => {
-		delete x?.scraped;
-		delete x?.scrapingError;
+		x = deleteScrapeInfos(x);
 		return x;
 	});
 	pushTodoListUpdate();
@@ -717,7 +611,6 @@ const pushTodoListUpdate = async () => {
 	}
 	const saveList = (JSON.parse(JSON.stringify(state.list)) as TodoItem[]).map((x) => {
 		delete x.edited;
-		// delete x.scraped;
 		return x;
 	});
 	useSocket().emit('todoListUpdate', saveList);
