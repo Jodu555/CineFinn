@@ -96,7 +96,7 @@
 							<span v-if="state.permittedAccounts.find((x) => x.UUID == element.creator) != null"
 								>- {{ state.permittedAccounts.find((x) => x.UUID == element.creator)?.username }}</span
 							>
-							<div style="width: 15%" class="d-flex justify-content-around">
+							<div v-if="auth.userInfo.role > 1" style="width: 15%" class="d-flex justify-content-around">
 								<a v-if="element.references.aniworld" target="_blank" :href="element.references.aniworld" class="h6">A</a>
 								<span v-if="element.references.zoro" class="h6">Z</span>
 								<a v-if="element.references.sto" target="_blank" :href="element.references.sto" class="h6">S</a>
@@ -118,9 +118,9 @@
 										{{ numWithFP((element.scraped?.movies?.length * constants.mbperMovie) / 1024, 1) }}GB
 									</li>
 								</template>
-								<li>
+								<li v-if="auth.userInfo.role > 2">
 									<em>
-										<template v-if="auth.userInfo.role > 2">
+										<template>
 											Source:
 											<template v-if="element.scraped !== undefined && element.scraped !== true">
 												<br />
