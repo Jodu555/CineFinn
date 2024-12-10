@@ -621,7 +621,6 @@ const useTodo = async (ID: string) => {
 
 		if (todoObject.scraped !== true) {
 			seriesObject.infos = JSON.parse(JSON.stringify(todoObject.scraped?.informations)) satisfies SerieInfo;
-			//@ts-ignore-next-line
 			delete seriesObject?.infos?.image;
 		}
 		const response = await useAxios().post('/index/', seriesObject);
