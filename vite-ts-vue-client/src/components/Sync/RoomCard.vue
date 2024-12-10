@@ -7,7 +7,7 @@
 			>
 			<div class="card-body">
 				<h4 class="card-title">{{ getSeries(room.seriesID)?.title }}</h4>
-				<p class="card-text">Opend: {{ ago }} with {{ room.members?.length || 0 }} users</p>
+				<p class="card-text">Opend: {{ ago }} with {{ room.members?.length || 0 }} {{ room.members?.length == 1 ? 'user' : 'users' }}</p>
 				<button class="btn btn-outline-success" @click="joinRoom(room.ID)">Join</button>
 			</div>
 		</div>
