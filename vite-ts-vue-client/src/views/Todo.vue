@@ -346,7 +346,7 @@ import draggable from 'vuedraggable';
 import type { AniWorldAdditionalSeriesInformations } from '@Types/scrapers';
 import type { DatabaseNewsItem, DatabaseParsedTodoItem, TodoReferences } from '@Types/database';
 import { decideImageURL, languageDevision, type TodoItem } from '@/utils/todo';
-import type { SerieEpisode, SerieInfo, SerieMovie } from '@Types/classes';
+import type { Serie, SerieEpisode, SerieInfo, SerieMovie } from '@Types/classes';
 
 const minimal = ref(false);
 
@@ -619,7 +619,7 @@ const useTodo = async (ID: string) => {
 			infos: {} as SerieInfo,
 		};
 
-		if (todoObject.scraped !== true) {
+		if (todoObject.scraped !== true && todoObject.scraped != undefined) {
 			seriesObject.infos = JSON.parse(JSON.stringify(todoObject.scraped?.informations)) satisfies SerieInfo;
 			delete seriesObject?.infos?.image;
 		}
@@ -636,6 +636,26 @@ const useTodo = async (ID: string) => {
 				timerProgressBar: true,
 			});
 		} else {
+			if (response.data.ID !== undefined) {
+				const serieID = response.data.ID;
+
+				const imageUrl = decideImageURL(false, todoObject);
+
+				const imageResponse = await useAxios().post(`/index/${serieID}/cover`, { imageUrl });
+
+				if (imageResponse.status !== 200) {
+					instance.$swal({
+						toast: true,
+						position: 'top-end',
+						showConfirmButton: false,
+						timer: 3000,
+						icon: 'error',
+						title: `${imageResponse.data.error.message || 'An Error occurd'}`,
+						timerProgressBar: true,
+					});
+				}
+			}
+
 			const newsObject = {
 				content: `Added ${seriesObject.title}`,
 				time: Date.now(),

@@ -1,5 +1,7 @@
 import { Database } from '@jodu555/mysqlapi';
 import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
 import express, { NextFunction, Response } from 'express';
 import { Series, cleanupSeriesBeforeFrontResponse } from '../classes/series';
 import { sendSeriesReloadToAll } from '../sockets/client.socket';
@@ -56,6 +58,35 @@ router.patch('/:ID', roleAuthorization(Role.Mod), async (req: AuthenticatedReque
 	await sendSeriesReloadToAll();
 });
 
+router.post('/:ID/cover', roleAuthorization(Role.Admin), async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+	const serieID = req.params.ID;
+	const serie = (await getSeries()).find((x) => x.ID === serieID);
+	if (serie == undefined) {
+		next(new Error('Serie not found!'));
+		return;
+	}
+	const imageUrl = req.body.imageUrl;
+	const imagePath = path.join(process.env.PREVIEW_IMGS_PATH, serie.ID, 'cover.jpg');
+	console.log(`Downloading Cover for ${serie.title}(${serie.ID}) URL: ${imageUrl} TO: ${imagePath}`);
+	await downloadImage(imageUrl, imagePath);
+	setSeries(
+		(await getSeries()).map((x) => {
+			if (x.ID == req.params.ID) {
+				const out = deepMerge<Series>(x, {
+					infos: {
+						image: true,
+					}
+				});
+				res.json(out);
+				return out;
+			} else {
+				return x;
+			}
+		})
+	);
+	await sendSeriesReloadToAll();
+});
+
 router.post('/', roleAuthorization(Role.Admin), async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	req.body.ID = generateID();
 	const serie = Series.fromObject(req.body);
@@ -64,5 +95,24 @@ router.post('/', roleAuthorization(Role.Admin), async (req: AuthenticatedRequest
 	await sendSeriesReloadToAll();
 	res.json(serie);
 });
+
+async function downloadImage(url: string, imagePath: string) {
+	try {
+		fs.mkdirSync(path.join(imagePath, '..'), { recursive: true });
+		const response = await axios({
+			url,
+			responseType: 'stream',
+		});
+		return new Promise<void>((resolve, reject) => {
+			response.data
+				.pipe(fs.createWriteStream(imagePath))
+				.on('finish', () => resolve())
+				.on('error', (e: Error) => reject(e));
+		});
+	} catch (error) {
+		console.error(url, imagePath);
+		return null;
+	}
+}
 
 export { router };

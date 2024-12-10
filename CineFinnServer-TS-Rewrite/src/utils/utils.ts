@@ -88,7 +88,7 @@ const toAllSockets = async (cb: toAllSocketsFunctionCB, filter: toAllSocketsFunc
 	sockets.filter(filter).forEach(cb);
 };
 
-function deepMerge<T>(current: T, updates: T): T {
+function deepMerge<T>(current: T, updates: Partial<T>): T {
 	// if (updates === null) return current;
 	if (typeof updates !== 'object') return current;
 	for (const key of Object.keys(updates)) {
