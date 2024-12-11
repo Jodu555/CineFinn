@@ -99,7 +99,9 @@
 							<div v-if="auth.userInfo.role > 1" style="width: 15%" class="d-flex justify-content-around">
 								<a v-if="element.references.aniworld" target="_blank" :href="element.references.aniworld" class="h6">A</a>
 								<span v-if="element.references.zoro" class="h6">Z</span>
+								<a v-if="element.references.anix" target="_blank" :href="element.references.anix" class="h6">AX</a>
 								<a v-if="element.references.sto" target="_blank" :href="element.references.sto" class="h6">S</a>
+								<a v-if="element.references.myasiantv" target="_blank" :href="element.references.myasiantv" class="h6">M</a>
 							</div>
 
 							<ul v-if="!minimal && languageDevision(element).total != -1">
@@ -118,9 +120,9 @@
 										{{ numWithFP((element.scraped?.movies?.length * constants.mbperMovie) / 1024, 1) }}GB
 									</li>
 								</template>
-								<li v-if="auth.userInfo.role > 2">
+								<li>
 									<em>
-										<template>
+										<div>
 											Source:
 											<template v-if="element.scraped !== undefined && element.scraped !== true">
 												<br />
@@ -144,7 +146,11 @@
 													`https://anix.to/anime/${element.references.anix}`
 												}}</a>
 											</template>
-										</template>
+											<template v-if="element.scrapedMyasiantv !== undefined && element.scrapedMyasiantv !== true">
+												<br />
+												<a target="_blank" :href="element.scrapedMyasiantv.url">{{ element.scrapedMyasiantv.url }}</a>
+											</template>
+										</div>
 										<br />
 										<p style="cursor: pointer" @click="deleteOrRetryScrapeTodo(element.ID)"><u>Delete Scraped infos</u></p>
 									</em>
