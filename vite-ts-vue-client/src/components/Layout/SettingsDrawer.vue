@@ -25,12 +25,12 @@
 							<b>Rolle:</b> <span class="text-muted">{{ roleIDToName(userInfo.role) }}</span>
 						</h5>
 					</li>
-					<li class="list-group-item">
+					<!-- <li class="list-group-item">
 						<h5>
 							<b>Password: </b>
 							<span class="text-muted"><a href="#" @click="togglePasswordResetModal = true">Reset</a></span>
 						</h5>
-					</li>
+					</li> -->
 				</ul>
 				<template v-if="jobs.some((x) => userInfo.role >= x?.role)">
 					<pre v-if="settings.developerMode.value">{{ { showJobs, showSettings } }}</pre>
