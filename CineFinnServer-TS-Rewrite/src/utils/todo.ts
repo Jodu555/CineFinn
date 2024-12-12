@@ -58,6 +58,7 @@ export function checkIfTodoNeedsScrape(todo: DatabaseParsedTodoItem) {
 	// const needsAnix = !todo.scrapedAnix && todo.references.anix !== '' && todo.references.anix !== undefined;
 	// const needsSTO = !todo.scraped && todo.references.sto !== '';
 	// return needsAniworld || needsZoro || needsAnix || needsSTO;
+
 	for (const scraper of scrapers) {
 		if (!todo[scraper.scrapeKey] && todo.references[scraper.referenceKey] !== '' && todo.references[scraper.referenceKey] !== undefined) {
 			return true;
@@ -108,6 +109,8 @@ export async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 
 			// if (!aniInfos && !stoInfos) todo.scraped = undefined;
 
+			let scraperKeys: string[] = [];
+
 			await Promise.all(scrapers.map(async (scraper) => {
 				if (todo.references[scraper.referenceKey] === '' || todo.references[scraper.referenceKey] === undefined) {
 					return null;
@@ -118,7 +121,8 @@ export async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 				if (todo.scrapingError) delete todo.scrapingError;
 				if (result) {
 					todo[scraper.scrapeKey] = result as any;
-					if (scraper.scrapeKey != 'scraped') {
+					scraperKeys.push(scraper.scrapeKey);
+					if (scraper.scrapeKey != 'scraped' && todo.scraped == true) {
 						todo.scraped = undefined;
 					}
 				} else {
@@ -142,7 +146,8 @@ export async function backgroundScrapeTodo(todo: DatabaseParsedTodoItem) {
 					console.log('Met Exit condition');
 				}
 
-				if (list.find((x) => x.ID == todo.ID).scraped == true) {
+				const subItem = list.find((x) => x.ID == todo.ID);
+				if (scraperKeys.every(x => subItem?.[x] == true)) {
 					console.log('Impossible....');
 					await wait(42);
 				} else {
