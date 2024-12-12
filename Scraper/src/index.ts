@@ -52,6 +52,10 @@ socket.on('connect', async () => {
 
 	// const array: ExtendedEpisodeDownload[] = [];
 
+	// const sto = new Aniworld('http://186.2.175.5/serie/stream/game-of-thrones');
+	// const infos = await sto.parseInformations();
+	// console.log(JSON.stringify(infos, null, 3));
+
 	// const zoro = new Zoro('19130');
 	// console.log(JSON.stringify(await zoro.parseInformations(), null, 3));
 

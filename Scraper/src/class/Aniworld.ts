@@ -1,8 +1,7 @@
 import { AniWorldSeriesInformations, AniWorldAdditionalSeriesInformations, AniWorldEntity } from '@Types/scrapers';
-const axios = require('axios');
 const cheerio = require('cheerio');
-const jsdom = require('jsdom');
-
+import axios from 'axios';
+import jsdom from 'jsdom';
 
 class Aniworld {
 	url: string;
@@ -85,7 +84,7 @@ class Aniworld {
 		const out: AniWorldEntity[] = [];
 		episodes.forEach((ep) => {
 			let langs = [];
-			[...ep.querySelectorAll('.editFunctions img')].forEach((lang) => {
+			[...ep.querySelectorAll<HTMLImageElement>('.editFunctions img')].forEach((lang) => {
 				langs.push(lang.src);
 			});
 
@@ -109,8 +108,8 @@ class Aniworld {
 				})
 				.filter((x) => x != null);
 
-			const mainName = ep.querySelector('.seasonEpisodeTitle strong').textContent;
-			const secondName = ep.querySelector('.seasonEpisodeTitle span').textContent;
+			const mainName = ep.querySelector('.seasonEpisodeTitle strong')?.textContent;
+			const secondName = ep.querySelector('.seasonEpisodeTitle span')?.textContent;
 
 			if (langs.length > 0) out.push({ mainName, secondName, langs });
 		});
