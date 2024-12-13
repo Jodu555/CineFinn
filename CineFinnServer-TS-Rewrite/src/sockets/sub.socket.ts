@@ -5,7 +5,7 @@ import { PassThrough } from 'stream';
 import { randomUUID, createHash } from 'node:crypto';
 import { ExtendedSocket } from '../types/session';
 import { Langs, Serie, SerieObject } from '@Types/classes';
-import { getSeries, setSeries, toAllSockets } from '../utils/utils';
+import { getSeries, getVideoFilePath, setSeries, toAllSockets } from '../utils/utils';
 import { sendSeriesReloadToAll } from './client.socket';
 import { Response } from 'express';
 import { Movie, Episode, Series } from '../classes/series';
@@ -176,14 +176,17 @@ export async function generateMovingItemArray() {
 
 			all.forEach((z) => {
 				if (z.subID != prioSub) {
-					movingArray.push({
-						ID: createHash('md5').update(`${x.ID}${z.subID}${prioSub}${z.filePath}`).digest('base64'),
-						seriesID: x.ID,
-						fromSubID: z.subID,
-						toSubID: prioSub,
-						filePath: z.filePath,
-						entity: z,
-					});
+					for (const lang of z.langs) {
+						const filePath = getVideoFilePath(z, lang);
+						movingArray.push({
+							ID: createHash('md5').update(`${x.ID}${z.subID}${prioSub}${filePath}`).digest('base64'),
+							seriesID: x.ID,
+							fromSubID: z.subID,
+							toSubID: prioSub,
+							filePath: filePath,
+							entity: z,
+						});
+					}
 				}
 			});
 		}
