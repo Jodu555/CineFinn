@@ -1,9 +1,10 @@
 import fs from 'fs';
+import path from 'path';
 import { RemoteSocket, Server, Socket } from 'socket.io';
 import IORedis from 'ioredis';
-import { Series } from '../classes/series';
+import { Episode, Movie, Series } from '../classes/series';
 import { crawlAndIndex, mergeSeriesArrays } from './crawler';
-import { SerieObject } from '@Types/classes';
+import { Langs, SerieObject } from '@Types/classes';
 import { ExtendedRemoteSocket, User } from '../types/session';
 import { AuthenticationHelper } from '@jodu555/express-helpers';
 const outputFileName = process.env.LOCAL_DB_FILE;
@@ -98,6 +99,20 @@ function deepMerge<T>(current: T, updates: Partial<T>): T {
 	return current;
 }
 
+function getVideoFilePath(entity: Movie | Episode, language: Langs) {
+	let filePath = entity.filePath;
+
+	if (entity.langs.length > 1) {
+		if (language) {
+			if (entity.langs.includes(language as Langs)) {
+				const { dir, name, ext } = path.parse(filePath);
+				filePath = path.join(dir, `${name.split('_')[0]}_${language}${ext}`);
+			}
+		}
+	}
+	return filePath;
+}
+
 export {
 	getSeries,
 	setSeries,
@@ -113,4 +128,5 @@ export {
 	toAllSockets,
 	deepMerge,
 	dangerouslySetSeries,
+	getVideoFilePath,
 };

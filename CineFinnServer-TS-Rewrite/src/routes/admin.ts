@@ -3,7 +3,7 @@ import express, { NextFunction, Response } from 'express';
 import { Database } from '@jodu555/mysqlapi';
 import { generateOverview, generateAccounts, generateSubSystems, sendSocketAdminUpdate } from '../utils/admin';
 import { AuthenticatedRequest } from '../types/session';
-import { getSeries } from '../utils/utils';
+import { getSeries, getVideoFilePath } from '../utils/utils';
 import { additionalMovingItems, getSubSocketByID } from '../sockets/sub.socket';
 const database = Database.getDatabase();
 
@@ -56,16 +56,18 @@ router.post('/subsystems/movingItem', async (req: AuthenticatedRequest, res: Res
         for (const series of serieses) {
             for (const episode of series.seasons.flat()) {
                 if (episode.subID == toSubSystemID) continue;
-                additionalMovingItems.push({
-                    ID: createHash('md5').update(`${series.ID}${episode.subID}${toSubSystemID}${episode.filePath}`).digest('base64'),
-                    seriesID: series.ID,
-                    fromSubID: episode.subID,
-                    toSubID: toSubSystemID,
-                    filePath: episode.filePath,
-                    entity: episode,
-                });
+                for (const lang of episode.langs) {
+                    const filePath = getVideoFilePath(episode, lang);
+                    additionalMovingItems.push({
+                        ID: createHash('md5').update(`${series.ID}${episode.subID}${toSubSystemID}${filePath}`).digest('base64'),
+                        seriesID: series.ID,
+                        fromSubID: episode.subID,
+                        toSubID: toSubSystemID,
+                        filePath: filePath,
+                        entity: episode,
+                    });
+                }
             }
-
         }
         sendSocketAdminUpdate();
     }

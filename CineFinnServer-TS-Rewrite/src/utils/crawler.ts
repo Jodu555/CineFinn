@@ -313,6 +313,8 @@ const mergeSeriesArrays = (before: Series[], after: Series[], keepCurrentlyNotPr
 			newPrioSub,
 		);
 
+		if (newPrioSub == newEpisode.subID) return;
+
 		const movingItem = {
 			ID: createHash('md5').update(`${serie.ID}${newEpisode.subID}${newPrioSub}${existEpisode.filePath}`).digest('base64'),
 			seriesID: serie.ID,
