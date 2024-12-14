@@ -196,7 +196,7 @@ function registerCommands() {
 		new Command(
 			['reloadClient', 'rlc'],
 			'reloadClient <all/Socket-ID/User-UUID>',
-			'Reloads the page for all current connected sockets',
+			'Reloads the page for the specified connected sockets',
 			async (command, [...args], scope) => {
 				if (args[1] == 'all') {
 					const num = await sendSiteReload();
@@ -276,7 +276,7 @@ function registerCommands() {
 	);
 
 	commandManager.registerCommand(
-		new Command(['sync'], 'sync set owner <RoomID> <UserUUID>', 'Manages The File Streams', async (command, [...args], scope) => {
+		new Command(['sync'], 'sync set owner <RoomID> <UserUUID>', 'Manages The Sync System', async (command, [...args], scope) => {
 			if (args[1] == 'set' && args[2] == 'owner') {
 				const roomID = args[3];
 				const userUUID = args[4];
