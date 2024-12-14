@@ -312,92 +312,10 @@ function registerCommands() {
 			return '';
 		})
 	);
-
-	commandManager.registerCommand(
-		new Command(['testupload'], 'testupload', 'Just a simple test command', async (command, [...args], scope) => {
-			// console.log(await getAllFilesFromAllSubs());
-			const series = await getSeries();
-
-			// const eps = series.filter((x) => x.seasons.flat().some((e) => e.subID == args[1]));
-
-			// console.log(eps);
-
-			// const socketIDOrUserUUID = args[1];
-			// const sockets = (await getIO().fetchSockets()) as ExtendedRemoteSocket[];
-			// let i = 0;
-			// sockets.forEach((socket) => {
-			// 	if (socket.id == socketIDOrUserUUID || socket.auth.user?.UUID == args[1]) {
-			// 		const sessionID = Math.floor(Math.random() * 10 ** 5).toString();
-			// 		console.log('U just forcibly started for', socket.auth.user.username, 'a rmvc Session with ID', sessionID);
-			// 		socket.auth.RMVCSessionID = sessionID;
-			// 		socket.emit('rmvc-sessionCreated', sessionID);
-			// 	}
-			// });
-
-			//Upload from Server to SubSystem
-			const serie = series.find((x) => x.ID == '5844324f');
-
-			if (serie == undefined) return;
-
-			const episode = serie.seasons.at(0).at(0);
-
-			if (episode == undefined) return;
-
-			const parsed = path.parse(episode.filePath);
-
-			const remotePath = path.join(serie.title, `Season-${episode.season}`, `${parsed.name}${parsed.ext}`);
-			console.log(episode, remotePath);
-
-			const result = await uploadFileToSubSystem(episode.filePath, 'local-kdrama', remotePath);
-
-			console.log(result);
-
-			episode.subID = 'local-kdrama';
-			await sendSeriesReloadToAll();
-
-			return 'Exectued test command successfully';
-		})
-	);
-	commandManager.registerCommand(
-		new Command(['testdownload'], 'testdownload', 'Just a simple test command', async (command, [...args], scope) => {
-			// console.log(await getAllFilesFromAllSubs());
-			const series = await getSeries();
-
-			//Download from SubSystem to Server
-			const serie = series.find((x) => x.ID == 'e905317f');
-
-			if (serie == undefined) return;
-
-			const episode = serie.seasons.at(0).at(0);
-
-			if (episode == undefined) return;
-
-			const parsed = path.parse(episode.filePath);
-
-			const remotePath = path.join(process.env.VIDEO_PATH, serie.categorie, serie.title, `Season-${episode.season}`, `${parsed.name}${parsed.ext}`);
-			console.log(episode, remotePath);
-
-			const result = await downloadFileFromSubSystem(episode.filePath, 'local-kdrama', remotePath, (percent) => {
-				toAllSockets(
-					(socket) => {
-						socket.emit('admin-movingItem-update', { ID: 'XSHxLmvLDPl05nJpVUJbWw==', progress: percent });
-					},
-					(socket) => socket.auth.type == 'client' && socket.auth.user.role >= 2
-				);
-			});
-
-			console.log(result);
-
-			episode.subID = 'main';
-			await sendSeriesReloadToAll();
-
-			return 'Exectued test command successfully';
-		})
-	);
 	commandManager.registerCommand(
 		new Command(['test'], 'test', 'Just a simple test command', async (command, [...args], scope) => {
 			// console.log(await getAllFilesFromAllSubs());
-			await processMovingItem(args[1]);
+			// await processMovingItem(args[1]);
 
 			return 'Exectued test command successfully';
 		})

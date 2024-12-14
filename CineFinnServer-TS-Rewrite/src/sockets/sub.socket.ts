@@ -120,6 +120,52 @@ export interface MovingItem {
 	};
 }
 
+class MovingItemQueue {
+	private items: string[] = [];
+	private timeout: NodeJS.Timeout;
+
+	private onFinishedCallback: () => void;
+
+	public onFinished(callback: () => void) {
+		this.onFinishedCallback = callback;
+	}
+
+	public enqueue(item: string) {
+		console.log('MovingItemQueue: Enqueue', item);
+		this.items.push(item);
+		this.setupTimer();
+	}
+
+	private setupTimer() {
+		if (this.timeout != null) {
+			clearTimeout(this.timeout);
+		}
+		this.timeout = setTimeout(() => {
+			this.timeout = null;
+			this.dequeue();
+		}, 10000);
+	}
+
+	public async dequeue() {
+		const item = this.items.shift();
+		console.log('MovingItemQueue: Dequeue', item);
+		if (this.items.length == 0) {
+			if (this.onFinishedCallback != null) {
+				this.onFinishedCallback();
+				clearTimeout(this.timeout);
+			}
+			return null;
+		}
+		await processMovingItem(item);
+		this.setupTimer();
+		return item;
+	}
+
+	public get length() {
+		return this.items.length;
+	}
+}
+
 export let additionalMovingItems: MovingItem[] = [];
 
 export function getPrioSubIDForSerie(serie: Series | Serie | SerieObject): string | undefined {
@@ -241,6 +287,19 @@ export async function getAllFilesFromAllSubs() {
 	return allFiles;
 }
 
+export const movingItemQueue = new MovingItemQueue();
+
+movingItemQueue.onFinished(async () => {
+	await sendSocketAdminUpdate();
+	setSeries(await crawlAndIndex());
+	await sendSeriesReloadToAll();
+	await sendSocketAdminUpdate();
+});
+
+export async function prepareProcessMovingItem(ID: string) {
+	movingItemQueue.enqueue(ID);
+}
+
 export async function processMovingItem(ID: string) {
 	const movingItems = await generateMovingItemArray();
 	const series = await getSeries();
@@ -318,8 +377,6 @@ export async function processMovingItem(ID: string) {
 				additionalMovingItems = additionalMovingItems.splice(additionalIDX, 1);
 				sendSocketAdminUpdate();
 			}
-			setSeries(await crawlAndIndex());
-			await sendSeriesReloadToAll();
 		}, 5000);
 	} catch (error) {
 		console.log(movingItem, error);

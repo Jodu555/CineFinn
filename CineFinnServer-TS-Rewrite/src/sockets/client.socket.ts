@@ -10,7 +10,7 @@ import { isScraperSocketConnected } from './scraper.socket';
 import { LOOKUP, callpointToEvent } from '../routes/managment';
 import { backgroundScrapeTodo, checkIfTodoNeedsScrape } from '../utils/todo';
 import { sendSocketAdminUpdate } from '../utils/admin';
-import { processMovingItem } from './sub.socket';
+import { prepareProcessMovingItem, processMovingItem } from './sub.socket';
 import { DatabaseParsedTodoItem, DatabaseTodoItem } from '@Types/database';
 
 const database = Database.getDatabase();
@@ -154,7 +154,7 @@ const initialize = (socket: ExtendedSocket) => {
 		if (!isPermitted(auth.user, Role.Mod)) {
 			return;
 		}
-		processMovingItem(ID);
+		prepareProcessMovingItem(ID);
 	});
 
 	// socket.emit('reloadSeries', cleanupSeriesBeforeFrontResponse(getSeries()));
