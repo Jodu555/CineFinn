@@ -1,7 +1,7 @@
 <template>
 	<div class="video-actor-container">
 		<div v-for="group in Object.keys(characters)" :key="group">
-			<h2>{{ group[-1] }}</h2>
+			<h2>{{ group }}</h2>
 			<div v-for="char in characters[group]" :key="char.name" class="actress-container">
 				<div class="row">
 					<img class="actress-image col" :src="char.imageURL" alt="" />
@@ -9,11 +9,11 @@
 						<p style="margin-bottom: 0.1rem">{{ char.name }}</p>
 						<p class="actress-speaker">
 							<img class="actress-speaker-flag" src="/flag-langs/gersub.svg" alt="Deutsche Sprache, Flagge" title="Deutsch/German" />
-							Saori HAYAMI
+							<span class="ms-2">{{ char.informations.find((x) => x.lang == 'ja')?.data.Sprecher }}</span>
 						</p>
 						<p class="actress-speaker">
 							<img class="actress-speaker-flag" src="/flag-langs/gerdub.svg" alt="Deutsche Sprache, Flagge" title="Deutsch/German" />
-							Mia Diekow
+							<span class="ms-2">{{ char.informations.find((x) => x.lang == 'de')?.data.Sprecher }}</span>
 						</p>
 					</div>
 				</div>
@@ -28,6 +28,24 @@ import axios from 'axios';
 interface Character {
 	name: string;
 	imageURL: string;
+	cat: string;
+	informations: CharacterInformations[];
+}
+
+interface CharacterInformations {
+	lang: 'de' | 'en' | 'ja';
+	data: {
+		Alter: string;
+		Augenfarbe: string;
+		Geburtstag: string;
+		Geschlecht: string;
+		Gewicht: string;
+		Größe: string;
+		Haarfarbe: string;
+		Nationalität: string;
+		Sprecher: string;
+		Tätigkeiten: string;
+	};
 }
 
 export default {
@@ -38,14 +56,16 @@ export default {
 		};
 	},
 	async created() {
-		const response = await axios.get<Record<string, Character[]>>('http://localhost:4896/chars');
+		const response = await axios.get<Character[]>('http://localhost:4896/chars');
 		if (response.status == 200) {
-			this.characters = response.data;
-			// Object.keys(json).forEach((key) => {
-			// 	const data = json[key];
-			// 	data[-1] = key;
-			// 	this.characters.push(data);
-			// });
+			// this.characters = response.data;
+			for (const char of response.data) {
+				if (this.characters[char.cat] != undefined) {
+					this.characters[char.cat].push(char);
+				} else {
+					this.characters[char.cat] = [char];
+				}
+			}
 			console.log(this.characters);
 		}
 	},
