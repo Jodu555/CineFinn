@@ -148,16 +148,23 @@ class MovingItemQueue {
 
 	public async dequeue() {
 		const item = this.items.shift();
-		console.log('MovingItemQueue: Dequeue', item);
-		if (this.items.length == 0) {
+		if (item == undefined) {
 			if (this.onFinishedCallback != null) {
 				this.onFinishedCallback();
 				clearTimeout(this.timeout);
 			}
 			return null;
 		}
+		console.log('MovingItemQueue: Dequeue', item);
 		await processMovingItem(item);
-		this.setupTimer();
+		if (this.items.length == 0) {
+			if (this.onFinishedCallback != null) {
+				this.onFinishedCallback();
+				clearTimeout(this.timeout);
+			}
+		} else {
+			this.setupTimer();
+		}
 		return item;
 	}
 
@@ -374,7 +381,7 @@ export async function processMovingItem(ID: string) {
 		setTimeout(async () => {
 			const additionalIDX = additionalMovingItems.findIndex(x => x.ID == ID);
 			if (additionalIDX != -1) {
-				additionalMovingItems = additionalMovingItems.splice(additionalIDX, 1);
+				additionalMovingItems.splice(additionalIDX, 1);
 				sendSocketAdminUpdate();
 			}
 		}, 5000);

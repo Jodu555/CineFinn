@@ -391,8 +391,17 @@ async function removeManualMovingItems() {
 }
 
 async function processAllMovingItems() {
+	useSwal({
+		toast: true,
+		position: 'top-end',
+		timer: 1500,
+		title: 'Success',
+		text: 'Queued Multiple Items for Moving ' + adminStore.subsystems.movingItems.length,
+		icon: 'success',
+		confirmButtonText: 'Ok',
+	});
 	for (const item of adminStore.subsystems.movingItems) {
-		moveItem(item.ID);
+		deepMoveItem(item.ID);
 	}
 }
 
@@ -423,6 +432,19 @@ async function selectSeries(seriesID: string) {
 }
 
 function moveItem(ID: string) {
+	deepMoveItem(ID);
+	useSwal({
+		toast: true,
+		position: 'top-end',
+		timer: 1500,
+		title: 'Success',
+		text: 'Queued Item for Moving ' + ID,
+		icon: 'success',
+		confirmButtonText: 'Ok',
+	});
+}
+
+function deepMoveItem(ID: string) {
 	useSocket().emit('move-moving-item', { ID });
 }
 
