@@ -11,6 +11,7 @@
 				{{ isPaused ? 'Resume' : 'Pause' }}
 			</button>
 			<button type="button" @click="retry('failed')" class="btn btn-outline-warning">Retry Failed</button>
+			<button type="button" @click="clean('completed')" class="btn btn-outline-secondary">Clean Completed</button>
 		</div>
 
 		<ul class="mt-3 nav justify-content-evenly nav-underline">
@@ -161,7 +162,9 @@ onMounted(async () => {
 	}, 1500);
 });
 
-async function retry(queueType: string = 'failed') {
+type QueueType = 'completed' | 'failed';
+
+async function retry(queueType: QueueType = 'failed') {
 	const response = await useAxios().put(`/bullboard/queues/previewImageQueue/retry/${queueType}`, {});
 	if (response.status !== 200) return;
 }
@@ -171,6 +174,11 @@ async function pause() {
 }
 async function resume() {
 	const response = await useAxios().put(`/bullboard/queues/previewImageQueue/resume`, {});
+	if (response.status !== 200) return;
+}
+
+async function clean(queueType: QueueType) {
+	const response = await useAxios().put(`/bullboard/queues/previewImageQueue/clean/${queueType}`, {});
 	if (response.status !== 200) return;
 }
 
