@@ -297,6 +297,7 @@ async function compareForNewReleasesSTO(
 	ignoranceList: IgnoranceItem[],
 	inherit: boolean = true
 ): Promise<ExtendedEpisodeDownload[]> {
+	const debug = false;
 	const limit = promiseLimit(10);
 	const data = series.filter((x) => x.references?.sto && !ignoranceList.find((v) => v.ID == x.ID && !v.lang));
 
@@ -306,7 +307,9 @@ async function compareForNewReleasesSTO(
 				return new Promise(async (res, _) => {
 					let world: Aniworld;
 					if (typeof serie.references.sto == 'string') world = new Aniworld(serie.references.sto);
+					debug && console.log('Started Parsing', serie.references.sto);
 					const out = await world.parseInformations();
+					debug && console.log('Finished Parsing', serie.references.sto);
 					res({
 						ID: serie.ID,
 						title: serie.title,
@@ -400,6 +403,8 @@ async function compareForNewReleasesSTO(
 		const ignoranceObject = ignoranceList.find((x) => x.ID == aniworldSeries.ID);
 		console.log('-----=====', localSeries.title, '=====-----   START');
 		for (const _aniworldSeasonIDX in aniworldSeries.seasons) {
+			debug && console.log('Checking Season', localSeries.title, _aniworldSeasonIDX);
+
 			const aniworldSeasonIDX = Number(_aniworldSeasonIDX);
 
 			const aniworldSeason = aniworldSeries.seasons[aniworldSeasonIDX];
@@ -423,6 +428,7 @@ async function compareForNewReleasesSTO(
 				continue;
 			}
 			for (const _aniworldEpisodeIDX in aniworldSeason) {
+				debug && console.log('Checking Episode', localSeries.title, _aniworldSeasonIDX, _aniworldEpisodeIDX);
 				const aniworldEpisodeIDX = Number(_aniworldEpisodeIDX);
 				const aniworldEpisode = aniworldSeason[aniworldEpisodeIDX];
 				const localEpisode = localSeason.find((x) => x.episode == aniworldEpisodeIDX + 1);
@@ -448,8 +454,10 @@ async function compareForNewReleasesSTO(
 			for (const _aniworldMovieIDX in aniworldSeries.movies) {
 				const aniworldMovieIDX = Number(_aniworldMovieIDX);
 				const aniworldMovie = aniworldSeries.movies[aniworldMovieIDX];
+				debug && console.log('Checking Movie', localSeries.title, _aniworldMovieIDX, aniworldMovie);
 
-				aniworldMovie.secondName = sanitizeFileName(aniworldMovie.secondName);
+				const movieName = aniworldMovie.secondName || aniworldMovie.mainName;
+				aniworldMovie.secondName = sanitizeFileName(movieName);
 
 				const localMovie = localSeries.movies.find((x) => {
 					// console.log(aniworldMovie.secondName, x.primaryName, similar(aniworldMovie.secondName, x.primaryName));
