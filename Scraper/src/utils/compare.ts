@@ -91,6 +91,7 @@ async function compareForNewReleasesAniWorld(
 	ignoranceList: IgnoranceItem[],
 	inherit: boolean = true
 ): Promise<ExtendedEpisodeDownload[]> {
+	const debug = true;
 	const limit = promiseLimit(10);
 	const data = series.filter((x) => x.references?.aniworld && !ignoranceList.find((v) => v.ID == x.ID && !v.lang));
 
@@ -200,6 +201,7 @@ async function compareForNewReleasesAniWorld(
 		const ignoranceObject = ignoranceList.find((x) => x.ID == aniworldSeries.ID) || ({} as IgnoranceItem);
 		console.log('-----=====', localSeries.title, '=====-----   START');
 		for (const _aniworldSeasonIDX in aniworldSeries.seasons) {
+			debug && console.log('Checking Season', localSeries.title, _aniworldSeasonIDX);
 			const aniworldSeasonIDX = Number(_aniworldSeasonIDX);
 
 			const aniworldSeason = aniworldSeries.seasons[aniworldSeasonIDX];
@@ -223,6 +225,7 @@ async function compareForNewReleasesAniWorld(
 				continue;
 			}
 			for (const _aniworldEpisodeIDX in aniworldSeason) {
+				debug && console.log('Checking Episode', localSeries.title, _aniworldSeasonIDX, _aniworldEpisodeIDX);
 				const aniworldEpisodeIDX = Number(_aniworldEpisodeIDX);
 				const aniworldEpisode = aniworldSeason[aniworldEpisodeIDX];
 				const localEpisode = localSeason.find((x) => x.episode == aniworldEpisodeIDX + 1);
@@ -248,8 +251,10 @@ async function compareForNewReleasesAniWorld(
 			for (const _aniworldMovieIDX in aniworldSeries.movies) {
 				const aniworldMovieIDX = Number(_aniworldMovieIDX);
 				const aniworldMovie = aniworldSeries.movies[aniworldMovieIDX];
+				debug && console.log('Checking Movie', localSeries.title, _aniworldMovieIDX, aniworldMovie);
 
-				aniworldMovie.secondName = sanitizeFileName(aniworldMovie.secondName);
+				const movieName = aniworldMovie.secondName || aniworldMovie.mainName;
+				aniworldMovie.secondName = sanitizeFileName(movieName);
 
 				const localMovie = localSeries.movies.find((x) => {
 					// console.log(aniworldMovie.secondName, x.primaryName, similar(aniworldMovie.secondName, x.primaryName));

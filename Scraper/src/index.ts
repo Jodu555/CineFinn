@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import * as crypto from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -12,6 +13,7 @@ const { similar } = require('./utils/utils');
 import MyAsianTV from './class/MyAsianTv';
 import { Serie, IgnoranceItem, ExtendedEpisodeDownload } from '@Types/classes';
 import { AniWorldSeriesInformations, MyAsianSeries, ZoroReturn } from '@Types/scrapers';
+import { downloadImage } from './utils/utils';
 
 const socket = io(process.env.CORE_URL, { auth: { type: 'scraper', token: process.env.AUTH_TOKEN } });
 
@@ -100,7 +102,7 @@ socket.on('connect', async () => {
 
 	// console.log(infos.seasons[0][16]);
 
-	// await checkForUpdates();
+	await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
@@ -108,7 +110,55 @@ socket.on('connect', async () => {
 	// await addReference();
 
 	// await checkAllAnimes();
+	// await downloadImages();
 });
+
+async function downloadImages() {
+	const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
+	console.log(res.data.length);
+	const doable = res.data.filter((x) => x.references.aniworld || x.references.sto);
+
+	console.log(doable.length);
+
+	for (const serie of doable) {
+		const imagePath = path.join('D:', 'Allgemein', 'Ich', 'Temp', 'images', serie.ID);
+		if (fs.existsSync(path.join(imagePath, 'cover.jpg'))) {
+			console.log('Already exists: ', serie.title);
+			continue;
+		}
+		console.log('Parsing: ', serie.title, serie.references.aniworld);
+
+		const aniworld = new Aniworld(serie.references.aniworld as string || serie.references.sto as string);
+		const informations = await aniworld.parseInformations();
+		if (!informations) {
+			console.log('no informations from ', serie.references.aniworld);
+			continue;
+		}
+
+		fs.mkdirSync(imagePath, { recursive: true });
+		await downloadImage(informations.informations.image as string, path.join(imagePath, 'cover.jpg'));
+		console.log('Downloaded ', serie.title, 'Cover');
+		console.log(imagePath);
+	}
+
+	console.log('Done');
+
+
+
+	// const imageResponse = await useAxios().post(`/index/${serieID}/cover`, { imageUrl });
+
+	// 			if (imageResponse.status !== 200) {
+	// 				instance.$swal({
+	// 					toast: true,
+	// 					position: 'top-end',
+	// 					showConfirmButton: false,
+	// 					timer: 3000,
+	// 					icon: 'error',
+	// 					title: `${imageResponse.data.error.message || 'An Error occurd'}`,
+	// 					timerProgressBar: true,
+	// 				});
+	// 			}
+}
 
 async function checkAllAnimes() {
 	const data = JSON.parse(fs.readFileSync('allaniworldanimes.json', 'utf8'));
@@ -182,6 +232,14 @@ async function checkForUpdates() {
 	// );
 	// console.log(res.data);
 
+	res.data.map(x => {
+		if (x.infos.disabled) {
+			x.seasons = [];
+			x.movies = [];
+		}
+		return x;
+	});
+
 	//This list should say, that these animes should the new episodes no be included unless they are german dubbed
 	const ignoranceList: IgnoranceItem[] = [
 		{
@@ -233,12 +291,13 @@ async function checkForUpdates() {
 	];
 
 	console.log(condensedArray);
+	console.log(condensedArray.length);
 	// return;
 
-	await kickOffAniDl(condensedArray);
+	// await kickOffAniDl(condensedArray);
 
-	await recrawlArchive();
-	await generateImages();
+	// await recrawlArchive();
+	// await generateImages();
 }
 
 async function kickOffAniDl(list: ExtendedEpisodeDownload[]) {
