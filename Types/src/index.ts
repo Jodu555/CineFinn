@@ -19,3 +19,17 @@ export interface SubSystem {
     affectedSeriesIDs: string[];
     type: 'sub';
 }
+
+export interface MovingItem {
+    ID: string;
+    seriesID: string;
+    fromSubID: string;
+    toSubID: string;
+    filePath: string;
+    meta: {
+        progress: number;
+        isMoving: boolean;
+        result: string;
+        isAdditional: boolean;
+    };
+}

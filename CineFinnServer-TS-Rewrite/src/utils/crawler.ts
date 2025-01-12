@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { listFiles } from './fileutils';
 import { Episode, Movie, Series, filenameParser } from '../classes/series';
 import { SerieEpisodeObject, SerieObject } from '@Types/classes';
-import { MovingItem, SubFile, additionalMovingItems, getAllFilesFromAllSubs, getPrioSubIDForSerie, processMovingItem } from '../sockets/sub.socket';
+import { ServerMovingItem, SubFile, additionalMovingItems, getAllFilesFromAllSubs, getPrioSubIDForSerie, processMovingItem } from '../sockets/sub.socket';
 
 const generateID = () => {
 	return uuidv4().split('-')[0];
@@ -322,7 +322,13 @@ const mergeSeriesArrays = (before: Series[], after: Series[], keepCurrentlyNotPr
 			toSubID: newPrioSub,
 			filePath: newEpisode.filePath,
 			entity: newEpisode,
-		} satisfies MovingItem;
+			meta: {
+				isMoving: false,
+				progress: 0,
+				result: '',
+				isAdditional: false,
+			}
+		} satisfies ServerMovingItem;
 
 		additionalMovingItems.push(movingItem);
 

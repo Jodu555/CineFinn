@@ -65,6 +65,12 @@ router.post('/subsystems/movingItem', async (req: AuthenticatedRequest, res: Res
                         toSubID: toSubSystemID,
                         filePath: filePath,
                         entity: episode,
+                        meta: {
+                            isMoving: false,
+                            progress: 0,
+                            result: '',
+                            isAdditional: true
+                        }
                     });
                 }
             }

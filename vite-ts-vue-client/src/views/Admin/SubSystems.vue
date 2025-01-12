@@ -265,13 +265,16 @@
 				<button type="button" class="btn btn-outline-warning me-4" @click="processAllMovingItems()">
 					Move All ({{ adminStore.subsystems.movingItems.length }})
 				</button>
+				<button type="button" class="btn btn-outline-warning me-4" @click="processAllAdditionalMovingItems()">
+					Move Additional ({{ adminStore.subsystems.movingItems.filter((x) => x.meta.isAdditional).length }})
+				</button>
 				<button type="button" class="btn btn-outline-danger" @click="removeManualMovingItems()">Remove Manual Items</button>
 			</div>
 
 			<hr />
 			<div v-auto-animate v-for="item in adminStore.subsystems.movingItems" :key="item.ID" class="row">
 				<div class="col-auto ms-5 me-auto mb-3">
-					<h4 class="mb-2">#{{ item.seriesID }} -- {{ item.ID }}</h4>
+					<h4 class="mb-2">#{{ item.seriesID }} -- {{ item.ID }} - {{ item.meta }}</h4>
 					<div class="d-flex gap-2">
 						<h5
 							:class="{
@@ -402,6 +405,22 @@ async function processAllMovingItems() {
 	});
 	for (const item of adminStore.subsystems.movingItems) {
 		deepMoveItem(item.ID);
+	}
+}
+async function processAllAdditionalMovingItems() {
+	useSwal({
+		toast: true,
+		position: 'top-end',
+		timer: 1500,
+		title: 'Success',
+		text: 'Queued Multiple Items for Moving ' + adminStore.subsystems.movingItems.filter((x) => x.meta.isAdditional).length,
+		icon: 'success',
+		confirmButtonText: 'Ok',
+	});
+	for (const item of adminStore.subsystems.movingItems) {
+		if (item.meta.isAdditional) {
+			deepMoveItem(item.ID);
+		}
 	}
 }
 

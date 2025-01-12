@@ -1,5 +1,5 @@
 import { useAxios } from '@/utils';
-import type { SubSystem } from '@Types/index';
+import type { MovingItem, SubSystem } from '@Types/index';
 import { defineStore } from 'pinia';
 
 interface DBAccount {
@@ -25,19 +25,6 @@ interface Overview {
 	sockets: number;
 	streams: number;
 	scraper: boolean;
-}
-
-export interface MovingItem {
-	ID: string;
-	seriesID: string;
-	fromSubID: string;
-	toSubID: string;
-	filePath: string;
-	meta: {
-		progress: number;
-		isMoving: boolean;
-		result: string;
-	};
 }
 
 interface SubSystemsAPIRes {
@@ -74,14 +61,9 @@ export const useAdminStore = defineStore('admin', {
 			const response = await useAxios().get<SubSystemsAPIRes>('/admin/subsystems');
 
 			if (response.status == 200) {
-				response.data.movingItems = response.data.movingItems.map((x) => {
-					x.meta = {
-						isMoving: false,
-						progress: 0,
-						result: '',
-					};
-					return x;
-				});
+				// response.data.movingItems = response.data.movingItems.map((x) => {
+				// 	return x;
+				// });
 				this.subsystems = response?.data;
 			}
 		},

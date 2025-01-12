@@ -4,7 +4,9 @@
 			<div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark">
 				<div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white">
 					<a href="/" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-						<router-link class="nav-link px-0 align-middle" to="/admin/"><span class="fs-5 d-none d-sm-inline">Admin Area</span></router-link>
+						<router-link class="nav-link px-0 align-middle" to="/admin/"
+							><span class="fs-5 d-none d-sm-inline">Admin Area</span></router-link
+						>
 					</a>
 					<ul class="nav flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
 						<li class="nav-item">
@@ -63,14 +65,14 @@ onMounted(async () => {
 			adminStore.accounts = data;
 		}
 		if (context == 'subsystem') {
-			data.movingItems = data.movingItems.map((x: any) => {
-				x.meta = {
-					isMoving: false,
-					progress: 0,
-					result: '',
-				};
-				return x;
-			});
+			// data.movingItems = data.movingItems.map((x: any) => {
+			// 	x.meta = {
+			// 		isMoving: false,
+			// 		progress: 0,
+			// 		result: '',
+			// 	};
+			// 	return x;
+			// });
 			adminStore.subsystems = data;
 		}
 	});
@@ -84,6 +86,7 @@ onMounted(async () => {
 					progress: progress,
 					isMoving: true,
 					result: message || '',
+					isAdditional: false,
 				};
 			} else {
 				console.log('Update!!!!');

@@ -11,6 +11,7 @@ import { Response } from 'express';
 import { Movie, Episode, Series } from '../classes/series';
 import { crawlAndIndex } from '../utils/crawler';
 import { sendSocketAdminUpdate } from '../utils/admin';
+import { MovingItem } from '@Types/index';
 
 export const subSocketMap = new Map<string, ExtendedSocket>();
 // export const ongoingRequests = new Map<string, { res: Response }>();
@@ -106,19 +107,9 @@ export async function checkifSubExists(subID: string) {
 	return series.length > 0;
 }
 
-export interface MovingItem {
-	ID: string;
-	seriesID: string;
-	fromSubID: string;
-	toSubID: string;
-	filePath: string;
+export type ServerMovingItem = MovingItem & {
 	entity: Movie | Episode;
-	meta?: {
-		progress: number;
-		isMoving: boolean;
-		result: string;
-	};
-}
+};
 
 class MovingItemQueue {
 	private items: string[] = [];
@@ -173,7 +164,7 @@ class MovingItemQueue {
 	}
 }
 
-export let additionalMovingItems: MovingItem[] = [];
+export let additionalMovingItems: ServerMovingItem[] = [];
 
 export function getPrioSubIDForSerie(serie: Series | Serie | SerieObject): string | undefined {
 	const obj: Record<string, number> = {};
@@ -201,7 +192,7 @@ export function getPrioSubIDForSerie(serie: Series | Serie | SerieObject): strin
 }
 
 export async function generateMovingItemArray() {
-	const movingArray: MovingItem[] = [];
+	const movingArray: ServerMovingItem[] = [];
 
 	const series = await getSeries();
 
@@ -238,6 +229,12 @@ export async function generateMovingItemArray() {
 							toSubID: prioSub,
 							filePath: filePath,
 							entity: z,
+							meta: {
+								isMoving: false,
+								progress: 0,
+								result: '',
+								isAdditional: false,
+							}
 						});
 					}
 				}
