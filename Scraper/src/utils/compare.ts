@@ -91,7 +91,7 @@ async function compareForNewReleasesAniWorld(
 	ignoranceList: IgnoranceItem[],
 	inherit: boolean = true
 ): Promise<ExtendedEpisodeDownload[]> {
-	const debug = true;
+	const debug = false;
 	const limit = promiseLimit(10);
 	const data = series.filter((x) => x.references?.aniworld && !ignoranceList.find((v) => v.ID == x.ID && !v.lang));
 
