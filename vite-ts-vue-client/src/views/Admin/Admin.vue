@@ -65,14 +65,16 @@ onMounted(async () => {
 			adminStore.accounts = data;
 		}
 		if (context == 'subsystem') {
-			// data.movingItems = data.movingItems.map((x: any) => {
-			// 	x.meta = {
-			// 		isMoving: false,
-			// 		progress: 0,
-			// 		result: '',
-			// 	};
-			// 	return x;
-			// });
+			data.movingItems = data.movingItems.map((x: any) => {
+				if (!x.meta)
+					x.meta = {
+						isMoving: false,
+						progress: 0,
+						result: '',
+						isAdditional: false,
+					};
+				return x;
+			});
 			adminStore.subsystems = data;
 		}
 	});

@@ -275,7 +275,7 @@
 			<div v-auto-animate v-for="item in adminStore.subsystems.movingItems" :key="item.ID" class="row">
 				<div class="col-auto ms-5 me-auto mb-3">
 					<h4 class="mb-2">
-						#{{ item.seriesID }} -- {{ item.ID }} - &nbsp;&nbsp;&nbsp;{{ item.meta.isAdditional ? 'Additional' : 'System' }}
+						#{{ item.seriesID }} -- {{ item.ID }} &nbsp;&nbsp;&nbsp;- {{ item.meta.isAdditional ? 'Additional' : 'System' }}
 					</h4>
 					<div class="d-flex gap-2">
 						<h5
