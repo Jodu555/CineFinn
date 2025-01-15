@@ -102,7 +102,7 @@ socket.on('connect', async () => {
 
 	// console.log(infos.seasons[0][16]);
 
-	await checkForUpdates();
+	// await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await manuallyPrintTheInfosOut();
@@ -121,7 +121,9 @@ async function downloadImages() {
 	console.log(doable.length);
 
 	for (const serie of doable) {
-		const imagePath = path.join('D:', 'Allgemein', 'Ich', 'Temp', 'images', serie.ID);
+		// const imagePath = path.join('D:', 'Allgemein', 'Ich', 'Temp', 'images', serie.ID);
+		// const imagePath = path.join('S:', 'CineFinn-data', 'previewImages', serie.ID);
+		const imagePath = path.join('S:', 'slash', 'media', 'ms2', 'CineFinn-data', 'previewImages', serie.ID);
 		if (fs.existsSync(path.join(imagePath, 'cover.jpg'))) {
 			console.log('Already exists: ', serie.title);
 			continue;
