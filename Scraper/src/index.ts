@@ -296,10 +296,10 @@ async function checkForUpdates() {
 	console.log(condensedArray.length);
 	// return;
 
-	// await kickOffAniDl(condensedArray);
+	await kickOffAniDl(condensedArray);
 
-	// await recrawlArchive();
-	// await generateImages();
+	await recrawlArchive();
+	await generateImages();
 }
 
 async function kickOffAniDl(list: ExtendedEpisodeDownload[]) {
