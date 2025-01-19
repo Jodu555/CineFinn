@@ -4,6 +4,9 @@ import child_process from 'child_process';
 import IORedis from 'ioredis';
 import { Job, Queue, Worker, tryCatch } from 'bullmq';
 import { JobMeta } from '@Types/index';
+import { CommandManager, Command } from '@jodu555/commandmanager';
+
+const commandManager = CommandManager.createCommandManager(process.stdin, process.stdout);
 
 export const wait = (timeout: number) => {
 	return new Promise((resolve) => {
@@ -199,6 +202,76 @@ async function main() {
 		},
 		{ connection, concurrency: config.concurrentGenerators, removeOnComplete: { count: 1000 }, removeOnFail: { count: 5000 } }
 	);
+
+	commandManager.registerCommand(
+		new Command(
+			['info', 'i'], // The Command
+			'info', // A Usage Info with arguments
+			'Prints current information', // A Description what the command does
+			(command, [...args], scope) => {
+				const count = 20;
+				return [
+					'-'.repeat(count) + ' Information ' + '-'.repeat(count),
+					`Version: ${config.version}`,
+					`Generator Name: ${config.generatorName}`,
+					`Redis Connection: ${config.redisConnection.host}:${config.redisConnection.port}`,
+					`Concurrent Generators: ${worker.opts.concurrency}`,
+					`Use Read Rate: ${config.useReadRate}`,
+					// `Path Remapper: ${JSON.stringify(config.pathRemapper)}`,
+					`Is Paused: ${worker.isPaused()}`,
+					'-'.repeat(count) + ' Information ' + '-'.repeat(count),
+				];
+			}
+		)
+	);
+
+	commandManager.registerCommand(
+		new Command(
+			'pause', // The Command
+			'pause', // A Usage Info with arguments
+			'Pauses the generator', // A Description what the command does
+			(command, [...args], scope) => {
+				worker.pause();
+				return ['Paused the Worker successfully!'];
+			}
+		)
+	);
+
+	commandManager.registerCommand(
+		new Command(
+			'resume', // The Command
+			'resume', // A Usage Info with arguments
+			'Resumes the generator', // A Description what the command does
+			(command, [...args], scope) => {
+				worker.resume();
+				return ['Resumed the Worker successfully!'];
+			}
+		)
+	);
+
+	commandManager.registerCommand(
+		new Command(
+			'set', // The Command
+			'set concurrency <number>', // A Usage Info with arguments
+			'Sets the concurrency of the generator', // A Description what the command does
+			(command, [...args], scope) => {
+
+				if (args[1] == 'concurrency') {
+					if (args.length < 2) {
+						return ['Please provide a number as second argument!'];
+					}
+					const concurrency = parseInt(args[2]);
+					if (isNaN(concurrency)) {
+						return ['Please provide a number as second argument!'];
+					}
+					worker.concurrency = concurrency;
+					return ['Set the Worker concurrency to ' + concurrency];
+				}
+				return ['Please provide a valid argument!'];
+			}
+		)
+	);
+
 }
 
 const DEBUG = false;
