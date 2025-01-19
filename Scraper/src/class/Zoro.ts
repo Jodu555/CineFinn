@@ -89,10 +89,12 @@ class Zoro {
 
 			const tickContainer = document.querySelector('.tick');
 
-			const subCount = tickContainer.querySelector('.tick-item.tick-sub')?.textContent.trim();
-			const dubCount = tickContainer.querySelector('.tick-item.tick-dub')?.textContent.trim();
-			const episodeCount = tickContainer.querySelector('.tick-item.tick-eps')?.textContent.trim();
-
+			const subCount = parseInt(tickContainer.querySelector('.tick-item.tick-sub')?.textContent.trim());
+			let dubCount = parseInt(tickContainer.querySelector('.tick-item.tick-dub')?.textContent.trim());
+			const episodeCount = parseInt(tickContainer.querySelector('.tick-item.tick-eps')?.textContent.trim());
+			if (isNaN(dubCount)) {
+				dubCount = 0;
+			}
 			console.log('Information:', {
 				subCount,
 				dubCount,
@@ -124,12 +126,21 @@ class Zoro {
 				console.log('Parsing: ' + si.title);
 				let inst = si.ID == this.ID ? this : new Zoro(si.ID);
 				const interEps = await inst.getEpisodeList();
-				if (dubCount == undefined || (subCount == dubCount && subCount === episodeCount)) {
+				if ((subCount == dubCount && subCount === episodeCount)) {
 					seasons.push(
 						interEps.episodes.map((x) => {
 							return {
 								...x,
 								langs: ['sub', 'dub'],
+							} as ExtendedZoroEpisode;
+						})
+					);
+				} else if (dubCount === 0 && subCount === episodeCount) {
+					seasons.push(
+						interEps.episodes.map((x) => {
+							return {
+								...x,
+								langs: ['sub'],
 							} as ExtendedZoroEpisode;
 						})
 					);
@@ -141,9 +152,9 @@ class Zoro {
 			return {
 				title,
 				image: imageSrc,
-				subCount: parseInt(subCount),
-				dubCount: parseInt(dubCount),
-				episodeCount: parseInt(episodeCount),
+				subCount: subCount,
+				dubCount: dubCount,
+				episodeCount: episodeCount,
 				seasons,
 			};
 		} catch (error) {
