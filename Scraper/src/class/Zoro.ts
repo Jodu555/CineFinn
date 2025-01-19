@@ -89,11 +89,14 @@ class Zoro {
 
 			const tickContainer = document.querySelector('.tick');
 
-			const subCount = parseInt(tickContainer.querySelector('.tick-item.tick-sub')?.textContent.trim());
+			let subCount = parseInt(tickContainer.querySelector('.tick-item.tick-sub')?.textContent.trim());
 			let dubCount = parseInt(tickContainer.querySelector('.tick-item.tick-dub')?.textContent.trim());
 			const episodeCount = parseInt(tickContainer.querySelector('.tick-item.tick-eps')?.textContent.trim());
 			if (isNaN(dubCount)) {
 				dubCount = 0;
+			}
+			if (isNaN(subCount)) {
+				subCount = 0;
 			}
 			console.log('Information:', {
 				subCount,
@@ -141,6 +144,15 @@ class Zoro {
 							return {
 								...x,
 								langs: ['sub'],
+							} as ExtendedZoroEpisode;
+						})
+					);
+				} else if (subCount === 0 && dubCount === episodeCount) {
+					seasons.push(
+						interEps.episodes.map((x) => {
+							return {
+								...x,
+								langs: ['dub'],
 							} as ExtendedZoroEpisode;
 						})
 					);
