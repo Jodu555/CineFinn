@@ -413,22 +413,6 @@ app.get('/', (_, res) => {
 	res.status(200).json({ success: true, result: map.entries() });
 });
 
-// stream.on('data', (data) => {
-// 	packetCount++;
-// 	hash.update(data);
-// 	subSocket.emit('dataStream', { transmitID, fd, data });
-// });
-// stream.on('close', () => {
-// 	const fingerprint = hash.digest('hex');
-// 	console.log('Finished sending Packets', transmitID, fd, packetCount, fingerprint);
-// 	subSocket.emit('closeStream', { transmitID, fd, packetCount, fingerprint });
-// });
-// stream.on('open', (_fd) => {
-// 	fd = _fd;
-// 	console.log('Starting sending Packets', transmitID, fd);
-// 	subSocket.emit('openStream', { transmitID, fd: _fd, size: stats.size, remotePath });
-// });
-
 interface TransmitData {
 	fd: number;
 	transmitID: string;
