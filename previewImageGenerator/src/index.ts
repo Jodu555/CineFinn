@@ -265,6 +265,7 @@ async function main() {
 						return ['Please provide a number as second argument!'];
 					}
 					worker.concurrency = concurrency;
+					worker.opts.concurrency = concurrency;
 					return ['Set the Worker concurrency to ' + concurrency];
 				}
 				return ['Please provide a valid argument!'];
