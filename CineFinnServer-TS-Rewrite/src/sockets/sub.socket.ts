@@ -255,7 +255,20 @@ export async function generateMovingItemArray() {
 		// };
 	});
 	// console.log(test, movingArray);
-	return [...additionalMovingItems, ...movingArray];
+	return [...additionalMovingItems, ...movingArray].map(x => {
+		if (inProcessMovingItemMeta.has(x.ID)) {
+			return {
+				...x,
+				meta: {
+					...x.meta,
+					progress: inProcessMovingItemMeta.get(x.ID)!.progress,
+					isMoving: inProcessMovingItemMeta.get(x.ID)!.isMoving,
+					result: inProcessMovingItemMeta.get(x.ID)!.result,
+					isAdditional: inProcessMovingItemMeta.get(x.ID)!.isAdditional
+				}
+			};
+		}
+	});
 }
 
 export async function getAllFilesFromAllSubs() {
@@ -304,6 +317,8 @@ export async function prepareProcessMovingItem(ID: string) {
 	movingItemQueue.enqueue(ID);
 }
 
+const inProcessMovingItemMeta = new Map<string, { progress: number, isMoving: boolean, result: string, isAdditional: boolean; }>();
+
 export async function processMovingItem(ID: string) {
 	const movingItems = await generateMovingItemArray();
 	const series = await getSeries();
@@ -331,16 +346,24 @@ export async function processMovingItem(ID: string) {
 		pathGen = path.join(serie.categorie, serie.title, `Season-${movingItem.entity.season}`, `${parsed.name}${parsed.ext}`);
 	}
 
+	inProcessMovingItemMeta.set(ID, {
+		progress: 0,
+		isMoving: true,
+		result: '',
+		isAdditional: movingItem.meta.isAdditional
+	});
+
 	let lastPercent = 0;
 	const percentCB: (percent: number) => void = (percent) => {
 		if (percent - lastPercent > 1) {
 			toAllSockets(
 				(socket) => {
 					socket.emit('admin-movingItem-update', { ID, progress: percent });
-					lastPercent = percent;
 				},
 				(socket) => socket.auth.type == 'client' && socket.auth.user.role >= 2
 			);
+			lastPercent = percent;
+			inProcessMovingItemMeta.get(ID)!.progress = percent;
 		}
 	};
 
@@ -365,20 +388,25 @@ export async function processMovingItem(ID: string) {
 			result.fingerprintValidation = res.fingerprintValidation;
 		}
 
+		const message = `Took ${result.elapsedTimeMS / 1000}s with a ${result.fingerprintValidation ? 'Valid' : 'Invalid'} fingerprint`;
 		toAllSockets(
 			(socket) => {
 				socket.emit('admin-movingItem-update', {
 					ID,
 					progress: 100,
-					message: `Took ${result.elapsedTimeMS / 1000}s with a ${result.fingerprintValidation ? 'Valid' : 'Invalid'} fingerprint`,
+					message,
 				});
 			},
 			(socket) => socket.auth.type == 'client' && socket.auth.user.role >= 2
 		);
+		inProcessMovingItemMeta.get(ID)!.isMoving = false;
+		inProcessMovingItemMeta.get(ID)!.progress = 100;
+		inProcessMovingItemMeta.get(ID)!.result = message;
 		setTimeout(async () => {
 			const additionalIDX = additionalMovingItems.findIndex(x => x.ID == ID);
 			if (additionalIDX != -1) {
 				additionalMovingItems.splice(additionalIDX, 1);
+				inProcessMovingItemMeta.delete(ID);
 				sendSocketAdminUpdate();
 			}
 		}, 5000);
