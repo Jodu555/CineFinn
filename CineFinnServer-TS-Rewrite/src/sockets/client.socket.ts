@@ -123,8 +123,11 @@ const initialize = (socket: ExtendedSocket) => {
 		const items = await database.get<DatabaseTodoItem>('todos').get();
 		const deleted = items.filter((x) => !didID.find((y) => y == x.ID));
 
-		if (isPermitted(auth.user, Role.Admin)) {
-			for (const deletedItem of deleted) {
+		for (const deletedItem of deleted) {
+			const deletedTodo = JSON.parse(deletedItem.content) as DatabaseParsedTodoItem;
+			if (isPermitted(auth.user, Role.Admin)) {
+				await database.get('todos').delete({ ID: deletedItem.ID, content: deletedItem.content });
+			} else if (deletedTodo.creator == auth.user.UUID && isPermitted(auth.user, Role.Mod)) {
 				await database.get('todos').delete({ ID: deletedItem.ID, content: deletedItem.content });
 			}
 		}
