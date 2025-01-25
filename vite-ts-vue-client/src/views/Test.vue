@@ -2,7 +2,7 @@
 	<div>
 		<h2 class="text-center">Test Route</h2>
 
-		<div class="d-flex justify-content-center">
+		<div class="d-flex justify-content-center" v-if="false">
 			<div class="d-flex overflow-x-scroll pb-2" style="overflow-y: hidden">
 				<div
 					v-for="column in columns"
@@ -16,6 +16,26 @@
 						</template>
 						<!-- Each element from here will be draggable and animated. Note :key is very important here to be unique both for draggable and animations to be smooth & consistent. -->
 						<!-- </transition-group> -->
+					</draggable>
+				</div>
+			</div>
+		</div>
+		<div v-else class="d-flex flex-column align-items-center">
+			<div class="d-flex flex-column pb-2 w-100">
+				<div v-for="column in columns" :key="column.title" class="border border-secondary rounded-lg px-3 py-3 mb-3">
+					<p class="display-6 text-center">{{ column.title }}</p>
+					<!-- style="flex-wrap: nowrap; max-width: 45%; width: 45%" -->
+					<draggable
+						:list="column.todos"
+						:animation="200"
+						class="fully row"
+						style="flex-wrap: nowrap"
+						ghost-class="ghost-card"
+						group="tasks"
+						item-key="id">
+						<template #item="{ element }">
+							<TaskCard :permittedAccounts="permittedAccounts" :element="element" class="col-3 mt-3 cursor-move"></TaskCard>
+						</template>
 					</draggable>
 				</div>
 			</div>
@@ -76,6 +96,7 @@ onMounted(async () => {
 	if (response.status == 200) {
 		list.value = response?.data?.sort((a, b) => a.order - b.order);
 		columns.value[0].todos = list.value;
+		// columns.value[0].todos = list.value.splice(-3);
 	}
 	if (accResponse.status == 200) {
 		permittedAccounts.value = accResponse.data;
