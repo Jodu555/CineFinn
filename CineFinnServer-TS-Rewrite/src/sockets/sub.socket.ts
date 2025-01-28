@@ -267,6 +267,8 @@ export async function generateMovingItemArray() {
 					isAdditional: inProcessMovingItemMeta.get(x.ID)!.isAdditional
 				}
 			};
+		} else {
+			return x;
 		}
 	});
 }
