@@ -66,7 +66,7 @@ onMounted(async () => {
 		}
 		if (context == 'subsystem') {
 			data.movingItems = data.movingItems.map((x: any) => {
-				if (!x.meta)
+				if (!x?.meta)
 					x.meta = {
 						isMoving: false,
 						progress: 0,
