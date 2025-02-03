@@ -234,13 +234,13 @@ async function checkForUpdates() {
 	// );
 	// console.log(res.data);
 
-	res.data.map(x => {
-		if (x.infos.disabled) {
-			x.seasons = [];
-			x.movies = [];
-		}
-		return x;
-	});
+	// res.data.map(x => {
+	// 	if (x.infos.disabled) {
+	// 		x.seasons = [];
+	// 		x.movies = [];
+	// 	}
+	// 	return x;
+	// });
 
 	//This list should say, that these animes should the new episodes no be included unless they are german dubbed
 	const ignoranceList: IgnoranceItem[] = [
