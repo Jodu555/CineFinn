@@ -67,6 +67,7 @@
 				currentLanguage: {{ watchStore.currentLanguage }}
 				videoSrc: {{ watchStore.videoSrc }}
 				entityObject: {{ watchStore.entityObject }}
+				currentSeries.seasons {{ JSON.stringify(watchStore.currentSeries.seasons[0]) }}
 			</pre
 			>
 
@@ -104,7 +105,7 @@
 					<EntityListView
 						v-if="watchStore.currentSeason != -1"
 						title="Episodes:"
-						:array="watchStore.currentSeries.seasons.find((x) => x[0].season == ((watchStore.entityObject as SerieEpisode)?.season || -1))"
+						:array="watchStore.currentSeries.seasons.find((x) => x[0].season == ((watchStore.entityObject as SerieEpisode)?.season || watchStore.currentSeason))"
 						:current="watchStore.currentEpisode"
 						:currentSeason="watchStore.currentSeason"
 						:changeFN="changeEpisode"
