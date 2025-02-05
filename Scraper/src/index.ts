@@ -424,7 +424,7 @@ async function programmaticallyInsertTheInfos() {
 	const res = await axios.get<Serie[]>('http://localhost:3100/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 	// const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 
-	res.data = res.data.filter((x) => x.references?.aniworld);
+	res.data = res.data.filter((x) => x.references?.aniworld || x.references?.sto);
 	res.data = res.data.filter((x) => !(x.infos.title || x.infos.description));
 
 	console.log(res.data);

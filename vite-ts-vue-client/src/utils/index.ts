@@ -30,12 +30,13 @@ function deleteCookie(cname: string) {
 }
 
 function useBaseURL(): string {
-	if (location.hostname == 'localhost' || location.hostname.includes('192.168')) {
-		return `http://${location.hostname}:3100`;
-		// return 'http://cinema-api.jodu555.de';
-	} else {
-		return 'http://cinema-api.jodu555.de';
-	}
+	return import.meta.env.VITE_API_ENDPOINT || 'http://localhost:3100';
+	// if (location.hostname == 'localhost' || location.hostname.includes('192.168')) {
+	// 	return `http://${location.hostname}:3100`;
+	// 	// return 'http://cinema-api.jodu555.de';
+	// } else {
+	// 	return 'http://cinema-api.jodu555.de';
+	// }
 }
 
 let instance: AxiosInstance | null = null;
