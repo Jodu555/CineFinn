@@ -30,83 +30,10 @@ socket.on('disconnect', () => {
 socket.on('connect', async () => {
 	console.log('Socket Connection: Connected');
 
-	// const res = await axios.get('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
-
-	// const cleaned = res.data.filter((x) => x.categorie == 'Aniworld' && !x.infos.infos && !x.title.includes('She-Ra'));
-
-	// const commands = [];
-
-	// for (const x of cleaned) {
-	// 	const img = await manuallyPrintTheInfosOut(x.references.aniworld);
-	// 	commands.push(`wget ${img} -O ${x.ID}/cover.jpg`);
-	// }
-
-	// console.log(commands);
-
-	// {
-	// 	"_animeFolder": "By the Grace of the Gods",
-	// 	"finished": false,
-	// 	"folder": "Season 2",
-	// 	"file": "By the Grace of the Gods St.2 Flg.7_GerSub",
-	// 	"url": "https://aniworld.to/anime/stream/by-the-grace-of-the-gods/staffel-2/episode-7",
-	// 	"m3u8": ""
-	// },
-
-	// const array: ExtendedEpisodeDownload[] = [];
-
-	// const sto = new Aniworld('http://186.2.175.5/serie/stream/game-of-thrones');
-	// const infos = await sto.parseInformations();
-	// console.log(JSON.stringify(infos, null, 3));
-
-	// const zoro = new Zoro('19130');
-	// console.log(JSON.stringify(await zoro.parseInformations(), null, 3));
-
-	// const anix = new Anix('shining-hearts-shiawase-no-pan-dub');
-	// await anix.initialize();
-	// const out = await anix.parseInformations();
-	// console.log(JSON.stringify(out, null, 3));
-
-	// const anix = new Anix('tsukimichi-moonlit-fantasy-m067');
-	// console.log(JSON.stringify(await anix.parseInformations(), null, 3));
-
-	// for (const episode of episodes) {
-	// 	if (episode.langs.includes('dub')) {
-	// 		array.push({
-	// 			_animeFolder: 'The Reincarnation of the Strongest Exorcist in Another World',
-	// 			finished: false,
-	// 			folder: 'Season-1',
-	// 			file: `The Reincarnation of the Strongest Exorcist in Another World St.1 Flg.${episode.number}_EngDub`,
-	// 			url: episode.url,
-	// 			m3u8: '',
-	// 		});
-	// 	}
-	// }
-
-	// console.log(array);
-
-	// fs.writeFileSync('zorolist.json', JSON.stringify(array, null, 3));
-
-	// const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
-
-	// const refs = new Set();
-
-	// res.data.forEach((serie) => {
-	// 	refs.add(serie.references);
-	// });
-
-	// console.log(refs);
-
-	// const sto = new Aniworld('http://186.2.175.5/serie/stream/chicago-med/');
-
-	// const infos = await sto.parseInformations();
-
-	// console.log(infos.seasons[0][16]);
-
 	// await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
-	// await manuallyPrintTheInfosOut();
-	// await programmaticallyInsertTheInfos();
+	await programmaticallyInsertTheInfos();
 	// await addReference();
 
 	// await checkAllAnimes();
@@ -114,7 +41,7 @@ socket.on('connect', async () => {
 });
 
 async function downloadImages() {
-	const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
+	const res = await axios.get<Serie[]>(`${process.env.ACTION_API_HOST}/index/all?auth-token=${process.env.AUTH_TOKEN_REST}`);
 	console.log(res.data.length);
 	const doable = res.data.filter((x) => x.references.aniworld || x.references.sto);
 
@@ -212,7 +139,8 @@ async function addReference() {
 }
 
 async function checkForUpdates() {
-	const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
+	const res = await axios.get<Serie[]>(`${process.env.ACTION_API_HOST}/index/all?auth-token=${process.env.AUTH_TOKEN_REST}`);
+	// const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 	// res.data = res.data.filter((x) => x.references.zoro == '18586');
 	// res.data = res.data.filter((x) => x.ID == '804a1338');
 	// res.data = res.data.filter((x) => x.title.includes('Honor') || x.title.includes('Grace'));
@@ -243,35 +171,11 @@ async function checkForUpdates() {
 	// });
 
 	//This list should say, that these animes should the new episodes no be included unless they are german dubbed
-	const ignoranceList: IgnoranceItem[] = [
-		{
-			ID: 'c8001b23', // Detektiv Conan
-		},
-		// {
-		// 	ID: '9d59f7ba', // Family Guy
-		// },
-		// {
-		// 	ID: '9a7a77e0', // Rick and Morty
-		// },
-		// {
-		// 	ID: '49322db6', // Star Wars: The Clone Wars
-		// },
-		{
-			ID: 'db9fc61c', // Disney's Fillmore
-		},
-		// {
-		// 	ID: '792da61e', // South Park
-		// },
-		{
-			ID: '84b1fb51', // iCarly
-		},
-		{
-			ID: '92eeb2bd', // Die fantastische Welt von Gumball
-		}
-	];
+	const ignoranceList: IgnoranceItem[] = [];
 
 	if (process.env.IGNORE_API_HOST) {
-		const ignoreResponse = await axios.get<{ ID: string, title: string; }[]>(`http://cinema-api.jodu555.de/ignoreList/?auth-token=${process.env.AUTH_TOKEN_REST}`);
+		const ignoreResponse = await axios.get<{ ID: string; title: string; }[]>(`${process.env.ACTION_API_HOST}/ignoreList/?auth-token=${process.env.AUTH_TOKEN_REST}`);
+		// const ignoreResponse = await axios.get<{ ID: string, title: string; }[]>(`http://cinema-api.jodu555.de/ignoreList/?auth-token=${process.env.AUTH_TOKEN_REST}`);
 		console.log('Loaded', ignoreResponse.data.length, 'Animes/Series to Ignore for now!');
 		for (const item of ignoreResponse.data) {
 			ignoranceList.push({
@@ -349,7 +253,7 @@ async function kickOffAniDl(list: ExtendedEpisodeDownload[]) {
 
 async function recrawlArchive() {
 	console.time('Recrawl');
-	await axios.get('http://cinema-api.jodu555.de/managment/job/crawl', {
+	await axios.get(`${process.env.ACTION_API_HOST}/managment/job/crawl`, {
 		headers: {
 			'auth-token': process.env.AUTH_TOKEN_REST,
 		},
@@ -359,7 +263,7 @@ async function recrawlArchive() {
 
 async function generateImages() {
 	console.time('GenerateImg');
-	await axios.get('http://cinema-api.jodu555.de/managment/job/img/generate', {
+	await axios.get(`${process.env.ACTION_API_HOST}/managment/job/img/generate`, {
 		headers: {
 			'auth-token': process.env.AUTH_TOKEN_REST,
 		},
@@ -398,41 +302,39 @@ async function generateNewDownloadList() {
 	compareForNewReleases(mappedArr, []);
 }
 
-async function manuallyPrintTheInfosOut(refUrl: string) {
-	const anime = !refUrl ? new Aniworld('https://aniworld.to/anime/stream/reincarnated-as-a-sword') : new Aniworld(refUrl);
-	const infos = await anime.parseInformations();
-	if (!infos) {
-		console.log('no infos from ', refUrl);
-		return;
-	}
-	const { url, informations } = infos;
-
-	const output = {
-		references: { aniworld: url },
-		infos: {
-			...informations,
-			image: true,
-		},
-	};
-
-	console.log(JSON.stringify(output, null, 3));
-	// console.log(informations.image);
-	return informations.image;
-}
-
 async function programmaticallyInsertTheInfos() {
-	const res = await axios.get<Serie[]>('http://localhost:3100/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
+	const res = await axios.get<Serie[]>(`${process.env.ACTION_API_HOST}/index/all?auth-token=${process.env.AUTH_TOKEN_REST}`);
+	// const res = await axios.get<Serie[]>('http://localhost:3100/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 	// const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 
-	res.data = res.data.filter((x) => x.references?.aniworld || x.references?.sto);
-	res.data = res.data.filter((x) => !(x.infos.title || x.infos.description));
+	console.log(
+		'Loaded',
+		res.data.length,
+		'Animes/Series to check for the informations'
+	);
 
-	console.log(res.data);
+
+	res.data = res.data.filter((x) => x.references?.aniworld || x.references?.sto);
+	console.log('Came', res.data.length);
+
+	res.data = res.data.filter((x) => {
+		if (x.infos.title == undefined || x.infos.description == undefined) {
+			return true;
+		}
+		const result = !(x.infos.title.trim().length > 2 && x.infos.description.trim().length > 10);
+		return result;
+	});
+
+	console.log(
+		'Filtered',
+		res.data.length,
+		'Animes/Series to check for the informations'
+	);
 
 	const imageList = [];
 
 	for (const series of res.data) {
-		const anime = new Aniworld(series.references.aniworld as string);
+		const anime = new Aniworld(series.references.aniworld as string || series.references.sto as string);
 		const infos = await anime.parseInformations();
 		if (!infos) {
 			console.log(`Could not parse ${series.title}`);
@@ -452,8 +354,7 @@ async function programmaticallyInsertTheInfos() {
 
 		// imageList.push(img);
 
-		// const response = await axios.patch(`http://cinema-api.jodu555.de/index/${series.ID}?auth-token=${process.env.AUTH_TOKEN_REST}`, patchBody);
-		const response = await axios.patch(`http://localhost:3100/index/${series.ID}?auth-token=${process.env.AUTH_TOKEN_REST}`, patchBody);
+		const response = await axios.patch(`${process.env.ACTION_API_HOST}/index/${series.ID}?auth-token=${process.env.AUTH_TOKEN_REST}`, patchBody);
 
 		// console.log(response.status, { ID: series.ID, title: series.title, infos: series.infos, references: series.references }, patchBody);
 
