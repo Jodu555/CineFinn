@@ -33,7 +33,7 @@ socket.on('connect', async () => {
 	// await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
-	await programmaticallyInsertTheInfos();
+	// await programmaticallyInsertTheInfos();
 	// await addReference();
 
 	// await checkAllAnimes();
