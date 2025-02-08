@@ -11,7 +11,11 @@
 			<div class="row row-cols-2 row-cols-lg-5 g-2 g-lg-3 d-flex justify-content-between gap-3">
 				<div v-for="subsystemID in adminStore.subsystems.knownSubSystems" :key="subsystemID" class="card mb-3" style="max-width: 540px">
 					<div class="card-body">
-						<h5 class="card-title">{{ subsystemID }}</h5>
+						<h5
+							class="card-title"
+							:class="{ 'text-danger': idtoSock(subsystemID) == undefined, 'text-success': idtoSock(subsystemID) != undefined }">
+							{{ subsystemID }}
+						</h5>
 						<div class="card-text">
 							<ul class="list-group list-group-flush">
 								<li class="list-group-item">
