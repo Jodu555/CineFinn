@@ -58,7 +58,7 @@ function buildAwaitSocketReturn<R, T>(method: string): (arg0: T) => Promise<R | 
 		return new Promise<R | void>((resolve, reject) => {
 			const __refID = randomUUID().split('-')[0];
 			if (!$socket) return reject(new Error('Socket not reachable'));
-			const timeout = setTimeout(() => reject(new Error('Timeout reached')), 1000 * 60 * 15);
+			const timeout = setTimeout(() => reject(new Error('Timeout reached')), 1000 * 60 * 30);
 			const listener = (data: R & AbstractSocketCall) => {
 				if (data.__refID == __refID) {
 					delete data.__refID;

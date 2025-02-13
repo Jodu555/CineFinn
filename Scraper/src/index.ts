@@ -142,7 +142,7 @@ async function checkForUpdates() {
 	const res = await axios.get<Serie[]>(`${process.env.ACTION_API_HOST}/index/all?auth-token=${process.env.AUTH_TOKEN_REST}`);
 	// const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 	// res.data = res.data.filter((x) => x.references.zoro == '18586');
-	// res.data = res.data.filter((x) => x.ID == '804a1338');
+	// res.data = res.data.filter((x) => x.ID == '1136c6bb');
 	// res.data = res.data.filter((x) => x.title.includes('Honor') || x.title.includes('Grace'));
 	// res.data.length = res.data.length / 0.5;
 	// res.data.push(
@@ -189,12 +189,12 @@ async function checkForUpdates() {
 	const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: true, zoro: false });
 	console.timeEnd('Compare');
 
-	if (output.aniworld.length == 0 && output.sto.length == 0) return;
 
 	const condensedArray = [
 		...output.aniworld.map(x => ({ _categorie: 'Aniworld', ...x })),
 		...output.sto.map(x => ({ _categorie: 'STO', ...x }))
 	];
+	if (condensedArray.length == 0) return;
 
 	console.log(condensedArray);
 	console.log(condensedArray.length);
