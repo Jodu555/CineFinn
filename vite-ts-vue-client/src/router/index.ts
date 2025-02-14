@@ -53,6 +53,14 @@ const router = createRouter({
 			meta: { requiresLogin: true },
 		},
 		{
+			path: '/anidb',
+			name: 'AniDB',
+			component: function () {
+				return import(/* webpackChunkName: "todo" */ '@/views/AniDB.vue');
+			},
+			meta: { requiresLogin: true },
+		},
+		{
 			path: '/vote',
 			name: 'Voting',
 			component: function () {
