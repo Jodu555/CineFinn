@@ -134,7 +134,7 @@ class MovingItemQueue {
 		this.timeout = setTimeout(() => {
 			this.timeout = null;
 			this.dequeue();
-		}, 5000);
+		}, parseInt(process.env.MOVING_ITEM_TICK) || 5000);
 	}
 
 	public async dequeue() {
