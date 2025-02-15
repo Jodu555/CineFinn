@@ -27,8 +27,14 @@
 						</div>
 						<div class="col-md-8">
 							<div class="card-body">
-								<h5 id="title" class="card-title">{{ anime.name }}</h5>
-								<ul id="languages" class="list-group mt-3 list-group-flush">
+								<h5 v-if="anime.loading" id="title" class="card-title">Loading...</h5>
+								<h5 v-else id="title" class="card-title">{{ anime.name }}</h5>
+								<div v-if="anime.loading" class="d-flex justify-content-center mt-5">
+									<div class="spinner-border text-primary" role="status">
+										<span class="visually-hidden">Loading...</span>
+									</div>
+								</div>
+								<ul v-else id="languages" class="list-group mt-3 list-group-flush">
 									<template v-if="anime.groups.length == 0">
 										<li class="list-group-item">No languages found</li>
 									</template>
@@ -44,6 +50,7 @@
 										</li>
 									</template>
 								</ul>
+
 								<p class="card-text d-flex justify-content-end">
 									<small class="text-body-secondary">ID: {{ anime.ID }}</small>
 								</p>
@@ -69,11 +76,12 @@ const $socket = useSocket();
 
 const loading = ref(false);
 
-const ids = ref([17695, 18205, 11086, 18291, 12264, 17583, 17498, 15287, 18528]);
+const ids = ref<number[]>([]);
 
 const animes = ref<AniDBAnime[]>([]);
 
 interface AniDBAnime {
+	loading: boolean;
 	ID: number;
 	name: string;
 	coverImage: string;
@@ -142,12 +150,56 @@ function transformAniDBAnime(data: AniDBAnime): AniDBAnime {
 }
 
 onMounted(async () => {
-	await Promise.all(
-		ids.value.map(async (id) => {
-			const data = await axios.get<AniDBAnime>('http://localhost:3000/anidb/anime/' + id);
-			animes.value.push(transformAniDBAnime(data.data));
-		})
-	);
+	const response = await axios.get<number[]>('http://localhost:3000/anidb/list');
+	ids.value = response.data;
+
+	animes.value = ids.value.map((id) => {
+		return {
+			loading: true,
+			ID: id,
+			name: '',
+			coverImage: '',
+			groups: [],
+		};
+	});
+
+	/**
+	 *
+	 * Timing Results:
+	 * Loading with Cache and no parallelization: 184.0029296875 ms
+	 * Loading with Cache and parallelization: 237.534912109375 ms
+	 * Loading without Cache and no parallelization: 9013.2080078125 ms
+	 * Loading without Cache and parallelization: Loading:  10747.005859375 ms
+	 *
+	 * This would indicate that the parallelization is completely useless
+	 *
+	 */
+
+	console.time('Loading');
+	for (const id of ids.value) {
+		const data = await axios.get<AniDBAnime>('http://localhost:3000/anidb/anime/' + id);
+		const target = animes.value.find((x) => x.ID == id);
+		const anime = transformAniDBAnime(data.data);
+		if (!target) return;
+		target.loading = false;
+		target.coverImage = anime.coverImage;
+		target.name = anime.name;
+		target.groups = anime.groups;
+	}
+
+	// await Promise.all(
+	// 	ids.value.map(async (id) => {
+	// 		const data = await axios.get<AniDBAnime>('http://localhost:3000/anidb/anime/' + id);
+	// 		const target = animes.value.find((x) => x.ID == id);
+	// 		const anime = transformAniDBAnime(data.data);
+	// 		if (!target) return;
+	// 		target.loading = false;
+	// 		target.coverImage = anime.coverImage;
+	// 		target.name = anime.name;
+	// 		target.groups = anime.groups;
+	// 	})
+	// );
+	console.timeEnd('Loading');
 });
 
 async function addEmptyItem() {
