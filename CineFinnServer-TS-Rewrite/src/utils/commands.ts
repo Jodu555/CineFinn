@@ -29,7 +29,7 @@ function registerCommands() {
 		new Command(
 			['reload', 'rl'],
 			'reload',
-			'Reloads the infos from current out.json file wihout before saving them',
+			`Reloads the infos from current ${process.env.LOCAL_DB_FILE} file wihout before saving them`,
 			async (command, [...args], scope) => {
 				getSeries(false, true);
 				await sendSeriesReloadToAll();

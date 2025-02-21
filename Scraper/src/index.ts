@@ -30,7 +30,8 @@ socket.on('disconnect', () => {
 socket.on('connect', async () => {
 	console.log('Socket Connection: Connected');
 
-	// await checkForUpdates();
+	// await fixer();
+	await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await programmaticallyInsertTheInfos();
@@ -39,6 +40,97 @@ socket.on('connect', async () => {
 	// await checkAllAnimes();
 	// await downloadImages();
 });
+
+
+
+
+
+// async function fixer() {
+// 	const animes = [{
+// 		ID: '75941d47',
+// 		url: 'https://aniworld.to/anime/stream/bogus-skill-fruitmaster-about-that-time-i-became-able-to-eat-unlimited-numbers-of-skill-fruits-that-kill-you',
+// 		name: 'Bogus Skill „Fruitmaster“ - About That Time I Became Able to Eat Unlimited Numbers of Skill Fruits (That Kill You)'
+// 	},
+// 	{
+// 		ID: 'e6a8551f',
+// 		url: 'https://aniworld.to/anime/stream/no-longer-allowed-in-another-world',
+// 		name: 'No Longer Allowed in Another World'
+// 	},
+// 	{
+// 		ID: '73c9c55e',
+// 		url: 'https://aniworld.to/anime/stream/magic-maker-how-to-make-magic-in-another-world',
+// 		name: 'Magic Maker - How to Make Magic in Another World '
+// 	},
+// 	{
+// 		ID: 'f61a3e61',
+// 		url: 'https://aniworld.to/anime/stream/7th-time-loop-the-villainess-enjoys-a-carefree-life-married-to-her-worst-enemy',
+// 		name: '7th Time Loop - The Villainess Enjoys a Carefree Life Married to Her Worst Enemy!'
+// 	},
+// 	{
+// 		ID: 'a6abd489',
+// 		url: 'https://aniworld.to/anime/stream/ragna-crimson',
+// 		name: 'Ragna Crimson'
+// 	},
+// 	{
+// 		ID: '8ae04a49',
+// 		url: 'https://aniworld.to/anime/stream/why-does-nobody-remember-me-in-this-world',
+// 		name: 'Why does Nobody Remember Me in This World'
+// 	},
+// 	{
+// 		ID: 'e4854fdf',
+// 		url: 'https://aniworld.to/anime/stream/i-want-to-escape-from-princess-lessons',
+// 		name: 'I Want to Escape from Princess Lessons'
+// 	},
+// 	{
+// 		ID: '0c46842e',
+// 		url: 'https://aniworld.to/anime/stream/uncle-from-another-world',
+// 		name: 'Uncle from Another World'
+// 	},
+// 	{
+// 		ID: 'e3c02a81',
+// 		url: 'https://aniworld.to/anime/stream/outbreak-company',
+// 		name: 'Outbreak Company'
+// 	},
+// 	{
+// 		ID: '9e77527f',
+// 		url: 'https://aniworld.to/anime/stream/ascendance-of-a-bookworm',
+// 		name: 'Ascendance of a Bookworm'
+// 	}
+// 	];
+
+// 	for (const _anime of animes) {
+// 		const anime = new Aniworld(_anime.url);
+// 		const informations = await anime.parseInformations();
+// 		if (!informations) {
+// 			console.log(`Could not parse ${_anime.url}`);
+// 			continue;
+// 		}
+
+// 		const seriesObject = {
+// 			ID: _anime.ID,
+// 			categorie: 'Aniworld',
+// 			title: _anime.name,
+// 			movies: [],
+// 			seasons: [],
+// 			references: {
+// 				aniworld: _anime.url,
+// 			},
+// 			infos: informations.informations,
+// 		};
+// 		const imageObject = { imageUrl: informations.informations.image };
+
+// 		console.log(seriesObject, imageObject);
+
+
+// 		const response = await axios.post(`${process.env.ACTION_API_HOST}/index/?auth-token=${process.env.AUTH_TOKEN_REST}`, seriesObject);
+// 		const imageResponse = await axios.post(`${process.env.ACTION_API_HOST}/index/${_anime.ID}/cover?auth-token=${process.env.AUTH_TOKEN_REST}`, imageObject);
+
+// 		console.log(response.status);
+// 	}
+
+
+
+// }
 
 async function downloadImages() {
 	const res = await axios.get<Serie[]>(`${process.env.ACTION_API_HOST}/index/all?auth-token=${process.env.AUTH_TOKEN_REST}`);

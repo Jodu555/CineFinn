@@ -106,7 +106,7 @@ const crawlAndIndex = async () => {
 					}
 					if (existEpisode.langs.includes(parsedData.language)) {
 						// console.log(item, existEpisode, parsedData, base, e);
-						const error = `Overloading Language Detected in ${item.title}(${item.ID}) - ${existEpisode.season}x${existEpisode.episode} ${parsedData.language}`;
+						const error = `Overloading Language Detected in ${item.title}(${item.ID}) - ${existEpisode.season}x${existEpisode.episode} ${existEpisode.filePath} - ${e} ${parsedData.language}`;
 						console.log(error);
 						return;
 					}
