@@ -99,33 +99,30 @@ async function main() {
 			job.log('Evaluated Path Video File: ' + vidFile);
 			job.log('Evaluated Path Image Directory: ' + imgDir);
 
-			let command = '';
-
 			if (job.data.entity.subID != 'main' && job.data.publicStreamURL == undefined) {
 				await job.moveToFailed(new Error('No publicStreamURL found for subID: ' + job.data.entity.subID), job.token);
 				return;
 			}
 
+			/**
+			 * Read Rate Information:
+			 * 
+			 * - https://stackoverflow.com/questions/70649196/how-to-limit-reading-speed-with-ffmpeg
+			 * - https://www.ffmpeg.org/ffmpeg.html#Advanced-options
+			 * 
+			 */
+			let input = '';
+			let readRateArg = '';
 			if (job.data.publicStreamURL && job.data.entity.subID != 'main') {
+				input = job.data.publicStreamURL;
 				if (config.useReadRate) {
-					/**
-					 * Read Rate Information:
-					 * 
-					 * - https://stackoverflow.com/questions/70649196/how-to-limit-reading-speed-with-ffmpeg
-					 * - https://www.ffmpeg.org/ffmpeg.html#Advanced-options
-					 * 
-					 */
-
-					command = `ffmpeg -hide_banner -readrate ${job.data.readrate || 0} -i "${job.data.publicStreamURL}" -vf fps=1/10,scale=120:-1 "${path.join(
-						imgDir,
-						'preview%d.jpg'
-					)}"`;
-				} else {
-					command = `ffmpeg -hide_banner -i "${job.data.publicStreamURL}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
+					readRateArg = `-readrate ${job.data.readrate || 0}`;
 				}
 			} else {
-				command = `ffmpeg -hide_banner -i "${vidFile}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
+				input = vidFile;
 			}
+
+			const command = `ffmpeg -hide_banner ${readRateArg} -i "${input}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
 
 			await job.log('Crafted Command: ' + command);
 
