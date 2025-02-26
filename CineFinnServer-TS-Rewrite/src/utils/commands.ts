@@ -20,6 +20,7 @@ import {
 } from '../sockets/sub.socket';
 import { sendSocketAdminUpdate } from './admin';
 import { DatabaseSyncRoomItem } from '@Types/database';
+import { keys } from '../routes/previewImages';
 
 const commandManager = CommandManager.getCommandManager();
 const database = Database.getDatabase();
@@ -339,6 +340,24 @@ function registerCommands() {
 
 			return 'Exectued test command successfully';
 		})
+	);
+
+	commandManager.registerCommand(
+		new Command(
+			['previewImage', 'pI'], // The Command
+			'previewImage getKeys', // A Usage Info with arguments
+			'Test', // A Description what the command does
+			(command, [...args], scope) => {
+				const arr = ['Keys: '];
+				if (args[1] == 'getKeys') {
+					const prepare = [...keys.keys()].map((x) => `- ${x}  : ${JSON.stringify(keys.get(x))}`);
+					arr.push(...prepare);
+					return arr;
+				} else {
+					return ['Unknown Command'];
+				}
+			}
+		)
 	);
 }
 
