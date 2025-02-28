@@ -86,7 +86,7 @@ router.post("/upload", fileUpload(), async (req, res) => {
         files.push(...req.files.file);
     }
 
-    const uploadLocation = path.join(process.env.PREVIEW_IMGS_PATH, uploadMeta.seriesID, `${uploadMeta.sesasonIdx}-${uploadMeta.episodeIdx}`, uploadMeta.language);
+    const uploadLocation = path.join(process.env.PREVIEW_IMGS_PATH, uploadMeta.seriesID, 'previewImages', `${uploadMeta.sesasonIdx}-${uploadMeta.episodeIdx}`, uploadMeta.language);
     for (const file of files) {
         if (!fs.existsSync(uploadLocation)) {
             fs.mkdirSync(uploadLocation, { recursive: true });
