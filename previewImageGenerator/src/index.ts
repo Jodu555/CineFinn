@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import axios from 'axios';
 import child_process from 'child_process';
 import IORedis from 'ioredis';
 import { Job, Queue, Worker, tryCatch } from 'bullmq';
@@ -24,11 +25,13 @@ interface Config {
 	};
 	concurrentGenerators: number;
 	useReadRate: boolean;
+	useExperimantalAPIUpload: boolean;
+	tempImagePath: string;
 	pathRemapper: Record<string, string>;
 }
 
 const defaultConfig: Config = {
-	version: '1.0.2',
+	version: '1.0.3',
 	generatorName: 'previewImageGenerator',
 	redisConnection: {
 		host: 'localhost',
@@ -37,6 +40,8 @@ const defaultConfig: Config = {
 	},
 	concurrentGenerators: 5,
 	useReadRate: false,
+	useExperimantalAPIUpload: false,
+	tempImagePath: '/tmp/previewImageGenerator',
 	pathRemapper: {
 		'/media/all/CineFinn-data': '/mnt/test',
 	},
@@ -79,7 +84,7 @@ async function main() {
 	//config.pathRemapper['X:\\MediaLib\\Application\\'] = '\\media\\pi\\Seagate Expansion Drive\\MediaLib\\Application\\'
 
 	const worker = new Worker<JobMeta>(
-		'previewImageQueue',
+		previewImageQueue,
 		async (job) => {
 			await job.updateData({
 				...job.data,
@@ -122,7 +127,9 @@ async function main() {
 				input = vidFile;
 			}
 
-			const command = `ffmpeg -hide_banner ${readRateArg} -i "${input}" -vf fps=1/10,scale=120:-1 "${path.join(imgDir, 'preview%d.jpg')}"`;
+			const output = config.useExperimantalAPIUpload ? path.join(config.tempImagePath, job.id) : imgDir;
+
+			const command = `ffmpeg -hide_banner ${readRateArg} -i "${input}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
 
 			await job.log('Crafted Command: ' + command);
 
@@ -159,6 +166,61 @@ async function main() {
 				await job.log('Job Failed! After #' + failCount + ' Times!');
 				await job.log('See Log on why this happend!');
 				throw new Error('Job Failed! After #' + failCount + ' Times!');
+			}
+
+
+			const log = async (...args: any[]) => {
+				await job.log(args.map(x => {
+					if (typeof x == 'object') {
+						return JSON.stringify(x);
+					}
+					return x;
+				}).join(' '));
+				console.log(job.id, ...args);
+			};
+
+			if (config.useExperimantalAPIUpload && (job.data.entity as any).season != undefined && job.data.publicStreamURL) {
+				const url = new URL(job.data.publicStreamURL);
+				const token = url.searchParams.get('auth-token');
+				await log('Uploading to Experimental API!', url.origin, token);
+
+				const presignMeta = {
+					seriesID: job.data.serieID,
+					sesasonIdx: (job.data.entity as any).season,
+					episodeIdx: (job.data.entity as any).episode,
+					language: job.data.lang,
+				};
+
+				const createPresignedURLRequest = await axios.post(`${url.origin}/previewImages/createPresignedURL?auth-token=${token}`, presignMeta);
+				const { key } = createPresignedURLRequest.data;
+				await log('Created Presigned URL with Key', key, 'and meta', presignMeta);
+
+				const chunkedFiles = getChunkedFiles(output, 100);
+
+				await log('File Chunk Count:', chunkedFiles.length);
+
+				let i = 0;
+				for (const chunk of chunkedFiles) {
+					i++;
+					const formData = new FormData();
+					const now = Date.now();
+					for (const file of chunk) {
+						const fileData = new Blob([fs.readFileSync(path.join(output, file))], { type: "image/jpeg" });
+						formData.append('file', fileData, file);
+					}
+					const response = await axios.post(`${url.origin}/previewImages/upload?auth-token=SECR-DEV&key=${key}`, formData, {
+						headers: {
+							"Content-Type": "multipart/form-data",
+						},
+					});
+					const duration = Date.now() - now;
+					await log('Upload Response Data', response.data);
+					await log('Uploaded Chunk', i, 'of', chunkedFiles.length, 'with', chunk.length, 'files in', duration, 'ms');
+				}
+
+				const deletePresignedURLRequest = await axios.post(`${url.origin}/previewImages/deletePresignedURL?auth-token=${token}`, { key });
+				await log('Deleted Presigned URL with Key', key, 'and data', deletePresignedURLRequest.data);
+
 			}
 
 			// try {
@@ -273,6 +335,20 @@ async function main() {
 }
 
 const DEBUG = false;
+
+function getChunkedFiles(dir: string, chunkSize: number) {
+	const files = fs.readdirSync(dir);
+	const chunkedFiles: string[][] = files.reduce((acc, file, index) => {
+		const chunkIndex = Math.floor(index / chunkSize);
+		if (!acc[chunkIndex]) {
+			acc[chunkIndex] = [];
+		}
+		acc[chunkIndex].push(file);
+		return acc;
+	}, []);
+
+	return chunkedFiles;
+}
 
 async function tryCommand(job: Job<JobMeta, any, string>, imgDir: string, command: string) {
 	try {
