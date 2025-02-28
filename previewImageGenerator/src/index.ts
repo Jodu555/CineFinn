@@ -218,12 +218,13 @@ async function main() {
 						},
 					});
 					const duration = Date.now() - now;
-					await log('Upload Response Data', response.data);
 					await log('Uploaded Chunk', i, 'of', chunkedFiles.length, 'with', chunk.length, 'files in', duration, 'ms');
 				}
 
 				const deletePresignedURLRequest = await axios.post(`${url.origin}/previewImages/deletePresignedURL?auth-token=${token}`, { key });
 				await log('Deleted Presigned URL with Key', key, 'and data', deletePresignedURLRequest.data);
+
+				fs.rmSync(output, { recursive: true, force: true });
 
 			}
 
