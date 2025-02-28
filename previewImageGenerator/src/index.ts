@@ -129,6 +129,10 @@ async function main() {
 
 			const output = config.useExperimantalAPIUpload ? path.join(config.tempImagePath, job.id) : imgDir;
 
+			if (!fs.existsSync(output)) {
+				fs.mkdirSync(output, { recursive: true });
+			}
+
 			const command = `ffmpeg -hide_banner ${readRateArg} -i "${input}" -vf fps=1/10,scale=120:-1 "${path.join(output, 'preview%d.jpg')}"`;
 
 			await job.log('Crafted Command: ' + command);
