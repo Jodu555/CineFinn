@@ -9,7 +9,8 @@ const database = Database.getDatabase();
 
 const router = express.Router();
 
-interface meta {
+interface metaEpisode {
+    type: 'episode';
     seriesID: string;
     sesasonIdx: number;
     episodeIdx: number;
@@ -17,24 +18,45 @@ interface meta {
     key: string;
 }
 
+interface metaMovie {
+    type: 'movie';
+    seriesID: string;
+    primaryName: string;
+    language: string;
+    key: string;
+}
+
+type meta = metaEpisode | metaMovie;
+
 const keys = new Map<string, meta>();
 
 router.post('/createPresignedURL', (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 
-    const { seriesID, sesasonIdx, episodeIdx, language } = req.body;
 
-    if (!seriesID || !sesasonIdx || !episodeIdx || !language) {
-        res.status(400).send('Missing Parameters');
+    if (req.body.type === 'episode') {
+        const key = crypto.randomBytes(16).toString('hex');
+        const { seriesID, sesasonIdx, episodeIdx, language } = req.body;
+
+        keys.set(key, { type: 'episode', seriesID, sesasonIdx, episodeIdx, language, key });
+
+        res.json({
+            key,
+        });
         return;
     }
 
-    const key = crypto.randomBytes(16).toString('hex');
+    if (req.body.type === 'movie') {
+        const key = crypto.randomBytes(16).toString('hex');
+        const { seriesID, primaryName, language } = req.body;
 
-    keys.set(key, { seriesID, sesasonIdx, episodeIdx, language, key });
+        keys.set(key, { type: 'movie', seriesID, primaryName, language, key });
 
-    res.json({
-        key,
-    });
+        res.json({
+            key,
+        });
+        return;
+    }
+
 });
 
 router.post('/deletePresignedURL', (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -86,7 +108,14 @@ router.post("/upload", fileUpload(), async (req, res) => {
         files.push(...req.files.file);
     }
 
-    const uploadLocation = path.join(process.env.PREVIEW_IMGS_PATH, uploadMeta.seriesID, 'previewImages', `${uploadMeta.sesasonIdx}-${uploadMeta.episodeIdx}`, uploadMeta.language);
+    let uploadLocation = path.join(process.env.PREVIEW_IMGS_PATH, uploadMeta.seriesID, 'previewImages');
+
+    if (uploadMeta.type === 'episode') {
+        uploadLocation = path.join(uploadLocation, `${uploadMeta.sesasonIdx}-${uploadMeta.episodeIdx}`, uploadMeta.language);
+    } else if (uploadMeta.type === 'movie') {
+        uploadLocation = path.join(uploadLocation, 'Movies', uploadMeta.primaryName, uploadMeta.language);
+    }
+
     for (const file of files) {
         if (!fs.existsSync(uploadLocation)) {
             fs.mkdirSync(uploadLocation, { recursive: true });

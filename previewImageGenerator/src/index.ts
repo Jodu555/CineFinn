@@ -183,17 +183,46 @@ async function main() {
 				console.log(job.id, ...args);
 			};
 
-			if (config.useExperimantalAPIUpload && (job.data.entity as any).season != undefined && job.data.publicStreamURL) {
+			if (config.useExperimantalAPIUpload && job.data.publicStreamURL) {
 				const url = new URL(job.data.publicStreamURL);
 				const token = url.searchParams.get('auth-token');
 				await log('Uploading to Experimental API!', url.origin, token);
 
-				const presignMeta = {
-					seriesID: job.data.serieID,
-					sesasonIdx: (job.data.entity as any).season,
-					episodeIdx: (job.data.entity as any).episode,
-					language: job.data.lang,
-				};
+				interface metaEpisode {
+					type: 'episode';
+					seriesID: string;
+					sesasonIdx: number;
+					episodeIdx: number;
+					language: string;
+				}
+
+				interface metaMovie {
+					type: 'movie';
+					seriesID: string;
+					primaryName: string;
+					language: string;
+				}
+
+				type meta = metaEpisode | metaMovie;
+
+
+				let presignMeta: meta = null;
+				if ((job.data.entity as any).season != undefined) {
+					presignMeta = {
+						type: 'episode',
+						seriesID: job.data.serieID,
+						sesasonIdx: (job.data.entity as any).season,
+						episodeIdx: (job.data.entity as any).episode,
+						language: job.data.lang,
+					} satisfies metaEpisode;
+				} else {
+					presignMeta = {
+						type: 'movie',
+						seriesID: job.data.serieID,
+						primaryName: (job.data.entity as any).name,
+						language: job.data.lang,
+					} satisfies metaMovie;
+				}
 
 				const createPresignedURLRequest = await axios.post(`${url.origin}/previewImages/createPresignedURL?auth-token=${token}`, presignMeta);
 				const { key } = createPresignedURLRequest.data;
