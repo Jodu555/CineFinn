@@ -155,7 +155,7 @@ function transformAniDBAnime(data: AniDBAnime): AniDBAnime {
 	return data;
 }
 
-onMounted(async () => {
+async function load() {
 	const response = await axios.get<number[]>('http://localhost:3000/anidb/list');
 	ids.value = response.data;
 
@@ -208,6 +208,10 @@ onMounted(async () => {
 	// 	})
 	// );
 	console.timeEnd('Loading');
+}
+
+onMounted(async () => {
+	load();
 });
 
 async function addEmptyItem() {
@@ -236,6 +240,8 @@ async function addEmptyItem() {
 async function rescrapeAllItems() {
 	loading.value = true;
 	await axios.get<AniDBAnime>('http://localhost:3000/anidb/refetch/');
+	await load();
+	loading.value = false;
 }
 </script>
 
