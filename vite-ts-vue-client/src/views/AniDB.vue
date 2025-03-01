@@ -29,6 +29,9 @@
 							<div class="card-body">
 								<h5 v-if="anime.loading" id="title" class="card-title">Loading...</h5>
 								<h5 v-else id="title" class="card-title">{{ anime.name }}</h5>
+								<p class="card-text d-flex justify-content-end">
+									<small class="text-body-secondary">Episodes: {{ anime.totalEpisodes }}</small>
+								</p>
 								<div v-if="anime.loading" class="d-flex justify-content-center mt-5">
 									<div class="spinner-border text-primary" role="status">
 										<span class="visually-hidden">Loading...</span>
@@ -45,7 +48,7 @@
 													'text-info': group.languages.includes('EngDub') && !group.languages.includes('GerDub'),
 													'text-success': group.languages.includes('GerDub'),
 												}"
-												>{{ group.name }} - {{ group.languages.join(', ') }}</small
+												>{{ group.name }} - {{ group.languages.join(', ') }} | {{ group.highestEpisodeCount }}</small
 											>
 										</li>
 									</template>
@@ -83,11 +86,13 @@ const animes = ref<AniDBAnime[]>([]);
 interface AniDBAnime {
 	loading: boolean;
 	ID: number;
+	totalEpisodes: number;
 	name: string;
 	coverImage: string;
 	groups: {
 		name: string;
 		state: string;
+		highestEpisodeCount: string;
 		languages: string[];
 	}[];
 }
@@ -100,6 +105,7 @@ function transformAniDBAnime(data: AniDBAnime): AniDBAnime {
 			return {
 				name: x.name,
 				state: x.state,
+				highestEpisodeCount: x.highestEpisodeCount,
 				languages: x.languages
 					.map((l) => {
 						const re = /(audio|subtitle)[ ]\|[ ](language):[ ](.*)/gm;
@@ -157,6 +163,7 @@ onMounted(async () => {
 		return {
 			loading: true,
 			ID: id,
+			totalEpisodes: 0,
 			name: '',
 			coverImage: '',
 			groups: [],
@@ -184,6 +191,7 @@ onMounted(async () => {
 		target.loading = false;
 		target.coverImage = anime.coverImage;
 		target.name = anime.name;
+		target.totalEpisodes = anime.totalEpisodes || 0;
 		target.groups = anime.groups;
 	}
 
@@ -225,9 +233,9 @@ async function addEmptyItem() {
 	}
 }
 
-function rescrapeAllItems() {
+async function rescrapeAllItems() {
 	loading.value = true;
-	$socket.emit('callCheckForUpdates');
+	await axios.get<AniDBAnime>('http://localhost:3000/anidb/refetch/');
 }
 </script>
 
