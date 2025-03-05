@@ -219,7 +219,7 @@ async function main() {
 					presignMeta = {
 						type: 'movie',
 						seriesID: job.data.serieID,
-						primaryName: (job.data.entity as any).name,
+						primaryName: (job.data.entity as any).primaryName,
 						language: job.data.lang,
 					} satisfies metaMovie;
 				}
