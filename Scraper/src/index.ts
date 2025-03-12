@@ -31,7 +31,7 @@ socket.on('connect', async () => {
 	console.log('Socket Connection: Connected');
 
 	// await fixer();
-	await checkForUpdates();
+	// await checkForUpdates();
 	// await manuallyCraftTheList();
 	// await generateNewDownloadList();
 	// await programmaticallyInsertTheInfos();
