@@ -12,7 +12,7 @@
 			<button v-if="auth.userInfo.role >= 2" class="btn btn-outline-danger mb-5" @click="rescrapeAllItems">Rescrape All Items</button>
 		</div>
 
-		<div v-if="loading" class="d-flex justify-content-center">
+		<div v-if="loading" class="d-flex justify-content-center mt-2 mb-5">
 			<div class="spinner-border" role="status">
 				<span class="visually-hidden">Loading...</span>
 			</div>
@@ -156,8 +156,64 @@ function transformAniDBAnime(data: AniDBAnime): AniDBAnime {
 }
 
 async function load() {
-	const response = await axios.get<number[]>('http://localhost:3000/anidb/list');
-	ids.value = response.data;
+	loading.value = true;
+	try {
+		const response = await axios.get<number[]>(`${import.meta.env.VITE_ANIDB_API_ENDPOINT}/anidb/list`);
+
+		if (response.status != 200) {
+			instance.$swal({
+				toast: true,
+				position: 'top-end',
+				showConfirmButton: false,
+				timer: 3000,
+				icon: 'error',
+				title: `Error loading AniDB Anime List!`,
+				timerProgressBar: true,
+			});
+			return;
+		}
+
+		if (response.data == undefined) {
+			instance.$swal({
+				toast: true,
+				position: 'top-end',
+				showConfirmButton: false,
+				timer: 3000,
+				icon: 'error',
+				title: `Error loading AniDB Anime List!`,
+				timerProgressBar: true,
+			});
+			return;
+		}
+
+		if (response.data.length == 0) {
+			instance.$swal({
+				toast: true,
+				position: 'top-end',
+				showConfirmButton: false,
+				timer: 3000,
+				icon: 'error',
+				title: `No Items found in the AniDB Anime List!`,
+				timerProgressBar: true,
+			});
+			return;
+		}
+
+		ids.value = response.data;
+	} catch (error) {
+		instance.$swal({
+			toast: true,
+			position: 'top-end',
+			showConfirmButton: false,
+			timer: 3000,
+			icon: 'error',
+			title: `Error loading AniDB Anime List!`,
+			timerProgressBar: true,
+		});
+		return;
+	} finally {
+		loading.value = false;
+	}
 
 	animes.value = ids.value.map((id) => {
 		return {
@@ -184,7 +240,7 @@ async function load() {
 
 	console.time('Loading');
 	for (const id of ids.value) {
-		const data = await axios.get<AniDBAnime>('http://localhost:3000/anidb/anime/' + id);
+		const data = await axios.get<AniDBAnime>(`${import.meta.env.VITE_ANIDB_API_ENDPOINT}/anidb/anime/${id}`);
 		const target = animes.value.find((x) => x.ID == id);
 		const anime = transformAniDBAnime(data.data);
 		if (!target) return;
@@ -197,7 +253,7 @@ async function load() {
 
 	// await Promise.all(
 	// 	ids.value.map(async (id) => {
-	// 		const data = await axios.get<AniDBAnime>('http://localhost:3000/anidb/anime/' + id);
+	// 		const data = await axios.get<AniDBAnime>(`${import.meta.env.VITE_ANIDB_API_ENDPOINT}/anidb/anime/${id}`);
 	// 		const target = animes.value.find((x) => x.ID == id);
 	// 		const anime = transformAniDBAnime(data.data);
 	// 		if (!target) return;
@@ -208,6 +264,7 @@ async function load() {
 	// 	})
 	// );
 	console.timeEnd('Loading');
+	loading.value = false;
 }
 
 onMounted(async () => {
@@ -230,16 +287,43 @@ async function addEmptyItem() {
 		},
 	});
 	if (anidbID) {
-		instance.$swal({ title: `The Card ${anidbID} has been added to the list! Please wait for the scraper to finish.` });
+		if (ids.value.find((x) => x == Number(anidbID))) {
+			instance.$swal({
+				toast: true,
+				position: 'top-end',
+				showConfirmButton: false,
+				timer: 3000,
+				icon: 'error',
+				title: `The Card ${anidbID} is already in the list!`,
+				timerProgressBar: true,
+			});
+			return;
+		}
+		instance.$swal({
+			toast: true,
+			position: 'top-end',
+			showConfirmButton: false,
+			timer: 3000,
+			icon: 'success',
+			title: `The Card ${anidbID} has been added to the list! Please wait for the scraper to finish.`,
+			timerProgressBar: true,
+		});
 		ids.value.push(Number(anidbID));
-		const data = await axios.get<AniDBAnime>('http://localhost:3000/anidb/anime/' + anidbID);
+		const data = await axios.get<AniDBAnime>(`${import.meta.env.VITE_ANIDB_API_ENDPOINT}/anidb/anime/${anidbID}`);
 		animes.value.push(transformAniDBAnime(data.data));
 	}
 }
 
 async function rescrapeAllItems() {
 	loading.value = true;
-	await axios.get<AniDBAnime>('http://localhost:3000/anidb/refetch/');
+
+	animes.value = animes.value.map((x) => {
+		x.coverImage = '';
+		x.loading = true;
+		return x;
+	});
+
+	await axios.get<AniDBAnime>(`${import.meta.env.VITE_ANIDB_API_ENDPOINT}/anidb/refetch/`);
 	await load();
 	loading.value = false;
 }
