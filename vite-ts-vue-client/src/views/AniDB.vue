@@ -54,8 +54,11 @@
 									</template>
 								</ul>
 
-								<p class="card-text d-flex justify-content-end">
+								<p class="card-text d-flex justify-content-end mb-0">
 									<small class="text-body-secondary">ID: {{ anime.ID }}</small>
+								</p>
+								<p class="card-text d-flex justify-content-end mb-0">
+									<small class="text-body-secondary">Age: {{ new Date(anime.lastScraped).toLocaleString() }}</small>
 								</p>
 							</div>
 						</div>
@@ -89,6 +92,7 @@ interface AniDBAnime {
 	totalEpisodes: number;
 	name: string;
 	coverImage: string;
+	lastScraped: number;
 	groups: {
 		name: string;
 		state: string;
@@ -222,6 +226,7 @@ async function load() {
 			totalEpisodes: 0,
 			name: '',
 			coverImage: '',
+			lastScraped: 0,
 			groups: [],
 		};
 	});
@@ -249,6 +254,7 @@ async function load() {
 		target.name = anime.name;
 		target.totalEpisodes = anime.totalEpisodes || 0;
 		target.groups = anime.groups;
+		target.lastScraped = anime.lastScraped;
 	}
 
 	// await Promise.all(
