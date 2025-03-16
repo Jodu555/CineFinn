@@ -98,11 +98,6 @@ async function main() {
 			await job.log('--------------------- ' + new Array(config.generatorName.length).fill('=').join('') + ' ---------------------');
 
 			console.log('Recieve Job: ', job.id);
-			const vidFile = evalPath(config, job.data.filePath);
-			const imgDir = evalPath(config, job.data.output);
-
-			job.log('Evaluated Path Video File: ' + vidFile);
-			job.log('Evaluated Path Image Directory: ' + imgDir);
 
 			if (job.data.entity.subID != 'main' && job.data.publicStreamURL == undefined) {
 				await job.moveToFailed(new Error('No publicStreamURL found for subID: ' + job.data.entity.subID), job.token);
@@ -124,8 +119,23 @@ async function main() {
 					readRateArg = `-readrate ${job.data.readrate || 0}`;
 				}
 			} else {
+				const vidFile = evalPath(config, job.data.filePath);
+				job.log('Evaluated Path Video File: ' + vidFile);
+
+				if (!job.data.publicStreamURL && !fs.existsSync(vidFile)) {
+					console.log('Video File Missing', vidFile);
+					console.log('This is probably a misconfiguration of the config pathRemapper');
+					throw new Error('Video File Missing' + vidFile);
+					process.exit(1);
+				}
+
 				input = vidFile;
 			}
+
+
+
+			const imgDir = evalPath(config, job.data.output);
+			job.log('Evaluated Path Image Directory: ' + imgDir);
 
 			const output = config.useExperimantalAPIUpload ? path.join(config.tempImagePath, job.id) : imgDir;
 
@@ -139,12 +149,7 @@ async function main() {
 
 			// console.log(job.id, ' => ', command);
 
-			if (!job.data.publicStreamURL && !fs.existsSync(vidFile)) {
-				console.log('Video File Missing', vidFile);
-				console.log('This is probably a misconfiguration of the config pathRemapper');
-				throw new Error('Video File Missing' + vidFile);
-				process.exit(1);
-			}
+
 
 			let failCount = 0;
 			let success = false;
@@ -154,7 +159,7 @@ async function main() {
 				try {
 					console.log(job.id, ' => Attempt: #' + failCount + ' with Command: ' + command);
 					await job.log('Attempt: #' + failCount + ' with Command: ' + command);
-					const result = await tryCommand(job, imgDir, command);
+					const result = await tryCommand(job, output, command);
 					if (result) {
 						success = true;
 						break;
