@@ -21,6 +21,7 @@ import {
 import { sendSocketAdminUpdate } from './admin';
 import { DatabaseSyncRoomItem } from '@Types/database';
 import { keys } from '../routes/previewImages';
+import { Serie } from '@Types/classes';
 
 const commandManager = CommandManager.getCommandManager();
 const database = Database.getDatabase();
@@ -322,13 +323,20 @@ function registerCommands() {
 		})
 	);
 	commandManager.registerCommand(
-		new Command(['inspect'], 'inspect [SeasonXEpisode / MovieIdx]', 'A Command to inspect a entity', async (command, [...args], scope) => {
+		new Command(['inspect', 'is'], 'inspect [SeasonXEpisode / MovieIdx]', 'A Command to inspect a entity', async (command, [...args], scope) => {
 			const serieID = args[1];
 			const entityPtr = args[2];
 
 			const serie = (await getSeries()).find((x) => x.ID == serieID);
 
 			if (!serie) return 'NO Series with that ID';
+
+			if (entityPtr == undefined) {
+				const cloneSerie = JSON.parse(JSON.stringify(serie)) as Serie;
+				delete cloneSerie.seasons;
+				delete cloneSerie.movies;
+				console.log(cloneSerie);
+			}
 
 			if (entityPtr.includes('x')) {
 				const [seasonId, episodeId] = entityPtr.split('x').map((x) => Number(x));
