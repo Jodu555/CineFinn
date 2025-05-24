@@ -336,6 +336,7 @@ function registerCommands() {
 				delete cloneSerie.seasons;
 				delete cloneSerie.movies;
 				console.log(cloneSerie);
+				return 'Finished';
 			}
 
 			if (entityPtr.includes('x')) {
