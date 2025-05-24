@@ -214,3 +214,19 @@ but rather multiple that get arranged and aggregated together by the main system
 
 The commit where i just deleted all the old stuff can be found here:
 https://github.com/Jodu555/CineFinn/commit/18d3a4dd89e22a2b6db01bc81dd10a2e0c04b2ad
+
+
+### Interesting Ideas to tackle at some point
+Ben: May. 1 2025:
+
+Moin Jodu,
+du hast ja mal gesagt, dass man dir Vorschläge für die Seite geben kann ich hab da ein paar:
+
+Wäre cool, wenn man direkt sehen könnte, ob es neue Folgen bei einem Anime gibt, ohne erst draufklicken zu müssen.
+
+Wenn man auf einen Anime geht und dann zurück, landet man ja immer wieder ganz oben. Wäre nice, wenn die Seite sich merkt, wo man war.
+
+Und beim Durchsuchen könnte man vielleicht noch eine Kategorie für Sprachen einbauen. Ich such oft nach Animes auf Deutsch, aber sehe das halt erst, wenn ich draufgehe.
+
+
+Sind einfach ein paar Sachen, die mir aufgefallen sind.
