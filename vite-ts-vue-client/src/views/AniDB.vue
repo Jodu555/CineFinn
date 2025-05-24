@@ -3,13 +3,15 @@
 		<br />
 
 		<div class="d-flex justify-content-between">
-			<button v-if="auth.userInfo.role >= 2" class="btn btn-outline-primary mb-5" @click="addEmptyItem">Add Item</button>
+			<button v-if="auth.userInfo.role >= 2" class="btn btn-outline-primary mb-5" @click="addEmptyItem">Add
+				Item</button>
 
 			<div>
 				<h2 class="text-center">AniDB</h2>
 			</div>
 
-			<button v-if="auth.userInfo.role >= 2" class="btn btn-outline-danger mb-5" @click="rescrapeAllItems">Rescrape All Items</button>
+			<button v-if="auth.userInfo.role >= 2" class="btn btn-outline-danger mb-5"
+				@click="rescrapeAllItems">Rescrape All Items</button>
 		</div>
 
 		<div v-if="loading" class="d-flex justify-content-center mt-2 mb-5">
@@ -29,9 +31,17 @@
 							<div class="card-body">
 								<h5 v-if="anime.loading" id="title" class="card-title">Loading...</h5>
 								<h5 v-else id="title" class="card-title">{{ anime.name }}</h5>
-								<p class="card-text d-flex justify-content-end">
-									<small class="text-body-secondary">Episodes: {{ anime.totalEpisodes }}</small>
-								</p>
+								<div class="d-flex justify-content-between">
+									<div class="d-flex justify-content-end gap-2">
+										<small @click="refetchAnime(anime.ID)" style="cursor: pointer"
+											class="text-success-emphasis">Refetch</small>
+										<small @click="deleteAnime(anime.ID)" style="cursor: pointer"
+											class="text-danger-emphasis">Delete</small>
+									</div>
+									<p class="card-text">
+										<small class="text-body-secondary">Episodes: {{ anime.totalEpisodes }}</small>
+									</p>
+								</div>
 								<div v-if="anime.loading" class="d-flex justify-content-center mt-5">
 									<div class="spinner-border text-primary" role="status">
 										<span class="visually-hidden">Loading...</span>
@@ -43,13 +53,10 @@
 									</template>
 									<template v-else>
 										<li v-for="group in anime.groups" class="list-group-item">
-											<small
-												:class="{
-													'text-info': group.languages.includes('EngDub') && !group.languages.includes('GerDub'),
-													'text-success': group.languages.includes('GerDub'),
-												}"
-												>{{ group.name }} - {{ group.languages.join(', ') }} | {{ group.highestEpisodeCount }}</small
-											>
+											<small :class="{
+												'text-info': group.languages.includes('EngDub') && !group.languages.includes('GerDub'),
+												'text-success': group.languages.includes('GerDub'),
+											}">{{ group.name }} - {{ group.languages.join(', ') }} | {{ group.highestEpisodeCount }}</small>
 										</li>
 									</template>
 								</ul>
@@ -58,7 +65,8 @@
 									<small class="text-body-secondary">ID: {{ anime.ID }}</small>
 								</p>
 								<p class="card-text d-flex justify-content-end mb-0">
-									<small class="text-body-secondary">Age: {{ new Date(anime.lastScraped).toLocaleString() }}</small>
+									<small class="text-body-secondary">Age: {{ new
+										Date(anime.lastScraped).toLocaleString() }}</small>
 								</p>
 							</div>
 						</div>
@@ -318,6 +326,34 @@ async function addEmptyItem() {
 		const data = await axios.get<AniDBAnime>(`${import.meta.env.VITE_ANIDB_API_ENDPOINT}/anidb/anime/${anidbID}`);
 		animes.value.push(transformAniDBAnime(data.data));
 	}
+}
+
+async function refetchAnime(anidbID: number) {
+	loading.value = true;
+	animes.value = animes.value.map((x) => {
+		if (x.ID == anidbID) {
+			x.coverImage = '';
+			x.loading = true;
+		}
+		return x;
+	});
+
+	await axios.get<AniDBAnime>(`${import.meta.env.VITE_ANIDB_API_ENDPOINT}/anidb/refetch/${anidbID}`);
+	await load();
+	loading.value = false;
+}
+
+
+async function deleteAnime(anidbID: number) {
+	loading.value = true;
+	animes.value = animes.value.filter((x) => {
+		if (x.ID == anidbID) {
+			return false;
+		}
+		return true;
+	});
+	await axios.get<AniDBAnime>(`${import.meta.env.VITE_ANIDB_API_ENDPOINT}/anidb/anime/${anidbID}/delete`);
+	loading.value = false;
 }
 
 async function rescrapeAllItems() {

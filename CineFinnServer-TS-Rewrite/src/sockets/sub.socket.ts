@@ -556,6 +556,7 @@ export function downloadFileFromSubSystem(subPath: string, subID: string, localP
 			const percent = ((state.cumSize / state.size) * 100).toFixed(2);
 			percentCb(Number(percent));
 			// console.log(((state.cumSize / state.size) * 100).toFixed(2) + '%');
+			//@ts-ignore
 			state.hash.update(data);
 			state.stream.write(data);
 		};
@@ -636,6 +637,7 @@ export function uploadFileToSubSystem(filePath: string, subID: string, remotePat
 			const percent = ((cumSize / stats.size) * 100).toFixed(2);
 			percentCb(Number(percent));
 			packetCount++;
+			//@ts-ignore
 			hash.update(data);
 			subSocket.emit('dataStream', { transmitID, fd, data });
 		});
