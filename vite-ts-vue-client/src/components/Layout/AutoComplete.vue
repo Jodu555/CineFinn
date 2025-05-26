@@ -1,17 +1,11 @@
 <template>
 	<div class="dropdown">
-		<input
-			ref="inputRef"
-			@input="input"
-			@keydown="keydown"
-			type="text"
-			class="form-control me-3 dropdown-toggle"
-			:placeholder="options.placeholder || ''"
-			style="width: 18rem"
-			autocomplete="off"
+		<input ref="inputRef" @input="input" @keydown="keydown" type="text" class="form-control me-3 dropdown-toggle"
+			:placeholder="options.placeholder || ''" style="width: 18rem" autocomplete="off"
 			data-bs-toggle="dropdown" />
 		<ul ref="dropdownMenuRef" :id="id" v-show="recommendations.length >= 1" class="dropdown-menu">
-			<button v-for="recommendation in recommendations" @click="select(recommendation)" type="button" class="dropdown-item">
+			<button v-for="recommendation in recommendations" @click="select(recommendation)" type="button"
+				class="dropdown-item">
 				<span v-for="value in recommendation.values" :class="{ 'text-primary': value.h }">
 					{{ value.value }}
 				</span>
@@ -41,7 +35,7 @@ interface InputItem {
 interface RecommendationItem {
 	properties?: InputItem;
 	taken?: boolean;
-	values?: { value: string | undefined; h: boolean }[];
+	values?: { value: string | undefined; h: boolean; }[];
 }
 
 const recommendations = ref<RecommendationItem[]>([]);
@@ -74,39 +68,51 @@ function select(item: RecommendationItem) {
 async function input() {
 	try {
 		dropdown.show();
-		const maximumItems = props?.options?.maximumItems || 5;
+		const maximumItems = props?.options?.maximumItems || 8;
 		const lookup = inputRef.value?.value.toLowerCase();
-		console.log('lookup', lookup);
 
 		if (lookup?.trim() === '') {
 			recommendations.value = [];
 			return;
 		}
 
-		recommendations.value = props.data
+		recommendations.value = props.data.sort((a, b) => Math.random() - 0.5)
 			.map((key) => {
 				const value = key.value;
-				console.log({ key, lookup });
 				const idx = removeDiacritics(value)
 					.toLowerCase()
 					.indexOf(removeDiacritics(lookup || '').toLowerCase());
 				if (idx >= 0) {
+					const before = value.substring(0, idx);
+					const after = value.substring(idx + (lookup?.length || 0), value.length);
+					const matched = value.substring(idx, idx + (lookup?.length || 0));
+
+					// const matchPercent = (matched.length / value.length);
+					// const matchPercent = matched.length / value.length;
+					const matchPercent = 0;
+
 					return {
 						properties: key,
 						taken: true,
+						precision: after == '' && before == '' ? 1 : matchPercent,
 						values: [
-							{ value: value.substring(0, idx), h: false },
-							{ value: value.substring(idx, idx + (lookup?.length || 0)), h: true },
-							{ value: value.substring(idx + (lookup?.length || 0), value.length), h: false },
+							{ value: before, h: false },
+							{ value: matched, h: true },
+							{ value: after, h: false },
 						],
 					};
 				} else {
 					return {
 						taken: false,
+						precision: 0,
 					};
 				}
 			})
-			.filter((x) => x.taken);
+			.filter((x) => x.taken).sort((a, b) => {
+				if (a.precision > b.precision) return -1;
+				if (a.precision < b.precision) return 1;
+				return 0;
+			});
 		recommendations.value.splice(maximumItems, recommendations.value.length);
 	} catch (error) {
 		console.log(error);
@@ -129,7 +135,7 @@ function keydown(e: KeyboardEvent) {
 }
 
 function removeDiacritics(str: string) {
-	console.log('removeDiacritics', str);
+	// console.log('removeDiacritics', str);
 
 	return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
