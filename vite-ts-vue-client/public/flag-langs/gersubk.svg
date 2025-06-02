@@ -3,8 +3,8 @@
 <path d="M832.601 0H66.399C29.268 0 -1 30.5903 -1 68.5152V200H900V68.5152C900 30.5903 869.732 0 832.601 0Z" fill="#464655"/>
 <path d="M-1 531.485C-1 569.41 29.268 600 66.399 600H832.425C869.732 600 899.824 569.231 899.824 531.485V400H-1V531.485Z" fill="#FFE15A"/>
 <path d="M900 200H-1V400H900V200Z" fill="#FF4B55"/>
-<mask id="mask0_18_210" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="-1" y="0" width="901" height="600">
-<path d="M900 0L239.558 600H-1L-1 0L900 0Z" fill="#D9D9D9"/>
+<mask id="mask0_18_210" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="-442" y="-51" width="1342" height="674">
+<path d="M900 -51L-83.699 623L-442 623L-442 -51L900 -51Z" fill="#D9D9D9"/>
 </mask>
 <g mask="url(#mask0_18_210)">
 <path d="M66 0C28.9969 0 -1 29.9969 -1 67V533C-1 570.003 28.9969 600 66 600H833C870.003 600 900 570.003 900 533V67C900 29.9969 870.003 0 833 0H66Z" fill="white"/>

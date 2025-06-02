@@ -27,6 +27,14 @@ const langDetails = {
 		title: 'Koreanisch mit deutschen Untertiteln',
 		alt: 'Deutsche Flagge, Flagge, Untertitel, Flag, Koreanisch, Korean',
 	},
+	engsubc: {
+		title: 'Chinesisch mit englischen Untertiteln',
+		alt: 'Englische Flagge, Flagge, Untertitel, Flag, Chinesisch, Chinese',
+	},
+	gersubc: {
+		title: 'Chinesisch mit deutschen Untertiteln',
+		alt: 'Deutsche Flagge, Flagge, Untertitel, Flag, Chinesisch, Chinese',
+	},
 } as Record<string, { title: string; alt: string; }>;
 
 function roleIDToName(id: number) {

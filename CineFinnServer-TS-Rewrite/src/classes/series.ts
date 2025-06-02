@@ -118,7 +118,7 @@ const filenameParser = (filepath: string, filename: string): ParsedInformation |
 		},
 		{
 			//v2 Episode Parser
-			re: /^(.*)St#(\d+) Flg#(\d+)_(GerSub|GerDub|EngDub|EngSub|JapDub).mp4/gi,
+			re: /^(.*)St#(\d+) Flg#(\d+)_(GerSub|GerDub|EngDub|EngSub|JapDub|EngSubK|GerSubK|GerSubC|EngSubC)\.mp4/gi,
 			parse: (match) => {
 				const [original, title, season, episode, language] = match;
 				return { movie: false, title: title.trim(), season: Number(season), episode: Number(episode), language } as ParsedInformation;
@@ -126,7 +126,7 @@ const filenameParser = (filepath: string, filename: string): ParsedInformation |
 		},
 		{
 			//v2 Movie Parser
-			re: /^(.*)_(GerSub|GerDub|EngDub|EngSub|JapDub)\.mp4/gi,
+			re: /^(.*)_(GerSub|GerDub|EngDub|EngSub|JapDub|EngSubK|GerSubK|GerSubC|EngSubC)\.mp4/gi,
 			parse: (match) => {
 				// console.log(`match`, match);
 				const [original, movieTitle, language] = match;
