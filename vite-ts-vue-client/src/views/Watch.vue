@@ -8,24 +8,19 @@
 				<span class="visually-hidden">Loading...</span>
 			</div>
 		</div>
-		<div v-auto-animate class="container" v-if="watchStore.currentSeries != undefined && watchStore.currentSeries.ID != '-1'">
+		<div v-auto-animate class="container"
+			v-if="watchStore.currentSeries != undefined && watchStore.currentSeries.ID != '-1'">
 			<div class="float-end btn-group">
-				<button
-					v-if="authStore.userInfo.role >= 2"
-					@click="doSegmentAnnotation = !doSegmentAnnotation"
-					class="btn btn-outline-info"
-					title="Annotate Segments">
+				<button v-if="authStore.userInfo.role >= 2" @click="doSegmentAnnotation = !doSegmentAnnotation"
+					class="btn btn-outline-info" title="Annotate Segments">
 					<font-awesome-icon icon="fa-solid fa-highlighter" />
 				</button>
-				<button
-					class="btn btn-outline-info"
-					title="Series Information"
-					data-bs-toggle="modal"
-					data-bs-target="#seriesInformationModal"
-					disabled>
+				<button class="btn btn-outline-info" title="Series Information" data-bs-toggle="modal"
+					data-bs-target="#seriesInformationModal" disabled>
 					<font-awesome-icon icon="fa-solid fa-info" />
 				</button>
-				<button class="btn btn-outline-info" title="Keyboard Controls" data-bs-toggle="modal" data-bs-target="#controlsModal">
+				<button class="btn btn-outline-info" title="Keyboard Controls" data-bs-toggle="modal"
+					data-bs-target="#controlsModal">
 					<font-awesome-icon icon="fa-regular fa-keyboard" />
 				</button>
 			</div>
@@ -38,10 +33,13 @@
 			<div class="text-center" v-if="showDisabled">
 				<h2 class="text-danger">It Seems there is currently no data for this Series</h2>
 				<p class="text-danger mb-0">
-					It either got removed, or is on a node which is currently un reachable, or is currently being transcoded
+					It either got removed, or is on a node which is currently un reachable, or is currently being
+					transcoded
 				</p>
-				<p class="text-danger">Please check back later and if this issue persists please contact the Administrator</p>
-				<router-link type="button" to="/" class="mt-3 mb-4 btn btn-outline-primary btn-lg">Go Watch something else</router-link>
+				<p class="text-danger">Please check back later and if this issue persists please contact the
+					Administrator</p>
+				<router-link type="button" to="/" class="mt-3 mb-4 btn btn-outline-primary btn-lg">Go Watch something
+					else</router-link>
 			</div>
 
 			<pre v-if="authStore.settings.developerMode.value">
@@ -53,8 +51,7 @@
 						)
 					)
 				}}
-			</pre
-			>
+			</pre>
 			<div v-auto-animate v-if="showLatestWatchButton" class="text-center mb-2">
 				<button @click="skipToLatestTime" class="btn btn-outline-info">Jump to Latest watch position!</button>
 			</div>
@@ -68,55 +65,43 @@
 				videoSrc: {{ watchStore.videoSrc }}
 				entityObject: {{ watchStore.entityObject }}
 				currentSeries.seasons {{ JSON.stringify(watchStore.currentSeries.seasons[0]) }}
-			</pre
-			>
+			</pre>
 
 			<template v-if="!showDisabled">
 				<MarkSeasonDropdown />
 
-				<div
-					v-if="
-						watchStore.currentSeries.movies.length >= 1 &&
-						watchStore.currentSeries.seasons.length == 0 &&
-						(watchStore.currentSeries.movies.length == 1 || watchStore.currentMovie == -1)
-					">
-					<EntityListViewMovies v-if="watchStore.currentSeries.movies.length > 1" :changeMovie="changeMovie" />
+				<div v-if="
+					watchStore.currentSeries.movies.length >= 1 &&
+					watchStore.currentSeries.seasons.length == 0 &&
+					(watchStore.currentSeries.movies.length == 1 || watchStore.currentMovie == -1)
+				">
+					<EntityListViewMovies v-if="watchStore.currentSeries.movies.length > 1"
+						:changeMovie="changeMovie" />
 				</div>
 
 				<div v-else>
 					<!-- Movies -->
-					<EntityListView
-						v-if="watchStore.currentSeries.movies.length >= 1"
-						title="Movies:"
-						:array="watchStore.currentSeries.movies"
-						:current="watchStore.currentMovie"
-						:changeFN="changeMovie"
-						:watchList="watchStore.watchList" />
+					<EntityListView v-if="watchStore.currentSeries.movies.length >= 1" title="Movies:"
+						:array="watchStore.currentSeries.movies" :current="watchStore.currentMovie"
+						:changeFN="changeMovie" :watchList="watchStore.watchList" />
 					<!-- Seasons -->
-					<EntityListView
-						title="Seasons:"
-						v-if="watchStore.currentSeries.seasons.length >= 1"
-						:array="watchStore.currentSeries.seasons"
-						:current="watchStore.currentSeason"
-						:changeFN="changeSeason"
-						:season="true"
-						:watchList="watchStore.watchList" />
+					<EntityListView title="Seasons:" v-if="watchStore.currentSeries.seasons.length >= 1"
+						:array="watchStore.currentSeries.seasons" :current="watchStore.currentSeason"
+						:changeFN="changeSeason" :season="true" :watchList="watchStore.watchList" />
 					<!-- Episodes -->
-					<EntityListView
-						v-if="watchStore.currentSeason != -1"
-						title="Episodes:"
+					<EntityListView v-if="watchStore.currentSeason != -1" title="Episodes:"
 						:array="watchStore.currentSeries.seasons.find((x) => x[0].season == ((watchStore.entityObject as SerieEpisode)?.season || watchStore.currentSeason))"
-						:current="watchStore.currentEpisode"
-						:currentSeason="watchStore.currentSeason"
-						:changeFN="changeEpisode"
-						:watchList="watchStore.watchList" />
+						:current="watchStore.currentEpisode" :currentSeason="watchStore.currentSeason"
+						:changeFN="changeEpisode" :watchList="watchStore.watchList" />
 				</div>
 
 				<!-- Previous & Title & Languages & Next -->
 				<EntityActionsInformation :switchTo="switchTo" :changeLanguage="changeLanguage" />
 			</template>
 		</div>
-		<ExtendedVideo ref="videoRef" v-if="!showDisabled" v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="sendVideoTimeUpdate" />
+		<!-- <ExtendedVideo ref="videoRef" v-if="!showDisabled" v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="sendVideoTimeUpdate" /> -->
+		<ExtendedVideoV2 ref="videoRef" v-if="!showDisabled" v-show="showVideo" :switchTo="switchTo"
+			:sendVideoTimeUpdate="sendVideoTimeUpdate" />
 		<SegmentSubmission :videoRef="videoRef" v-if="!showDisabled && showVideo && doSegmentAnnotation" />
 	</div>
 </template>
@@ -128,6 +113,7 @@ import { singleDimSwitcher, multiDimSwitcher, deepswitchTo } from '@/utils/switc
 import EntityListView from '@/components/Watch/EntityListView.vue';
 import SegmentSubmission from '@/components/Watch/SegmentSubmission.vue';
 import ExtendedVideo from '@/components/Watch/ExtendedVideo.vue';
+import ExtendedVideoV2 from '@/components/Watch/ExtendedVideoV2.vue';
 import ControlInformationModal from '@/components/Watch/ControlInformationModal.vue';
 import EntityActionsInformation from '@/components/Watch/EntityActionsInformation.vue';
 import MarkSeasonDropdown from '@/components/Watch/MarkSeasonDropdown.vue';
