@@ -243,6 +243,7 @@ async function main() {
 					const formData = new FormData();
 					const now = Date.now();
 					for (const file of chunk) {
+						//@ts-ignore
 						const fileData = new Blob([fs.readFileSync(path.join(output, file))], { type: "image/jpeg" });
 						formData.append('file', fileData, file);
 					}

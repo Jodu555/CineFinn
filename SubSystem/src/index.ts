@@ -515,6 +515,7 @@ socket.on('requestFile', ({ transmitID, subPath }) => {
 	let fd: number;
 	stream.on('data', (data) => {
 		packetCount++;
+		//@ts-ignore
 		hash.update(data);
 		socket.emit('dataStream', { transmitID, fd, data });
 	});

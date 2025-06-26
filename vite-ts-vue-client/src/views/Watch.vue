@@ -99,9 +99,10 @@
 				<EntityActionsInformation :switchTo="switchTo" :changeLanguage="changeLanguage" />
 			</template>
 		</div>
-		<!-- <ExtendedVideo ref="videoRef" v-if="!showDisabled" v-show="showVideo" :switchTo="switchTo" :sendVideoTimeUpdate="sendVideoTimeUpdate" /> -->
-		<ExtendedVideoV2 ref="videoRef" v-if="!showDisabled" v-show="showVideo" :switchTo="switchTo"
+		<ExtendedVideo ref="videoRef" v-if="!showDisabled" v-show="showVideo" :switchTo="switchTo"
 			:sendVideoTimeUpdate="sendVideoTimeUpdate" />
+		<!--<ExtendedVideoV2 ref="videoRef" v-if="!showDisabled" v-show="showVideo" :switchTo="switchTo"
+			:sendVideoTimeUpdate="sendVideoTimeUpdate" />-->
 		<SegmentSubmission :videoRef="videoRef" v-if="!showDisabled && showVideo && doSegmentAnnotation" />
 	</div>
 </template>
