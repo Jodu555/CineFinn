@@ -22,6 +22,7 @@ import { sendSocketAdminUpdate } from './admin';
 import { DatabaseSyncRoomItem } from '@Types/database';
 import { keys } from '../routes/previewImages';
 import { Serie } from '@Types/classes';
+import { Series } from '../classes/series';
 
 const commandManager = CommandManager.getCommandManager();
 const database = Database.getDatabase();
@@ -367,6 +368,33 @@ function registerCommands() {
 				}
 			}
 		)
+	);
+
+	commandManager.registerCommand(
+		new Command(['swap'], 'swap <Serie-A-ID> <Serie-B-ID>', 'This command allows to swap the place of serie a with serie b', async (command, [...args], scope) => {
+			const serieAID = args[1];
+			const serieBID = args[2];
+
+			const series = JSON.parse(JSON.stringify(await getSeries())) as Series[];
+			const serieA = series.find((x) => x.ID == serieAID);
+			const serieB = series.find((x) => x.ID == serieBID);
+
+			if (!serieA || !serieB) {
+				return 'No series found with those IDs';
+			}
+
+			const serieAIndex = series.indexOf(serieA);
+			const serieBIndex = series.indexOf(serieB);
+
+			series[serieAIndex] = serieB;
+			series[serieBIndex] = serieA;
+
+
+			dangerouslySetSeries(series);
+			await sendSeriesReloadToAll();
+			await sendSocketAdminUpdate();
+
+		})
 	);
 }
 
