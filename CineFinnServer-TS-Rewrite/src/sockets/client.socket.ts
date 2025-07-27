@@ -92,7 +92,10 @@ const initialize = (socket: ExtendedSocket) => {
 	});
 
 	socket.on('todoListUpdate', async (list) => {
+		// console.log('TodoListUpdate from', auth.user.username, 'with', list.length, 'items');
+
 		if (!isPermitted(auth.user, Role.Mod)) {
+			console.log('Not permitted to update todos');
 			const todosDB = await database.get<DatabaseTodoItem>('todos').get();
 			const todos: DatabaseParsedTodoItem[] = todosDB.map((t) => JSON.parse(t.content));
 			socket.emit(
@@ -123,21 +126,33 @@ const initialize = (socket: ExtendedSocket) => {
 		const items = await database.get<DatabaseTodoItem>('todos').get();
 		const deleted = items.filter((x) => !didID.find((y) => y == x.ID));
 
+		let onedeletionFailed = false;
 		for (const deletedItem of deleted) {
+			// console.log('Trying to delete todo', deletedItem.ID);
 			const deletedTodo = JSON.parse(deletedItem.content) as DatabaseParsedTodoItem;
 			if (isPermitted(auth.user, Role.Admin)) {
+				// console.log('Deleting todo', deletedItem.ID, 'from DB cause of Admin');
 				await database.get('todos').delete({ ID: deletedItem.ID, content: deletedItem.content });
 			} else if (deletedTodo.creator == auth.user.UUID && isPermitted(auth.user, Role.Mod)) {
+				// console.log('Deleting todo', deletedItem.ID, 'from DB cause of Mod');
 				await database.get('todos').delete({ ID: deletedItem.ID, content: deletedItem.content });
+			} else {
+				onedeletionFailed = true;
+				// console.log('Not deleting todo', deletedItem.ID, 'from DB cause of User');
 			}
 		}
 
+		const newTodos: DatabaseParsedTodoItem[] = (await database.get<DatabaseTodoItem>('todos').get()).map(x => JSON.parse(x.content));
+
 		await toAllSockets(
 			(s) => {
-				s.emit('todoListUpdate', list);
+				s.emit('todoListUpdate', newTodos);
 			},
 			(s) => {
 				if (s.auth.type == 'client') {
+
+					if (onedeletionFailed) return true;
+
 					if (hadToScrape && s.id == socket.id) return true;
 
 					if (!hadToScrape && s.id != socket.id) return true;
