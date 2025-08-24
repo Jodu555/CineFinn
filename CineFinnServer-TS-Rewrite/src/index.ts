@@ -42,7 +42,8 @@ app.use(
 				req.originalUrl.includes('/images') ||
 				req.originalUrl.includes('/video') ||
 				req.originalUrl.includes('/status') ||
-				req.originalUrl.includes('/bullboard')
+				req.originalUrl.includes('/bullboard') ||
+				req.originalUrl.includes('/anidb/')
 			) {
 				return true;
 			} else {

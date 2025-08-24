@@ -79,7 +79,7 @@
 
 <script lang="ts" setup>
 import { useAuthStore } from '@/stores/auth.store';
-import { useAxios } from '@/utils';
+import { useAxios, useBaseURL } from '@/utils';
 import { useSocket } from '@/utils/socket';
 import axios from 'axios';
 import { getCurrentInstance, onMounted, ref } from 'vue';
@@ -164,6 +164,10 @@ function transformAniDBAnime(data: AniDBAnime): AniDBAnime {
 		});
 
 	data.groups = filtered as any;
+
+	const url = new URL(data.coverImage);
+	data.coverImage = useBaseURL() + url.pathname + '?auth-token=' + auth.authToken;
+
 	return data;
 }
 
