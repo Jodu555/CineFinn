@@ -409,7 +409,7 @@ async function tryCommand(job: Job<JobMeta, any, string>, imgDir: string, comman
 			` => Finished Command with Exit-Code: ${code} on a ${durationString} Video with the highest speed of ${highestSpeed}x and the lastPercent: ${lastPercent}%`
 		);
 
-		if (lastPercent < 99) {
+		if (lastPercent < 98) {
 			await job.log('Video Duration: ' + durationString);
 			await job.log(`Lines of ffmpeg output: ${JSON.stringify(output, null, 3)}`);
 			// await job.log(`Last 25 Lines of ffmpeg output: ${JSON.stringify(output.slice(Math.max(output.length - 25, 1)), null, 3)}`);
@@ -440,9 +440,9 @@ async function spawnFFmpegProcess(command: string, cwd: string = undefined, prog
 		let latestUpdate = Date.now();
 
 		let timeout = setTimeout(() => {
-			const err = new Error('Timeout Reached: ' + JSON.stringify(cumOutput, null, 3));
+			const err = new Error('Timeout Reached after 2 minutes could not start ffmpeg: ' + JSON.stringify(cumOutput, null, 3));
 			reject(err);
-		}, 1000 * 60 * 1);
+		}, 1000 * 60 * 2);
 
 		let interval = setInterval(() => {
 			const sAgo = (Date.now() - latestUpdate) / 1000;
@@ -450,11 +450,11 @@ async function spawnFFmpegProcess(command: string, cwd: string = undefined, prog
 				DEBUG && console.log('Last Update ' + sAgo + 's ago');
 			}
 
-			if (sAgo > 60 * 7) {
-				console.log('No output for 7 minutes, killing process', sAgo);
+			if (sAgo > 60 * 4) {
+				console.log('No output for 4 minutes, killing process', sAgo);
 				proc.kill();
 				clearInterval(interval);
-				reject(new Error('No output for 7 minutes, killing process: ' + JSON.stringify(cumOutput, null, 3)));
+				reject(new Error('No output for 4 minutes, killing process: ' + JSON.stringify(cumOutput, null, 3)));
 			}
 		}, 1000);
 
