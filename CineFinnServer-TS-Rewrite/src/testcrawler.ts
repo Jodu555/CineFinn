@@ -12,13 +12,13 @@ const generateID = (): string => {
 	// return Math.floor(Math.random() * 10000);
 };
 
-const crawlAndIndex = () => {
+const crawlAndIndex = async () => {
 	const { Series, filenameParser, Episode, Movie } = require('./classes/series');
 
 	const overcategories = ['Aniworld', 'STO'];
 	const obj = {};
 
-	let { dirs, files } = listFiles(process.env.VIDEO_PATH);
+	let { dirs, files } = await listFiles(process.env.VIDEO_PATH);
 
 	//Strip all non mp4 files from the files
 	files = files.filter((f) => path.parse(f).ext == '.mp4');
@@ -112,13 +112,13 @@ const crawlAndIndex = () => {
 	return series;
 };
 
-const newCrawlAndIndex = () => {
+const newCrawlAndIndex = async () => {
 	const pathEntries = [process.env.VIDEO_PATH];
 
 	let files: string[] = [];
 
 	for (const pathEntrie of pathEntries) {
-		let { files: tmp_files } = listFiles(pathEntrie);
+		let { files: tmp_files } = await listFiles(pathEntrie);
 		files.push(...tmp_files);
 		tmp_files = null;
 	}
@@ -248,7 +248,7 @@ const mergeSeriesArrays = (before: Series[], after: Series[]) => {
 	const beforeTimes = [];
 	for (let i = 0; i < 100; i++) {
 		const before = Date.now();
-		const series = newCrawlAndIndex();
+		const series = await newCrawlAndIndex();
 		// const series = crawlAndIndex();
 		console.log(series.length);
 		beforeTimes.push(Date.now() - before);
