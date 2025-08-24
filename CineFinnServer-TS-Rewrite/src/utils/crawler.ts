@@ -37,7 +37,7 @@ const crawlAndIndex = async () => {
 	//TODO: this is not good takes abt 3s on 800
 	// console.time('getting Files');
 	for (const pathEntry of pathEntries) {
-		let { files: tmp_files } = listFiles(pathEntry);
+		let { files: tmp_files } = await listFiles(pathEntry);
 		files.push(...tmp_files.map((x) => ({ path: x, subID: 'main' })));
 		tmp_files = null;
 	}
