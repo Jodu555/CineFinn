@@ -170,7 +170,7 @@ function transformAniDBAnime(data: AniDBAnime): AniDBAnime {
 async function load() {
 	loading.value = true;
 	try {
-		const response = await axios.get<number[]>(`${import.meta.env.VITE_ANIDB_API_ENDPOINT}/anidb/list`);
+		const response = await useAxios().get<number[]>(`/anidb/list`);
 
 		if (response.status != 200) {
 			instance.$swal({
@@ -253,7 +253,7 @@ async function load() {
 
 	console.time('Loading');
 	for (const id of ids.value) {
-		const data = await axios.get<AniDBAnime>(`${import.meta.env.VITE_ANIDB_API_ENDPOINT}/anidb/anime/${id}`);
+		const data = await useAxios().get<AniDBAnime>(`/anidb/anime/${id}`);
 		const target = animes.value.find((x) => x.ID == id);
 		const anime = transformAniDBAnime(data.data);
 		if (!target) return;
@@ -267,7 +267,7 @@ async function load() {
 
 	// await Promise.all(
 	// 	ids.value.map(async (id) => {
-	// 		const data = await axios.get<AniDBAnime>(`${import.meta.env.VITE_ANIDB_API_ENDPOINT}/anidb/anime/${id}`);
+	// 		const data = await useAxios().get<AniDBAnime>(`/anidb/anime/${id}`);
 	// 		const target = animes.value.find((x) => x.ID == id);
 	// 		const anime = transformAniDBAnime(data.data);
 	// 		if (!target) return;
@@ -323,7 +323,7 @@ async function addEmptyItem() {
 			timerProgressBar: true,
 		});
 		ids.value.push(Number(anidbID));
-		const data = await axios.get<AniDBAnime>(`${import.meta.env.VITE_ANIDB_API_ENDPOINT}/anidb/anime/${anidbID}`);
+		const data = await useAxios().get<AniDBAnime>(`/anidb/anime/${anidbID}`);
 		animes.value.push(transformAniDBAnime(data.data));
 	}
 }
@@ -338,7 +338,7 @@ async function refetchAnime(anidbID: number) {
 		return x;
 	});
 
-	await axios.get<AniDBAnime>(`${import.meta.env.VITE_ANIDB_API_ENDPOINT}/anidb/refetch/${anidbID}`);
+	await useAxios().get<AniDBAnime>(`/anidb/refetch/${anidbID}`);
 	await load();
 	loading.value = false;
 }
@@ -352,7 +352,7 @@ async function deleteAnime(anidbID: number) {
 		}
 		return true;
 	});
-	await axios.get<AniDBAnime>(`${import.meta.env.VITE_ANIDB_API_ENDPOINT}/anidb/anime/${anidbID}/delete`);
+	await useAxios().get<AniDBAnime>(`/anidb/anime/${anidbID}/delete`);
 	loading.value = false;
 }
 
@@ -365,7 +365,7 @@ async function rescrapeAllItems() {
 		return x;
 	});
 
-	await axios.get<AniDBAnime>(`${import.meta.env.VITE_ANIDB_API_ENDPOINT}/anidb/refetch/`);
+	await useAxios().get<AniDBAnime>(`/anidb/refetch/`);
 	await load();
 	loading.value = false;
 }
