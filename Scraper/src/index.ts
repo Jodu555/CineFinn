@@ -230,7 +230,7 @@ async function addReference() {
 	}
 }
 
-async function checkForUpdates() {
+async function checkForUpdates(smart: boolean = false) {
 	const res = await axios.get<Serie[]>(`${process.env.ACTION_API_HOST}/index/all?auth-token=${process.env.AUTH_TOKEN_REST}`);
 	// const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
 	// res.data = res.data.filter((x) => x.references.zoro == '18586');
@@ -274,6 +274,19 @@ async function checkForUpdates() {
 				ID: item.ID,
 			});
 		}
+	}
+
+
+	if (smart) {
+		//Get calendar API data and ignore rest
+
+		const allIDS = res.data.map(x => x.ID);
+
+		const calendarIDResponse = await axios.get<string[]>(`${process.env.ACTION_API_HOST}/calendar/all?auth-token=${process.env.AUTH_TOKEN_REST}`);
+
+		const useLessIds = allIDS.filter(x => !calendarIDResponse.data.includes(x));
+		console.log(useLessIds.length, 'animes/series to ignore because they are not in the calendar');
+		ignoranceList.push(...useLessIds.map(x => ({ ID: x })));
 	}
 
 	console.time('Compare');
@@ -566,7 +579,7 @@ buildFunction<any, { title: string; aniworld: boolean; }>('manageTitle', async (
 	return { url: doStuff(title, aniworld) };
 });
 
-buildFunction<{ success: boolean; error?: Error; }, void>('checkForUpdates', async () => {
+buildFunction<{ success: boolean; error?: Error; }, { smart: boolean; }>('checkForUpdates', async ({ smart }) => {
 	try {
 		await checkForUpdates();
 		return { success: true };

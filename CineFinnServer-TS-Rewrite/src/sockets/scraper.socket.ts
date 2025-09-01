@@ -49,7 +49,7 @@ const getZoroInfos = buildAwaitSocketReturn<ZoroReturn, { ID: string | number; }
 const getAnixInfos = buildAwaitSocketReturn<AnixSeriesInformation, { slug: string; }>('AnixData');
 const getNewZoroInfos = buildAwaitSocketReturn<ZoroSeriesInformation, { ID: string | number; }>('newZoroData');
 const getMyAsianTVInfos = buildAwaitSocketReturn<MyAsianSeries, { slug: string; }>('MyAsianTVData');
-const checkForUpdates = buildAwaitSocketReturn<{ success: boolean; error: Error; }, void>('checkForUpdates');
+const checkForUpdates = buildAwaitSocketReturn<{ success: boolean; error: Error; }, { smart: boolean; }>('checkForUpdates');
 
 const manageTitle = buildAwaitSocketReturn('manageTitle');
 

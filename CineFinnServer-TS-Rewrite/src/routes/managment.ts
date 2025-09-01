@@ -79,7 +79,7 @@ router.get('/job/img/generate', async (req: AuthenticatedRequest, res: Response,
 	}
 });
 
-router.get('/job/checkForUpdates', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+router.get('/job/checkForUpdates-smart', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const id = 'checkForUpdates';
 	const job = await database.get<DatabaseJobItem>('jobs').getOne({ ID: id });
 	if (job.running == 'true') {
@@ -99,7 +99,59 @@ router.get('/job/checkForUpdates', async (req: AuthenticatedRequest, res: Respon
 	try {
 		new Promise<void>(async (resolve, reject) => {
 			try {
-				await checkForUpdates();
+				await checkForUpdates({ smart: true });
+				database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
+				await toAllSockets(
+					(s) => {
+						s.emit(callpointToEvent(LOOKUP[id].callpoint));
+					},
+					(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
+				);
+				resolve();
+			} catch (error) {
+				database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
+				await toAllSockets(
+					(s) => {
+						s.emit(callpointToEvent(LOOKUP[id].callpoint));
+					},
+					(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
+				);
+				reject(error);
+			}
+		});
+	} catch (error) {
+		database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
+		toAllSockets(
+			(s) => {
+				s.emit(callpointToEvent(LOOKUP[id].callpoint));
+			},
+			(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
+		);
+	}
+	res.json(await assembleJobArray());
+});
+
+router.get('/job/checkForUpdates-old', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+	const id = 'checkForUpdates';
+	const job = await database.get<DatabaseJobItem>('jobs').getOne({ ID: id });
+	if (job.running == 'true') {
+		const error = new Error('Job is already running!');
+		next(error);
+		return;
+	}
+
+	if (!isScraperSocketConnected()) {
+		const error = new Error('There is currently no scraper socket connected!');
+		next(error);
+		return;
+	}
+
+	database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'true' });
+	//TODO: this is ugly and shittie there is a better way to solve this but i dont have time for it now
+	try {
+		new Promise<void>(async (resolve, reject) => {
+			try {
+				await checkForUpdates({ smart: false });
 				database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
 				await toAllSockets(
 					(s) => {

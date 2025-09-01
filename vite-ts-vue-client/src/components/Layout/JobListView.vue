@@ -14,7 +14,18 @@
 				<p v-if="lastRun">Latest Run: {{ new Date(lastRun).toLocaleString() }}</p>
 				<p v-if="lastDuration">Latest Duration: {{ new Date(lastDuration).toLocaleString() }}</p>
 
-				<button @click="click(id)" class="btn btn-outline-info">Start</button>
+				<template v-if="id === 'checkForUpdates'">
+					<div class="btn-group" role="group" aria-label="Button group name">
+						<button type="button" @click="click(id + '-smart')" class="btn btn-outline-info">
+							Smart
+						</button>
+						<button type="button" @click="click(id + '-old')" class="btn btn-outline-warning">
+							Old
+						</button>
+					</div>
+
+				</template>
+				<button v-else @click="click(id)" class="btn btn-outline-info">Start</button>
 			</div>
 		</li>
 	</div>

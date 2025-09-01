@@ -1,6 +1,7 @@
 <template>
 	<div>
-		<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasSettings" aria-labelledby="offcanvasSettingsLabel">
+		<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasSettings"
+			aria-labelledby="offcanvasSettingsLabel">
 			<div class="offcanvas-header">
 				<h5 class="offcanvas-title" id="offcanvasSettingsLabel">Infos - Settings</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -37,29 +38,25 @@
 					<h2 @click="showJobs = !showJobs">
 						<p class="d-flex justify-content-between" style="align-items: center">
 							Jobs:
-							<font-awesome-icon style="margin-left: 0.5rem" size="xs" :icon="['fa-solid', showJobs ? 'chevron-up' : 'chevron-down']" />
+							<font-awesome-icon style="margin-left: 0.5rem" size="xs"
+								:icon="['fa-solid', showJobs ? 'chevron-up' : 'chevron-down']" />
 						</p>
 					</h2>
 					<hr />
 					<ul v-if="showJobs" class="list-group list-group-flush mb-3">
 						<pre v-if="settings.developerMode.value">{{ jobs }}</pre>
 						<template v-for="job in jobs">
-							<JobListView
-								v-if="parseInt(String(userInfo.role)) >= parseInt(String(job.role))"
-								:id="job.id"
-								:title="job.name"
-								:callpoint="job.callpoint"
-								:key="job.id"
-								:running="job.running"
-								:lastRun="job.lastRun"
-								:click="start" />
+							<JobListView v-if="parseInt(String(userInfo.role)) >= parseInt(String(job.role))"
+								:id="job.id" :title="job.name" :callpoint="job.callpoint" :key="job.id"
+								:running="job.running" :lastRun="job.lastRun" :click="start" />
 						</template>
 					</ul>
 				</template>
 				<h2 @click="showSettings = !showSettings">
 					<p class="d-flex justify-content-between" style="align-items: center">
 						Settings:
-						<font-awesome-icon style="margin-left: 0.5rem" size="xs" :icon="['fa-solid', showSettings ? 'chevron-up' : 'chevron-down']" />
+						<font-awesome-icon style="margin-left: 0.5rem" size="xs"
+							:icon="['fa-solid', showSettings ? 'chevron-up' : 'chevron-down']" />
 					</p>
 				</h2>
 				<hr />
@@ -67,23 +64,19 @@
 					<pre v-if="settings.developerMode.value">{{ settings }}</pre>
 					<div v-for="(setting, key) of settings" :key="key" class="">
 						<div v-if="setting.type === 'checkbox'" class="mb-3 form-check">
-							<input
-								type="checkbox"
-								@change="
-									(event) => {
-										setting.value = (event.target as any).checked;
-										updateSettings();
-									}
-								"
-								v-model="setting.value"
-								class="form-check-input"
-								:id="key" />
+							<input type="checkbox" @change="
+								(event) => {
+									setting.value = (event.target as any).checked;
+									updateSettings();
+								}
+							" v-model="setting.value" class="form-check-input" :id="key" />
 							<label class="form-check-label" :for="key">{{ setting.title }}</label>
 						</div>
 					</div>
 
 					<div class="d-grid gap-2">
-						<button type="button" @click="resetSettings()" class="btn btn-outline-danger">Reset to Default Settings</button>
+						<button type="button" @click="resetSettings()" class="btn btn-outline-danger">Reset to Default
+							Settings</button>
 					</div>
 				</div>
 			</div>
@@ -92,47 +85,32 @@
 			<template #title>Password Reset</template>
 			<template #body>
 				<div class="form-check form-switch">
-					<input v-model="showPasswords" class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked />
+					<input v-model="showPasswords" class="form-check-input" type="checkbox" id="flexSwitchCheckChecked"
+						checked />
 					<label class="form-check-label" for="flexSwitchCheckChecked">Show Passwords</label>
 				</div>
 
 				<form @submit.prevent="" class="card-text" id="loginForm">
 					<fieldset>
 						<div class="form-group">
-							<InputValidator
-								v-model="form.oldPassword"
-								v-model:valid="form.oldPasswordValid"
-								:type="showPasswords ? 'text' : 'password'"
-								id="password"
-								name="Old Password"
-								autocomplete="old-password"
-								placeholder="Enter Old Password"
+							<InputValidator v-model="form.oldPassword" v-model:valid="form.oldPasswordValid"
+								:type="showPasswords ? 'text' : 'password'" id="password" name="Old Password"
+								autocomplete="old-password" placeholder="Enter Old Password"
 								:rules="rules.passwordRules" />
 						</div>
 						<div class="form-group">
-							<InputValidator
-								v-model="form.newPassword"
-								v-model:valid="form.newPasswordValid"
-								:type="showPasswords ? 'text' : 'password'"
-								id="password"
-								name="New Password"
-								autocomplete="current-password"
-								placeholder="Enter Password"
+							<InputValidator v-model="form.newPassword" v-model:valid="form.newPasswordValid"
+								:type="showPasswords ? 'text' : 'password'" id="password" name="New Password"
+								autocomplete="current-password" placeholder="Enter Password"
 								:rules="rules.passwordRules" />
 						</div>
 						<div class="form-group">
-							<InputValidator
-								v-model="form.newPasswordAgain"
-								v-model:valid="form.newPasswordAgainValid"
-								:type="showPasswords ? 'text' : 'password'"
-								id="password"
-								name="Password"
-								autocomplete="current-password"
-								placeholder="Enter Password"
+							<InputValidator v-model="form.newPasswordAgain" v-model:valid="form.newPasswordAgainValid"
+								:type="showPasswords ? 'text' : 'password'" id="password" name="Password"
+								autocomplete="current-password" placeholder="Enter Password"
 								:rules="computedRules.passwordAgainRules" />
 						</div>
-						<button
-							type="submit"
+						<button type="submit"
 							:disabled="!(form.oldPasswordValid && form.newPasswordValid && form.newPasswordAgainValid && !showPasswords)"
 							class="mt-4 btn btn-primary">
 							Reset Password
@@ -222,10 +200,21 @@ export default {
 						});
 					});
 				});
-			} catch (error) {}
+			} catch (error) { }
 		},
 		async start(id: string) {
-			const job = this.jobs.find((j) => j.id == id);
+			console.log(id);
+
+			let extra = '';
+			let job: Job | undefined;
+			if (id.endsWith('-smart') || id.endsWith('-old')) {
+				console.log('came');
+
+				extra = id.split('-')[1];
+				job = this.jobs.find((j) => j.id == id.replace('-smart', '').replace('-old', ''));
+			} else {
+				job = this.jobs.find((j) => j.id == id);
+			}
 			if (!job) return;
 
 			job.running = true;
@@ -241,7 +230,10 @@ export default {
 			});
 
 			try {
-				const response = await useAxios().get(`/managment${job.callpoint}`);
+
+				console.log(`/managment${job.callpoint}-${extra}`);
+
+				// const response = await useAxios().get(`/managment${job.callpoint}`);
 			} catch (error: any) {
 				job.running = false;
 				this.$swal({
