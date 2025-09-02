@@ -230,6 +230,52 @@ async function addReference() {
 	}
 }
 
+async function getRelevantReleasesUsingCalendar() {
+
+
+	type CalendarJSON = Record<string, CalendarItemJSON>;
+
+	type Calendar = Record<string, CalendarItem>;
+	interface CalendarItemJSON {
+		dayInfoText: string;
+		date: string;
+		releases: string[];
+	}
+
+	interface CalendarItem {
+		dayInfoText: string;
+		date: Date;
+		releases: string[];
+	}
+	const calendarIDResponse = await axios.get<CalendarJSON>(`${process.env.CALENDAR_API_HOST}/calendar`);
+
+	const transformedCalendar: Calendar = {};
+	for (const [key, value] of Object.entries(calendarIDResponse.data)) {
+		const date = new Date(value.date);
+		// transformedCalendar[date.toISOString()] = {
+		transformedCalendar[key] = {
+			dayInfoText: value.dayInfoText,
+			date,
+			releases: value.releases,
+		};
+	}
+
+	const relevantReleases = [];
+
+	for (const [key, value] of Object.entries(transformedCalendar)) {
+		const currentTime = new Date().getTime();
+		const diff = currentTime - value.date.getTime();
+		if (diff > 0) {
+			//In Past
+			relevantReleases.push(...value.releases);
+		}
+	}
+
+	console.log('Relevant Releases', relevantReleases);
+
+	return relevantReleases;
+}
+
 async function checkForUpdates(smart: boolean = false) {
 	const res = await axios.get<Serie[]>(`${process.env.ACTION_API_HOST}/index/all?auth-token=${process.env.AUTH_TOKEN_REST}`);
 	// const res = await axios.get<Serie[]>('http://cinema-api.jodu555.de/index/all?auth-token=' + process.env.AUTH_TOKEN_REST);
@@ -281,11 +327,9 @@ async function checkForUpdates(smart: boolean = false) {
 		//Get calendar API data and ignore rest
 
 		const allIDS = res.data.map(x => x.ID);
-
-		const calendarIDResponse = await axios.get<string[]>(`${process.env.ACTION_API_HOST}/calendar/all?auth-token=${process.env.AUTH_TOKEN_REST}`);
-
-		const useLessIds = allIDS.filter(x => !calendarIDResponse.data.includes(x));
-		console.log(useLessIds.length, 'animes/series to ignore because they are not in the calendar');
+		const calendarIDResponse = await getRelevantReleasesUsingCalendar();
+		const useLessIds = allIDS.filter(x => !calendarIDResponse.includes(x));
+		console.log(useLessIds.length, 'animes/series to ignore because they are not in the relevant calendar');
 		ignoranceList.push(...useLessIds.map(x => ({ ID: x })));
 	}
 
