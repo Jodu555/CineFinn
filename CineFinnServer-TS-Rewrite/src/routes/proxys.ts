@@ -87,3 +87,37 @@ export const bullBoardProxy = async (req: AuthenticatedRequest, res: Response, n
 		});
 	}
 };
+
+export const imageRewriteSSL = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+
+	if (typeof req.query.url != 'string') {
+		res.status(400).json({
+			message: 'No URL was provided',
+		});
+		return;
+	}
+
+	// console.log('Proxying to', proxyUrl);
+	try {
+		const proxy = await axios({
+			method: req.method,
+			url: req.query.url,
+			headers: req.headers,
+			data: req.body,
+			responseType: 'stream',
+			validateStatus: () => true,
+		});
+		// console.log(proxy.status, proxy.headers);
+
+		if (proxy.status != 200) {
+			res.status(proxy.status).json({});
+			return;
+		} else {
+			proxy.data.pipe(res);
+		}
+	} catch (error) {
+		res.status(500).json({
+			message: 'The Proxied API did not respond with anything',
+		});
+	}
+};

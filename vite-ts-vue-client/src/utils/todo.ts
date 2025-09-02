@@ -1,6 +1,7 @@
 import type { DatabaseParsedTodoItem, TodoReferences } from '@Types/database';
 import type { AniWorldEntity, AnixEpisode, ExtendedZoroEpisode, MyAsianEpisode, SimpleZoroEpisode } from '@Types/scrapers';
 import type { Ref } from 'vue';
+import { useBaseURL } from '.';
 
 export interface TodoItem extends DatabaseParsedTodoItem {
     edited?: boolean;
@@ -124,6 +125,12 @@ export function decideImageURL(minimal: boolean, element: TodoItem) {
             const img = lookDeep(scrapeInfo, scraper.imagePath);
             // console.log(img);
             if (img && typeof img == 'string') {
+                console.log(new URL(img).protocol);
+                if (new URL(img).protocol == 'http:') {
+                    // return `${useBaseURL()}/imageRewriteSSL?auth-token=${}&url=${encodeURIComponent(img)}`;
+                    return `${useBaseURL()}/imageRewriteSSL?url=${encodeURIComponent(img)}`;
+                }
+
                 return img;
             }
         }
