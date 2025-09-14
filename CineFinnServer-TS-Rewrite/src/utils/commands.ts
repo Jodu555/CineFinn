@@ -23,6 +23,8 @@ import { DatabaseSyncRoomItem } from '@Types/database';
 import { keys } from '../routes/previewImages';
 import { Serie } from '@Types/classes';
 import { Series } from '../classes/series';
+import { imageCache } from '../routes/proxys';
+import { clearImageCache } from '../routes/proxys';
 
 const commandManager = CommandManager.getCommandManager();
 const database = Database.getDatabase();
@@ -394,6 +396,30 @@ function registerCommands() {
 			await sendSeriesReloadToAll();
 			await sendSocketAdminUpdate();
 
+		})
+	);
+
+	commandManager.registerCommand(
+		new Command(['cache', 'ca'], 'cache <cacheType> <list/clear>', 'Cache Commands', async (command, [...args], scope) => {
+			const cacheType = args[1];
+			console.log(cacheType, args[2]);
+
+			if (cacheType == 'image') {
+				if (args[2] == 'list') {
+					const arr = ['Keys: '];
+					for (const key of imageCache.keys()) {
+						const obj = imageCache.get(key);
+						delete obj.data;
+						arr.push(` - ${key}  : ${JSON.stringify(obj)}`);
+					}
+					arr.push('', `Total Size:${imageCache.size}`);
+
+					return arr;
+				} else if (args[2] == 'clear') {
+					clearImageCache();
+					return 'Cleared the image cache';
+				}
+			}
 		})
 	);
 }

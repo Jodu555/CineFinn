@@ -126,10 +126,10 @@ export function decideImageURL(minimal: boolean, element: TodoItem) {
             // console.log(img);
             if (img && typeof img == 'string') {
                 console.log(new URL(img).protocol);
-                if (new URL(img).protocol == 'http:') {
-                    // return `${useBaseURL()}/imageRewriteSSL?auth-token=${}&url=${encodeURIComponent(img)}`;
-                    return `${useBaseURL()}/imageRewriteSSL?url=${encodeURIComponent(img)}`;
-                }
+                // if (new URL(img).protocol == 'http:') {
+                // return `${useBaseURL()}/imageRewriteSSL?auth-token=${}&url=${encodeURIComponent(img)}`;
+                return `${useBaseURL()}/imageRewriteSSL?url=${encodeURIComponent(img)}`;
+                // }
 
                 return img;
             }
