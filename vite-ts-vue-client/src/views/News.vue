@@ -2,14 +2,14 @@
 	<div class="container">
 		<pre v-if="settings.developerMode.value">
 				{{ { loading: loading, newsInput: newsInput, sort: sort } }}
-		</pre
-		>
+		</pre>
 		<div>
 			<h1 class="text-center">News</h1>
 			<div v-if="settings.showNewsAddForm.value">
 				<form @submit.prevent="onAddNews" class="text-center mb-3 hstack gap-4">
 					<input type="text" v-model="newsInput" class="form-control" placeholder="News" />
-					<button type="submit" :disabled="!(newsInput.trim().length > 5)" class="btn btn-outline-primary">Submit</button>
+					<button type="submit" :disabled="!(newsInput.trim().length > 5)"
+						class="btn btn-outline-primary">Submit</button>
 				</form>
 			</div>
 			<div class="text-end">

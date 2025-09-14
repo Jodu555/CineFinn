@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import Home from '@/views/Home.vue';
 import Login from '@/views/Login.vue';
 import NotFound from '@/views/NotFound.vue';
+import AlternateHome from '@/views/AlternateHome.vue';
 
 const rBase = location.hostname == 'localhost' ? './' : './';
 
@@ -18,6 +19,12 @@ const router = createRouter({
 			path: '/',
 			name: 'Home',
 			component: Home,
+			meta: { requiresLogin: true },
+		},
+		{
+			path: '/alternateHome',
+			name: 'AlternateHome',
+			component: AlternateHome,
 			meta: { requiresLogin: true },
 		},
 		{
