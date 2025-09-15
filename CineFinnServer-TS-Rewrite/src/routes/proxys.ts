@@ -175,3 +175,36 @@ export const imageRewriteSSL = async (req: AuthenticatedRequest, res: Response, 
 		});
 	}
 };
+
+
+export const MAIN_API_PROXY = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+	console.log(req.originalUrl, req.method, req.body);
+	// res.status(500).json({});
+	// return;
+
+	const proxyUrl = `https://cinema-api.jodu555.de${req.originalUrl.replace('/MAIN_PROXY', '')}`;
+	console.log('Proxying to', proxyUrl);
+	try {
+		const proxy = await axios({
+			method: req.method,
+			url: proxyUrl,
+			headers: { ...req.headers, Host: 'cinema-api.jodu555.de' },
+			data: req.body,
+			responseType: 'stream',
+			validateStatus: () => true,
+		});
+		// console.log(proxy.status, proxy.headers);
+
+		if (proxy.status != 200) {
+			res.status(proxy.status).json({});
+			return;
+		} else {
+			proxy.data.pipe(res);
+		}
+	} catch (error) {
+		res.status(500).json({
+			message: 'The Proxied API did not respond with anything',
+			error,
+		});
+	}
+};

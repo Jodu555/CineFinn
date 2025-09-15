@@ -11,7 +11,7 @@
             </div>
         </div>
 
-        <div id="carouselExampleCaptions" class="carousel slide">
+        <div v-if="showFranchises" id="carouselExampleCaptions" class="carousel slide">
             <div class="carousel-indicators">
                 <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active"
                     aria-current="true" aria-label="Slide 1"></button>
@@ -62,7 +62,12 @@
             </button>
         </div>
 
-        <div class="mt-5 mb-4 d-flex justify-content-between">
+        <div class="d-none d-md-block">
+            <div class="mt-4 d-flex justify-content-center align-items-center">
+                <h3>Showing {{ selectedSeries.length }} / {{ indexStore.series.length }} Serie(s)</h3>
+            </div>
+        </div>
+        <div class="mb-4 d-flex justify-content-between">
             <div class="d-flex gap-4">
                 <span v-for="cat in categories" @click="selectedCategory = cat" :key="cat"
                     :class="selectedCategory == cat ? 'btn btn-outline-primary' : 'btn btn-outline-secondary'">
@@ -82,7 +87,7 @@
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 row-cols-xxl-5 g-4">
             <EntityCard v-for="entity in selectedSeries"
                 :highlighted="scrolledToLastSeries && entity.ID == showScrollToLastSeries" class="border-success"
-                :entity="entity" :key="entity.title" />
+                :entity="entity" :key="entity.ID" />
         </div>
     </div>
 </template>
@@ -91,6 +96,8 @@
 import EntityCard from '@/components/Home/EntityCard.vue';
 import { useIndexStore } from '@/stores/index.store';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+
+const showFranchises = ref(false);
 
 const franchises = ref([
     {

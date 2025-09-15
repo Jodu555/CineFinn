@@ -205,7 +205,7 @@ import { router as ignoreList_router } from './routes/ignorelist';
 import { router as previewImages_router } from './routes/previewImages';
 import video from './routes/video';
 import { sendSocketAdminUpdate } from './utils/admin';
-import { bullBoardProxy, segmentProxy, aniDBAPIProxy, imageRewriteSSL } from './routes/proxys';
+import { bullBoardProxy, segmentProxy, aniDBAPIProxy, imageRewriteSSL, MAIN_API_PROXY } from './routes/proxys';
 import { SerieMovieObject } from '@Types/classes';
 
 // Your Middleware handlers here
@@ -230,6 +230,7 @@ app.use('/segments', authHelper.authentication(), segmentProxy);
 app.use('/bullboard', authHelper.authenticationFull((u) => u.role >= 2), bullBoardProxy);
 app.use('/anidb', authHelper.authenticationFull((u) => u.role >= 2), aniDBAPIProxy);
 app.use('/imageRewriteSSL', imageRewriteSSL);
+app.use('/MAIN_PROXY', MAIN_API_PROXY);
 
 //Your direct routing stuff here
 app.get('/video', authHelper.authentication(), video);

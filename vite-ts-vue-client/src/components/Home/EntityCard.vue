@@ -47,7 +47,7 @@
 					<p class="ms-auto text-muted" style="margin-bottom: 0.1rem">ID: {{ entity.ID }}</p>
 				</div>
 				<button v-if="settings.showNewsAddForm.value && userInfo.role >= 2" type="button"
-					class="btn btn-outline-info btn-sm" @click="editing = !editing">
+					class="btn btn-outline-info btn-sm" @click="toggleEdit()">
 					<font-awesome-icon :icon="['fa-solid', 'fa-pen']" size="lg" />
 				</button>
 
@@ -102,8 +102,7 @@
 								rows="3"></textarea>
 						</div>
 						<div class="d-flex">
-							<button @click="editing = false" type="button"
-								class="btn btn-outline-danger">Cancel</button>
+							<button @click="toggleEdit()" type="button" class="btn btn-outline-danger">Cancel</button>
 							<button type="submit" class="ms-auto btn btn-outline-success">Save</button>
 						</div>
 					</form>
@@ -154,11 +153,11 @@ export default defineComponent({
 		};
 	},
 	created() {
-		this.editObject.infos = { ...this.editObject.infos, ...this.entity.infos };
+		// this.editObject.infos = { ...this.editObject.infos, ...this.entity.infos };
 
-		this.editObject.references.aniworld = this.entity.references?.aniworld || '';
-		this.editObject.references.zoro = this.entity.references?.zoro || '';
-		this.editObject.references.sto = this.entity.references?.sto || '';
+		// this.editObject.references.aniworld = this.entity.references?.aniworld || '';
+		// this.editObject.references.zoro = this.entity.references?.zoro || '';
+		// this.editObject.references.sto = this.entity.references?.sto || '';
 	},
 	computed: {
 		...mapWritableState(useAuthStore, ['settings', 'userInfo']),
@@ -175,6 +174,16 @@ export default defineComponent({
 	},
 	methods: {
 		...mapActions(useIndexStore, ['loadSeries']),
+		toggleEdit() {
+			if (this.editing == false) {
+				this.editObject.infos = { ...this.editObject.infos, ...this.entity.infos };
+
+				this.editObject.references.aniworld = this.entity.references?.aniworld || '';
+				this.editObject.references.zoro = this.entity.references?.zoro || '';
+				this.editObject.references.sto = this.entity.references?.sto || '';
+			}
+			this.editing = !this.editing;
+		},
 		goAndWatch() {
 			this.$router.push({ path: '/watch', query: { id: this.entity.ID } });
 			localStorage.setItem('lastSeriesRow', JSON.stringify({ ID: this.entity.ID }));
