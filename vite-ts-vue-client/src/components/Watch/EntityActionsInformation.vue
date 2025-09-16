@@ -1,5 +1,5 @@
 <template>
-	<div v-if="entityObject" class="d-flex justify-content-between">
+	<div v-if="entityObject" class="d-flex justify-content-between mt-3">
 		<div v-auto-animate>
 			<button @click="switchTo(-1)" title="Previous Episode" class="btn btn-outline-warning">
 				<font-awesome-icon icon="fa-solid fa-backward-step" size="lg" />
@@ -7,9 +7,9 @@
 			</button>
 		</div>
 		<h3 v-auto-animate class="text-secondary text-truncate" style="margin-bottom: 0">
-			<p class="text-center text-wrap" style="margin-bottom: 0.6rem">
+			<!-- <p class="text-center text-wrap" style="margin-bottom: 0.6rem">
 				{{ entityObject.primaryName }}
-			</p>
+			</p> -->
 			<div v-auto-animate class="text-center">
 				<img v-for="lang in entityObject.langs" :key="lang" @click="changeLanguage(lang)"
 					class="flag shadow mb-4 bg-body" :class="{ active: currentLanguage == lang }"
