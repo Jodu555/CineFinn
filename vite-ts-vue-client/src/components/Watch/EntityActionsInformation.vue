@@ -6,17 +6,13 @@
 				{{ showNextPrevTxt ? 'Previous' : '' }}
 			</button>
 		</div>
-		<h3 v-auto-animate class="text-muted text-truncate" style="margin-bottom: 0">
+		<h3 v-auto-animate class="text-secondary text-truncate" style="margin-bottom: 0">
 			<p class="text-center text-wrap" style="margin-bottom: 0.6rem">
 				{{ entityObject.primaryName }}
 			</p>
 			<div v-auto-animate class="text-center">
-				<img
-					v-for="lang in entityObject.langs"
-					:key="lang"
-					@click="changeLanguage(lang)"
-					class="flag shadow mb-4 bg-body"
-					:class="{ active: currentLanguage == lang }"
+				<img v-for="lang in entityObject.langs" :key="lang" @click="changeLanguage(lang)"
+					class="flag shadow mb-4 bg-body" :class="{ active: currentLanguage == lang }"
 					:src="`/flag-langs/${lang.toLowerCase()}.svg`"
 					:alt="langDetails[lang.toLowerCase()]?.alt || 'None Alt'"
 					:title="langDetails[lang.toLowerCase()]?.title || 'None Title'" />
@@ -62,6 +58,7 @@ export default defineComponent({
 	width: 50px;
 	cursor: pointer;
 }
+
 .flag.active {
 	-webkit-box-shadow: 0 8px 10px 0 #65abf3 !important;
 	box-shadow: 0 8px 10px 0 #65abf3 !important;

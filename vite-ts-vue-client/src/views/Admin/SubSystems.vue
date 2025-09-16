@@ -7,19 +7,21 @@
 			</div>
 		</div>
 		<div v-else>
-			<p class="text-center display-6">{{ adminStore.subsystems.subSockets.length }} / {{ adminStore.subsystems.knownSubSystems.length }}</p>
+			<p class="text-center display-6">{{ adminStore.subsystems.subSockets.length }} / {{
+				adminStore.subsystems.knownSubSystems.length }}</p>
 			<div class="row row-cols-2 row-cols-lg-5 g-2 g-lg-3 d-flex justify-content-between gap-3">
-				<div v-for="subsystemID in adminStore.subsystems.knownSubSystems" :key="subsystemID" class="card mb-3" style="max-width: 540px">
+				<div v-for="subsystemID in adminStore.subsystems.knownSubSystems" :key="subsystemID" class="card mb-3"
+					style="max-width: 540px">
 					<div class="card-body">
-						<h5
-							class="card-title"
+						<h5 class="card-title"
 							:class="{ 'text-danger': idtoSock(subsystemID) == undefined, 'text-success': idtoSock(subsystemID) != undefined }">
 							{{ subsystemID }}
 						</h5>
 						<div class="card-text">
 							<ul class="list-group list-group-flush">
 								<li class="list-group-item">
-									PToken: {{ idtoSock(subsystemID) == undefined ? 'Offline' : idtoSock(subsystemID)?.ptoken }}
+									PToken: {{ idtoSock(subsystemID) == undefined ? 'Offline' :
+										idtoSock(subsystemID)?.ptoken }}
 								</li>
 								<li class="list-group-item">
 									Endpoint:
@@ -27,25 +29,23 @@
 										idtoSock(subsystemID) == undefined
 											? 'Offline'
 											: idtoSock(subsystemID)?.endpoint
-											? idtoSock(subsystemID)?.endpoint
-											: '*Socket Transmit*'
+												? idtoSock(subsystemID)?.endpoint
+												: '*Socket Transmit*'
 									}}
 								</li>
 								<li v-if="idtoSock(subsystemID) !== undefined" class="list-group-item">
 									Readrate: {{ idtoSock(subsystemID)?.readrate }}
 								</li>
 								<li class="list-group-item">
-									Series: {{ idtoSock(subsystemID) == undefined ? 'Offline' : idtoSock(subsystemID)?.affectedSeriesIDs.length }}
+									Series: {{ idtoSock(subsystemID) == undefined ? 'Offline' :
+										idtoSock(subsystemID)?.affectedSeriesIDs.length }}
 								</li>
 							</ul>
 							<div v-if="idtoSock(subsystemID) !== undefined" class="d-grid gap-2">
-								<button
-									type="button"
-									@click="
-										toggleShowSeries = true;
-										selectedSubSystem = subsystemID;
-									"
-									class="btn btn-outline-primary mt-2">
+								<button type="button" @click="
+									toggleShowSeries = true;
+								selectedSubSystem = subsystemID;
+								" class="btn btn-outline-primary mt-2">
 									List
 								</button>
 							</div>
@@ -59,14 +59,9 @@
 				<template #body>
 					<div class="mb-3 ms-5 me-5">
 						<label for="searchTerm" class="form-label">Search</label>
-						<input
-							v-model="searchTerm"
-							type="text"
-							class="form-control"
-							id="searchTerm"
-							aria-describedby="helpId"
-							placeholder="Name or ID" />
-						<small id="helpId" class="form-text text-muted">Name or ID of the Series</small>
+						<input v-model="searchTerm" type="text" class="form-control" id="searchTerm"
+							aria-describedby="helpId" placeholder="Name or ID" />
+						<small id="helpId" class="form-text text-secondary">Name or ID of the Series</small>
 					</div>
 					<div class="d-flex justify-content-center">
 						<table class="table" style="width: 75%; max-width: 85%">
@@ -78,14 +73,13 @@
 								</tr>
 							</thead>
 							<tbody v-auto-animate>
-								<tr
-									v-for="serie in idtoSock(selectedSubSystem)
-										?.affectedSeriesIDs.map((x) => indexStore.series.find((y) => y.ID == x))
-										.filter(
-											(x) =>
-												x?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-												x?.ID.toLowerCase().startsWith(searchTerm.toLowerCase())
-										)">
+								<tr v-for="serie in idtoSock(selectedSubSystem)
+									?.affectedSeriesIDs.map((x) => indexStore.series.find((y) => y.ID == x))
+									.filter(
+										(x) =>
+											x?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+											x?.ID.toLowerCase().startsWith(searchTerm.toLowerCase())
+									)">
 									<template v-if="serie !== undefined">
 										<td scope="row">{{ serie.ID }}</td>
 										<td>{{ serie.title }}</td>
@@ -106,10 +100,12 @@
 			<Modal id="selectSeriesToMove" size="xl" v-model:show="toggleSelectEntityToMoveModal">
 				<template #title>Detailed Disabled Series Overview</template>
 				<template #body>
-					<h3 class="text-center">{{ selectedSeries == '' && selectSubSystem === false ? 'List of Series' : 'Select SubSystem' }}</h3>
+					<h3 class="text-center">{{ selectedSeries == '' && selectSubSystem === false ? 'List of Series' :
+						'Select SubSystem' }}</h3>
 					<template v-if="movingSerieses.size > 0">
 						<h5>Selected:</h5>
-						<div v-auto-animate class="row row-cols-3 row-cols-lg-5 g-2 g-lg-3 d-flex justify-content-between gap-1 mb-4">
+						<div v-auto-animate
+							class="row row-cols-3 row-cols-lg-5 g-2 g-lg-3 d-flex justify-content-between gap-1 mb-4">
 							<div v-for="id in movingSerieses.keys()">
 								<span class="text-primary">
 									{{ id }}
@@ -117,22 +113,17 @@
 							</div>
 						</div>
 						<div v-if="selectSubSystem === false" class="d-flex justify-content-center mb-4">
-							<button type="button" @click="nextStepSelectSubSystem()" style="width: 60%" class="btn btn-outline-success">Next</button>
+							<button type="button" @click="nextStepSelectSubSystem()" style="width: 60%"
+								class="btn btn-outline-success">Next</button>
 						</div>
 					</template>
 
 					<div v-if="selectedSeries == '' && selectSubSystem === false" class="table-responsive-md">
 						<div class="mb-3 ms-5 me-5">
 							<label for="searchTerm" class="form-label">Search</label>
-							<input
-								v-model="searchTerm"
-								type="text"
-								class="form-control"
-								id="searchTerm"
-								aria-describedby="helpId"
-								placeholder="Name or ID"
-								autocomplete="off" />
-							<small id="helpId" class="form-text text-muted">Name or ID of the Series</small>
+							<input v-model="searchTerm" type="text" class="form-control" id="searchTerm"
+								aria-describedby="helpId" placeholder="Name or ID" autocomplete="off" />
+							<small id="helpId" class="form-text text-secondary">Name or ID of the Series</small>
 						</div>
 						<table class="table">
 							<thead>
@@ -143,23 +134,25 @@
 								</tr>
 							</thead>
 							<tbody v-auto-animate>
-								<tr
-									v-for="serie in indexStore.series.filter(
-										(x) =>
-											x.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-											x.ID.toLowerCase().startsWith(searchTerm.toLowerCase())
-									)">
+								<tr v-for="serie in indexStore.series.filter(
+									(x) =>
+										x.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+										x.ID.toLowerCase().startsWith(searchTerm.toLowerCase())
+								)">
 									<td scope="row">{{ serie.ID }}</td>
 									<td>{{ serie.title }}</td>
 									<td>
-										<button type="button" class="btn btn-outline-primary me-3" @click="selectSeries(serie.ID)">View</button>
+										<button type="button" class="btn btn-outline-primary me-3"
+											@click="selectSeries(serie.ID)">View</button>
 										<template v-if="movingSerieses.has(serie.ID)">
-											<button type="button" @click="movingSerieses.delete(serie.ID)" class="btn btn-outline-warning me-3">
+											<button type="button" @click="movingSerieses.delete(serie.ID)"
+												class="btn btn-outline-warning me-3">
 												Remove Full
 											</button>
 										</template>
 										<template v-else>
-											<button type="button" @click="movingSerieses.add(serie.ID)" class="btn btn-outline-danger me-3">
+											<button type="button" @click="movingSerieses.add(serie.ID)"
+												class="btn btn-outline-danger me-3">
 												Add Full
 											</button>
 										</template>
@@ -170,7 +163,8 @@
 					</div>
 					<template v-if="selectedSeries !== ''">
 						<div class="mb-3 d-flex justify-content-center">
-							<button type="button" @click="selectedSeries = ''" style="width: 50%" class="btn btn-outline-secondary">Back</button>
+							<button type="button" @click="selectedSeries = ''" style="width: 50%"
+								class="btn btn-outline-secondary">Back</button>
 						</div>
 
 						<div class="d-flex justify-content-center">
@@ -183,12 +177,11 @@
 									</tr>
 								</thead>
 								<tbody>
-									<tr v-for="episode in indexStore.series.find((x) => x.ID == selectedSeries)?.seasons.flat()">
+									<tr
+										v-for="episode in indexStore.series.find((x) => x.ID == selectedSeries)?.seasons.flat()">
 										<td scope="row">{{ episode.season }}x{{ episode.episode }}</td>
 										<td>
-											<img
-												v-for="lang in episode.langs"
-												:key="lang"
+											<img v-for="lang in episode.langs" :key="lang"
 												class="flag shadow mb-1 mt-1 bg-body"
 												:src="`/flag-langs/${lang.toLowerCase()}.svg`"
 												:alt="langDetails[lang.toLowerCase()]?.alt || 'None Alt'"
@@ -196,18 +189,13 @@
 										</td>
 										<td>
 											<template v-if="selectedEps.has(uniEp(episode))">
-												<button
-													type="button"
-													@click="selectedEps.delete(uniEp(episode))"
+												<button type="button" @click="selectedEps.delete(uniEp(episode))"
 													class="btn btn-outline-warning me-3">
 													Delete Full EP
 												</button>
 											</template>
 											<template v-else>
-												<button
-													type="button"
-													disabled
-													@click="selectedEps.add(uniEp(episode))"
+												<button type="button" disabled @click="selectedEps.add(uniEp(episode))"
 													class="btn btn-outline-primary me-3">
 													Select Full EP
 												</button>
@@ -219,8 +207,7 @@
 						</div>
 					</template>
 					<template v-if="selectSubSystem === true && selectedSeries == '' && selectedSubSystem == ''">
-						<h2
-							v-if="adminStore.subsystems.knownSubSystems.filter((x) => idtoSock(x) !== undefined).length == 0"
+						<h2 v-if="adminStore.subsystems.knownSubSystems.filter((x) => idtoSock(x) !== undefined).length == 0"
 							class="text-center text-danger mb-5">
 							No Active SubSystems found!
 						</h2>
@@ -230,18 +217,18 @@
 								<div class="card-body">
 									<h4 class="card-title">main</h4>
 									<div class="d-grid gap-2">
-										<button type="button" @click="selectedSubSystem = 'main'" class="btn btn-outline-primary mt-2">Select</button>
+										<button type="button" @click="selectedSubSystem = 'main'"
+											class="btn btn-outline-primary mt-2">Select</button>
 									</div>
 								</div>
 							</div>
-							<div
-								v-for="subsystemID in adminStore.subsystems.knownSubSystems.filter((x) => idtoSock(x) !== undefined)"
-								:key="subsystemID"
-								class="card text-start">
+							<div v-for="subsystemID in adminStore.subsystems.knownSubSystems.filter((x) => idtoSock(x) !== undefined)"
+								:key="subsystemID" class="card text-start">
 								<div class="card-body">
 									<h4 class="card-title">{{ subsystemID }}</h4>
 									<div v-if="idtoSock(subsystemID) !== undefined" class="d-grid gap-2">
-										<button type="button" @click="selectedSubSystem = subsystemID" class="btn btn-outline-primary mt-2">
+										<button type="button" @click="selectedSubSystem = subsystemID"
+											class="btn btn-outline-primary mt-2">
 											Select
 										</button>
 									</div>
@@ -254,10 +241,12 @@
 							<h2>Your About to send the above shown Serie/s!</h2>
 							<h2>To The SubSystem:</h2>
 							<h3>{{ selectedSubSystem }}</h3>
-							<button type="button" class="btn btn-outline-warning mt-3 mb-4" @click="cancleMoving()">Cancel</button>
+							<button type="button" class="btn btn-outline-warning mt-3 mb-4"
+								@click="cancleMoving()">Cancel</button>
 						</div>
 						<div class="d-grid gap-2">
-							<button type="button" class="btn btn-outline-success mt-3 mb-4" @click="submitMoving()">Do it</button>
+							<button type="button" class="btn btn-outline-success mt-3 mb-4" @click="submitMoving()">Do
+								it</button>
 						</div>
 					</template>
 				</template>
@@ -265,38 +254,42 @@
 
 			<h2 class="text-center mt-3 mb-5">MovingList ({{ adminStore.subsystems.movingItems.length }})</h2>
 			<div class="d-flex justify-content-center">
-				<button type="button" class="btn btn-outline-primary me-4" @click="toggleSelectEntityToMoveModal = true">Add Item</button>
+				<button type="button" class="btn btn-outline-primary me-4"
+					@click="toggleSelectEntityToMoveModal = true">Add
+					Item</button>
 				<button type="button" class="btn btn-outline-warning me-4" @click="processAllMovingItems()">
 					Move All ({{ adminStore.subsystems.movingItems.length }})
 				</button>
 				<button type="button" class="btn btn-outline-warning me-4" @click="processAllAdditionalMovingItems()">
-					Move Additional ({{ adminStore.subsystems.movingItems.filter((x) => x.meta.isAdditional).length }})
+					Move Additional ({{adminStore.subsystems.movingItems.filter((x) => x.meta.isAdditional).length}})
 				</button>
-				<button type="button" class="btn btn-outline-danger" @click="removeManualMovingItems()">Remove Additional Items</button>
+				<button type="button" class="btn btn-outline-danger" @click="removeManualMovingItems()">Remove
+					Additional
+					Items</button>
 			</div>
 
 			<hr />
 			<div v-auto-animate v-for="item in adminStore.subsystems.movingItems" :key="item.ID" class="row">
 				<div class="col-auto ms-5 me-auto mb-3">
 					<h4 class="mb-2">
-						#{{ item.seriesID }} -- {{ item.ID }} &nbsp;&nbsp;&nbsp;- {{ item.meta.isAdditional ? 'Additional' : 'System' }}
+						#{{ item.seriesID }} -- {{ item.ID }} &nbsp;&nbsp;&nbsp;- {{ item.meta.isAdditional ?
+							'Additional' :
+						'System' }}
 					</h4>
 					<div class="d-flex gap-2">
-						<h5
-							:class="{
-								'text-success': adminStore.subsystems.subSockets.find((x) => x.id == item.fromSubID) || item.fromSubID == 'main',
-								'text-danger':
-									adminStore.subsystems.subSockets.find((x) => x.id == item.fromSubID) == undefined && item.fromSubID != 'main',
-							}">
+						<h5 :class="{
+							'text-success': adminStore.subsystems.subSockets.find((x) => x.id == item.fromSubID) || item.fromSubID == 'main',
+							'text-danger':
+								adminStore.subsystems.subSockets.find((x) => x.id == item.fromSubID) == undefined && item.fromSubID != 'main',
+						}">
 							{{ item.fromSubID }}
 						</h5>
 						<h5>=></h5>
-						<h5
-							:class="{
-								'text-success': adminStore.subsystems.subSockets.find((x) => x.id == item.toSubID) || item.toSubID == 'main',
-								'text-danger':
-									adminStore.subsystems.subSockets.find((x) => x.id == item.toSubID) == undefined && item.toSubID != 'main',
-							}">
+						<h5 :class="{
+							'text-success': adminStore.subsystems.subSockets.find((x) => x.id == item.toSubID) || item.toSubID == 'main',
+							'text-danger':
+								adminStore.subsystems.subSockets.find((x) => x.id == item.toSubID) == undefined && item.toSubID != 'main',
+						}">
 							{{ item.toSubID }}
 						</h5>
 					</div>
@@ -305,18 +298,15 @@
 						<h6 class="mt-2">
 							{{ item.filePath }}
 						</h6>
-						<button v-if="!item.meta.isMoving" @click="moveItem(item.ID)" type="button" class="btn btn-outline-warning">Move</button>
+						<button v-if="!item.meta.isMoving" @click="moveItem(item.ID)" type="button"
+							class="btn btn-outline-warning">Move</button>
 					</div>
 				</div>
 				<div class="ms-5 mb-3" style="width: 95%" v-if="item.meta.isMoving">
 					<div class="progress mt-2 mb-2" style="height: 30px">
-						<div
-							class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
-							role="progressbar"
-							:style="{ width: `${item.meta.progress}%` }"
-							:aria-valuenow="item.meta.progress"
-							aria-valuemin="0"
-							aria-valuemax="100">
+						<div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+							role="progressbar" :style="{ width: `${item.meta.progress}%` }"
+							:aria-valuenow="item.meta.progress" aria-valuemin="0" aria-valuemax="100">
 							<span class="h5 mt-2">{{ item.meta.progress }}%</span>
 						</div>
 					</div>

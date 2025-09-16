@@ -14,15 +14,10 @@
 						<form @submit.prevent="joinRoom(roomInputID)">
 							<h3 class="card-title">Join a Room</h3>
 							<div class="mb-3">
-								<input
-									type="text"
-									v-model="roomInputID"
-									class="form-control"
-									name="roomid"
-									id="roomid"
-									aria-describedby="helpId"
-									placeholder="RoomID" />
-								<small id="helpId" class="form-text text-muted">The ID of the room you want to join</small>
+								<input type="text" v-model="roomInputID" class="form-control" name="roomid" id="roomid"
+									aria-describedby="helpId" placeholder="RoomID" />
+								<small id="helpId" class="form-text text-secondary">The ID of the room you want to
+									join</small>
 							</div>
 							<div class="d-grid gap-2">
 								<button type="submit" class="btn btn-success">Join</button>
@@ -36,7 +31,8 @@
 				<div class="card text-start">
 					<div class="card-body">
 						<h3 class="card-title">Open Your Own</h3>
-						<p class="card-text text-muted text-center">Open your own Room to watch with friends and have fun!</p>
+						<p class="card-text text-secondary text-center">Open your own Room to watch with friends and
+							have fun!</p>
 						<div class="d-grid gap-2">
 							<button @click="createRoom()" type="button" class="btn btn-success">Open</button>
 						</div>

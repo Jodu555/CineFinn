@@ -32,7 +32,7 @@
 						<br />
 					</template>
 
-					<small v-if="entity.infos.startDate || entity.infos.endDate" class="text-muted">{{
+					<small v-if="entity.infos.startDate || entity.infos.endDate" class="text-secondary">{{
 						entity.infos.startDate }} - {{
 							entity.infos.endDate }}</small>
 					<small v-else class="text-mute">- Get Ready for it</small>
@@ -44,7 +44,7 @@
 					Watch</router-link> -->
 
 				<div class="d-flex">
-					<p class="ms-auto text-muted" style="margin-bottom: 0.1rem">ID: {{ entity.ID }}</p>
+					<p class="ms-auto text-secondary" style="margin-bottom: 0.1rem">ID: {{ entity.ID }}</p>
 				</div>
 				<button v-if="settings.showNewsAddForm.value && userInfo.role >= 2" type="button"
 					class="btn btn-outline-info btn-sm" @click="toggleEdit()">
@@ -109,7 +109,7 @@
 				</div>
 			</div>
 			<div class="card-footer"
-				:class="{ 'text-muted': !entity.infos.disabled, 'text-danger': entity.infos.disabled }">
+				:class="{ 'text-secondary': !entity.infos.disabled, 'text-danger': entity.infos.disabled }">
 				{{ entityInfoString }}
 			</div>
 		</div>

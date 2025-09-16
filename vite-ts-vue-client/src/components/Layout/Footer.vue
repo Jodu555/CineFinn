@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<footer class="footer">
-			<p class="text-center text-muted footer-text">
+			<p class="text-center text-secondary footer-text">
 				© Copyright
 				{{ new Date().getFullYear() }}
 				by <a href="https://Jodu555.de" target="_blank">Jodu555</a> /

@@ -3,7 +3,7 @@
 		<li class="list-group-item">
 			<h5>{{ title }}</h5>
 			<div v-if="running">
-				<span class="text-muted">Loading...</span>
+				<span class="text-secondary">Loading...</span>
 				<div class="d-flex justify-content-center">
 					<div class="spinner-grow text-info" style="width: 3rem; height: 3rem" role="status">
 						<span class="visually-hidden">Loading...</span>

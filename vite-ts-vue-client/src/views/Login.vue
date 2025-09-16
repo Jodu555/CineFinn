@@ -1,30 +1,21 @@
 <template>
 	<div class="container">
 		<h1 class="text-center mb-3">Login - CineFinn</h1>
-		<div v-if="error != '' && !(form.usernameValid && form.passwordValid)" class="alert alert-danger alert-dismissible">
+		<div v-if="error != '' && !(form.usernameValid && form.passwordValid)"
+			class="alert alert-danger alert-dismissible">
 			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-			<strong
-				>Error: <span>{{ error }}</span></strong
-			>
+			<strong>Error: <span>{{ error }}</span></strong>
 		</div>
 		<div class="row">
 			<div class="col-1"></div>
 			<div class="col-5">
 				<div class="d-flex justify-content-evenly">
-					<button
-						type="button"
-						:disabled="loggingin"
-						class="btn btn-lg"
-						:class="{ 'btn-secondary': loggingin, 'btn-primary': !loggingin }"
-						@click="loggingin = true">
+					<button type="button" :disabled="loggingin" class="btn btn-lg"
+						:class="{ 'btn-secondary': loggingin, 'btn-primary': !loggingin }" @click="loggingin = true">
 						Login
 					</button>
-					<button
-						type="button"
-						:disabled="!loggingin"
-						class="btn btn-lg"
-						:class="{ 'btn-secondary': !loggingin, 'btn-primary': loggingin }"
-						@click="loggingin = false">
+					<button type="button" :disabled="!loggingin" class="btn btn-lg"
+						:class="{ 'btn-secondary': !loggingin, 'btn-primary': loggingin }" @click="loggingin = false">
 						Register
 					</button>
 				</div>
@@ -41,28 +32,17 @@
 						<form @submit.prevent="onLogin()" class="card-text" id="loginForm">
 							<fieldset>
 								<div class="form-group">
-									<InputValidator
-										v-model="form.username"
-										v-model:valid="form.usernameValid"
-										type="text"
-										id="username"
-										name="Username"
-										autocomplete="username"
-										placeholder="Enter Username"
-										:rules="rules.usernameRules" />
+									<InputValidator v-model="form.username" v-model:valid="form.usernameValid"
+										type="text" id="username" name="Username" autocomplete="username"
+										placeholder="Enter Username" :rules="rules.usernameRules" />
 								</div>
 								<div class="form-group">
-									<InputValidator
-										v-model="form.password"
-										v-model:valid="form.passwordValid"
-										type="password"
-										id="password"
-										name="Password"
-										autocomplete="current-password"
-										placeholder="Enter Password"
-										:rules="rules.passwordRules" />
+									<InputValidator v-model="form.password" v-model:valid="form.passwordValid"
+										type="password" id="password" name="Password" autocomplete="current-password"
+										placeholder="Enter Password" :rules="rules.passwordRules" />
 								</div>
-								<button type="submit" :disabled="!(form.usernameValid && form.passwordValid)" class="mt-4 btn btn-primary">Login</button>
+								<button type="submit" :disabled="!(form.usernameValid && form.passwordValid)"
+									class="mt-4 btn btn-primary">Login</button>
 							</fieldset>
 						</form>
 					</div>
@@ -80,39 +60,23 @@
 						<form @submit.prevent="onRegister()" class="card-text" id="loginForm">
 							<fieldset>
 								<div class="form-group">
-									<InputValidator
-										v-model="form.token"
-										v-model:valid="form.tokenValid"
-										type="text"
-										id="token"
-										name="Token"
-										autocomplete="registertoken"
-										placeholder="Enter your Registration Token"
-										:rules="rules.tokenRules" />
+									<InputValidator v-model="form.token" v-model:valid="form.tokenValid" type="text"
+										id="token" name="Token" autocomplete="registertoken"
+										placeholder="Enter your Registration Token" :rules="rules.tokenRules" />
 								</div>
 								<div class="form-group">
-									<InputValidator
-										v-model="form.username"
-										v-model:valid="form.usernameValid"
-										type="text"
-										id="username"
-										name="Username"
-										autocomplete="username"
-										placeholder="Enter Username"
-										:rules="rules.usernameRules" />
+									<InputValidator v-model="form.username" v-model:valid="form.usernameValid"
+										type="text" id="username" name="Username" autocomplete="username"
+										placeholder="Enter Username" :rules="rules.usernameRules" />
 								</div>
 								<div class="form-group">
-									<InputValidator
-										v-model="form.password"
-										v-model:valid="form.passwordValid"
-										type="password"
-										id="password"
-										name="Password"
-										autocomplete="current-password"
-										placeholder="Enter Password"
-										:rules="rules.passwordRules" />
+									<InputValidator v-model="form.password" v-model:valid="form.passwordValid"
+										type="password" id="password" name="Password" autocomplete="current-password"
+										placeholder="Enter Password" :rules="rules.passwordRules" />
 								</div>
-								<button type="submit" :disabled="!(form.usernameValid && form.passwordValid && form.tokenValid)" class="mt-4 btn btn-primary">
+								<button type="submit"
+									:disabled="!(form.usernameValid && form.passwordValid && form.tokenValid)"
+									class="mt-4 btn btn-primary">
 									Register
 								</button>
 							</fieldset>
@@ -122,7 +86,7 @@
 			</div>
 			<div class="col-1"></div>
 			<div class="col-4">
-				<h2 class="text-muted text-center">
+				<h2 class="text-secondary text-center">
 					If you got here by accident I would recommend you to go home! <br />
 					This page is for known users only!
 					<br />

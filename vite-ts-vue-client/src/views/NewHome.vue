@@ -42,7 +42,7 @@
                         <img :src="franchise.logo" :alt="franchise.slug"
                             style="height: 5rem; width: 5rem; object-fit: contain;"></img>
                         <!-- <h3>{{ franchise.name }}</h3> -->
-                        <p class="text-muted mt-2 mb-1">{{ franchise.description }}</p>
+                        <p class="text-secondary mt-2 mb-1">{{ franchise.description }}</p>
                         <p class="text-info mb-2">{{ franchise.contentCount }}</p>
                         <button class="btn btn-outline-info">More Info</button>
                     </div>

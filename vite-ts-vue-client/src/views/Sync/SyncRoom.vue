@@ -16,12 +16,12 @@
 				entityObject: {{ entityObject }}
 				currentRoom: {{ currentRoom }}
 				isOwner: {{ isOwner }}
-		</pre
-		>
+		</pre>
 		<Modal v-if="currentRoom != null" size="xl" v-model:show="showSyncModal">
 			<template #title> Sync Room {{ currentRoom.ID }} Manager</template>
 			<template #body>
-				<h5 v-if="isOwner" class="text-danger text-center">If you promote a person you will automatically get demoted</h5>
+				<h5 v-if="isOwner" class="text-danger text-center">If you promote a person you will automatically get
+					demoted</h5>
 				<div class="table-responsive-md">
 					<table class="table">
 						<thead>
@@ -36,11 +36,8 @@
 								<td scope="row">{{ member.name }}</td>
 								<td>{{ toReadableRole(member.role) }}</td>
 								<td>
-									<button
-										v-if="member.role == 0 && isOwner"
-										@click="promote(member.UUID)"
-										type="button"
-										class="btn btn-primary me-3">
+									<button v-if="member.role == 0 && isOwner" @click="promote(member.UUID)"
+										type="button" class="btn btn-primary me-3">
 										Promote
 									</button>
 								</td>
@@ -64,64 +61,39 @@
 					<p class="card-text text-center">
 						<span> Active Sync Session... </span>
 						<br />
-						<span class="text-muted">{{ currentRoom.members.length }} Participants</span>
+						<span class="text-secondary">{{ currentRoom.members.length }} Participants</span>
 					</p>
 					<button @click="showSyncModal = true" class="btn btn-outline-info">Manage</button>
 				</div>
 			</div>
-			<AutoComplete
-				v-if="isOwner"
-				:options="{ placeholder: 'Select a Series...', clearAfterSelect: true }"
-				:data="autoCompleteSeries"
-				:select-fn="
-					(id) => {
+			<AutoComplete v-if="isOwner" :options="{ placeholder: 'Select a Series...', clearAfterSelect: true }"
+				:data="autoCompleteSeries" :select-fn="(id) => {
 						isOwner ? selectSeries(id) : null;
 					}
-				" />
+					" />
 		</div>
 		<div v-if="currentSeries != undefined && currentSeries.ID != '-1'">
 			<div v-if="isOwner">
 				<!-- Movies -->
-				<EntityListView
-					v-if="currentSeries.movies.length >= 1"
-					title="Movies:"
-					:array="currentSeries.movies"
-					:current="currentMovie"
-					:currentSeriesID="currentSeries.ID"
-					:changeFN="changeMovie"
+				<EntityListView v-if="currentSeries.movies.length >= 1" title="Movies:" :array="currentSeries.movies"
+					:current="currentMovie" :currentSeriesID="currentSeries.ID" :changeFN="changeMovie"
 					:watchList="watchList" />
 				<!-- Seasons -->
-				<EntityListView
-					title="Seasons:"
-					v-if="currentSeries.seasons.length >= 1"
-					:array="currentSeries.seasons"
-					:current="currentSeason"
-					:currentSeriesID="currentSeries.ID"
-					:changeFN="changeSeason"
-					:season="true"
+				<EntityListView title="Seasons:" v-if="currentSeries.seasons.length >= 1" :array="currentSeries.seasons"
+					:current="currentSeason" :currentSeriesID="currentSeries.ID" :changeFN="changeSeason" :season="true"
 					:watchList="watchList" />
 				<!-- Episodes -->
-				<EntityListView
-					v-if="currentSeason != -1"
-					title="Episodes:"
+				<EntityListView v-if="currentSeason != -1" title="Episodes:"
 					:array="currentSeries.seasons.find((x) => x[0].season == (entityObject as SerieEpisode)?.season)"
-					:current="currentEpisode"
-					:currentSeason="currentSeason"
-					:currentSeriesID="currentSeries.ID"
-					:changeFN="changeEpisode"
-					:watchList="watchList" />
+					:current="currentEpisode" :currentSeason="currentSeason" :currentSeriesID="currentSeries.ID"
+					:changeFN="changeEpisode" :watchList="watchList" />
 
 				<EntityActionsInformation :switch-to="switchTo" :change-language="changeLanguage" />
 			</div>
 
-			<ExtendedVideo
-				ref="extendedVideoChild"
-				v-show="showVideo"
-				:events="{ playback: deepPlayback, skip: deepSkip, skipTimeline: deepSkipTimeline }"
-				:inSyncRoom="true"
-				:canPlay="isOwner"
-				:switchTo="switchTo"
-				:sendVideoTimeUpdate="sendVideoTimeUpdate" />
+			<ExtendedVideo ref="extendedVideoChild" v-show="showVideo"
+				:events="{ playback: deepPlayback, skip: deepSkip, skipTimeline: deepSkipTimeline }" :inSyncRoom="true"
+				:canPlay="isOwner" :switchTo="switchTo" :sendVideoTimeUpdate="sendVideoTimeUpdate" />
 		</div>
 	</div>
 </template>

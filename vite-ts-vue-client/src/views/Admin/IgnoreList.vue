@@ -9,17 +9,15 @@
 		<div v-else>
 			<div class="d-flex justify-content-center">
 				<div class="mb-3 ms-5 me-5">
-					<AutoComplete
-						:options="{ placeholder: 'Add a Series', clearAfterSelect: true }"
-						:data="autoCompleteSeries"
-						:select-fn="addIgnoranceItem" />
+					<AutoComplete :options="{ placeholder: 'Add a Series', clearAfterSelect: true }"
+						:data="autoCompleteSeries" :select-fn="addIgnoranceItem" />
 				</div>
 			</div>
 
 			<!-- <div class="mb-3 ms-5 me-5">
 				<label for="searchTerm" class="form-label">Search</label>
 				<input v-model="searchTerm" type="text" class="form-control" id="searchTerm" aria-describedby="helpId" placeholder="Name or ID" />
-				<small id="helpId" class="form-text text-muted">Name or ID of the Series</small>
+				<small id="helpId" class="form-text text-secondary">Name or ID of the Series</small>
 			</div> -->
 			<div class="d-flex justify-content-center">
 				<div class="table-responsive">
@@ -37,7 +35,8 @@
 									<td scope="row">{{ entity.ID }}</td>
 									<td>{{ entity.title }}</td>
 									<td>
-										<button type="button" class="btn btn-outline-danger" @click="removeIgnoranceItem(entity.ID)">Delete</button>
+										<button type="button" class="btn btn-outline-danger"
+											@click="removeIgnoranceItem(entity.ID)">Delete</button>
 									</td>
 								</template>
 							</tr>
@@ -64,7 +63,7 @@ import { computed, onMounted, ref } from 'vue';
 const indexStore = useIndexStore();
 const adminStore = useAdminStore();
 
-const ignoreList = ref<{ ID: string; title: string }[]>([]);
+const ignoreList = ref<{ ID: string; title: string; }[]>([]);
 
 const autoCompleteSeries = computed(() => {
 	return indexStore.series.map((x) => ({ value: x.title, ID: x.ID })).filter((x) => x.value);
@@ -102,7 +101,7 @@ const entitys = computed(() => {
 onMounted(async () => {
 	document.title = `Cinema | Admin-IgnoreList`;
 
-	const response = await useAxios().get<{ ID: string; title: string }[]>('ignorelist');
+	const response = await useAxios().get<{ ID: string; title: string; }[]>('ignorelist');
 	ignoreList.value = response.data;
 });
 </script>

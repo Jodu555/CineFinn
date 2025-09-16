@@ -13,23 +13,23 @@
 				<ul class="list-group list-group-flush mb-2">
 					<li class="list-group-item">
 						<h5>
-							<b>Username:</b> <span class="text-muted">{{ userInfo.username }}</span>
+							<b>Username:</b> <span class="text-secondary">{{ userInfo.username }}</span>
 						</h5>
 					</li>
 					<li class="list-group-item">
 						<h5>
-							<b>E-Mail:</b> <span class="text-muted">{{ userInfo.email }}</span>
+							<b>E-Mail:</b> <span class="text-secondary">{{ userInfo.email }}</span>
 						</h5>
 					</li>
 					<li class="list-group-item">
 						<h5>
-							<b>Rolle:</b> <span class="text-muted">{{ roleIDToName(userInfo.role) }}</span>
+							<b>Rolle:</b> <span class="text-secondary">{{ roleIDToName(userInfo.role) }}</span>
 						</h5>
 					</li>
 					<!-- <li class="list-group-item">
 						<h5>
 							<b>Password: </b>
-							<span class="text-muted"><a href="#" @click="togglePasswordResetModal = true">Reset</a></span>
+							<span class="text-secondary"><a href="#" @click="togglePasswordResetModal = true">Reset</a></span>
 						</h5>
 					</li> -->
 				</ul>
@@ -203,13 +203,10 @@ export default {
 			} catch (error) { }
 		},
 		async start(id: string) {
-			console.log(id);
 
 			let extra = '';
 			let job: Job | undefined;
 			if (id.endsWith('-smart') || id.endsWith('-old')) {
-				console.log('came');
-
 				extra = id.split('-')[1];
 				job = this.jobs.find((j) => j.id == id.replace('-smart', '').replace('-old', ''));
 			} else {
@@ -230,10 +227,8 @@ export default {
 			});
 
 			try {
-
-				console.log(`/managment${job.callpoint}-${extra}`);
-
-				// const response = await useAxios().get(`/managment${job.callpoint}`);
+				const actualCallPoint = `/managment${job.callpoint}${extra ? `-${extra}` : ''}`;
+				const response = await useAxios().get(actualCallPoint);
 			} catch (error: any) {
 				job.running = false;
 				this.$swal({
