@@ -94,19 +94,19 @@
 					<fieldset>
 						<div class="form-group">
 							<InputValidator v-model="form.oldPassword" v-model:valid="form.oldPasswordValid"
-								:type="showPasswords ? 'text' : 'password'" id="password" name="Old Password"
+								:type="showPasswords ? 'text' : 'password'" id="old-password" name="Old Password"
 								autocomplete="old-password" placeholder="Enter Old Password"
 								:rules="rules.passwordRules" />
 						</div>
 						<div class="form-group">
 							<InputValidator v-model="form.newPassword" v-model:valid="form.newPasswordValid"
-								:type="showPasswords ? 'text' : 'password'" id="password" name="New Password"
+								:type="showPasswords ? 'text' : 'password'" id="new-password" name="New Password"
 								autocomplete="current-password" placeholder="Enter Password"
 								:rules="rules.passwordRules" />
 						</div>
 						<div class="form-group">
 							<InputValidator v-model="form.newPasswordAgain" v-model:valid="form.newPasswordAgainValid"
-								:type="showPasswords ? 'text' : 'password'" id="password" name="Password"
+								:type="showPasswords ? 'text' : 'password'" id="repeat-new-password" name="Password"
 								autocomplete="current-password" placeholder="Enter Password"
 								:rules="computedRules.passwordAgainRules" />
 						</div>
