@@ -1,5 +1,5 @@
 <template>
-	<div class="col" :id="entity.ID">
+	<div class="col" style="content-visibility: auto;" :id="entity.ID">
 		<div class="card" :class="{ 'border-success': highlighted }" v-auto-animate>
 			<pre v-if="settings.developerMode.value">
 				{{ { editing: editing, title: entity.title, categorie: entity.categorie, infos: entity.infos, references: entity.references } }}
@@ -26,16 +26,16 @@
 							@click="showDescription = false">Less</small>
 						<br />
 					</template>
-					<template v-else>
+					<!-- <template v-else>
 						Here will later be provided some description an image and the start + end Date
 						<br />
 						<br />
-					</template>
+					</template> -->
 
 					<small v-if="entity.infos.startDate || entity.infos.endDate" class="text-secondary">{{
 						entity.infos.startDate }} - {{
 							entity.infos.endDate }}</small>
-					<small v-else class="text-mute">- Get Ready for it</small>
+					<!-- <small v-else class="text-mute">- Get Ready for it</small> -->
 				</p>
 				<button @click="goAndWatch" class="btn btn-outline-primary btn-sm">
 					Go & Watch
@@ -43,7 +43,7 @@
 				<!-- <router-link class="btn btn-outline-primary btn-sm" :to="'/watch?id=' + entity.ID">Go &
 					Watch</router-link> -->
 
-				<div class="d-flex">
+				<div v-if="userInfo.role >= 2" class="d-flex">
 					<p class="ms-auto text-secondary" style="margin-bottom: 0.1rem">ID: {{ entity.ID }}</p>
 				</div>
 				<button v-if="settings.showNewsAddForm.value && userInfo.role >= 2" type="button"

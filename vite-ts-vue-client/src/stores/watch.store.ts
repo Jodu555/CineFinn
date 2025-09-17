@@ -120,6 +120,26 @@ export const useWatchStore = defineStore('watch', {
 				console.error('Error in watch.store.ts', error);
 			}
 		},
+		unloadSeriesInfo(ID: string) {
+
+			const index = useIndexStore();
+
+			const data = index.series.map((s) => {
+				if (s.ID === ID) {
+					console.log('UNLOADING', s);
+					const obj = {
+						...s,
+						seasons: s.seasons.map((s, i) => -1) as any
+					};
+					console.log(obj);
+
+					return obj;
+				} else {
+					return s;
+				}
+			});
+			index.series = data;
+		},
 		async loadWatchList(ID: string) {
 			const response = await useAxios().get(`/watch/info?series=${ID}`);
 			if (response.status == 200) this.watchList = response.data;

@@ -206,10 +206,15 @@ onBeforeUnmount(() => {
 	}
 	localStorage.removeItem('data');
 	document.title = `Cinema | Jodu555`;
+
 });
 
 onUnmounted(() => {
 	useSocket().off('watchListChange');
+
+	const seriesID = watchStore.currentSeries?.ID;
+	if (seriesID == undefined) return;
+	watchStore.unloadSeriesInfo(seriesID);
 });
 
 const showDisabled = computed(() => {
