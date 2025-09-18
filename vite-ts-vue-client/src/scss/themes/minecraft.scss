@@ -1,0 +1,587 @@
+[data-bs-theme="minecraft"] {
+	/* Body & Background Colors - Stone/Cobblestone */
+	--bs-body-color: oklch(0.90 0.02 80);
+	/* Light text like torchlight */
+	--bs-body-color-rgb: 238, 235, 230;
+	/* RGB equivalent */
+	--bs-body-bg: oklch(0.18 0.03 60);
+	/* Dark stone background */
+	--bs-body-bg-rgb: 50, 48, 45;
+	/* RGB equivalent */
+
+	/* Emphasis & Secondary Colors */
+	--bs-emphasis-color: oklch(0.95 0.02 80);
+	/* Bright white like snow/quartz */
+	--bs-emphasis-color-rgb: 248, 246, 242;
+	--bs-secondary-color: oklch(0.62 0.04 70);
+	/* Muted text like cobblestone */
+	--bs-secondary-color-rgb: 165, 162, 155;
+	--bs-secondary-bg: oklch(0.25 0.03 60);
+	/* Secondary background like stone bricks */
+	--bs-secondary-bg-rgb: 68, 65, 62;
+
+	/* Tertiary Colors */
+	--bs-tertiary-color: oklch(0.62 0.04 75);
+	/* Muted stone color */
+	--bs-tertiary-color-rgb: 165, 162, 158;
+	--bs-tertiary-bg: oklch(0.22 0.03 60);
+	/* Card background like smooth stone */
+	--bs-tertiary-bg-rgb: 60, 57, 54;
+
+	/* Theme Colors - Primary (Grass Green) */
+	--bs-primary: oklch(0.55 0.18 135);
+	/* Classic grass block green */
+	--bs-primary-rgb: 46, 165, 46;
+	--bs-primary-text-emphasis: oklch(0.75 0.15 135);
+	/* Lighter grass text */
+	--bs-primary-bg-subtle: oklch(0.20 0.06 135);
+	/* Subtle grass background */
+	--bs-primary-border-subtle: oklch(0.35 0.12 135);
+	/* Subtle grass border */
+
+	/* Theme Colors - Secondary (Stone) */
+	--bs-secondary: oklch(0.25 0.03 60);
+	/* Stone gray */
+	--bs-secondary-rgb: 68, 65, 62;
+	--bs-secondary-text-emphasis: oklch(0.90 0.02 80);
+	--bs-secondary-bg-subtle: oklch(0.22 0.03 60);
+	--bs-secondary-border-subtle: oklch(0.30 0.03 60);
+
+	/* Theme Colors - Success (Emerald) */
+	--bs-success: oklch(0.62 0.20 165);
+	/* Emerald green */
+	--bs-success-rgb: 20, 195, 90;
+	--bs-success-text-emphasis: oklch(0.78 0.16 165);
+	--bs-success-bg-subtle: oklch(0.20 0.06 165);
+	--bs-success-border-subtle: oklch(0.35 0.12 165);
+
+	/* Theme Colors - Info (Diamond Blue) */
+	--bs-info: oklch(0.60 0.15 220);
+	/* Diamond/water blue */
+	--bs-info-rgb: 64, 156, 255;
+	--bs-info-text-emphasis: oklch(0.75 0.12 220);
+	--bs-info-bg-subtle: oklch(0.20 0.05 220);
+	--bs-info-border-subtle: oklch(0.35 0.10 220);
+
+	/* Theme Colors - Warning (Gold) */
+	--bs-warning: oklch(0.75 0.15 75);
+	/* Gold ingot yellow */
+	--bs-warning-rgb: 255, 215, 0;
+	--bs-warning-text-emphasis: oklch(0.85 0.12 75);
+	--bs-warning-bg-subtle: oklch(0.20 0.04 75);
+	--bs-warning-border-subtle: oklch(0.35 0.08 75);
+
+	/* Theme Colors - Danger (Redstone/Lava) */
+	--bs-danger: oklch(0.55 0.25 15);
+	/* Redstone/lava red */
+	--bs-danger-rgb: 220, 20, 20;
+	--bs-danger-text-emphasis: oklch(0.72 0.20 15);
+	--bs-danger-bg-subtle: oklch(0.20 0.08 15);
+	--bs-danger-border-subtle: oklch(0.35 0.15 15);
+
+	/* Theme Colors - Light (Glowstone) */
+	--bs-light: oklch(0.90 0.02 80);
+	/* Glowstone light */
+	--bs-light-rgb: 238, 235, 230;
+	--bs-light-text-emphasis: oklch(0.18 0.03 60);
+	--bs-light-bg-subtle: oklch(0.85 0.03 80);
+	--bs-light-border-subtle: oklch(0.72 0.04 80);
+
+	/* Theme Colors - Dark (Obsidian) */
+	--bs-dark: oklch(0.15 0.02 270);
+	/* Obsidian black */
+	--bs-dark-rgb: 38, 35, 40;
+	--bs-dark-text-emphasis: oklch(0.90 0.02 80);
+	--bs-dark-bg-subtle: oklch(0.18 0.03 60);
+	--bs-dark-border-subtle: oklch(0.25 0.03 60);
+
+	/* Headings */
+	--bs-heading-color: oklch(0.92 0.03 80);
+	/* Bright heading like enchanted text */
+
+	/* Links */
+	--bs-link-color: oklch(0.55 0.18 135);
+	/* Primary grass green */
+	--bs-link-color-rgb: 46, 165, 46;
+	--bs-link-hover-color: oklch(0.65 0.16 135);
+	/* Lighter grass on hover */
+	--bs-link-hover-color-rgb: 78, 195, 78;
+
+	/* Borders */
+	--bs-border-color: oklch(0.32 0.03 60);
+	/* Stone border color */
+	--bs-border-color-rgb: 88, 85, 82;
+	--bs-border-color-translucent: rgba(46, 165, 46, 0.15);
+	/* Translucent grass green */
+
+	/* Code */
+	--bs-code-color: oklch(0.75 0.12 280);
+	/* Purple like enchanted items */
+
+	/* Highlights */
+	--bs-highlight-color: oklch(0.15 0.02 270);
+	/* Dark text for highlights */
+	--bs-highlight-bg: oklch(0.75 0.15 75);
+	/* Gold background */
+
+	/* Forms */
+	--bs-form-valid-color: oklch(0.62 0.20 165);
+	/* Emerald green */
+	--bs-form-valid-border-color: oklch(0.62 0.20 165);
+	--bs-form-invalid-color: oklch(0.55 0.25 15);
+	/* Redstone red */
+	--bs-form-invalid-border-color: oklch(0.55 0.25 15);
+
+	/* Component specific overrides */
+
+	/* Cards - Crafting table style */
+	.card {
+		--bs-card-bg: oklch(0.22 0.03 60);
+		/* Smooth stone background */
+		--bs-card-border-color: oklch(0.32 0.03 60);
+		box-shadow: 
+			inset -2px -2px 0 oklch(0.15 0.02 60),
+			inset 2px 2px 0 oklch(0.35 0.04 60),
+			2px 2px 4px oklch(0.10 0.02 60 / 0.3);
+		/* Minecraft block shadow effect */
+		border-radius: 2px;
+		/* Pixelated corners */
+		
+		&.card-crafting {
+			background: 
+				linear-gradient(45deg, oklch(0.45 0.08 45) 25%, oklch(0.40 0.06 40) 25%),
+				linear-gradient(-45deg, oklch(0.45 0.08 45) 25%, oklch(0.40 0.06 40) 25%),
+				linear-gradient(45deg, oklch(0.40 0.06 40) 75%, oklch(0.45 0.08 45) 75%),
+				linear-gradient(-45deg, oklch(0.40 0.06 40) 75%, oklch(0.45 0.08 45) 75%);
+			background-size: 16px 16px;
+			background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+			/* Crafting table wood pattern */
+		}
+		
+		&.card-grass {
+			background: linear-gradient(to bottom, oklch(0.55 0.18 135) 0%, oklch(0.35 0.12 45) 100%);
+			/* Grass block gradient */
+		}
+		
+		&.card-stone {
+			background-image: 
+				radial-gradient(circle at 25% 25%, oklch(0.28 0.03 60) 2px, transparent 2px),
+				radial-gradient(circle at 75% 75%, oklch(0.20 0.03 60) 1px, transparent 1px);
+			/* Stone texture pattern */
+		}
+	}
+
+	/* Dropdowns - Inventory style */
+	.dropdown-menu {
+		--bs-dropdown-bg: oklch(0.22 0.03 60);
+		/* Inventory background */
+		--bs-dropdown-border-color: oklch(0.35 0.04 60);
+		--bs-dropdown-link-color: oklch(0.90 0.02 80);
+		--bs-dropdown-link-hover-bg: oklch(0.28 0.03 60);
+		--bs-dropdown-link-active-bg: oklch(0.55 0.18 135);
+		box-shadow: 
+			inset -2px -2px 0 oklch(0.15 0.02 60),
+			inset 2px 2px 0 oklch(0.35 0.04 60),
+			4px 4px 8px oklch(0.10 0.02 60 / 0.4);
+		border-radius: 2px;
+		
+		.dropdown-item {
+			border-radius: 0;
+			margin: 1px;
+			border: 1px solid transparent;
+			
+			&:hover {
+				border-color: oklch(0.75 0.15 75);
+				/* Gold selection border */
+				box-shadow: inset 0 0 4px oklch(0.75 0.15 75 / 0.3);
+			}
+		}
+	}
+
+	/* Modals - Chest interface */
+	.modal-content {
+		--bs-modal-bg: oklch(0.25 0.04 45);
+		/* Wood chest color */
+		--bs-modal-border-color: oklch(0.35 0.06 45);
+		box-shadow: 
+			inset -3px -3px 0 oklch(0.20 0.03 45),
+			inset 3px 3px 0 oklch(0.35 0.05 45),
+			0 8px 32px oklch(0.08 0.02 60 / 0.5);
+		border-radius: 4px;
+		
+		.modal-header {
+			background: linear-gradient(to bottom, oklch(0.30 0.05 45), oklch(0.25 0.04 45));
+			border-bottom: 2px solid oklch(0.35 0.06 45);
+			
+			.modal-title {
+				text-shadow: 1px 1px 2px oklch(0.10 0.02 60);
+				font-weight: bold;
+			}
+		}
+	}
+
+	/* Buttons - Block style */
+	.btn {
+		border-radius: 2px;
+		font-weight: 500;
+		text-shadow: 1px 1px 1px oklch(0.10 0.02 60 / 0.5);
+		transition: all 0.1s ease;
+		
+		&:active {
+			transform: translate(1px, 1px);
+			/* Block press effect */
+		}
+	}
+
+	.btn-primary {
+		background: linear-gradient(to bottom, oklch(0.60 0.18 135), oklch(0.50 0.18 135));
+		border-color: oklch(0.45 0.18 135);
+		box-shadow: 
+			inset -2px -2px 0 oklch(0.45 0.15 135),
+			inset 2px 2px 0 oklch(0.65 0.20 135),
+			2px 2px 4px oklch(0.10 0.02 60 / 0.3);
+		
+		&:hover {
+			background: linear-gradient(to bottom, oklch(0.65 0.18 135), oklch(0.55 0.18 135));
+			box-shadow: 
+				inset -2px -2px 0 oklch(0.50 0.15 135),
+				inset 2px 2px 0 oklch(0.70 0.20 135),
+				2px 2px 6px oklch(0.10 0.02 60 / 0.4);
+		}
+	}
+
+	.btn-secondary {
+		background: linear-gradient(to bottom, oklch(0.30 0.03 60), oklch(0.25 0.03 60));
+		border-color: oklch(0.20 0.03 60);
+		box-shadow: 
+			inset -2px -2px 0 oklch(0.20 0.02 60),
+			inset 2px 2px 0 oklch(0.35 0.04 60);
+	}
+
+	.btn-success {
+		background: linear-gradient(to bottom, oklch(0.67 0.20 165), oklch(0.57 0.20 165));
+		border-color: oklch(0.52 0.20 165);
+		box-shadow: 
+			inset -2px -2px 0 oklch(0.52 0.18 165),
+			inset 2px 2px 0 oklch(0.72 0.22 165);
+		/* Emerald block style */
+	}
+
+	.btn-warning {
+		background: linear-gradient(to bottom, oklch(0.80 0.15 75), oklch(0.70 0.15 75));
+		border-color: oklch(0.65 0.15 75);
+		color: oklch(0.15 0.02 60);
+		text-shadow: none;
+		box-shadow: 
+			inset -2px -2px 0 oklch(0.65 0.12 75),
+			inset 2px 2px 0 oklch(0.85 0.18 75);
+		/* Gold block style */
+	}
+
+	.btn-danger {
+		background: linear-gradient(to bottom, oklch(0.60 0.25 15), oklch(0.50 0.25 15));
+		border-color: oklch(0.45 0.25 15);
+		box-shadow: 
+			inset -2px -2px 0 oklch(0.45 0.22 15),
+			inset 2px 2px 0 oklch(0.65 0.28 15);
+		/* Redstone block style */
+	}
+
+	.btn-info {
+		background: linear-gradient(to bottom, oklch(0.65 0.15 220), oklch(0.55 0.15 220));
+		border-color: oklch(0.50 0.15 220);
+		box-shadow: 
+			inset -2px -2px 0 oklch(0.50 0.12 220),
+			inset 2px 2px 0 oklch(0.70 0.18 220);
+		/* Diamond block style */
+	}
+
+	/* Tables - Inventory grid */
+	.table {
+		--bs-table-bg: oklch(0.20 0.03 60);
+		--bs-table-border-color: oklch(0.32 0.03 60);
+		--bs-table-striped-bg: oklch(0.18 0.03 60);
+		--bs-table-hover-bg: oklch(0.25 0.03 60);
+		border-radius: 2px;
+		
+		th, td {
+			border-width: 2px;
+			border-style: inset;
+			border-color: oklch(0.35 0.04 60);
+			padding: 8px;
+			position: relative;
+			
+			&:hover {
+				background: oklch(0.28 0.03 60);
+				box-shadow: inset 0 0 4px oklch(0.75 0.15 75 / 0.3);
+				/* Item slot hover */
+			}
+		}
+		
+		&.table-inventory {
+			td {
+				width: 40px;
+				height: 40px;
+				text-align: center;
+				vertical-align: middle;
+				background-size: 32px 32px;
+				background-position: center;
+				background-repeat: no-repeat;
+			}
+		}
+	}
+
+	/* Forms - Anvil/Enchanting style */
+	.form-control,
+	.form-select {
+		--bs-body-bg: oklch(0.25 0.03 60);
+		--bs-border-color: oklch(0.35 0.04 60);
+		border-radius: 2px;
+		border-width: 2px;
+		border-style: inset;
+		box-shadow: inset 2px 2px 4px oklch(0.15 0.02 60 / 0.5);
+		
+		&::placeholder {
+			color: oklch(0.55 0.04 70);
+		}
+	}
+
+	.form-control:focus,
+	.form-select:focus {
+		--bs-border-color: oklch(0.75 0.12 280);
+		/* Enchanted purple border */
+		box-shadow: 
+			inset 2px 2px 4px oklch(0.15 0.02 60 / 0.5),
+			0 0 8px oklch(0.75 0.12 280 / 0.4);
+		/* Enchanted glow */
+	}
+
+	.form-check-input {
+		border-radius: 1px;
+		border-width: 2px;
+		
+		&:checked {
+			background-color: oklch(0.55 0.18 135);
+			border-color: oklch(0.45 0.18 135);
+			background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+		}
+	}
+
+	/* Progress bars - XP bar style */
+	.progress {
+		--bs-progress-bg: oklch(0.15 0.02 60);
+		height: 12px;
+		border-radius: 6px;
+		border: 2px solid oklch(0.25 0.03 60);
+		box-shadow: inset 0 2px 4px oklch(0.10 0.02 60 / 0.5);
+	}
+
+	.progress-bar {
+		background: linear-gradient(to bottom, oklch(0.75 0.15 120), oklch(0.65 0.15 120));
+		border-radius: 4px;
+		box-shadow: 
+			inset 0 1px 0 oklch(0.85 0.18 120),
+			inset 0 -1px 0 oklch(0.55 0.12 120);
+		/* XP bar gradient */
+		position: relative;
+		
+		&::after {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(90deg, 
+				transparent 0%, 
+				oklch(0.95 0.08 120 / 0.3) 45%, 
+				oklch(0.98 0.12 120 / 0.6) 50%, 
+				oklch(0.95 0.08 120 / 0.3) 55%, 
+				transparent 100%);
+			animation: xp-gleam 3s infinite linear;
+		}
+	}
+
+	/* Badges - Item count style */
+	.badge {
+		border-radius: 2px;
+		font-family: monospace;
+		font-weight: bold;
+		text-shadow: 1px 1px 1px oklch(0.08 0.02 60);
+		
+		&.text-bg-primary {
+			background: oklch(0.55 0.18 135) !important;
+			box-shadow: inset -1px -1px 0 oklch(0.45 0.15 135);
+		}
+		
+		&.text-bg-warning {
+			background: oklch(0.75 0.15 75) !important;
+			color: oklch(0.15 0.02 60) !important;
+			text-shadow: none;
+		}
+	}
+
+	/* Alerts - Achievement style */
+	.alert {
+		border-radius: 4px;
+		border-width: 2px;
+		border-style: solid;
+		
+		&.alert-success {
+			background: linear-gradient(135deg, 
+				oklch(0.82 0.10 165) 0%, 
+				oklch(0.78 0.12 165) 100%);
+			border-color: oklch(0.62 0.20 165);
+			color: oklch(0.15 0.05 165);
+			
+			&::before {
+				content: "🏆 Achievement Unlocked! ";
+				font-weight: bold;
+			}
+		}
+		
+		&.alert-warning {
+			background: linear-gradient(135deg, 
+				oklch(0.85 0.08 75) 0%, 
+				oklch(0.80 0.10 75) 100%);
+			border-color: oklch(0.75 0.15 75);
+			color: oklch(0.15 0.02 60);
+		}
+	}
+
+	/* Navigation - Hotbar style */
+	.navbar {
+		background: linear-gradient(to bottom, 
+			oklch(0.25 0.03 60), 
+			oklch(0.20 0.03 60));
+		border-bottom: 3px solid oklch(0.35 0.04 60);
+		box-shadow: 0 2px 8px oklch(0.08 0.02 60 / 0.3);
+		
+		.navbar-brand {
+			font-weight: bold;
+			text-shadow: 2px 2px 4px oklch(0.08 0.02 60);
+			color: oklch(0.75 0.15 75) !important;
+			/* Gold text like enchanted items */
+		}
+		
+		.nav-link {
+			border-radius: 2px;
+			margin: 2px;
+			transition: all 0.2s ease;
+			
+			&:hover {
+				background: oklch(0.28 0.03 60);
+				box-shadow: inset 0 0 4px oklch(0.75 0.15 75 / 0.3);
+				/* Hotbar selection */
+			}
+		}
+	}
+
+	/* Custom Minecraft animations */
+	@keyframes xp-gleam {
+		0% { transform: translateX(-100%); }
+		100% { transform: translateX(300%); }
+	}
+
+	@keyframes block-break {
+		0%, 100% { transform: scale(1); }
+		50% { transform: scale(0.95); }
+	}
+
+	@keyframes enchanted-glow {
+		0%, 100% { 
+			text-shadow: 
+				0 0 5px oklch(0.75 0.12 280 / 0.8),
+				0 0 10px oklch(0.75 0.12 280 / 0.6),
+				0 0 15px oklch(0.75 0.12 280 / 0.4);
+		}
+		50% { 
+			text-shadow: 
+				0 0 8px oklch(0.75 0.12 280 / 1.0),
+				0 0 15px oklch(0.75 0.12 280 / 0.8),
+				0 0 25px oklch(0.75 0.12 280 / 0.6);
+		}
+	}
+
+	/* Special Minecraft utility classes */
+	.minecraft-enchanted {
+		animation: enchanted-glow 2s infinite alternate;
+		color: oklch(0.75 0.12 280) !important;
+	}
+
+	.minecraft-breaking {
+		animation: block-break 0.3s infinite;
+	}
+
+	.minecraft-block {
+		box-shadow: 
+			inset -2px -2px 0 oklch(0.15 0.02 60),
+			inset 2px 2px 0 oklch(0.35 0.04 60);
+		border-radius: 2px;
+	}
+
+	.minecraft-pixelated {
+		image-rendering: pixelated;
+		image-rendering: -moz-crisp-edges;
+		image-rendering: crisp-edges;
+	}
+
+	/* Tool durability bar */
+	.durability-bar {
+		height: 4px;
+		background: oklch(0.15 0.02 60);
+		border-radius: 2px;
+		overflow: hidden;
+		
+		.durability-fill {
+			height: 100%;
+			transition: width 0.3s ease;
+			
+			&.durability-high {
+				background: oklch(0.55 0.18 135);
+			}
+			
+			&.durability-medium {
+				background: oklch(0.75 0.15 75);
+			}
+			
+			&.durability-low {
+				background: oklch(0.55 0.25 15);
+			}
+		}
+	}
+
+	/* Item rarity colors */
+	.rarity-common { color: oklch(0.90 0.02 80); }
+	.rarity-uncommon { color: oklch(0.75 0.15 75); }
+	.rarity-rare { color: oklch(0.65 0.15 220); }
+	.rarity-epic { color: oklch(0.75 0.12 280); }
+	.rarity-legendary { color: oklch(0.72 0.20 25); }
+
+	/* Block texture backgrounds */
+	.bg-grass { 
+		background: linear-gradient(to bottom, oklch(0.55 0.18 135) 0%, oklch(0.35 0.12 45) 100%); 
+	}
+	
+	.bg-stone { 
+		background: oklch(0.22 0.03 60);
+		background-image: 
+			radial-gradient(circle at 25% 25%, oklch(0.28 0.03 60) 2px, transparent 2px),
+			radial-gradient(circle at 75% 75%, oklch(0.18 0.03 60) 1px, transparent 1px);
+	}
+	
+	.bg-wood { 
+		background: oklch(0.40 0.06 40);
+		background-image: 
+			linear-gradient(90deg, oklch(0.35 0.05 35) 50%, transparent 50%);
+		background-size: 4px 100%;
+	}
+	
+	.bg-cobblestone { 
+		background: oklch(0.25 0.03 60);
+		background-image: 
+			radial-gradient(circle at 20% 50%, oklch(0.30 0.03 60) 3px, transparent 3px),
+			radial-gradient(circle at 80% 25%, oklch(0.20 0.03 60) 2px, transparent 2px),
+			radial-gradient(circle at 60% 75%, oklch(0.28 0.03 60) 2px, transparent 2px);
+	}
+}

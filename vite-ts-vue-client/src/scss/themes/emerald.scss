@@ -1,0 +1,270 @@
+[data-bs-theme="emerald"] {
+	/* Body & Background Colors */
+	--bs-body-color: oklch(0.95 0.02 160);
+	/* Very light text with subtle green tint */
+	--bs-body-color-rgb: 240, 242, 240;
+	/* RGB equivalent */
+	--bs-body-bg: oklch(0.08 0.05 160);
+	/* Very dark background with green undertone */
+	--bs-body-bg-rgb: 18, 22, 19;
+	/* RGB equivalent */
+
+	/* Emphasis & Secondary Colors */
+	--bs-emphasis-color: oklch(0.98 0.03 160);
+	/* Near white with green hint */
+	--bs-emphasis-color-rgb: 248, 255, 250;
+	--bs-secondary-color: oklch(0.65 0.05 160);
+	/* Muted text with green tint */
+	--bs-secondary-color-rgb: 160, 170, 162;
+	--bs-secondary-bg: oklch(0.15 0.04 160);
+	/* Secondary background */
+	--bs-secondary-bg-rgb: 35, 42, 37;
+
+	/* Tertiary Colors */
+	--bs-tertiary-color: oklch(0.65 0.04 160);
+	/* Same as muted */
+	--bs-tertiary-color-rgb: 160, 168, 162;
+	--bs-tertiary-bg: oklch(0.12 0.04 160);
+	/* Card background */
+	--bs-tertiary-bg-rgb: 28, 33, 30;
+
+	/* Theme Colors - Primary (Emerald) */
+	--bs-primary: oklch(0.64 0.17 162);
+	/* Emerald primary */
+	--bs-primary-rgb: 52, 211, 153;
+	--bs-primary-text-emphasis: oklch(0.78 0.15 162);
+	/* Lighter emerald text */
+	--bs-primary-bg-subtle: oklch(0.12 0.06 162);
+	/* Subtle emerald background */
+	--bs-primary-border-subtle: oklch(0.3 0.12 162);
+	/* Subtle emerald border */
+
+	/* Theme Colors - Secondary */
+	--bs-secondary: oklch(0.15 0.04 160);
+	/* Dark green-gray */
+	--bs-secondary-rgb: 35, 42, 37;
+	--bs-secondary-text-emphasis: oklch(0.95 0.02 160);
+	--bs-secondary-bg-subtle: oklch(0.12 0.04 160);
+	--bs-secondary-border-subtle: oklch(0.2 0.04 160);
+
+	/* Theme Colors - Success */
+	--bs-success: oklch(0.70 0.18 145);
+	/* Forest green */
+	--bs-success-rgb: 34, 197, 94;
+	--bs-success-text-emphasis: oklch(0.82 0.15 145);
+	--bs-success-bg-subtle: oklch(0.12 0.06 145);
+	--bs-success-border-subtle: oklch(0.3 0.12 145);
+
+	/* Theme Colors - Info */
+	--bs-info: oklch(0.62 0.16 180);
+	/* Teal accent */
+	--bs-info-rgb: 20, 184, 166;
+	--bs-info-text-emphasis: oklch(0.76 0.14 180);
+	--bs-info-bg-subtle: oklch(0.12 0.06 180);
+	--bs-info-border-subtle: oklch(0.3 0.12 180);
+
+	/* Theme Colors - Warning */
+	--bs-warning: oklch(0.78 0.16 85);
+	/* Lime yellow */
+	--bs-warning-rgb: 217, 199, 54;
+	--bs-warning-text-emphasis: oklch(0.86 0.14 85);
+	--bs-warning-bg-subtle: oklch(0.12 0.05 85);
+	--bs-warning-border-subtle: oklch(0.3 0.10 85);
+
+	/* Theme Colors - Danger */
+	--bs-danger: oklch(0.58 0.20 15);
+	/* Red destructive */
+	--bs-danger-rgb: 239, 68, 68;
+	--bs-danger-text-emphasis: oklch(0.76 0.18 15);
+	--bs-danger-bg-subtle: oklch(0.12 0.05 15);
+	--bs-danger-border-subtle: oklch(0.3 0.12 15);
+
+	/* Theme Colors - Light */
+	--bs-light: oklch(0.95 0.02 160);
+	/* Light text with green hint */
+	--bs-light-rgb: 240, 242, 240;
+	--bs-light-text-emphasis: oklch(0.08 0.05 160);
+	--bs-light-bg-subtle: oklch(0.90 0.03 160);
+	--bs-light-border-subtle: oklch(0.78 0.04 160);
+
+	/* Theme Colors - Dark */
+	--bs-dark: oklch(0.08 0.05 160);
+	/* Dark emerald background */
+	--bs-dark-rgb: 18, 22, 19;
+	--bs-dark-text-emphasis: oklch(0.95 0.02 160);
+	--bs-dark-bg-subtle: oklch(0.12 0.04 160);
+	--bs-dark-border-subtle: oklch(0.2 0.04 160);
+
+	/* Headings */
+	--bs-heading-color: oklch(0.96 0.03 162);
+	/* Slightly brighter than body for headings */
+
+	/* Links */
+	--bs-link-color: oklch(0.64 0.17 162);
+	/* Primary emerald */
+	--bs-link-color-rgb: 52, 211, 153;
+	--bs-link-hover-color: oklch(0.72 0.16 162);
+	/* Lighter emerald on hover */
+	--bs-link-hover-color-rgb: 110, 231, 183;
+
+	/* Borders */
+	--bs-border-color: oklch(0.22 0.04 160);
+	/* Border color with green tint */
+	--bs-border-color-rgb: 48, 56, 50;
+	--bs-border-color-translucent: rgba(52, 211, 153, 0.15);
+	/* Translucent emerald */
+
+	/* Code */
+	--bs-code-color: oklch(0.78 0.12 140);
+	/* Light mint green for code */
+
+	/* Highlights */
+	--bs-highlight-color: oklch(0.08 0.05 160);
+	/* Dark text for highlights */
+	--bs-highlight-bg: oklch(0.78 0.16 85);
+	/* Lime yellow background */
+
+	/* Forms */
+	--bs-form-valid-color: oklch(0.70 0.18 145);
+	/* Forest green */
+	--bs-form-valid-border-color: oklch(0.70 0.18 145);
+	--bs-form-invalid-color: oklch(0.58 0.20 15);
+	/* Red */
+	--bs-form-invalid-border-color: oklch(0.58 0.20 15);
+
+	/* Component specific overrides */
+
+	/* Cards */
+	.card {
+		--bs-card-bg: oklch(0.12 0.04 160);
+		/* Card background with green tint */
+		--bs-card-border-color: oklch(0.22 0.04 160);
+	}
+
+	/* Dropdowns */
+	.dropdown-menu {
+		--bs-dropdown-bg: oklch(0.12 0.04 160);
+		/* Dropdown background */
+		--bs-dropdown-border-color: oklch(0.22 0.04 160);
+		--bs-dropdown-link-color: oklch(0.95 0.02 160);
+		--bs-dropdown-link-hover-bg: oklch(0.16 0.04 160);
+		--bs-dropdown-link-active-bg: oklch(0.64 0.17 162);
+		/* Primary emerald */
+	}
+
+	/* Modals */
+	.modal-content {
+		--bs-modal-bg: oklch(0.12 0.04 160);
+		--bs-modal-border-color: oklch(0.22 0.04 160);
+	}
+
+	/* Popovers */
+	.popover {
+		--bs-popover-bg: oklch(0.10 0.04 160);
+		/* Darker popover background */
+		--bs-popover-border-color: oklch(0.22 0.04 160);
+	}
+
+	/* Tooltips */
+	.tooltip {
+		--bs-tooltip-bg: oklch(0.16 0.05 160);
+	}
+
+	/* Navs */
+	.nav-tabs {
+		--bs-nav-tabs-border-color: oklch(0.22 0.04 160);
+		--bs-nav-tabs-link-hover-border-color: oklch(0.32 0.06 160);
+		--bs-nav-tabs-link-active-bg: oklch(0.12 0.04 160);
+		--bs-nav-tabs-link-active-border-color: oklch(0.64 0.17 162);
+	}
+
+	/* Buttons */
+	.btn-outline-primary {
+		--bs-btn-border-color: oklch(0.64 0.17 162);
+		--bs-btn-color: oklch(0.64 0.17 162);
+		--bs-btn-hover-bg: oklch(0.64 0.17 162);
+		--bs-btn-hover-color: oklch(0.08 0.05 160);
+	}
+
+	/* Tables */
+	.table {
+		--bs-table-bg: transparent;
+		--bs-table-border-color: oklch(0.22 0.04 160);
+		--bs-table-striped-bg: oklch(0.10 0.03 160);
+		--bs-table-hover-bg: oklch(0.16 0.04 160);
+	}
+
+	/* Forms */
+	.form-control,
+	.form-select {
+		--bs-body-bg: oklch(0.16 0.04 160);
+		/* Input background */
+		--bs-border-color: oklch(0.22 0.04 160);
+	}
+
+	.form-control:focus,
+	.form-select:focus {
+		--bs-border-color: oklch(0.64 0.17 162);
+		--bs-box-shadow: 0 0 0 0.25rem oklch(0.64 0.17 162 / 0.5);
+		/* Emerald ring color */
+	}
+
+	/* Accordion */
+	.accordion {
+		--bs-accordion-bg: oklch(0.12 0.04 160);
+		--bs-accordion-border-color: oklch(0.22 0.04 160);
+		--bs-accordion-btn-bg: oklch(0.12 0.04 160);
+	}
+
+	/* Offcanvas */
+	.offcanvas {
+		--bs-offcanvas-bg: oklch(0.12 0.04 160);
+		--bs-offcanvas-border-color: oklch(0.22 0.04 160);
+	}
+
+	/* List Group */
+	.list-group-item {
+		--bs-list-group-color: oklch(0.95 0.02 160);
+		--bs-list-group-bg: oklch(0.12 0.04 160);
+		--bs-list-group-border-color: oklch(0.22 0.04 160);
+		--bs-list-group-action-color: oklch(0.95 0.02 160);
+		--bs-list-group-action-hover-color: oklch(0.95 0.02 160);
+		--bs-list-group-action-hover-bg: oklch(0.16 0.04 160);
+	}
+
+	/* Close Button */
+	.btn-close {
+		--bs-btn-close-color: oklch(0.65 0.05 160);
+		--bs-btn-close-opacity: 0.5;
+		--bs-btn-close-hover-opacity: 0.75;
+		--bs-btn-close-focus-shadow: none;
+		--bs-btn-close-focus-opacity: 0.75;
+		--bs-btn-close-disabled-opacity: 0.25;
+		filter: invert(1) grayscale(100%) brightness(200%);
+	}
+
+	/* Progress bars */
+	.progress {
+		--bs-progress-bg: oklch(0.16 0.04 160);
+	}
+
+	/* Badges */
+	.badge {
+		&.text-bg-primary {
+			--bs-badge-color: oklch(0.08 0.05 160);
+		}
+	}
+
+	/* Alerts */
+	.alert-primary {
+		--bs-alert-color: oklch(0.15 0.08 162);
+		--bs-alert-bg: oklch(0.88 0.08 162);
+		--bs-alert-border-color: oklch(0.75 0.12 162);
+	}
+
+	.alert-success {
+		--bs-alert-color: oklch(0.15 0.08 145);
+		--bs-alert-bg: oklch(0.88 0.08 145);
+		--bs-alert-border-color: oklch(0.75 0.12 145);
+	}
+}
