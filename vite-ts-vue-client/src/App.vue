@@ -21,12 +21,12 @@ watch(
 onMounted(() => {
 	// auth.login({ username: 'Jodu555', password: 'Test' }, true);
 	// document.querySelector('html')!.setAttribute('data-bs-theme', 'light');
-	// document.querySelector('html')!.setAttribute('data-bs-theme', 'dark');
+	document.querySelector('html')!.setAttribute('data-bs-theme', 'dark');
 	// document.querySelector('html')!.setAttribute('data-bs-theme', 'experimental');
 	// document.querySelector('html')!.setAttribute('data-bs-theme', 'emerald');
 	// document.querySelector('html')!.setAttribute('data-bs-theme', 'neon');
 	// document.querySelector('html')!.setAttribute('data-bs-theme', 'redstone');
-	document.querySelector('html')!.setAttribute('data-bs-theme', 'minecraft');
+	// document.querySelector('html')!.setAttribute('data-bs-theme', 'minecraft');
 
 	useSocket().on('reloadSeries', (series) => {
 		index.reloadSeries(series);
