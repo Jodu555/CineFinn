@@ -625,7 +625,7 @@ buildFunction<any, { title: string; aniworld: boolean; }>('manageTitle', async (
 
 buildFunction<{ success: boolean; error?: Error; }, { smart: boolean; }>('checkForUpdates', async ({ smart }) => {
 	try {
-		await checkForUpdates();
+		await checkForUpdates(smart);
 		return { success: true };
 	} catch (error) {
 		return { success: false, error };

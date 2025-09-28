@@ -18,7 +18,7 @@ const router = createRouter({
 		{
 			path: '/',
 			name: 'Home',
-			component: NewHome,
+			component: Home,
 			// component: Home,
 			meta: { requiresLogin: true },
 		},
