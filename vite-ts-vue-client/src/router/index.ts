@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import Home from '@/views/Home.vue';
 import Login from '@/views/Login.vue';
 import NotFound from '@/views/NotFound.vue';
-import NewHome from '@/views/NewHome.vue';
+// import NewHome from '@/views/NewHome.vue';
 
 const rBase = location.hostname == 'localhost' ? './' : './';
 
@@ -25,7 +25,10 @@ const router = createRouter({
 		{
 			path: '/alternateHome',
 			name: 'AlternateHome',
-			component: NewHome,
+			// component: NewHome,
+			component: function () {
+				return import(/* webpackChunkName: "browse" */ '@/views/NewHome.vue');
+			},
 			meta: { requiresLogin: true },
 		},
 		{
@@ -64,7 +67,7 @@ const router = createRouter({
 			path: '/anidb',
 			name: 'AniDB',
 			component: function () {
-				return import(/* webpackChunkName: "todo" */ '@/views/AniDB.vue');
+				return import(/* webpackChunkName: "anidb" */ '@/views/AniDB.vue');
 			},
 			meta: { requiresLogin: true },
 		},
@@ -72,7 +75,7 @@ const router = createRouter({
 			path: '/vote',
 			name: 'Voting',
 			component: function () {
-				return import(/* webpackChunkName: "todo" */ '@/views/Voting.vue');
+				return import(/* webpackChunkName: "voting" */ '@/views/Voting.vue');
 			},
 			meta: { requiresLogin: true },
 		},
@@ -80,7 +83,7 @@ const router = createRouter({
 			path: '/test',
 			name: 'Test',
 			component: function () {
-				return import(/* webpackChunkName: "todo" */ '@/views/Test.vue');
+				return import(/* webpackChunkName: "test" */ '@/views/Test.vue');
 			},
 			meta: { requiresLogin: true },
 		},
@@ -88,7 +91,7 @@ const router = createRouter({
 			path: '/admin',
 			name: 'Admin',
 			component: function () {
-				return import(/* webpackChunkName: "adminmain" */ '@/views/Admin/Admin.vue');
+				return import(/* webpackChunkName: "adminMain" */ '@/views/Admin/Admin.vue');
 			},
 			meta: { requiresLogin: true, requiresTeam: true },
 			children: [
@@ -96,7 +99,7 @@ const router = createRouter({
 					name: 'Overview',
 					path: '',
 					component: function () {
-						return import(/* webpackChunkName: "overview" */ '@/views/Admin/Overview.vue');
+						return import(/* webpackChunkName: "adminOverview" */ '@/views/Admin/Overview.vue');
 					},
 					meta: { requiresLogin: true },
 				},
@@ -104,7 +107,7 @@ const router = createRouter({
 					name: 'Accounts',
 					path: 'accounts',
 					component: function () {
-						return import(/* webpackChunkName: "accounts" */ '@/views/Admin/Accounts.vue');
+						return import(/* webpackChunkName: "adminAccounts" */ '@/views/Admin/Accounts.vue');
 					},
 					meta: { requiresLogin: true },
 				},
@@ -112,7 +115,7 @@ const router = createRouter({
 					name: 'Jobs',
 					path: 'jobs',
 					component: function () {
-						return import(/* webpackChunkName: "jobs" */ '@/views/Admin/Jobs.vue');
+						return import(/* webpackChunkName: "adminJobs" */ '@/views/Admin/Jobs.vue');
 					},
 					meta: { requiresLogin: true },
 				},
@@ -120,7 +123,7 @@ const router = createRouter({
 					name: 'SubSystems',
 					path: 'subsystems',
 					component: function () {
-						return import(/* webpackChunkName: "subsystem" */ '@/views/Admin/SubSystems.vue');
+						return import(/* webpackChunkName: "adminSubsystem" */ '@/views/Admin/SubSystems.vue');
 					},
 					meta: { requiresLogin: true },
 				},
@@ -128,7 +131,7 @@ const router = createRouter({
 					name: 'IgnoreList',
 					path: 'ignorelist',
 					component: function () {
-						return import(/* webpackChunkName: "ignorelist" */ '@/views/Admin/IgnoreList.vue');
+						return import(/* webpackChunkName: "adminIgnorelist" */ '@/views/Admin/IgnoreList.vue');
 					},
 					meta: { requiresLogin: true },
 				},
@@ -138,7 +141,7 @@ const router = createRouter({
 			path: '/sync',
 
 			component: function () {
-				return import(/* webpackChunkName: "syncmain" */ '@/views/Sync/Sync.vue');
+				return import(/* webpackChunkName: "syncMain" */ '@/views/Sync/Sync.vue');
 			},
 			meta: { requiresLogin: true },
 			children: [
@@ -146,14 +149,14 @@ const router = createRouter({
 					name: 'Sync',
 					path: '',
 					component: function () {
-						return import(/* webpackChunkName: "synclist" */ '@/views/Sync/SyncList.vue');
+						return import(/* webpackChunkName: "syncList" */ '@/views/Sync/SyncList.vue');
 					},
 					meta: { requiresLogin: true },
 				},
 				{
 					path: ':key',
 					component: function () {
-						return import(/* webpackChunkName: "syncroom" */ '@/views/Sync/SyncRoom.vue');
+						return import(/* webpackChunkName: "syncRoom" */ '@/views/Sync/SyncRoom.vue');
 					},
 					meta: { requiresLogin: true },
 				},
