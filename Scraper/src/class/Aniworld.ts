@@ -3,6 +3,7 @@ const cheerio = require('cheerio');
 import axios from 'axios';
 import jsdom from 'jsdom';
 
+const timing = false;
 class Aniworld {
 	url: string;
 	imageSRCPrefix: string;
@@ -13,13 +14,18 @@ class Aniworld {
 
 	async parseInformations(): Promise<void | AniWorldSeriesInformations> {
 		try {
+			timing && console.time('parseInformations');
+			timing && console.time('firstRequest');
 			const response = await axios.get(this.url, {
 				headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36' },
 			});
+			timing && console.timeEnd('firstRequest');
 
+			timing && console.time('firstParse');
 			const additional = this.parseAdditionalInformations(response.data);
 
 			const { numberOfSeasons, hasMovies } = this.parseEntityInformations(response.data);
+			timing && console.timeEnd('firstParse');
 
 			const output: AniWorldSeriesInformations = { url: this.url, informations: additional, hasMovies, seasons: new Array(numberOfSeasons) };
 
@@ -32,14 +38,16 @@ class Aniworld {
 				output.movies = this.getListInformations(movResponse.data);
 				console.log(`    => Got ${output.movies.length} Movies`);
 			}
-
+			timing && console.time('getListInformations');
 			output.seasons[0] = this.getListInformations(response.data);
+			timing && console.timeEnd('getListInformations');
 			console.log(`    => Got Season ${0} with ${output.seasons[0].length} Episodes`);
 			for (let i = 1; i < numberOfSeasons; i++) {
 				const seaResponse = await axios.get(`${this.url}/staffel-${i + 1}`);
 				output.seasons[i] = this.getListInformations(seaResponse.data);
 				console.log(`    => Got Season ${i} with ${output.seasons[i].length} Episodes`);
 			}
+			timing && console.timeEnd('parseInformations');
 			return output;
 		} catch (error) {
 			return null;
