@@ -54,39 +54,71 @@ async function assembleJobArray() {
 	return response;
 }
 
-router.get('/job/img/generate', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-	const id = 'generate';
+async function handleJob(id: string, req: AuthenticatedRequest, res: Response, next: NextFunction, enterFunction: () => Promise<void>, cleanupFunction: () => Promise<void> | undefined) {
 	const job = await database.get<DatabaseJobItem>('jobs').getOne({ ID: id });
 	if (job.running == 'true') {
 		const error = new Error('Job is already running!');
 		next(error);
-	} else {
-		database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'true' });
-		try {
-			generateImages(await getSeries(), async () => {
-				database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
-				toAllSockets(
-					(s) => {
-						s.emit(callpointToEvent(LOOKUP[id].callpoint));
-					},
-					(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
-				);
-			});
-		} catch (error) {
-			database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
-		}
-		res.json(await assembleJobArray());
+		return;
 	}
+	database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'true' });
+	try {
+		await enterFunction();
+		database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
+		await cleanupFunction();
+		toAllSockets(
+			(s) => {
+				s.emit(callpointToEvent(LOOKUP[id].callpoint));
+			},
+			(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
+		);
+	} catch (error) {
+		database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
+		toAllSockets(
+			(s) => {
+				s.emit(callpointToEvent(LOOKUP[id].callpoint));
+			},
+			(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
+		);
+		console.log(error);
+		next(error);
+		return;
+	}
+	res.json(await assembleJobArray());
+
+}
+
+router.get('/job/img/generate', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+	await handleJob('generate', req, res, next, async () => {
+		return new Promise<void>(async (resolve) => {
+			generateImages(await getSeries(), resolve);
+		});
+	}, undefined);
+	// const id = 'generate';
+	// const job = await database.get<DatabaseJobItem>('jobs').getOne({ ID: id });
+	// if (job.running == 'true') {
+	// 	const error = new Error('Job is already running!');
+	// 	next(error);
+	// } else {
+	// 	database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'true' });
+	// 	try {
+	// 		generateImages(await getSeries(), async () => {
+	// 			database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
+	// 			toAllSockets(
+	// 				(s) => {
+	// 					s.emit(callpointToEvent(LOOKUP[id].callpoint));
+	// 				},
+	// 				(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
+	// 			);
+	// 		});
+	// 	} catch (error) {
+	// 		database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
+	// 	}
+	// 	res.json(await assembleJobArray());
+	// }
 });
 
 router.get('/job/checkForUpdates-smart', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-	const id = 'checkForUpdates';
-	const job = await database.get<DatabaseJobItem>('jobs').getOne({ ID: id });
-	if (job.running == 'true') {
-		const error = new Error('Job is already running!');
-		next(error);
-		return;
-	}
 
 	if (!isScraperSocketConnected()) {
 		const error = new Error('There is currently no scraper socket connected!');
@@ -94,51 +126,69 @@ router.get('/job/checkForUpdates-smart', async (req: AuthenticatedRequest, res: 
 		return;
 	}
 
-	database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'true' });
-	//TODO: this is ugly and shittie there is a better way to solve this but i dont have time for it now
-	try {
-		new Promise<void>(async (resolve, reject) => {
+	await handleJob('checkForUpdates', req, res, next, async () => {
+		return new Promise<void>(async (resolve, reject) => {
 			try {
 				await checkForUpdates({ smart: true });
-				database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
-				await toAllSockets(
-					(s) => {
-						s.emit(callpointToEvent(LOOKUP[id].callpoint));
-					},
-					(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
-				);
 				resolve();
 			} catch (error) {
-				database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
-				await toAllSockets(
-					(s) => {
-						s.emit(callpointToEvent(LOOKUP[id].callpoint));
-					},
-					(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
-				);
 				reject(error);
 			}
 		});
-	} catch (error) {
-		database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
-		toAllSockets(
-			(s) => {
-				s.emit(callpointToEvent(LOOKUP[id].callpoint));
-			},
-			(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
-		);
-	}
-	res.json(await assembleJobArray());
+	}, undefined);
+
+	// const id = 'checkForUpdates';
+	// const job = await database.get<DatabaseJobItem>('jobs').getOne({ ID: id });
+	// if (job.running == 'true') {
+	// 	const error = new Error('Job is already running!');
+	// 	next(error);
+	// 	return;
+	// }
+
+	// if (!isScraperSocketConnected()) {
+	// 	const error = new Error('There is currently no scraper socket connected!');
+	// 	next(error);
+	// 	return;
+	// }
+
+	// database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'true' });
+	// //TODO: this is ugly and shittie there is a better way to solve this but i dont have time for it now
+	// try {
+	// 	new Promise<void>(async (resolve, reject) => {
+	// 		try {
+	// 			await checkForUpdates({ smart: true });
+	// 			database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
+	// 			await toAllSockets(
+	// 				(s) => {
+	// 					s.emit(callpointToEvent(LOOKUP[id].callpoint));
+	// 				},
+	// 				(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
+	// 			);
+	// 			resolve();
+	// 		} catch (error) {
+	// 			database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
+	// 			await toAllSockets(
+	// 				(s) => {
+	// 					s.emit(callpointToEvent(LOOKUP[id].callpoint));
+	// 				},
+	// 				(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
+	// 			);
+	// 			reject(error);
+	// 		}
+	// 	});
+	// } catch (error) {
+	// 	database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
+	// 	toAllSockets(
+	// 		(s) => {
+	// 			s.emit(callpointToEvent(LOOKUP[id].callpoint));
+	// 		},
+	// 		(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
+	// 	);
+	// }
+	// res.json(await assembleJobArray());
 });
 
 router.get('/job/checkForUpdates-old', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-	const id = 'checkForUpdates';
-	const job = await database.get<DatabaseJobItem>('jobs').getOne({ ID: id });
-	if (job.running == 'true') {
-		const error = new Error('Job is already running!');
-		next(error);
-		return;
-	}
 
 	if (!isScraperSocketConnected()) {
 		const error = new Error('There is currently no scraper socket connected!');
@@ -146,41 +196,66 @@ router.get('/job/checkForUpdates-old', async (req: AuthenticatedRequest, res: Re
 		return;
 	}
 
-	database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'true' });
-	//TODO: this is ugly and shittie there is a better way to solve this but i dont have time for it now
-	try {
-		new Promise<void>(async (resolve, reject) => {
+	await handleJob('checkForUpdates', req, res, next, async () => {
+		return new Promise<void>(async (resolve, reject) => {
 			try {
 				await checkForUpdates({ smart: false });
-				database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
-				await toAllSockets(
-					(s) => {
-						s.emit(callpointToEvent(LOOKUP[id].callpoint));
-					},
-					(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
-				);
 				resolve();
 			} catch (error) {
-				database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
-				await toAllSockets(
-					(s) => {
-						s.emit(callpointToEvent(LOOKUP[id].callpoint));
-					},
-					(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
-				);
 				reject(error);
 			}
 		});
-	} catch (error) {
-		database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
-		toAllSockets(
-			(s) => {
-				s.emit(callpointToEvent(LOOKUP[id].callpoint));
-			},
-			(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
-		);
-	}
-	res.json(await assembleJobArray());
+	}, undefined);
+
+	// const id = 'checkForUpdates';
+	// const job = await database.get<DatabaseJobItem>('jobs').getOne({ ID: id });
+	// if (job.running == 'true') {
+	// 	const error = new Error('Job is already running!');
+	// 	next(error);
+	// 	return;
+	// }
+
+	// if (!isScraperSocketConnected()) {
+	// 	const error = new Error('There is currently no scraper socket connected!');
+	// 	next(error);
+	// 	return;
+	// }
+
+	// database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'true' });
+	// //TODO: this is ugly and shittie there is a better way to solve this but i dont have time for it now
+	// try {
+	// 	new Promise<void>(async (resolve, reject) => {
+	// 		try {
+	// 			await checkForUpdates({ smart: false });
+	// 			database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
+	// 			await toAllSockets(
+	// 				(s) => {
+	// 					s.emit(callpointToEvent(LOOKUP[id].callpoint));
+	// 				},
+	// 				(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
+	// 			);
+	// 			resolve();
+	// 		} catch (error) {
+	// 			database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
+	// 			await toAllSockets(
+	// 				(s) => {
+	// 					s.emit(callpointToEvent(LOOKUP[id].callpoint));
+	// 				},
+	// 				(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
+	// 			);
+	// 			reject(error);
+	// 		}
+	// 	});
+	// } catch (error) {
+	// 	database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
+	// 	toAllSockets(
+	// 		(s) => {
+	// 			s.emit(callpointToEvent(LOOKUP[id].callpoint));
+	// 		},
+	// 		(s) => s.auth.type == 'client' && s.auth.user.role >= LOOKUP[id].role
+	// 	);
+	// }
+	// res.json(await assembleJobArray());
 });
 
 // router.get('/job/img/validate', (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -206,24 +281,40 @@ router.get('/job/checkForUpdates-old', async (req: AuthenticatedRequest, res: Re
 
 router.get('/job/crawl', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 	const id = 'crawl';
-	const job = await database.get<DatabaseJobItem>('jobs').getOne({ ID: id });
+	await handleJob(id, req, res, next, async () => {
+		return new Promise<void>(async (resolve, reject) => {
+			try {
+				setSeries(await crawlAndIndex());
+				setTimeout(async () => {
+					resolve();
+				}, 100);
+			} catch (error) {
+				reject(error);
+			}
+		});
+	}, async () => {
+		sendSeriesReloadToAll((s) => s.emit(callpointToEvent(LOOKUP[id].callpoint)));
+	});
 
-	if (job.running == 'true') {
-		const error = new Error('Job is already running!');
-		next(error);
-	} else {
-		try {
-			database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'true' });
-			setSeries(await crawlAndIndex());
-			setTimeout(async () => {
-				database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
-				sendSeriesReloadToAll((s) => s.emit(callpointToEvent(LOOKUP[id].callpoint)));
-			}, 500);
-			res.json(await assembleJobArray());
-		} catch (error) {
-			database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
-		}
-	}
+	// const id = 'crawl';
+	// const job = await database.get<DatabaseJobItem>('jobs').getOne({ ID: id });
+
+	// if (job.running == 'true') {
+	// 	const error = new Error('Job is already running!');
+	// 	next(error);
+	// } else {
+	// 	try {
+	// 		database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'true' });
+	// 		setSeries(await crawlAndIndex());
+	// 		setTimeout(async () => {
+	// 			database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
+	// 			sendSeriesReloadToAll((s) => s.emit(callpointToEvent(LOOKUP[id].callpoint)));
+	// 		}, 500);
+	// 		res.json(await assembleJobArray());
+	// 	} catch (error) {
+	// 		database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
+	// 	}
+	// }
 });
 
 export { router, LOOKUP, callpointToEvent };
