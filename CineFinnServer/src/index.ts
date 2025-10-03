@@ -19,5 +19,5 @@ serve({
 }, async (info) => {
   await connectDatabase();
   console.log(`Server is running on http://localhost:${info.port}`);
-  // await crawl();
+  await crawl();
 });
