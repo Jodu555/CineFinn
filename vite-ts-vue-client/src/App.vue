@@ -47,7 +47,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-	<div id="conta" :style="{ 'padding-bottom': $route.path == '/watch' ? '5rem' : '3.5rem' }">
+	<div id="conta" :style="{ 'padding-bottom': $route.path == '/watch' || $route.path == '/newwatch' ? '5rem' : '3.5rem' }">
 		<div v-auto-animate="{ duration: 250 }" id="app">
 			<Navigation />
 			<settings-drawer v-if="auth.loggedIn" />
@@ -64,7 +64,6 @@ onUnmounted(() => {
 @import '../node_modules/bootstrap/scss/functions';
 @import '../node_modules/bootstrap/scss/bootstrap';
 @import './scss/main.scss';
-
 
 #conta {
 	min-height: 100vh;

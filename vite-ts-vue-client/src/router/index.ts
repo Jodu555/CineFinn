@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth.store';
-import Home from '@/views/Home.vue';
 import Login from '@/views/Login.vue';
 import NotFound from '@/views/NotFound.vue';
+import NewHome from '@/views/NewHome.vue';
 // import NewHome from '@/views/NewHome.vue';
 
 const rBase = location.hostname == 'localhost' ? './' : './';
@@ -18,19 +18,27 @@ const router = createRouter({
 		{
 			path: '/',
 			name: 'Home',
-			component: Home,
+			component: NewHome,
 			// component: Home,
 			meta: { requiresLogin: true },
 		},
 		{
-			path: '/alternateHome',
-			name: 'AlternateHome',
-			// component: NewHome,
+			path: '/old',
+			name: 'OldHome',
 			component: function () {
-				return import(/* webpackChunkName: "browse" */ '@/views/NewHome.vue');
+				return import(/* webpackChunkName: "oldHome" */ '@/views/Home.vue');
 			},
 			meta: { requiresLogin: true },
 		},
+		// {
+		// 	path: '/alternateHome',
+		// 	name: 'AlternateHome',
+		// 	// component: NewHome,
+		// 	component: function () {
+		// 		return import(/* webpackChunkName: "browse" */ '@/views/NewHome.vue');
+		// 	},
+		// 	meta: { requiresLogin: true },
+		// },
 		{
 			path: '/browse',
 			name: 'Browse',
@@ -44,6 +52,22 @@ const router = createRouter({
 			name: 'Watch',
 			component: function () {
 				return import(/* webpackChunkName: "watch" */ '@/views/Watch.vue');
+			},
+			meta: { requiresLogin: true },
+		},
+		// {
+		// 	path: '/newwatch',
+		// 	name: 'NewWatch',
+		// 	component: function () {
+		// 		return import(/* webpackChunkName: "newwatch" */ '@/views/NewWatch.vue');
+		// 	},
+		// 	meta: { requiresLogin: true },
+		// },
+		{
+			path: '/newnewwatch',
+			name: 'NewNewWatch',
+			component: function () {
+				return import(/* webpackChunkName: "newnewwatch" */ '@/views/NewNewWatch.vue');
 			},
 			meta: { requiresLogin: true },
 		},
