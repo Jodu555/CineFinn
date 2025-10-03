@@ -9,13 +9,33 @@ export interface Series {
     UUID: string;
     tags: string;
     title: string;
-    infos: string;
-    refs: string;
+    infos: SeriesInfos;
+    refs: SeriesRefs;
+}
+
+export type SeriesRefs = Record<'aniworld' | 'zoro' | 'sto' | string, string | Record<string, string>>;
+
+export interface SeriesInfos {
+    image?: boolean;
+    imageURL?: string;
+    infos?: string;
+    title?: string;
+    startDate?: string;
+    endDate?: string;
+    description?: string;
+    disabled?: boolean;
+}
+
+interface Season {
+    UUID: string;
+    serie_UUID: string;
+    season_IDX: number;
+    episodes: number;
 }
 
 interface Episode {
     UUID: string;
-    serie_UUID: string;
+    season_UUID: string;
     season_IDX: number;
     episode_IDX: number;
 }
@@ -39,6 +59,7 @@ interface WatchableEntity {
 }
 
 export let seriesTable: thingDatabase<Series>;
+export let seasonsTable: thingDatabase<Season>;
 export let episodesTable: thingDatabase<Episode>;
 export let moviesTable: thingDatabase<Movie>;
 export let watchableEntitysTable: thingDatabase<WatchableEntity>;
@@ -49,16 +70,18 @@ export async function connectDatabase() {
     await createTables();
 }
 
+const UUID_FIELD = {
+    type: 'varchar(64)',
+    null: false,
+};
+
 async function createTables() {
     database.createTable('series', {
         options: {
             timestamps: true,
             PK: 'UUID',
         },
-        UUID: {
-            type: 'varchar(64)',
-            null: false,
-        },
+        UUID: UUID_FIELD,
         tags: {
             type: 'text',
             null: false,
@@ -69,13 +92,36 @@ async function createTables() {
         },
         infos: {
             type: 'text',
-            null: false,
+            null: true,
+            json: true,
         },
         refs: {
             type: 'text',
             null: true,
+            json: true,
         },
     });
+
+    database.createTable('seasons', {
+        options: {
+            timestamps: true,
+            PK: 'UUID',
+            // FK: {
+            //     serie_UUID: 'series/UUID',
+            // },
+        },
+        UUID: UUID_FIELD,
+        serie_UUID: UUID_FIELD,
+        season_IDX: {
+            type: 'int',
+            null: false,
+        },
+        episodes: {
+            type: 'int',
+            null: false,
+        }
+    });
+
     database.createTable('episodes', {
         options: {
             timestamps: true,
@@ -84,14 +130,8 @@ async function createTables() {
             //     serie_UUID: 'series/UUID',
             // },
         },
-        UUID: {
-            type: 'varchar(64)',
-            null: false,
-        },
-        serie_UUID: {
-            type: 'varchar(64)',
-            null: false,
-        },
+        UUID: UUID_FIELD,
+        season_UUID: UUID_FIELD,
         season_IDX: {
             type: 'int',
             null: false,
@@ -109,18 +149,12 @@ async function createTables() {
             //     serie_UUID: 'series/UUID',
             // },
         },
-        UUID: {
-            type: 'varchar(64)',
-            null: false,
-        },
+        UUID: UUID_FIELD,
         primaryName: {
             type: 'varchar(256)',
             null: false,
         },
-        serie_UUID: {
-            type: 'varchar(64)',
-            null: false,
-        },
+        serie_UUID: UUID_FIELD,
         movie_IDX: {
             type: 'int',
             null: false,
@@ -134,14 +168,8 @@ async function createTables() {
             //     serie_UUID: 'series/UUID',
             // },
         },
-        UUID: {
-            type: 'varchar(64)',
-            null: false,
-        },
-        watchable_UUID: {
-            type: 'varchar(64)',
-            null: false,
-        },
+        UUID: UUID_FIELD,
+        watchable_UUID: UUID_FIELD,
         lang: {
             type: 'varchar(32)',
             null: false,
@@ -170,6 +198,7 @@ async function createTables() {
     });
 
     seriesTable = database.get<Series>('series');
+    seasonsTable = database.get<Season>('seasons');
     episodesTable = database.get<Episode>('episodes');
     moviesTable = database.get<Movie>('movies');
     watchableEntitysTable = database.get<WatchableEntity>('watchableEntitys');

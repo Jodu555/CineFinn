@@ -18,8 +18,8 @@ importers:
         specifier: ^1.5.3
         version: 1.5.3
       '@jodu555/mysqlapi':
-        specifier: ^4.0.14
-        version: 4.0.14
+        specifier: ^4.0.15
+        version: 4.0.15
       axios:
         specifier: ^1.12.2
         version: 1.12.2
@@ -216,8 +216,8 @@ packages:
   '@jodu555/commandmanager@1.5.3':
     resolution: {integrity: sha512-8Xcge6om5JzR5kpvXNWk1+mgOroO3NoxCDDUxE8TlNHyyqk0UCBbU0HhEYAucWbMf90qwrOgjDHe6Mi9Aalvpw==}
 
-  '@jodu555/mysqlapi@4.0.14':
-    resolution: {integrity: sha512-CUmudTd0MTjMYP4iNFUvgudswzIFBAKvsKAe1tXTp4YZZwsPoL3QcxZ0h77Eilbtf6G26PYlNMC70VZ9vAXLug==}
+  '@jodu555/mysqlapi@4.0.15':
+    resolution: {integrity: sha512-My2R0s4EQK7R3deMsQqSF1p2JgqLtB3hZL8Pr8tXBeQjQJMeNF1ziHFPxnbF4CrmyixQyofBq3bOWzTFRcE2aQ==}
 
   '@opentelemetry/api@1.9.0':
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
@@ -495,7 +495,7 @@ snapshots:
 
   '@jodu555/commandmanager@1.5.3': {}
 
-  '@jodu555/mysqlapi@4.0.14':
+  '@jodu555/mysqlapi@4.0.15':
     dependencies:
       '@types/mysql': 2.15.27
       mysql: 2.18.1

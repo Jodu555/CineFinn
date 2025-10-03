@@ -3,8 +3,7 @@ import path from 'path';
 import { listFiles } from './fileutils.js';
 import { createHash, randomUUID } from 'node:crypto';
 import { filenameParser } from './parser.js';
-import { database, episodesTable, moviesTable, seriesTable, watchableEntitysTable, type Series } from './database.js';
-import { automatedCache, invalidateCache } from './cache.js';
+import { database, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, type Series } from './database.js';
 import { tryCatch } from './tryCatch.js';
 import { CacheContext } from './LRUCache.js';
 
@@ -34,7 +33,10 @@ const generateEntityID = () => {
 
 
 export async function crawl() {
-    const crawlerCache = new CacheContext('crawler', 500);
+    const crawlerSeriesSeasonsCache = new CacheContext('crawler-series', 500);
+
+    const crawlerEpisodesCache = new CacheContext('crawler-episodes', 150);
+
     const pathEntries = [process.env.VIDEO_PATH!];
     let { files } = await listFiles(pathEntries[0]);
 
@@ -43,6 +45,8 @@ export async function crawl() {
     files = files.filter((f) => viableExtensions.includes(path.parse(f).ext));
 
     console.time('Handling Files');
+
+    const seasonCountersMap = new Map<string, number>();
 
     for (const file of files) {
         const base = path.parse(file).base;
@@ -53,22 +57,20 @@ export async function crawl() {
             continue;
         }
 
-        let { data: exsitingSeries, cacheInfo: existingSeriesCacheInfo } = await crawlerCache.execute(seriesTable, 'getOne', [{ title: parsedData.title, unique: true }]);
+        let { data: exsitingSeries, cacheInfo: existingSeriesCacheInfo } = await crawlerSeriesSeasonsCache.execute(seriesTable, 'getOne', [{ title: parsedData.title, unique: true }]);
         if (exsitingSeries == undefined) {
             console.log('Series Does not Exist', parsedData.title);
             const categorie = path.parse(path.join(path.parse(file).dir, '../../')).base;
             exsitingSeries = await seriesTable.create({
                 UUID: generateSeriesID(),
                 title: parsedData.title,
-                infos: JSON.stringify({
+                infos: {
                     disabled: false,
-                }),
-                refs: JSON.stringify({
-
-                }),
+                },
+                refs: {},
                 tags: JSON.stringify([categorie]),
             });
-            await invalidateCache(existingSeriesCacheInfo.cacheKey);
+            crawlerSeriesSeasonsCache.invalidate(existingSeriesCacheInfo.cacheKey);
         }
 
         // console.log('Series Exists', exsitingSeries.UUID, exsitingSeries.title);
@@ -94,8 +96,33 @@ export async function crawl() {
             watchableUUID = existingMovie.UUID;
         } else {
 
-            let { data: existingEpisode, cacheInfo: existingEpisodeCacheInfo } = await crawlerCache.execute(episodesTable, 'getOne', [{
+            let { data: existingSeason, cacheInfo: existingSeasonCacheInfo } = await crawlerSeriesSeasonsCache.execute(seasonsTable, 'getOne', [{
                 serie_UUID: exsitingSeries.UUID,
+                season_IDX: parsedData.season,
+                unique: true,
+            }]);
+            if (existingSeason == undefined) {
+                console.log('Season Does not Exist', parsedData.season);
+                existingSeason = await seasonsTable.create({
+                    UUID: generateSeasonID(),
+                    serie_UUID: exsitingSeries.UUID,
+                    season_IDX: parsedData.season,
+                    episodes: 0,
+                });
+                console.log('Created Season', existingSeason.UUID, existingSeason.season_IDX);
+                crawlerSeriesSeasonsCache.invalidate(existingSeasonCacheInfo.cacheKey);
+            }
+
+            const counter = seasonCountersMap.get(existingSeason.UUID);
+            if (counter == undefined) {
+                seasonCountersMap.set(existingSeason.UUID, existingSeason.episodes + 1);
+            } else {
+                seasonCountersMap.set(existingSeason.UUID, counter + 1);
+            }
+
+
+            let { data: existingEpisode, cacheInfo: existingEpisodeCacheInfo } = await crawlerEpisodesCache.execute(episodesTable, 'getOne', [{
+                season_UUID: existingSeason.UUID,
                 season_IDX: parsedData.season,
                 episode_IDX: parsedData.episode,
                 unique: true,
@@ -104,12 +131,12 @@ export async function crawl() {
                 console.log('Episode Does not Exist', parsedData.season, parsedData.episode);
                 existingEpisode = await episodesTable.create({
                     UUID: generateEpisodeID(),
-                    serie_UUID: exsitingSeries.UUID,
+                    season_UUID: existingSeason.UUID,
                     season_IDX: parsedData.season,
                     episode_IDX: parsedData.episode,
                 });
-                console.log('Created Episode', existingEpisode.UUID, existingEpisode.serie_UUID, existingEpisode.season_IDX, existingEpisode.episode_IDX);
-                await invalidateCache(existingEpisodeCacheInfo.cacheKey);
+                console.log('Created Episode', existingEpisode.UUID, existingEpisode.season_UUID, existingEpisode.season_IDX, existingEpisode.episode_IDX);
+                await crawlerEpisodesCache.invalidate(existingEpisodeCacheInfo.cacheKey);
             }
             watchableUUID = existingEpisode.UUID;
 
@@ -133,15 +160,25 @@ export async function crawl() {
                 hash: '',
             });
         }
-
-
-
     }
 
     console.timeEnd('Handling Files');
     console.log('done');
 
-    crawlerCache.clear();
+    for (const [key, value] of seasonCountersMap) {
+        await seasonsTable.update({
+            UUID: key,
+        }, {
+            episodes: value,
+        });
+    }
+
+
+    console.log(seasonCountersMap);
+
+
+    crawlerEpisodesCache.clear();
+    crawlerSeriesSeasonsCache.clear();
 
 }
 

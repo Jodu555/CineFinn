@@ -58,7 +58,7 @@ class LRUCache<T> {
         if (this.cache.size >= this.maxSize) {
             const firstKey = this.cache.keys().next().value;
             this.cache.delete(firstKey!);
-            console.log(`[cache] Cache size exceeded, removing key: ${firstKey}`);
+            // console.log(`[cache] Cache size exceeded, removing key: ${firstKey}`);
         }
 
         this.cache.set(key, value);
@@ -163,9 +163,9 @@ export class CacheContext {
     invalidate(key: string): boolean {
         const result = this.lruCache.delete(key);
         if (result) {
-            console.log(`[${this.name}] Cache invalidated for key:`, key);
+            // console.log(`[${this.name}] Cache invalidated for key:`, key);
         } else {
-            console.log(`[${this.name}] Key not found for invalidation:`, key);
+            // console.log(`[${this.name}] Key not found for invalidation:`, key);
         }
         return result;
     }
