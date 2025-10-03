@@ -232,6 +232,7 @@
 														class="text-muted small mb-0"
 														style="
 															display: -webkit-box;
+															line-clamp: 2;
 															-webkit-line-clamp: 2;
 															-webkit-box-orient: vertical;
 															overflow: hidden;

@@ -13,12 +13,16 @@ const generateSeriesID = () => {
     return `S#${generateID()}`;
 };
 
+const generateSeasonID = () => {
+    return `SE#${generateID()}`;
+};
+
 const generateMovieID = () => {
-    return `M#${generateID()}`;
+    return `MO#${generateID()}`;
 };
 
 const generateEpisodeID = () => {
-    return `E#${generateID()}`;
+    return `EP#${generateID()}`;
 };
 
 const generateEntityID = () => {
