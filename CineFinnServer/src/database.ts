@@ -5,6 +5,25 @@ import { Database, type thingDatabase } from '@jodu555/mysqlapi';
 
 export let database: Database;
 
+export interface Account {
+    UUID: string;
+    username: string;
+    password: string;
+    email: string;
+    role: number;
+    settings: Record<string, string>;
+    activityDetails: {
+        lastHandshake: string;
+        lastLogin: string;
+    };
+    status: 'active' | 'suspended' | 'deleted' | 'trial';
+}
+
+export interface AuthToken {
+    TOKEN: string;
+    account_UUID: string;
+}
+
 export interface Series {
     UUID: string;
     tags: string;
@@ -58,6 +77,9 @@ interface WatchableEntity {
     hash: string;
 }
 
+export let accountsTable: thingDatabase<Account>;
+export let authTokensTable: thingDatabase<AuthToken>;
+
 export let seriesTable: thingDatabase<Series>;
 export let seasonsTable: thingDatabase<Season>;
 export let episodesTable: thingDatabase<Episode>;
@@ -76,6 +98,58 @@ const UUID_FIELD = {
 };
 
 async function createTables() {
+
+    database.createTable('accounts', {
+        options: {
+            timestamps: true,
+            PK: 'UUID',
+        },
+        UUID: UUID_FIELD,
+        username: {
+            type: 'varchar(64)',
+            null: false,
+        },
+        password: {
+            type: 'varchar(256)',
+            null: false,
+        },
+        email: {
+            type: 'varchar(256)',
+            null: false,
+        },
+        role: {
+            type: 'int',
+            null: false,
+        },
+        activityDetails: {
+            type: 'json',
+            null: false,
+            json: true,
+        },
+        status: {
+            type: 'varchar(32)',
+            null: false,
+        },
+        settings: {
+            type: 'json',
+            null: false,
+            json: true,
+        },
+    });
+    database.createTable('authtokens', {
+        options: {
+            PK: 'TOKEN',
+        },
+        TOKEN: {
+            type: 'varchar(64)',
+            null: false,
+        },
+        account_UUID: {
+            type: 'varchar(64)',
+            null: false,
+        },
+    });
+
     database.createTable('series', {
         options: {
             timestamps: true,
@@ -100,8 +174,7 @@ async function createTables() {
             null: true,
             json: true,
         },
-    });
-
+    }); 1;
     database.createTable('seasons', {
         options: {
             timestamps: true,
@@ -121,7 +194,6 @@ async function createTables() {
             null: false,
         }
     });
-
     database.createTable('episodes', {
         options: {
             timestamps: true,
@@ -196,6 +268,9 @@ async function createTables() {
             null: false,
         }
     });
+
+    accountsTable = database.get<Account>('accounts');
+    authTokensTable = database.get<AuthToken>('authtokens');
 
     seriesTable = database.get<Series>('series');
     seasonsTable = database.get<Season>('seasons');

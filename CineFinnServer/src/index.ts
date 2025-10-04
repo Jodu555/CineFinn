@@ -4,27 +4,37 @@ import dotenv from 'dotenv';
 import { connectDatabase, database, seriesTable, type Series } from './database.js';
 import { crawl } from './crawler.js';
 dotenv.config();
+import { proxy } from 'hono/proxy';
+import { trimTrailingSlash } from 'hono/trailing-slash';
 
 
 
-const app = new Hono();
+const app = new Hono({
+  strict: false,
+});
+app.use(trimTrailingSlash());
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!');
+app.get('/index', async (c) => {
+  return c.json(await seriesTable.get());
 });
 
-// function preffifySeries(series: Series) {
-//   return {
-//     ...series,
-//     infos: JSON.parse(series.infos),
-//     refs: JSON.parse(series.refs),
-//     tags: JSON.parse(series.tags),
-//   };
-// }
+app.get('*', async (c, next) => {
 
-app.get('/index/', async (c) => {
-  return c.json(await seriesTable.get());
-  // return c.json((await seriesTable.get()).map(preffifySeries));
+  const proxyables = [
+    '/index/all',
+  ];
+
+  if (!proxyables.includes(c.req.path)) {
+    return next();
+  }
+
+  console.log('Came', c.req.path);
+
+  const queryString = c.req.url.split('?')[1];
+
+  const newUrl = `http://localhost:3100${c.req.path}?${queryString}`;
+
+  return proxy(newUrl);
 });
 
 serve({
