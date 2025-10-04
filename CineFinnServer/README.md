@@ -87,7 +87,7 @@ POST /news
 
 
 ### Concepts
-- [ ] Auth (Login, Logout, Register, Info)
+- [x] Auth (Login, Logout, Register, Info)
 - [ ] Indexing
 - [ ] WatchTime
 - [ ] SyncSystem

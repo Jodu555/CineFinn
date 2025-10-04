@@ -8,7 +8,7 @@ export let database: Database;
 export interface Account {
     UUID: string;
     username: string;
-    password: string;
+    password?: string;
     email: string;
     role: number;
     settings: Record<string, string>;
@@ -159,6 +159,7 @@ async function createTables() {
         tags: {
             type: 'text',
             null: false,
+            json: true,
         },
         title: {
             type: 'varchar(256)',

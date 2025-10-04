@@ -78,7 +78,10 @@ export const useAuthStore = defineStore('auth', {
 							email: json.email,
 							role: json.role,
 						};
-						this.settings = JSON.parse(json.settings);
+						if (typeof json.settings == 'string') {
+							json.settings = JSON.parse(json.settings);
+						}
+						this.settings = json.settings;
 						this.loggedIn = true;
 						this.authToken = authtoken;
 
@@ -102,6 +105,7 @@ export const useAuthStore = defineStore('auth', {
 					this.$reset();
 				}
 			} catch (error) {
+				console.log(error);
 				deleteCookie('auth-token');
 				this.logout();
 			}

@@ -12,23 +12,23 @@ const generateID = () => {
 };
 
 const generateSeriesID = () => {
-    return `S#${generateID()}`;
+    return `S-${generateID()}`;
 };
 
 const generateSeasonID = () => {
-    return `SE#${generateID()}`;
+    return `SE-${generateID()}`;
 };
 
 const generateMovieID = () => {
-    return `MO#${generateID()}`;
+    return `MO-${generateID()}`;
 };
 
 const generateEpisodeID = () => {
-    return `EP#${generateID()}`;
+    return `EP-${generateID()}`;
 };
 
 const generateEntityID = () => {
-    return `WE#${generateID()}`;
+    return `WE-${generateID()}`;
 };
 
 

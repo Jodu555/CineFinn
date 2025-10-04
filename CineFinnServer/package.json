@@ -12,6 +12,7 @@
     "@jodu555/commandmanager": "^1.5.3",
     "@jodu555/mysqlapi": "^4.0.15",
     "axios": "^1.12.2",
+    "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.3",
     "hono": "^4.9.9",
     "mysql": "^2.18.1"
