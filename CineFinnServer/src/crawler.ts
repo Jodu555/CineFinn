@@ -144,7 +144,7 @@ export async function crawl() {
 
         let existingWatchableEntity = await watchableEntitysTable.getOne({
             watchable_UUID: watchableUUID,
-            // lang: parsedData.language,
+            lang: parsedData.language,
             unique: true,
         });
         if (existingWatchableEntity == undefined) {

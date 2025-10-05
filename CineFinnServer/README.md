@@ -9,6 +9,10 @@ open http://localhost:3000
 
 ## Feautre Parity
 
+> After giving it some more thought getting Feature Parity might not be what i want at least not 1:1 the same responses
+> Since i already Completely reworked the whole crawler and the whole indexing system the same json response would be actually careless
+> Sicne i would throw so much data away that would be highly useful to the client
+
 ### Routes
 
 #### Static

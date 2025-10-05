@@ -1,7 +1,7 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import dotenv from 'dotenv';
-import { connectDatabase, database, seasonsTable, seriesTable, type Series } from './database.js';
+import { connectDatabase, database, episodesTable, seasonsTable, seriesTable, watchableEntitysTable, type Series } from './database.js';
 import { crawl } from './crawler.js';
 dotenv.config();
 import { proxy } from 'hono/proxy';
@@ -49,21 +49,49 @@ app.get('/index', async (c) => {
     }));
 
     return c.json(overhauledSeries);
+});
 
-    // return c.json((await seriesTable.get()).map(async e => {
-    //   const categorie = e.tags[0];
-    //   const seasons = await seasonsTable.get({ serie_UUID: e.UUID });
-    //   console.log(seasons);
-    //   // delete (e as any).tags;
-    //   return {
-    //     ...e,
-    //     categorie,
-    //     movies: [],
-    //     seasons: [
-    //       12
-    //     ],
-    //   };
-    // }));
+app.get('/index/:UUID', async (c) => {
+
+    const serie = await seriesTable.getOne({ UUID: c.req.param('UUID') });
+
+    if (serie == undefined) {
+        return c.json({
+            error: 'Serie not found',
+        });
+    }
+
+    const seasons = await seasonsTable.get({ serie_UUID: serie.UUID });
+
+
+    const newSeasons = seasons.map(async (season) => {
+        const episodes = await episodesTable.get({ season_UUID: season.UUID });
+        return (await Promise.all(episodes.map(async (episode) => {
+            const watchableEntitys = await watchableEntitysTable.get({ watchable_UUID: episode.UUID });
+            return {
+                ...episode,
+                watchableEntitys,
+            };
+        }))).sort((a, b) => a.episode_IDX - b.episode_IDX);
+    });
+
+    // const newSeasons = seasons.map(async (season) => {
+    //     const episodes = await episodesTable.get({ season_UUID: season.UUID });
+    //     return (await Promise.all(episodes.map(async (episode) => {
+    //         const watchableEntity = await watchableEntitysTable.getOne({ watchable_UUID: episode.UUID });
+    //         return {
+    //             ...episode,
+    //             ...watchableEntity,
+    //         };
+    //     }))).sort((a, b) => a.episode_IDX - b.episode_IDX);
+    // });
+
+    const finalOutput = {
+        ...serie,
+        seasons: await Promise.all(newSeasons),
+    };
+
+    return c.json(finalOutput);
 });
 
 app.get('*', async (c, next) => {
@@ -103,5 +131,5 @@ serve({
     await connectDatabase();
     registerSchemas();
     console.log(`Server is running on http://localhost:${info.port}`);
-    await crawl();
+    // await crawl();
 });
