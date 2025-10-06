@@ -4,37 +4,6 @@ import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
 
-/* import the fontawesome core */
-import { library } from '@fortawesome/fontawesome-svg-core';
-
-import {
-	faUpLong,
-	faDownLong,
-	faInfo,
-	faForwardStep,
-	faBackwardStep,
-	faRightFromBracket,
-	faGears,
-	faChevronUp,
-	faChevronDown,
-	faForward,
-	faBackward,
-	faPen,
-	faShare,
-	faPlay,
-	faPause,
-	faNetworkWired,
-	faTrash,
-	faCheck,
-	faChevronLeft,
-	faChevronRight,
-	faHighlighter,
-} from '@fortawesome/free-solid-svg-icons';
-import { faKeyboard } from '@fortawesome/free-regular-svg-icons';
-
-/* import font awesome icon component */
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-
 import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
@@ -46,9 +15,13 @@ const app = createApp(App);
 app.use(createPinia());
 app.use(router);
 
-library.add(
-	faDownLong,
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+
+// Solid icons
+import {
 	faUpLong,
+	faDownLong,
 	faInfo,
 	faForwardStep,
 	faBackwardStep,
@@ -56,6 +29,51 @@ library.add(
 	faGears,
 	faChevronUp,
 	faChevronDown,
+	faChevronLeft,
+	faChevronRight,
+	faForward,
+	faBackward,
+	faPen,
+	faShare,
+	faPlay,
+	faPause,
+	faNetworkWired,
+	faTrash,
+	faCheck,
+	faHighlighter,
+	faClock,
+	faStar,
+	faPlus,
+	faTv,
+	faFilm,
+	faList,
+	faGrip,
+	faHeart as faHeartSolid
+} from '@fortawesome/free-solid-svg-icons';
+
+// Regular icons
+import {
+	faKeyboard,
+	faHeart,
+	faStar as faStarRegular,
+	faCalendar,
+	faClock as faClockRegular
+} from '@fortawesome/free-regular-svg-icons';
+
+// Register all icons
+library.add(
+	// Solid icons
+	faUpLong,
+	faDownLong,
+	faInfo,
+	faForwardStep,
+	faBackwardStep,
+	faRightFromBracket,
+	faGears,
+	faChevronUp,
+	faChevronDown,
+	faChevronLeft,
+	faChevronRight,
 	faForward,
 	faBackward,
 	faPen,
@@ -65,11 +83,22 @@ library.add(
 	faPause,
 	faTrash,
 	faCheck,
-	faChevronLeft,
-	faChevronRight,
-	faHighlighter
-); // solid
-library.add(faKeyboard); // regular
+	faHighlighter,
+	faClock,
+	faStar,
+	faPlus,
+	faTv,
+	faFilm,
+	faList,
+	faGrip,
+	faHeartSolid,
+	// Regular icons
+	faKeyboard,
+	faHeart,
+	faStarRegular,
+	faCalendar,
+	faClockRegular
+);
 
 app.component('font-awesome-icon', FontAwesomeIcon);
 

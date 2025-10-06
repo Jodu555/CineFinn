@@ -1,5 +1,5 @@
 <template>
-	<div class="container-fluid bg-dark text-white min-vh-100 py-4">
+	<div class="container-fluid text-white min-vh-100 py-4">
 		<!-- Content Information -->
 		<div class="container">
 			<div class="row g-4">
@@ -19,11 +19,14 @@
 							<div class="d-flex flex-wrap align-items-center gap-3 mb-3">
 								<span class="badge bg-secondary">{{ content.year }}</span>
 								<span class="badge bg-danger">{{ content.type.toUpperCase() }}</span>
-								<div class="d-flex align-items-center">
-									<span class="text-warning me-1">★</span>
+								<div class="d-flex align-items-center" v-if="SHOW_RATING">
+									<font-awesome-icon :icon="['fas', 'star']" class="text-warning me-1" />
 									<span class="fw-medium">{{ content.rating }}</span>
 								</div>
-								<span class="text-muted">{{ content.duration }}</span>
+								<span class="text-muted">
+									<font-awesome-icon :icon="['far', 'clock']" class="me-1" />
+									{{ content.duration }}
+								</span>
 							</div>
 
 							<div class="d-flex flex-wrap gap-2 mb-3">
@@ -36,11 +39,11 @@
 
 							<div class="d-flex gap-3">
 								<button class="btn btn-danger">
-									<span class="me-2">+</span>
+									<font-awesome-icon :icon="['fas', 'plus']" class="me-2" />
 									Add to Watchlist
 								</button>
-								<button class="btn btn-outline-light">
-									<span class="me-2">★</span>
+								<button class="btn btn-outline-light" v-if="SHOW_RATING">
+									<font-awesome-icon :icon="['far', 'star']" class="me-2" />
 									Rate
 								</button>
 							</div>
@@ -56,6 +59,7 @@
 									@click="activeTab = 'seasons'"
 									type="button"
 									role="tab">
+									<font-awesome-icon :icon="['fas', 'tv']" class="me-2" />
 									Seasons
 								</button>
 							</li>
@@ -65,7 +69,8 @@
 									@click="activeTab = 'movies'"
 									type="button"
 									role="tab">
-									🎬 Movies ({{ content.movies?.length }})
+									<font-awesome-icon :icon="['fas', 'film']" class="me-2" />
+									Movies ({{ content.movies?.length }})
 								</button>
 							</li>
 						</ul>
@@ -89,13 +94,13 @@
 											type="button"
 											:class="['btn', viewMode === 'grid' ? 'btn-danger' : 'btn-outline-secondary']"
 											@click="viewMode = 'grid'">
-											☰
+											<font-awesome-icon :icon="['fas', 'list']" />
 										</button>
 										<button
 											type="button"
 											:class="['btn', viewMode === 'compact' ? 'btn-danger' : 'btn-outline-secondary']"
 											@click="viewMode = 'compact'">
-											⊞
+											<font-awesome-icon :icon="['fas', 'grip']" />
 										</button>
 									</div>
 								</div>
@@ -122,17 +127,24 @@
 															: 'bg-secondary',
 													]"
 													style="width: 64px; height: 40px">
-													<span v-if="isEpisodeWatched(selectedSeason, episode.number)" class="text-success">✓</span>
-													<span v-else>▶</span>
+													<font-awesome-icon
+														v-if="isEpisodeWatched(selectedSeason, episode.number)"
+														:icon="['fas', 'check']"
+														class="text-success" />
+													<font-awesome-icon v-else :icon="['fas', 'play']" />
 												</div>
 												<div class="flex-grow-1">
 													<h3 :class="['h6 mb-1', isEpisodeWatched(selectedSeason, episode.number) ? 'text-success' : '']">
 														{{ episode.title }}
-														<small v-if="isEpisodeWatched(selectedSeason, episode.number)" class="text-success">
-															✓ Watched
+														<small v-if="isEpisodeWatched(selectedSeason, episode.number)" class="text-success ms-2">
+															<font-awesome-icon :icon="['fas', 'check']" />
+															Watched
 														</small>
 													</h3>
-													<p class="text-muted small mb-0">{{ episode.duration }}</p>
+													<p class="text-muted small mb-0">
+														<font-awesome-icon :icon="['far', 'clock']" class="me-1" />
+														{{ episode.duration }}
+													</p>
 												</div>
 												<div class="progress" style="width: 80px; height: 4px">
 													<div
@@ -166,12 +178,11 @@
 													]">
 													{{ episode.number }}
 												</span>
-												<span
+												<font-awesome-icon
 													v-if="isEpisodeWatched(selectedSeason, episode.number)"
-													class="text-success"
-													style="font-size: 0.75rem">
-													✓
-												</span>
+													:icon="['fas', 'check']"
+													class="text-success mt-1"
+													size="xs" />
 												<div
 													v-if="isCurrentEpisode(selectedSeason, episode.number)"
 													class="progress w-100 mt-1"
@@ -209,22 +220,35 @@
 														'rounded d-flex align-items-center justify-content-center flex-shrink-0',
 														watchedMovies.has(movie.id) ? 'bg-success bg-opacity-25' : 'bg-secondary',
 													]"
-													style="width: 80px; height: 80px; font-size: 2rem">
-													<span v-if="watchedMovies.has(movie.id)" class="text-success">✓</span>
-													<span v-else>🎬</span>
+													style="width: 80px; height: 80px">
+													<font-awesome-icon
+														v-if="watchedMovies.has(movie.id)"
+														:icon="['fas', 'check']"
+														class="text-success"
+														size="2x" />
+													<font-awesome-icon v-else :icon="['fas', 'film']" size="2x" />
 												</div>
 												<div class="flex-grow-1">
 													<h3 :class="['h5 mb-2', watchedMovies.has(movie.id) ? 'text-success' : '']">
 														{{ movie.title }}
-														<small v-if="watchedMovies.has(movie.id)" class="text-success"> ✓ Watched </small>
+														<small v-if="watchedMovies.has(movie.id)" class="text-success ms-2">
+															<font-awesome-icon :icon="['fas', 'check']" />
+															Watched
+														</small>
 													</h3>
 													<div class="d-flex align-items-center gap-3 mb-2 small text-muted">
-														<span>{{ movie.year }}</span>
+														<span>
+															<font-awesome-icon :icon="['far', 'calendar']" class="me-1" />
+															{{ movie.year }}
+														</span>
 														<span>•</span>
-														<span>{{ movie.duration }}</span>
+														<span>
+															<font-awesome-icon :icon="['far', 'clock']" class="me-1" />
+															{{ movie.duration }}
+														</span>
 														<span>•</span>
-														<div class="d-flex align-items-center">
-															<span class="text-warning me-1">★</span>
+														<div class="d-flex align-items-center" v-if="SHOW_RATING">
+															<font-awesome-icon :icon="['fas', 'star']" class="text-warning me-1" />
 															<span>{{ movie.rating }}</span>
 														</div>
 													</div>
@@ -232,7 +256,6 @@
 														class="text-muted small mb-0"
 														style="
 															display: -webkit-box;
-															line-clamp: 2;
 															-webkit-line-clamp: 2;
 															-webkit-box-orient: vertical;
 															overflow: hidden;
@@ -256,7 +279,10 @@
 
 				<!-- Related Content Sidebar -->
 				<div class="col-lg-4">
-					<h2 class="h5 mb-3">More Like This</h2>
+					<h2 class="h5 mb-3">
+						<font-awesome-icon :icon="['fas', 'heart']" class="me-2 text-danger" />
+						More Like This
+					</h2>
 					<div class="d-flex flex-column gap-3">
 						<div
 							v-for="item in relatedContent"
@@ -273,11 +299,17 @@
 										style="width: 48px; height: 72px; object-fit: cover" />
 									<div class="flex-grow-1 overflow-hidden">
 										<h3 class="h6 mb-1 text-truncate">{{ item.title }}</h3>
-										<p class="text-muted small mb-1">{{ item.year }} • {{ item.type }}</p>
-										<div class="d-flex align-items-center small">
-											<span class="text-warning me-1">★</span>
+										<p class="text-muted small mb-1">
+											<font-awesome-icon :icon="['far', 'calendar']" class="me-1" />
+											{{ item.year }} • {{ item.type }}
+										</p>
+										<div class="d-flex align-items-center small" v-if="SHOW_RATING">
+											<font-awesome-icon :icon="['fas', 'star']" class="text-warning me-1" />
 											<span>{{ item.rating }}</span>
 										</div>
+									</div>
+									<div class="d-flex align-items-center">
+										<font-awesome-icon :icon="['fas', 'chevron-right']" class="text-muted" />
 									</div>
 								</div>
 							</div>
@@ -389,6 +421,8 @@ const relatedContent = [
 ];
 
 // State
+const SHOW_RATING = false;
+
 const contentId = ref(4);
 const content = computed(() => streamingContent.find((item) => item.id === contentId.value));
 const progress = ref(15);
@@ -466,12 +500,12 @@ watch(progress, (newProgress) => {
 
 .cursor-pointer:hover {
 	transform: translateY(-2px);
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+	/* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); */
 }
 
 .card {
-	background-color: rgba(255, 255, 255, 0.05);
-	border-color: rgba(255, 255, 255, 0.1);
+	/* background-color: rgba(255, 255, 255, 0.05);
+	border-color: rgba(255, 255, 255, 0.1); */
 }
 
 .card:hover {
@@ -479,7 +513,7 @@ watch(progress, (newProgress) => {
 }
 
 .nav-tabs {
-	border-bottom-color: rgba(255, 255, 255, 0.1);
+	/* border-bottom-color: rgba(255, 255, 255, 0.1); */
 }
 
 .nav-tabs .nav-link {
