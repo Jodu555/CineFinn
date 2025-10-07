@@ -245,7 +245,7 @@ function handleScroll(e: Event) {
         [0, window.innerHeight - (document.querySelector('.footer')?.getBoundingClientRect().height || 0) - 25]
     );
 
-    if (document.documentElement.scrollTop > 100) {
+    if (document.documentElement.scrollTop > 50) {
         backToTop.value = true;
         const backToTopElem = document.querySelector<HTMLDivElement>('#backToTop');
         if (backToTopElem) backToTopElem.style.top = `${Math.ceil(mapping)}px`;
@@ -266,4 +266,11 @@ function scrollToTop() {
 
 </script>
 
-<style scoped></style>
+<style scoped>
+.back-to-top {
+	position: fixed;
+	/* bottom: 64px; */
+	right: 25px;
+	/* display: none; */
+}
+</style>

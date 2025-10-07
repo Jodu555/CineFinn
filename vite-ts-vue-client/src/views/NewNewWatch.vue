@@ -1,4 +1,5 @@
 <template>
+	<input type="number" min="1" step="3" max="4" v-model="contentId" />
 	<div class="container-fluid text-white min-vh-100 py-4">
 		<!-- Content Information -->
 		<div class="container">
@@ -256,6 +257,7 @@
 														class="text-muted small mb-0"
 														style="
 															display: -webkit-box;
+															line-clamp: 2;
 															-webkit-line-clamp: 2;
 															-webkit-box-orient: vertical;
 															overflow: hidden;

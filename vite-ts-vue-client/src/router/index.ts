@@ -195,6 +195,21 @@ const router = createRouter({
 			meta: { requiresLogin: true },
 		},
 		{
+			path: '/newplaylists',
+			name: 'NewPlaylists',
+			component: function () {
+				return import(/* webpackChunkName: "newplaylists" */ '@/views/NewPlaylists.vue');
+			},
+			meta: { requiresLogin: true },
+		},
+		{
+			path: '/franchises/:slug',
+			name: 'Franchises',
+			component: function () {
+				return import(/* webpackChunkName: "franchises" */ '@/views/Franchises.vue');
+			},
+		},
+		{
 			path: '/rmvc',
 			name: 'RemoteVidoeControl',
 			component: function () {
