@@ -11,7 +11,11 @@ open http://localhost:3000
 
 > After giving it some more thought getting Feature Parity might not be what i want at least not 1:1 the same responses
 > Since i already Completely reworked the whole crawler and the whole indexing system the same json response would be actually careless
-> Sicne i would throw so much data away that would be highly useful to the client
+> Sicne i would throw so much data away that would be highly useful to the 
+
+I changed my mind again... Feature Parity is an illusion.
+I will build out this backend the way i see fit and then will just Build a new Frontend for it.
+No bending over backwards to have it behave and expect the same responses as the old one.
 
 ### Routes
 

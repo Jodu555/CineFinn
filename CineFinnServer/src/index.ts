@@ -38,12 +38,8 @@ app.get('/index', async (c) => {
             const seasons = await seasonsTable.get({ serie_UUID: e.UUID });
             resolve({
                 ...e,
-                ID: e.UUID,
-                categorie,
                 movies: [],
-                seasons: seasons.map(s => {
-                    return -1;
-                }),
+                seasons: seasons,
             });
         });
     }));
@@ -64,31 +60,25 @@ app.get('/index/:UUID', async (c) => {
     const seasons = await seasonsTable.get({ serie_UUID: serie.UUID });
 
 
-    const newSeasons = seasons.map(async (season) => {
+    const newSeasons = await Promise.all(seasons.map(async (season) => {
         const episodes = await episodesTable.get({ season_UUID: season.UUID });
-        return (await Promise.all(episodes.map(async (episode) => {
+        const filledEpisodesWithWatchables = await Promise.all(episodes.map(async (episode) => {
             const watchableEntitys = await watchableEntitysTable.get({ watchable_UUID: episode.UUID });
             return {
                 ...episode,
                 watchableEntitys,
             };
-        }))).sort((a, b) => a.episode_IDX - b.episode_IDX);
-    });
-
-    // const newSeasons = seasons.map(async (season) => {
-    //     const episodes = await episodesTable.get({ season_UUID: season.UUID });
-    //     return (await Promise.all(episodes.map(async (episode) => {
-    //         const watchableEntity = await watchableEntitysTable.getOne({ watchable_UUID: episode.UUID });
-    //         return {
-    //             ...episode,
-    //             ...watchableEntity,
-    //         };
-    //     }))).sort((a, b) => a.episode_IDX - b.episode_IDX);
-    // });
+        }));
+        const obj = {
+            ...season,
+            episodes: filledEpisodesWithWatchables.sort((a, b) => a.episode_IDX - b.episode_IDX),
+        };
+        return obj;
+    }));
 
     const finalOutput = {
         ...serie,
-        seasons: await Promise.all(newSeasons),
+        seasons: newSeasons.sort((a, b) => a.season_IDX - b.season_IDX),
     };
 
     return c.json(finalOutput);
