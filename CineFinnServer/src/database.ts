@@ -2,6 +2,10 @@ import dotenv from 'dotenv';
 dotenv.config();;
 import { Database, type thingDatabase } from '@jodu555/mysqlapi';
 
+interface timestamped {
+    createdAt: number;
+    updatedAt: number;
+}
 
 export let database: Database;
 
@@ -45,28 +49,28 @@ export interface SeriesInfos {
     disabled?: boolean;
 }
 
-interface Season {
+export interface Season {
     UUID: string;
     serie_UUID: string;
     season_IDX: number;
     episodes: number;
 }
 
-interface Episode {
+export interface Episode {
     UUID: string;
     season_UUID: string;
     season_IDX: number;
     episode_IDX: number;
 }
 
-interface Movie {
+export interface Movie {
     UUID: string;
     primaryName: string;
     serie_UUID: string;
     movie_IDX: number;
 }
 
-interface WatchableEntity {
+export interface WatchableEntity {
     UUID: string;
     watchable_UUID: string;
     lang: string;
@@ -77,14 +81,52 @@ interface WatchableEntity {
     hash: string;
 }
 
-export let accountsTable: thingDatabase<Account>;
-export let authTokensTable: thingDatabase<AuthToken>;
+export interface WatchHistory {
+    UUID: string;
+    account_UUID: string;
+    watchable_UUID: string;
+    watchTime: number;
+}
 
-export let seriesTable: thingDatabase<Series>;
-export let seasonsTable: thingDatabase<Season>;
-export let episodesTable: thingDatabase<Episode>;
-export let moviesTable: thingDatabase<Movie>;
-export let watchableEntitysTable: thingDatabase<WatchableEntity>;
+export interface SyncRoom {
+    UUID: string;
+    series_UUID: string;
+    watchableEntity_UUID: string;
+    members: SyncRoomMember[];
+}
+
+interface SyncRoomMember {
+    UUID: string;
+    username: string;
+    role: number;
+}
+
+export type JobType = 'crawl' | 'generatePreviewImages' | 'checkForUpdates-smart' | 'checkForUpdates-old';
+
+interface Job extends timestamped {
+    UUID: string;
+    type: JobType;
+    failed_at: number;
+    finished_at: number;
+    data: any;
+    result: any;
+}
+
+
+export let accountsTable: thingDatabase<Account, Account & timestamped>;
+export let authTokensTable: thingDatabase<AuthToken, AuthToken>;
+
+export let seriesTable: thingDatabase<Series, Series & timestamped>;
+export let seasonsTable: thingDatabase<Season, Season & timestamped>;
+export let episodesTable: thingDatabase<Episode, Episode & timestamped>;
+export let moviesTable: thingDatabase<Movie, Movie & timestamped>;
+export let watchableEntitysTable: thingDatabase<WatchableEntity, WatchableEntity & timestamped>;
+
+export let watchHistoryTable: thingDatabase<WatchHistory, WatchHistory & timestamped>;
+
+export let syncRoomsTable: thingDatabase<SyncRoom, SyncRoom & timestamped>;
+
+export let jobsTable: thingDatabase<Job, Job & timestamped>;
 
 export async function connectDatabase() {
     database = Database.createDatabase(process.env.DB_HOST!, process.env.DB_USERNAME!, process.env.DB_PASSWORD!, process.env.DB_DATABASE!);
@@ -139,6 +181,7 @@ async function createTables() {
     database.createTable('authtokens', {
         options: {
             PK: 'TOKEN',
+            K: ['account_UUID'],
         },
         TOKEN: {
             type: 'varchar(64)',
@@ -180,6 +223,7 @@ async function createTables() {
         options: {
             timestamps: true,
             PK: 'UUID',
+            K: ['serie_UUID']
             // FK: {
             //     serie_UUID: 'series/UUID',
             // },
@@ -199,6 +243,7 @@ async function createTables() {
         options: {
             timestamps: true,
             PK: 'UUID',
+            K: ['season_UUID']
             // FK: {
             //     serie_UUID: 'series/UUID',
             // },
@@ -218,6 +263,7 @@ async function createTables() {
         options: {
             timestamps: true,
             PK: 'UUID',
+            K: ['serie_UUID']
             // FK: {
             //     serie_UUID: 'series/UUID',
             // },
@@ -237,6 +283,7 @@ async function createTables() {
         options: {
             timestamps: true,
             PK: 'UUID',
+            K: ['watchable_UUID']
             // FK: {
             //     serie_UUID: 'series/UUID',
             // },
@@ -270,14 +317,81 @@ async function createTables() {
         }
     });
 
-    accountsTable = database.get<Account>('accounts');
+    database.createTable('watchHistory', {
+        options: {
+            timestamps: true,
+            PK: 'UUID',
+            K: ['account_UUID', 'watchable_UUID'],
+        },
+        UUID: UUID_FIELD,
+        account_UUID: UUID_FIELD,
+        watchable_UUID: UUID_FIELD,
+        watchTime: {
+            type: 'int',
+            null: false,
+        },
+    });
+
+    database.createTable('syncRooms', {
+        options: {
+            timestamps: true,
+            PK: 'UUID',
+            K: ['series_UUID'],
+        },
+        UUID: UUID_FIELD,
+        series_UUID: UUID_FIELD,
+        watchableEntity_UUID: UUID_FIELD,
+        members: {
+            type: 'json',
+            null: false,
+            json: true,
+        },
+    });
+
+    database.createTable('jobs', {
+        options: {
+            timestamps: true,
+            PK: 'UUID',
+        },
+        UUID: UUID_FIELD,
+        type: {
+            type: 'varchar(64)',
+            null: false,
+        },
+        failed_at: {
+            type: 'int',
+            null: true,
+        },
+        finished_at: {
+            type: 'int',
+            null: true,
+        },
+        data: {
+            type: 'json',
+            null: true,
+            json: true,
+        },
+        result: {
+            type: 'json',
+            null: true,
+            json: true,
+        }
+    });
+
+    accountsTable = database.get<Account, Account & timestamped>('accounts');
     authTokensTable = database.get<AuthToken>('authtokens');
 
-    seriesTable = database.get<Series>('series');
-    seasonsTable = database.get<Season>('seasons');
-    episodesTable = database.get<Episode>('episodes');
-    moviesTable = database.get<Movie>('movies');
-    watchableEntitysTable = database.get<WatchableEntity>('watchableEntitys');
+    seriesTable = database.get<Series, Series & timestamped>('series');
+    seasonsTable = database.get<Season, Season & timestamped>('seasons');
+    episodesTable = database.get<Episode, Episode & timestamped>('episodes');
+    moviesTable = database.get<Movie, Movie & timestamped>('movies');
+    watchableEntitysTable = database.get<WatchableEntity, WatchableEntity & timestamped>('watchableEntitys');
+
+    watchHistoryTable = database.get<WatchHistory, WatchHistory & timestamped>('watchHistory');
+
+    syncRoomsTable = database.get<SyncRoom, SyncRoom & timestamped>('syncRooms');
+
+    jobsTable = database.get<Job, Job & timestamped>('jobs');
 
 }
 
