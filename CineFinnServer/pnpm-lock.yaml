@@ -10,16 +10,16 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: ^1.19.5
-        version: 1.19.5(hono@4.9.9)
+        version: 1.19.5(hono@4.9.10)
       '@hono/prometheus':
         specifier: ^1.0.2
-        version: 1.0.2(hono@4.9.9)(prom-client@15.1.3)
+        version: 1.0.2(hono@4.9.10)(prom-client@15.1.3)
       '@jodu555/commandmanager':
         specifier: ^1.5.3
         version: 1.5.3
       '@jodu555/mysqlapi':
-        specifier: ^4.0.15
-        version: 4.0.15
+        specifier: ^4.0.16
+        version: 4.0.16
       axios:
         specifier: ^1.12.2
         version: 1.12.2
@@ -30,8 +30,8 @@ importers:
         specifier: ^17.2.3
         version: 17.2.3
       hono:
-        specifier: ^4.9.9
-        version: 4.9.9
+        specifier: ^4.9.10
+        version: 4.9.10
       mysql:
         specifier: ^2.18.1
         version: 2.18.1
@@ -219,8 +219,8 @@ packages:
   '@jodu555/commandmanager@1.5.3':
     resolution: {integrity: sha512-8Xcge6om5JzR5kpvXNWk1+mgOroO3NoxCDDUxE8TlNHyyqk0UCBbU0HhEYAucWbMf90qwrOgjDHe6Mi9Aalvpw==}
 
-  '@jodu555/mysqlapi@4.0.15':
-    resolution: {integrity: sha512-My2R0s4EQK7R3deMsQqSF1p2JgqLtB3hZL8Pr8tXBeQjQJMeNF1ziHFPxnbF4CrmyixQyofBq3bOWzTFRcE2aQ==}
+  '@jodu555/mysqlapi@4.0.16':
+    resolution: {integrity: sha512-7uWzunMQCuB/9mlry1selMUAL+spPaHLZT1j/8V0o62ppGkpqFzUnCNhNg1oh3AeOIVxk2eMFvoa6m4VgOcXcw==}
 
   '@opentelemetry/api@1.9.0':
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
@@ -321,8 +321,8 @@ packages:
     resolution: {integrity: sha512-sTSfBjoXBp89JvIKIefqw7U2CCebsc74kiY6awiGogKtoSGbgjYE/G/+l9sF3MWFPNc9IcoOC4ODfKHfxFmp0g==}
     engines: {node: '>= 0.4'}
 
-  get-tsconfig@4.10.1:
-    resolution: {integrity: sha512-auHyJ4AgMz7vgS8Hp3N6HXSmlMdUyhSUrfBF16w153rxtLIEOE+HGqaBppczZvnHLqQJfiHotCYpNhl0lUROFQ==}
+  get-tsconfig@4.11.0:
+    resolution: {integrity: sha512-sNsqf7XKQ38IawiVGPOoAlqZo1DMrO7TU+ZcZwi7yLl7/7S0JwmoBMKz/IkUPhSoXM0Ng3vT0yB1iCe5XavDeQ==}
 
   gopd@1.2.0:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
@@ -340,8 +340,8 @@ packages:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
 
-  hono@4.9.9:
-    resolution: {integrity: sha512-Hxw4wT6zjJGZJdkJzAx9PyBdf7ZpxaTSA0NfxqjLghwMrLBX8p33hJBzoETRakF3UJu6OdNQBZAlNSkGqKFukw==}
+  hono@4.9.10:
+    resolution: {integrity: sha512-AlI15ijFyKTXR7eHo7QK7OR4RoKIedZvBuRjO8iy4zrxvlY5oFCdiRG/V/lFJHCNXJ0k72ATgnyzx8Yqa5arug==}
     engines: {node: '>=16.9.0'}
 
   inherits@2.0.4:
@@ -491,18 +491,18 @@ snapshots:
   '@esbuild/win32-x64@0.25.10':
     optional: true
 
-  '@hono/node-server@1.19.5(hono@4.9.9)':
+  '@hono/node-server@1.19.5(hono@4.9.10)':
     dependencies:
-      hono: 4.9.9
+      hono: 4.9.10
 
-  '@hono/prometheus@1.0.2(hono@4.9.9)(prom-client@15.1.3)':
+  '@hono/prometheus@1.0.2(hono@4.9.10)(prom-client@15.1.3)':
     dependencies:
-      hono: 4.9.9
+      hono: 4.9.10
       prom-client: 15.1.3
 
   '@jodu555/commandmanager@1.5.3': {}
 
-  '@jodu555/mysqlapi@4.0.15':
+  '@jodu555/mysqlapi@4.0.16':
     dependencies:
       '@types/mysql': 2.15.27
       mysql: 2.18.1
@@ -631,7 +631,7 @@ snapshots:
       dunder-proto: 1.0.1
       es-object-atoms: 1.1.1
 
-  get-tsconfig@4.10.1:
+  get-tsconfig@4.11.0:
     dependencies:
       resolve-pkg-maps: 1.0.0
 
@@ -647,7 +647,7 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
-  hono@4.9.9: {}
+  hono@4.9.10: {}
 
   inherits@2.0.4: {}
 
@@ -704,7 +704,7 @@ snapshots:
   tsx@4.20.6:
     dependencies:
       esbuild: 0.25.10
-      get-tsconfig: 4.10.1
+      get-tsconfig: 4.11.0
     optionalDependencies:
       fsevents: 2.3.3
 
