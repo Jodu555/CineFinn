@@ -65,7 +65,9 @@ async function handleJob(id: string, req: AuthenticatedRequest, res: Response, n
 	try {
 		await enterFunction();
 		database.get<Partial<DatabaseJobItem>>('jobs').update({ ID: id }, { running: 'false' });
-		await cleanupFunction();
+		if (typeof cleanupFunction === 'function') {
+			await cleanupFunction();
+		}
 		toAllSockets(
 			(s) => {
 				s.emit(callpointToEvent(LOOKUP[id].callpoint));
