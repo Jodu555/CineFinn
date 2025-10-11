@@ -6,11 +6,12 @@ import { crawl } from './crawler.js';
 dotenv.config();
 import { proxy } from 'hono/proxy';
 import { trimTrailingSlash } from 'hono/trailing-slash';
-import { authRouter, registerSchemas } from './auth.js';
+import { authFullMiddleware, authRouter } from './auth.js';
 import { prometheus } from '@hono/prometheus';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { ownLogger } from './ownLogger.js';
+import { managmentRouter } from './managment.js';
 
 
 const app = new Hono({
@@ -27,6 +28,8 @@ app.get('/metrics', printMetrics);
 
 
 app.route('/auth', authRouter);
+
+app.route('/managment', managmentRouter);
 
 app.get('/index', async (c) => {
 
@@ -119,7 +122,6 @@ serve({
     port: 3000
 }, async (info) => {
     await connectDatabase();
-    registerSchemas();
     console.log(`Server is running on http://localhost:${info.port}`);
     // await crawl();
 });

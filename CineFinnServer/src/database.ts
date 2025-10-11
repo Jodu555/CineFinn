@@ -103,7 +103,7 @@ interface SyncRoomMember {
 
 export type JobType = 'crawl' | 'generatePreviewImages' | 'checkForUpdates-smart' | 'checkForUpdates-old';
 
-interface Job extends timestamped {
+interface Job {
     UUID: string;
     type: JobType;
     failed_at: number;

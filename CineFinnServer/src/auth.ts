@@ -4,54 +4,23 @@ import { accountsTable, authTokensTable, database, type Account } from './databa
 import bcrypt from 'bcryptjs';
 import { randomUUID } from 'node:crypto';
 import { HTTPException } from 'hono/http-exception';
+import z from 'zod';
 
-export async function registerSchemas() {
+const registerLoginSchema = z.object({
+    email: z.email(),
+    username: z.string().min(3).max(15).trim().regex(/^[a-zA-Z0-9]+$/, {
+        message: "Muss nur alphanumerische Zeichen enthalten.",
+    }),
+    password: z.string().min(8).max(128).trim(),
+    token: z.string().min(5).max(15).optional(),
+});
 
-    const len = {
-        min: 3,
-    };
-
-    const registerSchema = {
-        UUID: {
-            value: randomUUID(),
-        },
-        username: {
-            required: true,
-            anum: false,
-            min: 3,
-            max: 15,
-        },
-        email: {
-            email: true,
-            ...len,
-            max: 20,
-        },
-        password: {
-            required: true,
-            ...len,
-            max: 100,
-        },
-        token: {
-            min: 10,
-            max: 15,
-        },
-    };
-
-    const loginSchema = {
-        username: {
-            anum: false,
-            max: 15,
-            ...len,
-        },
-        password: {
-            ...len,
-            max: 100,
-        },
-    };
-
-    database.registerSchema('registerSchema', registerSchema, 'accounts');
-    database.registerSchema('loginSchema', loginSchema, 'accounts');
-}
+const loginSchema = z.object({
+    username: z.string().min(3).max(15).trim().regex(/^[a-zA-Z0-9]+$/, {
+        message: "Muss nur alphanumerische Zeichen enthalten.",
+    }),
+    password: z.string().min(8).max(128).trim(),
+});
 
 export async function getUser(token: string) {
     const authToken = await authTokensTable.getOne({
@@ -75,14 +44,16 @@ export async function getUser(token: string) {
     return user;
 }
 
-export const authFullMiddleware = (cb: (user: Account) => boolean) => createMiddleware<{
+export interface AuthedVars {
     Variables: {
         credentials: {
             token: string;
             user: Account;
         };
     };
-}>(async (c, next) => {
+}
+
+export const authFullMiddleware = (cb: (user: Account) => boolean) => createMiddleware<AuthedVars>(async (c, next) => {
     const token = c.req.header('auth-token') || c.req.query('auth-token');
     if (token == undefined) {
         throw new HTTPException(401, {
@@ -117,9 +88,9 @@ export const authMiddleware = authFullMiddleware((user) => true);
 export const authRouter = new Hono();
 
 authRouter.post('/login', async (c) => {
-
-    const validation = database.getSchema('loginSchema').validate(await c.req.json(), true);
-    const user = validation.object as any;
+    const jsonBody = await c.req.json();
+    const registerData = loginSchema.parse(jsonBody);
+    const user = registerData;
     const result = await accountsTable.getOne({ username: user.username, unique: true });
     if (result == undefined) {
         const value = user.username ? 'username' : 'email';
@@ -147,8 +118,10 @@ authRouter.post('/login', async (c) => {
 });
 
 authRouter.post('/register', async (c) => {
-    const validation = database.getSchema('registerSchema').validate(await c.req.json(), true);
-    const user = validation.object as any;
+    const jsonBody = await c.req.json();
+    const registerData = registerLoginSchema.parse(jsonBody);
+
+    const user = registerData;
 
     const registerToken = user.token;
     delete user.token;
@@ -159,10 +132,7 @@ authRouter.post('/register', async (c) => {
         });
     }
     const search = { ...user }; //Spreading to disable the reference
-    delete search.password;
 
-
-    search.unique = false;
     const result = await accountsTable.getOne({ username: search.username, unique: true });
     console.log(search, result);
 
@@ -174,9 +144,11 @@ authRouter.post('/register', async (c) => {
 
     user.password = await bcrypt.hash(user.password, 8);
 
+    delete (user as any).token;
+
     await accountsTable.create({
+        UUID: randomUUID(),
         ...user,
-        email: `${user.username}@nil.com`,
         activityDetails: {
             lastHandshake: new Date().toLocaleString('de'),
             lastLogin: new Date().toLocaleString('de'),
@@ -185,7 +157,7 @@ authRouter.post('/register', async (c) => {
         role: 1,
         status: 'trial',
     });
-    delete user.password;
+    delete (user as any).password;
     return c.json(user);
 });
 

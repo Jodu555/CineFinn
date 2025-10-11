@@ -3,7 +3,7 @@ import path from 'path';
 import { listFiles } from './fileutils.js';
 import { createHash, randomUUID } from 'node:crypto';
 import { filenameParser } from './parser.js';
-import { database, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, type Series } from './database.js';
+import { database, episodesTable, jobsTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, type Series } from './database.js';
 import { tryCatch } from './tryCatch.js';
 import { CacheContext } from './LRUCache.js';
 
@@ -32,7 +32,7 @@ const generateEntityID = () => {
 };
 
 
-export async function crawl() {
+export async function crawl(jobUUID: string) {
     const crawlerSeriesSeasonsCache = new CacheContext('crawler-series', 500);
 
     const crawlerEpisodesCache = new CacheContext('crawler-episodes', 150);
@@ -43,6 +43,8 @@ export async function crawl() {
     const viableExtensions = ['.mp4', '.mkv', '.webm'];
 
     files = files.filter((f) => viableExtensions.includes(path.parse(f).ext));
+
+    jobUUID !== undefined && await jobsTable.update({ UUID: jobUUID }, { data: { files } });
 
     console.time('Handling Files');
 
@@ -175,6 +177,15 @@ export async function crawl() {
 
 
     console.log(seasonCountersMap);
+
+    jobUUID !== undefined && await jobsTable.update({ UUID: jobUUID },
+        {
+            result: {
+                info: Array.from(seasonCountersMap.entries())
+            },
+            finished_at: Date.now(),
+        }
+    );
 
 
     crawlerEpisodesCache.clear();
