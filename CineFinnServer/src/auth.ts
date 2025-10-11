@@ -11,7 +11,7 @@ const registerLoginSchema = z.object({
     username: z.string().min(3).max(15).trim().regex(/^[a-zA-Z0-9]+$/, {
         message: "Muss nur alphanumerische Zeichen enthalten.",
     }),
-    password: z.string().min(8).max(128).trim(),
+    password: z.string().min(4).max(128).trim(),
     token: z.string().min(5).max(15).optional(),
 });
 
@@ -19,7 +19,7 @@ const loginSchema = z.object({
     username: z.string().min(3).max(15).trim().regex(/^[a-zA-Z0-9]+$/, {
         message: "Muss nur alphanumerische Zeichen enthalten.",
     }),
-    password: z.string().min(8).max(128).trim(),
+    password: z.string().min(4).max(128).trim(),
 });
 
 export async function getUser(token: string) {

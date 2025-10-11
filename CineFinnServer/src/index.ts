@@ -121,6 +121,8 @@ serve({
     fetch: app.fetch,
     port: 3000
 }, async (info) => {
+    console.log(info);
+
     await connectDatabase();
     console.log(`Server is running on http://localhost:${info.port}`);
     // await crawl();
