@@ -29,18 +29,25 @@ const generateEntityID = () => {
     return `WE-${generateID()}`;
 };
 
+interface Segment {
+    ID: string;
+    season: number;
+    episode: number;
+    movie: number;
+    time: string;
+}
+
 async function run() {
     await connectDatabase();
 
-    const oldDB = Database.createDatabase(process.env.OLD_DB_HOST!, process.env.OLD_DB_USERNAME!, process.env.OLD_DB_PASSWORD!, process.env.OLD_DB_DATABASE!);
-    await oldDB.connect();
-    const watchStrings = await oldDB.get('watch_strings').get({});
-    console.log(watchStrings);
+
+
 
     // console.log(await seriesTable.get({}));
 
 
     // await importSerieses();
+    // await importWatchHistory();
 }
 
 async function importSerieses() {
@@ -129,6 +136,25 @@ async function importSerieses() {
                 } satisfies WatchableEntity);
                 console.log(`=> Added watchable entity ${serie.title} #${i} (${lang})`);
             }
+        }
+    }
+}
+
+async function importWatchHistory() {
+    const oldDB = Database.createDatabase(process.env.OLD_DB_HOST!, process.env.OLD_DB_USERNAME!, process.env.OLD_DB_PASSWORD!, process.env.OLD_DB_DATABASE!);
+    await oldDB.connect();
+    const watchStrings = await oldDB.get('watch_strings').get({}) as { watch_string: string; }[];
+    console.log(watchStrings);
+
+    for (const watchString of watchStrings) {
+        const re = /(\w+):(?:(\d+)-(\d+)|(\d+))\.(\d+);/gim;
+        const list: Segment[] = [];
+        var outp: RegExpExecArray | null;
+        while ((outp = re.exec(watchString.watch_string)) !== null) {
+            // console.log(outp);
+            let isMovie = false;
+            const [og, ID, se = -1, ep = -1, movie = -1, time] = outp;
+            list.push({ ID, season: Number(se), episode: Number(ep), movie: Number(movie), time: time });
         }
     }
 }
