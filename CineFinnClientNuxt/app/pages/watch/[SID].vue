@@ -9,7 +9,7 @@
 					<div class="row g-4 mb-4">
 						<div class="col-auto">
 							<img
-								:src="buildCoverURL"
+								:src="coverURL"
 								:alt="series.title"
 								class="img-fluid rounded"
 								style="width: 128px; height: 192px; object-fit: cover" />
@@ -36,7 +36,10 @@
 								</span>
 							</div> -->
 
-							<ElongatedText class="text-muted mb-4" :text="series.infos.description" :max-length="250"></ElongatedText>
+							<ElongatedText
+								class="text-muted mb-4"
+								:text="series.infos.description || 'No Description available yet...'"
+								:max-length="250"></ElongatedText>
 							<!-- <p class="text-muted mb-4">{{ series.infos.description }}</p> -->
 
 							<div class="d-flex gap-3">
@@ -113,49 +116,46 @@
 								<!-- Grid View -->
 								<div v-if="viewMode === 'grid'" class="d-flex flex-column gap-2">
 									<div
-										v-for="episode in currentSeasonData"
+										v-for="episode in currentDetailedSeasonData?.episodes"
 										:key="episode.UUID"
 										:class="[
 											'card cursor-pointer',
-											isEpisodeWatched(selectedSeason, episode.UUID) ? 'border-success bg-success bg-opacity-10' : '',
-											isCurrentEpisode(selectedSeason, episode.UUID) ? 'border-primary border-2' : '',
+											isEpisodeWatched(episode.UUID) ? 'border-success bg-success bg-opacity-10' : '',
+											isCurrentEpisode(episode.UUID) ? 'border-primary border-2' : '',
 										]"
-										@click="handleEpisodeClick(selectedSeason, episode.UUID)"
+										@click="handleEpisodeClick(episode.UUID)"
 										style="cursor: pointer">
 										<div class="card-body p-3">
 											<div class="d-flex align-items-center gap-3">
 												<div
 													:class="[
 														'rounded d-flex align-items-center justify-content-center',
-														isEpisodeWatched(selectedSeason, episode.UUID) ? 'bg-success bg-opacity-25' : 'bg-secondary',
+														isEpisodeWatched(episode.UUID) ? 'bg-success bg-opacity-25' : 'bg-secondary',
 													]"
 													style="width: 64px; height: 40px">
 													<font-awesome-icon
-														v-if="isEpisodeWatched(selectedSeason, episode.UUID)"
+														v-if="isEpisodeWatched(episode.UUID)"
 														:icon="['fas', 'check']"
 														class="text-success" />
 													<font-awesome-icon v-else :icon="['fas', 'play']" />
 												</div>
 												<div class="flex-grow-1">
-													<h3 :class="['h6 mb-1', isEpisodeWatched(selectedSeason, episode.UUID) ? 'text-success' : '']">
+													<h3 :class="['h6 mb-1', isEpisodeWatched(episode.UUID) ? 'text-success' : '']">
 														{{ episode.episode_IDX }}
-														<small v-if="isEpisodeWatched(selectedSeason, episode.UUID)" class="text-success ms-2">
+														<small v-if="isEpisodeWatched(episode.UUID)" class="text-success ms-2">
 															<font-awesome-icon :icon="['fas', 'check']" />
 															Watched
 														</small>
 													</h3>
 													<p class="text-muted small mb-0">
 														<font-awesome-icon :icon="['far', 'clock']" class="me-1" />
-														{{ episode.UUID }}
+														{{ episode.watchableEntitys.map((e) => e.lang).join(', ') }}
 													</p>
 												</div>
 												<div class="progress" style="width: 80px; height: 4px">
 													<div
-														:class="[
-															'progress-bar',
-															isEpisodeWatched(selectedSeason, episode.UUID) ? 'bg-success' : 'bg-danger',
-														]"
-														:style="{ width: getEpisodeProgress(selectedSeason, episode.UUID) + '%' }"></div>
+														:class="['progress-bar', isEpisodeWatched(episode.UUID) ? 'bg-success' : 'bg-danger']"
+														:style="{ width: getEpisodeProgress(episode.UUID) + '%' }"></div>
 												</div>
 											</div>
 										</div>
@@ -164,38 +164,28 @@
 
 								<!-- Compact View -->
 								<div v-else class="row row-cols-4 row-cols-sm-6 row-cols-md-8 row-cols-lg-10 row-cols-xl-12 g-1">
-									<div v-for="episode in currentSeasonData" :key="episode.UUID" class="col">
+									<div v-for="episode in currentDetailedSeasonData?.episodes" :key="episode.UUID" class="col">
 										<div
 											:class="[
 												'card h-100 cursor-pointer',
-												isEpisodeWatched(selectedSeason, episode.UUID) ? 'border-success bg-success bg-opacity-10' : '',
-												isCurrentEpisode(selectedSeason, episode.UUID) ? 'border-primary border-2' : '',
+												isEpisodeWatched(episode.UUID) ? 'border-success bg-success bg-opacity-10' : '',
+												isCurrentEpisode(episode.UUID) ? 'border-primary border-2' : '',
 											]"
-											@click="handleEpisodeClick(selectedSeason, episode.UUID)"
+											@click="handleEpisodeClick(episode.UUID)"
 											style="cursor: pointer; aspect-ratio: 1">
 											<div class="card-body p-1 d-flex flex-column align-items-center justify-content-center">
-												<span
-													:class="[
-														'small fw-medium',
-														isEpisodeWatched(selectedSeason, episode.UUID) ? 'text-success' : '',
-													]">
+												<span :class="['small fw-medium', isEpisodeWatched(episode.UUID) ? 'text-success' : '']">
 													{{ episode.episode_IDX }}
 												</span>
 												<font-awesome-icon
-													v-if="isEpisodeWatched(selectedSeason, episode.UUID)"
+													v-if="isEpisodeWatched(episode.UUID)"
 													:icon="['fas', 'check']"
 													class="text-success mt-1"
 													size="xs" />
-												<div
-													v-if="isCurrentEpisode(selectedSeason, episode.UUID)"
-													class="progress w-100 mt-1"
-													style="height: 2px">
+												<div v-if="isCurrentEpisode(episode.UUID)" class="progress w-100 mt-1" style="height: 2px">
 													<div
-														:class="[
-															'progress-bar',
-															isEpisodeWatched(selectedSeason, episode.UUID) ? 'bg-success' : 'bg-danger',
-														]"
-														:style="{ width: '50' + '%' }"></div>
+														:class="['progress-bar', isEpisodeWatched(episode.UUID) ? 'bg-success' : 'bg-danger']"
+														:style="{ width: getEpisodeProgress(episode.UUID) + '%' }"></div>
 												</div>
 											</div>
 										</div>
@@ -204,58 +194,58 @@
 							</div>
 
 							<!-- Movies Tab -->
-							<!-- <div v-if="activeTab === 'movies' && hasMovies" class="tab-pane fade show active">
+							<div v-if="activeTab === 'movies' && hasMovies" class="tab-pane fade show active">
 								<div class="d-flex flex-column gap-3">
 									<div
-										v-for="movie in content.movies"
-										:key="movie.id"
+										v-for="movie in indexStore.detailedMovies"
+										:key="movie.UUID"
 										:class="[
 											'card cursor-pointer',
-											watchedMovies.has(movie.id) ? 'border-success bg-success bg-opacity-10' : '',
-											currentMovie === movie.id ? 'border-primary border-2' : '',
+											isMovieWatched(movie.UUID) ? 'border-success bg-success bg-opacity-10' : '',
+											isCurrentMovie(movie.UUID) ? 'border-primary border-2' : '',
 										]"
-										@click="handleMovieClick(movie.id)"
+										@click="handleMovieClick(movie.UUID)"
 										style="cursor: pointer">
 										<div class="card-body p-4">
 											<div class="d-flex gap-3">
 												<div
 													:class="[
 														'rounded d-flex align-items-center justify-content-center flex-shrink-0',
-														watchedMovies.has(movie.id) ? 'bg-success bg-opacity-25' : 'bg-secondary',
+														isMovieWatched(movie.UUID) ? 'bg-success bg-opacity-25' : 'bg-secondary',
 													]"
 													style="width: 80px; height: 80px">
 													<font-awesome-icon
-														v-if="watchedMovies.has(movie.id)"
+														v-if="isMovieWatched(movie.UUID)"
 														:icon="['fas', 'check']"
 														class="text-success"
 														size="2x" />
 													<font-awesome-icon v-else :icon="['fas', 'film']" size="2x" />
 												</div>
 												<div class="flex-grow-1">
-													<h3 :class="['h5 mb-2', watchedMovies.has(movie.id) ? 'text-success' : '']">
-														{{ movie.title }}
-														<small v-if="watchedMovies.has(movie.id)" class="text-success ms-2">
+													<h3 :class="['h5 mb-2', isMovieWatched(movie.UUID) ? 'text-success' : '']">
+														{{ movie.primaryName }}
+														<small v-if="isMovieWatched(movie.UUID)" class="text-success ms-2">
 															<font-awesome-icon :icon="['fas', 'check']" />
 															Watched
 														</small>
 													</h3>
 													<div class="d-flex align-items-center gap-3 mb-2 small text-muted">
 														<span>
-															<font-awesome-icon :icon="['far', 'calendar']" class="me-1" />
-															{{ movie.year }}
+															<font-awesome-icon :icon="['far', 'clock']" class="me-1" />
+															{{
+																movie.watchableEntitys.reduce((prev, curr) => {
+																	return prev + curr.runtime;
+																}, 0) / movie.watchableEntitys.length
+															}}
 														</span>
 														<span>•</span>
 														<span>
-															<font-awesome-icon :icon="['far', 'clock']" class="me-1" />
-															{{ movie.duration }}
+															<font-awesome-icon :icon="['fa', 'language']" class="me-1" />
+															{{ movie.watchableEntitys.map((e) => e.lang).join(', ') }}
 														</span>
 														<span>•</span>
-														<div class="d-flex align-items-center" v-if="SHOW_RATING">
-															<font-awesome-icon :icon="['fas', 'star']" class="text-warning me-1" />
-															<span>{{ movie.rating }}</span>
-														</div>
 													</div>
-													<p
+													<!-- <p
 														class="text-muted small mb-0"
 														style="
 															display: -webkit-box;
@@ -265,18 +255,18 @@
 															overflow: hidden;
 														">
 														{{ movie.description }}
-													</p>
-													<div v-if="currentMovie === movie.id" class="progress mt-3" style="height: 4px">
+													</p> -->
+													<div class="progress mt-3" style="height: 4px">
 														<div
-															:class="['progress-bar', watchedMovies.has(movie.id) ? 'bg-success' : 'bg-danger']"
-															:style="{ width: progress + '%' }"></div>
+															:class="['progress-bar', isMovieWatched(movie.UUID) ? 'bg-success' : 'bg-danger']"
+															:style="{ width: getMovieProgress(movie.UUID) + '%' }"></div>
 													</div>
 												</div>
 											</div>
 										</div>
 									</div>
 								</div>
-							</div> -->
+							</div>
 						</div>
 					</div>
 				</div>
@@ -337,15 +327,20 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 
+definePageMeta({
+	middleware: 'auth',
+	scrollToTop: true,
+});
+
 const route = useRoute();
 const authStore = useAuthStore();
 const indexStore = useIndexStore();
 
 const series = computed(() => indexStore.series.find((s) => s.UUID === route.params.SID));
 
-await callOnce('loadSeriesInfo', async () => await indexStore.loadSeriesInfo(route.params.SID as string));
+await callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string));
 
-const buildCoverURL = computed(() => {
+const coverURL = computed(() => {
 	// const CURRENT_EXTERNAL_API = 'http://localhost:3000';
 	const url = new URL('https://cinema-api.jodu555.de' + `/images/${series.value!.UUID}/cover.jpg`);
 
@@ -364,13 +359,12 @@ const currentSeasonData = computed(() => {
 
 	return (eps as any as Episode[]) || [];
 });
+
+const currentDetailedSeasonData = computed(() => {
+	return indexStore.detailedSeasons.find((s) => s.UUID === selectedSeason.value);
+});
+
 const selectedSeason = ref(series.value?.seasons?.[0]?.UUID || '');
-// watch(
-// 	() => selectedSeason,
-// 	async (newValue) => {
-//         const response = await $fetch<Episode[]>('https://cinema-api.jodu555.de/index/' + newValue);
-// 	}
-// );
 
 const relatedContent = [
 	{
@@ -391,40 +385,57 @@ const relatedContent = [
 	},
 ];
 
+useSeoMeta({
+	title: computed(() => series.value?.title || ''),
+	description: computed(() => series.value?.infos.description || ''),
+	ogImage: computed(() => coverURL.value),
+	ogType: 'video.tv_show',
+	twitterCard: 'player',
+	twitterTitle: computed(() => series.value?.title || ''),
+	twitterDescription: computed(() => series.value?.infos.description || ''),
+});
+
 const viewMode = ref('grid');
-const activeTab = ref('seasons');
+
+type Tab = 'seasons' | 'movies' | 'nothing';
+const activeTab = ref<Tab>(hasSeasons.value ? 'seasons' : hasMovies.value ? 'movies' : 'nothing');
 
 // Methods
-const handleEpisodeClick = (seasonNumber: string, episodeNumber: string) => {
-	// currentEpisode.value = { season: seasonNumber, episode: episodeNumber };
-	// currentMovie.value = null;
-	// const episodeKey = `${seasonNumber}-${episodeNumber}`;
-	// watchedEpisodes.value.add(episodeKey);
-	// progress.value = 0;
+
+const currentMovieUUID = ref<string | null>(null);
+const currentEpisodeUUID = ref<string | null>(null);
+
+const handleEpisodeClick = (episodeUUID: string) => {
+	currentEpisodeUUID.value = episodeUUID;
+	currentMovieUUID.value = null;
+};
+const isCurrentEpisode = (episodeUUID: string) => {
+	return currentEpisodeUUID.value === episodeUUID;
 };
 
-const handleMovieClick = (movieId: string) => {
-	// currentMovie.value = movieId;
-	// currentEpisode.value = { season: '0', episode: '0' };
-	// watchedMovies.value.add(movieId);
-	// progress.value = 0;
-};
-
-const isEpisodeWatched = (season: string, episode: string) => {
-	// return watchedEpisodes.value.has(`${season}-${episode}`);
+const isEpisodeWatched = (episodeUUID: string) => {
 	return false;
 };
-
-const isCurrentEpisode = (season: string, episode: string) => {
-	// return !currentMovie.value && currentEpisode.value.season === season && currentEpisode.value.episode === episode;
-	return false;
+const getEpisodeProgress = (episodeUUID: string) => {
+	return 0;
 };
 
-const getEpisodeProgress = (season: string, episode: string) => {
-	// if (isCurrentEpisode(season, episode)) {
+const handleMovieClick = (movieUUID: string) => {
+	currentMovieUUID.value = movieUUID;
+	currentEpisodeUUID.value = null;
+};
+const isCurrentMovie = (movieUUID: string) => {
+	return currentMovieUUID.value === movieUUID;
+};
+
+const isMovieWatched = (movieUUID: string) => {
+	return false;
+};
+const getMovieProgress = (movieUUID: string) => {
+	// if (isCurrentMovie(movieUUID)) {
 	// 	return progress.value;
 	// }
-	// return isEpisodeWatched(season, episode) ? 100 : 0;
+	// return isMovieWatched(movieUUID) ? 100 : 0;
 	return 0;
 };
 
@@ -459,17 +470,8 @@ const navigateToContent = (id: number) => {
 	/* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); */
 }
 
-.card {
-	/* background-color: rgba(255, 255, 255, 0.05);
-	border-color: rgba(255, 255, 255, 0.1); */
-}
-
 .card:hover {
 	background-color: rgba(255, 255, 255, 0.08);
-}
-
-.nav-tabs {
-	/* border-bottom-color: rgba(255, 255, 255, 0.1); */
 }
 
 .nav-tabs .nav-link {

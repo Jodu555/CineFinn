@@ -4,7 +4,8 @@ export const useIndexStore = defineStore('index', {
     state: () => ({
         loading: false,
         series: [] as Series[],
-        detailedSeasons: null as Series | null,
+        detailedSeasons: [] as DetailedSeason[],
+        detailedMovies: [] as DetailedMovie[],
     }),
     actions: {
         async loadSeries() {
@@ -15,12 +16,11 @@ export const useIndexStore = defineStore('index', {
             this.series = response;
             this.loading = false;
         },
-        async loadSeriesInfo(serieID: string) {
+        async loadDetailedSeasonInfo(seriesID: string) {
             this.loading = true;
-            const response = await $fetch<Series>(useAPIURL() + '/index/' + serieID);
-            console.log('Loading series Info for ', serieID, 'response:', response);
-
-            this.series = this.series.map((s) => s.UUID === serieID ? response : s);
+            const response = await $fetch<DetailedSeries>(useAPIURL() + '/index/' + seriesID);
+            this.detailedSeasons = response.seasons;
+            this.detailedMovies = response.movies;
             this.loading = false;
         },
     }

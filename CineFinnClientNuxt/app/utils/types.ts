@@ -22,6 +22,11 @@ export interface Series {
     seasons: Season[];
 }
 
+export interface DetailedSeries extends Omit<Series, 'seasons'> {
+    seasons: DetailedSeason[];
+    movies: DetailedMovie[];
+}
+
 export type SeriesRefs = Record<'aniworld' | 'zoro' | 'sto' | string, string | Record<string, string>>;
 
 export interface SeriesInfos {
@@ -42,6 +47,10 @@ export interface Season {
     episodes: number;
 }
 
+export interface DetailedSeason extends Omit<Season, 'episodes'> {
+    episodes: DetailedEpisode[];
+}
+
 export interface Episode {
     UUID: string;
     season_UUID: string;
@@ -49,11 +58,19 @@ export interface Episode {
     episode_IDX: number;
 }
 
+export interface DetailedEpisode extends Episode {
+    watchableEntitys: WatchableEntity[];
+}
+
 export interface Movie {
     UUID: string;
     primaryName: string;
     serie_UUID: string;
     movie_IDX: number;
+}
+
+export interface DetailedMovie extends Movie {
+    watchableEntitys: WatchableEntity[];
 }
 
 export interface WatchableEntity {

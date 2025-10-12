@@ -1,7 +1,7 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import dotenv from 'dotenv';
-import { connectDatabase, database, episodesTable, seasonsTable, seriesTable, watchableEntitysTable, type Series } from './database.js';
+import { connectDatabase, database, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, type Series } from './database.js';
 import { crawl } from './crawler.js';
 dotenv.config();
 import { proxy } from 'hono/proxy';
@@ -39,10 +39,11 @@ app.get('/index', async (c) => {
         return new Promise(async (resolve, reject) => {
             const categorie = e.tags[0];
             const seasons = await seasonsTable.get({ serie_UUID: e.UUID });
+            const movies = await moviesTable.get({ serie_UUID: e.UUID });
             resolve({
                 ...e,
-                movies: [],
-                seasons: seasons,
+                movies: movies.sort((a, b) => a.movie_IDX - b.movie_IDX),
+                seasons: seasons.sort((a, b) => a.season_IDX - b.season_IDX),
             });
         });
     }));
@@ -50,9 +51,9 @@ app.get('/index', async (c) => {
     return c.json(overhauledSeries);
 });
 
-app.get('/index/:UUID', async (c) => {
+app.get('/index/:S-UUID', async (c) => {
 
-    const serie = await seriesTable.getOne({ UUID: c.req.param('UUID') });
+    const serie = await seriesTable.getOne({ UUID: c.req.param('S-UUID') });
 
     if (serie == undefined) {
         return c.json({
@@ -79,9 +80,19 @@ app.get('/index/:UUID', async (c) => {
         return obj;
     }));
 
+    const movies = await moviesTable.get({ serie_UUID: serie.UUID });
+    const newMovies = await Promise.all(movies.map(async (movie) => {
+        const watchableEntitys = await watchableEntitysTable.get({ watchable_UUID: movie.UUID });
+        return {
+            ...movie,
+            watchableEntitys,
+        };
+    }));
+
     const finalOutput = {
         ...serie,
         seasons: newSeasons.sort((a, b) => a.season_IDX - b.season_IDX),
+        movies: newMovies,
     };
 
     return c.json(finalOutput);
