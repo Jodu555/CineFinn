@@ -1,25 +1,37 @@
 <template>
 	<!-- <input type="number" min="1" step="3" max="4" v-model="contentId" /> -->
+
+	<div class="video-container">
+		<video
+			src="https://cinema-api.jodu555.de/video?auth-token=1132bf62-b31b-427f-9896-96d6120392b2&series=9e77527f&language=EngDub&season=1&episode=20"
+			controls
+			preload="auto"
+			style="width: 100%"></video>
+		<!-- <div style="width: 100%; height: 100%; background-color: rebeccapurple"></div> -->
+	</div>
 	<div v-if="series" class="container-fluid text-white min-vh-100 py-4">
 		<!-- Content Information -->
 		<div class="container">
 			<div class="row g-4">
 				<!-- Main Content Info -->
-				<div class="col-lg-8">
+				<div class="col-xl-8">
 					<div class="row g-4 mb-4">
-						<div class="col-auto">
-							<img
-								:src="coverURL"
-								:alt="series.title"
-								class="img-fluid rounded"
-								style="width: 128px; height: 192px; object-fit: cover" />
+						<div class="col-sm-12 col-md-auto">
+							<div class="d-flex justify-content-center">
+								<img
+									:src="coverURL"
+									:alt="series.title"
+									class="img-fluid rounded"
+									style="width: 128px; height: 192px; object-fit: cover" />
+							</div>
 						</div>
 						<div class="col">
-							<h1 class="display-5 fw-bold mb-3">{{ series.infos.title || series.title }}</h1>
+							<h1 class="display-5 fw-bold mb-3 text-center text-sm-center text-md-start">{{ series.infos.title || series.title }}</h1>
 
-							<div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+							<div
+								class="d-flex flex-wrap align-items-center justify-content-center justify-content-sm-center justify-content-md-start gap-3 mb-3">
 								<span class="badge bg-secondary">{{ series.infos.startDate }}</span>
-								<span class="badge bg-danger">{{ series.tags[0]!.toUpperCase() }}</span>
+								<span class="badge bg-primary">{{ series.tags[0]!.toUpperCase() }}</span>
 								<!-- <div class="d-flex align-items-center" v-if="SHOW_RATING">
 									<font-awesome-icon :icon="['fas', 'star']" class="text-warning me-1" />
 									<span class="fw-medium">{{ content.rating }}</span>
@@ -37,13 +49,13 @@
 							</div> -->
 
 							<ElongatedText
-								class="text-muted mb-4"
+								class="text-muted mb-4 text-center text-xs-center text-md-start"
 								:text="series.infos.description || 'No Description available yet...'"
-								:max-length="250"></ElongatedText>
+								:max-length="200"></ElongatedText>
 							<!-- <p class="text-muted mb-4">{{ series.infos.description }}</p> -->
 
 							<div class="d-flex gap-3">
-								<button class="btn btn-danger">
+								<button class="btn btn-outline-primary">
 									<font-awesome-icon :icon="['fas', 'plus']" class="me-2" />
 									Add to Watchlist
 								</button>
@@ -57,28 +69,30 @@
 
 					<!-- Episodes/Movies Section -->
 					<div v-if="hasSeasons || hasMovies" class="mb-4">
-						<ul class="nav nav-tabs mb-4" role="tablist">
-							<li v-if="hasSeasons" class="nav-item" role="presentation">
-								<button
-									:class="['nav-link', { active: activeTab === 'seasons' }]"
-									@click="activeTab = 'seasons'"
-									type="button"
-									role="tab">
-									<font-awesome-icon :icon="['fas', 'tv']" class="me-2" />
-									Seasons
-								</button>
-							</li>
-							<li v-if="hasMovies" class="nav-item" role="presentation">
-								<button
-									:class="['nav-link', { active: activeTab === 'movies' }]"
-									@click="activeTab = 'movies'"
-									type="button"
-									role="tab">
-									<font-awesome-icon :icon="['fas', 'film']" class="me-2" />
-									Movies ({{ series.movies?.length }})
-								</button>
-							</li>
-						</ul>
+						<div class="d-flex justify-content-center">
+							<ul class="nav nav-tabs mb-4" role="tablist">
+								<li v-if="hasSeasons" class="nav-item" role="presentation">
+									<button
+										:class="['nav-link', { active: activeTab === 'seasons' }]"
+										@click="activeTab = 'seasons'"
+										type="button"
+										role="tab">
+										<font-awesome-icon :icon="['fas', 'tv']" class="me-2 px-1" />
+										Seasons
+									</button>
+								</li>
+								<li v-if="hasMovies" class="nav-item" role="presentation">
+									<button
+										:class="['nav-link', { active: activeTab === 'movies' }]"
+										@click="activeTab = 'movies'"
+										type="button"
+										role="tab">
+										<font-awesome-icon :icon="['fas', 'film']" class="me-2 px-1" />
+										Movies ({{ series.movies?.length }})
+									</button>
+								</li>
+							</ul>
+						</div>
 
 						<div class="tab-content">
 							<!-- Seasons Tab -->
@@ -100,13 +114,13 @@
 									<div class="btn-group" role="group">
 										<button
 											type="button"
-											:class="['btn', viewMode === 'grid' ? 'btn-danger' : 'btn-outline-secondary']"
+											:class="['btn', viewMode === 'grid' ? 'btn-primary' : 'btn-outline-secondary']"
 											@click="viewMode = 'grid'">
 											<font-awesome-icon :icon="['fas', 'list']" />
 										</button>
 										<button
 											type="button"
-											:class="['btn', viewMode === 'compact' ? 'btn-danger' : 'btn-outline-secondary']"
+											:class="['btn', viewMode === 'compact' ? 'btn-primary' : 'btn-outline-secondary']"
 											@click="viewMode = 'compact'">
 											<font-awesome-icon :icon="['fas', 'grip']" />
 										</button>
@@ -120,42 +134,53 @@
 										:key="episode.UUID"
 										:class="[
 											'card cursor-pointer',
-											isEpisodeWatched(episode.UUID) ? 'border-success bg-success bg-opacity-10' : '',
+											isEpisodeWatched(episode.UUID) && !isCurrentEpisode(episode.UUID) ? 'border-success' : '',
+											isEpisodeWatched(episode.UUID) ? 'bg-success bg-opacity-10' : '',
 											isCurrentEpisode(episode.UUID) ? 'border-primary border-2' : '',
 										]"
 										@click="handleEpisodeClick(episode.UUID)"
 										style="cursor: pointer">
 										<div class="card-body p-3">
-											<div class="d-flex align-items-center gap-3">
-												<div
-													:class="[
-														'rounded d-flex align-items-center justify-content-center',
-														isEpisodeWatched(episode.UUID) ? 'bg-success bg-opacity-25' : 'bg-secondary',
-													]"
-													style="width: 64px; height: 40px">
-													<font-awesome-icon
-														v-if="isEpisodeWatched(episode.UUID)"
-														:icon="['fas', 'check']"
-														class="text-success" />
-													<font-awesome-icon v-else :icon="['fas', 'play']" />
-												</div>
+											<div class="d-flex">
 												<div class="flex-grow-1">
-													<h3 :class="['h6 mb-1', isEpisodeWatched(episode.UUID) ? 'text-success' : '']">
-														{{ episode.episode_IDX }}
-														<small v-if="isEpisodeWatched(episode.UUID)" class="text-success ms-2">
-															<font-awesome-icon :icon="['fas', 'check']" />
-															Watched
-														</small>
-													</h3>
-													<p class="text-muted small mb-0">
-														<font-awesome-icon :icon="['far', 'clock']" class="me-1" />
-														{{ episode.watchableEntitys.map((e) => e.lang).join(', ') }}
-													</p>
-												</div>
-												<div class="progress" style="width: 80px; height: 4px">
-													<div
-														:class="['progress-bar', isEpisodeWatched(episode.UUID) ? 'bg-success' : 'bg-danger']"
-														:style="{ width: getEpisodeProgress(episode.UUID) + '%' }"></div>
+													<div class="d-flex align-items-center gap-3">
+														<div
+															:class="[
+																'rounded d-flex align-items-center justify-content-center',
+																isEpisodeWatched(episode.UUID) ? 'bg-success bg-opacity-25' : 'bg-secondary',
+															]"
+															style="width: 64px; height: 40px">
+															<font-awesome-icon
+																v-if="isEpisodeWatched(episode.UUID)"
+																:icon="['fas', 'check']"
+																class="text-success" />
+															<font-awesome-icon v-else :icon="['fas', 'play']" />
+														</div>
+														<div class="flex-grow-1">
+															<h3 :class="['h6 mb-1', isEpisodeWatched(episode.UUID) ? 'text-success' : '']">
+																{{ episode.episode_IDX }}
+																<small v-if="isEpisodeWatched(episode.UUID)" class="text-success ms-2">
+																	<font-awesome-icon :icon="['fas', 'check']" />
+																	Watched
+																</small>
+															</h3>
+															<div class="d-flex gap-4">
+																<p class="text-muted small mb-0">
+																	<font-awesome-icon :icon="['far', 'clock']" class="me-1" />
+																	20min
+																</p>
+															</div>
+															<p class="text-muted small mb-0">
+																<font-awesome-icon :icon="['fa', 'language']" class="me-1" />
+																{{ episode.watchableEntitys.map((e) => e.lang).join(', ') }}
+															</p>
+														</div>
+													</div>
+													<div class="progress mt-3" style="width: 100%; height: 4px">
+														<div
+															:class="['progress-bar', isEpisodeWatched(episode.UUID) ? 'bg-success' : 'bg-danger']"
+															:style="{ width: getEpisodeProgress(episode.UUID) + '%' }"></div>
+													</div>
 												</div>
 											</div>
 										</div>
@@ -182,7 +207,7 @@
 													:icon="['fas', 'check']"
 													class="text-success mt-1"
 													size="xs" />
-												<div v-if="isCurrentEpisode(episode.UUID)" class="progress w-100 mt-1" style="height: 2px">
+												<div class="progress w-100 mt-2" style="height: 2px">
 													<div
 														:class="['progress-bar', isEpisodeWatched(episode.UUID) ? 'bg-success' : 'bg-danger']"
 														:style="{ width: getEpisodeProgress(episode.UUID) + '%' }"></div>
@@ -272,7 +297,7 @@
 				</div>
 
 				<!-- Related Content Sidebar -->
-				<div class="col-lg-4">
+				<div class="col-xl-4">
 					<h2 class="h5 mb-3">
 						<font-awesome-icon :icon="['fas', 'heart']" class="me-2 text-danger" />
 						More Like This
@@ -338,7 +363,9 @@ const indexStore = useIndexStore();
 
 const series = computed(() => indexStore.series.find((s) => s.UUID === route.params.SID));
 
-await callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string));
+await callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string), {
+	mode: 'navigation',
+});
 
 const coverURL = computed(() => {
 	// const CURRENT_EXTERNAL_API = 'http://localhost:3000';
@@ -414,10 +441,10 @@ const isCurrentEpisode = (episodeUUID: string) => {
 };
 
 const isEpisodeWatched = (episodeUUID: string) => {
-	return false;
+	return true;
 };
 const getEpisodeProgress = (episodeUUID: string) => {
-	return 0;
+	return 90;
 };
 
 const handleMovieClick = (movieUUID: string) => {
@@ -460,6 +487,24 @@ const navigateToContent = (id: number) => {
 	min-height: 100vh;
 }
 
+.center-play {
+	position: absolute;
+	top: 0;
+	right: 0;
+	transform: translate(-50%, 100%);
+}
+
+.video-container {
+	position: relative;
+	width: 90%;
+	max-width: 70vw;
+	/* max-width: 1000px; */
+	display: flex;
+	justify-content: center;
+	margin-inline: auto;
+	background-color: #000;
+}
+
 .cursor-pointer {
 	cursor: pointer;
 	transition: all 0.2s ease;
@@ -467,7 +512,7 @@ const navigateToContent = (id: number) => {
 
 .cursor-pointer:hover {
 	transform: translateY(-2px);
-	/* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); */
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .card:hover {
@@ -488,6 +533,6 @@ const navigateToContent = (id: number) => {
 .nav-tabs .nav-link.active {
 	color: white;
 	background-color: transparent;
-	border-color: transparent transparent #dc3545;
+	border-color: transparent transparent #0d6efd;
 }
 </style>
