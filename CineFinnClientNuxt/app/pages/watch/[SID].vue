@@ -1,12 +1,8 @@
 <template>
 	<!-- <input type="number" min="1" step="3" max="4" v-model="contentId" /> -->
 
-	<div class="video-container">
-		<video
-			src="https://cinema-api.jodu555.de/video?auth-token=1132bf62-b31b-427f-9896-96d6120392b2&series=9e77527f&language=EngDub&season=1&episode=20"
-			controls
-			preload="auto"
-			style="width: 100%"></video>
+	<div v-if="showVideo" class="video-container">
+		<video :src="videoSrc" controls preload="auto" style="width: 100%"></video>
 		<!-- <div style="width: 100%; height: 100%; background-color: rebeccapurple"></div> -->
 	</div>
 	<div v-if="series" class="container-fluid text-white min-vh-100 py-4">
@@ -337,13 +333,15 @@
 				</div>
 			</div>
 		</div>
-		<pre>
+		<pre v-if="false">
             activeTab: {{ activeTab }}
             viewMode: {{ viewMode }}
+			showVideo: {{ showVideo }}
+			videoSrc: {{ videoSrc }}
             selectedSeason: {{ selectedSeason }}
             hasSeasons: {{ hasSeasons }}
             hasMovies: {{ hasMovies }}
-            currentSeasonData: {{ currentSeasonData }}
+            currentDetailedSeasonData: {{ currentDetailedSeasonData }}
             series: {{ series }}
         </pre>
 	</div>
@@ -379,13 +377,6 @@ const coverURL = computed(() => {
 const hasSeasons = computed(() => series.value?.seasons && series.value.seasons.length > 0);
 
 const hasMovies = computed(() => series.value?.movies && series.value.movies.length > 0);
-
-// const currentSeasonData = ref<Episode[]>([]);
-const currentSeasonData = computed(() => {
-	const eps = series.value?.seasons.find((s) => s.UUID === selectedSeason.value)?.episodes;
-
-	return (eps as any as Episode[]) || [];
-});
 
 const currentDetailedSeasonData = computed(() => {
 	return indexStore.detailedSeasons.find((s) => s.UUID === selectedSeason.value);
@@ -427,6 +418,29 @@ const viewMode = ref('grid');
 type Tab = 'seasons' | 'movies' | 'nothing';
 const activeTab = ref<Tab>(hasSeasons.value ? 'seasons' : hasMovies.value ? 'movies' : 'nothing');
 
+const showVideo = computed(() => {
+	return currentMovieUUID.value !== null || currentEpisodeUUID.value !== null;
+});
+
+const videoSrc = computed(() => {
+	if (series.value === undefined) return '';
+
+	const BASE_URL = 'https://cinema-api.jodu555.de/video?auth-token=SECR-DEV';
+
+	if (currentMovieUUID.value !== null) {
+		const movie = indexStore.detailedMovies.find((m) => m.UUID === currentMovieUUID.value);
+		if (movie === undefined) return '';
+		return `${BASE_URL}&series=${series.value.UUID}&language=EngDub&movie=${movie.movie_IDX}`;
+	}
+	if (currentEpisodeUUID.value !== null) {
+		if (currentDetailedSeasonData.value === undefined) return '';
+		const episode = currentDetailedSeasonData.value.episodes.find((e) => e.UUID === currentEpisodeUUID.value);
+		if (episode === undefined) return '';
+		return `${BASE_URL}&series=${series.value.UUID}&language=EngDub&season=${episode.season_IDX}&episode=${episode.episode_IDX}`;
+	}
+	return '';
+});
+
 // Methods
 
 const currentMovieUUID = ref<string | null>(null);
@@ -435,6 +449,9 @@ const currentEpisodeUUID = ref<string | null>(null);
 const handleEpisodeClick = (episodeUUID: string) => {
 	currentEpisodeUUID.value = episodeUUID;
 	currentMovieUUID.value = null;
+
+	const router = useRouter();
+	router.push({ path: `/watch/${series.value!.UUID}`, query: { episode: episodeUUID } });
 };
 const isCurrentEpisode = (episodeUUID: string) => {
 	return currentEpisodeUUID.value === episodeUUID;
@@ -450,6 +467,9 @@ const getEpisodeProgress = (episodeUUID: string) => {
 const handleMovieClick = (movieUUID: string) => {
 	currentMovieUUID.value = movieUUID;
 	currentEpisodeUUID.value = null;
+
+	const router = useRouter();
+	router.push({ path: `/watch/${series.value!.UUID}`, query: { movie: movieUUID } });
 };
 const isCurrentMovie = (movieUUID: string) => {
 	return currentMovieUUID.value === movieUUID;
