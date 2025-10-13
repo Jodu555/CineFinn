@@ -1,7 +1,7 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import dotenv from 'dotenv';
-import { connectDatabase, database, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, type Series } from './database.js';
+import { connectDatabase, database, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, type Movie, type Season, type Series } from './database.js';
 import { crawl } from './crawler.js';
 dotenv.config();
 import { proxy } from 'hono/proxy';
@@ -12,6 +12,7 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { ownLogger } from './ownLogger.js';
 import { managmentRouter } from './managment.js';
+import { CacheContext } from './LRUCache.js';
 
 
 const app = new Hono({
@@ -31,24 +32,88 @@ app.route('/auth', authRouter);
 
 app.route('/managment', managmentRouter);
 
+export const indexSeriesCache = new CacheContext('index-series', 500);
+export const indexSeasonsCache = new CacheContext('index-seasons', 500);
+export const indexMoviesCache = new CacheContext('index-movies', 500);
+
 app.get('/index', async (c) => {
 
-    const series = await seriesTable.get();
+    interface DetailedSeries extends Omit<Series, 'seasons' | 'movies'> {
+        seasons: Season[];
+        movies: Movie[];
+    }
 
-    const overhauledSeries = await Promise.all(series.map(e => {
-        return new Promise(async (resolve, reject) => {
-            const categorie = e.tags[0];
-            const seasons = await seasonsTable.get({ serie_UUID: e.UUID });
-            const movies = await moviesTable.get({ serie_UUID: e.UUID });
-            resolve({
-                ...e,
-                movies: movies.sort((a, b) => a.movie_IDX - b.movie_IDX),
-                seasons: seasons.sort((a, b) => a.season_IDX - b.season_IDX),
-            });
+    const result = await new Promise<DetailedSeries[]>((resolve, reject) => {
+        database.pool.query(`
+          SELECT 
+    series.*,
+    CONCAT('[', GROUP_CONCAT(
+      JSON_OBJECT(
+        'UUID', seasons.UUID,
+        'serie_UUID', seasons.serie_UUID,
+        'season_IDX', seasons.season_IDX,
+        'episodes', seasons.episodes,
+        'created_at', seasons.created_at,
+        'updated_at', seasons.updated_at
+      )
+    ), ']') AS seasons_array
+   FROM series
+   LEFT JOIN seasons ON seasons.serie_UUID = series.UUID
+   GROUP BY series.UUID
+   
+          `, (error, rows, fields) => {
+
+            resolve(rows.map((row: any) => {
+                try {
+                    const obj = {
+                        ...row,
+                        tags: JSON.parse(row.tags),
+                        infos: JSON.parse(row.infos),
+                        refs: JSON.parse(row.refs),
+                        seasons: JSON.parse(row.seasons_array),
+                        movies: row.movies_array != undefined ? JSON.parse(row.movies_array) : [],
+                    };
+                    delete obj.seasons_array;
+                    delete obj.movies_array;
+                    return obj;
+                } catch (error) {
+                    console.log(error);
+                    console.log(row);
+
+                }
+                return null;
+            }));
         });
-    }));
+    });
 
-    return c.json(overhauledSeries);
+    return c.json(result);
+
+
+    // const seriesCR = await indexSeriesCache.execute(seriesTable, 'get', []);
+    // const series = await seriesTable.get();
+
+    // const series = seriesCR.data;
+    // const overhauledSeries = await Promise.all(series.map(e => {
+    //     return new Promise(async (resolve, reject) => {
+    //         const [CRseasons, CRmovies] = await Promise.all([
+    //             // seasonsTable.get({ serie_UUID: e.UUID }),
+    //             // moviesTable.get({ serie_UUID: e.UUID }),
+    //             indexSeasonsCache.execute(seasonsTable, 'get', [{ serie_UUID: e.UUID }]),
+    //             indexMoviesCache.execute(moviesTable, 'get', [{ serie_UUID: e.UUID }]),
+    //         ]);
+
+    //         const seasons = CRseasons.data.sort((a, b) => a.season_IDX - b.season_IDX);
+    //         const movies = CRmovies.data.sort((a, b) => a.movie_IDX - b.movie_IDX);
+
+    //         resolve({
+    //             ...e,
+    //             movies: movies.sort((a, b) => a.movie_IDX - b.movie_IDX),
+    //             seasons: seasons.sort((a, b) => a.season_IDX - b.season_IDX),
+    //         });
+    //     });
+    // }));
+
+    // return c.json(overhauledSeries);
 });
 
 app.get('/index/:S-UUID', async (c) => {

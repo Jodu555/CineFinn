@@ -130,7 +130,9 @@ export let jobsTable: thingDatabase<Job, Job & timestamped>;
 
 export async function connectDatabase() {
     database = Database.createDatabase(process.env.DB_HOST!, process.env.DB_USERNAME!, process.env.DB_PASSWORD!, process.env.DB_DATABASE!);
-    await database.connect();
+    await database.connect({
+        connectionLimit: 15,
+    });
     await createTables();
 }
 
