@@ -6,6 +6,7 @@ export const useIndexStore = defineStore('index', {
         series: [] as Series[],
         detailedSeasons: [] as DetailedSeason[],
         detailedMovies: [] as DetailedMovie[],
+        selectedWatchableEntity: null as WatchableEntity | null,
     }),
     actions: {
         async loadSeries() {
@@ -22,6 +23,28 @@ export const useIndexStore = defineStore('index', {
             this.detailedSeasons = response.seasons;
             this.detailedMovies = response.movies;
             this.loading = false;
+        },
+        setSelectedWatchableEntityUUID(entityUUID: string | null) {
+            const preferredLanguageList = ['GerDub', 'EngDub', 'GerSub', 'EngSub'];
+            let entity: DetailedMovie | DetailedEpisode | null = null;
+            if (entityUUID?.startsWith('M#')) {
+                entity = this.detailedMovies.find((m) => m.UUID === entityUUID)!;
+            }
+            if (entityUUID?.startsWith('E#')) {
+                entity = this.detailedSeasons.map(s => s.episodes).flat().find((e) => e.UUID === entityUUID)!;
+            }
+
+            if (!entity) {
+                this.selectedWatchableEntity = null;
+                return;
+            }
+
+            const preferredLanguage = preferredLanguageList.find(l => entity.watchableEntitys.find(we => we.lang === l));
+
+            this.selectedWatchableEntity = entity.watchableEntitys.find(we => we.lang === preferredLanguage)!;
+        },
+        setSelectedWatchableEntity(entity: WatchableEntity | null) {
+            this.selectedWatchableEntity = entity;
         },
     }
 });
