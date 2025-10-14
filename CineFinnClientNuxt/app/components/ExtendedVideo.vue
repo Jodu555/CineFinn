@@ -1,19 +1,19 @@
 <template>
 	<div>
-		<div v-if="!inSyncRoom">
+		<!-- <div v-if="!inSyncRoom">
 			<ShareModal />
 			<RmvcModal :switchTo :skip />
-		</div>
+		</div> -->
 		<div style="margin-top: 0.5%" class="video-container paused" data-volume-level="high">
 			<img class="thumbnail-img" />
-			<div v-if="entityObject && settings.showVideoTitleContainer.value" class="video-title-container">
+			<!-- <div v-if="entityObject && settings.showVideoTitleContainer.value" class="video-title-container">
 				<p v-if="currentMovie == -1">
 					{{ entityObject.primaryName }} - {{ String((entityObject as SerieEpisode).season).padStart(2, '0') }}x{{
 						String((entityObject as SerieEpisode).episode).padStart(2, '0')
 					}}
 				</p>
 				<p v-if="currentMovie !== -1">{{ entityObject.primaryName }}</p>
-			</div>
+			</div> -->
 
 			<font-awesome-icon class="skip skip-left" size="2xl" icon="fa-solid fa-backward" />
 			<div class="middle-play">
@@ -149,7 +149,7 @@
 				</div>
 			</div>
 
-			<pre v-if="settings.developerMode.value" class="internal-video-devinfos">
+			<pre v-if="true" class="internal-video-devinfos">
 VideoLoading: {{ videoLoading }} 
 ReadyState: {{ videoData.readyState }} 
 CurrentTime: {{ videoData.currentTime }}ms
@@ -217,6 +217,7 @@ interface VideoData {
 
 // Props
 interface Props {
+	videoSrc: string;
 	switchTo: (vel: number) => void;
 	sendVideoTimeUpdate: (time: number) => void;
 	inSyncRoom?: boolean;
@@ -225,6 +226,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+	videoSrc: '',
 	inSyncRoom: false,
 	canPlay: true,
 	events: () => ({}),
@@ -310,7 +312,7 @@ const updateVueVideoData = () => {
 };
 
 const generatePreviewImageURL = (previewImgNumber: number): string => {
-	if (!currentSeries.value || currentSeries.value.ID === '-1') return '';
+	// if (!currentSeries.value || currentSeries.value.ID === '-1') return '';
 
 	// let url = `${useBaseURL()}/images/${currentSeries.value.ID}/previewImages/`;
 	// if (currentMovie.value !== -1 && currentMovie.value !== undefined) {
@@ -850,10 +852,13 @@ onMounted(async () => {
 // 	}
 // );
 
-watch(videoSrc, async () => {
-	segmentData.value = [];
-	// await loadIntroData();
-});
+watch(
+	() => props.videoSrc,
+	async () => {
+		segmentData.value = [];
+		// await loadIntroData();
+	}
+);
 
 // Exposed properties for parent components
 defineExpose({

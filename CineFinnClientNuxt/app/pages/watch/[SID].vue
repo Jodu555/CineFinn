@@ -1,9 +1,18 @@
 <template>
 	<div>
-		<div v-if="showVideo" class="video-container">
-			<video :src="videoSrc" controls preload="auto" style="width: 100%"></video>
-			<!-- <div style="width: 100%; height: 100%; background-color: rebeccapurple"></div> -->
-		</div>
+		<ClientOnly>
+			<ExtendedVideo
+				v-if="showVideo"
+				:videoSrc="videoSrc"
+				:switch-to="() => 0"
+				:can-play="true"
+				:events="{}"
+				:send-video-time-update="() => 0" />
+		</ClientOnly>
+		<!-- <div v-if="showVideo" class="video-container"> -->
+		<!-- <video :src="videoSrc" controls preload="auto" style="width: 100%"></video> -->
+		<!-- <div style="width: 100%; height: 100%; background-color: rebeccapurple"></div> -->
+		<!-- </div> -->
 		<div v-if="series" class="container-fluid text-white min-vh-100 py-4">
 			<!-- Content Information -->
 			<div class="container">
@@ -336,6 +345,7 @@
 			</div>
 			<pre>
 			selectedWatchableEntity: {{ indexStore.selectedWatchableEntity }}
+			selectedEntity: {{ indexStore.selectedEntity }}
 		</pre
 			>
 			<pre v-if="false">
@@ -356,6 +366,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import ExtendedVideo from '~/components/ExtendedVideo.vue';
 
 definePageMeta({
 	middleware: 'auth',
@@ -389,8 +400,6 @@ const currentDetailedSeasonData = computed(() => {
 	return indexStore.detailedSeasons.find((s) => s.UUID === selectedSeason.value);
 });
 
-const selectedSeason = ref(series.value?.seasons?.[0]?.UUID || '');
-
 const relatedContent = [
 	{
 		id: 5,
@@ -414,6 +423,8 @@ const currentMovieUUID = ref<string | null>((route.query.movie as string) || nul
 const currentEpisodeUUID = ref<string | null>((route.query.episode as string) || null);
 
 indexStore.setSelectedWatchableEntityUUID(currentEpisodeUUID.value || currentMovieUUID.value);
+
+const selectedSeason = ref((indexStore.selectedEntity as DetailedEpisode)?.season_UUID || series.value?.seasons?.[0]?.UUID || '');
 
 useSeoMeta({
 	title: computed(() => series.value?.title || ''),

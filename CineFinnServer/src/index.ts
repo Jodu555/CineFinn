@@ -65,13 +65,15 @@ app.get('/index', async (c) => {
 
             resolve(rows.map((row: any) => {
                 try {
+                    const seasons = JSON.parse(row.seasons_array) as Season[];
+                    const movies = row.movies_array != undefined ? JSON.parse(row.movies_array) as Movie[] : [] as Movie[];
                     const obj = {
                         ...row,
                         tags: JSON.parse(row.tags),
                         infos: JSON.parse(row.infos),
                         refs: JSON.parse(row.refs),
-                        seasons: JSON.parse(row.seasons_array),
-                        movies: row.movies_array != undefined ? JSON.parse(row.movies_array) : [],
+                        seasons: seasons.sort((a, b) => a.season_IDX - b.season_IDX),
+                        movies: movies.sort((a, b) => a.movie_IDX - b.movie_IDX),
                     };
                     delete obj.seasons_array;
                     delete obj.movies_array;
