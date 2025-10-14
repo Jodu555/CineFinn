@@ -3,7 +3,8 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   css: [
-    '@fortawesome/fontawesome-svg-core/styles.css'
+    '@fortawesome/fontawesome-svg-core/styles.css',
+    '~/assets/main.scss'
   ],
   runtimeConfig: {
     public: {
@@ -24,12 +25,12 @@ export default defineNuxtConfig({
       bodyAttrs: {
         'data-bs-theme': 'dark'
       },
-      script: [
-        {
-          src: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js',
-          tagPosition: 'bodyClose'
-        }
-      ]
+      // script: [
+      //   {
+      //     src: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js',
+      //     tagPosition: 'bodyClose'
+      //   }
+      // ]
     }
   },
   modules: ['@pinia/nuxt', '@nuxt/image'],

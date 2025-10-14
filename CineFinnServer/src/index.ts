@@ -46,22 +46,29 @@ app.get('/index', async (c) => {
     const result = await new Promise<DetailedSeries[]>((resolve, reject) => {
         database.pool.query(`
           SELECT 
-    series.*,
-    CONCAT('[', GROUP_CONCAT(
-      JSON_OBJECT(
-        'UUID', seasons.UUID,
-        'serie_UUID', seasons.serie_UUID,
-        'season_IDX', seasons.season_IDX,
-        'episodes', seasons.episodes,
-        'created_at', seasons.created_at,
-        'updated_at', seasons.updated_at
-      )
-    ), ']') AS seasons_array
-   FROM series
-   LEFT JOIN seasons ON seasons.serie_UUID = series.UUID
-   GROUP BY series.UUID
-   
-          `, (error, rows, fields) => {
+            series.*,
+            (SELECT COALESCE(CONCAT('[', GROUP_CONCAT(
+            JSON_OBJECT(
+                'UUID', s.UUID,
+                'serie_UUID', s.serie_UUID,
+                'season_IDX', s.season_IDX,
+                'episodes', s.episodes,
+                'created_at', s.created_at,
+                'updated_at', s.updated_at
+            )
+            ), ']'), '[]') FROM seasons s WHERE s.serie_UUID = series.UUID) AS seasons_array,
+            (SELECT COALESCE(CONCAT('[', GROUP_CONCAT(
+            JSON_OBJECT(
+                'UUID', m.UUID,
+                'primaryName', m.primaryName,
+                'serie_UUID', m.serie_UUID,
+                'movie_IDX', m.movie_IDX,
+                'created_at', m.created_at,
+                'updated_at', m.updated_at
+            )
+            ), ']'), '[]') FROM movies m WHERE m.serie_UUID = series.UUID) AS movies_array
+        FROM series
+            `, (error, rows, fields) => {
 
             resolve(rows.map((row: any) => {
                 try {

@@ -7,7 +7,7 @@
 <script lang="ts" setup>
 //@ts-ignore
 // import * as bootstrap from 'bootstrap';
-// import 'bootstrap';
+import 'bootstrap';
 
 const authToken = useCookie('auth-token');
 const authStore = useAuthStore();
