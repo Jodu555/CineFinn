@@ -41,14 +41,16 @@
 								'--intro-skip-end': segment.endms / videoData.duration,
 							}"></div>
 
-						<div
-							v-for="i in videoData.buffered?.length"
-							v-show="Math.round(Math.abs(videoData.buffered?.start(i - 1) - videoData.buffered?.end(i - 1))) > 10"
-							class="timeline-buffer"
-							:style="{
-								'--buffer-start': videoData.buffered?.start(i - 1) / videoData.duration,
-								'--buffer-end': videoData.buffered?.end(i - 1) / videoData.duration,
-							}"></div>
+						<template v-if="videoData.buffered">
+							<div
+								v-for="i in videoData.buffered.length"
+								v-show="Math.round(Math.abs(videoData.buffered.start(i - 1) - videoData.buffered.end(i - 1))) > 10"
+								class="timeline-buffer"
+								:style="{
+									'--buffer-start': videoData.buffered.start(i - 1) / videoData.duration,
+									'--buffer-end': videoData.buffered.end(i - 1) / videoData.duration,
+								}"></div>
+						</template>
 
 						<img class="preview-img" />
 						<div class="thumb-indicator"></div>
@@ -150,28 +152,28 @@
 			</div>
 
 			<pre v-if="true" class="internal-video-devinfos">
-VideoLoading: {{ videoLoading }} 
-ReadyState: {{ videoData.readyState }} 
-CurrentTime: {{ videoData.currentTime }}ms
-Duration: {{ videoData.duration }}ms
-Progress: {{ videoData.duration - videoData.currentTime }}ms
-Volume: {{ videoData.volume }}
-Quality: T{{ videoData.quality?.totalVideoFrames }} / D{{ videoData.quality?.droppedVideoFrames }} / C{{ videoData.quality?.corruptedVideoFrames }}
-IntroData: {{ JSON.stringify(segmentData) }}
-AlreadySkipped: {{ JSON.stringify(alreadySkipped) }}
-Buffers: 
-	{{ videoData.bufferedPercentage }}% / 100%
-	<div class="internal-video-devinfos-child">
-		<span v-for="i in videoData.buffered?.length">
-			{{ videoData.buffered?.start(i - 1) }}ms - {{ videoData.buffered?.end(i - 1) }}ms = {{ Math.round(Math.abs(videoData.buffered?.start(i - 1) - videoData.buffered?.end(i - 1))) }}ms
-		</span>
-	</div>
-Seekable: 
-	<div class="internal-video-devinfos-child">
-		<span v-for="i in videoData.seekable?.length">
-			{{ videoRef?.seekable?.start(i - 1) }}ms - {{ videoRef?.seekable?.end(i - 1) }}ms = {{ Math.round(Math.abs(videoRef?.seekable?.start(i - 1) - videoRef?.seekable?.end(i - 1))) }}ms
-		</span>
-	</div>
+                VideoLoading: {{ videoLoading }} 
+                ReadyState: {{ videoData.readyState }} 
+                CurrentTime: {{ videoData.currentTime }}ms
+                Duration: {{ videoData.duration }}ms
+                Progress: {{ videoData.duration - videoData.currentTime }}ms
+                Volume: {{ videoData.volume }}
+                Quality: T{{ videoData.quality?.totalVideoFrames }} / D{{ videoData.quality?.droppedVideoFrames }} / C{{ videoData.quality?.corruptedVideoFrames }}
+                IntroData: {{ JSON.stringify(segmentData) }}
+                AlreadySkipped: {{ JSON.stringify(alreadySkipped) }}
+                Buffers: 
+                {{ videoData.bufferedPercentage }}% / 100%
+                <div v-if="videoData.buffered" class="internal-video-devinfos-child">
+                    <span v-for="i in videoData.buffered.length">
+                        {{ videoData.buffered.start(i - 1) }}ms - {{ videoData.buffered.end(i - 1) }}ms = {{ Math.round(Math.abs(videoData.buffered.start(i - 1) - videoData.buffered.end(i - 1))) }}ms
+                    </span>
+                </div>
+            Seekable: 
+                <div v-if="videoData.seekable" class="internal-video-devinfos-child">
+                    <span v-for="i in videoData.seekable?.length">
+                        {{ videoData.seekable.start(i - 1) }}ms - {{ videoData.seekable.end(i - 1) }}ms = {{ Math.round(Math.abs(videoData.seekable.start(i - 1) - videoData.seekable.end(i - 1))) }}ms
+                    </span>
+                </div>
 			</pre>
 
 			<video ref="videoRef" preload="auto" oncontextmenu="return false" playsinline :src="videoSrc"></video>
@@ -210,9 +212,9 @@ interface VideoData {
 	duration: number;
 	volume: number;
 	quality: VideoQuality;
-	buffered: TimeRanges | any[];
+	buffered: TimeRanges | null;
 	bufferedPercentage: string;
-	seekable: TimeRanges | any[];
+	seekable: TimeRanges | null;
 }
 
 // Props
@@ -257,9 +259,9 @@ const videoData = reactive<VideoData>({
 	duration: 0,
 	volume: 0,
 	quality: { creationTime: 0, totalVideoFrames: 0, droppedVideoFrames: 0, corruptedVideoFrames: 0 },
-	buffered: [],
+	buffered: null,
 	bufferedPercentage: '0',
-	seekable: [],
+	seekable: null,
 });
 
 // Computed
