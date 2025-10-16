@@ -27,6 +27,14 @@ it is the successor to the CineFinn v1 Project which is now deprecated and will 
 - [ ] Playlist System
 - [ ] Sync System
 
+## Word Explanation:
+- Series: A Series is a Collection of Movies and or Seasons
+- Movie: A Movie is a single Movie
+- Season: A Season is a Collection of Episodes
+- Episode: An Episode is a single Episode
+- Watchable: A Watchable Entity is a single Movie or Episode
+- Watchable Entity: A Watchable Entity is a Watchable's File. Common difference between same Watchable is the SubSystem or the Language
+- Watch History: A Watch History is a single Watch Time for a Watchable
 
 ## Code I Joinked
 
