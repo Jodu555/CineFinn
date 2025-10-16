@@ -47,7 +47,7 @@ async function run() {
 
 
     // await importSerieses();
-    // await importWatchHistory();
+    await importWatchHistory();
 }
 
 async function importSerieses() {
@@ -143,7 +143,7 @@ async function importSerieses() {
 async function importWatchHistory() {
     const oldDB = Database.createDatabase(process.env.OLD_DB_HOST!, process.env.OLD_DB_USERNAME!, process.env.OLD_DB_PASSWORD!, process.env.OLD_DB_DATABASE!);
     await oldDB.connect();
-    const watchStrings = await oldDB.get('watch_strings').get({}) as { watch_string: string; }[];
+    const watchStrings = await oldDB.get('watch_strings').get({}) as { account_UUID: string; watch_string: string; }[];
     console.log(watchStrings);
 
     for (const watchString of watchStrings) {
@@ -156,6 +156,8 @@ async function importWatchHistory() {
             const [og, ID, se = -1, ep = -1, movie = -1, time] = outp;
             list.push({ ID, season: Number(se), episode: Number(ep), movie: Number(movie), time: time });
         }
+        console.log(watchString.account_UUID, list.length);
+
     }
 }
 

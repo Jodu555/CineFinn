@@ -84,6 +84,7 @@ export interface WatchableEntity {
 export interface WatchHistory {
     UUID: string;
     account_UUID: string;
+    series_UUID: string;
     watchable_UUID: string;
     watchTime: number;
 }
@@ -323,10 +324,11 @@ async function createTables() {
         options: {
             timestamps: true,
             PK: 'UUID',
-            K: ['account_UUID', 'watchable_UUID'],
+            K: ['account_UUID', 'series_UUID', 'watchable_UUID'],
         },
         UUID: UUID_FIELD,
         account_UUID: UUID_FIELD,
+        series_UUID: UUID_FIELD,
         watchable_UUID: UUID_FIELD,
         watchTime: {
             type: 'int',

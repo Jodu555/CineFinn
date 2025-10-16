@@ -38,11 +38,11 @@ No bending over backwards to have it behave and expect the same responses as the
 - [ ] GET /status
 
 /managment
-- [ ] GET /managment/jobs/info
-- [ ] GET /managment/job/img/generate
-- [ ] GET /managment/job/checkForUpdates-smart
-- [ ] GET /managment/job/checkForUpdates-old
-- [ ] GET /managment/job/crawl
+- [x] GET /managment/jobs/info
+- [x] GET /managment/job/img/generate
+- [x] GET /managment/job/checkForUpdates-smart
+- [x] GET /managment/job/checkForUpdates-old
+- [x] GET /managment/job/crawl
 
 /news
 - [ ] GET /news
