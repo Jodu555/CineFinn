@@ -184,7 +184,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount, reactive } from 'vue';
 // import { mapState, mapWritableState, mapActions } from 'pinia';
-// import { throttle } from '@/utils/debounceAndThrottle';
+import { throttle } from '@/utils/debounceAndThrottle';
 // import ShareModal from '@/components/Watch/ShareModal.vue';
 // import RmvcModal from '@/components/Watch/RmvcModal.vue';
 // import { useAuthStore } from '@/stores/auth.store';
@@ -662,10 +662,10 @@ const initializeVideoControls = () => {
 
 	// video.volume = parseFloat(String(settings.value.volume.value));
 
-	// const timeUpdateThrottle = throttle(props.sendVideoTimeUpdate, 1000);
+	const timeUpdateThrottle = throttle(props.sendVideoTimeUpdate, 1500);
 	video.addEventListener('timeupdate', () => {
 		updateVueVideoData();
-		// timeUpdateThrottle(video.currentTime);
+		timeUpdateThrottle(video.currentTime);
 		currentTimeElem.textContent = formatDuration(video.currentTime);
 
 		let percent = video.currentTime / video.duration;

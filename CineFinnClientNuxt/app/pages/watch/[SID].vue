@@ -1,5 +1,6 @@
 <template>
 	<div>
+		{{ indexStore.selectedWatchableEntity }}
 		<ClientOnly>
 			<ExtendedVideo
 				v-if="showVideo"
@@ -7,7 +8,7 @@
 				:switch-to="() => 0"
 				:can-play="true"
 				:events="{}"
-				:send-video-time-update="() => 0" />
+				:send-video-time-update="sendVideoTimeUpdate" />
 		</ClientOnly>
 		<!-- <div v-if="showVideo" class="video-container"> -->
 		<!-- <video :src="videoSrc" controls preload="auto" style="width: 100%"></video> -->
@@ -367,6 +368,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import ExtendedVideo from '~/components/ExtendedVideo.vue';
+import useAPIURL from '~/hooks/useAPIURL';
 
 definePageMeta({
 	middleware: 'auth',
@@ -382,6 +384,13 @@ const series = computed(() => indexStore.series.find((s) => s.UUID === route.par
 await callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string), {
 	mode: 'navigation',
 });
+
+const sendVideoTimeUpdate = async (time: number) => {
+	console.log('Sending time update to server', time);
+	// useAxios().post(`/watch/updateTime/${currentEpisodeUUID.value}/${time}`, {});
+
+	await $fetch(`${useAPIURL()}/watch/updateTime/${indexStore.selectedWatchableEntity?.UUID.replace('#', '-')}/${time}`);
+};
 
 const coverURL = computed(() => {
 	// const CURRENT_EXTERNAL_API = 'http://localhost:3000';
