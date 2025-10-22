@@ -1,0 +1,28 @@
+{
+	"name": "@cinefinn/types",
+	"version": "1.0.0",
+	"description": "",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./socket": {
+			"types": "./dist/socket.d.ts",
+			"import": "./dist/socket.js"
+		}
+	},
+	"scripts": {
+		"dev": "tsc --watch",
+		"build": "tsc"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"packageManager": "pnpm@10.18.1",
+	"devDependencies": {
+		"@types/node": "^20.19.22"
+	}
+}
