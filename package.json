@@ -4,7 +4,8 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"dev": "pnpm run -r --parallel --aggregate-output dev"
+		"dev": "pnpm run -r --parallel --aggregate-output dev",
+		"build": "pnpm run -r build"
 	},
 	"keywords": [],
 	"author": "",
