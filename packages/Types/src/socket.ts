@@ -14,6 +14,9 @@ export interface InterServerEvents {
     ping: () => void;
 }
 
-export interface SocketData {
-    any: any;
+export interface SocketData<U = any> {
+    auth: {
+        token: string;
+        user: U
+    }
 }

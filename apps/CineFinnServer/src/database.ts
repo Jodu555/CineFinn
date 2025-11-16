@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();;
 import { Database, type thingDatabase } from '@jodu555/mysqlapi';
 
-interface timestamped {
+export interface timestamped {
     createdAt: number;
     updatedAt: number;
 }

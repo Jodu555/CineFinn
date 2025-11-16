@@ -1,18 +1,21 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import dotenv from 'dotenv';
-import { connectDatabase, database, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, type Movie, type Season, type Series } from './database.js';
+import { Server } from 'socket.io';
+import { connectDatabase, database, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, type Account, type Movie, type Season, type Series, type timestamped } from './database.js';
 import { crawl } from './crawler.js';
 dotenv.config();
 import { proxy } from 'hono/proxy';
 import { trimTrailingSlash } from 'hono/trailing-slash';
-import { authFullMiddleware, authRouter } from './auth.js';
+import { authFullMiddleware, authRouter, getUser } from './auth.js';
 import { prometheus } from '@hono/prometheus';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { ownLogger } from './ownLogger.js';
 import { managmentRouter } from './managment.js';
 import { CacheContext } from './LRUCache.js';
+import type { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from '@cinefinn/types/socket';
+import { tryCatch } from './tryCatch.js';
 
 
 const app = new Hono({
@@ -202,7 +205,7 @@ app.get('*', async (c, next) => {
     return proxy(newUrl);
 });
 
-serve({
+const httpServer = serve({
     fetch: app.fetch,
     port: 3000
 }, async (info) => {
@@ -211,4 +214,65 @@ serve({
     await connectDatabase();
     console.log(`Server is running on http://localhost:${info.port}`);
     // await crawl();
+});
+
+const io = new Server<
+    ClientToServerEvents,
+    ServerToClientEvents,
+    InterServerEvents,
+    SocketData<Account | Account & timestamped>
+>(httpServer, {
+    cors: {
+        methods: ['GET', 'POST'],
+    },
+});
+// setIO(io);
+
+io.use(async (socket, next) => {
+    console.log('Trying to authorize ', socket.id, socket.handshake.auth);
+
+    if (socket.handshake.auth.token === undefined) {
+        return next(new Error('Unauthorized'));
+    }
+
+    const token = socket.handshake.auth.token;
+
+    const { error, data: user } = await tryCatch(() => getUser(token));
+
+    if (error != null) {
+        console.log(error);
+        return next(new Error('Unauthorized'));
+    }
+    if (user == undefined || user == null) {
+        return next(new Error('Unauthorized'));
+    }
+
+    socket.data = {
+        auth: {
+            token,
+            user,
+        }
+    };
+    // Validate the token or something
+    next();
+
+});
+
+io.on('connection', (socket) => {
+    console.log(socket.handshake.auth);
+
+    console.log(socket.id, socket.data, 'a user connected');
+
+    socket.on('hello', () => {
+        console.log(socket.id, 'hello');
+    });
+
+    socket.on('clicked', (data) => {
+        console.log(socket.id, 'clicked', data);
+        io.emit('addClick', data);
+    });
+
+    socket.on('disconnect', () => {
+        console.log(socket.id, 'user disconnected');
+    });
 });
