@@ -26,7 +26,7 @@ export const useAuthStore = defineStore('auth', {
             this.loggedIn = true;
             this.authToken = response.token;
             useCookie('auth-token').value = this.authToken;
-            await this.authenticate();
+            await this.authenticate(true);
         },
         async register(credentials: { username: string; password: string; token: string; }) {
             const response = await $fetch<{ token: string; error?: { message: string; }; }>(useAPIURL() + '/auth/register', {
@@ -39,7 +39,7 @@ export const useAuthStore = defineStore('auth', {
             this.authToken = response.token;
             await this.authenticate();
         },
-        async authenticate() {
+        async authenticate(redirectToSlash = false) {
             try {
                 console.log('Authenticating user TRYING');
                 if (this.authToken == '') {
@@ -49,7 +49,7 @@ export const useAuthStore = defineStore('auth', {
                     return;
                 const token = this.authToken;
 
-                const response = await $fetch<Account>(useAPIURL() + '/auth/info', {
+                const response = await $fetch<Account>(`${useAPIURL()}/auth/info`, {
                     headers: {
                         'auth-token': token,
                     },
@@ -59,6 +59,12 @@ export const useAuthStore = defineStore('auth', {
                 // useCookie('auth-token').value = this.authToken;
                 this.loggedIn = true;
                 this.user = response;
+
+                if (redirectToSlash) {
+                    const router = useRouter();
+                    await router.push('/');
+                }
+
                 return response;
             } catch (error) {
                 console.log('Authenticating user FAILED', error);
@@ -70,7 +76,7 @@ export const useAuthStore = defineStore('auth', {
             }
         },
         async logout() {
-            const response = await $fetch<Account>('http://big.jodu555.de:8081/api/v1/auth/logout', {
+            const response = await $fetch<Account>(`${useAPIURL()}/auth/logout`, {
                 headers: {
                     'auth-token': this.authToken as string,
                 },
@@ -80,6 +86,11 @@ export const useAuthStore = defineStore('auth', {
             this.authToken = '';
             this.loggedIn = false;
             this.user = null as any as Account;
+
+            useAuthStore().$reset();
+            useIndexStore().$reset();
+
+            useRouter().push('/login');
         }
     }
 });

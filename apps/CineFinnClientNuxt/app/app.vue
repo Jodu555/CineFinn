@@ -1,4 +1,5 @@
 <template>
+	<SocketConnection />
 	<NuxtLayout>
 		<NuxtPage />
 	</NuxtLayout>
@@ -8,7 +9,7 @@
 //@ts-ignore
 // import * as bootstrap from 'bootstrap';
 // import 'bootstrap';
-
+import SocketConnection from '~/components/SocketConnection.client.vue';
 const authToken = useCookie('auth-token');
 const authStore = useAuthStore();
 const indexStore = useIndexStore();
@@ -24,7 +25,7 @@ watch(
 		// 	useSocket()?.disconnect();
 		// 	console.log('No auth token found');
 		// }
-		// await indexStore.loadSeries();
+		await indexStore.loadSeries();
 	},
 	{ immediate: true }
 );

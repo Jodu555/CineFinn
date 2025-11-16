@@ -10,6 +10,9 @@ importers:
 
   apps/CineFinnClientNuxt:
     dependencies:
+      '@cinefinn/types':
+        specifier: workspace:*
+        version: link:../../packages/Types
       '@fortawesome/fontawesome-svg-core':
         specifier: ^7.1.0
         version: 7.1.0
