@@ -1,10 +1,9 @@
 <script setup lang="ts">
 const isConnected = ref(false);
 const transport = ref('N/A');
+const socketID = ref('N/A');
 
 const socket = useSocket();
-
-console.log(socket);
 
 onMounted(() => {
 	socket.connect();
@@ -24,6 +23,10 @@ function onConnect() {
 		transport.value = rawTransport.name;
 	});
 
+	if (socket.id != undefined) {
+		socketID.value = socket.id;
+	}
+
 	socket.emit('hello');
 }
 
@@ -36,16 +39,12 @@ onBeforeUnmount(() => {
 	socket.off('connect', onConnect);
 	socket.off('disconnect', onDisconnect);
 });
-
-function log() {
-	console.log('log');
-}
 </script>
 
 <template>
 	<div>
-		<p>Status: {{ isConnected ? 'connected' : 'disconnected' }}</p>
-		<p>Transport: {{ transport }}</p>
+		<p class="mb-0">Status: {{ isConnected ? 'connected' : 'disconnected' }}</p>
+		<p class="mb-0">Transport: {{ transport }}</p>
+		<p>Socket ID: {{ socketID }}</p>
 	</div>
-	<button @click="log">Click me</button>
 </template>
