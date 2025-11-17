@@ -11,7 +11,7 @@
 			autocomplete="off"
 			data-bs-toggle="dropdown"
 		/>
-		<ul ref="dropdownMenuRef" :id="id" v-show="recommendations.length >= 1" class="dropdown-menu">
+		<ul ref="dropdownMenuRef" v-show="recommendations.length >= 1" class="dropdown-menu">
 			<button
 				v-for="(recommendation, index) in recommendations"
 				:key="index"
@@ -57,8 +57,6 @@ interface RecommendationItem {
 }
 
 const recommendations = ref<RecommendationItem[]>([]);
-
-const id = ref(String(Math.ceil(Math.random() * 100000)));
 
 const inputRef = ref<HTMLInputElement | null>(null);
 const dropdownMenuRef = ref<HTMLUListElement | null>(null);

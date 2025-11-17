@@ -3,13 +3,13 @@
 		<div class="card" :class="{ 'border-success': highlighted }">
 			<NuxtImg v-if="entity?.infos?.image" :placeholder="[238, 357]" :src="buildCoverURL" loading="lazy" />
 			<NuxtImg v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" loading="lazy" />
+			<!-- <SmartImage v-if="entity?.infos?.image" :src="buildCoverURL" :childclass="'card-img-top'" /> -->
+			<!-- <SmartImage v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" :childclass="'card-img-top'" /> -->
+			<!-- <img :src="buildCoverURL" alt="" class="card-img-top" loading="lazy" /> -->
 			<div class="card-body">
 				<h4 class="card-title">{{ entity.infos?.title || entity.infos?.infos || entity.title }}</h4>
 				<div class="card-text">
-					<ElongatedText
-						v-if="entity.infos.description"
-						:text="entity.infos.description || 'No Description available yet...'"
-						:max-length="125" />
+					<ElongatedText v-if="entity.infos.description" :text="entity.infos.description || 'No Description available yet...'" :max-length="125" />
 
 					<small v-if="entity.infos.startDate || entity.infos.endDate" class="text-secondary"
 						>{{ entity.infos.startDate }} - {{ entity.infos.endDate }}</small
@@ -29,6 +29,8 @@
 </template>
 
 <script lang="ts" setup>
+import SmartImage from './SmartImage.vue';
+
 const authStore = useAuthStore();
 const indexStore = useIndexStore();
 

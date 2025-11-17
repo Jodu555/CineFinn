@@ -12,7 +12,8 @@
 					v-for="cat in categories"
 					@click="selectedCategory = cat"
 					:key="cat"
-					:class="selectedCategory == cat ? 'btn btn-outline-primary' : 'btn btn-outline-secondary'">
+					:class="selectedCategory == cat ? 'btn btn-outline-primary' : 'btn btn-outline-secondary'"
+				>
 					{{ cat }}
 				</span>
 			</div>
@@ -21,7 +22,7 @@
 			</div>
 		</div>
 		<div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 row-cols-xxl-5 g-4">
-			<EntityCard v-for="entity in selectedSeries" :series-i-d="entity.UUID" :key="entity.UUID" />
+			<EntityCard v-for="(entity, idx) in selectedSeries" :series-i-d="entity.UUID" :key="entity.UUID" />
 			<!-- <EntityCard v-for="entity in selectedSeries"
                 :highlighted="scrolledToLastSeries && entity.ID == showScrollToLastSeries" class="border-success"
                 :entity="entity" :key="entity.ID" /> -->
@@ -56,7 +57,7 @@ const selectedSeries = computed(() => {
 	if (sort.value) {
 		arr = JSON.parse(JSON.stringify(arr)).reverse();
 	}
-	return arr;
+	return arr as Series[];
 });
 
 const categories = computed(() => {
@@ -64,6 +65,33 @@ const categories = computed(() => {
 	cats.unshift('Alle');
 	return cats;
 });
+
+// onMounted(async () => {
+// 	preloadImagesForNotSelectedCategories();
+// });
+
+// watch(selectedCategory, () => {
+// 	preloadImagesForNotSelectedCategories();
+// });
+
+function preloadImagesForNotSelectedCategories() {
+	// const prefetchedImages = new Set<HTMLImageElement>();
+	// for (const cat of categories.value) {
+	// 	// if (cat == 'Alle') continue;
+	// 	if (cat == selectedCategory.value) continue;
+	// 	// console.log('Preloading Category:', cat);
+	// 	const catSeries = indexStore.series.filter((i) => i.tags[0]! == cat).slice(0, 10);
+	// 	catSeries.forEach((s) => {
+	// 		// indexStore.prefetchSeries(s.UUID);
+	// 		const img = new Image();
+	// 		const url = new URL('https://cinema-api.jodu555.de' + `/images/${s.UUID}/cover.jpg`);
+	// 		url.searchParams.append('auth-token', 'SECR-DEV');
+	// 		img.src = url.href;
+	// 		prefetchedImages.add(img);
+	// 		// console.log('Preloading', url.href);
+	// 	});
+	// }
+}
 </script>
 
 <style scoped></style>
