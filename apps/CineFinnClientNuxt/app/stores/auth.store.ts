@@ -55,7 +55,7 @@ export const useAuthStore = defineStore('auth', {
                     },
                 });
 
-                console.log('Authenticating user', response);
+                console.log('Authenticating user', response.UUID, response.username, response.role, response.status);
                 // useCookie('auth-token').value = this.authToken;
                 this.loggedIn = true;
                 this.user = response;

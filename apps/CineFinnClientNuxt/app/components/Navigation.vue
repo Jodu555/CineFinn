@@ -1,7 +1,8 @@
 <template>
 	<nav
 		class="navbar sticky-top navbar-expand-lg"
-		style="backdrop-filter: blur(12px); background-color: color-mix(in oklab, var(--bs-body-bg) 77%, transparent)">
+		style="backdrop-filter: blur(12px); background-color: color-mix(in oklab, var(--bs-body-bg) 77%, transparent)"
+	>
 		<div class="container-fluid">
 			<router-link class="navbar-brand text-primary fw-bold" to="/">CineFinn</router-link>
 			<button
@@ -11,7 +12,8 @@
 				data-bs-target="#navbarNav"
 				aria-controls="navbarNav"
 				aria-expanded="false"
-				aria-label="Toggle navigation">
+				aria-label="Toggle navigation"
+			>
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarNav">
@@ -46,15 +48,20 @@
 					</li> -->
 				</ul>
 				<div v-if="authStore.loggedIn" class="d-flex">
-					<!-- <AutoComplete :options="{ placeholder: 'Search for a series...', clearAfterSelect: true }"
-						:data="autoCompleteSeries" :select-fn="autocompleteSearch" /> -->
+					<AutoComplete
+						:options="{ placeholder: 'Search for a series...', clearAfterSelect: true }"
+						:data="autoCompleteSeries"
+						:select-fn="autocompleteSearch"
+						:prefetch-fn="autocompletePrefetch"
+					/>
 					<div class="btn-group" style="margin-left: 2rem" role="group" aria-label="Basic outlined example">
 						<button
 							title="Settings"
 							class="btn btn-outline-primary"
 							data-bs-toggle="offcanvas"
 							data-bs-target="#offcanvasSettings"
-							aria-controls="offcanvasSettings">
+							aria-controls="offcanvasSettings"
+						>
 							<font-awesome-icon icon="fa-solid fa-gears" />
 						</button>
 						<button class="btn btn-outline-danger" title="Logout" @click="authStore.logout()">
@@ -68,7 +75,33 @@
 </template>
 
 <script setup lang="ts">
+import AutoComplete from './AutoComplete.vue';
+
 const authStore = useAuthStore();
+
+const indexStore = useIndexStore();
+
+const autoCompleteSeries = computed(() => {
+	const arr = [] as { ID: string; value: string }[];
+	indexStore.series.forEach((i) => {
+		arr.push({
+			ID: i.UUID,
+			value: i.title,
+		});
+	});
+	return arr;
+});
+
+async function autocompleteSearch(ID: string, value: string) {
+	console.log('Autocomplete Search', ID, value);
+	const router = useRouter();
+	await router.push(`/watch/${ID}`);
+}
+
+async function autocompletePrefetch(ID: string, value: string) {
+	console.log('Autocomplete Prefetch', ID, value);
+	await indexStore.prefetchSeries(ID);
+}
 </script>
 
 <style lang="scss" scoped>

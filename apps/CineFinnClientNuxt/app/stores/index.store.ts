@@ -8,6 +8,7 @@ export const useIndexStore = defineStore('index', {
         detailedMovies: [] as DetailedMovie[],
         selectedEntity: null as DetailedEpisode | DetailedMovie | null,
         selectedWatchableEntity: null as WatchableEntity | null,
+        detailedPrefetchedSeriesObj: {} as { [key: string]: DetailedSeries },
     }),
     actions: {
         async loadSeries() {
@@ -20,10 +21,33 @@ export const useIndexStore = defineStore('index', {
         },
         async loadDetailedSeasonInfo(seriesID: string) {
             this.loading = true;
+            console.log(`loadDetailedSeasonInfo for seriesID: ${seriesID}`);
+            if (this.detailedPrefetchedSeriesObj[seriesID]) {
+                this.detailedSeasons = this.detailedPrefetchedSeriesObj[seriesID].seasons;
+                this.detailedMovies = this.detailedPrefetchedSeriesObj[seriesID].movies;
+
+                this.detailedPrefetchedSeriesObj = {};
+                this.loading = false;
+                console.log(`loadDetailedSeasonInfo for seriesID: ${seriesID} from cache`);
+                return;
+            }
             const response = await $fetch<DetailedSeries>(useAPIURL() + '/index/' + seriesID);
             this.detailedSeasons = response.seasons;
             this.detailedMovies = response.movies;
             this.loading = false;
+            console.log(`loadDetailedSeasonInfo for seriesID: ${seriesID} from network`);
+
+        },
+        async prefetchSeries(seriesID: string) {
+            if (this.detailedPrefetchedSeriesObj[seriesID]) {
+                return;
+            }
+            const response = await $fetch<DetailedSeries>(useAPIURL() + '/index/' + seriesID);
+            const img = new Image();
+            const url = new URL('https://cinema-api.jodu555.de' + `/images/${seriesID}/cover.jpg`);
+            url.searchParams.append('auth-token', 'SECR-DEV');
+            img.src = url.href;
+            this.detailedPrefetchedSeriesObj[seriesID] = response;
         },
         setSelectedWatchableEntityUUID(entityUUID: string | null) {
             console.log('setSelectedWatchableEntityUUID', entityUUID);
