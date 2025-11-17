@@ -214,6 +214,14 @@ const httpServer = serve({
     await connectDatabase();
     console.log(`Server is running on http://localhost:${info.port}`);
     // await crawl();
+
+    setInterval(() => {
+        database.pool.query('SELECT 1', (error, rows, fields) => {
+            if (error) {
+                console.log('Error keeping database connection alive:', error);
+            }
+        });
+    }, 10000 * 30);
 });
 
 const io = new Server<

@@ -1,8 +1,15 @@
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+const devBootstrapCss = process.env.NODE_ENV === 'development'
+  ? readFileSync(resolve(process.cwd(), 'node_modules/bootstrap/dist/css/bootstrap.min.css'), 'utf8')
+  : null;
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   css: [
+    'bootstrap/dist/css/bootstrap.min.css',
     '@fortawesome/fontawesome-svg-core/styles.css',
     '~/assets/main.scss'
   ],
@@ -22,6 +29,7 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
+      style: devBootstrapCss ? [{ children: devBootstrapCss } as any] : [],
       bodyAttrs: {
         'data-bs-theme': 'dark'
       },

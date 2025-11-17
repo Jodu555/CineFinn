@@ -8,7 +8,8 @@
 				:switch-to="() => 0"
 				:can-play="true"
 				:events="{}"
-				:send-video-time-update="sendVideoTimeUpdate" />
+				:send-video-time-update="sendVideoTimeUpdate"
+			/>
 		</ClientOnly>
 		<!-- <div v-if="showVideo" class="video-container"> -->
 		<!-- <video :src="videoSrc" controls preload="auto" style="width: 100%"></video> -->
@@ -19,15 +20,11 @@
 			<div class="container">
 				<div class="row g-4">
 					<!-- Main Content Info -->
-					<div class="col-xl-8">
+					<div class="col-xl-11">
 						<div class="row g-4 mb-4">
 							<div class="col-sm-12 col-md-auto">
 								<div class="d-flex justify-content-center">
-									<img
-										:src="coverURL"
-										:alt="series.title"
-										class="img-fluid rounded"
-										style="width: 128px; height: 192px; object-fit: cover" />
+									<img :src="coverURL" :alt="series.title" class="img-fluid rounded" style="width: 128px; height: 192px; object-fit: cover" />
 								</div>
 							</div>
 							<div class="col">
@@ -35,8 +32,7 @@
 									{{ series.infos.title || series.title }}
 								</h1>
 
-								<div
-									class="d-flex flex-wrap align-items-center justify-content-center justify-content-sm-center justify-content-md-start gap-3 mb-3">
+								<div class="d-flex flex-wrap align-items-center justify-content-center justify-content-sm-center justify-content-md-start gap-3 mb-3">
 									<span class="badge bg-secondary">{{ series.infos.startDate }}</span>
 									<span class="badge bg-primary">{{ series.tags[0]!.toUpperCase() }}</span>
 									<!-- <div class="d-flex align-items-center" v-if="SHOW_RATING">
@@ -58,7 +54,8 @@
 								<ElongatedText
 									class="text-muted mb-4 text-center text-xs-center text-md-start"
 									:text="series.infos.description || 'No Description available yet...'"
-									:max-length="200"></ElongatedText>
+									:max-length="200"
+								></ElongatedText>
 								<!-- <p class="text-muted mb-4">{{ series.infos.description }}</p> -->
 
 								<div class="d-flex gap-3">
@@ -79,21 +76,13 @@
 							<div class="d-flex justify-content-center">
 								<ul class="nav nav-tabs mb-4" role="tablist">
 									<li v-if="hasSeasons" class="nav-item" role="presentation">
-										<button
-											:class="['nav-link', { active: activeTab === 'seasons' }]"
-											@click="activeTab = 'seasons'"
-											type="button"
-											role="tab">
+										<button :class="['nav-link', { active: activeTab === 'seasons' }]" @click="activeTab = 'seasons'" type="button" role="tab">
 											<font-awesome-icon :icon="['fas', 'tv']" class="me-2 px-1" />
 											Seasons
 										</button>
 									</li>
 									<li v-if="hasMovies" class="nav-item" role="presentation">
-										<button
-											:class="['nav-link', { active: activeTab === 'movies' }]"
-											@click="activeTab = 'movies'"
-											type="button"
-											role="tab">
+										<button :class="['nav-link', { active: activeTab === 'movies' }]" @click="activeTab = 'movies'" type="button" role="tab">
 											<font-awesome-icon :icon="['fas', 'film']" class="me-2 px-1" />
 											Movies ({{ series.movies?.length }})
 										</button>
@@ -104,15 +93,12 @@
 							<div class="tab-content">
 								<!-- Seasons Tab -->
 								<div v-if="activeTab === 'seasons' && hasSeasons" class="tab-pane fade show active">
-									<div
-										class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+									<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
 										<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3">
 											<h2 class="h5 mb-0">Episodes</h2>
 											<select v-model="selectedSeason" class="form-select" style="width: auto">
 												<option v-for="season in series.seasons" :key="season.UUID" :value="season.UUID">
-													Season {{ season.season_IDX }} ({{
-														Array.isArray(season.episodes) ? season.episodes.length : season.episodes
-													}}
+													Season {{ season.season_IDX }} ({{ Array.isArray(season.episodes) ? season.episodes.length : season.episodes }}
 													episodes)
 												</option>
 											</select>
@@ -122,13 +108,15 @@
 											<button
 												type="button"
 												:class="['btn', viewMode === 'grid' ? 'btn-primary' : 'btn-outline-secondary']"
-												@click="viewMode = 'grid'">
+												@click="viewMode = 'grid'"
+											>
 												<font-awesome-icon :icon="['fas', 'list']" />
 											</button>
 											<button
 												type="button"
 												:class="['btn', viewMode === 'compact' ? 'btn-primary' : 'btn-outline-secondary']"
-												@click="viewMode = 'compact'">
+												@click="viewMode = 'compact'"
+											>
 												<font-awesome-icon :icon="['fas', 'grip']" />
 											</button>
 										</div>
@@ -146,7 +134,8 @@
 												isCurrentEpisode(episode.UUID) ? 'border-primary border-2' : '',
 											]"
 											@click="handleEpisodeClick(episode.UUID)"
-											style="cursor: pointer">
+											style="cursor: pointer"
+										>
 											<div class="card-body p-3">
 												<div class="d-flex">
 													<div class="flex-grow-1">
@@ -156,11 +145,9 @@
 																	'rounded d-flex align-items-center justify-content-center',
 																	isEpisodeWatched(episode.UUID) ? 'bg-success bg-opacity-25' : 'bg-secondary',
 																]"
-																style="width: 64px; height: 40px">
-																<font-awesome-icon
-																	v-if="isEpisodeWatched(episode.UUID)"
-																	:icon="['fas', 'check']"
-																	class="text-success" />
+																style="width: 64px; height: 40px"
+															>
+																<font-awesome-icon v-if="isEpisodeWatched(episode.UUID)" :icon="['fas', 'check']" class="text-success" />
 																<font-awesome-icon v-else :icon="['fas', 'play']" />
 															</div>
 															<div class="flex-grow-1">
@@ -186,7 +173,8 @@
 														<div class="progress mt-3" style="width: 100%; height: 4px">
 															<div
 																:class="['progress-bar', isEpisodeWatched(episode.UUID) ? 'bg-success' : 'bg-danger']"
-																:style="{ width: getEpisodeProgress(episode.UUID) + '%' }"></div>
+																:style="{ width: getEpisodeProgress(episode.UUID) + '%' }"
+															></div>
 														</div>
 													</div>
 												</div>
@@ -204,20 +192,18 @@
 													isCurrentEpisode(episode.UUID) ? 'border-primary border-2' : '',
 												]"
 												@click="handleEpisodeClick(episode.UUID)"
-												style="cursor: pointer; aspect-ratio: 1">
+												style="cursor: pointer; aspect-ratio: 1"
+											>
 												<div class="card-body p-1 d-flex flex-column align-items-center justify-content-center">
 													<span :class="['small fw-medium', isEpisodeWatched(episode.UUID) ? 'text-success' : '']">
 														{{ episode.episode_IDX }}
 													</span>
-													<font-awesome-icon
-														v-if="isEpisodeWatched(episode.UUID)"
-														:icon="['fas', 'check']"
-														class="text-success mt-1"
-														size="xs" />
+													<font-awesome-icon v-if="isEpisodeWatched(episode.UUID)" :icon="['fas', 'check']" class="text-success mt-1" size="xs" />
 													<div class="progress w-100 mt-2" style="height: 2px">
 														<div
 															:class="['progress-bar', isEpisodeWatched(episode.UUID) ? 'bg-success' : 'bg-danger']"
-															:style="{ width: getEpisodeProgress(episode.UUID) + '%' }"></div>
+															:style="{ width: getEpisodeProgress(episode.UUID) + '%' }"
+														></div>
 													</div>
 												</div>
 											</div>
@@ -237,7 +223,8 @@
 												isCurrentMovie(movie.UUID) ? 'border-primary border-2' : '',
 											]"
 											@click="handleMovieClick(movie.UUID)"
-											style="cursor: pointer">
+											style="cursor: pointer"
+										>
 											<div class="card-body p-4">
 												<div class="d-flex gap-3">
 													<div
@@ -245,12 +232,9 @@
 															'rounded d-flex align-items-center justify-content-center flex-shrink-0',
 															isMovieWatched(movie.UUID) ? 'bg-success bg-opacity-25' : 'bg-secondary',
 														]"
-														style="width: 80px; height: 80px">
-														<font-awesome-icon
-															v-if="isMovieWatched(movie.UUID)"
-															:icon="['fas', 'check']"
-															class="text-success"
-															size="2x" />
+														style="width: 80px; height: 80px"
+													>
+														<font-awesome-icon v-if="isMovieWatched(movie.UUID)" :icon="['fas', 'check']" class="text-success" size="2x" />
 														<font-awesome-icon v-else :icon="['fas', 'film']" size="2x" />
 													</div>
 													<div class="flex-grow-1">
@@ -291,7 +275,8 @@
 														<div class="progress mt-3" style="height: 4px">
 															<div
 																:class="['progress-bar', isMovieWatched(movie.UUID) ? 'bg-success' : 'bg-danger']"
-																:style="{ width: getMovieProgress(movie.UUID) + '%' }"></div>
+																:style="{ width: getMovieProgress(movie.UUID) + '%' }"
+															></div>
 														</div>
 													</div>
 												</div>
@@ -304,7 +289,7 @@
 					</div>
 
 					<!-- Related Content Sidebar -->
-					<div class="col-xl-4">
+					<div v-if="false" class="col-xl-4">
 						<h2 class="h5 mb-3">
 							<font-awesome-icon :icon="['fas', 'heart']" class="me-2 text-danger" />
 							More Like This
@@ -315,14 +300,11 @@
 								:key="item.id"
 								class="card cursor-pointer"
 								@click="navigateToContent(item.id)"
-								style="cursor: pointer">
+								style="cursor: pointer"
+							>
 								<div class="card-body p-3">
 									<div class="d-flex gap-3">
-										<img
-											:src="item.cover"
-											:alt="item.title"
-											class="rounded flex-shrink-0"
-											style="width: 48px; height: 72px; object-fit: cover" />
+										<img :src="item.cover" :alt="item.title" class="rounded flex-shrink-0" style="width: 48px; height: 72px; object-fit: cover" />
 										<div class="flex-grow-1 overflow-hidden">
 											<h3 class="h6 mb-1 text-truncate">{{ item.title }}</h3>
 											<p class="text-muted small mb-1">
