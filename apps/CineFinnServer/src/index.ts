@@ -16,7 +16,7 @@ import { managmentRouter } from './managment.js';
 import { CacheContext } from './LRUCache.js';
 import type { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from '@cinefinn/types/socket';
 import { tryCatch } from './tryCatch.js';
-import type { Series, Season, Movie, Account, timestamped, DetailedSeries } from '@cinefinn/types/database';
+import type { Series, Season, Movie, Account, timestamped, DetailedSeries, DetailedMovie, DetailedEpisode, DetailedSeason, FrontendSeries } from '@cinefinn/types/database';
 
 
 const app = new Hono({
@@ -43,7 +43,7 @@ export const indexMoviesCache = new CacheContext('index-movies', 500);
 app.get('/index', async (c) => {
 
 
-    const result = await new Promise<DetailedSeries[]>((resolve, reject) => {
+    const result = await new Promise<FrontendSeries[]>((resolve, reject) => {
         database.pool.query(`
           SELECT 
             series.*,
@@ -81,10 +81,10 @@ app.get('/index', async (c) => {
                         refs: JSON.parse(row.refs),
                         seasons: seasons.sort((a, b) => a.season_IDX - b.season_IDX),
                         movies: movies.sort((a, b) => a.movie_IDX - b.movie_IDX),
-                    };
+                    } as FrontendSeries & { seasons_array?: string; movies_array?: string };
                     delete obj.seasons_array;
                     delete obj.movies_array;
-                    return obj;
+                    return obj as FrontendSeries;
                 } catch (error) {
                     console.log(error);
                     console.log(row);
@@ -96,33 +96,6 @@ app.get('/index', async (c) => {
     });
 
     return c.json(result);
-
-
-    // const seriesCR = await indexSeriesCache.execute(seriesTable, 'get', []);
-    // const series = await seriesTable.get();
-
-    // const series = seriesCR.data;
-    // const overhauledSeries = await Promise.all(series.map(e => {
-    //     return new Promise(async (resolve, reject) => {
-    //         const [CRseasons, CRmovies] = await Promise.all([
-    //             // seasonsTable.get({ serie_UUID: e.UUID }),
-    //             // moviesTable.get({ serie_UUID: e.UUID }),
-    //             indexSeasonsCache.execute(seasonsTable, 'get', [{ serie_UUID: e.UUID }]),
-    //             indexMoviesCache.execute(moviesTable, 'get', [{ serie_UUID: e.UUID }]),
-    //         ]);
-
-    //         const seasons = CRseasons.data.sort((a, b) => a.season_IDX - b.season_IDX);
-    //         const movies = CRmovies.data.sort((a, b) => a.movie_IDX - b.movie_IDX);
-
-    //         resolve({
-    //             ...e,
-    //             movies: movies.sort((a, b) => a.movie_IDX - b.movie_IDX),
-    //             seasons: seasons.sort((a, b) => a.season_IDX - b.season_IDX),
-    //         });
-    //     });
-    // }));
-
-    // return c.json(overhauledSeries);
 });
 
 app.get('/index/:S-UUID', async (c) => {
@@ -145,12 +118,12 @@ app.get('/index/:S-UUID', async (c) => {
             return {
                 ...episode,
                 watchableEntitys,
-            };
+            } as DetailedEpisode;
         }));
         const obj = {
             ...season,
             episodes: filledEpisodesWithWatchables.sort((a, b) => a.episode_IDX - b.episode_IDX),
-        };
+        } as DetailedSeason;
         return obj;
     }));
 
@@ -160,7 +133,7 @@ app.get('/index/:S-UUID', async (c) => {
         return {
             ...movie,
             watchableEntitys,
-        };
+        } as DetailedMovie;
     }));
 
     const finalOutput = {
@@ -169,38 +142,38 @@ app.get('/index/:S-UUID', async (c) => {
         movies: newMovies,
     };
 
-    return c.json(finalOutput);
+    return c.json(finalOutput as DetailedSeries);
 });
 
-app.get('*', async (c, next) => {
+// app.get('*', async (c, next) => {
 
-    const proxyables = [
-        '/index/all',
-        '/managment/jobs/info',
-        '/socket.io'
-    ];
+//     const proxyables = [
+//         '/index/all',
+//         '/managment/jobs/info',
+//         '/socket.io'
+//     ];
 
 
-    let isProxyable = false;
-    for (const proxyable of proxyables) {
-        if (c.req.path.startsWith(proxyable)) {
-            isProxyable = true;
-            break;
-        }
-    }
+//     let isProxyable = false;
+//     for (const proxyable of proxyables) {
+//         if (c.req.path.startsWith(proxyable)) {
+//             isProxyable = true;
+//             break;
+//         }
+//     }
 
-    // console.log('Came, isProxyable', c.req.path, isProxyable);
-    if (!isProxyable) {
-        return next();
-    }
+//     // console.log('Came, isProxyable', c.req.path, isProxyable);
+//     if (!isProxyable) {
+//         return next();
+//     }
 
-    const queryString = c.req.url.split('?')[1];
+//     const queryString = c.req.url.split('?')[1];
 
-    const newUrl = `http://localhost:3100${c.req.path}?${queryString}&auth-token=SECR-DEV`;
-    // const newUrl = `http://localhost:3100${c.req.path}?auth-token=SECR-DEV`;
+//     const newUrl = `http://localhost:3100${c.req.path}?${queryString}&auth-token=SECR-DEV`;
+//     // const newUrl = `http://localhost:3100${c.req.path}?auth-token=SECR-DEV`;
 
-    return proxy(newUrl);
-});
+//     return proxy(newUrl);
+// });
 
 const httpServer = serve({
     fetch: app.fetch,
