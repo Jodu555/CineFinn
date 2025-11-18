@@ -4,6 +4,7 @@ dotenv.config();;
 import axios from 'axios';
 import { connectDatabase, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, type Episode, type Movie, type Series, type WatchableEntity } from '../database.js';
 import { Database } from '@jodu555/mysqlapi';
+import path from 'path';
 
 const generateID = () => {
     return randomUUID().split('-')[0];
@@ -92,12 +93,19 @@ async function importSerieses() {
                     const iv = crypto.randomBytes(16);
                     const watchableEntityUUID = `WE#${crypto.randomUUID().split('-')[0]}`;
                     console.log(`=> Adding watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang})`);
+
+                    let filePath = episode.filePath;
+                    if (episode.langs.length > 1) {
+                        const { dir, name, ext } = path.parse(filePath);
+                        filePath = path.join(dir, `${name.split('_')[0]}_${lang}${ext}`);
+                    }
+
                     await watchableEntitysTable.create({
                         UUID: watchableEntityUUID,
                         watchable_UUID: episodeUUID,
                         lang: lang,
                         subID: episode.subID || 'main',
-                        filePath: episode.filePath,
+                        filePath: filePath,
                         IV: iv,
                         runtime: -1,
                         hash: '',
@@ -124,12 +132,19 @@ async function importSerieses() {
                 const iv = crypto.randomBytes(16);
                 const watchableEntityUUID = `WE#${crypto.randomUUID().split('-')[0]}`;
                 console.log(`=> Adding watchable entity ${serie.title} #${i} (${lang})`);
+
+                let filePath = movie.filePath;
+                if (movie.langs.length > 1) {
+                    const { dir, name, ext } = path.parse(filePath);
+                    filePath = path.join(dir, `${name.split('_')[0]}_${lang}${ext}`);
+                }
+
                 await watchableEntitysTable.create({
                     UUID: watchableEntityUUID,
                     watchable_UUID: movieUUID,
                     lang: lang,
                     subID: movie.subID || 'main',
-                    filePath: movie.filePath,
+                    filePath,
                     IV: iv,
                     runtime: -1,
                     hash: '',
