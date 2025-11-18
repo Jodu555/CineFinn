@@ -12,6 +12,10 @@
 		"./socket": {
 			"types": "./dist/socket.d.ts",
 			"import": "./dist/socket.js"
+		},
+		"./database": {
+			"types": "./dist/database.d.ts",
+			"import": "./dist/database.js"
 		}
 	},
 	"scripts": {

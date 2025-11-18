@@ -1,7 +1,8 @@
 import { Hono, type Context } from 'hono';
 import { authFullMiddleware, type AuthedVars } from './auth.js';
-import { jobsTable, type JobType } from './database.js';
+import { jobsTable } from './database.js';
 import { crawl } from './crawler.js';
+import type { JobType } from '@cinefinn/types/database';
 
 const router = new Hono();
 

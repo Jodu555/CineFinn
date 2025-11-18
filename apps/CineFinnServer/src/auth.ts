@@ -1,10 +1,11 @@
 import { Hono } from 'hono';
 import { createMiddleware } from 'hono/factory';
-import { accountsTable, authTokensTable, database, type Account } from './database.js';
+import { accountsTable, authTokensTable, database, } from './database.js';
 import bcrypt from 'bcryptjs';
 import { randomUUID } from 'node:crypto';
 import { HTTPException } from 'hono/http-exception';
 import z from 'zod';
+import type { Account } from '@cinefinn/types/database';
 
 const registerLoginSchema = z.object({
     email: z.email(),

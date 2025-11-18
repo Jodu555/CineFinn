@@ -1,3 +1,4 @@
+import type { Account } from '@cinefinn/types/database';
 import { defineStore } from 'pinia';
 import useAPIURL from '~/hooks/useAPIURL';
 

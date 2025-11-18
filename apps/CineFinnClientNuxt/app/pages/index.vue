@@ -31,6 +31,7 @@
 </template>
 
 <script lang="ts" setup>
+import type { FrontendSeries } from '@cinefinn/types/database';
 import EntityCard from '~/components/EntityCard.vue';
 
 definePageMeta({
@@ -57,7 +58,7 @@ const selectedSeries = computed(() => {
 	if (sort.value) {
 		arr = JSON.parse(JSON.stringify(arr)).reverse();
 	}
-	return arr as Series[];
+	return arr as FrontendSeries[];
 });
 
 const categories = computed(() => {

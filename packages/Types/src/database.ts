@@ -1,3 +1,8 @@
+export interface timestamped {
+    createdAt: number;
+    updatedAt: number;
+}
+
 export interface Account {
     UUID: string;
     username: string;
@@ -12,19 +17,30 @@ export interface Account {
     status: 'active' | 'suspended' | 'deleted' | 'trial';
 }
 
+export interface AuthToken {
+    TOKEN: string;
+    account_UUID: string;
+}
+
 export interface Series {
     UUID: string;
     tags: string;
     title: string;
     infos: SeriesInfos;
     refs: SeriesRefs;
-    movies: Movie[];
-    seasons: Season[];
 }
 
-export interface DetailedSeries extends Omit<Series, 'seasons'> {
-    seasons: DetailedSeason[];
-    movies: DetailedMovie[];
+export interface DetailedSeries extends Omit<Series, 'seasons' | 'movies'> {
+    seasons: Season[];
+    movies: Movie[];
+}
+
+export interface DetailedSeason extends Omit<Season, 'episodes'> {
+    episodes: DetailedEpisode[];
+}
+
+export interface DetailedEpisode extends Episode {
+    watchableEntitys: WatchableEntity[];
 }
 
 export type SeriesRefs = Record<'aniworld' | 'zoro' | 'sto' | string, string | Record<string, string>>;
@@ -47,19 +63,11 @@ export interface Season {
     episodes: number;
 }
 
-export interface DetailedSeason extends Omit<Season, 'episodes'> {
-    episodes: DetailedEpisode[];
-}
-
 export interface Episode {
     UUID: string;
     season_UUID: string;
     season_IDX: number;
     episode_IDX: number;
-}
-
-export interface DetailedEpisode extends Episode {
-    watchableEntitys: WatchableEntity[];
 }
 
 export interface Movie {
@@ -69,17 +77,13 @@ export interface Movie {
     movie_IDX: number;
 }
 
-export interface DetailedMovie extends Movie {
-    watchableEntitys: WatchableEntity[];
-}
-
 export interface WatchableEntity {
     UUID: string;
     watchable_UUID: string;
     lang: string;
     subID: string;
     filePath: string;
-    IV: any;
+    IV: Buffer;
     runtime: number;
     hash: string;
 }
@@ -87,6 +91,31 @@ export interface WatchableEntity {
 export interface WatchHistory {
     UUID: string;
     account_UUID: string;
+    series_UUID: string;
     watchable_UUID: string;
     watchTime: number;
+}
+
+export interface SyncRoom {
+    UUID: string;
+    series_UUID: string;
+    watchableEntity_UUID: string;
+    members: SyncRoomMember[];
+}
+
+export interface SyncRoomMember {
+    UUID: string;
+    username: string;
+    role: number;
+}
+
+export type JobType = 'crawl' | 'generatePreviewImages' | 'checkForUpdates-smart' | 'checkForUpdates-old';
+
+export interface Job {
+    UUID: string;
+    type: JobType;
+    failed_at: number;
+    finished_at: number;
+    data: any;
+    result: any;
 }

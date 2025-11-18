@@ -3,7 +3,7 @@ import path from 'path';
 import { listFiles } from './fileutils.js';
 import { createHash, randomUUID } from 'node:crypto';
 import { filenameParser } from './parser.js';
-import { database, episodesTable, jobsTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, type Series } from './database.js';
+import { database, episodesTable, jobsTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable } from './database.js';
 import { tryCatch } from './tryCatch.js';
 import { CacheContext } from './LRUCache.js';
 

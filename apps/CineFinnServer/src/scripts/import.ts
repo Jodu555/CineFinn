@@ -2,9 +2,10 @@ import crypto, { randomUUID } from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();;
 import axios from 'axios';
-import { connectDatabase, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, type Episode, type Movie, type Series, type WatchableEntity } from '../database.js';
+import { connectDatabase, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable } from '../database.js';
 import { Database } from '@jodu555/mysqlapi';
 import path from 'path';
+import type { Series, Episode, WatchableEntity, Movie } from '@cinefinn/types/database';
 
 const generateID = () => {
     return randomUUID().split('-')[0];

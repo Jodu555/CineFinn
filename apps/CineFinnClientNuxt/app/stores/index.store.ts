@@ -1,9 +1,10 @@
+import type { DetailedSeason, DetailedEpisode, WatchableEntity, DetailedSeries, DetailedMovie, FrontendSeries } from '@cinefinn/types/database';
 import useAPIURL from '~/hooks/useAPIURL';
 
 export const useIndexStore = defineStore('index', {
     state: () => ({
         loading: false,
-        series: [] as Series[],
+        series: [] as FrontendSeries[],
         detailedSeasons: [] as DetailedSeason[],
         detailedMovies: [] as DetailedMovie[],
         selectedEntity: null as DetailedEpisode | DetailedMovie | null,
@@ -15,7 +16,7 @@ export const useIndexStore = defineStore('index', {
             this.loading = true;
             // const response = await useAxios().get('/index');
             // const response = await $fetch<Series[]>(CURRENT_EXTERNAL_API + '/index');
-            const response = await $fetch<Series[]>(useAPIURL() + '/index');
+            const response = await $fetch<FrontendSeries[]>(useAPIURL() + '/index');
             this.series = response;
             this.loading = false;
         },

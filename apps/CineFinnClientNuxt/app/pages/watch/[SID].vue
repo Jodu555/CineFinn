@@ -348,6 +348,7 @@
 </template>
 
 <script setup lang="ts">
+import type { DetailedEpisode } from '@cinefinn/types/database';
 import { ref, computed, watch } from 'vue';
 import ExtendedVideo from '~/components/ExtendedVideo.vue';
 import useAPIURL from '~/hooks/useAPIURL';

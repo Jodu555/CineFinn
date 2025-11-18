@@ -2,7 +2,7 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import dotenv from 'dotenv';
 import { Server } from 'socket.io';
-import { connectDatabase, database, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, type Account, type Movie, type Season, type Series, type timestamped } from './database.js';
+import { connectDatabase, database, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable } from './database.js';
 import { crawl } from './crawler.js';
 dotenv.config();
 import { proxy } from 'hono/proxy';
@@ -16,6 +16,7 @@ import { managmentRouter } from './managment.js';
 import { CacheContext } from './LRUCache.js';
 import type { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from '@cinefinn/types/socket';
 import { tryCatch } from './tryCatch.js';
+import type { Series, Season, Movie, Account, timestamped, DetailedSeries } from '@cinefinn/types/database';
 
 
 const app = new Hono({
@@ -41,10 +42,6 @@ export const indexMoviesCache = new CacheContext('index-movies', 500);
 
 app.get('/index', async (c) => {
 
-    interface DetailedSeries extends Omit<Series, 'seasons' | 'movies'> {
-        seasons: Season[];
-        movies: Movie[];
-    }
 
     const result = await new Promise<DetailedSeries[]>((resolve, reject) => {
         database.pool.query(`
