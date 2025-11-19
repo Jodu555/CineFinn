@@ -266,6 +266,11 @@ async function createTables() {
             null: true,
             json: true,
         },
+        logs: {
+            type: 'json',
+            null: true,
+            json: true,
+        },
         result: {
             type: 'json',
             null: true,

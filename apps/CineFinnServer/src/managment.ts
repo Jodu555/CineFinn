@@ -19,7 +19,7 @@ async function checkIfRunning(type: string) {
 
 router.get('/jobs/info', authFullMiddleware((user) => user.role >= 1), async (c) => {
     const jobs = await jobsTable.get();
-    c.json(jobs);
+    return c.json(jobs);
 });
 
 async function handleJob(type: JobType, c: Context<AuthedVars>, callFunction: (jobUUID: string) => Promise<void>) {
@@ -34,14 +34,19 @@ async function handleJob(type: JobType, c: Context<AuthedVars>, callFunction: (j
         data: {
         },
         result: {},
+        logs: [],
         failed_at: 0,
         finished_at: 0,
     });
     callFunction(job.UUID);
+    return c.json({
+        message: 'Job started',
+        jobUUID: job.UUID,
+    });
 }
 
 router.get('/job/crawl', authFullMiddleware((user) => user.role >= 1), async (c) => {
-    await handleJob('crawl', c, crawl);
+    return await handleJob('crawl', c, crawl);
 });
 
 router.get('/job/img/generate', authFullMiddleware((user) => user.role >= 1), async (c) => {
@@ -57,9 +62,8 @@ router.get('/job/checkForUpdates-smart', authFullMiddleware((user) => user.role 
 });
 
 router.get('/job/checkForUpdates-old', authFullMiddleware((user) => user.role >= 1), async (c) => {
-    const jobs = await jobsTable.get();
     return c.json({
-        jobs,
+        message: 'Not implemented yet',
     });
 });
 

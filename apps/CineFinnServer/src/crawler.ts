@@ -6,6 +6,7 @@ import { filenameParser } from './parser.js';
 import { database, episodesTable, jobsTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable } from './database.js';
 import { tryCatch } from './tryCatch.js';
 import { CacheContext } from './LRUCache.js';
+import { Job } from './Job.js';
 
 const generateID = () => {
     return randomUUID().split('-')[0];
@@ -33,8 +34,9 @@ const generateEntityID = () => {
 
 
 export async function crawl(jobUUID: string) {
-    const crawlerSeriesSeasonsCache = new CacheContext('crawler-series', 500);
+    const job = await Job.fromDBUUID(jobUUID);
 
+    const crawlerSeriesSeasonsCache = new CacheContext('crawler-series', 500);
     const crawlerEpisodesCache = new CacheContext('crawler-episodes', 150);
 
     const pathEntries = [process.env.VIDEO_PATH!];
@@ -46,7 +48,7 @@ export async function crawl(jobUUID: string) {
 
     jobUUID !== undefined && await jobsTable.update({ UUID: jobUUID }, { data: { files } });
 
-    console.time('Handling Files');
+    job.time('Handling Files');
 
     const seasonCountersMap = new Map<string, number>();
 
@@ -55,13 +57,13 @@ export async function crawl(jobUUID: string) {
         const { error, data: parsedData } = tryCatch(() => filenameParser(file, base));
 
         if (error != null) {
-            console.log('Error Parsing File', file, error);
+            job.log('Error Parsing File', file, error);
             continue;
         }
 
         let { data: exsitingSeries, cacheInfo: existingSeriesCacheInfo } = await crawlerSeriesSeasonsCache.execute(seriesTable, 'getOne', [{ title: parsedData.title, unique: true }]);
         if (exsitingSeries == undefined) {
-            console.log('Series Does not Exist', parsedData.title);
+            job.log('Series Does not Exist', parsedData.title);
             const categorie = path.parse(path.join(path.parse(file).dir, '../../')).base;
             exsitingSeries = await seriesTable.create({
                 UUID: generateSeriesID(),
@@ -75,25 +77,25 @@ export async function crawl(jobUUID: string) {
             crawlerSeriesSeasonsCache.invalidate(existingSeriesCacheInfo.cacheKey);
         }
 
-        // console.log('Series Exists', exsitingSeries.UUID, exsitingSeries.title);
+        // job.log('Series Exists', exsitingSeries.UUID, exsitingSeries.title);
 
         let watchableUUID;
         if (parsedData.movie == true) {
-            console.log('Movie Parse', parsedData);
+            job.log('Movie Parse', parsedData);
             let existingMovie = await moviesTable.getOne({
                 serie_UUID: exsitingSeries.UUID,
                 primaryName: parsedData.movieTitle,
                 unique: true,
             });
             if (existingMovie == undefined) {
-                console.log('Movie Does not Exist', parsedData.movieTitle);
+                job.log('Movie Does not Exist', parsedData.movieTitle);
                 existingMovie = await moviesTable.create({
                     UUID: generateMovieID(),
                     primaryName: parsedData.movieTitle!,
                     serie_UUID: exsitingSeries.UUID,
                     movie_IDX: 0,
                 });
-                console.log('Created Movie', existingMovie.UUID, existingMovie.primaryName);
+                job.log('Created Movie', existingMovie.UUID, existingMovie.primaryName);
             }
             watchableUUID = existingMovie.UUID;
         } else {
@@ -104,14 +106,14 @@ export async function crawl(jobUUID: string) {
                 unique: true,
             }]);
             if (existingSeason == undefined) {
-                console.log('Season Does not Exist', parsedData.season);
+                job.log('Season Does not Exist', parsedData.season);
                 existingSeason = await seasonsTable.create({
                     UUID: generateSeasonID(),
                     serie_UUID: exsitingSeries.UUID,
                     season_IDX: parsedData.season,
                     episodes: 0,
                 });
-                console.log('Created Season', existingSeason.UUID, existingSeason.season_IDX);
+                job.log('Created Season', existingSeason.UUID, existingSeason.season_IDX);
                 crawlerSeriesSeasonsCache.invalidate(existingSeasonCacheInfo.cacheKey);
             }
 
@@ -130,14 +132,14 @@ export async function crawl(jobUUID: string) {
                 unique: true,
             }]);
             if (existingEpisode == undefined) {
-                console.log('Episode Does not Exist', parsedData.season, parsedData.episode);
+                job.log('Episode Does not Exist', parsedData.season, parsedData.episode);
                 existingEpisode = await episodesTable.create({
                     UUID: generateEpisodeID(),
                     season_UUID: existingSeason.UUID,
                     season_IDX: parsedData.season,
                     episode_IDX: parsedData.episode,
                 });
-                console.log('Created Episode', existingEpisode.UUID, existingEpisode.season_UUID, existingEpisode.season_IDX, existingEpisode.episode_IDX);
+                job.log('Created Episode', existingEpisode.UUID, existingEpisode.season_UUID, existingEpisode.season_IDX, existingEpisode.episode_IDX);
                 await crawlerEpisodesCache.invalidate(existingEpisodeCacheInfo.cacheKey);
             }
             watchableUUID = existingEpisode.UUID;
@@ -150,7 +152,7 @@ export async function crawl(jobUUID: string) {
             unique: true,
         });
         if (existingWatchableEntity == undefined) {
-            console.log('Watchable Entity Does not Exist', parsedData, parsedData.language);
+            job.log('Watchable Entity Does not Exist', parsedData, parsedData.language);
             existingWatchableEntity = await watchableEntitysTable.create({
                 UUID: generateEntityID(),
                 watchable_UUID: watchableUUID,
@@ -164,8 +166,8 @@ export async function crawl(jobUUID: string) {
         }
     }
 
-    console.timeEnd('Handling Files');
-    console.log('done');
+    job.timeEnd('Handling Files');
+    job.log('done');
 
     for (const [key, value] of seasonCountersMap) {
         await seasonsTable.update({
@@ -176,7 +178,7 @@ export async function crawl(jobUUID: string) {
     }
 
 
-    console.log(seasonCountersMap);
+    job.log(seasonCountersMap);
 
     jobUUID !== undefined && await jobsTable.update({ UUID: jobUUID },
         {
