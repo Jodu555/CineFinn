@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import useAPIURL from '~/hooks/useAPIURL';
+
 const isConnected = ref(false);
 const transport = ref('N/A');
 const socketID = ref('N/A');
@@ -43,6 +45,7 @@ onBeforeUnmount(() => {
 
 <template>
 	<div>
+		<p class="mb-0">API: {{ useAPIURL() }}</p>
 		<p class="mb-0">Status: {{ isConnected ? 'connected' : 'disconnected' }}</p>
 		<p class="mb-0">Transport: {{ transport }}</p>
 		<p>Socket ID: {{ socketID }}</p>

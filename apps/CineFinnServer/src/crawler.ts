@@ -46,7 +46,8 @@ export async function crawl(jobUUID: string) {
 
     files = files.filter((f) => viableExtensions.includes(path.parse(f).ext));
 
-    jobUUID !== undefined && await jobsTable.update({ UUID: jobUUID }, { data: { files } });
+    // jobUUID !== undefined && await jobsTable.update({ UUID: jobUUID }, { data: { files } });
+    await job.setData({ files });
 
     job.time('Handling Files');
 
@@ -178,16 +179,12 @@ export async function crawl(jobUUID: string) {
     }
 
 
-    job.log(seasonCountersMap);
+    job.log(Array.from(seasonCountersMap.entries()));
 
-    jobUUID !== undefined && await jobsTable.update({ UUID: jobUUID },
-        {
-            result: {
-                info: Array.from(seasonCountersMap.entries())
-            },
-            finished_at: Date.now(),
-        }
-    );
+    job.setResult({
+        info: Array.from(seasonCountersMap.entries())
+    })
+    await job.success();
 
 
     crawlerEpisodesCache.clear();
