@@ -40,11 +40,15 @@ export async function crawl(jobUUID: string) {
     const crawlerEpisodesCache = new CacheContext('crawler-episodes', 150);
 
     const pathEntries = [process.env.VIDEO_PATH!];
+    job.log('Listing Files');
     let { files } = await listFiles(pathEntries[0]);
+    job.log(`Found ${files.length} files`);
 
     const viableExtensions = ['.mp4', '.mkv', '.webm'];
 
+    const prevLength = files.length;
     files = files.filter((f) => viableExtensions.includes(path.parse(f).ext));
+    job.log(`Filtered ${prevLength - files.length} files`);
 
     // jobUUID !== undefined && await jobsTable.update({ UUID: jobUUID }, { data: { files } });
     await job.setData({ files });
@@ -82,7 +86,6 @@ export async function crawl(jobUUID: string) {
 
         let watchableUUID;
         if (parsedData.movie == true) {
-            job.log('Movie Parse', parsedData);
             let existingMovie = await moviesTable.getOne({
                 serie_UUID: exsitingSeries.UUID,
                 primaryName: parsedData.movieTitle,
@@ -168,8 +171,10 @@ export async function crawl(jobUUID: string) {
     }
 
     job.timeEnd('Handling Files');
-    job.log('done');
+    job.log('Done Handling Files');
 
+    job.log(`Updating ${Array.from(seasonCountersMap.entries()).length} Seasons`);
+    job.time('Updating Seasons');
     for (const [key, value] of seasonCountersMap) {
         await seasonsTable.update({
             UUID: key,
@@ -177,19 +182,21 @@ export async function crawl(jobUUID: string) {
             episodes: value,
         });
     }
+    job.timeEnd('Updating Seasons');
 
 
-    job.log(Array.from(seasonCountersMap.entries()));
+
 
     job.setResult({
         info: Array.from(seasonCountersMap.entries())
     })
-    await job.success();
 
-
+    job.time('Clearing Cache');
     crawlerEpisodesCache.clear();
     crawlerSeriesSeasonsCache.clear();
+    job.timeEnd('Clearing Cache');
 
+    await job.success();
 }
 
 // Without Cache:
