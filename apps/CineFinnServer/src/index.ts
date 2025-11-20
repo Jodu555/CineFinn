@@ -3,7 +3,7 @@ import { Hono } from 'hono';
 import dotenv from 'dotenv';
 import { Server } from 'socket.io';
 import { connectDatabase, database, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable } from './database.js';
-import { crawl } from './crawler.js';
+import { crawl } from './job/crawler.js';
 dotenv.config();
 import { proxy } from 'hono/proxy';
 import { trimTrailingSlash } from 'hono/trailing-slash';
@@ -12,12 +12,14 @@ import { prometheus } from '@hono/prometheus';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { ownLogger } from './ownLogger.js';
-import { managmentRouter } from './managment.js';
+import { managmentRouter } from './routes/managment.js';
 import { CacheContext } from './LRUCache.js';
 import type { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from '@cinefinn/types/socket';
 import { tryCatch } from './tryCatch.js';
 import type { Series, Season, Movie, Account, timestamped, DetailedSeries, DetailedMovie, DetailedEpisode, DetailedSeason, FrontendSeries } from '@cinefinn/types/database';
 import { setIO } from './utils.js';
+import { watchRouter } from './routes/watch.js';
+import { videoRouter } from './routes/video.js';
 
 
 const app = new Hono({
@@ -36,6 +38,8 @@ app.get('/metrics', printMetrics);
 app.route('/auth', authRouter);
 
 app.route('/managment', managmentRouter);
+app.route('/watch', watchRouter);
+app.route('/video', videoRouter);
 
 export const indexSeriesCache = new CacheContext('index-series', 500);
 export const indexSeasonsCache = new CacheContext('index-seasons', 500);
@@ -242,8 +246,16 @@ io.on('connection', (socket) => {
 
     console.log(socket.id, socket.data, 'a user connected');
 
-    socket.on('hello', () => {
-        console.log(socket.id, 'hello');
+    socket.on('updateTime', async (data) => {
+        console.log('updateTime', data);
+        // socket.broadcast.emit('updateTime', data);
+        const response = await app.request(`/watch/updateTime/${data.watchableUUID}/${data.time}`, {
+            method: 'POST',
+            headers: {
+                'auth-token': socket.handshake.auth.token,
+            },
+        })
+
     });
 
     socket.on('disconnect', () => {

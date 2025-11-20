@@ -55,10 +55,12 @@ export const useIndexStore = defineStore('index', {
 
             const preferredLanguageList = ['GerDub', 'EngDub', 'GerSub', 'EngSub'];
             let entity: DetailedMovie | DetailedEpisode | null = null;
-            if (entityUUID?.startsWith('M#')) {
+            if (entityUUID?.startsWith('MO-')) {
                 entity = this.detailedMovies.find((m) => m.UUID === entityUUID)!;
             }
-            if (entityUUID?.startsWith('E#')) {
+            if (entityUUID?.startsWith('EP-')) {
+                console.log('Is Episode', this.detailedSeasons);
+
                 entity = this.detailedSeasons.map(s => s.episodes).flat().find((e) => e.UUID === entityUUID)!;
             }
 

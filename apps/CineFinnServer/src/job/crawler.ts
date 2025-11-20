@@ -1,11 +1,11 @@
 import fs from 'fs';
 import path from 'path';
-import { listFiles } from './fileutils.js';
+import { listFiles } from '../fileutils.js';
 import { createHash, randomUUID } from 'node:crypto';
-import { filenameParser } from './parser.js';
-import { database, episodesTable, jobsTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable } from './database.js';
-import { tryCatch } from './tryCatch.js';
-import { CacheContext } from './LRUCache.js';
+import { filenameParser } from '../parser.js';
+import { database, episodesTable, jobsTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable } from '../database.js';
+import { tryCatch } from '../tryCatch.js';
+import { CacheContext } from '../LRUCache.js';
 import { Job } from './Job.js';
 
 const generateID = () => {

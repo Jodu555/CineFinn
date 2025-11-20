@@ -1,6 +1,7 @@
 import { Hono, type Context } from 'hono';
-import { authFullMiddleware, authMiddleware, type AuthedVars } from './auth.js';
-import { episodesTable, moviesTable, seasonsTable, watchHistoryTable } from './database.js';
+import { authFullMiddleware, authMiddleware, type AuthedVars } from '../auth.js';
+import { episodesTable, moviesTable, seasonsTable, watchableEntitysTable, watchHistoryTable } from '../database.js';
+import { getIO } from '../utils.js';
 
 const router = new Hono();
 
@@ -47,10 +48,28 @@ router.post('/markSeason/:seasonUUID/:bool', authMiddleware, async (c) => {
 
 router.post('/updateTime/:watchableUUID/:time', authMiddleware, async (c) => {
     const user = c.get('credentials').user;
-    const watchableUUID = c.req.param('watchableUUID');
+
     const time = Number(c.req.param('time'));
 
-    if (watchableUUID.startsWith('E#')) {
+    const updated = async (seriesUUID: string) => {
+        (await getIO().fetchSockets()).filter(s => s.data.auth.user.UUID === user.UUID).forEach(async s => {
+            const watchList = await watchHistoryTable.get({ series_UUID: seriesUUID, account_UUID: user.UUID });
+            s.emit('watchListUpdate', watchList)
+        });
+    }
+
+    let watchableUUID = c.req.param('watchableUUID');
+    if (watchableUUID.startsWith('WE-')) {
+        const watchableEntity = await watchableEntitysTable.getOne({ UUID: watchableUUID });
+        if (!watchableEntity) {
+            return c.json({
+                message: 'Watchable Entity not found',
+            });
+        }
+        watchableUUID = watchableEntity.watchable_UUID;
+    }
+
+    if (watchableUUID.startsWith('EP-')) {
         //Update Time for Episode
         const episode = await episodesTable.getOne({ UUID: watchableUUID });
         if (episode == undefined) {
@@ -73,12 +92,20 @@ router.post('/updateTime/:watchableUUID/:time', authMiddleware, async (c) => {
                 watchable_UUID: episode.UUID,
                 watchTime: time,
             });
+            await updated(season.serie_UUID);
+            return c.json({
+                message: 'Episode watchTime updated',
+            });
         } else {
             await watchHistoryTable.update({ UUID: watchHistory.UUID }, {
                 watchTime: time,
             });
+            await updated(season.serie_UUID);
+            return c.json({
+                message: 'Episode watchTime updated',
+            });
         }
-    } else if (watchableUUID.startsWith('M#')) {
+    } else if (watchableUUID.startsWith('MO-')) {
         //Update Time for Movie
         const movie = await moviesTable.getOne({ UUID: watchableUUID });
         if (movie == undefined) {
@@ -95,11 +122,24 @@ router.post('/updateTime/:watchableUUID/:time', authMiddleware, async (c) => {
                 watchable_UUID: movie.UUID,
                 watchTime: time,
             });
+            await updated(movie.serie_UUID);
+            return c.json({
+                message: 'Movie watchTime updated',
+            });
         } else {
             await watchHistoryTable.update({ UUID: watchHistory.UUID }, {
                 watchTime: time,
             });
+            await updated(movie.serie_UUID);
+            return c.json({
+                message: 'Movie watchTime updated',
+            });
         }
 
     }
+    return c.json({
+        message: 'WatchableUUID does not match any known type',
+    });
 });
+
+export { router as watchRouter };

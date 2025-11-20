@@ -364,15 +364,18 @@ const indexStore = useIndexStore();
 
 const series = computed(() => indexStore.series.find((s) => s.UUID === route.params.SID));
 
-await callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string), {
-	mode: 'navigation',
-});
+await callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string));
 
 const sendVideoTimeUpdate = async (time: number) => {
 	console.log('Sending time update to server', time);
 	// useAxios().post(`/watch/updateTime/${currentEpisodeUUID.value}/${time}`, {});
 
-	await $fetch(`${useAPIURL()}/watch/updateTime/${indexStore.selectedWatchableEntity?.UUID.replace('#', '-')}/${time}`);
+	useSocket().emit('updateTime', {
+		watchableUUID: indexStore.selectedWatchableEntity?.UUID!,
+		time,
+	});
+
+	// await $fetch(`${useAPIURL()}/watch/updateTime/${indexStore.selectedWatchableEntity?.UUID.replace('#', '-')}/${time}`);
 };
 
 const coverURL = computed(() => {
@@ -449,18 +452,29 @@ const showVideo = computed(() => {
 const videoSrc = computed(() => {
 	if (series.value === undefined) return '';
 
-	const BASE_URL = 'https://cinema-api.jodu555.de/video?auth-token=SECR-DEV';
+	const oldVideoAPI = false;
 
-	if (currentMovieUUID.value !== null) {
-		const movie = indexStore.detailedMovies.find((m) => m.UUID === currentMovieUUID.value);
-		if (movie === undefined) return '';
-		return `${BASE_URL}&series=${series.value.UUID}&language=EngDub&movie=${movie.movie_IDX}`;
+	if (oldVideoAPI) {
+		const BASE_URL = 'https://cinema-api.jodu555.de/video?auth-token=SECR-DEV';
+
+		if (currentMovieUUID.value !== null) {
+			const movie = indexStore.detailedMovies.find((m) => m.UUID === currentMovieUUID.value);
+			if (movie === undefined) return '';
+			return `${BASE_URL}&series=${series.value.UUID}&language=EngDub&movie=${movie.movie_IDX}`;
+		}
+		if (currentEpisodeUUID.value !== null) {
+			if (currentDetailedSeasonData.value === undefined) return '';
+			const episode = currentDetailedSeasonData.value.episodes.find((e) => e.UUID === currentEpisodeUUID.value);
+			if (episode === undefined) return '';
+			return `${BASE_URL}&series=${series.value.UUID}&language=EngDub&season=${episode.season_IDX}&episode=${episode.episode_IDX}`;
+		}
 	}
-	if (currentEpisodeUUID.value !== null) {
-		if (currentDetailedSeasonData.value === undefined) return '';
-		const episode = currentDetailedSeasonData.value.episodes.find((e) => e.UUID === currentEpisodeUUID.value);
-		if (episode === undefined) return '';
-		return `${BASE_URL}&series=${series.value.UUID}&language=EngDub&season=${episode.season_IDX}&episode=${episode.episode_IDX}`;
+
+	if (!oldVideoAPI) {
+		let url = `${useAPIURL()}/video/`;
+		url += `${indexStore.selectedWatchableEntity?.UUID}`;
+		url += `?auth-token=${authStore.authToken}`;
+		return url;
 	}
 	return '';
 });
