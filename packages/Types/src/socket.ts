@@ -5,7 +5,7 @@ export interface ServerToClientEvents {
     basicEmit: (a: number, b: string, c: Buffer) => void;
     withAck: (d: string, callback: (e: number) => void) => void;
     // addClick: (obj: { count: number; }) => void;
-    jobUpdate: (obj: database.Job) => void;
+    jobUpdate: (obj: (database.Job & database.timestamped)) => void;
 }
 
 export interface ClientToServerEvents {

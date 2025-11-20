@@ -1,5 +1,6 @@
-import type { JobType, Job as IJob } from "@cinefinn/types/database";
+import type { JobType, Job as IJob, timestamped } from "@cinefinn/types/database";
 import { jobsTable } from "./database.js";
+import { getIO } from "./utils.js";
 
 export class Job {
     UUID: string;
@@ -9,11 +10,12 @@ export class Job {
     result: any;
     failed_at: number;
     finished_at: number;
+    created_at: number;
 
     timers: Map<string, number> = new Map();
     queuedSaved = false;
     queuedSaveTimeout: NodeJS.Timeout | null = null;
-    constructor(UUID: string, type: JobType, data: any, logs: string[], result: any, failed_at: number, finished_at: number) {
+    constructor(UUID: string, type: JobType, data: any, logs: string[], result: any, failed_at: number, finished_at: number, created_at: number) {
         this.UUID = UUID;
         this.type = type;
         this.data = data;
@@ -21,10 +23,11 @@ export class Job {
         this.result = result;
         this.failed_at = failed_at;
         this.finished_at = finished_at;
+        this.created_at = created_at;
     }
 
-    static fromDB(dbJob: IJob) {
-        return new Job(dbJob.UUID, dbJob.type, dbJob.data, dbJob.logs, dbJob.result, dbJob.failed_at, dbJob.finished_at);
+    static fromDB(dbJob: IJob & timestamped) {
+        return new Job(dbJob.UUID, dbJob.type, dbJob.data, dbJob.logs, dbJob.result, dbJob.failed_at, dbJob.finished_at, dbJob.created_at);
     }
     static async fromDBUUID(UUID: string) {
         const dbJob = await jobsTable.getOne({ UUID });
@@ -34,9 +37,24 @@ export class Job {
         return Job.fromDB(dbJob);
     }
 
+    toDB(): IJob & timestamped {
+        return {
+            UUID: this.UUID,
+            type: this.type,
+            data: this.data,
+            logs: this.logs,
+            result: this.result,
+            failed_at: this.failed_at,
+            finished_at: this.finished_at,
+            created_at: this.created_at,
+            updated_at: Date.now(),
+        };
+    }
+
     async save(immediate = true) {
 
         //TODO: Broadcast to allegebale clients
+        getIO().emit('jobUpdate', this.toDB());
 
         if (immediate == false) {
             if (this.queuedSaved) {

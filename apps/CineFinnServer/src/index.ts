@@ -17,6 +17,7 @@ import { CacheContext } from './LRUCache.js';
 import type { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from '@cinefinn/types/socket';
 import { tryCatch } from './tryCatch.js';
 import type { Series, Season, Movie, Account, timestamped, DetailedSeries, DetailedMovie, DetailedEpisode, DetailedSeason, FrontendSeries } from '@cinefinn/types/database';
+import { setIO } from './utils.js';
 
 
 const app = new Hono({
@@ -204,7 +205,7 @@ const io = new Server<
         methods: ['GET', 'POST'],
     },
 });
-// setIO(io);
+setIO(io);
 
 io.use(async (socket, next) => {
     console.log('Trying to authorize ', socket.id, socket.handshake.auth);
@@ -243,11 +244,6 @@ io.on('connection', (socket) => {
 
     socket.on('hello', () => {
         console.log(socket.id, 'hello');
-    });
-
-    socket.on('clicked', (data) => {
-        console.log(socket.id, 'clicked', data);
-        io.emit('addClick', data);
     });
 
     socket.on('disconnect', () => {

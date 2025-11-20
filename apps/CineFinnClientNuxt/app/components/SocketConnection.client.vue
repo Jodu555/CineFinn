@@ -6,11 +6,13 @@ const transport = ref('N/A');
 const socketID = ref('N/A');
 
 const socket = useSocket();
+const managmentStore = useManagmentStore();
 
 onMounted(() => {
 	socket.connect();
 
 	socket.on('disconnect', onDisconnect);
+	socket.on('jobUpdate', managmentStore.updateJob);
 	if (socket.connected) {
 		onConnect();
 	}
