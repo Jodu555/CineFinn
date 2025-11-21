@@ -1,6 +1,6 @@
 export interface timestamped {
-    createdAt: number;
-    updatedAt: number;
+    created_at: number;
+    updated_at: number;
 }
 
 export interface Account {
@@ -30,9 +30,14 @@ export interface Series {
     refs: SeriesRefs;
 }
 
-export interface DetailedSeries extends Omit<Series, 'seasons' | 'movies'> {
+export interface FrontendSeries extends Omit<Series, 'seasons' | 'movies'> {
     seasons: Season[];
     movies: Movie[];
+}
+
+export interface DetailedSeries extends Omit<Series, 'seasons' | 'movies'> {
+    seasons: DetailedSeason[];
+    movies: DetailedMovie[];
 }
 
 export interface DetailedSeason extends Omit<Season, 'episodes'> {
@@ -40,6 +45,10 @@ export interface DetailedSeason extends Omit<Season, 'episodes'> {
 }
 
 export interface DetailedEpisode extends Episode {
+    watchableEntitys: WatchableEntity[];
+}
+
+export interface DetailedMovie extends Movie {
     watchableEntitys: WatchableEntity[];
 }
 
@@ -116,6 +125,7 @@ export interface Job {
     type: JobType;
     failed_at: number;
     finished_at: number;
+    logs: string[];
     data: any;
     result: any;
 }

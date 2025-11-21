@@ -50,14 +50,20 @@ export async function crawl(jobUUID: string) {
     files = files.filter((f) => viableExtensions.includes(path.parse(f).ext));
     job.log(`Filtered ${prevLength - files.length} files`);
 
+    job.log(`Working on ${files.length} files`);
     // jobUUID !== undefined && await jobsTable.update({ UUID: jobUUID }, { data: { files } });
-    await job.setData({ files });
+    // await job.setData({ files });
 
     job.time('Handling Files');
 
-    const seasonCountersMap = new Map<string, number>();
+    // const seasonCountersMap = new Map<string, number>();
 
+    const touchedSeasonsSet = new Set<string>();
+
+    let i = 0;
     for (const file of files) {
+        i++;
+        i % 100 == 0 && job.log(`Handling File ${i}/${files.length + 1}`);
         const base = path.parse(file).base;
         const { error, data: parsedData } = tryCatch(() => filenameParser(file, base));
 
@@ -121,12 +127,15 @@ export async function crawl(jobUUID: string) {
                 crawlerSeriesSeasonsCache.invalidate(existingSeasonCacheInfo.cacheKey);
             }
 
-            const counter = seasonCountersMap.get(existingSeason.UUID);
-            if (counter == undefined) {
-                seasonCountersMap.set(existingSeason.UUID, existingSeason.episodes + 1);
-            } else {
-                seasonCountersMap.set(existingSeason.UUID, counter + 1);
-            }
+            // let counter = seasonCountersMap.get(existingSeason.UUID);
+            // if (counter == undefined) {
+            //     seasonCountersMap.set(existingSeason.UUID, existingSeason.episodes);
+            //     // seasonCountersMap.set(existingSeason.UUID, 1);
+            //     counter = existingSeason.episodes;
+
+            // } else {
+            //     seasonCountersMap.set(existingSeason.UUID, counter + 1);
+            // }
 
 
             let { data: existingEpisode, cacheInfo: existingEpisodeCacheInfo } = await crawlerEpisodesCache.execute(episodesTable, 'getOne', [{
@@ -144,7 +153,9 @@ export async function crawl(jobUUID: string) {
                     episode_IDX: parsedData.episode,
                 });
                 job.log('Created Episode', existingEpisode.UUID, existingEpisode.season_UUID, existingEpisode.season_IDX, existingEpisode.episode_IDX);
-                await crawlerEpisodesCache.invalidate(existingEpisodeCacheInfo.cacheKey);
+                // seasonCountersMap.set(existingSeason.UUID, counter + 1);
+                touchedSeasonsSet.add(existingSeason.UUID);
+                crawlerEpisodesCache.invalidate(existingEpisodeCacheInfo.cacheKey);
             }
             watchableUUID = existingEpisode.UUID;
 
@@ -173,22 +184,21 @@ export async function crawl(jobUUID: string) {
     job.timeEnd('Handling Files');
     job.log('Done Handling Files');
 
-    job.log(`Updating ${Array.from(seasonCountersMap.entries()).length} Seasons`);
+    job.log(`Updating ${touchedSeasonsSet.size} Seasons`);
     job.time('Updating Seasons');
-    for (const [key, value] of seasonCountersMap) {
-        await seasonsTable.update({
-            UUID: key,
-        }, {
-            episodes: value,
-        });
+    for (const seasonUUID of touchedSeasonsSet) {
+        const season = await seasonsTable.getOne({ UUID: seasonUUID });
+        if (season == undefined) {
+            console.log('Season not found', seasonUUID);
+            continue;
+        }
+        const episodes = await episodesTable.get({ season_UUID: season.UUID });
+        await seasonsTable.update({ UUID: seasonUUID }, { episodes: episodes.length });
     }
     job.timeEnd('Updating Seasons');
 
-
-
-
     job.setResult({
-        info: Array.from(seasonCountersMap.entries())
+        info: Array.from(touchedSeasonsSet)
     })
 
     job.time('Clearing Cache');

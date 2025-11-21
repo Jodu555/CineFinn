@@ -67,7 +67,7 @@ export class Job {
             this.queuedSaveTimeout = setTimeout(() => {
                 this.queuedSaved = false;
                 this.save(true);
-            }, 500);
+            }, 900);
             return;
         } else {
             this.queuedSaved = false;

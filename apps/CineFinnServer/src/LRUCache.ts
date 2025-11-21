@@ -89,6 +89,8 @@ class LRUCache<T> {
     }
 }
 
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 // Cache Context class
 export class CacheContext {
     private lruCache: LRUCache<any>;
@@ -112,6 +114,7 @@ export class CacheContext {
         const cache = this.lruCache.get(key);
         if (cache) {
             if (cache.meta.lastUpdate + ttl > Date.now()) {
+                await wait(0); // Yield to event loop
                 return {
                     data: cache.data,
                     cacheInfo: {
