@@ -31,7 +31,7 @@ const { printMetrics, registerMetrics } = prometheus();
 app.use(cors());
 app.use(trimTrailingSlash());
 // app.use(logger());
-app.use(ownLogger(console.log, ['/socket.io']));
+app.use(ownLogger(console.log, ['/socket.io', '/video']));
 
 app.use('*', registerMetrics);
 app.get('/metrics', printMetrics);

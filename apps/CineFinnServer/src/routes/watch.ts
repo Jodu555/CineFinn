@@ -97,12 +97,18 @@ router.post('/updateTime/:watchableUUID/:time', authMiddleware, async (c) => {
                 message: 'Episode watchTime updated',
             });
         } else {
-            await watchHistoryTable.update({ UUID: watchHistory.UUID }, {
-                watchTime: time,
-            });
+            if (watchHistory.watchTime < time) {
+                await watchHistoryTable.update({ UUID: watchHistory.UUID }, {
+                    watchTime: time,
+                });
+                await updated(season.serie_UUID);
+                return c.json({
+                    message: 'Episode watchTime updated',
+                });
+            }
             await updated(season.serie_UUID);
             return c.json({
-                message: 'Episode watchTime updated',
+                message: 'Episode watchTime not updated because lower',
             });
         }
     } else if (watchableUUID.startsWith('MO-')) {
@@ -127,12 +133,18 @@ router.post('/updateTime/:watchableUUID/:time', authMiddleware, async (c) => {
                 message: 'Movie watchTime updated',
             });
         } else {
-            await watchHistoryTable.update({ UUID: watchHistory.UUID }, {
-                watchTime: time,
-            });
+            if (watchHistory.watchTime < time) {
+                await watchHistoryTable.update({ UUID: watchHistory.UUID }, {
+                    watchTime: time,
+                });
+                await updated(movie.serie_UUID);
+                return c.json({
+                    message: 'Movie watchTime updated',
+                });
+            }
             await updated(movie.serie_UUID);
             return c.json({
-                message: 'Movie watchTime updated',
+                message: 'Episode watchTime not updated because lower',
             });
         }
 

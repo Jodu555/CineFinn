@@ -1,22 +1,23 @@
 <template>
 	<div>
 		{{ indexStore.selectedWatchableEntity }}
-		<ExtendedVideo
-			v-if="showVideo"
-			:videoSrc="videoSrc"
-			:switch-to="() => 0"
-			:can-play="true"
-			:events="{}"
-			:send-video-time-update="sendVideoTimeUpdate"
-		/>
-		<!-- <ClientOnly>
-		</ClientOnly> -->
+		<ClientOnly>
+			<ExtendedVideo
+				v-if="showVideo"
+				:videoSrc="videoSrc"
+				:switch-to="() => 0"
+				:can-play="true"
+				:events="{}"
+				:send-video-time-update="sendVideoTimeUpdate"
+			/>
+		</ClientOnly>
 		<div v-if="series" class="container-fluid text-white min-vh-100 py-4">
 			<!-- Content Information -->
 			<div class="container">
 				<div class="row g-4">
 					<!-- Main Content Info -->
 					<div class="col-xl-11">
+						<!-- Series Info -->
 						<div class="row g-4 mb-4">
 							<div class="col-sm-12 col-md-auto">
 								<div class="d-flex justify-content-center">
@@ -69,6 +70,10 @@
 
 						<!-- Episodes/Movies Section -->
 						<div v-if="hasSeasons || hasMovies" class="mb-4">
+							<pre>
+								{{ { activeTab, hasSeasons, hasMovies } }}
+							</pre
+							>
 							<div class="d-flex justify-content-center">
 								<ul class="nav nav-tabs mb-4" role="tablist">
 									<li v-if="hasSeasons" class="nav-item" role="presentation">
@@ -157,7 +162,13 @@
 																<div class="d-flex gap-4">
 																	<p class="text-muted small mb-0">
 																		<font-awesome-icon :icon="['far', 'clock']" class="me-1" />
-																		20min
+																		<!-- 20min -->
+																		{{
+																			msToReadable(
+																				(episode.watchableEntitys.reduce((prev, curr) => prev + curr.runtime, 0) / episode.watchableEntitys.length) *
+																					1000
+																			)
+																		}}
 																	</p>
 																</div>
 																<p class="text-muted small mb-0">
@@ -168,7 +179,7 @@
 														</div>
 														<div class="progress mt-3" style="width: 100%; height: 4px">
 															<div
-																:class="['progress-bar', isEpisodeWatched(episode.UUID) ? 'bg-success' : 'bg-danger']"
+																:class="['progress-bar', isEpisodeWatched(episode.UUID) ? 'bg-success' : 'bg-secondary']"
 																:style="{ width: getEpisodeProgress(episode.UUID) + '%' }"
 															></div>
 														</div>
@@ -245,9 +256,13 @@
 															<span>
 																<font-awesome-icon :icon="['far', 'clock']" class="me-1" />
 																{{
-																	movie.watchableEntitys.reduce((prev, curr) => {
-																		return prev + curr.runtime;
-																	}, 0) / movie.watchableEntitys.length
+																	msToReadable(
+																		(movie.watchableEntitys.reduce((prev, curr) => {
+																			return prev + curr.runtime;
+																		}, 0) /
+																			movie.watchableEntitys.length) *
+																			1000
+																	)
 																}}
 															</span>
 															<span>•</span>
@@ -255,19 +270,14 @@
 																<font-awesome-icon :icon="['fa', 'language']" class="me-1" />
 																{{ movie.watchableEntitys.map((e) => e.lang).join(', ') }}
 															</span>
-															<span>•</span>
+															<!-- <span>•</span> -->
 														</div>
 														<!-- <p
-														class="text-muted small mb-0"
-														style="
-															display: -webkit-box;
-															line-clamp: 2;
-															-webkit-line-clamp: 2;
-															-webkit-box-orient: vertical;
-															overflow: hidden;
-														">
-														{{ movie.description }}
-													</p> -->
+															class="text-muted small mb-0"
+															style="display: -webkit-box; line-clamp: 2; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden"
+														>
+															{{ movie.description }}
+														</p> -->
 														<div class="progress mt-3" style="height: 4px">
 															<div
 																:class="['progress-bar', isMovieWatched(movie.UUID) ? 'bg-success' : 'bg-danger']"
@@ -361,6 +371,7 @@ const indexStore = useIndexStore();
 const series = computed(() => indexStore.series.find((s) => s.UUID === route.params.SID));
 
 await callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string));
+await callOnce('loadWatchHistory', async () => await indexStore.loadWatchHistory(route.params.SID as string));
 
 const sendVideoTimeUpdate = async (time: number) => {
 	console.log('Sending time update to server', time);
@@ -475,7 +486,6 @@ const videoSrc = computed(() => {
 	return '';
 });
 
-// Methods
 const handleEpisodeClick = (episodeUUID: string) => {
 	const router = useRouter();
 	if (currentEpisodeUUID.value === episodeUUID) {
@@ -492,13 +502,6 @@ const handleEpisodeClick = (episodeUUID: string) => {
 };
 const isCurrentEpisode = (episodeUUID: string) => {
 	return currentEpisodeUUID.value === episodeUUID;
-};
-
-const isEpisodeWatched = (episodeUUID: string) => {
-	return true;
-};
-const getEpisodeProgress = (episodeUUID: string) => {
-	return 90;
 };
 
 const handleMovieClick = (movieUUID: string) => {
@@ -520,31 +523,45 @@ const isCurrentMovie = (movieUUID: string) => {
 	return currentMovieUUID.value === movieUUID;
 };
 
+const isEpisodeWatched = (episodeUUID: string) => {
+	return getEpisodeProgress(episodeUUID) > 95;
+};
+const getEpisodeProgress = (episodeUUID: string) => {
+	const watchHistory = indexStore.watchHistory.find((w) => w.watchable_UUID === episodeUUID);
+	if (watchHistory == undefined) {
+		return 0;
+	}
+	const episode = currentDetailedSeasonData.value?.episodes.find((e) => e.UUID === episodeUUID);
+	if (episode == undefined) {
+		return 0;
+	}
+	const totalRuntime = episode.watchableEntitys.reduce((prev, curr) => prev + curr.runtime, 0) / episode.watchableEntitys.length;
+	const watchTime = Math.max(0, Math.min(watchHistory.watchTime, totalRuntime));
+	const percent = (watchTime / totalRuntime) * 100;
+	return percent;
+};
+
 const isMovieWatched = (movieUUID: string) => {
-	return false;
+	return getMovieProgress(movieUUID) > 95;
 };
 const getMovieProgress = (movieUUID: string) => {
-	// if (isCurrentMovie(movieUUID)) {
-	// 	return progress.value;
-	// }
-	// return isMovieWatched(movieUUID) ? 100 : 0;
-	return 0;
+	const watchHistory = indexStore.watchHistory.find((w) => w.watchable_UUID === movieUUID);
+	if (watchHistory == undefined) {
+		return 0;
+	}
+	const movie = indexStore.detailedMovies.find((m) => m.UUID === movieUUID);
+	if (movie == undefined) {
+		return 0;
+	}
+	const totalRuntime = movie.watchableEntitys.reduce((prev, curr) => prev + curr.runtime, 0) / movie.watchableEntitys.length;
+	const watchTime = Math.max(0, Math.min(watchHistory.watchTime, totalRuntime));
+	const percent = (watchTime / totalRuntime) * 100;
+	return percent;
 };
 
 const navigateToContent = (id: number) => {
 	// contentId.value = id;
 };
-
-// watch(progress, (newProgress) => {
-// 	// if (newProgress >= 90) {
-// 	// 	if (currentMovie.value) {
-// 	// 		watchedMovies.value.add(currentMovie.value);
-// 	// 	} else if (currentEpisode.value.season > 0) {
-// 	// 		const episodeKey = `${currentEpisode.value.season}-${currentEpisode.value.episode}`;
-// 	// 		watchedEpisodes.value.add(episodeKey);
-// 	// 	}
-// 	// }
-// });
 </script>
 
 <style scoped>
