@@ -150,19 +150,34 @@ io.on('connection', (socket) => {
 
     console.log(socket.id, socket.data, 'a user connected');
 
-    socket.on('updateTime', async (data) => {
-        console.log('updateTime', data);
-        // socket.broadcast.emit('updateTime', data);
+    const debouncedUpdateTime = debounce(async (data: { watchableUUID: string; time: number }) => {
+        console.log('debounced updateTime', data);
         const response = await app.request(`/watch/updateTime/${data.watchableUUID}/${data.time}`, {
             method: 'POST',
             headers: {
                 'auth-token': socket.handshake.auth.token,
             },
-        })
+        });
+    }, 4000);
 
+    socket.on('updateTime', async (data) => {
+        console.log('updateTime', data);
+        debouncedUpdateTime(data);
     });
 
     socket.on('disconnect', () => {
         console.log(socket.id, 'user disconnected');
     });
 });
+
+
+function debounce(cb: Function, delay = 1000) {
+    let timeout: NodeJS.Timeout;
+
+    return (...args: any[]) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            cb(...args);
+        }, delay);
+    };
+}
