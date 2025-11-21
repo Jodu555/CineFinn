@@ -2,7 +2,7 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import dotenv from 'dotenv';
 import { Server } from 'socket.io';
-import { connectDatabase, database, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable } from './database.js';
+import { accountsTable, authTokensTable, connectDatabase, database, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable } from './database.js';
 import { crawl } from './job/crawler.js';
 dotenv.config();
 import { proxy } from 'hono/proxy';
@@ -21,6 +21,7 @@ import { setIO } from './utils.js';
 import { watchRouter } from './routes/watch.js';
 import { videoRouter } from './routes/video.js';
 import { indexRouter } from './routes/index.js';
+import * as childProcess from 'node:child_process';
 
 
 const app = new Hono({
@@ -80,6 +81,23 @@ const httpServer = serve({
     console.log(info);
 
     await connectDatabase();
+    const adminUser = await accountsTable.getOne({
+        role: 3
+    })
+    if (adminUser != undefined) {
+        const adminToken = await authTokensTable.getOne({
+            TOKEN: 'SECR-DEV',
+        })
+        if (adminToken == undefined) {
+            authTokensTable.create({
+                TOKEN: 'SECR-DEV',
+                account_UUID: adminUser.UUID,
+            })
+            return;
+        }
+    } else {
+        console.log('Admin User not found');
+    }
     console.log(`Server is running on http://localhost:${info.port}`);
     // await crawl();
 
@@ -91,17 +109,42 @@ const httpServer = serve({
         });
     }, 10000 * 30);
 
-    const seasons = await seasonsTable.get();
+    // const seasons = await seasonsTable.get();
 
-    for await (const season of seasons) {
-        const episodes = await episodesTable.get({ season_UUID: season.UUID });
-        if (episodes.length !== season.episodes) {
-            console.log(`Season ${season.UUID} has ${season.episodes} episodes, but should have ${episodes.length}. Updating...`);
-            await seasonsTable.update({ UUID: season.UUID }, { episodes: episodes.length });
-        }
+    // for await (const season of seasons) {
+    //     const episodes = await episodesTable.get({ season_UUID: season.UUID });
+    //     if (episodes.length !== season.episodes) {
+    //         console.log(`Season ${season.UUID} has ${season.episodes} episodes, but should have ${episodes.length}. Updating...`);
+    //         await seasonsTable.update({ UUID: season.UUID }, { episodes: episodes.length });
+    //     }
+    // }
+
+    const entitys = await watchableEntitysTable.get({ runtime: -1 });
+    let i = 0;
+    for await (const entity of entitys) {
+        console.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`);
+
+        const runtime = await geFileRuntime(entity.UUID);
+        await watchableEntitysTable.update({ UUID: entity.UUID }, { runtime });
     }
 
 });
+
+function geFileRuntime(watchableUUID: string) {
+    return new Promise<number>((resolve, reject) => {
+        const videoURL = `http://localhost:3000/video/${watchableUUID}?auth-token=SECR-DEV`;
+        childProcess.exec(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${videoURL}"`, (error, stdout, stderr) => {
+            if (error) {
+                console.log(error);
+                console.log(stderr);
+                reject(error);
+                return;
+            }
+            const runtime = parseFloat(stdout);
+            resolve(runtime);
+        });
+    })
+}
 
 const io = new Server<
     ClientToServerEvents,

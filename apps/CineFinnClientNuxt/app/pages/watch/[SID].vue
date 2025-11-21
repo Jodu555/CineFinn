@@ -1,20 +1,16 @@
 <template>
 	<div>
 		{{ indexStore.selectedWatchableEntity }}
-		<ClientOnly>
-			<ExtendedVideo
-				v-if="showVideo"
-				:videoSrc="videoSrc"
-				:switch-to="() => 0"
-				:can-play="true"
-				:events="{}"
-				:send-video-time-update="sendVideoTimeUpdate"
-			/>
-		</ClientOnly>
-		<!-- <div v-if="showVideo" class="video-container"> -->
-		<!-- <video :src="videoSrc" controls preload="auto" style="width: 100%"></video> -->
-		<!-- <div style="width: 100%; height: 100%; background-color: rebeccapurple"></div> -->
-		<!-- </div> -->
+		<ExtendedVideo
+			v-if="showVideo"
+			:videoSrc="videoSrc"
+			:switch-to="() => 0"
+			:can-play="true"
+			:events="{}"
+			:send-video-time-update="sendVideoTimeUpdate"
+		/>
+		<!-- <ClientOnly>
+		</ClientOnly> -->
 		<div v-if="series" class="container-fluid text-white min-vh-100 py-4">
 			<!-- Content Information -->
 			<div class="container">

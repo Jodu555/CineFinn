@@ -466,6 +466,9 @@ const initializeVideoControls = () => {
 		if (!props.canPlay) return;
 
 		const rect = timelineContainer.getBoundingClientRect();
+		console.log('rect', rect);
+		console.log('e', e);
+
 		const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
 		isScrubbing = (e.buttons & 1) === 1;
 
@@ -478,6 +481,12 @@ const initializeVideoControls = () => {
 			if (props.events?.skipTimeline) {
 				props.events.skipTimeline(percent * video.duration);
 			}
+			console.log(
+				`toggleScrubbing percent: ${percent} video.duration: ${video.duration} video.currentTime: ${
+					video.currentTime
+				} wasPaused: ${wasPaused} result ${percent * video.duration}`
+			);
+
 			video.currentTime = percent * video.duration;
 			if (!wasPaused) video.play();
 		}
