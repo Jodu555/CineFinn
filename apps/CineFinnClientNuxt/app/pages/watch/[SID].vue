@@ -123,7 +123,7 @@
 										</div>
 									</div>
 
-									<!-- Grid View -->
+									<!-- List View -->
 									<div v-if="viewMode === 'grid'" class="d-flex flex-column gap-2">
 										<div
 											v-for="episode in currentDetailedSeasonData?.episodes"
@@ -153,7 +153,7 @@
 															</div>
 															<div class="flex-grow-1">
 																<h3 :class="['h6 mb-1', isEpisodeWatched(episode.UUID) ? 'text-success' : '']">
-																	{{ episode.episode_IDX }}
+																	Episode {{ episode.episode_IDX }}
 																	<small v-if="isEpisodeWatched(episode.UUID)" class="text-success ms-2">
 																		<font-awesome-icon :icon="['fas', 'check']" />
 																		Watched
@@ -190,25 +190,25 @@
 									</div>
 
 									<!-- Compact View -->
-									<div v-else class="row row-cols-4 row-cols-sm-6 row-cols-md-8 row-cols-lg-10 row-cols-xl-12 g-1">
+									<div v-else class="row row-cols-4 row-cols-sm-6 row-cols-md-8 row-cols-lg-10 row-cols-xl-12 g-2">
 										<div v-for="episode in currentDetailedSeasonData?.episodes" :key="episode.UUID" class="col">
 											<div
 												:class="[
-													'card h-100 cursor-pointer',
+													'card cursor-pointer',
 													isEpisodeWatched(episode.UUID) ? 'border-success bg-success bg-opacity-10' : '',
 													isCurrentEpisode(episode.UUID) ? 'border-primary border-2' : '',
 												]"
 												@click="handleEpisodeClick(episode.UUID)"
-												style="cursor: pointer; aspect-ratio: 1"
+												style="cursor: pointer; height: 100%; max-height: 100%"
 											>
-												<div class="card-body p-1 d-flex flex-column align-items-center justify-content-center">
-													<span :class="['small fw-medium', isEpisodeWatched(episode.UUID) ? 'text-success' : '']">
+												<div class="card-body p-1 d-flex flex-column align-items-center justify-content-center h-100 mb-2 pb-2">
+													<span :class="['h5', isEpisodeWatched(episode.UUID) ? 'text-success' : '']">
 														{{ episode.episode_IDX }}
 													</span>
 													<font-awesome-icon v-if="isEpisodeWatched(episode.UUID)" :icon="['fas', 'check']" class="text-success mt-1" size="xs" />
 													<div class="progress w-100 mt-2" style="height: 2px">
 														<div
-															:class="['progress-bar', isEpisodeWatched(episode.UUID) ? 'bg-success' : 'bg-danger']"
+															:class="['progress-bar', isEpisodeWatched(episode.UUID) ? 'bg-success' : 'bg-secondary']"
 															:style="{ width: getEpisodeProgress(episode.UUID) + '%' }"
 														></div>
 													</div>
@@ -247,10 +247,10 @@
 													<div class="flex-grow-1">
 														<h3 :class="['h5 mb-2', isMovieWatched(movie.UUID) ? 'text-success' : '']">
 															{{ movie.primaryName }}
-															<small v-if="isMovieWatched(movie.UUID)" class="text-success ms-2">
+															<!-- <small v-if="isMovieWatched(movie.UUID)" class="text-success ms-2">
 																<font-awesome-icon :icon="['fas', 'check']" />
 																Watched
-															</small>
+															</small> -->
 														</h3>
 														<div class="d-flex align-items-center gap-3 mb-2 small text-muted">
 															<span>
@@ -280,7 +280,7 @@
 														</p> -->
 														<div class="progress mt-3" style="height: 4px">
 															<div
-																:class="['progress-bar', isMovieWatched(movie.UUID) ? 'bg-success' : 'bg-danger']"
+																:class="['progress-bar', isMovieWatched(movie.UUID) ? 'bg-success' : 'bg-secondary']"
 																:style="{ width: getMovieProgress(movie.UUID) + '%' }"
 															></div>
 														</div>
@@ -545,17 +545,27 @@ const isMovieWatched = (movieUUID: string) => {
 	return getMovieProgress(movieUUID) > 95;
 };
 const getMovieProgress = (movieUUID: string) => {
+	console.log(`getMovieProgress: ${movieUUID}`);
+
 	const watchHistory = indexStore.watchHistory.find((w) => w.watchable_UUID === movieUUID);
 	if (watchHistory == undefined) {
 		return 0;
 	}
+	console.log(`watchHistory:`, watchHistory);
 	const movie = indexStore.detailedMovies.find((m) => m.UUID === movieUUID);
 	if (movie == undefined) {
 		return 0;
 	}
+	console.log(`movie:`, movie);
 	const totalRuntime = movie.watchableEntitys.reduce((prev, curr) => prev + curr.runtime, 0) / movie.watchableEntitys.length;
 	const watchTime = Math.max(0, Math.min(watchHistory.watchTime, totalRuntime));
 	const percent = (watchTime / totalRuntime) * 100;
+	console.log({
+		percent,
+		totalRuntime,
+		watchTime,
+	});
+
 	return percent;
 };
 

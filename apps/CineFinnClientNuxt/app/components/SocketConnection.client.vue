@@ -7,12 +7,14 @@ const socketID = ref('N/A');
 
 const socket = useSocket();
 const managmentStore = useManagmentStore();
+const indexStore = useIndexStore();
 
 onMounted(() => {
 	socket.connect();
 
 	socket.on('disconnect', onDisconnect);
 	socket.on('jobUpdate', managmentStore.updateJob);
+	socket.on('watchListUpdate', indexStore.updateWatchList);
 	if (socket.connected) {
 		onConnect();
 	}

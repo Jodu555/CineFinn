@@ -60,7 +60,9 @@ export const useIndexStore = defineStore('index', {
                 },
             });
             this.watchHistory = response;
-
+        },
+        async updateWatchList(watchList: WatchHistory[]) {
+            this.watchHistory = watchList;
         },
         setSelectedWatchableEntityUUID(entityUUID: string | null) {
             // console.log('setSelectedWatchableEntityUUID', entityUUID);
