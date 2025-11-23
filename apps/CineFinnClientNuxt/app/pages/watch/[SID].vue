@@ -108,8 +108,8 @@
 										<div class="btn-group" role="group">
 											<button
 												type="button"
-												:class="['btn', viewMode === 'grid' ? 'btn-primary' : 'btn-outline-secondary']"
-												@click="viewMode = 'grid'"
+												:class="['btn', viewMode === 'list' ? 'btn-primary' : 'btn-outline-secondary']"
+												@click="viewMode = 'list'"
 											>
 												<font-awesome-icon :icon="['fas', 'list']" />
 											</button>
@@ -124,7 +124,7 @@
 									</div>
 
 									<!-- List View -->
-									<div v-if="viewMode === 'grid'" class="d-flex flex-column gap-2">
+									<div v-if="viewMode === 'list'" class="d-flex flex-column gap-2">
 										<div
 											v-for="episode in currentDetailedSeasonData?.episodes"
 											:key="episode.UUID"
@@ -438,7 +438,20 @@ useSeoMeta({
 	twitterDescription: computed(() => series.value?.infos.description || ''),
 });
 
-const viewMode = ref('grid');
+let initialViewMode = route.query.viewMode;
+
+if (initialViewMode == undefined || typeof initialViewMode !== 'string') {
+	initialViewMode = 'list';
+}
+if (initialViewMode !== 'list' && initialViewMode !== 'compact') {
+	initialViewMode = 'list';
+}
+
+const viewMode = ref<'list' | 'compact'>(initialViewMode as 'list' | 'compact');
+
+watch(viewMode, (newValue) => {
+	useRouter().push({ query: { ...route.query, viewMode: newValue } });
+});
 
 type Tab = 'seasons' | 'movies' | 'nothing';
 
@@ -488,17 +501,21 @@ const videoSrc = computed(() => {
 
 const handleEpisodeClick = (episodeUUID: string) => {
 	const router = useRouter();
+	const prevQuery = JSON.parse(JSON.stringify(route.query));
+	delete prevQuery.movie;
+	delete prevQuery.episode;
+
 	if (currentEpisodeUUID.value === episodeUUID) {
 		currentEpisodeUUID.value = null;
 		indexStore.setSelectedWatchableEntityUUID(null);
-		router.push({ path: `/watch/${series.value!.UUID}` });
+		router.push({ path: `/watch/${series.value!.UUID}`, query: { ...prevQuery } });
 		return;
 	}
 	currentEpisodeUUID.value = episodeUUID;
 	currentMovieUUID.value = null;
 	indexStore.setSelectedWatchableEntityUUID(episodeUUID);
 
-	router.push({ path: `/watch/${series.value!.UUID}`, query: { episode: episodeUUID } });
+	router.push({ path: `/watch/${series.value!.UUID}`, query: { episode: episodeUUID, ...prevQuery } });
 };
 const isCurrentEpisode = (episodeUUID: string) => {
 	return currentEpisodeUUID.value === episodeUUID;
@@ -506,10 +523,13 @@ const isCurrentEpisode = (episodeUUID: string) => {
 
 const handleMovieClick = (movieUUID: string) => {
 	const router = useRouter();
+	const prevQuery = JSON.parse(JSON.stringify(route.query));
+	delete prevQuery.movie;
+	delete prevQuery.episode;
 	if (currentMovieUUID.value === movieUUID) {
 		currentMovieUUID.value = null;
 		indexStore.setSelectedWatchableEntityUUID(null);
-		router.push({ path: `/watch/${series.value!.UUID}` });
+		router.push({ path: `/watch/${series.value!.UUID}`, query: { ...prevQuery } });
 		return;
 	}
 
@@ -517,7 +537,7 @@ const handleMovieClick = (movieUUID: string) => {
 	currentEpisodeUUID.value = null;
 	indexStore.setSelectedWatchableEntityUUID(movieUUID);
 
-	router.push({ path: `/watch/${series.value!.UUID}`, query: { movie: movieUUID } });
+	router.push({ path: `/watch/${series.value!.UUID}`, query: { movie: movieUUID, ...prevQuery } });
 };
 const isCurrentMovie = (movieUUID: string) => {
 	return currentMovieUUID.value === movieUUID;
