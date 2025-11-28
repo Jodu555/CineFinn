@@ -190,6 +190,32 @@
 									</div>
 
 									<!-- Compact View -->
+									<!-- <div v-else class="row row-cols-4 row-cols-sm-6 row-cols-md-8 row-cols-lg-10 row-cols-xl-12 g-1">
+										<div v-for="episode in currentDetailedSeasonData?.episodes" :key="episode.UUID" class="col">
+											<div
+												:class="[
+													'card h-100 cursor-pointer',
+													isEpisodeWatched(episode.UUID) ? 'border-success bg-success bg-opacity-10' : '',
+													isCurrentEpisode(episode.UUID) ? 'border-primary border-2' : '',
+												]"
+												@click="handleEpisodeClick(episode.UUID)"
+												style="cursor: pointer; aspect-ratio: 1"
+											>
+												<div class="card-body p-1 d-flex flex-column align-items-center justify-content-center">
+													<span :class="['small fw-medium', isEpisodeWatched(episode.UUID) ? 'text-success' : '']">
+														{{ episode.episode_IDX }}
+													</span>
+													<font-awesome-icon v-if="isEpisodeWatched(episode.UUID)" :icon="['fas', 'check']" class="text-success mt-1" size="xs" />
+													<div class="progress w-100 mt-2" style="height: 2px">
+														<div
+															:class="['progress-bar', isEpisodeWatched(episode.UUID) ? 'bg-success' : 'bg-danger']"
+															:style="{ width: getEpisodeProgress(episode.UUID) + '%' }"
+														></div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div> -->
 									<div v-else class="row row-cols-4 row-cols-sm-6 row-cols-md-8 row-cols-lg-10 row-cols-xl-12 g-2">
 										<div v-for="episode in currentDetailedSeasonData?.episodes" :key="episode.UUID" class="col">
 											<div
