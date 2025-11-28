@@ -79,6 +79,7 @@ router.get('/:S-UUID', async (c) => {
         const episodes = await episodesTable.get({ season_UUID: season.UUID });
         const filledEpisodesWithWatchables = await Promise.all(episodes.map(async (episode) => {
             const watchableEntitys = await watchableEntitysTable.get({ watchable_UUID: episode.UUID });
+            watchableEntitys.map(we => { delete (we as any).filePath; return we });
             return {
                 ...episode,
                 watchableEntitys,
@@ -94,6 +95,7 @@ router.get('/:S-UUID', async (c) => {
     const movies = await moviesTable.get({ serie_UUID: serie.UUID });
     const newMovies = await Promise.all(movies.map(async (movie) => {
         const watchableEntitys = await watchableEntitysTable.get({ watchable_UUID: movie.UUID });
+        watchableEntitys.map(we => { delete (we as any).filePath; return we });
         return {
             ...movie,
             watchableEntitys,
