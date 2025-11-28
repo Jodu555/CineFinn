@@ -294,22 +294,37 @@ const formatDuration = (time: number): string => {
 
 const updateVueVideoData = () => {
 	if (!videoRef.value) return;
-	const { creationTime, totalVideoFrames, droppedVideoFrames, corruptedVideoFrames } = videoRef.value.getVideoPlaybackQuality();
-
-	let bufferedTime = 0;
-	for (let i = 0; i < videoRef.value.buffered.length; i++) {
-		try {
-			bufferedTime += videoRef.value.buffered.end(i) - videoRef.value.buffered.start(i);
-		} catch {}
+	let creationTime = 0,
+		totalVideoFrames = 0,
+		droppedVideoFrames = 0,
+		corruptedVideoFrames = 0;
+	try {
+		const q = videoRef.value.getVideoPlaybackQuality();
+		creationTime = q.creationTime;
+		totalVideoFrames = q.totalVideoFrames;
+		droppedVideoFrames = q.droppedVideoFrames;
+		corruptedVideoFrames = q.corruptedVideoFrames;
+	} catch (err) {
+		// some browsers may not support getVideoPlaybackQuality
 	}
 
-	const bufferedPercentage = ((bufferedTime / videoRef.value.duration) * 100).toFixed(2);
+	let bufferedTime = 0;
+	try {
+		for (let i = 0; i < videoRef.value.buffered.length; i++) {
+			try {
+				bufferedTime += videoRef.value.buffered.end(i) - videoRef.value.buffered.start(i);
+			} catch {}
+		}
+	} catch {}
+
+	const bufferedPercentage = videoRef.value.duration ? ((bufferedTime / videoRef.value.duration) * 100).toFixed(2) : '0';
+
 	videoLoading.value = videoRef.value.readyState < 1;
 
 	videoData.isPlaying = !videoRef.value.paused;
 	videoData.readyState = videoRef.value.readyState;
 	videoData.currentTime = videoRef.value.currentTime;
-	videoData.duration = videoRef.value.duration;
+	videoData.duration = videoRef.value.duration || 0;
 	videoData.volume = videoRef.value.volume;
 	videoData.quality = { creationTime, totalVideoFrames, droppedVideoFrames, corruptedVideoFrames };
 	videoData.buffered = videoRef.value.buffered;
@@ -319,15 +334,7 @@ const updateVueVideoData = () => {
 
 const generatePreviewImageURL = (previewImgNumber: number): string => {
 	// if (!currentSeries.value || currentSeries.value.ID === '-1') return '';
-
-	// let url = `${useBaseURL()}/images/${currentSeries.value.ID}/previewImages/`;
-	// if (currentMovie.value !== -1 && currentMovie.value !== undefined) {
-	// 	url += `Movies/${currentSeries.value.movies[currentMovie.value - 1].primaryName}`;
-	// } else {
-	// 	url += `${(entityObject.value as SerieEpisode).season}-${(entityObject.value as SerieEpisode).episode}`;
-	// }
-	// url += `/${currentLanguage.value}/preview${previewImgNumber}.jpg?auth-token=${authStore.authToken}`;
-	// return url;
+	// Implementation omitted in original - return empty or real url if you have one
 	return '';
 };
 
@@ -342,22 +349,48 @@ const skipSegment = () => {
 	}
 };
 
-// const loadIntroData = async () => {
-// 	alreadySkipped.value = [];
-// 	const season = (entityObject.value as SerieEpisode)?.season;
-// 	const episode = (entityObject.value as SerieEpisode)?.episode;
+type ListenerRecord = {
+	target: EventTarget;
+	type: string;
+	handler: EventListener; // store as EventListener for removeEventListener
+	options?: boolean | AddEventListenerOptions | undefined;
+};
 
-// 	if (season === undefined || episode === undefined) return;
+// Keep internal storage simple
+const _addedListeners: ListenerRecord[] = [];
 
-// 	try {
-// 		const response = await useAxios().get(`/segments/info/${currentSeries.value.ID}/${season}/${episode}`);
-// 		if (response.status === 200) {
-// 			segmentData.value = response.data;
-// 		}
-// 	} catch (error) {
-// 		console.error('Failed to load intro data');
-// 	}
-// };
+/**
+ * Generic addListener functions that helps with adding DOM event listeners
+ * and removes them when the component is unmounted. This is a convenience
+ * wrapper around the standard DOM APIs.
+ */
+function addListener<T extends Event = Event>(
+	target: EventTarget,
+	type: string,
+	handler: (ev: T) => any,
+	options?: boolean | AddEventListenerOptions
+) {
+	const h = handler as unknown as EventListener;
+	target.addEventListener(type, h, options);
+	_addedListeners.push({ target, type, handler: h, options });
+}
+
+function removeAllListeners() {
+	for (const rec of _addedListeners) {
+		try {
+			rec.target.removeEventListener(rec.type, rec.handler, rec.options);
+		} catch (err) {
+			// Can this happen? If so, ignore removal errors
+		}
+	}
+	_addedListeners.length = 0;
+}
+
+// These will be set during initialization
+let skip: (duration: number, set?: boolean, server?: boolean) => void = () => {};
+let skipPercent: (percent: number) => void = () => {};
+let togglePlay: () => void = () => {};
+let cleanup: () => void = () => {};
 
 const handleResize = () => {
 	screenWidth.value = window.innerWidth;
@@ -375,10 +408,7 @@ const initializeVideoControls = () => {
 
 	let isScrubbing = false;
 	let wasPaused = false;
-	let timeoutId: number;
-	let touchTimeout: number | null = null;
-	let tapedTwice = false;
-	let prevDblTapTimeout: number;
+	let lastClientX = 0;
 
 	const playPauseBtn = document.querySelector('.play-pause-btn') as HTMLButtonElement;
 	const muteBtn = document.querySelector('.mute-btn') as HTMLButtonElement;
@@ -395,7 +425,7 @@ const initializeVideoControls = () => {
 	const skipRight = document.querySelector('.skip-right') as HTMLButtonElement;
 
 	// Skip function
-	const skip = (duration: number, set = false, server = false) => {
+	skip = (duration: number, set = false, server = false) => {
 		if (!props.canPlay && !server) return;
 		if (props.events?.skip && !server) {
 			props.events.skip(set ? duration : video.currentTime + duration);
@@ -430,73 +460,96 @@ const initializeVideoControls = () => {
 		}
 	};
 
-	const skipPercent = (percent: number) => {
+	skipPercent = (percent: number) => {
 		percent = percent * 10;
 		const duration = (video.duration / 100) * percent;
 		skip(duration, true);
 	};
 
-	const togglePlay = () => {
+	togglePlay = () => {
 		if (!props.canPlay) return;
 		video.paused ? video.play() : video.pause();
 		updateVueVideoData();
 	};
 
-	// Timeline scrubbing
-	const handleTimelineUpdate = (e: MouseEvent) => {
+	// Timeline / preview helpers (use clientX)
+	const getPercentFromClientX = (clientX: number) => {
+		if (!timelineContainer) return 0;
 		const rect = timelineContainer.getBoundingClientRect();
-		const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+		const clamped = Math.min(Math.max(0, clientX - rect.left), rect.width);
+		const percent = rect.width === 0 ? 0 : clamped / rect.width;
+		return percent;
+	};
 
-		(document.querySelector('.time-info-timeline-indicator') as HTMLDivElement).innerText = formatDuration(percent * video.duration);
+	const handleTimelineHover = (clientX: number) => {
+		if (!timelineContainer) return;
+		const percent = getPercentFromClientX(clientX);
+		const previewTime = percent * video.duration || 0;
 
-		const previewImgNumber = Math.max(1, Math.floor((percent * video.duration) / 10));
+		const timeIndicator = document.querySelector('.time-info-timeline-indicator') as HTMLDivElement;
+		if (timeIndicator) timeIndicator.innerText = formatDuration(previewTime);
+
+		const previewImgNumber = Math.max(1, Math.floor(previewTime / 10));
 		const previewImgSrc = generatePreviewImageURL(previewImgNumber);
-		previewImg.src = previewImgSrc;
+		if (previewImg) previewImg.src = previewImgSrc;
 
 		timelineContainer.style.setProperty('--preview-position', String(percent));
 
 		if (isScrubbing) {
-			e.preventDefault();
-			thumbnailImg.src = previewImgSrc;
+			if (thumbnailImg) thumbnailImg.src = previewImgSrc;
 			timelineContainer.style.setProperty('--progress-position', String(percent));
 		}
 	};
 
-	const toggleScrubbing = (e: MouseEvent) => {
+	const startScrub = (clientX: number) => {
 		if (!props.canPlay) return;
-
-		const rect = timelineContainer.getBoundingClientRect();
-		console.log('rect', rect);
-		console.log('e', e);
-
-		const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
-		isScrubbing = (e.buttons & 1) === 1;
-
-		videoContainer.classList.toggle('scrubbing', isScrubbing);
-
-		if (isScrubbing) {
-			wasPaused = video.paused;
-			video.pause();
-		} else {
-			if (props.events?.skipTimeline) {
-				props.events.skipTimeline(percent * video.duration);
-			}
-			console.log(
-				`toggleScrubbing percent: ${percent} video.duration: ${video.duration} video.currentTime: ${
-					video.currentTime
-				} wasPaused: ${wasPaused} result ${percent * video.duration}`
-			);
-
-			video.currentTime = percent * video.duration;
-			if (!wasPaused) video.play();
-		}
-		handleTimelineUpdate(e);
+		isScrubbing = true;
+		lastClientX = clientX;
+		videoContainer.classList.add('scrubbing');
+		wasPaused = video.paused;
+		video.pause();
+		handleTimelineHover(clientX);
 	};
 
+	const moveScrub = (clientX: number) => {
+		if (!isScrubbing) {
+			handleTimelineHover(clientX);
+			return;
+		}
+		lastClientX = clientX;
+		handleTimelineHover(clientX);
+	};
+
+	const endScrub = async (clientX: number) => {
+		if (!isScrubbing) return;
+		isScrubbing = false;
+		videoContainer.classList.remove('scrubbing');
+
+		const percent = getPercentFromClientX(clientX);
+		if (props.events?.skipTimeline) {
+			props.events.skipTimeline(percent * video.duration);
+		}
+
+		const newTime = percent * video.duration;
+		// apply the seek
+		video.currentTime = newTime;
+		// resume only if it was playing before scrub started
+		if (!wasPaused) {
+			try {
+				await video.play();
+			} catch (err) {
+				// ignore play errors (autoplay policies etc.)
+			}
+		}
+		// update visuals
+		handleTimelineHover(clientX);
+	};
+
+	// Hover timeout handling
+	let hoverTimeoutId: number | undefined;
 	const resetHoverTimeout = () => {
-		clearTimeout(timeoutId);
-		//@ts-ignore
-		timeoutId = setTimeout(() => {
+		if (hoverTimeoutId) clearTimeout(hoverTimeoutId);
+		hoverTimeoutId = window.setTimeout(() => {
 			videoContainer.classList.remove('hovered');
 			videoContainer.style.cursor = 'none';
 		}, 5000);
@@ -588,7 +641,7 @@ const initializeVideoControls = () => {
 		if (videoContainer.classList.contains('mini-player')) {
 			document.exitPictureInPicture();
 		} else {
-			video.requestPictureInPicture();
+			video.requestPictureInPicture().catch(() => {});
 		}
 	};
 
@@ -600,113 +653,104 @@ const initializeVideoControls = () => {
 		let newRate = video.playbackRate + 0.25;
 		if (newRate > 2) newRate = 0.25;
 		video.playbackRate = newRate;
-		speedBtn.textContent = `${newRate}x`;
+		if (speedBtn) speedBtn.textContent = `${newRate}x`;
 	};
 
-	// Event listeners
-	document.addEventListener('keydown', handleKeyDown);
-	document.addEventListener('mouseup', () => {
-		if (isScrubbing) toggleScrubbing(new MouseEvent('mouseup'));
-	});
-	document.addEventListener('mousemove', (e) => {
-		if (isScrubbing) handleTimelineUpdate(e);
-	});
-	document.addEventListener('fullscreenchange', () => {
+	// --- Attach listeners via addListener helper for easy cleanup ---
+	addListener(document, 'keydown', handleKeyDown);
+	// fullscreenchange
+	const onFullScreenChange = () => {
 		videoContainer.classList.toggle('full-screen', !!document.fullscreenElement);
 		videoContainer.scrollIntoView();
-	});
+	};
+	addListener(document, 'fullscreenchange', onFullScreenChange);
 
-	videoContainer.addEventListener('mouseover', resetHoverTimeout);
-	videoContainer.addEventListener('mouseout', () => {
+	// Video container hover/mouse behavior
+	addListener(videoContainer, 'mouseover', resetHoverTimeout);
+	addListener(videoContainer, 'mouseout', () => {
 		videoContainer.classList.remove('hovered');
 		videoContainer.style.cursor = '';
 	});
-	videoContainer.addEventListener('mousemove', () => {
+	addListener(videoContainer, 'mousemove', () => {
 		resetHoverTimeout();
 		videoContainer.style.cursor = '';
 	});
 
-	timelineContainer.addEventListener('mousemove', handleTimelineUpdate);
-	timelineContainer.addEventListener('mousedown', toggleScrubbing);
-
-	// Video event listeners
-	video.addEventListener('loadeddata', () => {
-		totalTimeElem.textContent = formatDuration(video.duration);
-		dataLoading.value = false;
+	// Pointer-based timeline listeners
+	addListener(timelineContainer, 'pointerdown', (ev: PointerEvent) => {
+		ev.preventDefault();
+		(timelineContainer as HTMLElement).setPointerCapture(ev.pointerId);
+		startScrub(ev.clientX);
+	});
+	addListener(timelineContainer, 'pointermove', (ev: PointerEvent) => {
+		ev.preventDefault();
+		moveScrub(ev.clientX);
+	});
+	addListener(timelineContainer, 'pointerup', (ev: PointerEvent) => {
+		try {
+			(timelineContainer as HTMLElement).releasePointerCapture(ev.pointerId);
+		} catch {}
+		endScrub(ev.clientX);
+	});
+	addListener(timelineContainer, 'pointercancel', (ev: PointerEvent) => {
+		try {
+			(timelineContainer as HTMLElement).releasePointerCapture(ev.pointerId);
+		} catch {}
+		endScrub(ev.clientX || lastClientX);
 	});
 
-	video.addEventListener('loadstart', () => {
+	// Video event listeners (named so we can remove them)
+	const onLoadedData = () => {
+		if (totalTimeElem) totalTimeElem.textContent = formatDuration(video.duration);
+		dataLoading.value = false;
+	};
+	const onLoadStart = () => {
 		videoLoading.value = true;
 		dataLoading.value = true;
-	});
-
-	video.addEventListener('canplay', () => {
+	};
+	const onCanPlay = () => {
 		updateVueVideoData();
 		videoLoading.value = false;
-	});
-
-	video.addEventListener('seeking', () => {
+	};
+	const onSeeking = () => {
 		videoLoading.value = true;
-	});
-
-	video.addEventListener('stalled', async () => {
+	};
+	const onStalled = async () => {
 		videoLoading.value = true;
 		setTimeout(async () => {
 			if (video.readyState !== 4) {
 				const time = video.currentTime;
 				video.load();
-				await video.play();
+				try {
+					await video.play();
+				} catch {}
 				videoLoading.value = false;
 				video.currentTime = time;
 			}
 		}, 15000);
-	});
-
-	video.addEventListener('error', () => {
+	};
+	const onError = () => {
 		videoLoading.value = true;
-	});
-
-	video.addEventListener('progress', () => {
+	};
+	const onProgress = () => {
 		updateVueVideoData();
-	});
-
-	video.addEventListener('durationchange', () => {
+	};
+	const onDurationChange = () => {
 		updateVueVideoData();
-	});
-
-	// video.volume = parseFloat(String(settings.value.volume.value));
+	};
 
 	const timeUpdateThrottle = throttle(props.sendVideoTimeUpdate, 1500);
-	video.addEventListener('timeupdate', () => {
+	const onTimeUpdate = () => {
 		updateVueVideoData();
 		timeUpdateThrottle(video.currentTime);
-		currentTimeElem.textContent = formatDuration(video.currentTime);
+		if (currentTimeElem) currentTimeElem.textContent = formatDuration(video.currentTime);
 
 		let percent = video.currentTime / video.duration;
 		percent = isNaN(percent) ? 0 : percent;
 		timelineContainer.style.setProperty('--progress-position', String(percent));
-
-		// if (settings.value?.autoSkip?.value === true && video.currentTime === video.duration) {
-		// 	props.switchTo(1);
-		// 	setTimeout(() => {
-		// 		video.play();
-		// 	}, 400);
-		// }
-
-		if (
-			(isInterceptingWithIntro.value && !alreadySkipped.value.includes('intro')) ||
-			(isInterceptingWithOutro.value && !alreadySkipped.value.includes('outro'))
-		) {
-			// if (settings.value?.skipSegments?.value === true) {
-			// 	const segment = segmentData.value.find((x) => x.type === (isInterceptingWithIntro.value ? 'intro' : 'outro'));
-			// 	if (!segment) return;
-			// 	alreadySkipped.value.push(segment.type);
-			// 	skip(segment.endms + 2, true);
-			// }
-		}
-	});
-
-	video.addEventListener('volumechange', () => {
+	};
+	const onVolumeChange = () => {
+		if (!volumeSlider) return;
 		volumeSlider.value = String(video.volume);
 		let volumeLevel: string;
 
@@ -719,74 +763,79 @@ const initializeVideoControls = () => {
 			volumeLevel = 'low';
 		}
 
-		// if (settings.value.volume.value !== video.volume && video.volume !== 0) {
-		// 	settings.value.volume.value = video.volume;
-		// 	updateSettings();
-		// }
-
 		videoContainer.dataset.volumeLevel = volumeLevel;
-	});
-
-	video.addEventListener('play', () => {
-		if (props.events?.playback) {
-			props.events.playback(true, video.currentTime);
-		}
+	};
+	const onPlay = () => {
+		if (props.events?.playback) props.events.playback(true, video.currentTime);
 		videoContainer.classList.remove('paused');
-	});
-
-	video.addEventListener('pause', () => {
-		if (props.events?.playback) {
-			props.events.playback(false, video.currentTime);
-		}
+	};
+	const onPause = () => {
+		if (props.events?.playback) props.events.playback(false, video.currentTime);
 		videoContainer.classList.add('paused');
-	});
+	};
+	const onEnterPiP = () => videoContainer.classList.add('mini-player');
+	const onLeavePiP = () => videoContainer.classList.remove('mini-player');
 
-	video.addEventListener('enterpictureinpicture', () => {
-		videoContainer.classList.add('mini-player');
-	});
-
-	video.addEventListener('leavepictureinpicture', () => {
-		videoContainer.classList.remove('mini-player');
-	});
+	// Attach video listeners
+	addListener(video, 'loadeddata', onLoadedData);
+	addListener(video, 'loadstart', onLoadStart);
+	addListener(video, 'canplay', onCanPlay);
+	addListener(video, 'seeking', onSeeking);
+	addListener(video, 'stalled', onStalled);
+	addListener(video, 'error', onError);
+	addListener(video, 'progress', onProgress);
+	addListener(video, 'durationchange', onDurationChange);
+	addListener(video, 'timeupdate', onTimeUpdate);
+	addListener(video, 'volumechange', onVolumeChange);
+	addListener(video, 'play', onPlay);
+	addListener(video, 'pause', onPause);
+	addListener(video, 'enterpictureinpicture', onEnterPiP);
+	addListener(video, 'leavepictureinpicture', onLeavePiP);
 
 	// Button listeners
-	playPauseBtn?.addEventListener('click', togglePlay);
-	muteBtn?.addEventListener('click', toggleMute);
-	speedBtn?.addEventListener('click', changePlaybackSpeed);
-	theaterBtn?.addEventListener('click', toggleTheater);
-	fullScreenBtn?.addEventListener('click', toggleFullScreen);
-	miniPlayerBtn?.addEventListener('click', toggleMiniPlayer);
+	if (playPauseBtn) addListener(playPauseBtn, 'click', togglePlay);
+	if (muteBtn) addListener(muteBtn, 'click', toggleMute);
+	if (speedBtn) addListener(speedBtn, 'click', changePlaybackSpeed);
+	if (theaterBtn) addListener(theaterBtn, 'click', toggleTheater);
+	if (fullScreenBtn) addListener(fullScreenBtn, 'click', toggleFullScreen);
+	if (miniPlayerBtn) addListener(miniPlayerBtn, 'click', toggleMiniPlayer);
 
-	volumeSlider?.addEventListener('input', (e) => {
-		const target = e.target as HTMLInputElement;
-		video.volume = parseFloat(target.value);
-		video.muted = target.value === '0';
-	});
+	// Volume slider
+	if (volumeSlider)
+		addListener(volumeSlider, 'input', (e: Event) => {
+			const target = e.target as HTMLInputElement;
+			video.volume = parseFloat(target.value);
+			video.muted = target.value === '0';
+		});
 
-	// Touch controls
-	video.addEventListener('pointerdown', (ev) => {
+	// Pointerdown on video for toggling playback (original behavior)
+	addListener(video, 'pointerdown', (ev: PointerEvent) => {
 		if (ev.pointerType === 'mouse') {
+			// left click toggle play
 			if (ev.button === 0) togglePlay();
 		} else {
+			// touch interactions - show middle play overlay briefly
 			if (!videoContainer.classList.contains('paused')) {
 				videoContainer.classList.add('paused');
 			}
 			videoContainer.classList.remove('paused');
 			videoContainer.classList.add('touched');
-
+			let touchTimeout: number | undefined;
 			if (touchTimeout != null) clearTimeout(touchTimeout);
-			//@ts-ignore
-			touchTimeout = setTimeout(() => {
+			touchTimeout = window.setTimeout(() => {
 				videoContainer.classList.remove('touched');
-				touchTimeout = null;
+				touchTimeout = undefined;
 			}, 5000);
 		}
 	});
 
-	// Double tap to skip
-	video.addEventListener(
+	// touch double tap skip logic preserved
+	let tapedTwice = false;
+	let prevDblTapTimeout: number | undefined;
+	addListener(
+		video,
 		'touchstart',
-		(event) => {
+		(event: TouchEvent) => {
 			const getIntersection = (): { value: boolean; velocity: number } => {
 				const { top, left, width } = video.getBoundingClientRect();
 				const localX = event.touches[0]!.clientX - left;
@@ -816,33 +865,33 @@ const initializeVideoControls = () => {
 			if (out.value) skip(out.velocity);
 
 			if (prevDblTapTimeout) clearTimeout(prevDblTapTimeout);
-			//@ts-ignore
-			prevDblTapTimeout = setTimeout(() => {
+			prevDblTapTimeout = window.setTimeout(() => {
 				video.play();
 			}, 301);
 		},
 		{ passive: true }
 	);
 
+	// Provide cleanup closure
+	const cleanupFn = () => {
+		// remove all listeners we added
+		removeAllListeners();
+		// clear hover timeout if any
+		if (hoverTimeoutId) {
+			clearTimeout(hoverTimeoutId);
+			hoverTimeoutId = undefined;
+		}
+	};
+
+	// return the control functions for outside use
 	return {
 		skip,
 		skipPercent,
 		togglePlay,
-		cleanup: () => {
-			document.removeEventListener('keydown', handleKeyDown);
-			document.removeEventListener('mouseup', () => {});
-			document.removeEventListener('mousemove', () => {});
-			document.removeEventListener('fullscreenchange', () => {});
-		},
+		cleanup: cleanupFn,
 	};
 };
 
-let skip: Function;
-let skipPercent: Function;
-let togglePlay: Function;
-let cleanup: Function;
-
-// Hooks
 onMounted(async () => {
 	const data = initializeVideoControls();
 	if (data === undefined) return;
@@ -852,7 +901,6 @@ onMounted(async () => {
 	cleanup = data.cleanup;
 
 	window.addEventListener('resize', handleResize);
-	// await loadIntroData();
 
 	onBeforeUnmount(() => {
 		cleanup();
@@ -861,15 +909,6 @@ onMounted(async () => {
 });
 
 // Watchers
-// watch(
-// 	() => settings.value.volume.value,
-// 	(newValue) => {
-// 		if (videoRef.value) {
-// 			videoRef.value.volume = newValue;
-// 		}
-// 	}
-// );
-
 watch(
 	() => props.videoSrc,
 	async () => {
@@ -896,7 +935,7 @@ defineExpose({
 				break;
 			case 'sync-skip':
 			case 'sync-skipTimeline':
-				// skip function from initialization
+				// skip function from initialization (call skip or skipPercent externally)
 				break;
 		}
 	},
