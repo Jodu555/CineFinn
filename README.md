@@ -12,18 +12,31 @@ it is the successor to the CineFinn v1 Project which is now deprecated and will 
 > Technically all the MVP features are Server & Client side since I decided to rewrite both from scratch
 
 - [x] User Authentication (Login, Register, Logout)
+  - [ ] Fix the Cookie issue on token expiration
+  - [ ] Implement the Settings System
 - [x] Home Page to find Series
 - [ ] Job system to handle jobs
-- [ ] Series Indexing
-- [ ] Watching Videos
-- [ ] Series Watch Page
-- [ ] Same VideoPlayer as in v1
+  - [x] Crawling
+  - [ ] Generate Preview Images
+  - [ ] Check for Updates
+    - [ ] Smart Check
+    - [ ] Old Check
+- [x] Series Indexing
+- [x] Watching Videos
+- [x] Series Watch Page
+- [x] Same VideoPlayer as in v1
+- [ ] Create ConfigugrationManager package
+- [ ] Use the configugrationManager in all the app's like Server Scraper, PreviewImageGenerator, SubSystem etc.
+
+Note: The JobSystem does not mean to already write the consumers for the jobs. It just means that the server will create a necessary job!
+
+When all the boxes are checked, I will deploy the MVP to a testing environment and then start only using this! To find out if the MVP is working as expected, and eliminate any bugs.
 
 > Immediately after the MVP I want to implement the following features:
 
+- [ ] Preview Image Generation
 - [ ] Scraper
 - [ ] SubSystem
-- [ ] Preview Image Generation
 - [ ] Admin System
 - [ ] Playlist System
 - [ ] Sync System
