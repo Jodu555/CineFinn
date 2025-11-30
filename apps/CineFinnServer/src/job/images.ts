@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs, { watch } from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
 import { CacheContext } from "../LRUCache.js";
@@ -6,18 +6,19 @@ import { Job } from "./Job.js";
 import { episodesTable, moviesTable, seriesTable, watchableEntitysTable } from "../database.js";
 import { getConfig } from "../config.js";
 
-async function watchableUUIDToWatchable(wactableUUID: string, cache: CacheContext) {
-    if (wactableUUID.startsWith('EP#')) {
+async function watchableUUIDToWatchable(watchableUUID: string, cache: CacheContext) {
+    watchableUUID = 'tses';
+    if (watchableUUID.startsWith('EP-')) {
         let { data: episode, cacheInfo: existingSeasonCacheInfo } = await cache.execute(episodesTable, 'getOne', [{
-            UUID: wactableUUID,
+            UUID: watchableUUID,
             unique: true,
         }]);
         return episode;
-    } else if (wactableUUID.startsWith('MO#')) {
-        const movie = await moviesTable.getOne({ UUID: wactableUUID });
+    } else if (watchableUUID.startsWith('MO-')) {
+        const movie = await moviesTable.getOne({ UUID: watchableUUID });
         return movie;
     } else {
-        throw new Error('Unknown Watchable UUID' + wactableUUID);
+        throw new Error('Unknown Watchable UUID ' + watchableUUID);
     }
 }
 
@@ -33,9 +34,8 @@ interface QueuedPreviewImageGenerationJob {
     };
 }
 
-export async function generateImages(jobUUID: string) {
+export async function generatePreviewImages(job: Job) {
     const config = getConfig();
-    const job = await Job.fromDBUUID(jobUUID);
     await job.log('Started Image Crawling');
     const generatorEpisodesCache = new CacheContext('crawler-generator-episodes', 250);
     const generatorSeriesCache = new CacheContext('crawler-generator-series', 500);

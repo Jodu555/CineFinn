@@ -258,11 +258,11 @@ async function createTables() {
             null: false,
         },
         failed_at: {
-            type: 'int',
+            type: 'BIGINT',
             null: true,
         },
         finished_at: {
-            type: 'int',
+            type: 'BIGINT',
             null: true,
         },
         data: {

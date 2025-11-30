@@ -131,11 +131,11 @@ export class Job {
     async success() {
         this.failed_at = 0;
         this.finished_at = Date.now();
-        await this.save();
+        await this.save(true);
     }
 
     async fail() {
         this.failed_at = Date.now();
-        await this.save();
+        await this.save(true);
     }
 }

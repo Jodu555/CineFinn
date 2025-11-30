@@ -121,14 +121,14 @@ const httpServer = serve({
     //     }
     // }
 
-    const entitys = await watchableEntitysTable.get({ runtime: -1 });
-    let i = 0;
-    for await (const entity of entitys) {
-        console.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`);
+    // const entitys = await watchableEntitysTable.get({ runtime: -1 });
+    // let i = 0;
+    // for await (const entity of entitys) {
+    //     console.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`);
 
-        const runtime = await geFileRuntime(entity.UUID);
-        await watchableEntitysTable.update({ UUID: entity.UUID }, { runtime });
-    }
+    //     const runtime = await geFileRuntime(entity.UUID);
+    //     await watchableEntitysTable.update({ UUID: entity.UUID }, { runtime });
+    // }
 
 });
 

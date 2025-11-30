@@ -11,12 +11,17 @@
 					</div>
 				</div>
 				<div class="text-muted" style="overflow: scroll; overflow-x: scroll; max-height: 200px">
-					<p v-for="line in currentJob!.logs.reverse().slice(0,3)" :key="line" class="mb-0">{{ line.slice(0, 100) }}</p>
+					<p v-for="line in currentJob!.logs.reverse().slice(0, 3)" :key="line" class="mb-0">{{ line.slice(0,
+						100) }}</p>
 				</div>
 			</div>
 			<div class="row" v-else>
-				<p>Latest Run: {{ new Date(+currentJob!.finished_at || 0).toLocaleString() }}</p>
-				<p>Latest Duration: {{ msToReadable(+currentJob!.finished_at - +currentJob!.created_at || 0) }}</p>
+				<p class="mb-0">Latest Run: {{ new Date(jobPosNegCompletedAt).toLocaleString() }}
+				</p>
+				<p :class="{ 'mb-0': currentJob!.failed_at != 0 }">Latest Duration: {{ msToReadable(jobPosNegCompletedAt
+					-
+					+currentJob!.created_at || 0) }}</p>
+				<p v-if="currentJob!.failed_at != 0" class="text-danger">Latest Run Failed!</p>
 				<button @click="run(jobType)" class="btn btn-outline-info">Start</button>
 			</div>
 		</template>
@@ -60,6 +65,15 @@ async function run(id: JobType) {
 const currentJob = computed(() => managmentStore.jobs.sort((a, b) => b.created_at - a.created_at).find((x) => x.type === props.jobType));
 
 const isRunning = computed(() => currentJob.value?.finished_at == 0 && currentJob.value?.failed_at == 0);
+
+const jobPosNegCompletedAt = computed(() => {
+	if (currentJob.value == undefined) {
+		return 0;
+	}
+	return +currentJob.value.finished_at || +currentJob.value.failed_at;
+});
+
+
 </script>
 
 <style></style>

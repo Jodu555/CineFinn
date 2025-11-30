@@ -35,8 +35,7 @@ const generateEntityID = () => {
 };
 
 
-export async function crawl(jobUUID: string) {
-    const job = await Job.fromDBUUID(jobUUID);
+export async function crawl(job: Job) {
 
     const crawlerSeriesSeasonsCache = new CacheContext('crawler-series', 500);
     const crawlerEpisodesCache = new CacheContext('crawler-episodes', 150);
@@ -100,7 +99,7 @@ export async function crawl(jobUUID: string) {
                 unique: true,
             });
             if (existingMovie == undefined) {
-                job.log('Movie Does not Exist', parsedData.movieTitle);
+                job.log('Movie Does not Exist', parsedData);
                 existingMovie = await moviesTable.create({
                     UUID: generateMovieID(),
                     primaryName: parsedData.movieTitle!,
@@ -118,7 +117,7 @@ export async function crawl(jobUUID: string) {
                 unique: true,
             }]);
             if (existingSeason == undefined) {
-                job.log('Season Does not Exist', parsedData.season);
+                job.log('Season Does not Exist', parsedData);
                 existingSeason = await seasonsTable.create({
                     UUID: generateSeasonID(),
                     serie_UUID: exsitingSeries.UUID,
@@ -147,7 +146,7 @@ export async function crawl(jobUUID: string) {
                 unique: true,
             }]);
             if (existingEpisode == undefined) {
-                job.log('Episode Does not Exist', parsedData.season, parsedData.episode);
+                job.log('Episode Does not Exist', parsedData);
                 existingEpisode = await episodesTable.create({
                     UUID: generateEpisodeID(),
                     serie_UUID: exsitingSeries.UUID,
@@ -170,7 +169,7 @@ export async function crawl(jobUUID: string) {
             unique: true,
         });
         if (existingWatchableEntity == undefined) {
-            job.log('Watchable Entity Does not Exist', parsedData, parsedData.language);
+            job.log('Watchable Entity Does not Exist', parsedData);
             existingWatchableEntity = await watchableEntitysTable.create({
                 UUID: generateEntityID(),
                 watchable_UUID: watchableUUID,
