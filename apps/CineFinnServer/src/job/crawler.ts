@@ -8,6 +8,7 @@ import { tryCatch } from '../tryCatch.js';
 import { CacheContext } from '../LRUCache.js';
 import { Job } from './Job.js';
 import { getConfig } from '../config.js';
+import type { Episode } from '@cinefinn/types/database';
 
 const generateID = () => {
     return randomUUID().split('-')[0];
@@ -149,6 +150,7 @@ export async function crawl(jobUUID: string) {
                 job.log('Episode Does not Exist', parsedData.season, parsedData.episode);
                 existingEpisode = await episodesTable.create({
                     UUID: generateEpisodeID(),
+                    serie_UUID: exsitingSeries.UUID,
                     season_UUID: existingSeason.UUID,
                     season_IDX: parsedData.season,
                     episode_IDX: parsedData.episode,

@@ -146,6 +146,7 @@ async function createTables() {
             // },
         },
         UUID: UUID_FIELD,
+        serie_UUID: UUID_FIELD,
         season_UUID: UUID_FIELD,
         season_IDX: {
             type: 'int',

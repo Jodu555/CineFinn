@@ -74,6 +74,7 @@ export interface Season {
 
 export interface Episode {
     UUID: string;
+    serie_UUID: string;
     season_UUID: string;
     season_IDX: number;
     episode_IDX: number;
