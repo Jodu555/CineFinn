@@ -7,6 +7,7 @@ import { database, episodesTable, jobsTable, moviesTable, seasonsTable, seriesTa
 import { tryCatch } from '../tryCatch.js';
 import { CacheContext } from '../LRUCache.js';
 import { Job } from './Job.js';
+import { getConfig } from '../config.js';
 
 const generateID = () => {
     return randomUUID().split('-')[0];
@@ -39,7 +40,7 @@ export async function crawl(jobUUID: string) {
     const crawlerSeriesSeasonsCache = new CacheContext('crawler-series', 500);
     const crawlerEpisodesCache = new CacheContext('crawler-episodes', 150);
 
-    const pathEntries = [process.env.VIDEO_PATH!];
+    const pathEntries = [getConfig().videoPath];
     job.log('Listing Files');
     let { files } = await listFiles(pathEntries[0]);
     job.log(`Found ${files.length} files`);

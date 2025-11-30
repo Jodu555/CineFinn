@@ -18,7 +18,8 @@
 		"mysql": "^2.18.1",
 		"socket.io": "^4.8.1",
 		"zod": "^4.1.12",
-		"@cinefinn/types": "workspace:*"
+		"@cinefinn/types": "workspace:*",
+		"@cinefinn/configuration-manager": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/bootstrap": "^5.2.10",

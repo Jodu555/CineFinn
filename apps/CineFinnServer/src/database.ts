@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();;
 import { Database, type thingDatabase } from '@jodu555/mysqlapi';
 import type { Account, timestamped, AuthToken, Series, Season, Episode, Movie, WatchableEntity, WatchHistory, SyncRoom, Job } from '@cinefinn/types/database';
+import { getConfig } from './config.js';
 
 export let database: Database;
 
@@ -21,7 +22,9 @@ export let syncRoomsTable: thingDatabase<SyncRoom, SyncRoom & timestamped>;
 export let jobsTable: thingDatabase<Job, Job & timestamped>;
 
 export async function connectDatabase() {
-    database = Database.createDatabase(process.env.DB_HOST!, process.env.DB_USERNAME!, process.env.DB_PASSWORD!, process.env.DB_DATABASE!);
+    const config = getConfig();
+    database = Database.createDatabase(config.database.host, config.database.username, config.database.password, config.database.database);
+    // database = Database.createDatabase(process.env.DB_HOST!, process.env.DB_USERNAME!, process.env.DB_PASSWORD!, process.env.DB_DATABASE!);
     await database.connect({
         connectionLimit: 15,
     });

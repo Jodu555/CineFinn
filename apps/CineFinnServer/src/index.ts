@@ -22,6 +22,7 @@ import { watchRouter } from './routes/watch.js';
 import { videoRouter } from './routes/video.js';
 import { indexRouter } from './routes/index.js';
 import * as childProcess from 'node:child_process';
+import { getConfig } from './config.js';
 
 
 const app = new Hono({
@@ -74,9 +75,10 @@ app.route('/video', videoRouter);
 //     return proxy(newUrl);
 // });
 
+
 const httpServer = serve({
     fetch: app.fetch,
-    port: 3000
+    port: getConfig().system.PORT,
 }, async (info) => {
     console.log(info);
 
