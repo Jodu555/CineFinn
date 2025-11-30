@@ -25,8 +25,12 @@ it is the successor to the CineFinn v1 Project which is now deprecated and will 
 - [x] Watching Videos
 - [x] Series Watch Page
 - [x] Same VideoPlayer as in v1
-- [ ] Create ConfigugrationManager package
-- [ ] Use the configugrationManager in all the app's like Server Scraper, PreviewImageGenerator, SubSystem etc.
+- [x] Create ConfigugrationManager package
+- [ ] Use the configugrationManager in all the app's
+  - [x] Server
+  - [ ] Scraper
+  - [ ] PreviewImageGenerator
+  - [ ] SubSystem
 
 Note: The JobSystem does not mean to already write the consumers for the jobs. It just means that the server will create a necessary job!
 
