@@ -3,12 +3,25 @@ export interface timestamped {
     updated_at: number;
 }
 
+/**
+ * switch (id) {
+        case 1:
+            return 'User';
+        case 2:
+            return 'Moderator';
+        case 3:
+            return 'Administrator';
+        default:
+            return 'Unknown Role';
+    }
+ */
+
 export interface Account {
     UUID: string;
     username: string;
     password?: string;
     email: string;
-    role: number;
+    role: number; // See above for the role enum
     settings: Record<string, string>;
     activityDetails: {
         lastHandshake: string;
