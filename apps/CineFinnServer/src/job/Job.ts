@@ -58,7 +58,8 @@ export class Job {
         const socketJob = JSON.parse(JSON.stringify(this.toDB()));
         socketJob.data = {};
         socketJob.logs = socketJob.logs.slice(-10);
-        getIO().emit('jobUpdate', socketJob);
+        // getIO().emit('jobUpdate', socketJob);
+        getIO().volatile.emit('jobUpdate', socketJob);
     }
 
     async save(immediate = true) {

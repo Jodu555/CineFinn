@@ -5,7 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"dev": "pnpm run -r --parallel --aggregate-output dev",
-		"build": "pnpm run -r build"
+		"build": "pnpm run -r build",
+		"dev:packages": "pnpm run --filter \"./packages/*\" dev"
 	},
 	"keywords": [],
 	"author": "",

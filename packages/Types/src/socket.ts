@@ -1,5 +1,12 @@
 import type database = require("./database");
 
+type AuthType = 'client' | 'scraper' | 'subsystem';
+
+export interface AuthHandshake {
+    type: AuthType;
+    authToken: string;
+}
+
 export interface ServerToClientEvents {
     noArg: () => void;
     basicEmit: (a: number, b: string, c: Buffer) => void;
@@ -18,8 +25,23 @@ export interface InterServerEvents {
 }
 
 export interface SocketData<U = any> {
-    auth: {
-        token: string;
-        user: U
-    }
+    auth: SocketAuthData<U>;
+}
+
+type SocketAuthData<U = any> = SocketAuthDataClient<U> | SocketAuthDataScraper<U> | SocketAuthDataSubsystem<U>;
+
+interface SocketAuthDataClient<U = any> {
+    type: 'client';
+    token: string;
+    user: U
+}
+
+interface SocketAuthDataScraper<U = any> {
+    type: 'scraper';
+    token: string;
+}
+
+interface SocketAuthDataSubsystem<U = any> {
+    type: 'subsystem';
+    token: string;
 }

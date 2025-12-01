@@ -100,10 +100,12 @@ export interface Movie {
     movie_IDX: number;
 }
 
+export type Langs = 'GerDub' | 'GerSub' | 'EngDub' | 'EngSub' | 'JapDub' | 'EngSubK' | 'GerSubK' | 'GerSubC' | 'EngSubC';
+
 export interface WatchableEntity {
     UUID: string;
     watchable_UUID: string;
-    lang: string;
+    lang: Langs;
     subID: string;
     filePath: string;
     IV: Buffer;

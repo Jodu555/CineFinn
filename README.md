@@ -17,7 +17,7 @@ it is the successor to the CineFinn v1 Project which is now deprecated and will 
 - [x] Home Page to find Series
 - [ ] Job system to handle jobs
   - [x] Crawling
-  - [ ] Generate Preview Images
+  - [x] Generate Preview Images
   - [ ] Check for Updates
     - [ ] Smart Check
     - [ ] Old Check

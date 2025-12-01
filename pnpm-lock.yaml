@@ -57,6 +57,25 @@ importers:
         specifier: ^1.93.2
         version: 1.93.2
 
+  apps/CineFinnScraper:
+    dependencies:
+      '@cinefinn/configuration-manager':
+        specifier: workspace:*
+        version: link:../../packages/ConfigurationManager
+      '@cinefinn/types':
+        specifier: workspace:*
+        version: link:../../packages/Types
+      socket.io-client:
+        specifier: ^4.8.1
+        version: 4.8.1
+    devDependencies:
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.10.1
+      tsx:
+        specifier: ^4.20.6
+        version: 4.20.6
+
   apps/CineFinnServer:
     dependencies:
       '@cinefinn/configuration-manager':

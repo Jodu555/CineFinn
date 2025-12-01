@@ -1,11 +1,10 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
-import dotenv from 'dotenv';
+// import dotenv from 'dotenv';
+// dotenv.config();
 import { Server } from 'socket.io';
 import { accountsTable, authTokensTable, connectDatabase, database, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable } from './database.js';
-import { crawl } from './job/crawler.js';
-dotenv.config();
-import { proxy } from 'hono/proxy';
+
 import { trimTrailingSlash } from 'hono/trailing-slash';
 import { authFullMiddleware, authRouter, getUser } from './auth.js';
 import { prometheus } from '@hono/prometheus';
@@ -14,7 +13,7 @@ import { logger } from 'hono/logger';
 import { ownLogger } from './ownLogger.js';
 import { managmentRouter } from './routes/managment.js';
 import { CacheContext } from './LRUCache.js';
-import type { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from '@cinefinn/types/socket';
+import type { AuthHandshake, ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from '@cinefinn/types/socket';
 import { tryCatch } from './tryCatch.js';
 import type { Series, Season, Movie, Account, timestamped, DetailedSeries, DetailedMovie, DetailedEpisode, DetailedSeason, FrontendSeries } from '@cinefinn/types/database';
 import { setIO } from './utils.js';
@@ -161,58 +160,111 @@ const io = new Server<
 setIO(io);
 
 io.use(async (socket, next) => {
-    console.log('Trying to authorize ', socket.id, socket.handshake.auth);
+    const authHanshake = socket.handshake.auth as AuthHandshake;
+    console.log('Trying to authorize ', socket.id, authHanshake);
 
-    if (socket.handshake.auth.token === undefined) {
+
+    if (authHanshake.authToken === undefined) {
         return next(new Error('Unauthorized'));
     }
 
-    const token = socket.handshake.auth.token;
+    const token = authHanshake.authToken;
 
-    const { error, data: user } = await tryCatch(() => getUser(token));
+    switch (authHanshake.type) {
+        case 'client':
+            const { error, data: user } = await tryCatch(() => getUser(token));
 
-    if (error != null) {
-        console.log(error);
-        return next(new Error('Unauthorized'));
+            if (error != null) {
+                console.log(error);
+                return next(new Error('Unauthorized'));
+            }
+            if (user == undefined || user == null) {
+                return next(new Error('Unauthorized'));
+            }
+
+            socket.data = {
+                auth: {
+                    type: authHanshake.type,
+                    token,
+                    user,
+                }
+            };
+            next();
+            break;
+        case 'scraper':
+            console.log('scraper auth', token, getConfig().scraper.authToken);
+            if (token !== getConfig().scraper.authToken) {
+                return next(new Error('Unauthorized'));
+            }
+            socket.data = {
+                auth: {
+                    type: authHanshake.type,
+                    token,
+                }
+            };
+            next();
+            break;
+        case 'subsystem':
+            console.log('subsystem auth');
+            if (token !== getConfig().subsystem.authToken) {
+                return next(new Error('Unauthorized'));
+            }
+            socket.data = {
+                auth: {
+                    type: authHanshake.type,
+                    token,
+                }
+            };
+            next();
+            break;
+
+        default:
+            break;
     }
-    if (user == undefined || user == null) {
-        return next(new Error('Unauthorized'));
-    }
 
-    socket.data = {
-        auth: {
-            token,
-            user,
-        }
-    };
-    // Validate the token or something
-    next();
+
 
 });
 
 io.on('connection', (socket) => {
-    console.log(socket.handshake.auth);
+    const authHanshake = socket.handshake.auth as AuthHandshake;
+    console.log(authHanshake);
+    switch (authHanshake.type) {
+        case 'client':
+            console.log(socket.id, socket.data, 'a user connected');
 
-    console.log(socket.id, socket.data, 'a user connected');
+            const debouncedUpdateTime = debounce(async (data: { watchableUUID: string; time: number }) => {
+                console.log('debounced updateTime', data);
+                const response = await app.request(`/watch/updateTime/${data.watchableUUID}/${data.time}`, {
+                    method: 'POST',
+                    headers: {
+                        'auth-token': authHanshake.authToken,
+                    },
+                });
+            }, 4000);
 
-    const debouncedUpdateTime = debounce(async (data: { watchableUUID: string; time: number }) => {
-        console.log('debounced updateTime', data);
-        const response = await app.request(`/watch/updateTime/${data.watchableUUID}/${data.time}`, {
-            method: 'POST',
-            headers: {
-                'auth-token': socket.handshake.auth.token,
-            },
-        });
-    }, 4000);
+            socket.on('updateTime', async (data) => {
+                console.log('updateTime', data);
+                debouncedUpdateTime(data);
+            });
 
-    socket.on('updateTime', async (data) => {
-        console.log('updateTime', data);
-        debouncedUpdateTime(data);
-    });
+            socket.on('disconnect', () => {
+                console.log(socket.id, 'user disconnected');
+            });
+            break;
 
-    socket.on('disconnect', () => {
-        console.log(socket.id, 'user disconnected');
-    });
+        case 'scraper':
+            console.log('scraper connected');
+            break;
+
+        case 'subsystem':
+            console.log('subsystem connected');
+            break;
+        default:
+            console.log('unknown auth type', authHanshake);
+            break;
+    }
+
 });
 
 
