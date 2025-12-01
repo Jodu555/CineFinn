@@ -68,8 +68,8 @@ export const useAuthStore = defineStore('auth', {
                 return response;
             } catch (error) {
                 console.log('Authenticating user FAILED', error);
-                const authCookie = useCookie('auth-token');
-                authCookie.value = '';
+                // const authCookie = useCookie('auth-token');
+                // authCookie.value = '';
                 this.authToken = '';
                 this.loggedIn = false;
                 this.user = null as any as Account;

@@ -15,6 +15,8 @@ export class Job {
     timers: Map<string, number> = new Map();
     queuedSaved = false;
     queuedSaveTimeout: NodeJS.Timeout | null = null;
+    lastLogLineLength = 0;
+    lastSave = 0;
     constructor(UUID: string, type: JobType, data: any, logs: string[], result: any, failed_at: number, finished_at: number, created_at: number) {
         this.UUID = UUID;
         this.type = type;
@@ -51,10 +53,27 @@ export class Job {
         };
     }
 
+    sendSocketUpdate() {
+        //TODO: Broadcast to allegebale clients
+        const socketJob = JSON.parse(JSON.stringify(this.toDB()));
+        socketJob.data = {};
+        socketJob.logs = socketJob.logs.slice(-10);
+        getIO().emit('jobUpdate', socketJob);
+    }
+
     async save(immediate = true) {
 
-        //TODO: Broadcast to allegebale clients
-        getIO().emit('jobUpdate', this.toDB());
+        // if (immediate == false) {
+        //     const socketJob = JSON.parse(JSON.stringify(this.toDB()));
+        //     socketJob.logs = socketJob.logs.slice(-10);
+        //     getIO().emit('jobUpdate', socketJob);
+        //     console.log('SENT jobUpdate to socket');
+        // } else {
+        //     getIO().emit('jobUpdate', this.toDB());
+        //     console.log('SENT jobUpdate to socket');
+        // }
+
+        this.sendSocketUpdate();
 
         if (immediate == false) {
             if (this.queuedSaved) {
@@ -67,7 +86,7 @@ export class Job {
             this.queuedSaveTimeout = setTimeout(() => {
                 this.queuedSaved = false;
                 this.save(true);
-            }, 900);
+            }, 800);
             return;
         } else {
             this.queuedSaved = false;
@@ -100,6 +119,7 @@ export class Job {
         const logLine = `[${this.type}] ${this.UUID.split('-')[0]}: ${partialLine}`;
         console.log(logLine);
         this.logs.push(logLine);
+        // await this.saveLogLine();
         await this.save(false);
         return logLine;
     }
@@ -120,12 +140,12 @@ export class Job {
 
     async setData(data: any) {
         this.data = data;
-        await this.save(false);
+        await this.save(true);
     }
 
     async setResult(result: any) {
         this.result = result;
-        await this.save(false);
+        await this.save(true);
     }
 
     async success() {

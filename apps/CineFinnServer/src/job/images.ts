@@ -7,7 +7,6 @@ import { episodesTable, moviesTable, seriesTable, watchableEntitysTable } from "
 import { getConfig } from "../config.js";
 
 async function watchableUUIDToWatchable(watchableUUID: string, cache: CacheContext) {
-    watchableUUID = 'tses';
     if (watchableUUID.startsWith('EP-')) {
         let { data: episode, cacheInfo: existingSeasonCacheInfo } = await cache.execute(episodesTable, 'getOne', [{
             UUID: watchableUUID,
@@ -44,11 +43,13 @@ export async function generatePreviewImages(job: Job) {
 
 
     const queuedJobs: QueuedPreviewImageGenerationJob[] = [];
-
+    let i = 0;
     for await (const watchableEntity of watchableEntities) {
+        i++;
+        i % 100 == 0 && job.log(`Handling File ${i}/${watchableEntities.length + 1}`);
         const watchable = await watchableUUIDToWatchable(watchableEntity.watchable_UUID, generatorEpisodesCache);
         if (watchable == undefined) {
-            await job.log('Watchable not found', watchableEntity.watchable_UUID, 'for', watchableEntity.UUID);
+            job.log('Watchable not found', watchableEntity.watchable_UUID, 'for', watchableEntity.UUID);
             continue;
         }
         const { data: series, cacheInfo: existingSeriesCacheInfo } = await generatorSeriesCache.execute(seriesTable, 'getOne', [{
@@ -56,7 +57,7 @@ export async function generatePreviewImages(job: Job) {
             unique: true,
         }]);
         if (series == undefined) {
-            await job.log('Series not found', watchableEntity.watchable_UUID, 'for', watchableEntity.UUID, 'seriesuuid', watchable.serie_UUID);
+            job.log('Series not found', watchableEntity.watchable_UUID, 'for', watchableEntity.UUID, 'seriesuuid', watchable.serie_UUID);
             continue;
         }
 
@@ -84,9 +85,10 @@ export async function generatePreviewImages(job: Job) {
             }
         } satisfies QueuedPreviewImageGenerationJob;
         queuedJobs.push(generatedQueueJob);
-        await job.log(`Queued ${generatedQueueJob.type} series: ${series.UUID} watchableEntity: ${watchableEntity.UUID}`);
+        //job.log(`Queued ${generatedQueueJob.type} series: ${series.UUID} watchableEntity: ${watchableEntity.UUID}`);
     }
     await job.setData(queuedJobs);
+    job.log(`Finished Image Crawling (${queuedJobs.length})`);
     await job.success();
 
 }
