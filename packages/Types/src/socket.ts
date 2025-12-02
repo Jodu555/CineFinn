@@ -20,6 +20,18 @@ export interface ClientToServerEvents {
     updateTime: (obj: { watchableUUID: string; time: number; }) => void;
 }
 
+export interface ServerToScraperEvents {
+    noArg: () => void;
+    basicEmit: (a: number, b: string, c: Buffer) => void;
+    withAck: (d: string, callback: (e: number) => void) => void;
+}
+
+export interface ScraperToServerEvents {
+    noArg: () => void;
+    basicEmit: (a: number, b: string, c: Buffer) => void;
+    withAck: (d: string, callback: (e: number) => void) => void;
+}
+
 export interface InterServerEvents {
     ping: () => void;
 }
