@@ -111,7 +111,6 @@ const httpServer = serve({
     }, 10000 * 30);
 
     // const seasons = await seasonsTable.get();
-
     // for await (const season of seasons) {
     //     const episodes = await episodesTable.get({ season_UUID: season.UUID });
     //     if (episodes.length !== season.episodes) {

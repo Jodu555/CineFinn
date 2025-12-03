@@ -145,3 +145,20 @@ export interface Job {
     data: any;
     result: any;
 }
+
+
+
+export interface IgnoranceItem {
+    UUID?: string;
+    lang?: Langs;
+}
+
+export interface ExtendedEpisodeDownload {
+    _categorie?: string;
+    _animeFolder: string;
+    finished: boolean;
+    folder: string;
+    file: string;
+    url: string;
+    m3u8: string;
+}

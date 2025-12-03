@@ -24,12 +24,15 @@ export interface ServerToScraperEvents {
     noArg: () => void;
     basicEmit: (a: number, b: string, c: Buffer) => void;
     withAck: (d: string, callback: (e: number) => void) => void;
+    'job:checkForUpdates': (index: [database.DetailedSeries], callback: (chanedSeries: database.DetailedSeries[]) => void) => void;
 }
 
 export interface ScraperToServerEvents {
     noArg: () => void;
     basicEmit: (a: number, b: string, c: Buffer) => void;
     withAck: (d: string, callback: (e: number) => void) => void;
+    'job:recrawlArchive': () => void;
+    'job:generatePreviewImages': () => void;
 }
 
 export interface InterServerEvents {

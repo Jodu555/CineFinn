@@ -16,6 +16,10 @@
 		"./database": {
 			"types": "./dist/database.d.ts",
 			"import": "./dist/database.js"
+		},
+		"./scrapers": {
+			"types": "./dist/scrapers.d.ts",
+			"import": "./dist/scrapers.js"
 		}
 	},
 	"scripts": {

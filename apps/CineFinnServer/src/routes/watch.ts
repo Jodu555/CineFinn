@@ -52,7 +52,7 @@ router.post('/updateTime/:watchableUUID/:time', authMiddleware, async (c) => {
     const time = Number(c.req.param('time'));
 
     const updated = async (seriesUUID: string) => {
-        (await getIO().fetchSockets()).filter(s => s.data.auth.user.UUID === user.UUID).forEach(async s => {
+        (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'client' && s.data.auth.user.UUID === user.UUID).forEach(async s => {
             const watchList = await watchHistoryTable.get({ series_UUID: seriesUUID, account_UUID: user.UUID });
             s.emit('watchListUpdate', watchList)
         });

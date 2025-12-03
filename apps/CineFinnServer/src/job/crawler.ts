@@ -8,31 +8,7 @@ import { tryCatch } from '../tryCatch.js';
 import { CacheContext } from '../LRUCache.js';
 import { Job } from './Job.js';
 import { getConfig } from '../config.js';
-import type { Episode } from '@cinefinn/types/database';
-
-const generateID = () => {
-    return randomUUID().split('-')[0];
-};
-
-const generateSeriesID = () => {
-    return `S-${generateID()}`;
-};
-
-const generateSeasonID = () => {
-    return `SE-${generateID()}`;
-};
-
-const generateMovieID = () => {
-    return `MO-${generateID()}`;
-};
-
-const generateEpisodeID = () => {
-    return `EP-${generateID()}`;
-};
-
-const generateEntityID = () => {
-    return `WE-${generateID()}`;
-};
+import { generateSeriesID, generateMovieID, generateSeasonID, generateEpisodeID, generateEntityID } from '../utils/IdGenerators.js';
 
 
 export async function crawl(job: Job) {

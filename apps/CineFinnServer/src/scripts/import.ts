@@ -2,34 +2,11 @@ import crypto, { randomUUID } from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();;
 import axios from 'axios';
-import { connectDatabase, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable } from '../database.js';
+import { accountsTable, connectDatabase, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, watchHistoryTable } from '../database.js';
 import { Database } from '@jodu555/mysqlapi';
 import path from 'path';
 import type { Series, Episode, WatchableEntity, Movie } from '@cinefinn/types/database';
-
-const generateID = () => {
-    return randomUUID().split('-')[0];
-};
-
-const generateSeriesID = () => {
-    return `S-${generateID()}`;
-};
-
-const generateSeasonID = () => {
-    return `SE-${generateID()}`;
-};
-
-const generateMovieID = () => {
-    return `MO-${generateID()}`;
-};
-
-const generateEpisodeID = () => {
-    return `EP-${generateID()}`;
-};
-
-const generateEntityID = () => {
-    return `WE-${generateID()}`;
-};
+import { generateEntityID, generateEpisodeID, generateMovieID, generateSeasonID } from '../utils/IdGenerators.js';
 
 interface Segment {
     ID: string;
@@ -48,8 +25,9 @@ async function run() {
     // console.log(await seriesTable.get({}));
 
 
-    // await importSerieses();
-    await importWatchHistory();
+    await importSerieses();
+    // await importAccounts();
+    // await importWatchHistory();
 }
 
 async function importSerieses() {
@@ -80,10 +58,11 @@ async function importSerieses() {
             });
 
             for (const episode of season) {
-                const episodeUUID = `E#${crypto.randomUUID().split('-')[0]}`;
+                const episodeUUID = generateEpisodeID();
                 console.log(`=> Adding episode ${serie.title} S${episode.season}E${episode.episode}`);
                 await episodesTable.create({
                     UUID: episodeUUID,
+                    serie_UUID: serie.ID,
                     season_IDX: episode.season,
                     episode_IDX: episode.episode,
                     season_UUID: seasonUUID,
@@ -92,7 +71,7 @@ async function importSerieses() {
 
                 for (const lang of episode.langs) {
                     const iv = crypto.randomBytes(16);
-                    const watchableEntityUUID = `WE#${crypto.randomUUID().split('-')[0]}`;
+                    const watchableEntityUUID = generateEntityID();
                     console.log(`=> Adding watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang})`);
 
                     let filePath = episode.filePath;
@@ -120,7 +99,7 @@ async function importSerieses() {
         let i = 0;
         for (const movie of serie.movies) {
             i++;
-            const movieUUID = `M#${crypto.randomUUID().split('-')[0]}`;
+            const movieUUID = generateMovieID();
             console.log(`=> Adding movie ${serie.title} #${i}`);
             await moviesTable.create({
                 UUID: movieUUID,
@@ -131,7 +110,7 @@ async function importSerieses() {
             console.log(`=> Added movie ${serie.title} #${i}`);
             for (const lang of movie.langs) {
                 const iv = crypto.randomBytes(16);
-                const watchableEntityUUID = `WE#${crypto.randomUUID().split('-')[0]}`;
+                const watchableEntityUUID = generateEntityID();
                 console.log(`=> Adding watchable entity ${serie.title} #${i} (${lang})`);
 
                 let filePath = movie.filePath;
@@ -156,6 +135,26 @@ async function importSerieses() {
     }
 }
 
+async function importAccounts() {
+    const oldDB = Database.createDatabase(process.env.OLD_DB_HOST!, process.env.OLD_DB_USERNAME!, process.env.OLD_DB_PASSWORD!, process.env.OLD_DB_DATABASE!);
+    await oldDB.connect();
+    const accounts = await oldDB.get('accounts').get({}) as { UUID: string; username: string; password: string; email: string; role: number; settings: string; activityDetails: string }[];
+    console.log(accounts);
+    for (const account of accounts) {
+        await accountsTable.create({
+            UUID: account.UUID,
+            username: account.username,
+            password: account.password,
+            email: account.email,
+            role: account.role,
+            settings: JSON.parse(account.settings),
+            activityDetails: JSON.parse(account.activityDetails),
+            status: 'active',
+        });
+        console.log(`=> Added account ${account.username}`);
+    }
+}
+
 async function importWatchHistory() {
     const oldDB = Database.createDatabase(process.env.OLD_DB_HOST!, process.env.OLD_DB_USERNAME!, process.env.OLD_DB_PASSWORD!, process.env.OLD_DB_DATABASE!);
     await oldDB.connect();
@@ -173,7 +172,44 @@ async function importWatchHistory() {
             list.push({ ID, season: Number(se), episode: Number(ep), movie: Number(movie), time: time });
         }
         console.log(watchString.account_UUID, list.length);
+        for (const watchable of list) {
+            console.log(`=> Adding watchHistory entity ${watchString.account_UUID} S${watchable.season}E${watchable.episode} (${watchable.ID})`);
 
+            let watchableEM: Episode | Movie;
+            if (watchable.movie == -1) {
+                const episode = await episodesTable.getOne({
+                    serie_UUID: watchable.ID,
+                    season_IDX: watchable.season,
+                    episode_IDX: watchable.episode,
+                    unique: true,
+                });
+                if (episode == undefined) {
+                    console.log('Episode not found', watchable.ID, watchable.season, watchable.episode);
+                    continue;
+                }
+                watchableEM = episode;
+            } else {
+                const movie = await moviesTable.getOne({
+                    serie_UUID: watchable.ID,
+                    movie_IDX: watchable.movie,
+                    unique: true,
+                });
+                if (movie == undefined) {
+                    console.log('Movie not found', watchable.ID, watchable.movie);
+                    continue;
+                }
+                watchableEM = movie;
+            }
+
+            await watchHistoryTable.create({
+                UUID: crypto.randomUUID(),
+                account_UUID: watchString.account_UUID,
+                series_UUID: watchable.ID,
+                watchable_UUID: watchableEM.UUID,
+                watchTime: +watchable.time,
+            });
+            console.log(`=> Added watchHistory entity ${watchString.account_UUID} S${watchable.season}E${watchable.episode} (${watchable.ID})`);
+        }
     }
 }
 
