@@ -22,7 +22,8 @@
 								</div>
 							</div>
 							<div class="col">
-								<h1 class="display-5 fw-bold mb-3 text-center text-sm-center text-md-start">
+								<h1 @click="DEVELOPER_MODE = !DEVELOPER_MODE"
+									class="display-5 fw-bold mb-3 text-center text-sm-center text-md-start">
 									{{ series.infos.title || series.title }}
 								</h1>
 
@@ -371,6 +372,8 @@ import { ref, computed, watch } from 'vue';
 import ExtendedVideo from '~/components/ExtendedVideo.vue';
 import useAPIURL from '~/hooks/useAPIURL';
 
+// console.log('[SID] Created');
+
 const DEVELOPER_MODE = ref(false);
 
 definePageMeta({
@@ -384,8 +387,8 @@ const indexStore = useIndexStore();
 
 const series = computed(() => indexStore.series.find((s) => s.UUID === route.params.SID));
 
-await callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string));
-await callOnce('loadWatchHistory', async () => await indexStore.loadWatchHistory(route.params.SID as string));
+await callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string), { mode: 'navigation' });
+await callOnce('loadWatchHistory', async () => await indexStore.loadWatchHistory(route.params.SID as string), { mode: 'navigation' });
 
 const sendVideoTimeUpdate = async (time: number) => {
 	console.log('Sending time update to server', time);
