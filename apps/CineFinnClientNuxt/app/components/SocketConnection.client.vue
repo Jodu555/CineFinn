@@ -8,6 +8,7 @@ const socketID = ref('N/A');
 const socket = useSocket();
 const managmentStore = useManagmentStore();
 const indexStore = useIndexStore();
+const authStore = useAuthStore();
 
 onMounted(() => {
 	socket.connect();
@@ -15,6 +16,7 @@ onMounted(() => {
 	socket.on('disconnect', onDisconnect);
 	socket.on('jobUpdate', managmentStore.updateJob);
 	socket.on('watchListUpdate', indexStore.updateWatchList);
+	socket.on('settingsUpdate', authStore.updateSettings);
 	if (socket.connected) {
 		onConnect();
 	}

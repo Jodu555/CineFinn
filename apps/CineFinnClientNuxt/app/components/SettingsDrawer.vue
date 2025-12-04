@@ -27,7 +27,7 @@
 						</h5>
 					</li>
 				</ul>
-				<template v-if="authStore.user.role >= Role.Mod">
+				<div v-if="authStore.user.role >= Role.Mod">
 					<h2>Jobs</h2>
 					<hr />
 					<ul class="list-group list-group-flush mb-3">
@@ -38,7 +38,7 @@
 						>{{ data }}
 					</pre
 					> -->
-				</template>
+				</div>
 				<div>
 					<h2>Settings</h2>
 					<hr />
@@ -93,11 +93,11 @@ const managmentStore = useManagmentStore();
 await callOnce(managmentStore.loadJobs, { mode: 'navigation' });
 
 function updateSettings() {
-
-
+	useSocket().emit('updateSettings', authStore.user.settings);
 }
 
 function resetSettings() {
+	useSocket().emit('resetSettings');
 }
 
 function roleIDToName(id: number) {

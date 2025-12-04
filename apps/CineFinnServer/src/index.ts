@@ -13,15 +13,16 @@ import { logger } from 'hono/logger';
 import { ownLogger } from './ownLogger.js';
 import { managmentRouter } from './routes/managment.js';
 import { CacheContext } from './LRUCache.js';
-import type { AuthHandshake, ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from '@cinefinn/types/socket';
+import type { AuthHandshake, ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketAuthDataClient, SocketData } from '@cinefinn/types/socket';
 import { tryCatch } from './tryCatch.js';
 import type { Series, Season, Movie, Account, timestamped, DetailedSeries, DetailedMovie, DetailedEpisode, DetailedSeason, FrontendSeries } from '@cinefinn/types/database';
-import { setIO } from './utils.js';
+import { getIO, setIO } from './utils.js';
 import { watchRouter } from './routes/watch.js';
 import { videoRouter } from './routes/video.js';
 import { indexRouter } from './routes/index.js';
 import * as childProcess from 'node:child_process';
 import { getConfig } from './config.js';
+import { compareSettings } from './utils/settings.js';
 
 
 const app = new Hono({
@@ -225,19 +226,17 @@ io.use(async (socket, next) => {
 
 });
 
-io.on('connection', (socket) => {
-    const authHanshake = socket.handshake.auth as AuthHandshake;
-    console.log(authHanshake);
-    switch (authHanshake.type) {
+io.on('connection', async (socket) => {
+    switch (socket.data.auth.type) {
         case 'client':
-            console.log(socket.id, socket.data, 'a user connected');
-
+            const socketAuth = socket.data.auth as SocketAuthDataClient<Account | Account & timestamped>;
+            console.log(socket.id, socketAuth.user.username, 'connected');
             const debouncedUpdateTime = debounce(async (data: { watchableUUID: string; time: number }) => {
                 console.log('debounced updateTime', data);
                 const response = await app.request(`/watch/updateTime/${data.watchableUUID}/${data.time}`, {
                     method: 'POST',
                     headers: {
-                        'auth-token': authHanshake.authToken,
+                        'auth-token': socketAuth.token,
                     },
                 });
             }, 4000);
@@ -245,6 +244,14 @@ io.on('connection', (socket) => {
             socket.on('updateTime', async (data) => {
                 console.log('updateTime', data);
                 debouncedUpdateTime(data);
+            });
+
+            socket.on('updateSettings', async (data) => {
+                console.log('updateSettings', data);
+                await accountsTable.update({ UUID: socketAuth.user.UUID }, { settings: compareSettings(data) });
+                (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'client' && s.data.auth.user.UUID === socketAuth.user.UUID && s.id !== socket.id).forEach(async s => {
+                    s.emit('settingsUpdate', data);
+                });
             });
 
             socket.on('disconnect', () => {
@@ -260,7 +267,7 @@ io.on('connection', (socket) => {
             console.log('subsystem connected');
             break;
         default:
-            console.log('unknown auth type', authHanshake);
+            console.log('unknown auth type', socket.handshake.auth.type);
             break;
     }
 

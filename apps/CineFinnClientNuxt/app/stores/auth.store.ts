@@ -1,4 +1,4 @@
-import type { Account } from '@cinefinn/types/database';
+import type { Account, SettingsObject } from '@cinefinn/types/database';
 import { defineStore } from 'pinia';
 import useAPIURL from '~/hooks/useAPIURL';
 
@@ -92,6 +92,9 @@ export const useAuthStore = defineStore('auth', {
             useIndexStore().$reset();
 
             useRouter().push('/login');
+        },
+        updateSettings(settings: SettingsObject) {
+            this.user.settings = settings;
         }
     }
 });

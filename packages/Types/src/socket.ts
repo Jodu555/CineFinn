@@ -13,11 +13,14 @@ export interface ServerToClientEvents {
     withAck: (d: string, callback: (e: number) => void) => void;
     jobUpdate: (obj: (database.Job & database.timestamped)) => void;
     watchListUpdate: (obj: database.WatchHistory[]) => void;
+    settingsUpdate: (obj: database.SettingsObject) => void;
 }
 
 export interface ClientToServerEvents {
     hello: () => void;
     updateTime: (obj: { watchableUUID: string; time: number; }) => void;
+    updateSettings: (obj: database.SettingsObject) => void;
+    resetSettings: () => void;
 }
 
 export interface ServerToScraperEvents {
@@ -45,7 +48,7 @@ export interface SocketData<U = any> {
 
 type SocketAuthData<U = any> = SocketAuthDataClient<U> | SocketAuthDataScraper<U> | SocketAuthDataSubsystem<U>;
 
-interface SocketAuthDataClient<U = any> {
+export interface SocketAuthDataClient<U = any> {
     type: 'client';
     token: string;
     user: U

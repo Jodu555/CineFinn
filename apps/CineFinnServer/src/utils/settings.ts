@@ -38,6 +38,12 @@ function compareSettings(settings: any) {
             outputSettings[defaultSettingKey].value = settings[defaultSettingKey].value;
         }
     }
+
+    for (const presentSettingKey in settings) {
+        if (defSettings[presentSettingKey] == undefined) {
+            delete outputSettings[presentSettingKey];
+        }
+    }
     return outputSettings;
 }
 
