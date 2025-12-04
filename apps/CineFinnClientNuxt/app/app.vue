@@ -10,11 +10,7 @@
 // import * as bootstrap from 'bootstrap';
 // import 'bootstrap';
 import SocketConnection from '~/components/SocketConnection.client.vue';
-const authToken = useCookie('auth-token');
-const authStore = useAuthStore();
-const indexStore = useIndexStore();
-
-await callOnce('loadSeries', indexStore.loadSeries);
+const authToken = useCookie('auth-token', { watch: true });
 
 watch(
 	authToken,
@@ -25,7 +21,7 @@ watch(
 		// 	useSocket()?.disconnect();
 		// 	console.log('No auth token found');
 		// }
-		await indexStore.loadSeries();
+		await useIndexStore().loadSeries();
 	},
 	{ immediate: true }
 );

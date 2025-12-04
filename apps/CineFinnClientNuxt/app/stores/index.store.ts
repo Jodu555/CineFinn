@@ -15,11 +15,20 @@ export const useIndexStore = defineStore('index', {
     actions: {
         async loadSeries() {
             this.loading = true;
-            // const response = await useAxios().get('/index');
-            // const response = await $fetch<Series[]>(CURRENT_EXTERNAL_API + '/index');
-            const response = await $fetch<FrontendSeries[]>(useAPIURL() + '/index');
-            this.series = response;
-            this.loading = false;
+            const { data, status } = await useFetch<FrontendSeries[]>(`${useAPIURL()}/index`, {
+                key: 'index',
+                method: 'GET',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+            });
+            if (status.value == 'success') {
+                this.series = data.value!;
+                this.loading = false;
+            } else {
+                alert('Error loading Series ' + status.value);
+                this.loading = false;
+            }
         },
         async loadDetailedSeasonInfo(seriesID: string) {
             this.loading = true;
@@ -34,10 +43,23 @@ export const useIndexStore = defineStore('index', {
                 // console.log(`loadDetailedSeasonInfo for seriesID: ${seriesID} from cache`);
                 return;
             }
-            const response = await $fetch<DetailedSeries>(useAPIURL() + '/index/' + seriesID);
-            this.detailedSeasons = response.seasons;
-            this.detailedMovies = response.movies;
-            this.loading = false;
+            const { data, status } = await useFetch<DetailedSeries>(`${useAPIURL()}/index/${seriesID}`, {
+                key: 'index/' + seriesID,
+                method: 'GET',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+
+                },
+            });
+
+            if (status.value == 'success') {
+                this.detailedSeasons = data.value!.seasons;
+                this.detailedMovies = data.value!.movies;
+                this.loading = false;
+            } else {
+                alert('Error loading Detailed Series ' + status.value);
+                this.loading = false;
+            }
             // console.log(`loadDetailedSeasonInfo for seriesID: ${seriesID} from network`);
 
         },

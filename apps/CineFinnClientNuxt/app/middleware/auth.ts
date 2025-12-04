@@ -10,6 +10,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     if (authStore.authToken == '') {
         authStore.authToken = authCookie.value.toString();
         await authStore.authenticate();
+        await useIndexStore().loadSeries();
         // return navigateTo('/login');
     }
 
@@ -19,6 +20,8 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         if (authStore.loggedIn == false) {
             console.log('User is still not defined, redirecting to login');
             return navigateTo('/login');
+        } else {
+            await useIndexStore().loadSeries();
         }
     }
 

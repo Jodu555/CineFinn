@@ -7,7 +7,6 @@ const router = new Hono();
 
 router.get('/', authMiddleware, async (c) => {
 
-
     const result = await new Promise<FrontendSeries[]>((resolve, reject) => {
         database.pool.query(`
           SELECT 
