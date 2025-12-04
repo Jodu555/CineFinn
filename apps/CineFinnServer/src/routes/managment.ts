@@ -71,7 +71,7 @@ async function handleJob(type: JobType, c: Context<AuthedVars>, callFunction: (j
     const job = Job.fromDB(dbJob);
     callFunction(job).catch(async e => {
         console.log(`Job Processing ERROR: ${e}`);
-        await job.log(`JOb Processing ERROR: ${e}`);
+        await job.log(`Job Processing ERROR: ${e}`);
         await job.fail();
     });
     return c.json({
@@ -86,9 +86,6 @@ router.get('/job/crawl', authFullMiddleware((user) => user.role >= jobRegistry.c
 
 router.get('/job/generatePreviewImages', authFullMiddleware((user) => user.role >= jobRegistry.generatePreviewImages.minimumRole), async (c) => {
     return await handleJob('generatePreviewImages', c, generatePreviewImages);
-    // return c.json({
-    //     message: 'Not implemented yet',
-    // });
 });
 
 router.get('/job/checkForUpdates-smart', authFullMiddleware((user) => user.role >= jobRegistry['checkForUpdates-smart'].minimumRole), async (c) => {

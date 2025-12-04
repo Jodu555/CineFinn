@@ -1,10 +1,11 @@
 import type { FrontendSeries, Season, Movie, DetailedEpisode, DetailedSeason, DetailedMovie, DetailedSeries } from "@cinefinn/types/database";
 import { Hono } from "hono";
 import { database, seriesTable, seasonsTable, episodesTable, watchableEntitysTable, moviesTable } from "../database.js";
+import { authMiddleware } from "../auth.js";
 
 const router = new Hono();
 
-router.get('/', async (c) => {
+router.get('/', authMiddleware, async (c) => {
 
 
     const result = await new Promise<FrontendSeries[]>((resolve, reject) => {
@@ -62,7 +63,7 @@ router.get('/', async (c) => {
     return c.json(result);
 });
 
-router.get('/:S-UUID', async (c) => {
+router.get('/:S-UUID', authMiddleware, async (c) => {
 
     const serie = await seriesTable.getOne({ UUID: c.req.param('S-UUID') });
 
