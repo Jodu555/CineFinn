@@ -48,12 +48,12 @@ When all the boxes are checked, I will deploy the MVP to a testing environment a
 
 ## Word Explanation:
 
-- Series: A Series is a Collection of Movies and or Seasons
-- Movie: A Movie is a single Movie
-- Season: A Season is a Collection of Episodes
-- Episode: An Episode is a single Episode
-- Watchable: A Watchable Entity is a single Movie or Episode
-- Watchable Entity: A Watchable Entity is a Watchable's File. Common difference between same Watchable is the SubSystem or the Language
+- Series: A Series is a Collection of Movies and or Seasons (S-UUID)
+- Movie: A Movie is a single Movie (MO-UUID)
+- Season: A Season is a Collection of Episodes (SE-UUID)
+- Episode: An Episode is a single Episode (EP-UUID)
+- Watchable: A Watchable is a single Movie or Episode (EP-UUID or MO-UUID)
+- Watchable Entity: A Watchable Entity is a Watchable's File. Common difference between same Watchable is the SubSystem or the Language (WE-UUID)
 - Watch History: A Watch History is a single Watch Time for a Watchable
 
 ## Code I Joinked
