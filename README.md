@@ -12,8 +12,9 @@ it is the successor to the CineFinn v1 Project which is now deprecated and will 
 > Technically all the MVP features are Server & Client side since I decided to rewrite both from scratch
 
 - [x] User Authentication (Login, Register, Logout)
-  - [ ] Fix the Cookie issue on token expiration
-  - [ ] Implement the Settings System
+  - [x] Fix the Cookie issue on token expiration
+  - [x] Implement the Settings System
+    - [ ] Implement all the settings handling in the frontend (all that's possible at least)
 - [x] Home Page to find Series
 - [ ] Job system to handle jobs
   - [x] Crawling
