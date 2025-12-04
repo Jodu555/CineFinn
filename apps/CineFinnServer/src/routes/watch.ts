@@ -1,7 +1,8 @@
 import { Hono, type Context } from 'hono';
 import { authFullMiddleware, authMiddleware, type AuthedVars } from '../auth.js';
 import { episodesTable, moviesTable, seasonsTable, watchableEntitysTable, watchHistoryTable } from '../database.js';
-import { getIO } from '../utils.js';
+import { getIO, watchableUUIDToWatchable } from '../utils.js';
+import type { Episode, Movie } from '@cinefinn/types/database';
 
 const router = new Hono();
 
@@ -51,6 +52,12 @@ router.post('/updateTime/:watchableUUID/:time', authMiddleware, async (c) => {
 
     const time = Number(c.req.param('time'));
 
+    if (isNaN(time) && time < 0) {
+        return c.json({
+            message: 'Time must be a positive number',
+        });
+    }
+
     const updated = async (seriesUUID: string) => {
         (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'client' && s.data.auth.user.UUID === user.UUID).forEach(async s => {
             const watchList = await watchHistoryTable.get({ series_UUID: seriesUUID, account_UUID: user.UUID });
@@ -69,83 +76,41 @@ router.post('/updateTime/:watchableUUID/:time', authMiddleware, async (c) => {
         watchableUUID = watchableEntity.watchable_UUID;
     }
 
-    if (watchableUUID.startsWith('EP-')) {
-        //Update Time for Episode
-        const episode = await episodesTable.getOne({ UUID: watchableUUID });
-        if (episode == undefined) {
-            return c.json({
-                message: 'Episode not found',
-            });
-        }
-        const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, watchable_UUID: episode.UUID, unique: true });
-        if (watchHistory == undefined) {
-            await watchHistoryTable.create({
-                UUID: crypto.randomUUID(),
-                account_UUID: user.UUID,
-                series_UUID: episode.serie_UUID,
-                watchable_UUID: episode.UUID,
-                watchTime: time,
-            });
-            await updated(episode.serie_UUID);
-            return c.json({
-                message: 'Episode watchTime updated',
-            });
-        } else {
-            if (watchHistory.watchTime < time) {
-                await watchHistoryTable.update({ UUID: watchHistory.UUID }, {
-                    watchTime: time,
-                });
-                await updated(episode.serie_UUID);
-                return c.json({
-                    message: 'Episode watchTime updated',
-                });
-            }
-            await updated(episode.serie_UUID);
-            return c.json({
-                message: 'Episode watchTime not updated because lower',
-            });
-        }
-    } else if (watchableUUID.startsWith('MO-')) {
-        //Update Time for Movie
-        const movie = await moviesTable.getOne({ UUID: watchableUUID });
-        if (movie == undefined) {
-            return c.json({
-                message: 'Movie not found',
-            });
-        }
-        const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, watchable_UUID: movie.UUID, unique: true });
-        if (watchHistory == undefined) {
-            await watchHistoryTable.create({
-                UUID: crypto.randomUUID(),
-                account_UUID: user.UUID,
-                series_UUID: movie.serie_UUID,
-                watchable_UUID: movie.UUID,
-                watchTime: time,
-            });
-            await updated(movie.serie_UUID);
-            return c.json({
-                message: 'Movie watchTime updated',
-            });
-        } else {
-            if (watchHistory.watchTime < time) {
-                await watchHistoryTable.update({ UUID: watchHistory.UUID }, {
-                    watchTime: time,
-                });
-                await updated(movie.serie_UUID);
-                return c.json({
-                    message: 'Movie watchTime updated',
-                });
-            }
-            await updated(movie.serie_UUID);
-            return c.json({
-                message: 'Episode watchTime not updated because lower',
-            });
-        }
-
+    const watchable = await watchableUUIDToWatchable(watchableUUID);
+    if (watchable == undefined) {
+        return c.json({
+            message: 'Watchable does not match any known type',
+        });
     }
-    return c.json({
-        message: 'WatchableUUID does not match any known type',
-    });
+
+    const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, watchable_UUID: watchable.UUID, unique: true });
+    if (watchHistory == undefined) {
+        await watchHistoryTable.create({
+            UUID: crypto.randomUUID(),
+            account_UUID: user.UUID,
+            series_UUID: watchable.serie_UUID,
+            watchable_UUID: watchable.UUID,
+            watchTime: time,
+        });
+        await updated(watchable.serie_UUID);
+        return c.json({
+            message: 'Watchable watchTime updated',
+        });
+    } else {
+        if (watchHistory.watchTime < time) {
+            await watchHistoryTable.update({ UUID: watchHistory.UUID }, {
+                watchTime: time,
+            });
+            await updated(watchable.serie_UUID);
+            return c.json({
+                message: 'Watchable watchTime updated',
+            });
+        }
+        await updated(watchable.serie_UUID);
+        return c.json({
+            message: 'Watchable watchTime not updated because lower',
+        });
+    }
 });
 
 export { router as watchRouter };

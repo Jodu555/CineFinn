@@ -5,22 +5,7 @@ import { CacheContext } from "../LRUCache.js";
 import { Job } from "./Job.js";
 import { episodesTable, moviesTable, seriesTable, watchableEntitysTable } from "../database.js";
 import { getConfig } from "../config.js";
-
-async function watchableUUIDToWatchable(watchableUUID: string, cache: CacheContext) {
-    if (watchableUUID.startsWith('EP-')) {
-        let { data: episode, cacheInfo: existingSeasonCacheInfo } = await cache.execute(episodesTable, 'getOne', [{
-            UUID: watchableUUID,
-            unique: true,
-        }]);
-        return episode;
-    } else if (watchableUUID.startsWith('MO-')) {
-        const movie = await moviesTable.getOne({ UUID: watchableUUID });
-        return movie;
-    } else {
-        throw new Error('Unknown Watchable UUID ' + watchableUUID);
-    }
-}
-
+import { watchableUUIDToWatchable } from '../utils.js';
 
 interface QueuedPreviewImageGenerationJob {
     type: 'generatePreviewImages';
