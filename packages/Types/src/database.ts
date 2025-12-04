@@ -56,7 +56,7 @@ export type SettingsObject = {
         title: string;
         value: string;
         type: 'select';
-        options: Langs[];
+        options: string[];
     };
     showVideoTitleContainer: {
         title: string;
