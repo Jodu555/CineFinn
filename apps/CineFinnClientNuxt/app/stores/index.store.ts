@@ -48,7 +48,6 @@ export const useIndexStore = defineStore('index', {
                 method: 'GET',
                 headers: {
                     'auth-token': useAuthStore().authToken,
-
                 },
             });
 
@@ -67,7 +66,11 @@ export const useIndexStore = defineStore('index', {
             if (this.detailedPrefetchedSeriesObj[seriesID]) {
                 return;
             }
-            const response = await $fetch<DetailedSeries>(useAPIURL() + '/index/' + seriesID);
+            const response = await $fetch<DetailedSeries>(useAPIURL() + '/index/' + seriesID, {
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+            });
             const img = new Image();
             const url = new URL('https://cinema-api.jodu555.de' + `/images/${seriesID}/cover.jpg`);
             url.searchParams.append('auth-token', 'SECR-DEV');
