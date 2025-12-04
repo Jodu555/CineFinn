@@ -78,4 +78,4 @@ When all the boxes are checked, I will deploy the MVP to a testing environment a
 - The v1 site will be accessible under the normal domain!
 - After I am comfortable with the v2 I will migrate the v1 site to the new domain
   - Comfortable means that the v2 has at least feature parity with the v1 and is stable enough
-  - Until then the v2 site will be accessible using the normal domain suffixed with v2 (e.g. normaldomain.domain.com => normaldomainv2.domain.com)
+  - Until then the v2 site will be accessible using the normal domain suffixed with v2 (e.g. normaldomain.domain.com => v2.normaldomain.domain.com)
