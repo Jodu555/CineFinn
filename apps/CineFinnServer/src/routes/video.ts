@@ -41,14 +41,14 @@ function decodeRangeHeader(range: string, fileSize: number) {
     return { start, end };
 }
 
-router.get('/:watchableUUID', authMiddleware, async (c) => {
+router.get('/:watchableEntityUUID', authMiddleware, async (c) => {
     const user = c.get('credentials').user;
-    const watchableUUID = c.req.param('watchableUUID');
+    const watchableEntityUUID = c.req.param('watchableEntityUUID');
     const debug = false;
 
     try {
         // Find the watchable entity
-        const watchableEntity = await watchableEntitysTable.getOne({ UUID: watchableUUID });
+        const watchableEntity = await watchableEntitysTable.getOne({ UUID: watchableEntityUUID });
         if (!watchableEntity) {
             return c.json({ message: 'Watchable Entity not found' }, 404);
         }
