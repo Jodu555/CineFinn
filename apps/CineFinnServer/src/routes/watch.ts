@@ -77,22 +77,16 @@ router.post('/updateTime/:watchableUUID/:time', authMiddleware, async (c) => {
                 message: 'Episode not found',
             });
         }
-        const season = await seasonsTable.getOne({ UUID: episode.season_UUID });
-        if (season == undefined) {
-            return c.json({
-                message: 'Season not found',
-            });
-        }
         const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, watchable_UUID: episode.UUID, unique: true });
         if (watchHistory == undefined) {
             await watchHistoryTable.create({
                 UUID: crypto.randomUUID(),
                 account_UUID: user.UUID,
-                series_UUID: season.serie_UUID,
+                series_UUID: episode.serie_UUID,
                 watchable_UUID: episode.UUID,
                 watchTime: time,
             });
-            await updated(season.serie_UUID);
+            await updated(episode.serie_UUID);
             return c.json({
                 message: 'Episode watchTime updated',
             });
@@ -101,12 +95,12 @@ router.post('/updateTime/:watchableUUID/:time', authMiddleware, async (c) => {
                 await watchHistoryTable.update({ UUID: watchHistory.UUID }, {
                     watchTime: time,
                 });
-                await updated(season.serie_UUID);
+                await updated(episode.serie_UUID);
                 return c.json({
                     message: 'Episode watchTime updated',
                 });
             }
-            await updated(season.serie_UUID);
+            await updated(episode.serie_UUID);
             return c.json({
                 message: 'Episode watchTime not updated because lower',
             });
