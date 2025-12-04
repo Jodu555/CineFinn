@@ -7,6 +7,7 @@ import { HTTPException } from 'hono/http-exception';
 import z from 'zod';
 import type { Account } from '@cinefinn/types/database';
 import { getConfig } from './config.js';
+import { compareSettings, defaultSettings } from './utils/settings.js';
 
 const registerLoginSchema = z.object({
     email: z.email(),
@@ -39,10 +40,12 @@ export async function getUser(token: string) {
         unique: true,
     });
 
+
     if (user == undefined) {
         return null;
     }
 
+    user.settings = compareSettings(user.settings);
     return user;
 }
 
@@ -155,7 +158,7 @@ authRouter.post('/register', async (c) => {
             lastHandshake: new Date().toLocaleString('de'),
             lastLogin: new Date().toLocaleString('de'),
         },
-        settings: {},
+        settings: defaultSettings,
         role: 1,
         status: 'trial',
     });

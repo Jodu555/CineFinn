@@ -21,7 +21,7 @@ watch(
 		// 	useSocket()?.disconnect();
 		// 	console.log('No auth token found');
 		// }
-		await useIndexStore().loadSeries();
+		// await useIndexStore().loadSeries();
 	},
 	{ immediate: true }
 );

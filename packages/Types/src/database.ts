@@ -3,32 +3,96 @@ export interface timestamped {
     updated_at: number;
 }
 
-/**
- * switch (id) {
-        case 1:
-            return 'User';
-        case 2:
-            return 'Moderator';
-        case 3:
-            return 'Administrator';
-        default:
-            return 'Unknown Role';
-    }
- */
+export enum Role {
+    Admin = 3,
+    Mod = 2,
+    User = 1,
+}
 
 export interface Account {
     UUID: string;
     username: string;
     password?: string;
     email: string;
-    role: number; // See above for the role enum
-    settings: Record<string, string>;
+    role: Role; // See above for the role enum
+    settings: SettingsObject;
     activityDetails: {
         lastHandshake: string;
         lastLogin: string;
     };
     status: 'active' | 'suspended' | 'deleted' | 'trial';
 }
+
+type SettingsObjectType = 'hide' | 'text' | 'select' | 'checkbox';
+
+type SettingsValueCheckbox = {
+    title: string;
+    value: boolean;
+    type: 'checkbox';
+};
+
+type SettingsValueText = {
+    title: string;
+    value: string;
+    type: 'text';
+};
+
+type SettingsValueSelect = {
+    title: string;
+    value: string;
+    type: 'select';
+    options: string[];
+};
+
+type SettingsValueHide = {
+    value: string;
+    type: 'hide';
+};
+
+type SettingsKey = 'preferredLanguage' | 'showVideoTitleContainer' | 'showLatestWatchButton' | 'developerMode' | 'showNewsAddForm' | 'autoSkip' | 'skipSegments' | 'enableBetaFeatures' | 'volume';
+
+export type SettingsObject = {
+    preferredLanguage: {
+        title: string;
+        value: string;
+        type: 'select';
+        options: Langs[];
+    };
+    showVideoTitleContainer: {
+        title: string;
+        type: 'checkbox';
+        value: boolean;
+    };
+    showLatestWatchButton: {
+        title: string;
+        type: 'checkbox';
+        value: boolean;
+    };
+    developerMode: {
+        title: string;
+        type: 'checkbox';
+        value: boolean;
+    };
+    autoSkip: {
+        title: string;
+        type: 'checkbox';
+        value: boolean;
+    };
+    skipSegments: {
+        title: string;
+        type: 'checkbox';
+        value: boolean;
+    };
+    enableBetaFeatures: {
+        title: string;
+        type: 'checkbox';
+        value: boolean;
+    };
+    volume: {
+        type: 'hide';
+        value: number;
+    };
+};
 
 export interface AuthToken {
     TOKEN: string;

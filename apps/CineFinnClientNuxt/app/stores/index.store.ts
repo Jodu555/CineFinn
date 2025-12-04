@@ -26,7 +26,7 @@ export const useIndexStore = defineStore('index', {
                 this.series = data.value!;
                 this.loading = false;
             } else {
-                alert('Error loading Series ' + status.value);
+                // alert('Error loading Series ' + status.value);
                 this.loading = false;
             }
         },
@@ -57,7 +57,7 @@ export const useIndexStore = defineStore('index', {
                 this.detailedMovies = data.value!.movies;
                 this.loading = false;
             } else {
-                alert('Error loading Detailed Series ' + status.value);
+                // alert('Error loading Detailed Series ' + status.value);
                 this.loading = false;
             }
             // console.log(`loadDetailedSeasonInfo for seriesID: ${seriesID} from network`);

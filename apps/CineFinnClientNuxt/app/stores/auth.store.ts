@@ -61,6 +61,7 @@ export const useAuthStore = defineStore('auth', {
                 this.user = response;
 
                 if (redirectToSlash) {
+                    await useIndexStore().loadSeries();
                     const router = useRouter();
                     await router.push('/');
                 }
