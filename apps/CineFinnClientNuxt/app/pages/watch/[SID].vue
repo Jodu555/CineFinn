@@ -388,7 +388,7 @@ const indexStore = useIndexStore();
 const series = computed(() => indexStore.series.find((s) => s.UUID === route.params.SID));
 
 await callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string), { mode: 'navigation' });
-await callOnce('loadWatchHistory', async () => await indexStore.loadWatchHistory(route.params.SID as string), { mode: 'navigation' });
+callOnce('loadWatchHistory', async () => await indexStore.loadWatchHistory(route.params.SID as string), { mode: 'navigation' });
 
 const sendVideoTimeUpdate = async (time: number) => {
 	console.log('Sending time update to server', time);

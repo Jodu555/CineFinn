@@ -8,12 +8,8 @@
 		</div>
 		<div class="mb-4 d-flex justify-content-between">
 			<div class="d-flex gap-4">
-				<span
-					v-for="cat in categories"
-					@click="selectedCategory = cat"
-					:key="cat"
-					:class="selectedCategory == cat ? 'btn btn-outline-primary' : 'btn btn-outline-secondary'"
-				>
+				<span v-for="cat in categories" @click="selectedCategory = cat" :key="cat"
+					:class="selectedCategory == cat ? 'btn btn-outline-primary' : 'btn btn-outline-secondary'">
 					{{ cat }}
 				</span>
 			</div>
@@ -93,6 +89,8 @@ function preloadImagesForNotSelectedCategories() {
 	// 	});
 	// }
 }
+
+preloadRouteComponents('/watch/:SID');
 </script>
 
 <style scoped></style>
