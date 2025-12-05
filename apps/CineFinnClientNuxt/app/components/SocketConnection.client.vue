@@ -1,3 +1,12 @@
+<template>
+	<div>
+		<p class="mb-0">API: {{ useAPIURL() }}</p>
+		<p class="mb-0">Status: {{ isConnected ? 'connected' : 'disconnected' }}</p>
+		<p class="mb-0">Transport: {{ transport }}</p>
+		<p>Socket ID: {{ socketID }}</p>
+	</div>
+</template>
+
 <script setup lang="ts">
 import useAPIURL from '~/hooks/useAPIURL';
 
@@ -48,12 +57,3 @@ onBeforeUnmount(() => {
 	socket.off('disconnect', onDisconnect);
 });
 </script>
-
-<template>
-	<div>
-		<p class="mb-0">API: {{ useAPIURL() }}</p>
-		<p class="mb-0">Status: {{ isConnected ? 'connected' : 'disconnected' }}</p>
-		<p class="mb-0">Transport: {{ transport }}</p>
-		<p>Socket ID: {{ socketID }}</p>
-	</div>
-</template>
