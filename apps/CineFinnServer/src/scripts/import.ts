@@ -26,16 +26,19 @@ async function run() {
 
 
     await importSerieses();
-    // await importAccounts();
-    // await importWatchHistory();
+    await importAccounts();
+    await importWatchHistory();
 }
 
 async function importSerieses() {
     const response = await axios.get('https://cinema-api.jodu555.de/index/all?auth-token=SECR-DEV');
     const data = response.data;
 
+    let k = 0;
     for (const serie of data) {
-        console.log(`=> Adding ${serie.title}`);
+        k++;
+        k % 50 == 0 && console.log(`=> Working.... ${k}/${data.length} series`);
+        // console.log(`=> Adding ${serie.title}`);
         await seriesTable.create({
             UUID: serie.ID,
             tags: JSON.stringify([serie.categorie,]),
@@ -49,7 +52,7 @@ async function importSerieses() {
         for (const season of serie.seasons) {
             s++;
             const seasonUUID = generateSeasonID();
-            console.log(`=> Adding season ${serie.title} S${season.season}`);
+            // console.log(`=> Adding season ${serie.title} S${season.season}`);
             await seasonsTable.create({
                 UUID: seasonUUID,
                 serie_UUID: serie.ID,
@@ -59,7 +62,7 @@ async function importSerieses() {
 
             for (const episode of season) {
                 const episodeUUID = generateEpisodeID();
-                console.log(`=> Adding episode ${serie.title} S${episode.season}E${episode.episode}`);
+                // console.log(`=> Adding episode ${serie.title} S${episode.season}E${episode.episode}`);
                 await episodesTable.create({
                     UUID: episodeUUID,
                     serie_UUID: serie.ID,
@@ -67,12 +70,12 @@ async function importSerieses() {
                     episode_IDX: episode.episode,
                     season_UUID: seasonUUID,
                 } satisfies Episode);
-                console.log(`=> Added episode ${serie.title} S${episode.season}E${episode.episode}`);
+                // console.log(`=> Added episode ${serie.title} S${episode.season}E${episode.episode}`);
 
                 for (const lang of episode.langs) {
                     const iv = crypto.randomBytes(16);
                     const watchableEntityUUID = generateEntityID();
-                    console.log(`=> Adding watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang})`);
+                    // console.log(`=> Adding watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang})`);
 
                     let filePath = episode.filePath;
                     if (episode.langs.length > 1) {
@@ -90,7 +93,7 @@ async function importSerieses() {
                         runtime: -1,
                         hash: '',
                     } satisfies WatchableEntity);
-                    console.log(`=> Added watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang})`);
+                    // console.log(`=> Added watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang})`);
                 }
             }
         }
@@ -100,18 +103,18 @@ async function importSerieses() {
         for (const movie of serie.movies) {
             i++;
             const movieUUID = generateMovieID();
-            console.log(`=> Adding movie ${serie.title} #${i}`);
+            // console.log(`=> Adding movie ${serie.title} #${i} (${movie.primaryName})`);
             await moviesTable.create({
                 UUID: movieUUID,
                 serie_UUID: serie.ID,
                 movie_IDX: i,
-                primaryName: movie.name || `${serie.title} #${i}`,
+                primaryName: movie.primaryName || `${serie.title} #${i}`,
             } satisfies Movie);
-            console.log(`=> Added movie ${serie.title} #${i}`);
+            console.log(`=> Added movie ${serie.title} #${i} (${movie.primaryName})`);
             for (const lang of movie.langs) {
                 const iv = crypto.randomBytes(16);
                 const watchableEntityUUID = generateEntityID();
-                console.log(`=> Adding watchable entity ${serie.title} #${i} (${lang})`);
+                // console.log(`=> Adding watchable entity ${serie.title} #${i} (${lang})`);
 
                 let filePath = movie.filePath;
                 if (movie.langs.length > 1) {
@@ -129,7 +132,7 @@ async function importSerieses() {
                     runtime: -1,
                     hash: '',
                 } satisfies WatchableEntity);
-                console.log(`=> Added watchable entity ${serie.title} #${i} (${lang})`);
+                // console.log(`=> Added watchable entity ${serie.title} #${i} (${lang})`);
             }
         }
     }

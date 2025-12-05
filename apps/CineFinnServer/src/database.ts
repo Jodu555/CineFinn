@@ -94,6 +94,7 @@ async function createTables() {
         options: {
             timestamps: true,
             PK: 'UUID',
+            K: ['title']
         },
         UUID: UUID_FIELD,
         tags: {
@@ -140,7 +141,7 @@ async function createTables() {
         options: {
             timestamps: true,
             PK: 'UUID',
-            K: ['season_UUID']
+            K: ['season_UUID', 'serie_UUID']
             // FK: {
             //     serie_UUID: 'series/UUID',
             // },

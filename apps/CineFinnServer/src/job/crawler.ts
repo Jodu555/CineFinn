@@ -13,6 +13,8 @@ import { generateSeriesID, generateMovieID, generateSeasonID, generateEpisodeID,
 
 export async function crawl(job: Job) {
 
+    const EMPTY_IV = Buffer.alloc(0);
+
     const crawlerSeriesSeasonsCache = new CacheContext('crawler-series', 500);
     const crawlerEpisodesCache = new CacheContext('crawler-episodes', 150);
 
@@ -152,7 +154,7 @@ export async function crawl(job: Job) {
                 lang: parsedData.language,
                 subID: 'main',
                 filePath: file,
-                IV: Buffer.from([]),
+                IV: EMPTY_IV,
                 runtime: -1,
                 hash: '',
             });
