@@ -8,62 +8,7 @@ const router = new Hono();
 
 router.get('/', authMiddleware, async (c) => {
 
-    console.time('Old Query');
-    const result = await new Promise<FrontendSeries[]>((resolve, reject) => {
-        database.pool.query(`
-          SELECT 
-            series.*,
-            (SELECT COALESCE(CONCAT('[', GROUP_CONCAT(
-            JSON_OBJECT(
-                'UUID', s.UUID,
-                'serie_UUID', s.serie_UUID,
-                'season_IDX', s.season_IDX,
-                'episodes', s.episodes,
-                'created_at', s.created_at,
-                'updated_at', s.updated_at
-            )
-            ), ']'), '[]') FROM seasons s WHERE s.serie_UUID = series.UUID) AS seasons_array,
-            (SELECT COALESCE(CONCAT('[', GROUP_CONCAT(
-            JSON_OBJECT(
-                'UUID', m.UUID,
-                'primaryName', m.primaryName,
-                'serie_UUID', m.serie_UUID,
-                'movie_IDX', m.movie_IDX,
-                'created_at', m.created_at,
-                'updated_at', m.updated_at
-            )
-            ), ']'), '[]') FROM movies m WHERE m.serie_UUID = series.UUID) AS movies_array
-        FROM series
-            `, (error, rows, fields) => {
-
-            resolve(rows.map((row: any) => {
-                try {
-                    const seasons = JSON.parse(row.seasons_array) as Season[];
-                    const movies = row.movies_array != undefined ? JSON.parse(row.movies_array) as Movie[] : [] as Movie[];
-                    const obj = {
-                        ...row,
-                        tags: JSON.parse(row.tags),
-                        infos: JSON.parse(row.infos),
-                        refs: JSON.parse(row.refs),
-                        seasons: seasons.sort((a, b) => a.season_IDX - b.season_IDX),
-                        movies: movies.sort((a, b) => a.movie_IDX - b.movie_IDX),
-                    } as FrontendSeries & { seasons_array?: string; movies_array?: string };
-                    delete obj.seasons_array;
-                    delete obj.movies_array;
-                    return obj as FrontendSeries;
-                } catch (error) {
-                    console.log(error);
-                    console.log(row);
-
-                }
-                return null;
-            }));
-        });
-    });
-    console.timeEnd('Old Query');
-
-    console.time('New Query');
-    const newresult = (await queryDatabase(`
+    const result = (await queryDatabase(`
         SELECT 
             series.*,
             (SELECT COALESCE(CONCAT('[', GROUP_CONCAT(
@@ -109,14 +54,8 @@ router.get('/', authMiddleware, async (c) => {
         }
         return null;
     }).filter((x) => x != null);
-    console.timeEnd('New Query');
 
-
-    console.log('Equal?', JSON.stringify(result) === JSON.stringify(newresult));
-
-
-
-    return c.json(newresult);
+    return c.json(result);
 });
 
 router.get('/all', authMiddleware, async (c) => {
