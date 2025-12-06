@@ -56,6 +56,11 @@ When all the boxes are checked, I will deploy the MVP to a testing environment a
 - Watchable Entity: A Watchable Entity is a Watchable's File. Common difference between same Watchable is the SubSystem or the Language (WE-UUID)
 - Watch History: A Watch History is a single Watch Time for a Watchable
 
+## Thoughts and Considerations
+
+- I am currently thinking about caching the full index and the partial index in memory. Something like redis. Meaning that the /index/all and /index/S-ID would get a significant speedup and the /index also with the partial index cache. When implementing this i need to think about how to handle the cache invalidation. But sinde the recrawl is deterministic, i can just invalidate the cache when the recrawl is done. And maybe already refill the cache with the new data when the recrawl is done. So that the user does not have to wait for the next request.
+- I need to consider which in memory cache to use. Redis or something else. Or maybe just use the Server Memory or write the cache to disk. Whatever happens to be faster and more reliable.
+
 ## Code I Joinked
 
 ### The Full Video Player (Highly changed and customized by myself + integrated into the Vue Eco System)
