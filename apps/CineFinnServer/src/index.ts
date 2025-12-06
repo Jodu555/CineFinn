@@ -13,10 +13,10 @@ import { logger } from 'hono/logger';
 import { ownLogger } from './ownLogger.js';
 import { managmentRouter } from './routes/managment.js';
 import { CacheContext } from './LRUCache.js';
-import type { AuthHandshake, ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketAuthDataClient, SocketData } from '@cinefinn/types/socket';
+import type { AnythingToServerEvents, AuthHandshake, ClientToServerEvents, InterServerEvents, ServerToAnythingEvents, ServerToClientEvents, SocketAuthDataClient, SocketData } from '@cinefinn/types/socket';
 import { tryCatch } from './tryCatch.js';
 import type { Series, Season, Movie, Account, timestamped, DetailedSeries, DetailedMovie, DetailedEpisode, DetailedSeason, FrontendSeries } from '@cinefinn/types/database';
-import { getIO, setIO } from './utils.js';
+import { getIO, queryDatabase, setIO } from './utils.js';
 import { watchRouter } from './routes/watch.js';
 import { videoRouter } from './routes/video.js';
 import { indexRouter } from './routes/index.js';
@@ -103,6 +103,10 @@ const httpServer = serve({
     console.log(`Server is running on http://localhost:${info.port}`);
     // await crawl();
 
+
+    // console.log((seasonsTable as any).database.tables.get('seasons'))
+    // console.log(seasonsTable);
+
     setInterval(() => {
         database.pool.query('SELECT 1', (error, rows, fields) => {
             if (error) {
@@ -148,8 +152,8 @@ function geFileRuntime(watchableUUID: string) {
 }
 
 const io = new Server<
-    ClientToServerEvents,
-    ServerToClientEvents,
+    AnythingToServerEvents,
+    ServerToAnythingEvents,
     InterServerEvents,
     SocketData<Account | Account & timestamped>
 >(httpServer, {

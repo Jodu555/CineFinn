@@ -25,7 +25,7 @@ async function run() {
     // console.log(await seriesTable.get({}));
 
 
-    await importSerieses();
+    // await importSerieses();
     await importAccounts();
     await importWatchHistory();
 }
@@ -37,7 +37,7 @@ async function importSerieses() {
     let k = 0;
     for (const serie of data) {
         k++;
-        k % 50 == 0 && console.log(`=> Working.... ${k}/${data.length} series`);
+        k % 15 == 0 && console.log(`=> Working.... ${k}/${data.length} series`);
         // console.log(`=> Adding ${serie.title}`);
         await seriesTable.create({
             UUID: serie.ID,

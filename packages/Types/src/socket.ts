@@ -7,13 +7,21 @@ export interface AuthHandshake {
     authToken: string;
 }
 
+export type ServerToAnythingEvents = ServerToClientEvents & ServerToScraperEvents;
+
+export type AnythingToServerEvents = ClientToServerEvents & ScraperToServerEvents;
+
 export interface ServerToClientEvents {
-    noArg: () => void;
-    basicEmit: (a: number, b: string, c: Buffer) => void;
-    withAck: (d: string, callback: (e: number) => void) => void;
+    // noArg: () => void;
+    // basicEmit: (a: number, b: string, c: Buffer) => void;
+    // withAck: (d: string, callback: (e: number) => void) => void;
     jobUpdate: (obj: (database.Job & database.timestamped)) => void;
     watchListUpdate: (obj: database.WatchHistory[]) => void;
     settingsUpdate: (obj: database.SettingsObject) => void;
+}
+
+export interface ServerToScraperEvents {
+    'job:checkForUpdates': (index: [database.DetailedSeries], callback: (chanedSeries: database.DetailedSeries[]) => void) => void;
 }
 
 export interface ClientToServerEvents {
@@ -23,17 +31,10 @@ export interface ClientToServerEvents {
     resetSettings: () => void;
 }
 
-export interface ServerToScraperEvents {
-    noArg: () => void;
-    basicEmit: (a: number, b: string, c: Buffer) => void;
-    withAck: (d: string, callback: (e: number) => void) => void;
-    'job:checkForUpdates': (index: [database.DetailedSeries], callback: (chanedSeries: database.DetailedSeries[]) => void) => void;
-}
-
 export interface ScraperToServerEvents {
-    noArg: () => void;
-    basicEmit: (a: number, b: string, c: Buffer) => void;
-    withAck: (d: string, callback: (e: number) => void) => void;
+    // noArg: () => void;
+    // basicEmit: (a: number, b: string, c: Buffer) => void;
+    // withAck: (d: string, callback: (e: number) => void) => void;
     'job:recrawlArchive': () => void;
     'job:generatePreviewImages': () => void;
 }

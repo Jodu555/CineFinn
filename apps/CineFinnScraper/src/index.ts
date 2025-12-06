@@ -31,7 +31,7 @@ socket.on('disconnect', () => {
 
 socket.on('job:checkForUpdates', (cb) => {
     console.log('job:checkForUpdates');
-    cb(0);
+    // cb(0);
 });
 
 async function checkForUpdates(index: DetailedSeries[]) {
@@ -39,16 +39,16 @@ async function checkForUpdates(index: DetailedSeries[]) {
     //This list should say, that these animes should the new episodes no be included unless they are german dubbed
     const ignoranceList: IgnoranceItem[] = [];
 
-    if (process.env.IGNORE_API_HOST) {
-        const ignoreResponse = await axios.get<{ ID: string; title: string; }[]>(`${process.env.ACTION_API_HOST}/ignoreList/?auth-token=${process.env.AUTH_TOKEN_REST}`);
-        // const ignoreResponse = await axios.get<{ ID: string, title: string; }[]>(`http://cinema-api.jodu555.de/ignoreList/?auth-token=${process.env.AUTH_TOKEN_REST}`);
-        console.log('Loaded', ignoreResponse.data.length, 'Animes/Series to Ignore for now!');
-        for (const item of ignoreResponse.data) {
-            ignoranceList.push({
-                ID: item.ID,
-            });
-        }
-    }
+    // if (process.env.IGNORE_API_HOST) {
+    //     const ignoreResponse = await axios.get<{ ID: string; title: string; }[]>(`${process.env.ACTION_API_HOST}/ignoreList/?auth-token=${process.env.AUTH_TOKEN_REST}`);
+    //     // const ignoreResponse = await axios.get<{ ID: string, title: string; }[]>(`http://cinema-api.jodu555.de/ignoreList/?auth-token=${process.env.AUTH_TOKEN_REST}`);
+    //     console.log('Loaded', ignoreResponse.data.length, 'Animes/Series to Ignore for now!');
+    //     for (const item of ignoreResponse.data) {
+    //         ignoranceList.push({
+    //             ID: item.ID,
+    //         });
+    //     }
+    // }
 
 
     // if (smart) {

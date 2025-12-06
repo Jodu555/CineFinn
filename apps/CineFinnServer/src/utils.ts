@@ -2,7 +2,7 @@ import type { Account, timestamped } from '@cinefinn/types/database';
 import type { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData } from '@cinefinn/types/socket';
 import type { Server } from 'socket.io';
 import { CacheContext } from './LRUCache.js';
-import { episodesTable, moviesTable } from './database.js';
+import { database, episodesTable, moviesTable } from './database.js';
 
 let io: Server<ClientToServerEvents,
     ServerToClientEvents,
@@ -32,6 +32,47 @@ export async function watchableUUIDToWatchable(watchableUUID: string, cache?: Ca
     } else {
         throw new Error('Unknown Watchable UUID ' + watchableUUID);
     }
+}
+
+export function forEachNonBlocking<T>(array: T[], chunkSize: number, cb: (element: T, index: number) => void, finished?: () => void) {
+    let index = 0;
+
+    function processChunk() {
+        const end = Math.min(index + chunkSize, array.length);
+        for (let i = index; i < end; i++) {
+            cb(array[i], i);
+        }
+        index = end;
+        if (index < array.length) {
+            setImmediate(processChunk);
+        } else {
+            if (finished) finished();
+        }
+    }
+    processChunk();
+}
+
+export async function forEachNonBlockingAsync<T>(array: T[], chunkSize: number, cb: (element: T, index: number) => Promise<void>) {
+    return new Promise<void>((resolve, reject) => {
+        try {
+            forEachNonBlocking(array, chunkSize, cb, resolve);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+export async function queryDatabase(query: string) {
+    return new Promise<any[]>((resolve, reject) => {
+        database.pool.query(query, (error, rows, fields) => {
+            if (error) {
+                reject(error);
+                return;
+            }
+            resolve(rows);
+        });
+    })
+
 }
 
 export function getIO() {
