@@ -62,9 +62,9 @@ export async function forEachNonBlockingAsync<T>(array: T[], chunkSize: number, 
     });
 }
 
-export async function queryDatabase(query: string) {
+export async function queryDatabase(query: string, values = [] as any[]) {
     return new Promise<any[]>((resolve, reject) => {
-        database.pool.query(query, (error, rows, fields) => {
+        database.pool.query(query, values, (error, rows, fields) => {
             if (error) {
                 reject(error);
                 return;

@@ -103,7 +103,6 @@ const httpServer = serve({
     console.log(`Server is running on http://localhost:${info.port}`);
     // await crawl();
 
-
     // console.log((seasonsTable as any).database.tables.get('seasons'))
     // console.log(seasonsTable);
 
