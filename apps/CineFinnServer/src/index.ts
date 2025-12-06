@@ -23,6 +23,7 @@ import { indexRouter } from './routes/index.js';
 import * as childProcess from 'node:child_process';
 import { getConfig } from './config.js';
 import { compareSettings } from './utils/settings.js';
+import os from "os";
 
 
 const app = new Hono({
@@ -36,6 +37,19 @@ app.use(ownLogger(console.log, ['/socket.io', '/video']));
 
 app.use('*', registerMetrics);
 app.get('/metrics', printMetrics);
+
+app.get('/health', (c) => {
+    c.status(200);
+    const cpus = os.cpus();
+    return c.json({
+        status: 'ok',
+        memory: {
+            usage: process.memoryUsage(),
+            total: os.totalmem(),
+            free: os.freemem(),
+        },
+    });
+});
 
 
 app.route('/auth', authRouter);

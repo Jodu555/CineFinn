@@ -58,9 +58,15 @@ router.get('/', authMiddleware, async (c) => {
     return c.json(result);
 });
 
-router.get('/all', authMiddleware, async (c) => {
-    const output = [] as DetailedSeries[];
+let fullIndex: DetailedSeries[] = [];
 
+router.get('/all', authMiddleware, async (c) => {
+
+    if (fullIndex.length !== 0) {
+        return c.json(fullIndex);
+    }
+
+    const output = [] as DetailedSeries[];
     // console.time('Load All db')
     // const [
     //     allSeries,
@@ -212,7 +218,7 @@ router.get('/all', authMiddleware, async (c) => {
         output.push(obj);
     });
 
-
+    fullIndex = output;
 
     return c.json(output);
 

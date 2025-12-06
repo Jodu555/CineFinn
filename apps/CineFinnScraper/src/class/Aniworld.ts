@@ -1,4 +1,4 @@
-const cheerio = require('cheerio');
+import * as cheerio from 'cheerio';
 import type { Langs } from '@cinefinn/types/database';
 import type { AniWorldAdditionalSeriesInformations, AniWorldEntity, AniWorldSeriesInformations } from '@cinefinn/types/scrapers';
 import axios from 'axios';

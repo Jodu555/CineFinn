@@ -23,6 +23,7 @@ socket = io(config.CORE.URL, {
 
 socket.on('connect', () => {
     console.log('Connected to Core');
+    checkForUpdates([]);
 });
 
 socket.on('disconnect', () => {
@@ -35,6 +36,18 @@ socket.on('job:checkForUpdates', (cb) => {
 });
 
 async function checkForUpdates(index: DetailedSeries[]) {
+
+    const response = await axios.get<DetailedSeries[]>('http://localhost:3000/index/all?auth-token=SECR-DEV', {
+        timeout: 1000 * 60,
+    });
+
+    if (response.status != 200) {
+        console.log('Error fetching index');
+        return;
+    }
+    index = response.data;
+
+    index.splice(10, index.length);
 
     //This list should say, that these animes should the new episodes no be included unless they are german dubbed
     const ignoranceList: IgnoranceItem[] = [];
