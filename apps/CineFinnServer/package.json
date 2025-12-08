@@ -7,6 +7,8 @@
 		"start": "node dist/index.js"
 	},
 	"dependencies": {
+		"@cinefinn/configuration-manager": "workspace:*",
+		"@cinefinn/types": "workspace:*",
 		"@hono/node-server": "^1.19.5",
 		"@hono/prometheus": "^1.0.2",
 		"@jodu555/commandmanager": "^1.5.3",
@@ -16,10 +18,10 @@
 		"dotenv": "^17.2.3",
 		"hono": "^4.9.10",
 		"mysql": "^2.18.1",
+		"p-limit": "^7.2.0",
 		"socket.io": "^4.8.1",
-		"zod": "^4.1.12",
-		"@cinefinn/types": "workspace:*",
-		"@cinefinn/configuration-manager": "workspace:*"
+		"unstorage": "^1.17.3",
+		"zod": "^4.1.12"
 	},
 	"devDependencies": {
 		"@types/bootstrap": "^5.2.10",

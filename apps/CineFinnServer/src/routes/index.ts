@@ -3,8 +3,12 @@ import { Hono } from "hono";
 import { database, seriesTable, seasonsTable, episodesTable, watchableEntitysTable, moviesTable } from "../database.js";
 import { authMiddleware } from "../auth.js";
 import { forEachNonBlocking, forEachNonBlockingAsync, queryDatabase } from "../utils.js";
+import { createStorage } from "unstorage";
+import pLimit from 'p-limit';
 
 const router = new Hono();
+
+const storage = createStorage<DetailedSeries>()
 
 router.get('/', authMiddleware, async (c) => {
 
@@ -58,11 +62,10 @@ router.get('/', authMiddleware, async (c) => {
     return c.json(result);
 });
 
-let fullIndex: DetailedSeries[] = [];
-
 router.get('/all', authMiddleware, async (c) => {
 
-    if (fullIndex.length !== 0) {
+    if (await storage.hasItem('fullIndex')) {
+        const fullIndex = await storage.getItem('fullIndex');
         return c.json(fullIndex);
     }
 
@@ -218,13 +221,23 @@ router.get('/all', authMiddleware, async (c) => {
         output.push(obj);
     });
 
-    fullIndex = output;
+
+    const limit = pLimit(5);
+    const promises = output.map(s => {
+        limit(() => storage.setItem(`fullIndex-${s.UUID}`, s));
+    })
+    await Promise.all(promises);
 
     return c.json(output);
 
 });
 
 router.get('/:S-UUID', authMiddleware, async (c) => {
+
+    if (await storage.hasItem(`fullIndex-${c.req.param('S-UUID')}`)) {
+        return c.json(await storage.getItem(`fullIndex-${c.req.param('S-UUID')}`));
+    }
+
 
     const rows = (await queryDatabase(`
         SELECT 
@@ -320,6 +333,9 @@ router.get('/:S-UUID', authMiddleware, async (c) => {
             error: 'Serie not found',
         });
     }
+
+
+    await storage.setItem(`fullIndex-${c.req.param('S-UUID')}`, outputSeries);
 
     return c.json(outputSeries as DetailedSeries);
 
