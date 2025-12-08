@@ -31,7 +31,7 @@ onMounted(() => {
 	}
 	socket.on('connect', onConnect);
 });
-
+const router = useRouter();
 function onConnect() {
 	isConnected.value = true;
 	transport.value = socket.io.engine.transport.name;
@@ -44,8 +44,18 @@ function onConnect() {
 		socketID.value = socket.id;
 	}
 
-	socket.emit('hello');
+	socket.emit('state', {
+		url: router.currentRoute.value.fullPath,
+	});
 }
+
+watch(() => router.currentRoute.value.fullPath, (newURL) => {
+	if (isConnected.value) {
+		socket.emit('state', {
+			url: newURL,
+		});
+	}
+});
 
 function onDisconnect() {
 	isConnected.value = false;

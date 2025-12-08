@@ -25,7 +25,7 @@ export interface ServerToScraperEvents {
 }
 
 export interface ClientToServerEvents {
-    hello: () => void;
+    state: (obj: { url: string }) => void;
     updateTime: (obj: { watchableUUID: string; time: number; }) => void;
     updateSettings: (obj: database.SettingsObject) => void;
     resetSettings: () => void;
