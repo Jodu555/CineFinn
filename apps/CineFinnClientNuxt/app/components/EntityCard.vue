@@ -7,6 +7,9 @@
 			<LazyNuxtImg v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" loading="lazy"
 				root-margin="100px" />
 
+			<LazyNuxtImg v-if="true" :src="`https://picsum.photos/seed/movie${randomNumber}/600/900`" loading="lazy"
+				root-margin="100px" />
+
 			<!-- <NuxtImg v-if="entity?.infos?.image" :placeholder="[238, 357]" :src="buildCoverURL" loading="lazy" />
 			<NuxtImg v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" loading="lazy" /> -->
 
@@ -39,6 +42,7 @@
 <script lang="ts" setup>
 import SmartImage from './SmartImage.vue';
 
+
 const authStore = useAuthStore();
 const indexStore = useIndexStore();
 
@@ -46,6 +50,7 @@ const props = defineProps<{
 	seriesID: string;
 	highlighted?: boolean;
 }>();
+const randomNumber = useState('randomNumber' + props.seriesID, () => Math.floor(Math.random() * 1000));
 
 const entity = computed(() => {
 	return indexStore.series.find((i) => i.UUID == props.seriesID)!;
