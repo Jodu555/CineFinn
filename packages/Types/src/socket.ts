@@ -55,12 +55,12 @@ export interface SocketAuthDataClient<U = any> {
     user: U
 }
 
-interface SocketAuthDataScraper<U = any> {
+export interface SocketAuthDataScraper<U = any> {
     type: 'scraper';
     token: string;
 }
 
-interface SocketAuthDataSubsystem<U = any> {
+export interface SocketAuthDataSubsystem<U = any> {
     type: 'subsystem';
     token: string;
 }
