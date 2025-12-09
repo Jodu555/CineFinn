@@ -75,6 +75,17 @@ export async function queryDatabase(query: string, values = [] as any[]) {
 
 }
 
+export function debounce(cb: Function, delay = 1000) {
+    let timeout: NodeJS.Timeout;
+
+    return (...args: any[]) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            cb(...args);
+        }, delay);
+    };
+}
+
 export function getIO() {
     return io;
 }
