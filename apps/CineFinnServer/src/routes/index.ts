@@ -1,17 +1,42 @@
 import type { FrontendSeries, Season, Movie, DetailedEpisode, DetailedSeason, DetailedMovie, DetailedSeries, Episode } from "@cinefinn/types/database";
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import { database, seriesTable, seasonsTable, episodesTable, watchableEntitysTable, moviesTable } from "../database.js";
 import { authMiddleware } from "../auth.js";
 import { forEachNonBlocking, forEachNonBlockingAsync, queryDatabase } from "../utils.js";
-import { createStorage } from "unstorage";
+import { createStorage, prefixStorage } from "unstorage";
 import pLimit from 'p-limit';
+import { createMiddleware } from "hono/factory";
+import type { Storage, StorageValue } from "unstorage";
 
 
 
-const storage = createStorage<DetailedSeries>()
+const indexStorage = createStorage();
+const fullIndexStorage = prefixStorage<DetailedSeries>(indexStorage, 'fullIndex');
+const undetailedIndexStorage = prefixStorage<FrontendSeries[]>(indexStorage, 'undetailedIndex');
+
+export const cachingMiddleware = <T extends StorageValue>(storage: Storage<T>, keyFunction = (c: Context<any>) => c.req.path) => {
+    return createMiddleware(async (c, next) => {
+        const key = keyFunction(c);
+        console.log('Checking cache for', key);
+        if (await storage.hasItem(key)) {
+            console.log('HIT');
+            c.header('X-Cache-Hit', 'true');
+            return c.json(await storage.getItem(key));
+        } else {
+            await next();
+            const response = (await c.res.clone().json()) as T;
+            await storage.setItem(key, response);
+        }
+    })
+};
 
 const router = new Hono()
     .get('/', authMiddleware, async (c) => {
+
+
+        if (await undetailedIndexStorage.hasItem('undetailedIndex')) {
+            return c.json(await undetailedIndexStorage.getItem('undetailedIndex'));
+        }
 
         const result = (await queryDatabase(`
         SELECT 
@@ -60,12 +85,14 @@ const router = new Hono()
             return null;
         }).filter((x) => x != null);
 
+        await undetailedIndexStorage.setItem('undetailedIndex', result as FrontendSeries[]);
+
         return c.json(result);
     })
     .get('/all', authMiddleware, async (c) => {
 
-        if (await storage.hasItem('fullIndex')) {
-            const fullIndex = await storage.getItem('fullIndex');
+        if (await fullIndexStorage.hasItem('fullIndex')) {
+            const fullIndex = await fullIndexStorage.getItem('fullIndex');
             return c.json(fullIndex);
         }
 
@@ -224,17 +251,17 @@ const router = new Hono()
 
         const limit = pLimit(5);
         const promises = output.map(s => {
-            limit(() => storage.setItem(`fullIndex-${s.UUID}`, s));
+            limit(() => fullIndexStorage.setItem(`fullIndex-${s.UUID}`, s));
         })
         await Promise.all(promises);
 
         return c.json(output);
 
     })
-    .get('/:S-UUID', authMiddleware, async (c) => {
+    .get('/:S-UUID', authMiddleware, cachingMiddleware(fullIndexStorage), async (c) => {
 
-        if (await storage.hasItem(`fullIndex-${c.req.param('S-UUID')}`)) {
-            return c.json(await storage.getItem(`fullIndex-${c.req.param('S-UUID')}`));
+        if (await fullIndexStorage.hasItem(`fullIndex-${c.req.param('S-UUID')}`)) {
+            return c.json(await fullIndexStorage.getItem(`fullIndex-${c.req.param('S-UUID')}`));
         }
 
 
@@ -272,8 +299,7 @@ const router = new Hono()
                 'updated_at', e.updated_at
             )
             ), ']'), '[]') FROM episodes e WHERE e.serie_UUID = series.UUID) AS episodes_array
-        FROM series WHERE UUID = "086e5d7e"
-        `));
+        FROM series WHERE UUID = ?`, [c.req.param('S-UUID')]));
 
         const allWatchableEntitys = await watchableEntitysTable.get({});
 
@@ -334,7 +360,7 @@ const router = new Hono()
         }
 
 
-        await storage.setItem(`fullIndex-${c.req.param('S-UUID')}`, outputSeries);
+        await fullIndexStorage.setItem(`fullIndex-${c.req.param('S-UUID')}`, outputSeries);
 
         return c.json(outputSeries as DetailedSeries);
 
@@ -385,4 +411,4 @@ const router = new Hono()
         // return c.json(finalOutput as DetailedSeries);
     });
 
-export { router as indexRouter };
+export { router as indexRouter, indexStorage, fullIndexStorage, undetailedIndexStorage };

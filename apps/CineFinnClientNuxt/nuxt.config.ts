@@ -41,5 +41,9 @@ export default defineNuxtConfig({
       // ]
     }
   },
-  modules: ['@pinia/nuxt', '@nuxt/image'],
+  prometheus: {
+    verbose: true,
+    prefix: 'cinefinn_client_',
+  },
+  modules: ['@pinia/nuxt', '@nuxt/image', '@artmizu/nuxt-prometheus'],
 });

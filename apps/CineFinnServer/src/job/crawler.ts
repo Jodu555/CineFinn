@@ -10,6 +10,8 @@ import { Job } from './Job.js';
 import { getConfig } from '../config.js';
 import { generateSeriesID, generateMovieID, generateSeasonID, generateEpisodeID, generateEntityID } from '../utils/IdGenerators.js';
 import type { Langs } from '@cinefinn/types/database';
+import { indexStorage } from '../routes/index.js';
+import { app } from '../index.js';
 
 
 // export async function crawl(job: Job) {
@@ -601,6 +603,16 @@ export async function crawl(job: Job) {
     try { crawlerEpisodesCache.clear(); } catch (e) { }
     try { crawlerSeriesSeasonsCache.clear(); } catch (e) { }
     job.timeEnd('Clearing Cache');
+
+
+    job.time('Invlaidating Cache');
+    await indexStorage.clear();
+    job.timeEnd('Invlaidating Cache');
+
+    app.request('/index/all', {
+        headers: { 'auth-token': getConfig().system.PUBLIC_API_AUTH_TOKEN },
+    });
+
 
     await job.success();
 }

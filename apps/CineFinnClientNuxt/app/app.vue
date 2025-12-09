@@ -1,6 +1,7 @@
 <template>
 	<SocketConnection />
 	<NuxtRouteAnnouncer />
+	<!-- <NuxtLoadingIndicator :color="false" /> -->
 	<NuxtLayout>
 		<NuxtPage />
 	</NuxtLayout>

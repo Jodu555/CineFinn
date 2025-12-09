@@ -295,3 +295,7 @@ function debounce(cb: Function, delay = 1000) {
         }, delay);
     };
 }
+
+export {
+    app,
+}
