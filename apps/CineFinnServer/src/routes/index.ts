@@ -6,13 +6,14 @@ import { forEachNonBlocking, forEachNonBlockingAsync, queryDatabase } from "../u
 import { createStorage } from "unstorage";
 import pLimit from 'p-limit';
 
-const router = new Hono();
+
 
 const storage = createStorage<DetailedSeries>()
 
-router.get('/', authMiddleware, async (c) => {
+const router = new Hono()
+    .get('/', authMiddleware, async (c) => {
 
-    const result = (await queryDatabase(`
+        const result = (await queryDatabase(`
         SELECT 
             series.*,
             (SELECT COALESCE(CONCAT('[', GROUP_CONCAT(
@@ -37,102 +38,101 @@ router.get('/', authMiddleware, async (c) => {
             ), ']'), '[]') FROM movies m WHERE m.serie_UUID = series.UUID) AS movies_array
         FROM series
         `)).map((row: any) => {
-        try {
-            const seasons = JSON.parse(row.seasons_array) as Season[];
-            const movies = row.movies_array != undefined ? JSON.parse(row.movies_array) as Movie[] : [] as Movie[];
-            const obj = {
-                ...row,
-                tags: JSON.parse(row.tags),
-                infos: JSON.parse(row.infos),
-                refs: JSON.parse(row.refs),
-                seasons: seasons.sort((a, b) => a.season_IDX - b.season_IDX),
-                movies: movies.sort((a, b) => a.movie_IDX - b.movie_IDX),
-            } as FrontendSeries & { seasons_array?: string; movies_array?: string };
-            delete obj.seasons_array;
-            delete obj.movies_array;
-            return obj as FrontendSeries;
-        } catch (error) {
-            console.log(error);
-            console.log(row);
+            try {
+                const seasons = JSON.parse(row.seasons_array) as Season[];
+                const movies = row.movies_array != undefined ? JSON.parse(row.movies_array) as Movie[] : [] as Movie[];
+                const obj = {
+                    ...row,
+                    tags: JSON.parse(row.tags),
+                    infos: JSON.parse(row.infos),
+                    refs: JSON.parse(row.refs),
+                    seasons: seasons.sort((a, b) => a.season_IDX - b.season_IDX),
+                    movies: movies.sort((a, b) => a.movie_IDX - b.movie_IDX),
+                } as FrontendSeries & { seasons_array?: string; movies_array?: string };
+                delete obj.seasons_array;
+                delete obj.movies_array;
+                return obj as FrontendSeries;
+            } catch (error) {
+                console.log(error);
+                console.log(row);
 
+            }
+            return null;
+        }).filter((x) => x != null);
+
+        return c.json(result);
+    })
+    .get('/all', authMiddleware, async (c) => {
+
+        if (await storage.hasItem('fullIndex')) {
+            const fullIndex = await storage.getItem('fullIndex');
+            return c.json(fullIndex);
         }
-        return null;
-    }).filter((x) => x != null);
 
-    return c.json(result);
-});
+        const output = [] as DetailedSeries[];
+        // console.time('Load All db')
+        // const [
+        //     allSeries,
+        //     allSeasons,
+        //     allEpisodes,
+        //     allMovies,
+        //     allWatchableEntitys
+        // ] = await Promise.all([
+        //     seriesTable.get({}),
+        //     seasonsTable.get({}),
+        //     episodesTable.get({}),
+        //     moviesTable.get({}),
+        //     watchableEntitysTable.get({})
+        // ]);
+        // console.timeEnd('Load All db')
 
-router.get('/all', authMiddleware, async (c) => {
+        // await forEachNonBlockingAsync(allSeries, 10, async (serie, index) => {
+        //     index % 50 == 0 && console.log(`=> Working.... ${index}/${allSeries.length} series`);
 
-    if (await storage.hasItem('fullIndex')) {
-        const fullIndex = await storage.getItem('fullIndex');
-        return c.json(fullIndex);
-    }
+        //     // const seasons = await seasonsTable.get({ serie_UUID: serie.UUID });
+        //     const seasons = allSeasons.filter(s => s.serie_UUID == serie.UUID);
+        //     const newSeasons = seasons.map((season) => {
+        //         // const episodes = await episodesTable.get({ season_UUID: season.UUID });
+        //         const episodes = allEpisodes.filter(e => e.season_UUID == season.UUID);
 
-    const output = [] as DetailedSeries[];
-    // console.time('Load All db')
-    // const [
-    //     allSeries,
-    //     allSeasons,
-    //     allEpisodes,
-    //     allMovies,
-    //     allWatchableEntitys
-    // ] = await Promise.all([
-    //     seriesTable.get({}),
-    //     seasonsTable.get({}),
-    //     episodesTable.get({}),
-    //     moviesTable.get({}),
-    //     watchableEntitysTable.get({})
-    // ]);
-    // console.timeEnd('Load All db')
+        //         const filledEpisodesWithWatchables = episodes.map((episode) => {
+        //             // const watchableEntitys = await watchableEntitysTable.get({ watchable_UUID: episode.UUID });
+        //             const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == episode.UUID);
+        //             watchableEntitys.map(we => { delete (we as any).filePath; return we });
+        //             return {
+        //                 ...episode,
+        //                 watchableEntitys,
+        //             } as DetailedEpisode;
+        //         });
+        //         const obj = {
+        //             ...season,
+        //             episodes: filledEpisodesWithWatchables.sort((a, b) => a.episode_IDX - b.episode_IDX),
+        //         } as DetailedSeason;
+        //         return obj;
+        //     });
 
-    // await forEachNonBlockingAsync(allSeries, 10, async (serie, index) => {
-    //     index % 50 == 0 && console.log(`=> Working.... ${index}/${allSeries.length} series`);
+        //     // const movies = await moviesTable.get({ serie_UUID: serie.UUID });
+        //     const movies = allMovies.filter(m => m.serie_UUID == serie.UUID);
 
-    //     // const seasons = await seasonsTable.get({ serie_UUID: serie.UUID });
-    //     const seasons = allSeasons.filter(s => s.serie_UUID == serie.UUID);
-    //     const newSeasons = seasons.map((season) => {
-    //         // const episodes = await episodesTable.get({ season_UUID: season.UUID });
-    //         const episodes = allEpisodes.filter(e => e.season_UUID == season.UUID);
+        //     const newMovies = movies.map((movie) => {
+        //         // const watchableEntitys = await watchableEntitysTable.get({ watchable_UUID: movie.UUID });
+        //         const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == movie.UUID);
+        //         watchableEntitys.map(we => { delete (we as any).filePath; return we });
+        //         return {
+        //             ...movie,
+        //             watchableEntitys,
+        //         } as DetailedMovie;
+        //     });
 
-    //         const filledEpisodesWithWatchables = episodes.map((episode) => {
-    //             // const watchableEntitys = await watchableEntitysTable.get({ watchable_UUID: episode.UUID });
-    //             const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == episode.UUID);
-    //             watchableEntitys.map(we => { delete (we as any).filePath; return we });
-    //             return {
-    //                 ...episode,
-    //                 watchableEntitys,
-    //             } as DetailedEpisode;
-    //         });
-    //         const obj = {
-    //             ...season,
-    //             episodes: filledEpisodesWithWatchables.sort((a, b) => a.episode_IDX - b.episode_IDX),
-    //         } as DetailedSeason;
-    //         return obj;
-    //     });
+        //     const finalOutput = {
+        //         ...serie,
+        //         seasons: newSeasons.sort((a, b) => a.season_IDX - b.season_IDX),
+        //         movies: newMovies,
+        //     };
+        //     output.push(finalOutput);
+        // });
 
-    //     // const movies = await moviesTable.get({ serie_UUID: serie.UUID });
-    //     const movies = allMovies.filter(m => m.serie_UUID == serie.UUID);
-
-    //     const newMovies = movies.map((movie) => {
-    //         // const watchableEntitys = await watchableEntitysTable.get({ watchable_UUID: movie.UUID });
-    //         const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == movie.UUID);
-    //         watchableEntitys.map(we => { delete (we as any).filePath; return we });
-    //         return {
-    //             ...movie,
-    //             watchableEntitys,
-    //         } as DetailedMovie;
-    //     });
-
-    //     const finalOutput = {
-    //         ...serie,
-    //         seasons: newSeasons.sort((a, b) => a.season_IDX - b.season_IDX),
-    //         movies: newMovies,
-    //     };
-    //     output.push(finalOutput);
-    // });
-
-    const rows = await queryDatabase(`
+        const rows = await queryDatabase(`
           SELECT 
             series.*,
             (SELECT COALESCE(CONCAT('[', GROUP_CONCAT(
@@ -169,77 +169,76 @@ router.get('/all', authMiddleware, async (c) => {
         FROM series
             `) as any;
 
-    const allWatchableEntitys = await watchableEntitysTable.get({});
+        const allWatchableEntitys = await watchableEntitysTable.get({});
 
 
 
-    await forEachNonBlockingAsync(rows, 10, async (row: any, index) => {
-        index % 50 == 0 && console.log(`=> Working.... ${index}/${rows.length} series`);
-        const seasons = JSON.parse(row.seasons_array) as Season[];
-        const movies = row.movies_array != undefined ? JSON.parse(row.movies_array) as Movie[] : [] as Movie[];
-        const episodes = row.episodes_array != undefined ? JSON.parse(row.episodes_array) as Episode[] : [] as Episode[];
+        await forEachNonBlockingAsync(rows, 10, async (row: any, index) => {
+            index % 50 == 0 && console.log(`=> Working.... ${index}/${rows.length} series`);
+            const seasons = JSON.parse(row.seasons_array) as Season[];
+            const movies = row.movies_array != undefined ? JSON.parse(row.movies_array) as Movie[] : [] as Movie[];
+            const episodes = row.episodes_array != undefined ? JSON.parse(row.episodes_array) as Episode[] : [] as Episode[];
 
-        const newSeasons = seasons.map((season) => {
-            const episode = episodes.filter(e => e.season_UUID == season.UUID);
+            const newSeasons = seasons.map((season) => {
+                const episode = episodes.filter(e => e.season_UUID == season.UUID);
 
-            const newEpisodes = episode.map((episode) => {
-                const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == episode.UUID);
-                watchableEntitys.map(we => { delete (we as any).filePath; return we });
+                const newEpisodes = episode.map((episode) => {
+                    const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == episode.UUID);
+                    watchableEntitys.map(we => { delete (we as any).filePath; return we });
+                    return {
+                        ...episode,
+                        watchableEntitys,
+                    } as DetailedEpisode;
+                });
+
                 return {
-                    ...episode,
-                    watchableEntitys,
-                } as DetailedEpisode;
+                    ...season,
+                    episodes: newEpisodes.sort((a, b) => a.episode_IDX - b.episode_IDX),
+                } as DetailedSeason;
             });
 
-            return {
-                ...season,
-                episodes: newEpisodes.sort((a, b) => a.episode_IDX - b.episode_IDX),
-            } as DetailedSeason;
+            const newMovies = movies.map((movie) => {
+                const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == movie.UUID);
+                watchableEntitys.map(we => { delete (we as any).filePath; return we });
+                return {
+                    ...movie,
+                    watchableEntitys,
+                } as DetailedMovie;
+            });
+
+            const obj = {
+                ...row,
+                tags: JSON.parse(row.tags),
+                infos: JSON.parse(row.infos),
+                refs: JSON.parse(row.refs),
+                seasons: newSeasons.sort((a, b) => a.season_IDX - b.season_IDX),
+                movies: newMovies.sort((a, b) => a.movie_IDX - b.movie_IDX),
+            } as DetailedSeries & { seasons_array?: string; movies_array?: string; episodes_array?: string };
+            delete obj.seasons_array;
+            delete obj.movies_array;
+            delete obj.episodes_array;
+
+            output.push(obj);
         });
 
-        const newMovies = movies.map((movie) => {
-            const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == movie.UUID);
-            watchableEntitys.map(we => { delete (we as any).filePath; return we });
-            return {
-                ...movie,
-                watchableEntitys,
-            } as DetailedMovie;
-        });
 
-        const obj = {
-            ...row,
-            tags: JSON.parse(row.tags),
-            infos: JSON.parse(row.infos),
-            refs: JSON.parse(row.refs),
-            seasons: newSeasons.sort((a, b) => a.season_IDX - b.season_IDX),
-            movies: newMovies.sort((a, b) => a.movie_IDX - b.movie_IDX),
-        } as DetailedSeries & { seasons_array?: string; movies_array?: string; episodes_array?: string };
-        delete obj.seasons_array;
-        delete obj.movies_array;
-        delete obj.episodes_array;
+        const limit = pLimit(5);
+        const promises = output.map(s => {
+            limit(() => storage.setItem(`fullIndex-${s.UUID}`, s));
+        })
+        await Promise.all(promises);
 
-        output.push(obj);
-    });
+        return c.json(output);
 
-
-    const limit = pLimit(5);
-    const promises = output.map(s => {
-        limit(() => storage.setItem(`fullIndex-${s.UUID}`, s));
     })
-    await Promise.all(promises);
+    .get('/:S-UUID', authMiddleware, async (c) => {
 
-    return c.json(output);
-
-});
-
-router.get('/:S-UUID', authMiddleware, async (c) => {
-
-    if (await storage.hasItem(`fullIndex-${c.req.param('S-UUID')}`)) {
-        return c.json(await storage.getItem(`fullIndex-${c.req.param('S-UUID')}`));
-    }
+        if (await storage.hasItem(`fullIndex-${c.req.param('S-UUID')}`)) {
+            return c.json(await storage.getItem(`fullIndex-${c.req.param('S-UUID')}`));
+        }
 
 
-    const rows = (await queryDatabase(`
+        const rows = (await queryDatabase(`
         SELECT 
             series.*,
             (SELECT COALESCE(CONCAT('[', GROUP_CONCAT(
@@ -276,116 +275,114 @@ router.get('/:S-UUID', authMiddleware, async (c) => {
         FROM series WHERE UUID = "086e5d7e"
         `));
 
-    const allWatchableEntitys = await watchableEntitysTable.get({});
+        const allWatchableEntitys = await watchableEntitysTable.get({});
 
-    let outputSeries: DetailedSeries | undefined;
+        let outputSeries: DetailedSeries | undefined;
 
-    await forEachNonBlockingAsync(rows, 20, async (row: any, index) => {
-        const seasons = JSON.parse(row.seasons_array) as Season[];
-        const movies = row.movies_array != undefined ? JSON.parse(row.movies_array) as Movie[] : [] as Movie[];
-        const episodes = row.episodes_array != undefined ? JSON.parse(row.episodes_array) as Episode[] : [] as Episode[];
+        await forEachNonBlockingAsync(rows, 20, async (row: any, index) => {
+            const seasons = JSON.parse(row.seasons_array) as Season[];
+            const movies = row.movies_array != undefined ? JSON.parse(row.movies_array) as Movie[] : [] as Movie[];
+            const episodes = row.episodes_array != undefined ? JSON.parse(row.episodes_array) as Episode[] : [] as Episode[];
 
-        const newSeasons = seasons.map((season) => {
-            const episode = episodes.filter(e => e.season_UUID == season.UUID);
+            const newSeasons = seasons.map((season) => {
+                const episode = episodes.filter(e => e.season_UUID == season.UUID);
 
-            const newEpisodes = episode.map((episode) => {
-                const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == episode.UUID);
-                watchableEntitys.map(we => { delete (we as any).filePath; return we });
+                const newEpisodes = episode.map((episode) => {
+                    const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == episode.UUID);
+                    watchableEntitys.map(we => { delete (we as any).filePath; return we });
+                    return {
+                        ...episode,
+                        watchableEntitys,
+                    } as DetailedEpisode;
+                });
+
                 return {
-                    ...episode,
-                    watchableEntitys,
-                } as DetailedEpisode;
+                    ...season,
+                    episodes: newEpisodes.sort((a, b) => a.episode_IDX - b.episode_IDX),
+                } as DetailedSeason;
             });
 
-            return {
-                ...season,
-                episodes: newEpisodes.sort((a, b) => a.episode_IDX - b.episode_IDX),
-            } as DetailedSeason;
+            const newMovies = movies.map((movie) => {
+                const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == movie.UUID);
+                watchableEntitys.map(we => { delete (we as any).filePath; return we });
+                return {
+                    ...movie,
+                    watchableEntitys,
+                } as DetailedMovie;
+            });
+
+            const obj = {
+                ...row,
+                tags: JSON.parse(row.tags),
+                infos: JSON.parse(row.infos),
+                refs: JSON.parse(row.refs),
+                seasons: newSeasons.sort((a, b) => a.season_IDX - b.season_IDX),
+                movies: newMovies.sort((a, b) => a.movie_IDX - b.movie_IDX),
+            } as DetailedSeries & { seasons_array?: string; movies_array?: string; episodes_array?: string };
+            delete obj.seasons_array;
+            delete obj.movies_array;
+            delete obj.episodes_array;
+
+            outputSeries = obj;
         });
 
-        const newMovies = movies.map((movie) => {
-            const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == movie.UUID);
-            watchableEntitys.map(we => { delete (we as any).filePath; return we });
-            return {
-                ...movie,
-                watchableEntitys,
-            } as DetailedMovie;
-        });
 
-        const obj = {
-            ...row,
-            tags: JSON.parse(row.tags),
-            infos: JSON.parse(row.infos),
-            refs: JSON.parse(row.refs),
-            seasons: newSeasons.sort((a, b) => a.season_IDX - b.season_IDX),
-            movies: newMovies.sort((a, b) => a.movie_IDX - b.movie_IDX),
-        } as DetailedSeries & { seasons_array?: string; movies_array?: string; episodes_array?: string };
-        delete obj.seasons_array;
-        delete obj.movies_array;
-        delete obj.episodes_array;
+        if (outputSeries == undefined) {
+            return c.json({
+                error: 'Serie not found',
+            });
+        }
 
-        outputSeries = obj;
+
+        await storage.setItem(`fullIndex-${c.req.param('S-UUID')}`, outputSeries);
+
+        return c.json(outputSeries as DetailedSeries);
+
+        // const serie = await seriesTable.getOne({ UUID: c.req.param('S-UUID') });
+
+        // if (serie == undefined) {
+        //     return c.json({
+        //         error: 'Serie not found',
+        //     });
+        // }
+
+        // const seasons = await seasonsTable.get({ serie_UUID: serie.UUID });
+
+
+        // const newSeasons = await Promise.all(seasons.map(async (season) => {
+        //     const episodes = await episodesTable.get({ season_UUID: season.UUID });
+        //     const filledEpisodesWithWatchables = await Promise.all(episodes.map(async (episode) => {
+        //         const watchableEntitys = await watchableEntitysTable.get({ watchable_UUID: episode.UUID });
+        //         watchableEntitys.map(we => { delete (we as any).filePath; return we });
+        //         return {
+        //             ...episode,
+        //             watchableEntitys,
+        //         } as DetailedEpisode;
+        //     }));
+        //     const obj = {
+        //         ...season,
+        //         episodes: filledEpisodesWithWatchables.sort((a, b) => a.episode_IDX - b.episode_IDX),
+        //     } as DetailedSeason;
+        //     return obj;
+        // }));
+
+        // const movies = await moviesTable.get({ serie_UUID: serie.UUID });
+        // const newMovies = await Promise.all(movies.map(async (movie) => {
+        //     const watchableEntitys = await watchableEntitysTable.get({ watchable_UUID: movie.UUID });
+        //     watchableEntitys.map(we => { delete (we as any).filePath; return we });
+        //     return {
+        //         ...movie,
+        //         watchableEntitys,
+        //     } as DetailedMovie;
+        // }));
+
+        // const finalOutput = {
+        //     ...serie,
+        //     seasons: newSeasons.sort((a, b) => a.season_IDX - b.season_IDX),
+        //     movies: newMovies,
+        // };
+
+        // return c.json(finalOutput as DetailedSeries);
     });
-
-
-    if (outputSeries == undefined) {
-        return c.json({
-            error: 'Serie not found',
-        });
-    }
-
-
-    await storage.setItem(`fullIndex-${c.req.param('S-UUID')}`, outputSeries);
-
-    return c.json(outputSeries as DetailedSeries);
-
-    // const serie = await seriesTable.getOne({ UUID: c.req.param('S-UUID') });
-
-    // if (serie == undefined) {
-    //     return c.json({
-    //         error: 'Serie not found',
-    //     });
-    // }
-
-    // const seasons = await seasonsTable.get({ serie_UUID: serie.UUID });
-
-
-    // const newSeasons = await Promise.all(seasons.map(async (season) => {
-    //     const episodes = await episodesTable.get({ season_UUID: season.UUID });
-    //     const filledEpisodesWithWatchables = await Promise.all(episodes.map(async (episode) => {
-    //         const watchableEntitys = await watchableEntitysTable.get({ watchable_UUID: episode.UUID });
-    //         watchableEntitys.map(we => { delete (we as any).filePath; return we });
-    //         return {
-    //             ...episode,
-    //             watchableEntitys,
-    //         } as DetailedEpisode;
-    //     }));
-    //     const obj = {
-    //         ...season,
-    //         episodes: filledEpisodesWithWatchables.sort((a, b) => a.episode_IDX - b.episode_IDX),
-    //     } as DetailedSeason;
-    //     return obj;
-    // }));
-
-    // const movies = await moviesTable.get({ serie_UUID: serie.UUID });
-    // const newMovies = await Promise.all(movies.map(async (movie) => {
-    //     const watchableEntitys = await watchableEntitysTable.get({ watchable_UUID: movie.UUID });
-    //     watchableEntitys.map(we => { delete (we as any).filePath; return we });
-    //     return {
-    //         ...movie,
-    //         watchableEntitys,
-    //     } as DetailedMovie;
-    // }));
-
-    // const finalOutput = {
-    //     ...serie,
-    //     seasons: newSeasons.sort((a, b) => a.season_IDX - b.season_IDX),
-    //     movies: newMovies,
-    // };
-
-    // return c.json(finalOutput as DetailedSeries);
-});
-
-
 
 export { router as indexRouter };

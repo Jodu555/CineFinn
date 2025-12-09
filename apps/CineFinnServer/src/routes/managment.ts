@@ -7,7 +7,7 @@ import { generatePreviewImages } from '../job/images.js';
 import { tryCatch } from '../tryCatch.js';
 import { Job } from '../job/Job.js';
 
-const router = new Hono();
+
 
 interface JobRegister {
     minimumRole: number;
@@ -39,10 +39,6 @@ async function checkIfRunning(type: string) {
     }
 }
 
-router.get('/jobs/info', authFullMiddleware((user) => user.role >= 1), async (c) => {
-    const jobs = await jobsTable.get();
-    return c.json(jobs);
-});
 
 async function handleJob(type: JobType, c: Context<AuthedVars>, callFunction: (job: Job) => Promise<void>) {
     if (await checkIfRunning(type)) {
@@ -80,24 +76,26 @@ async function handleJob(type: JobType, c: Context<AuthedVars>, callFunction: (j
     });
 }
 
-router.get('/job/crawl', authFullMiddleware((user) => user.role >= jobRegistry.crawl.minimumRole), async (c) => {
-    return await handleJob('crawl', c, crawl);
-});
-
-router.get('/job/generatePreviewImages', authFullMiddleware((user) => user.role >= jobRegistry.generatePreviewImages.minimumRole), async (c) => {
-    return await handleJob('generatePreviewImages', c, generatePreviewImages);
-});
-
-router.get('/job/checkForUpdates-smart', authFullMiddleware((user) => user.role >= jobRegistry['checkForUpdates-smart'].minimumRole), async (c) => {
-    return c.json({
-        message: 'Not implemented yet',
+const router = new Hono()
+    .get('/jobs/info', authFullMiddleware((user) => user.role >= 1), async (c) => {
+        const jobs = await jobsTable.get();
+        return c.json(jobs);
+    })
+    .get('/job/crawl', authFullMiddleware((user) => user.role >= jobRegistry.crawl.minimumRole), async (c) => {
+        return await handleJob('crawl', c, crawl);
+    })
+    .get('/job/generatePreviewImages', authFullMiddleware((user) => user.role >= jobRegistry.generatePreviewImages.minimumRole), async (c) => {
+        return await handleJob('generatePreviewImages', c, generatePreviewImages);
+    })
+    .get('/job/checkForUpdates-smart', authFullMiddleware((user) => user.role >= jobRegistry['checkForUpdates-smart'].minimumRole), async (c) => {
+        return c.json({
+            message: 'Not implemented yet',
+        });
+    })
+    .get('/job/checkForUpdates-old', authFullMiddleware((user) => user.role >= jobRegistry['checkForUpdates-old'].minimumRole), async (c) => {
+        return c.json({
+            message: 'Not implemented yet',
+        });
     });
-});
-
-router.get('/job/checkForUpdates-old', authFullMiddleware((user) => user.role >= jobRegistry['checkForUpdates-old'].minimumRole), async (c) => {
-    return c.json({
-        message: 'Not implemented yet',
-    });
-});
 
 export { router as managmentRouter };

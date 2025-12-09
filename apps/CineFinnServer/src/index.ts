@@ -26,38 +26,32 @@ import { compareSettings } from './utils/settings.js';
 import os from "os";
 
 
+const { printMetrics, registerMetrics } = prometheus();
 const app = new Hono({
     strict: false,
-});
-const { printMetrics, registerMetrics } = prometheus();
-app.use(cors());
-app.use(trimTrailingSlash());
-// app.use(logger());
-app.use(ownLogger(console.log, ['/socket.io', '/video']));
-
-app.use('*', registerMetrics);
-app.get('/metrics', printMetrics);
-
-app.get('/health', (c) => {
-    c.status(200);
-    const cpus = os.cpus();
-    return c.json({
-        status: 'ok',
-        memory: {
-            usage: process.memoryUsage(),
-            total: os.totalmem(),
-            free: os.freemem(),
-        },
-    });
-});
-
-
-app.route('/auth', authRouter);
-
-app.route('/index', indexRouter);
-app.route('/managment', managmentRouter);
-app.route('/watch', watchRouter);
-app.route('/video', videoRouter);
+})
+    .use(cors())
+    .use(trimTrailingSlash())
+    .use(ownLogger(console.log, ['/socket.io', '/video']))
+    .use('*', registerMetrics)
+    .get('/metrics', printMetrics)
+    .get('/health', (c) => {
+        c.status(200);
+        const cpus = os.cpus();
+        return c.json({
+            status: 'ok',
+            memory: {
+                usage: process.memoryUsage(),
+                total: os.totalmem(),
+                free: os.freemem(),
+            },
+        });
+    })
+    .route('/auth', authRouter)
+    .route('/index', indexRouter)
+    .route('/managment', managmentRouter)
+    .route('/watch', watchRouter)
+    .route('/video', videoRouter);
 
 // app.get('*', async (c, next) => {
 

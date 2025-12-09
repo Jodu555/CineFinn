@@ -4,7 +4,7 @@ import { authMiddleware } from "../auth.js";
 import { watchableEntitysTable } from "../database.js";
 import { streamSSE } from 'hono/streaming';
 
-const router = new Hono();
+
 
 function decodeRangeHeader(range: string, fileSize: number) {
     const bytesPrefix = 'bytes=';
@@ -41,70 +41,71 @@ function decodeRangeHeader(range: string, fileSize: number) {
     return { start, end };
 }
 
-router.get('/:watchableEntityUUID', authMiddleware, async (c) => {
-    const user = c.get('credentials').user;
-    const watchableEntityUUID = c.req.param('watchableEntityUUID');
-    const debug = false;
+const router = new Hono()
+    .get('/:watchableEntityUUID', authMiddleware, async (c) => {
+        const user = c.get('credentials').user;
+        const watchableEntityUUID = c.req.param('watchableEntityUUID');
+        const debug = false;
 
-    try {
-        // Find the watchable entity
-        const watchableEntity = await watchableEntitysTable.getOne({ UUID: watchableEntityUUID });
-        if (!watchableEntity) {
-            return c.json({ message: 'Watchable Entity not found' }, 404);
-        }
+        try {
+            // Find the watchable entity
+            const watchableEntity = await watchableEntitysTable.getOne({ UUID: watchableEntityUUID });
+            if (!watchableEntity) {
+                return c.json({ message: 'Watchable Entity not found' }, 404);
+            }
 
-        const filePath = watchableEntity.filePath;
-        debug && console.log('Got filePath', filePath);
+            const filePath = watchableEntity.filePath;
+            debug && console.log('Got filePath', filePath);
 
-        // Check if file exists
-        if (!fs.existsSync(filePath)) {
-            return c.json({ message: 'Video file not found' }, 404);
-        }
+            // Check if file exists
+            if (!fs.existsSync(filePath)) {
+                return c.json({ message: 'Video file not found' }, 404);
+            }
 
-        const stat = fs.statSync(filePath);
-        const fileSize = stat.size;
-        const range = c.req.header('Range');
+            const stat = fs.statSync(filePath);
+            const fileSize = stat.size;
+            const range = c.req.header('Range');
 
-        // Handle HEAD requests
-        if (c.req.method === 'HEAD') {
-            c.header('Accept-Ranges', 'bytes');
-            c.header('Content-Length', fileSize.toString());
+            // Handle HEAD requests
+            if (c.req.method === 'HEAD') {
+                c.header('Accept-Ranges', 'bytes');
+                c.header('Content-Length', fileSize.toString());
+                c.header('Content-Type', 'video/mp4');
+                return c.body(null, 200);
+            }
+
+            // Decode range header
+            const { start, end } = decodeRangeHeader(range || '', fileSize);
+            const contentLength = end - start + 1;
+
+            debug && console.log('Range:', { start, end, contentLength, fileSize });
+
+            // Create file stream
+            const fileStream = fs.createReadStream(filePath, {
+                start,
+                end,
+                highWaterMark: 64 * 1024 // 64KB chunks
+            });
+
+            // Set status code first
+            c.status(range ? 206 : 200);
+
+            // Set headers
             c.header('Content-Type', 'video/mp4');
-            return c.body(null, 200);
+            c.header('Accept-Ranges', 'bytes');
+            c.header('Content-Length', contentLength.toString());
+
+            if (range) {
+                c.header('Content-Range', `bytes ${start}-${end}/${fileSize}`);
+            }
+
+            // Return the file stream as body
+            return c.body(fileStream as any);
+
+        } catch (error) {
+            console.error('Error in video streaming:', error);
+            return c.json({ message: 'Internal server error' }, 500);
         }
-
-        // Decode range header
-        const { start, end } = decodeRangeHeader(range || '', fileSize);
-        const contentLength = end - start + 1;
-
-        debug && console.log('Range:', { start, end, contentLength, fileSize });
-
-        // Create file stream
-        const fileStream = fs.createReadStream(filePath, {
-            start,
-            end,
-            highWaterMark: 64 * 1024 // 64KB chunks
-        });
-
-        // Set status code first
-        c.status(range ? 206 : 200);
-
-        // Set headers
-        c.header('Content-Type', 'video/mp4');
-        c.header('Accept-Ranges', 'bytes');
-        c.header('Content-Length', contentLength.toString());
-
-        if (range) {
-            c.header('Content-Range', `bytes ${start}-${end}/${fileSize}`);
-        }
-
-        // Return the file stream as body
-        return c.body(fileStream as any);
-
-    } catch (error) {
-        console.error('Error in video streaming:', error);
-        return c.json({ message: 'Internal server error' }, 500);
-    }
-});
+    });
 
 export { router as videoRouter };
