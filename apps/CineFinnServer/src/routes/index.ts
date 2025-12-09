@@ -17,9 +17,7 @@ const undetailedIndexStorage = prefixStorage<FrontendSeries[]>(indexStorage, 'un
 export const cachingMiddleware = <T extends StorageValue>(storage: Storage<T>, keyFunction = (c: Context<any>) => c.req.path) => {
     return createMiddleware(async (c, next) => {
         const key = keyFunction(c);
-        console.log('Checking cache for', key);
         if (await storage.hasItem(key)) {
-            console.log('HIT');
             c.header('X-Cache-Hit', 'true');
             return c.json(await storage.getItem(key));
         } else {
@@ -31,13 +29,7 @@ export const cachingMiddleware = <T extends StorageValue>(storage: Storage<T>, k
 };
 
 const router = new Hono()
-    .get('/', authMiddleware, async (c) => {
-
-
-        if (await undetailedIndexStorage.hasItem('undetailedIndex')) {
-            return c.json(await undetailedIndexStorage.getItem('undetailedIndex'));
-        }
-
+    .get('/', authMiddleware, cachingMiddleware(undetailedIndexStorage, (c) => 'undetailedIndex'), async (c) => {
         const result = (await queryDatabase(`
         SELECT 
             series.*,
@@ -84,9 +76,6 @@ const router = new Hono()
             }
             return null;
         }).filter((x) => x != null);
-
-        await undetailedIndexStorage.setItem('undetailedIndex', result as FrontendSeries[]);
-
         return c.json(result);
     })
     .get('/all', authMiddleware, async (c) => {
@@ -258,11 +247,7 @@ const router = new Hono()
         return c.json(output);
 
     })
-    .get('/:S-UUID', authMiddleware, cachingMiddleware(fullIndexStorage), async (c) => {
-
-        if (await fullIndexStorage.hasItem(`fullIndex-${c.req.param('S-UUID')}`)) {
-            return c.json(await fullIndexStorage.getItem(`fullIndex-${c.req.param('S-UUID')}`));
-        }
+    .get('/:S-UUID', authMiddleware, cachingMiddleware(fullIndexStorage, (c) => `fullIndex-${c.req.param('S-UUID')}`), async (c) => {
 
 
         const rows = (await queryDatabase(`
@@ -358,9 +343,6 @@ const router = new Hono()
                 error: 'Serie not found',
             });
         }
-
-
-        await fullIndexStorage.setItem(`fullIndex-${c.req.param('S-UUID')}`, outputSeries);
 
         return c.json(outputSeries as DetailedSeries);
 
