@@ -8,7 +8,9 @@ import { accountsTable } from "../database.js";
 import { debounce, getIO } from "../utils.js";
 import { compareSettings } from "../utils/settings.js";
 
-async function authFunction(authHandshake: AuthHandshake): Promise<SocketAuthDataClient<Account | Account & timestamped>> {
+type LocalAuthData = SocketAuthDataClient<Account | Account & timestamped>;
+
+async function authFunction(authHandshake: AuthHandshake): Promise<LocalAuthData> {
     const { authToken: token } = authHandshake;
 
     if (token === undefined) {
@@ -33,7 +35,7 @@ async function authFunction(authHandshake: AuthHandshake): Promise<SocketAuthDat
 }
 
 async function connectionFunction(socket: definedSocket) {
-    const socketAuth = socket.data.auth as SocketAuthDataClient<Account | Account & timestamped>;
+    const socketAuth = socket.data.auth as LocalAuthData;
     console.log(socket.id, socketAuth.user.username, 'connected');
     const debouncedUpdateTime = debounce(async (data: { watchableUUID: string; time: number }) => {
         console.log('debounced updateTime', data);
