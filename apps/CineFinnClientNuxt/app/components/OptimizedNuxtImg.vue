@@ -2,15 +2,21 @@
     <!-- ClientOnly prevents server from rendering the image HTML -->
     <ClientOnly>
         <div ref="root" :class="containerClass" :style="containerStyle" role="img" :aria-label="alt ?? undefined">
+            <NuxtImg :src="visible ? (src as string) : 'https://noop.org'" :alt="alt" :width="width" :height="height"
+                :sizes="sizes" :format="format" :provider="provider" :loading="(loadingAttr as any)"
+                v-bind="nuxtImgAttrs" :style="{ width, height }" />
+            <div v-if="!visible" class="lazy-placeholder" :style="placeholderStyle">Loading....</div>
             <!-- Render NuxtImg only when visible -->
-            <NuxtImg v-if="visible" :src="(src as string)" :alt="alt" :width="width" :height="height" :sizes="sizes"
-                :format="format" :provider="provider" :loading="(loadingAttr as any)" v-bind="nuxtImgAttrs" />
-            <!-- Optional lightweight placeholder while not visible -->
+            <!-- <NuxtImg v-if="visible" :src="(src as string)" :alt="alt" :width="width" :height="height" :sizes="sizes"
+                :format="format" :provider="provider" :loading="(loadingAttr as any)" v-bind="nuxtImgAttrs" :style="{
+                    width,
+                    height,
+                }" />
             <template v-else>
                 <slot name="placeholder">
-                    <div class="lazy-placeholder" :style="placeholderStyle"></div>
+                    <div class="lazy-placeholder" :style="placeholderStyle">Loading....</div>
                 </slot>
-            </template>
+            </template> -->
         </div>
     </ClientOnly>
 </template>
@@ -50,7 +56,8 @@ const props = defineProps({
     containerStyle: { type: [String, Object], default: '' }
 })
 
-const root = ref<HTMLElement | null>(null)
+// const root = ref<HTMLElement | null>(null)
+const root = useTemplateRef('root');
 const visible = ref(false)
 let observer: IntersectionObserver | null = null
 
@@ -64,7 +71,19 @@ const placeholderStyle = computed(() => ({
 // If user didn't set loadingAttr, use 'lazy' for the actual <NuxtImg>
 const loadingAttr = computed(() => props.loadingAttr ?? 'lazy')
 
+onNuxtReady(() => {
+    console.log('onNuxtReady called');
+    trySetup();
+})
+
 onMounted(() => {
+    console.log('onMounted called');
+
+    trySetup();
+});
+
+function trySetup() {
+    console.log('Came 1', root.value, visible.value, observer == null);
     // Only run on client
     if (!root.value) return
 
@@ -73,6 +92,8 @@ onMounted(() => {
         visible.value = true
         return
     }
+
+    if (observer !== null) return;
 
     observer = new IntersectionObserver(
         (entries, obs) => {
@@ -91,9 +112,10 @@ onMounted(() => {
     )
 
     observer.observe(root.value)
-})
+}
 
 onBeforeUnmount(() => {
+    console.log('onBeforeUnmount called');
     if (observer && root.value) {
         observer.unobserve(root.value)
         observer.disconnect()
@@ -106,5 +128,6 @@ onBeforeUnmount(() => {
 .lazy-placeholder {
     width: 100%;
     object-fit: cover;
+    background: gray;
 }
 </style>

@@ -45,5 +45,5 @@ export default defineNuxtConfig({
     verbose: true,
     prefix: 'cinefinn_client_',
   },
-  modules: ['@pinia/nuxt', '@nuxt/image', '@artmizu/nuxt-prometheus'],
+  modules: ['@pinia/nuxt', '@nuxt/image', '@artmizu/nuxt-prometheus', 'vue3-carousel-nuxt'],
 });
