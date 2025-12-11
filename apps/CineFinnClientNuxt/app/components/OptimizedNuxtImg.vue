@@ -53,7 +53,7 @@ const props = defineProps({
     // prefer explicit loading attr, otherwise default to 'lazy' when mounted
     loadingAttr: { type: String, default: undefined },
     containerClass: { type: [String, Array, Object], default: '' },
-    containerStyle: { type: [String, Object], default: '' }
+    containerStyle: { type: [String, Object], default: '' },
 })
 
 // const root = ref<HTMLElement | null>(null)

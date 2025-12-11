@@ -8,9 +8,14 @@
 			<LazyOptimizedNuxtImg v-else-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" loading="lazy"
 				root-margin="100px" style="width: 100%; height: 100%" :width="'100%'" :height="'100%'" />
 
-			<OptimizedNuxtImg v-else style="width: 100%; height: 100%" :width="'100%'" :height="'100%'"
-				:src="`https://picsum.photos/seed/movie${randomNumber}/300/400`" loading="lazy" root-margin="500px"
+			<OptimizedNuxtImg v-else-if="!props.serverRendered" style="width: 100%; height: 100%" :width="'100%'"
+				:height="'100%'" :src="`https://picsum.photos/seed/movie${randomNumber}/300/400`" root-margin="500px"
 				placeholder-height="400px" class="entitycard-img" />
+
+			<div v-else class="entitycard-img">
+				<img :style="imgStyle" :src="`https://picsum.photos/seed/movie${randomNumber}/300/400`">
+
+			</div>
 
 			<!-- <NuxtImg v-if="entity?.infos?.image" :placeholder="[238, 357]" :src="buildCoverURL" loading="lazy" />
 			<NuxtImg v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" loading="lazy" /> -->
@@ -50,17 +55,31 @@ const indexStore = useIndexStore();
 // 	noBody?: boolean;
 // }>();
 
+const imgStyle = computed(() =>
+	isHydrated.value
+		? { width: '100%', height: '100%' }      // client after hydration
+		: { width: '300px', height: '400px' }   // server / initial
+)
+
+const isHydrated = ref(false)
+onMounted(() => {
+	isHydrated.value = true;
+})
+
+
 const props = withDefaults(defineProps<{
 	seriesID: string;
 	highlighted?: boolean;
 	showBody?: boolean;
 	showFooter?: boolean;
 	beClickable?: boolean;
+	serverRendered?: boolean;
 }>(), {
 	highlighted: false,
 	showBody: true,
 	showFooter: true,
 	beClickable: false,
+	serverRendered: false,
 });
 
 const randomNumber = useState('randomNumber' + props.seriesID, () => Math.floor(Math.random() * 1000));

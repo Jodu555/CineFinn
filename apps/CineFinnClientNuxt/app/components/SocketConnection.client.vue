@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div v-if="false">
 		<p class="mb-0">API: {{ useAPIURL() }}</p>
 		<p class="mb-0">Status: {{ isConnected ? 'connected' : 'disconnected' }}</p>
 		<p class="mb-0">Transport: {{ transport }}</p>
