@@ -123,23 +123,27 @@ const httpServer = serve({
         });
     }, 10000 * 30);
 
-    // const seasons = await seasonsTable.get();
-    // for await (const season of seasons) {
-    //     const episodes = await episodesTable.get({ season_UUID: season.UUID });
-    //     if (episodes.length !== season.episodes) {
-    //         console.log(`Season ${season.UUID} has ${season.episodes} episodes, but should have ${episodes.length}. Updating...`);
-    //         await seasonsTable.update({ UUID: season.UUID }, { episodes: episodes.length });
-    //     }
-    // }
+    console.log('Fixing Seasons');
+    const seasons = await seasonsTable.get();
+    for await (const season of seasons) {
+        const episodes = await episodesTable.get({ season_UUID: season.UUID });
+        if (episodes.length !== season.episodes) {
+            console.log(`Season ${season.UUID} has ${season.episodes} episodes, but should have ${episodes.length}. Updating...`);
+            await seasonsTable.update({ UUID: season.UUID }, { episodes: episodes.length });
+        }
+    }
+    console.log('Seasons Fixed');
 
-    // const entitys = await watchableEntitysTable.get({ runtime: -1 });
-    // let i = 0;
-    // for await (const entity of entitys) {
-    //     console.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`);
 
-    //     const runtime = await geFileRuntime(entity.UUID);
-    //     await watchableEntitysTable.update({ UUID: entity.UUID }, { runtime });
-    // }
+    console.log('Inserting Missing WatchableEntity runtimes');
+    const entitys = await watchableEntitysTable.get({ runtime: -1 });
+    let i = 0;
+    for await (const entity of entitys) {
+        console.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`);
+        const runtime = await geFileRuntime(entity.UUID);
+        await watchableEntitysTable.update({ UUID: entity.UUID }, { runtime });
+    }
+    console.log('Missing WatchableEntity runtimes inserted');
 
 });
 

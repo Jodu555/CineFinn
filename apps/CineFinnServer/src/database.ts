@@ -32,7 +32,7 @@ export async function connectDatabase() {
 }
 
 const UUID_FIELD = {
-    type: 'varchar(64)',
+    type: 'varchar(16)',
     null: false,
 };
 
@@ -98,7 +98,7 @@ async function createTables() {
         },
         UUID: UUID_FIELD,
         tags: {
-            type: 'text',
+            type: 'json',
             null: false,
             json: true,
         },
@@ -191,11 +191,11 @@ async function createTables() {
         watchable_UUID: UUID_FIELD,
         // serie_UUID: UUID_FIELD, //Maybe implement this, this would make so much so much easier
         lang: {
-            type: 'varchar(32)',
+            type: 'varchar(10)',
             null: false,
         },
         subID: {
-            type: 'varchar(64)',
+            type: 'varchar(16)',
             null: false,
             default: 'main',
         },
@@ -256,7 +256,7 @@ async function createTables() {
         },
         UUID: UUID_FIELD,
         type: {
-            type: 'varchar(64)',
+            type: 'varchar(16)',
             null: false,
         },
         failed_at: {

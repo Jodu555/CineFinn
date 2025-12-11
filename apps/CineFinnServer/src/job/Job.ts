@@ -53,13 +53,17 @@ export class Job {
         };
     }
 
-    sendSocketUpdate() {
+    sendSocketUpdate(immediate = false) {
         //TODO: Broadcast to allegebale clients
         const socketJob = JSON.parse(JSON.stringify(this.toDB()));
         socketJob.data = {};
         socketJob.logs = socketJob.logs.slice(-10);
         // getIO().emit('jobUpdate', socketJob);
-        getIO().volatile.emit('jobUpdate', socketJob);
+        if (immediate) {
+            getIO().emit('jobUpdate', socketJob);
+        } else {
+            getIO().volatile.emit('jobUpdate', socketJob);
+        }
     }
 
     async save(immediate = true) {
@@ -74,7 +78,7 @@ export class Job {
         //     console.log('SENT jobUpdate to socket');
         // }
 
-        this.sendSocketUpdate();
+        this.sendSocketUpdate(immediate);
 
         if (immediate == false) {
             if (this.queuedSaved) {

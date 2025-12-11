@@ -92,7 +92,7 @@ async function compareForNewReleasesAniWorld(
 ): Promise<ExtendedEpisodeDownload[]> {
     const debug = false;
     const limit = promiseLimit<AniWorldSerieCompare>(10);
-    const data = series.filter((x) => x.refs?.aniworld && !ignoranceList.find((v) => v.ID == x.UUID && !v.lang));
+    const data = series.filter((x) => x.refs?.aniworld && !ignoranceList.find((v) => v.UUID == x.UUID && !v.lang));
 
     const compare: AniWorldSerieCompare[] = await Promise.all(
         data.map(async (serie) => {
@@ -168,7 +168,7 @@ async function compareForNewReleasesAniWorld(
 
     for (const aniworldSeries of compare) {
         const localSeries = series.find((e) => e.UUID == aniworldSeries.UUID);
-        const ignoranceObject = ignoranceList.find((x) => x.ID == aniworldSeries.UUID) || ({} as IgnoranceItem);
+        const ignoranceObject = ignoranceList.find((x) => x.UUID == aniworldSeries.UUID) || ({} as IgnoranceItem);
 
     }
 

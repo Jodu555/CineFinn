@@ -1,5 +1,5 @@
 <template>
-    <div class="shadow p-1 mb-3 mt-1 rounded">
+    <div class="shadow-lg p-1 mb-3 mt-1 rounded">
         <h4 class="ms-3 mb-3">Neu hinzugefügt</h4>
         <Carousel v-bind="carouselConfig">
             <Slide v-for="series in [...indexStore.series]" :key="series.UUID">
@@ -24,7 +24,7 @@
             </template>
         </Carousel>
     </div>
-    <div class="shadow p-1 mb-3 mt-1 rounded">
+    <div class="shadow-lg p-1 mb-3 mt-1 rounded">
         <h4 class="ms-3 mb-3">Weiterschauen</h4>
         <Carousel v-bind="carouselConfig">
             <Slide v-for="series in [...indexStore.series]" :key="series.UUID">

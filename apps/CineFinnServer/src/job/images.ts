@@ -9,6 +9,7 @@ import { watchableUUIDToWatchable } from '../utils.js';
 
 interface QueuedPreviewImageGenerationJob {
     type: 'generatePreviewImages';
+    UUID: string;
     data: {
         publicStreamURL: string;
         seriesUUID: string;
@@ -60,6 +61,7 @@ export async function generatePreviewImages(job: Job) {
         videoURL.searchParams.set('auth-token', config.system.PUBLIC_API_AUTH_TOKEN);
 
         const generatedQueueJob = {
+            UUID: crypto.randomUUID(),
             type: 'generatePreviewImages',
             data: {
                 publicStreamURL: videoURL.toString(),
