@@ -10,11 +10,11 @@
         <template #addons>
             <Navigation>
                 <template #prev>
-                    <font-awesome-icon icon="fa-solid fa-chevron-left" size="2xl"
+                    <font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-left" size="2xl"
                         style="color:white; margin-left: 1.5rem" />
                 </template>
                 <template #next>
-                    <font-awesome-icon icon="fa-solid fa-chevron-right" size="2xl"
+                    <font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-right" size="2xl"
                         style="color:white; margin-right: 1.5rem;" beat />
                 </template>
             </Navigation>
@@ -34,6 +34,12 @@ const indexStore = useIndexStore();
 import 'vue3-carousel/carousel.css'
 import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel'
 import EntityCard from '~/components/EntityCard.vue';
+
+const ready = ref(false);
+
+onMounted(() => {
+    ready.value = true;
+});
 
 const carouselConfig = {
     itemsToShow: 1,
