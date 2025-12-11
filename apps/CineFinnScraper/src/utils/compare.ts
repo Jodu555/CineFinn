@@ -1,4 +1,4 @@
-import type { DetailedSeries, ExtendedEpisodeDownload, IgnoranceItem, Langs, SeriesRefs } from '@cinefinn/types/database';
+import type { DetailedEpisode, DetailedMovie, DetailedSeries, ExtendedEpisodeDownload, IgnoranceItem, Langs, SeriesRefs } from '@cinefinn/types/database';
 import type { AniWorldEntity, AniWorldSeriesInformations, ExtendedZoroEpisode } from '@cinefinn/types/scrapers';
 import * as fs from 'fs';
 import Aniworld from '../class/Aniworld.js';
@@ -165,11 +165,141 @@ async function compareForNewReleasesAniWorld(
     }
 
 
+    type OutputListMeta = {
+        serieTitle: string;
+        serieReferenceAniworld: string;
+    } & (OutputListMetaEpisode | OutputListMetaMovie);
 
-    for (const aniworldSeries of compare) {
-        const localSeries = series.find((e) => e.UUID == aniworldSeries.UUID);
-        const ignoranceObject = ignoranceList.find((x) => x.UUID == aniworldSeries.UUID) || ({} as IgnoranceItem);
+    interface OutputListMetaEpisode {
+        type: 'episode';
+        seasonIDX: number;
+        episodeIDX: number;
+    }
 
+    interface OutputListMetaMovie {
+        type: 'movie';
+        movieTitle: string;
+        movieIDX: number;
+    }
+
+    const handle = (entity: AniWorldEntity, ignoranceItem: IgnoranceItem, outputListMeta: OutputListMeta, localEntity?: DetailedEpisode | DetailedMovie) => {
+
+        let language: Langs | undefined = undefined;
+        if (localEntity == undefined) {
+            const lang = entity.langs.find((e) => {
+                return ['GerDub', 'GerSub', 'EngDub', 'EngSub'].find((x) => x.includes(e));
+            });
+            if (lang == undefined) return;
+            language = lang;
+        }
+        if (localEntity) {
+            const localLangs = localEntity.watchableEntitys.map(x => x.lang);
+            let lang: Langs | undefined = undefined;
+            switch (true) {
+                case entity.langs.includes('GerDub') && !localLangs.includes('GerDub'):
+                    lang = 'GerDub';
+                    break;
+                case entity.langs.includes('GerSub') && !localLangs.includes('GerDub') && !localLangs.includes('GerSub'):
+                    lang = 'GerSub';
+                    break;
+                case entity.langs.includes('EngDub') && !localLangs.includes('EngDub') && !localLangs.includes('GerDub') && !localLangs.includes('GerSub'):
+                    lang = 'EngDub';
+                    break;
+                case entity.langs.includes('EngSub') && !localLangs.includes('EngDub') && !localLangs.includes('EngSub') && !localLangs.includes('GerDub') && !localLangs.includes('GerSub'):
+                    lang = 'EngSub';
+                    break;
+            }
+            if (lang == undefined) return;
+            language = lang;
+        }
+        /**
+         * Check ignoranceObject
+         * if localEpisode exists start language decision
+         * if not start language decision
+         */
+
+
+        if (language == undefined) {
+            return;
+        }
+
+        if (outputListMeta.type === 'episode') {
+            addtoOutputList(outputListMeta.serieTitle, outputListMeta.serieReferenceAniworld as string, outputListMeta.seasonIDX, outputListMeta.episodeIDX, language);
+        }
+        if (outputListMeta.type === 'movie') {
+            addtoOutputListMovie(outputListMeta.serieTitle, outputListMeta.serieReferenceAniworld as string, outputListMeta.movieTitle, outputListMeta.movieIDX, language);
+        }
+
+
+    }
+
+
+    for (const aniworldSerie of compare) {
+        const localSerie = series.find((e) => e.UUID == aniworldSerie.UUID);
+        if (localSerie == undefined) {
+            console.log('Serie not found. WTF????', aniworldSerie.UUID);
+            continue;
+        }
+        const ignoranceItem = ignoranceList.find((x) => x.UUID == aniworldSerie.UUID) || ({} as IgnoranceItem);
+
+        for (const _aniworldSeasonIDX in aniworldSerie.seasons) {
+            const aniworldSeasonIDX = Number(_aniworldSeasonIDX);
+            const aniworldSeason = aniworldSerie.seasons[aniworldSeasonIDX];
+            const localSeason = localSerie.seasons.find((x) => x.season_IDX == aniworldSeasonIDX + 1);
+            if (localSeason == undefined) {
+                console.log('Missing Season!');
+                for (const episode of aniworldSeason) {
+                    handle(episode, ignoranceItem, {
+                        type: 'episode',
+                        serieTitle: localSerie.title,
+                        serieReferenceAniworld: localSerie.refs.aniworld as string,
+                        seasonIDX: aniworldSeasonIDX + 1,
+                        episodeIDX: aniworldSeason.indexOf(episode) + 1,
+                    });
+                }
+                continue;
+            }
+            for (const _aniworldEpisodeIDX in aniworldSeason) {
+                const aniworldEpisodeIDX = Number(_aniworldEpisodeIDX);
+                const aniworldEpisode = aniworldSeason[aniworldEpisodeIDX];
+                const localEpisode = localSeason.episodes.find((x) => x.episode_IDX == aniworldEpisodeIDX + 1);
+                handle(aniworldEpisode, ignoranceItem, {
+                    type: 'episode',
+                    serieTitle: localSerie.title,
+                    serieReferenceAniworld: localSerie.refs.aniworld as string,
+                    seasonIDX: aniworldSeasonIDX + 1,
+                    episodeIDX: Number(_aniworldEpisodeIDX + 1),
+                }, localEpisode);
+            }
+        }
+
+        if (!aniworldSerie.hasMovies) {
+            continue;
+        }
+
+        for (const _aniworldMovieIDX in aniworldSerie.movies) {
+            const aniworldMovieIDX = Number(_aniworldMovieIDX);
+            const aniworldMovie = aniworldSerie.movies[aniworldMovieIDX];
+            const localMovie = localSerie.movies.find((x) => x.movie_IDX == aniworldMovieIDX + 1);
+            // if (localMovie == undefined) {
+            //     console.log('Missing Movie!');
+            //     handle(aniworldMovie, ignoranceItem, {
+            //         type: 'movie',
+            //         serieTitle: localSerie.title,
+            //         serieReferenceAniworld: localSerie.refs.aniworld as string,
+            //         movieTitle: aniworldMovie.mainName,
+            //         movieIDX: aniworldMovieIDX + 1,
+            //     });
+            //     continue;
+            // }
+            handle(aniworldMovie, ignoranceItem, {
+                type: 'movie',
+                serieTitle: localSerie.title,
+                serieReferenceAniworld: localSerie.refs.aniworld as string,
+                movieTitle: aniworldMovie.mainName,
+                movieIDX: aniworldMovieIDX + 1,
+            }, localMovie);
+        }
     }
 
     console.log(outputDlList.length);
