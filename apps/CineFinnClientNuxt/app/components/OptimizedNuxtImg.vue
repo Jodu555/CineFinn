@@ -2,8 +2,8 @@
     <!-- ClientOnly prevents server from rendering the image HTML -->
     <ClientOnly>
         <div ref="root" :class="containerClass" :style="containerStyle" role="img" :aria-label="alt ?? undefined">
-            <NuxtImg :src="visible ? (src as string) : 'https://noop.org'" :alt="alt" :width="width" :height="height"
-                :sizes="sizes" :format="format" :provider="provider" :loading="(loadingAttr as any)"
+            <NuxtImg v-show="visible" :src="visible ? (src as string) : 'https://noop.org'" :alt="alt" :width="width"
+                :height="height" :sizes="sizes" :format="format" :provider="provider" :loading="(loadingAttr as any)"
                 v-bind="nuxtImgAttrs" :style="{ width, height }" />
             <div v-if="!visible" class="lazy-placeholder" :style="placeholderStyle">Loading....</div>
             <!-- Render NuxtImg only when visible -->
@@ -72,18 +72,18 @@ const placeholderStyle = computed(() => ({
 const loadingAttr = computed(() => props.loadingAttr ?? 'lazy')
 
 onNuxtReady(() => {
-    console.log('onNuxtReady called');
+    // console.log('onNuxtReady called');
     trySetup();
 })
 
 onMounted(() => {
-    console.log('onMounted called');
+    // console.log('onMounted called');
 
     trySetup();
 });
 
 function trySetup() {
-    console.log('Came 1', root.value, visible.value, observer == null);
+    // console.log('Came 1', root.value, visible.value, observer == null);
     // Only run on client
     if (!root.value) return
 
@@ -115,7 +115,7 @@ function trySetup() {
 }
 
 onBeforeUnmount(() => {
-    console.log('onBeforeUnmount called');
+    // console.log('onBeforeUnmount called');
     if (observer && root.value) {
         observer.unobserve(root.value)
         observer.disconnect()

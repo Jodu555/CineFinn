@@ -1,5 +1,5 @@
 <template>
-	<div class="col" style="content-visibility: auto" :id="entity.UUID">
+	<div class="col" style="content-visibility: auto" :id="entity.UUID" @click="clicked">
 		<div class="card" :class="{ 'border-success': highlighted }">
 
 
@@ -17,7 +17,7 @@
 			<!-- <SmartImage v-if="entity?.infos?.image" :src="buildCoverURL" :childclass="'card-img-top'" /> -->
 			<!-- <SmartImage v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" :childclass="'card-img-top'" /> -->
 			<!-- <img :src="buildCoverURL" alt="" class="card-img-top" loading="lazy" /> -->
-			<div class="card-body">
+			<div class="card-body" v-if="props.showBody">
 				<h4 class="card-title">{{ entity.infos?.title || entity.infos?.infos || entity.title }}</h4>
 				<div class="card-text">
 					<ElongatedText v-if="entity.infos.description"
@@ -32,7 +32,7 @@
 					<p class="ms-auto text-secondary" style="margin-bottom: 0.1rem">ID: {{ entity.UUID }}</p>
 				</div>
 			</div>
-			<div class="card-footer"
+			<div v-if="props.showFooter" class="card-footer"
 				:class="{ 'text-secondary': !entity.infos.disabled, 'text-danger': entity.infos.disabled }">
 				{{ entityInfoString }}
 			</div>
@@ -41,19 +41,27 @@
 </template>
 
 <script lang="ts" setup>
-import SmartImage from './SmartImage.vue';
-
-onMounted(() => {
-	console.log('EntityCard mounted');
-})
-
 const authStore = useAuthStore();
 const indexStore = useIndexStore();
+// const props = defineProps<{
+// 	seriesID: string;
+// 	highlighted?: boolean;
+// 	noBody?: boolean;
+// }>();
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
 	seriesID: string;
 	highlighted?: boolean;
-}>();
+	showBody?: boolean;
+	showFooter?: boolean;
+	beClickable?: boolean;
+}>(), {
+	highlighted: false,
+	showBody: true,
+	showFooter: true,
+	beClickable: false,
+});
+
 const randomNumber = useState('randomNumber' + props.seriesID, () => Math.floor(Math.random() * 1000));
 
 const entity = computed(() => {
@@ -78,6 +86,12 @@ const entityInfoString = computed(() => {
 		entity.value.seasons.length >= 1 ? entity.value.seasons.length + ' ' + (entity.value.seasons.length > 1 ? 'Seasons' : 'Season') : '';
 	return entity.value.movies.length >= 1 && entity.value.seasons.length >= 1 ? moviePart + ' | ' + seasonPart : moviePart + seasonPart;
 });
+
+function clicked() {
+	if (props.beClickable) {
+		goAndWatch();
+	}
+}
 
 const goAndWatch = () => {
 	console.log('Go and watch', entity.value);

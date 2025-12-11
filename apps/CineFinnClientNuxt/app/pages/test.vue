@@ -1,12 +1,9 @@
 <template>
     <Carousel v-bind="carouselConfig">
         <Slide v-for="series in [...indexStore.series, ...indexStore.series, ...indexStore.series]" :key="series.UUID">
-            <div class="carusel__item" style="height: 100%; width: 100%">
-                <EntityCard :seriesID="series.UUID" />
-                <!-- <div class="row">
-                    <div class="col">
-                    </div>
-                </div> -->
+            <div class="carusel__item entity-hover" style="height: 100%; width: 100%;">
+                <EntityCard :seriesID="series.UUID" :show-body="false" :show-footer="false" :be-clickable="true"
+                    class="entity-card" />
             </div>
         </Slide>
 
@@ -14,11 +11,11 @@
             <Navigation>
                 <template #prev>
                     <font-awesome-icon icon="fa-solid fa-chevron-left" size="2xl"
-                        style="color:white; margin-left: 2.5rem" />
+                        style="color:white; margin-left: 1.5rem" />
                 </template>
                 <template #next>
                     <font-awesome-icon icon="fa-solid fa-chevron-right" size="2xl"
-                        style="color:white; margin-right: 2.5rem;" beat />
+                        style="color:white; margin-right: 1.5rem;" beat />
                 </template>
             </Navigation>
             <!-- <Pagination /> -->
@@ -39,12 +36,13 @@ import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel'
 import EntityCard from '~/components/EntityCard.vue';
 
 const carouselConfig = {
-    itemsToShow: 4,
+    itemsToShow: 1,
     snapAlign: 'center',
     pauseAutoplayOnHover: true,
-    autoplay: 1000 * 1,
+    // autoplay: 1000 * 1,
     transition: 400,
-    gap: 10,
+    wrapAround: true,
+    gap: 20,
     breakpoints: {
         //This Works by taking the default from settings and then for example 450 works until somehting other is specified so 450 up to in this case 600
         450: {
@@ -90,3 +88,16 @@ const carouselConfig = {
     }
 }
 </script>
+
+<style lang="scss">
+.entity-hover {
+    transition: transform .2s ease-in-out;
+    cursor: pointer;
+
+    &:hover {
+        transform: scale(1.1);
+        // box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+        transition: transform .1s ease-in-out;
+    }
+}
+</style>
