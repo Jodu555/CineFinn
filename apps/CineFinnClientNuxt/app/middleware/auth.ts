@@ -7,10 +7,20 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         return navigateTo('/login');
     }
 
+    const checkOnboarding = () => {
+        if (to.path === '/onboarding') {
+            return;
+        }
+        if (authStore.user.email.includes('@nil.com')) {
+            return navigateTo('/onboarding');
+        }
+    }
+
     if (authStore.authToken == '') {
         authStore.authToken = authCookie.value.toString();
         try {
             await authStore.authenticate();
+            checkOnboarding();
             await useIndexStore().loadSeries();
         } catch (error) {
             return navigateTo('/login');
@@ -25,6 +35,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
                 console.log('User is still not defined, redirecting to login');
                 return navigateTo('/login');
             } else {
+                checkOnboarding();
                 await useIndexStore().loadSeries();
             }
         } catch (error) {

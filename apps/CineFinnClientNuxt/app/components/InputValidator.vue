@@ -1,18 +1,12 @@
 <template>
 	<div>
 		<label :for="id" class="form-label mt-4">{{ name }}</label>
-		<input
-			:type="type"
-			:id="id"
-			:autocomplete="autocomplete"
-			:value="modelValue"
-			@input="$emit('update:modelValue', ($event!.target! as any).value)"
-			:class="{
+		<input :disabled="disabled" :type="type" :id="id" :autocomplete="autocomplete" :value="modelValue"
+			@input="$emit('update:modelValue', ($event!.target! as any).value)" :class="{
 				'form-control': true,
 				'is-invalid': internalValid == false,
 				'is-valid': internalValid == true,
-			}"
-			:placeholder="placeholder" />
+			}" :placeholder="placeholder" />
 		<div :id="id" class="invalid-feedback">
 			{{ invalidMessage }}
 		</div>
@@ -31,6 +25,7 @@ export default defineComponent({
 		rules: { type: Array, required: true },
 		modelValue: { type: String, required: true },
 		valid: { type: Boolean, required: true },
+		disabled: { type: Boolean, required: false, default: false },
 	},
 	data() {
 		return {
