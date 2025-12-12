@@ -5,18 +5,21 @@ import { CacheContext } from "../LRUCache.js";
 import { Job } from "./Job.js";
 import { episodesTable, moviesTable, seriesTable, watchableEntitysTable } from "../database.js";
 import { getConfig } from "../config.js";
-import { watchableUUIDToWatchable } from '../utils.js';
+import { forEachNonBlockingAsync, getIORedis, watchableUUIDToWatchable } from '../utils.js';
+import { Queue, QueueEvents } from 'bullmq';
 
 interface QueuedPreviewImageGenerationJob {
     type: 'generatePreviewImages';
     UUID: string;
-    data: {
-        publicStreamURL: string;
-        seriesUUID: string;
-        watchableEntityUUID: string;
-        resultPath: string;
-        readrate: number;
-    };
+    data: QueuedPreviewImageGenerationJobData;
+}
+
+interface QueuedPreviewImageGenerationJobData {
+    publicStreamURL: string;
+    seriesUUID: string;
+    watchableEntityUUID: string;
+    resultPath: string;
+    readrate: number;
 }
 
 export async function generatePreviewImages(job: Job) {
@@ -48,7 +51,7 @@ export async function generatePreviewImages(job: Job) {
         }
 
 
-        const resultPath = path.join(config.imagePath, series.UUID, 'previewImages', watchableEntity.UUID);
+        const resultPath = path.join(config.imagePath, series.UUID, 'previewImages', watchableEntity.watchable_UUID, watchableEntity.UUID);
         if (fs.existsSync(resultPath) && (await fsPromises.readdir(resultPath)).length != 0) {
             //We may predict that greater than 0 files means it worked not the best
             //TODO: lets get back to this and compute it with the actual file length and a rough estimation of how many images there should be
@@ -76,62 +79,70 @@ export async function generatePreviewImages(job: Job) {
     }
     await job.setData(queuedJobs);
     job.log(`Finished Image Crawling (${queuedJobs.length})`);
+    job.time('Added to Queue');
+    const previewImageQueue = 'previewImageQueue';
+    const connection = getIORedis();
+    const queue = new Queue<QueuedPreviewImageGenerationJobData>(previewImageQueue, { connection });
+    await forEachNonBlockingAsync(queuedJobs, 2, async (p, i) => {
+        await queue.add(p.data.seriesUUID, p.data, { removeOnComplete: false, removeOnFail: false });
+    });
+    job.timeEnd('Added to Queue');
     await job.success();
 
 }
 
-interface QueueItem<T> {
-    UUID: string;
-    queueID: string;
-    data: T;
-    finished_at: string;
-    created_at: string;
-    failtimes: number;
-}
+// interface QueueItem<T> {
+//     UUID: string;
+//     queueID: string;
+//     data: T;
+//     finished_at: string;
+//     created_at: string;
+//     failtimes: number;
+// }
 
-class Queue<T> {
-    name: string;
-    state: 'paused' | 'running';
-    constructor(name: string) {
-        this.name = name;
-        this.state = 'paused';
-    }
+// class Queue<T> {
+//     name: string;
+//     state: 'paused' | 'running';
+//     constructor(name: string) {
+//         this.name = name;
+//         this.state = 'paused';
+//     }
 
-    static async fromDB() {
-        //TODO: Load the queue from the DB
-    }
+//     static async fromDB() {
+//         //TODO: Load the queue from the DB
+//     }
 
-    add(item: QueueItem<T>) {
-        //TODO: Add the item to the queue
-    }
-    pause() {
-        //TODO: Pause the queue
-    }
-    resume() {
-        //TODO: Resume the queue
-    }
-}
+//     add(item: QueueItem<T>) {
+//         //TODO: Add the item to the queue
+//     }
+//     pause() {
+//         //TODO: Pause the queue
+//     }
+//     resume() {
+//         //TODO: Resume the queue
+//     }
+// }
 
-class Worker<T> {
-    name: string;
-    state: 'paused' | 'running';
-    concurrency: number;
-    constructor(name: string, workerFunction: (item: T) => Promise<void>) {
-        this.name = name;
-        this.state = 'paused';
-        this.concurrency = 1;
-        this.work();
-    }
+// class Worker<T> {
+//     name: string;
+//     state: 'paused' | 'running';
+//     concurrency: number;
+//     constructor(name: string, workerFunction: (item: T) => Promise<void>) {
+//         this.name = name;
+//         this.state = 'paused';
+//         this.concurrency = 1;
+//         this.work();
+//     }
 
-    static async fromDB() {
-        //TODO: Load the worker from the DB
-    }
+//     static async fromDB() {
+//         //TODO: Load the worker from the DB
+//     }
 
-    async work() {
-        setTimeout(async () => {
-            //TODO: Get the next item from the queue
-            // await workerFunction(item);
-            this.work();
-        }, 1000);
-    }
-}
+//     async work() {
+//         setTimeout(async () => {
+//             //TODO: Get the next item from the queue
+//             // await workerFunction(item);
+//             this.work();
+//         }, 1000);
+//     }
+// }

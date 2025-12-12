@@ -35,7 +35,6 @@
 import type { Account } from '@cinefinn/types/database';
 import useAPIURL from '~/hooks/useAPIURL';
 
-
 const { status, data: accounts } = await useFetch<Account[]>(useAPIURL() + '/admin/accounts', {
   key: 'admin-accounts',
   method: 'GET',

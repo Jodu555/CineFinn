@@ -17,21 +17,6 @@
                             <NuxtLink class="nav-link px-0 align-middle" exact-active-class="active"
                                 to="/admin/accounts"><span class="ms-1 d-none d-sm-inline">Accounts</span></NuxtLink>
                         </li>
-                        <!-- <li>
-                            <NuxtLink class="nav-link px-0 align-middle" exact-active-class="active" to="/admin/jobs">
-                                <span class="ms-1 d-none d-sm-inline">Jobs</span>
-                            </NuxtLink>
-                        </li>
-                        <li>
-                            <NuxtLink class="nav-link px-0 align-middle" exact-active-class="active"
-                                to="/admin/subsystems"><span class="ms-1 d-none d-sm-inline">SubSystems</span>
-                            </NuxtLink>
-                        </li>
-                        <li>
-                            <NuxtLink class="nav-link px-0 align-middle" exact-active-class="active"
-                                to="/admin/ignoreList"><span class="ms-1 d-none d-sm-inline">Ignore
-                                    List</span></NuxtLink>
-                        </li> -->
                     </ul>
                 </div>
             </div>
