@@ -5,6 +5,7 @@ export const useIndexStore = defineStore('index', {
     state: () => ({
         loading: false,
         series: [] as FrontendSeries[],
+        detailedSerie: null as DetailedSeries | null,
         detailedSeasons: [] as DetailedSeason[],
         detailedMovies: [] as DetailedMovie[],
         selectedEntity: null as DetailedEpisode | DetailedMovie | null,
@@ -37,6 +38,7 @@ export const useIndexStore = defineStore('index', {
                 const prefetched = this.detailedPrefetchedSeriesObj[seriesID];
                 this.detailedSeasons = prefetched.seasons;
                 this.detailedMovies = prefetched.movies;
+                this.detailedSerie = prefetched;
 
                 this.detailedPrefetchedSeriesObj = {};
                 this.loading = false;
@@ -54,6 +56,7 @@ export const useIndexStore = defineStore('index', {
             if (status.value == 'success') {
                 this.detailedSeasons = data.value!.seasons;
                 this.detailedMovies = data.value!.movies;
+                this.detailedSerie = data.value!;
                 this.loading = false;
             } else {
                 // alert('Error loading Detailed Series ' + status.value);

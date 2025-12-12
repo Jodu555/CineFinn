@@ -15,7 +15,7 @@ import { managmentRouter } from './routes/managment.js';
 import { CacheContext } from './LRUCache.js';
 import type { AnythingToServerEvents, AuthHandshake, ClientToServerEvents, InterServerEvents, ServerToAnythingEvents, ServerToClientEvents, SocketAuthDataClient, SocketData } from '@cinefinn/types/socket';
 import { tryCatch } from './tryCatch.js';
-import type { Series, Season, Movie, Account, timestamped, DetailedSeries, DetailedMovie, DetailedEpisode, DetailedSeason, FrontendSeries } from '@cinefinn/types/database';
+import { type Series, type Season, type Movie, type Account, type timestamped, type DetailedSeries, type DetailedMovie, type DetailedEpisode, type DetailedSeason, type FrontendSeries, Role } from '@cinefinn/types/database';
 import { getIO, queryDatabase, setIO } from './utils.js';
 import { watchRouter } from './routes/watch.js';
 import { videoRouter } from './routes/video.js';
@@ -52,7 +52,14 @@ const app = new Hono({
     .route('/index', indexRouter)
     .route('/managment', managmentRouter)
     .route('/watch', watchRouter)
-    .route('/video', videoRouter);
+    .route('/video', videoRouter)
+    .get('/admin/accounts', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+        const accounts = await accountsTable.get();
+        accounts.forEach(a => {
+            delete a.password;
+        });
+        return c.json(accounts);
+    });
 
 // app.get('*', async (c, next) => {
 

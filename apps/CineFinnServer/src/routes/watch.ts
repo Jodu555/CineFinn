@@ -51,7 +51,7 @@ const router = new Hono()
 
         const time = Number(c.req.param('time'));
 
-        if (isNaN(time) && time < 0) {
+        if (isNaN(time) || time < 0) {
             return c.json({
                 message: 'Time must be a positive number',
             });
