@@ -3,6 +3,7 @@ import type { ClientToServerEvents, ServerToClientEvents, InterServerEvents, Soc
 import type { Server } from 'socket.io';
 import { CacheContext } from './LRUCache.js';
 import { database, episodesTable, moviesTable } from './database.js';
+import { Redis } from 'ioredis';
 
 let io: Server<ClientToServerEvents,
     ServerToClientEvents,
@@ -14,6 +15,17 @@ export function setIO(newIO: Server<ClientToServerEvents,
     InterServerEvents,
     SocketData<Account | Account & timestamped>>) {
     io = newIO;
+}
+export function getIO() {
+    return io;
+}
+
+let ioRedis: Redis;
+export function setIORedis(newIORedis: Redis) {
+    ioRedis = newIORedis;
+}
+export function getIORedis() {
+    return ioRedis;
 }
 
 export async function watchableUUIDToWatchable(watchableUUID: string, cache?: CacheContext) {
@@ -84,8 +96,4 @@ export function debounce(cb: Function, delay = 1000) {
             cb(...args);
         }, delay);
     };
-}
-
-export function getIO() {
-    return io;
 }

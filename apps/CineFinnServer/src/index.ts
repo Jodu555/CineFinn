@@ -1,3 +1,4 @@
+import { Redis } from 'ioredis';
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 // import dotenv from 'dotenv';
@@ -16,7 +17,7 @@ import { CacheContext } from './LRUCache.js';
 import type { AnythingToServerEvents, AuthHandshake, ClientToServerEvents, InterServerEvents, ServerToAnythingEvents, ServerToClientEvents, SocketAuthDataClient, SocketData } from '@cinefinn/types/socket';
 import { tryCatch } from './tryCatch.js';
 import { type Series, type Season, type Movie, type Account, type timestamped, type DetailedSeries, type DetailedMovie, type DetailedEpisode, type DetailedSeason, type FrontendSeries, Role } from '@cinefinn/types/database';
-import { getIO, queryDatabase, setIO } from './utils.js';
+import { getIO, queryDatabase, setIO, setIORedis } from './utils.js';
 import { watchRouter } from './routes/watch.js';
 import { videoRouter } from './routes/video.js';
 import { indexRouter } from './routes/index.js';
@@ -182,6 +183,14 @@ const io = new Server<
 });
 export type definedSocket = Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData<Account | (Account & timestamped)>>
 setIO(io);
+setIORedis(
+    new Redis({
+        host: getConfig().redis.host,
+        port: getConfig().redis.port,
+        password: getConfig().redis.password,
+        maxRetriesPerRequest: null,
+    })
+);
 setupSocketIO();
 
 export {

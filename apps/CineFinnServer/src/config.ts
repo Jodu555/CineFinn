@@ -17,6 +17,11 @@ interface Config {
         password: string;
         database: string;
     };
+    redis: {
+        host: string;
+        port: number;
+        password: string;
+    };
     scraper: {
         authToken: string;
     };
@@ -51,6 +56,11 @@ const defaultConfig: Config = {
         username: 'root',
         password: 'root',
         database: 'cinefinn',
+    },
+    redis: {
+        host: 'localhost',
+        port: 6379,
+        password: 'root',
     },
     scraper: {
         authToken: 'SUPER-SECURE-SCRAPER-TOKEN',
