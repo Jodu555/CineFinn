@@ -8,23 +8,26 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     }
 
     const checkOnboarding = () => {
+        console.log('Checking Onboarding');
         if (to.path === '/onboarding') {
-            return;
+            console.log('Already on onboarding');
+            return false;
         }
         if (authStore.user.email.includes('@nil.com')) {
-            return navigateTo('/onboarding');
+            console.log('User is onboarded');
+            return true;
         }
     }
 
     if (authStore.authToken == '') {
         authStore.authToken = authCookie.value.toString();
-        try {
-            await authStore.authenticate();
-            checkOnboarding();
-            await useIndexStore().loadSeries();
-        } catch (error) {
-            return navigateTo('/login');
-        }
+        // try {
+        //     await authStore.authenticate();
+        //     if (checkOnboarding()) return navigateTo('/onboarding');
+        //     await useIndexStore().loadSeries();
+        // } catch (error) {
+        //     return navigateTo('/login');
+        // }
     }
 
     if (authStore.loggedIn == false) {
@@ -35,12 +38,15 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
                 console.log('User is still not defined, redirecting to login');
                 return navigateTo('/login');
             } else {
-                checkOnboarding();
+                if (checkOnboarding()) return navigateTo('/onboarding');
                 await useIndexStore().loadSeries();
             }
         } catch (error) {
             return navigateTo('/login');
         }
     }
+
+
+    if (checkOnboarding()) return navigateTo('/onboarding');
 
 });
