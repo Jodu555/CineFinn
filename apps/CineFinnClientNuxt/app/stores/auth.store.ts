@@ -1,5 +1,6 @@
 import type { Account, SettingsObject } from '@cinefinn/types/database';
 import { defineStore } from 'pinia';
+import type { FetchError } from 'ofetch';
 import useAPIURL from '~/hooks/useAPIURL';
 
 export const useAuthStore = defineStore('auth', {
@@ -29,15 +30,22 @@ export const useAuthStore = defineStore('auth', {
             await this.authenticate(true);
         },
         async register(credentials: { username: string; password: string; token: string; }) {
-            const response = await $fetch<{ token: string; error?: { message: string; }; }>(useAPIURL() + '/auth/register', {
+            const { data, error } = await tryCatch<Promise<{ token: string, user: Account }>, FetchError>(() => $fetch<{ token: string, user: Account }>(useAPIURL() + '/auth/register', {
                 method: 'POST',
                 body: JSON.stringify(credentials),
-            });
+            }));
+            if (error) {
+                this.error = error.data || 'An unknown error occurred.';
+                return;
+            }
+
+            console.log(data);
 
 
             this.loggedIn = true;
-            this.authToken = response.token;
-            await this.authenticate();
+            this.authToken = data.token;
+            useCookie('auth-token').value = this.authToken;
+            await this.authenticate(true);
         },
         async authenticate(redirectToSlash = false) {
             try {
@@ -48,6 +56,7 @@ export const useAuthStore = defineStore('auth', {
                 if (!this.authToken)
                     return;
                 const token = this.authToken;
+                useCookie('auth-token').value = token;
 
                 const response = await $fetch<Account>(`${useAPIURL()}/auth/info`, {
                     headers: {

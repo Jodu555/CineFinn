@@ -1,15 +1,9 @@
 <template>
     <div class="container shadow p-3 mb-5 rounded">
         <h1 class="d-flex justify-content-center">Onboarding</h1>
-        <h4 class="d-flex justify-content-center">
-            If you See this Page, you logged in, with an account from the v1 CineFinn to properly use this v2 CineFinn.
-        </h4>
-        <h4 class="d-flex justify-content-center">You need to fill in your email address to continue</h4>
-        <!-- <div class="mb-3">
-            <label for="mail" class="form-label fw-bold">Email</label>
-            <input type="email" id="mail" class="form-control" aria-describedby="helpId" v-model="email" />
-            <small id="helpId" class="form-text text-muted">Your email address</small>
-        </div> -->
+        <h4 class="d-flex justify-content-center">You need to Verify your E-Mail Address to Continue</h4>
+        <h6 class="d-flex justify-content-center">You will receive an E-Mail with a Verification Code this is
+            neccessary to complete the Registration and helps with a forgotten password</h6>
         <div class="alert alert-danger" role="alert" v-if="errorMessage.length > 0">
             <strong>Error:</strong> {{ errorMessage }}
         </div>
@@ -107,13 +101,7 @@ async function submitForm() {
     }
 }
 
-const validateEmail = (email: string) => {
-    return String(email)
-        .toLowerCase()
-        .match(
-            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-        );
-};
+
 
 </script>
 

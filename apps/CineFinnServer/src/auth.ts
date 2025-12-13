@@ -11,7 +11,6 @@ import { compareSettings, defaultSettings } from './utils/settings.js';
 import { getEmailManager } from './utils.js';
 
 const registerLoginSchema = z.object({
-    email: z.email(),
     username: z.string().min(3).max(15).trim().regex(/^[a-zA-Z0-9]+$/, {
         message: "Muss nur alphanumerische Zeichen enthalten.",
     }),
@@ -100,114 +99,126 @@ export const authFullMiddleware = (cb: (user: Account) => boolean) => createMidd
 export const authMiddleware = authFullMiddleware((user) => true);
 
 
-export const authRouter = new Hono().post('/login', async (c) => {
-    const jsonBody = await c.req.json();
-    const registerData = loginSchema.parse(jsonBody);
-    const user = registerData;
-    const result = await accountsTable.getOne({ username: user.username, unique: true });
-    if (result == undefined) {
-        const value = user.username ? 'username' : 'email';
-        throw new HTTPException(401, {
-            message: `Invalid ${value}!`
+export const authRouter = new Hono()
+    .post('/login', async (c) => {
+        const jsonBody = await c.req.json();
+        const registerData = loginSchema.parse(jsonBody);
+        const user = registerData;
+        const result = await accountsTable.getOne({ username: user.username, unique: true });
+        if (result == undefined) {
+            const value = user.username ? 'username' : 'email';
+            throw new HTTPException(401, {
+                message: `Invalid ${value}!`
+            });
+        }
+        if (await bcrypt.compare(user.password, result.password!) == false) {
+            throw new HTTPException(401, {
+                message: 'Invalid password!'
+            });
+        }
+
+        const authToken = randomUUID();
+        delete result.password;
+        await authTokensTable.create({
+            TOKEN: authToken,
+            account_UUID: result.UUID,
         });
-    }
-    if (await bcrypt.compare(user.password, result.password!) == false) {
-        throw new HTTPException(401, {
-            message: 'Invalid password!'
+
+        return c.json({
+            token: authToken,
         });
-    }
 
-    const authToken = randomUUID();
-    delete result.password;
-    await authTokensTable.create({
-        TOKEN: authToken,
-        account_UUID: result.UUID,
-    });
+    }).post('/register', async (c) => {
+        const jsonBody = await c.req.json();
+        const registerData = registerLoginSchema.parse(jsonBody);
 
-    return c.json({
-        token: authToken,
-    });
+        const user = registerData;
 
-}).post('/register', async (c) => {
-    const jsonBody = await c.req.json();
-    const registerData = registerLoginSchema.parse(jsonBody);
+        const registerToken = user.token;
+        delete user.token;
 
-    const user = registerData;
+        if (registerToken != getConfig().registration.token) {
+            throw new HTTPException(401, {
+                message: 'Invalid Registration Token!'
+            });
+        }
+        const search = { ...user }; //Spreading to disable the reference
 
-    const registerToken = user.token;
-    delete user.token;
+        const result = await accountsTable.getOne({ username: search.username, unique: true });
+        console.log(search, result);
 
-    if (registerToken != getConfig().registration.token) {
-        throw new HTTPException(401, {
-            message: 'Invalid Registration Token!'
+        if (result !== undefined) {
+            throw new HTTPException(400, {
+                message: 'The email or the username is already taken!'
+            });
+        }
+
+        user.password = await bcrypt.hash(user.password, 8);
+
+        delete (user as any).token;
+
+        const userUUID = randomUUID();
+        await accountsTable.create({
+            UUID: userUUID,
+            ...user,
+            email: user.username + '@nil.com',
+            activityDetails: {
+                lastHandshake: new Date().toLocaleString('de'),
+                lastLogin: new Date().toLocaleString('de'),
+            },
+            settings: defaultSettings,
+            role: 1,
+            status: 'trial',
+            emailVerifyCode: '',
         });
-    }
-    const search = { ...user }; //Spreading to disable the reference
-
-    const result = await accountsTable.getOne({ username: search.username, unique: true });
-    console.log(search, result);
-
-    if (result !== undefined) {
-        throw new HTTPException(400, {
-            message: 'The email or the username is already taken!'
+        delete (user as any).password;
+        const authToken = randomUUID();
+        await authTokensTable.create({
+            TOKEN: authToken,
+            account_UUID: userUUID,
         });
-    }
 
-    user.password = await bcrypt.hash(user.password, 8);
-
-    delete (user as any).token;
-
-    await accountsTable.create({
-        UUID: randomUUID(),
-        ...user,
-        activityDetails: {
-            lastHandshake: new Date().toLocaleString('de'),
-            lastLogin: new Date().toLocaleString('de'),
-        },
-        settings: defaultSettings,
-        role: 1,
-        status: 'trial',
-        emailVerifyCode: Math.floor(1000 + Math.random() * 9000).toString(),
-    });
-    delete (user as any).password;
-    return c.json(user);
-}).get('/logout', authMiddleware, async (c) => {
-    await authTokensTable.delete({
-        TOKEN: c.get('credentials').token,
-        account_UUID: c.get('credentials').user.UUID,
-    });
-    return c.json({
-        message: 'Successfully logged out',
-    });
-}).get('/info', authMiddleware, async (c) => {
-    return c.json(c.get('credentials').user);
-}).post('/onboarding/stepOne', authMiddleware, async (c) => {
-    const jsonBody = await c.req.json();
-    const onboardingData = onboardingSchemaStepOne.parse(jsonBody);
-    const user = c.get('credentials').user;
-    user.email = onboardingData.email;
-    const emailVerifyCode = Math.floor(1000 + Math.random() * 99000).toString();
-    await accountsTable.update({ UUID: user.UUID }, { email: onboardingData.email, emailVerifyCode });
-    await getEmailManager().sendEmail(user.UUID, 'VERIFICATION', { verificationToken: emailVerifyCode });
-    return c.json({
-        message: 'Successfully updated email',
-    });
-}).post('/onboarding/stepTwo', authMiddleware, async (c) => {
-    const jsonBody = await c.req.json();
-    const onboardingData = onboardingSchemaStepTwo.parse(jsonBody);
-    const user = c.get('credentials').user;
-    if (user.email !== onboardingData.email) {
-        throw new HTTPException(400, {
-            message: 'Email does not match!',
+        return c.json({
+            token: authToken,
+            user,
         });
-    }
-    if (user.emailVerifyCode !== onboardingData.verificationCode) {
-        throw new HTTPException(400, {
-            message: 'Invalid verification code!',
+    }).get('/logout', authMiddleware, async (c) => {
+        await authTokensTable.delete({
+            TOKEN: c.get('credentials').token,
+            account_UUID: c.get('credentials').user.UUID,
         });
-    }
-    await accountsTable.update({ UUID: user.UUID }, { status: 'active', emailVerifyCode: '' });
-    return c.json({
-        message: 'Successfully updated verification code',
+        return c.json({
+            message: 'Successfully logged out',
+        });
+    }).get('/info', authMiddleware, async (c) => {
+        return c.json(c.get('credentials').user);
+    }).post('/onboarding/stepOne', authMiddleware, async (c) => {
+        const jsonBody = await c.req.json();
+        const onboardingData = onboardingSchemaStepOne.parse(jsonBody);
+        const user = c.get('credentials').user;
+        user.email = onboardingData.email;
+        const emailVerifyCode = Math.floor(1000 + Math.random() * 99000).toString();
+        await accountsTable.update({ UUID: user.UUID }, { email: onboardingData.email, emailVerifyCode });
+        await getEmailManager().sendEmail(user.UUID, 'VERIFICATION', { verificationToken: emailVerifyCode });
+        return c.json({
+            message: 'Successfully updated email',
+        });
+    }).post('/onboarding/stepTwo', authMiddleware, async (c) => {
+        const jsonBody = await c.req.json();
+        const onboardingData = onboardingSchemaStepTwo.parse(jsonBody);
+        const user = c.get('credentials').user;
+        if (user.email !== onboardingData.email) {
+            throw new HTTPException(400, {
+                message: 'Email does not match!',
+            });
+        }
+        if (user.emailVerifyCode !== onboardingData.verificationCode) {
+            throw new HTTPException(400, {
+                message: 'Invalid verification code!',
+            });
+        }
+        await accountsTable.update({ UUID: user.UUID }, { status: 'active', emailVerifyCode: '' });
+        return c.json({
+            message: 'Successfully updated verification code',
+        });
     });
-});

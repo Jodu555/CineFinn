@@ -34,9 +34,12 @@
 					<!-- <li class="nav-item">
 						<router-link class="nav-link" active-class="active" to="/rmvc">RMVC</router-link>
 					</li> -->
-					<li v-if="authStore.user.role >= Role.Mod" class="nav-item">
-						<NuxtLink class="nav-link" active-class="active" to="/admin">Admin</NuxtLink>
-					</li>
+					<template v-if="authStore.loggedIn">
+						<li v-if="authStore.user?.role >= Role.Mod" class="nav-item">
+							<NuxtLink class="nav-link" active-class="active" to="/admin">Admin</NuxtLink>
+						</li>
+
+					</template>
 				</ul>
 				<div v-if="authStore.loggedIn" class="d-flex">
 					<AutoComplete :options="{ placeholder: 'Search for a series...', clearAfterSelect: true }"
