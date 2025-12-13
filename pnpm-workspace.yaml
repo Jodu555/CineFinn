@@ -5,4 +5,5 @@ packages:
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - esbuild
+  - msgpackr-extract
   - sharp

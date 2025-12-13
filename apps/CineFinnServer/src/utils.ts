@@ -1,15 +1,19 @@
 import type { Account, timestamped } from '@cinefinn/types/database';
-import type { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData } from '@cinefinn/types/socket';
+import type { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData, AnythingToServerEvents, ServerToAnythingEvents } from '@cinefinn/types/socket';
 import type { Server } from 'socket.io';
 import { CacheContext } from './LRUCache.js';
 import { database, episodesTable, moviesTable } from './database.js';
 import { Redis } from 'ioredis';
 import EmailManager from './utils/EmailManager.js';
 
-let io: Server<ClientToServerEvents,
-    ServerToClientEvents,
+let io: Server<AnythingToServerEvents,
+    ServerToAnythingEvents,
     InterServerEvents,
     SocketData<Account | Account & timestamped>>;
+// let io: Server<ClientToServerEvents,
+//     ServerToClientEvents,
+//     InterServerEvents,
+//     SocketData<Account | Account & timestamped>>;
 
 export function setIO(newIO: Server<ClientToServerEvents,
     ServerToClientEvents,

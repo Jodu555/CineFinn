@@ -12,6 +12,7 @@ import { generateSeriesID, generateMovieID, generateSeasonID, generateEpisodeID,
 import type { Langs } from '@cinefinn/types/database';
 import { indexStorage } from '../routes/index.js';
 import { app } from '../index.js';
+import { getIO } from '../utils.js';
 
 
 // export async function crawl(job: Job) {
@@ -213,19 +214,47 @@ type WatchableRow = any;
  */
 export async function crawl(job: Job) {
 
+    interface SubFile {
+        subID: string;
+        path: string;
+    }
+    let files: SubFile[] = [];
     // Small LRU caches still available for other uses if desired
     const crawlerSeriesSeasonsCache = new CacheContext('crawler-series', 500);
     const crawlerEpisodesCache = new CacheContext('crawler-episodes', 150);
 
     const pathEntries = [getConfig().videoPath];
     job.log('Listing Files');
-    let { files } = await listFiles(pathEntries[0]);
-    job.log(`Found ${files.length} files`);
+    let { files: localFiles } = await listFiles(pathEntries[0]);
+    files = files.concat(localFiles.map(f => ({ subID: 'main', path: f })));
+    job.log(`Found ${localFiles.length} local files`);
+
+
+    const subSystemSockets = (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'subsystem')
+
+
+    const subSystemFilesPromise = subSystemSockets.map(s => {
+        return new Promise<SubFile[]>((resolve, reject) => {
+            s.emit('listFiles', (files) => {
+                job.log(`Found ${files.length} subsystem files`);
+                resolve(files.map(f => ({ subID: 'TODO', path: f })));
+            });
+            setTimeout(() => {
+                reject('Timeout');
+            }, 1000 * 60 * 5);
+        })
+    });
+
+    const subSystemFiles = await Promise.all(subSystemFilesPromise);
+    for (const subSystemFile of subSystemFiles) {
+        files = files.concat(subSystemFile)
+    }
+    job.log(`Found ${files.length} total files`);
 
     const viableExtensions = ['.mp4', '.mkv', '.webm'];
 
     const prevLength = files.length;
-    files = files.filter((f) => viableExtensions.includes(path.parse(f).ext));
+    files = files.filter((f) => viableExtensions.includes(path.parse(f.path).ext));
     job.log(`Filtered ${prevLength - files.length} files`);
 
     job.log(`Working on ${files.length} files`);
@@ -435,15 +464,15 @@ export async function crawl(job: Job) {
     }
 
     // ---- Helper: get-or-create watchable entity
-    async function ensureWatchable(watchableUUID: string, lang: string, filePath: string): Promise<WatchableRow> {
-        const key = `${watchableUUID}::${lang}`;
+    async function ensureWatchable(watchableUUID: string, lang: string, file: SubFile): Promise<WatchableRow> {
+        const key = `${watchableUUID}::${lang}::${file.subID}`;
         const cached = watchableByKey.get(key);
         if (cached) return cached;
         if (creatingWatchables.has(key)) return creatingWatchables.get(key)!;
 
         const p = (async () => {
             // try DB getOne
-            let existing = await watchableEntitysTable.getOne({ watchable_UUID: watchableUUID, lang: lang as Langs, unique: true });
+            let existing = await watchableEntitysTable.getOne({ watchable_UUID: watchableUUID, lang: lang as Langs, subID: file.subID, unique: true });
             if (existing) {
                 watchableByKey.set(key, existing);
                 return existing;
@@ -452,8 +481,8 @@ export async function crawl(job: Job) {
                 UUID: generateEntityID(),
                 watchable_UUID: watchableUUID,
                 lang: lang as Langs,
-                subID: 'main',
-                filePath,
+                subID: file.subID,
+                filePath: file.path,
                 IV: EMPTY_IV,
                 runtime: -1,
                 hash: '',
@@ -507,7 +536,8 @@ export async function crawl(job: Job) {
     }
 
     // The per-file worker processing function
-    async function processFile(file: string, idx: number) {
+    async function processFile(subFile: SubFile, idx: number) {
+        const file = subFile.path;
         // Light logging
         if (idx % 100 === 0) job.log(`Handling File ${idx}/${files.length}`);
 
@@ -535,7 +565,7 @@ export async function crawl(job: Job) {
         }
 
         // create / ensure watchable entity (file lang)
-        await ensureWatchable(watchableUUID, parsedData.language, file);
+        await ensureWatchable(watchableUUID, parsedData.language, subFile);
     }
 
     // Choose concurrency based on environment; default to 20 concurrent workers

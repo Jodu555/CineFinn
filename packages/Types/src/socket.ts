@@ -7,9 +7,9 @@ export interface AuthHandshake {
     authToken: string;
 }
 
-export type ServerToAnythingEvents = ServerToClientEvents & ServerToScraperEvents;
+export type ServerToAnythingEvents = ServerToClientEvents & ServerToScraperEvents & ServerToSubSystemEvents;
 
-export type AnythingToServerEvents = ClientToServerEvents & ScraperToServerEvents;
+export type AnythingToServerEvents = ClientToServerEvents & ScraperToServerEvents & SubSystemToServerEvents;
 
 export interface ServerToClientEvents {
     // noArg: () => void;
@@ -38,6 +38,15 @@ export interface ScraperToServerEvents {
     'job:recrawlArchive': () => void;
     'job:generatePreviewImages': () => void;
 }
+
+export interface SubSystemToServerEvents {
+
+}
+
+export interface ServerToSubSystemEvents {
+    'listFiles': (callback: (files: string[]) => void) => void;
+}
+
 
 export interface InterServerEvents {
     ping: () => void;
