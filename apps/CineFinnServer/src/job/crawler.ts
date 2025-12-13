@@ -297,6 +297,9 @@ export async function crawl(job: Job) {
     const creatingMovies = new Map<string, Promise<MovieRow>>();
     const creatingWatchables = new Map<string, Promise<WatchableRow>>();
 
+    const allSeries = new Set<string>(prefetchedSeries.map(s => s.UUID));
+    const touchedSeries = new Set<string>();
+
     // Utility: increment local season counter
     function incSeasonCount(seasonUUID: string) {
         seasonEpisodeCounts.set(seasonUUID, (seasonEpisodeCounts.get(seasonUUID) || 0) + 1);
@@ -555,6 +558,7 @@ export async function crawl(job: Job) {
 
         // ensure series exists
         const serie = await ensureSeries(parsedData.title, file);
+        touchedSeries.add(serie.UUID);
 
         let watchableUUID: string;
 
@@ -629,6 +633,19 @@ export async function crawl(job: Job) {
     }
 
     job.timeEnd('Updating Seasons');
+
+    const probablyMissingSeries = allSeries.difference(touchedSeries);
+    if (probablyMissingSeries.size > 0) {
+        job.log('Probably missing series:', probablyMissingSeries);
+        for (const UUID of probablyMissingSeries) {
+            const serie = await seriesTable.getOne({ UUID });
+            if (serie == undefined) {
+                job.log('Serie not found', UUID);
+                continue;
+            }
+            await seriesTable.update({ UUID }, { infos: { disabled: true } });
+        }
+    }
 
     job.setResult({
         info: Array.from(touchedSeasonsSet)
