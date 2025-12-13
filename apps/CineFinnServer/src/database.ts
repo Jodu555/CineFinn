@@ -32,8 +32,9 @@ export async function connectDatabase() {
     await createTables();
 }
 
+
 const UUID_FIELD = {
-    type: 'varchar(16)',
+    type: 'varchar(40)',
     null: false,
 };
 

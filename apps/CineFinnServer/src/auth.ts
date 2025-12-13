@@ -31,6 +31,7 @@ const onboardingSchemaStepOne = z.object({
 });
 
 const onboardingSchemaStepTwo = z.object({
+    email: z.email(),
     verificationCode: z.string().min(4).max(6).trim(),
 });
 
@@ -185,9 +186,9 @@ export const authRouter = new Hono().post('/login', async (c) => {
     const onboardingData = onboardingSchemaStepOne.parse(jsonBody);
     const user = c.get('credentials').user;
     user.email = onboardingData.email;
-    const verifyCode = Math.floor(1000 + Math.random() * 99000).toString();
-    await accountsTable.update({ UUID: user.UUID }, { email: onboardingData.email });
-    await getEmailManager().sendEmail(user.UUID, 'VERIFICATION', { verificationToken: verifyCode });
+    const emailVerifyCode = Math.floor(1000 + Math.random() * 99000).toString();
+    await accountsTable.update({ UUID: user.UUID }, { email: onboardingData.email, emailVerifyCode });
+    await getEmailManager().sendEmail(user.UUID, 'VERIFICATION', { verificationToken: emailVerifyCode });
     return c.json({
         message: 'Successfully updated email',
     });
@@ -195,11 +196,17 @@ export const authRouter = new Hono().post('/login', async (c) => {
     const jsonBody = await c.req.json();
     const onboardingData = onboardingSchemaStepTwo.parse(jsonBody);
     const user = c.get('credentials').user;
+    if (user.email !== onboardingData.email) {
+        throw new HTTPException(400, {
+            message: 'Email does not match!',
+        });
+    }
     if (user.emailVerifyCode !== onboardingData.verificationCode) {
         throw new HTTPException(400, {
             message: 'Invalid verification code!',
         });
     }
+    await accountsTable.update({ UUID: user.UUID }, { status: 'active', emailVerifyCode: '' });
     return c.json({
         message: 'Successfully updated verification code',
     });

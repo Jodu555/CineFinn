@@ -23,3 +23,7 @@ export const generateEpisodeID = () => {
 export const generateEntityID = () => {
     return `WE-${generateID()}`;
 };
+
+export const generateEmailID = () => {
+    return `MAIL-${generateID()}`;
+};

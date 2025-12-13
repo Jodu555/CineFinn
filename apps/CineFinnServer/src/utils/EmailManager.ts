@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 import { getConfig } from '../config.js';
 import type { Email, EmailTypes } from '@cinefinn/types/database';
 import { accountsTable, emailsTable } from '../database.js';
+import { generateEmailID } from './IdGenerators.js';
 
 // type EmailTypeData<K extends EmailTypes> = {
 //     [key in K]: K extends 'VERIFICATION' ? { email: string; verificationToken: string; } : K extends 'DISCOUNT' ? { discountAmount: number; discountCode: string; } : never;
@@ -86,7 +87,7 @@ export default class EmailManager {
             const obj = await this.getEmailData(email_type, data);
 
             const email: Email = {
-                UUID: crypto.randomUUID(),
+                UUID: generateEmailID(),
                 account_UUID,
                 email_type,
                 status: 'PENDING',

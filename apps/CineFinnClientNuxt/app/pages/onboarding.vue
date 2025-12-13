@@ -10,6 +10,10 @@
             <input type="email" id="mail" class="form-control" aria-describedby="helpId" v-model="email" />
             <small id="helpId" class="form-text text-muted">Your email address</small>
         </div> -->
+        <div class="alert alert-danger" role="alert" v-if="errorMessage.length > 0">
+            <strong>Error:</strong> {{ errorMessage }}
+        </div>
+
         <form @submit.prevent="submitForm">
             <InputValidator v-model="email" v-model:valid="emailValid" :disabled="stepTwo" type="email" id="email"
                 name="Email" autocomplete="email" placeholder="Enter Email" :rules="emailRules" />
@@ -32,10 +36,15 @@
 </template>
 
 <script lang="ts" setup>
-
+import useAPIURL from '~/hooks/useAPIURL';
+import type { FetchError } from 'ofetch';
 definePageMeta({
     middleware: 'auth',
 });
+
+const authStore = useAuthStore();
+
+const errorMessage = ref<string>('');
 
 const email = ref<string>('');
 const emailValid = ref(false);
@@ -52,24 +61,49 @@ const verificationCodeRules = [
     (value: string) => value.length < 6 || 'Must be below 6 Characters',
 ];
 
-function submitForm() {
+async function submitForm() {
     if (!stepTwo.value) {
         console.log('Send Verification Email', email.value);
         if (!emailValid.value) return;
 
+        const { data, error } = await tryCatch<Promise<unknown>, FetchError>(() => $fetch(useAPIURL() + '/auth/onboarding/stepOne', {
+            method: 'POST',
+            headers: {
+                'auth-token': authStore.authToken,
+            },
+            body: JSON.stringify({
+                email: email.value,
+            }),
+        }))
+
+        if (error) {
+            errorMessage.value = error.data || 'An unknown error occurred.';
+            email.value = '';
+            emailValid.value = false;
+            return;
+        }
         stepTwo.value = true;
-        //Send Verification Email Logic here
     } else {
-        console.log('Submit Verification Code', verificationCode.value);
         if (!verificationCodeValid.value) return;
 
-        //Submit Verification Code Logic here
+        const { data, error } = await tryCatch<Promise<unknown>, FetchError>(() => $fetch(useAPIURL() + '/auth/onboarding/stepTwo', {
+            method: 'POST',
+            headers: {
+                'auth-token': authStore.authToken,
+            },
+            body: JSON.stringify({
+                email: email.value,
+                verificationCode: verificationCode.value,
+            }),
+        }))
 
-        if (false) {
+        if (error) {
+            errorMessage.value = error.data || 'An unknown error occurred.';
             verificationCode.value = '';
             verificationCodeValid.value = false;
+            return;
         }
-
+        useRouter().push('/');
     }
 }
 
