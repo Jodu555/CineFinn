@@ -19,7 +19,7 @@ export async function setupSocketIO() {
 
 export interface SocketConsumerMeta {
     type: SocketAuthType;
-    authFunction: (authHandshake: AuthHandshake) => Promise<SocketAuthData<Account | Account & timestamped>>;
+    authFunction: (authHandshake: any) => Promise<SocketAuthData<Account | Account & timestamped>>;
     connectionFunction: (socket: definedSocket) => Promise<void>;
 }
 

@@ -2,10 +2,32 @@ import type database = require("./database");
 
 export type SocketAuthType = 'client' | 'scraper' | 'subsystem';
 
-export interface AuthHandshake {
-    type: SocketAuthType;
+// export interface AuthHandshake {
+//     type: SocketAuthType;
+//     authToken: string;
+// }
+
+export type AuthHandshake = AuthHandshakeClient | AuthHandshakeScraper | AuthHandshakeSubsystem;
+
+export interface AuthHandshakeClient {
+    type: 'client';
     authToken: string;
 }
+
+export interface AuthHandshakeScraper {
+    type: 'scraper';
+    authToken: string;
+}
+
+export interface AuthHandshakeSubsystem {
+    type: 'subsystem';
+    authToken: string;
+    id: string;
+    token: string;
+    ptoken: string;
+    readrate: number;
+}
+
 
 export type ServerToAnythingEvents = ServerToClientEvents & ServerToScraperEvents & ServerToSubSystemEvents;
 
@@ -72,4 +94,7 @@ export interface SocketAuthDataScraper<U = any> {
 export interface SocketAuthDataSubsystem<U = any> {
     type: 'subsystem';
     token: string;
+    id: string;
+    ptoken: string;
+    readrate: number;
 }

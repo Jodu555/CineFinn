@@ -1,9 +1,9 @@
 
-import type { AuthHandshake, SocketAuthDataScraper } from "@cinefinn/types/socket";
+import type { AuthHandshakeScraper, SocketAuthDataScraper } from "@cinefinn/types/socket";
 import type { SocketConsumerMeta } from "./index.js";
 import { getConfig } from "../config.js";
 
-async function authFunction(authHandshake: AuthHandshake): Promise<SocketAuthDataScraper> {
+async function authFunction(authHandshake: AuthHandshakeScraper): Promise<SocketAuthDataScraper> {
     const { authToken } = authHandshake;
 
     if (authToken === undefined) {

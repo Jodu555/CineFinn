@@ -1,8 +1,8 @@
-import type { AuthHandshake, SocketAuthDataSubsystem } from "@cinefinn/types/socket";
+import type { AuthHandshakeSubsystem, SocketAuthDataSubsystem } from "@cinefinn/types/socket";
 import type { SocketConsumerMeta } from "./index.js";
 import { getConfig } from "../config.js";
 
-async function authFunction(authHandshake: AuthHandshake): Promise<SocketAuthDataSubsystem> {
+async function authFunction(authHandshake: AuthHandshakeSubsystem): Promise<SocketAuthDataSubsystem> {
     console.log('subsystem auth');
     const { authToken: token } = authHandshake;
 
@@ -16,6 +16,9 @@ async function authFunction(authHandshake: AuthHandshake): Promise<SocketAuthDat
     return {
         type: 'subsystem',
         token,
+        id: authHandshake.id,
+        ptoken: authHandshake.ptoken,
+        readrate: authHandshake.readrate,
     }
 }
 

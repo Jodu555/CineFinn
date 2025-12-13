@@ -237,7 +237,7 @@ export async function crawl(job: Job) {
         return new Promise<SubFile[]>((resolve, reject) => {
             s.emit('listFiles', (files) => {
                 job.log(`Found ${files.length} subsystem files`);
-                resolve(files.map(f => ({ subID: 'TODO', path: f })));
+                resolve(files.map(f => ({ subID: s.data.auth.type === 'subsystem' ? s.data.auth.id : 'main', path: f })));
             });
             setTimeout(() => {
                 reject('Timeout');
@@ -472,8 +472,13 @@ export async function crawl(job: Job) {
 
         const p = (async () => {
             // try DB getOne
-            let existing = await watchableEntitysTable.getOne({ watchable_UUID: watchableUUID, lang: lang as Langs, subID: file.subID, unique: true });
+            let existing = await watchableEntitysTable.getOne({ watchable_UUID: watchableUUID, lang: lang as Langs, unique: true });
             if (existing) {
+                if (existing.subID !== file.subID) {
+                    console.log('SubID mismatch', existing.subID, file.subID);
+                    await watchableEntitysTable.update({ UUID: existing.UUID }, { subID: file.subID });
+                    existing.subID = file.subID;
+                }
                 watchableByKey.set(key, existing);
                 return existing;
             }

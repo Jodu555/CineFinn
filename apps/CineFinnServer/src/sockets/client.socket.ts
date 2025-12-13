@@ -1,4 +1,4 @@
-import type { AuthHandshake, SocketAuthDataClient } from "@cinefinn/types/socket";
+import type { AuthHandshake, AuthHandshakeClient, SocketAuthDataClient } from "@cinefinn/types/socket";
 import { tryCatch } from "../tryCatch.js";
 import { getUser } from "../auth.js";
 import type { Account, timestamped } from "@cinefinn/types/database";
@@ -10,7 +10,7 @@ import { compareSettings } from "../utils/settings.js";
 
 type LocalAuthData = SocketAuthDataClient<Account | Account & timestamped>;
 
-async function authFunction(authHandshake: AuthHandshake): Promise<LocalAuthData> {
+async function authFunction(authHandshake: AuthHandshakeClient): Promise<LocalAuthData> {
     const { authToken: token } = authHandshake;
 
     if (token === undefined) {

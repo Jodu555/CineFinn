@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { setupConfigurationManagment } from '@cinefinn/configuration-manager';
-import type { AuthHandshake, ServerToSubSystemEvents, SubSystemToServerEvents } from '@cinefinn/types/socket';
+import type { AuthHandshake, AuthHandshakeSubsystem, ServerToSubSystemEvents, SubSystemToServerEvents } from '@cinefinn/types/socket';
 import { io, Socket } from 'socket.io-client';
 const cliOptions = [['identifier', 'I'], ['entrypoint', 'E'], ['port', 'P'], ['endpoint'], ['core-url'], ['core-token']];
 
@@ -45,11 +45,11 @@ socket = io(config.core.url, {
     auth: {
         type: 'subsystem',
         authToken: config.core.token,
-        // id: config.identifier,
-        // token: config.core.token,
-        // ptoken,
-        // readrate: config.experimental.readrate || 0,
-    } satisfies AuthHandshake,
+        id: config.identifier,
+        token: config.core.token,
+        ptoken,
+        readrate: config.experimental.readrate || 0,
+    } satisfies AuthHandshakeSubsystem,
 });
 
 socket.on('connect_error', (error) => {
