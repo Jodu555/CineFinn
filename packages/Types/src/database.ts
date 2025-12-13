@@ -16,6 +16,7 @@ export interface Account {
     email: string;
     role: Role; // See above for the role enum
     settings: SettingsObject;
+    emailVerifyCode: string;
     activityDetails: {
         lastHandshake: string;
         lastLogin: string;
@@ -98,6 +99,22 @@ export interface AuthToken {
     TOKEN: string;
     account_UUID: string;
 }
+
+export interface Email {
+    UUID: string;
+    account_UUID: string;
+    email_type: EmailTypes;
+    status: EmailStatus;
+    subject: string;
+    html: string;
+    text: string;
+    data: string;
+    sent_at: number;
+    created_at: number;
+}
+
+export type EmailTypes = 'VERIFICATION' | 'PASSWORD_RESET';
+export type EmailStatus = 'PENDING' | 'SENT';
 
 export interface Series {
     UUID: string;

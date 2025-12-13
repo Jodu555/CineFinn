@@ -4,6 +4,7 @@ import type { Server } from 'socket.io';
 import { CacheContext } from './LRUCache.js';
 import { database, episodesTable, moviesTable } from './database.js';
 import { Redis } from 'ioredis';
+import EmailManager from './utils/EmailManager.js';
 
 let io: Server<ClientToServerEvents,
     ServerToClientEvents,
@@ -26,6 +27,14 @@ export function setIORedis(newIORedis: Redis) {
 }
 export function getIORedis() {
     return ioRedis;
+}
+
+let emailManager: EmailManager;
+export function getEmailManager() {
+    if (emailManager == undefined) {
+        emailManager = new EmailManager();
+    }
+    return emailManager;
 }
 
 export async function watchableUUIDToWatchable(watchableUUID: string, cache?: CacheContext) {

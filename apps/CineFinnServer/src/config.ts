@@ -22,6 +22,15 @@ interface Config {
         port: number;
         password: string;
     };
+    smtp: {
+        host: string;
+        port: number;
+        secure: boolean;
+        auth: {
+            user: string;
+            pass: string;
+        };
+    };
     scraper: {
         authToken: string;
     };
@@ -61,6 +70,15 @@ const defaultConfig: Config = {
         host: 'localhost',
         port: 6379,
         password: 'root',
+    },
+    smtp: {
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+            user: 'yourEmail',
+            pass: 'yourAppPassword',
+        },
     },
     scraper: {
         authToken: 'SUPER-SECURE-SCRAPER-TOKEN',

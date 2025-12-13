@@ -8,6 +8,7 @@ import z from 'zod';
 import type { Account } from '@cinefinn/types/database';
 import { getConfig } from './config.js';
 import { compareSettings, defaultSettings } from './utils/settings.js';
+import { getEmailManager } from './utils.js';
 
 const registerLoginSchema = z.object({
     email: z.email(),
@@ -165,6 +166,7 @@ export const authRouter = new Hono().post('/login', async (c) => {
         settings: defaultSettings,
         role: 1,
         status: 'trial',
+        emailVerifyCode: Math.floor(1000 + Math.random() * 9000).toString(),
     });
     delete (user as any).password;
     return c.json(user);
@@ -183,8 +185,9 @@ export const authRouter = new Hono().post('/login', async (c) => {
     const onboardingData = onboardingSchemaStepOne.parse(jsonBody);
     const user = c.get('credentials').user;
     user.email = onboardingData.email;
+    const verifyCode = Math.floor(1000 + Math.random() * 99000).toString();
     await accountsTable.update({ UUID: user.UUID }, { email: onboardingData.email });
-    //TODO: Send Verification Email
+    await getEmailManager().sendEmail(user.UUID, 'VERIFICATION', { verificationToken: verifyCode });
     return c.json({
         message: 'Successfully updated email',
     });
@@ -192,6 +195,11 @@ export const authRouter = new Hono().post('/login', async (c) => {
     const jsonBody = await c.req.json();
     const onboardingData = onboardingSchemaStepTwo.parse(jsonBody);
     const user = c.get('credentials').user;
+    if (user.emailVerifyCode !== onboardingData.verificationCode) {
+        throw new HTTPException(400, {
+            message: 'Invalid verification code!',
+        });
+    }
     return c.json({
         message: 'Successfully updated verification code',
     });

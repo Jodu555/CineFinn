@@ -1,13 +1,14 @@
 import dotenv from 'dotenv';
 dotenv.config();;
 import { Database, type thingDatabase } from '@jodu555/mysqlapi';
-import type { Account, timestamped, AuthToken, Series, Season, Episode, Movie, WatchableEntity, WatchHistory, SyncRoom, Job } from '@cinefinn/types/database';
+import type { Account, timestamped, AuthToken, Series, Season, Episode, Movie, WatchableEntity, WatchHistory, SyncRoom, Job, Email } from '@cinefinn/types/database';
 import { getConfig } from './config.js';
 
 export let database: Database;
 
 export let accountsTable: thingDatabase<Account, Account & timestamped>;
 export let authTokensTable: thingDatabase<AuthToken, AuthToken>;
+export let emailsTable: thingDatabase<Email, Email & timestamped>;
 
 export let seriesTable: thingDatabase<Series, Series & timestamped>;
 export let seasonsTable: thingDatabase<Season, Season & timestamped>;
@@ -69,6 +70,10 @@ async function createTables() {
             type: 'varchar(32)',
             null: false,
         },
+        emailVerifyCode: {
+            type: 'varchar(10)',
+            null: false,
+        },
         settings: {
             type: 'json',
             null: false,
@@ -88,6 +93,55 @@ async function createTables() {
             type: 'varchar(64)',
             null: false,
         },
+    });
+    database.createTable('emails', {
+        options: {
+            PK: 'UUID',
+            K: ['account_UUID', 'status'],
+        },
+        UUID: UUID_FIELD,
+        account_UUID: UUID_FIELD,
+        email_type: {
+            //The email type to create the email for like 'VERIFICATION' or 'PASSWORD_RESET'
+            type: 'varchar(32)',
+            null: false,
+        },
+        status: {
+            //The status of the email like 'PENDING' or 'SENT'
+            type: 'varchar(32)',
+            null: false,
+        },
+        subject: {
+            //The subject of the email
+            type: 'varchar(255)',
+            null: false,
+        },
+        html: {
+            //The html of the email
+            type: 'TEXT',
+            null: false,
+        },
+        text: {
+            //The text of the email
+            type: 'TEXT',
+            null: false,
+        },
+        data: {
+            //The data to send with the email
+            type: 'TEXT',
+            null: true,
+            json: true,
+        },
+        sent_at: {
+            //The time the email was sent
+            type: 'BIGINT',
+            null: true,
+        },
+        created_at: {
+            //The time the email record was created
+            type: 'BIGINT',
+            null: false,
+        }
     });
 
     database.createTable('series', {
@@ -286,6 +340,7 @@ async function createTables() {
 
     accountsTable = database.get<Account, Account & timestamped>('accounts');
     authTokensTable = database.get<AuthToken>('authtokens');
+    emailsTable = database.get<Email, Email & timestamped>('emails');
 
     seriesTable = database.get<Series, Series & timestamped>('series');
     seasonsTable = database.get<Season, Season & timestamped>('seasons');

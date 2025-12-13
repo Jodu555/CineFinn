@@ -17,7 +17,7 @@ import { CacheContext } from './LRUCache.js';
 import type { AnythingToServerEvents, AuthHandshake, ClientToServerEvents, InterServerEvents, ServerToAnythingEvents, ServerToClientEvents, SocketAuthDataClient, SocketData } from '@cinefinn/types/socket';
 import { tryCatch } from './tryCatch.js';
 import { type Series, type Season, type Movie, type Account, type timestamped, type DetailedSeries, type DetailedMovie, type DetailedEpisode, type DetailedSeason, type FrontendSeries, Role } from '@cinefinn/types/database';
-import { getIO, queryDatabase, setIO, setIORedis } from './utils.js';
+import { getIO, queryDatabase, setIO, setIORedis, getEmailManager } from './utils.js';
 import { watchRouter } from './routes/watch.js';
 import { videoRouter } from './routes/video.js';
 import { indexRouter } from './routes/index.js';
@@ -130,6 +130,8 @@ const httpServer = serve({
             }
         });
     }, 10000 * 30);
+
+    getEmailManager();
 
     // console.log('Fixing Seasons');
     // const seasons = await seasonsTable.get();
