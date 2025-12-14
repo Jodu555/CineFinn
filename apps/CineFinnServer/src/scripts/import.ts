@@ -150,6 +150,7 @@ async function importAccounts() {
             password: account.password,
             email: account.email,
             role: account.role,
+            emailVerifyCode: '',
             settings: JSON.parse(account.settings),
             activityDetails: JSON.parse(account.activityDetails),
             status: 'active',
