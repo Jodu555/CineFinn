@@ -647,9 +647,9 @@ export async function crawl(job: Job) {
         }
     }
 
-    job.setResult({
-        info: Array.from(touchedSeasonsSet)
-    });
+    // job.setResult({
+    //     info: Array.from(touchedSeasonsSet)
+    // });
 
     job.time('Clearing Cache');
     try { crawlerEpisodesCache.clear(); } catch (e) { }

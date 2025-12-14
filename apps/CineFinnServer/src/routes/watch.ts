@@ -10,7 +10,7 @@ const router = new Hono()
     .get('/info/:seriesUUID', authMiddleware, async (c) => {
         const user = c.get('credentials').user;
         const seriesUUID = c.req.param('seriesUUID');
-        const watchList = await watchHistoryTable.get({ series_UUID: seriesUUID, account_UUID: user.UUID });
+        const watchList = await watchHistoryTable.get({ series_UUID: seriesUUID, account_UUID: user.UUID, unique: true });
         return c.json(watchList);
     })
     .post('/markSeason/:seasonUUID/:bool', authMiddleware, async (c) => {

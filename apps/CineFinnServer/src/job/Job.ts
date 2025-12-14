@@ -60,9 +60,9 @@ export class Job {
         socketJob.logs = socketJob.logs.slice(-10);
         // getIO().emit('jobUpdate', socketJob);
         if (immediate) {
-            getIO().emit('jobUpdate', socketJob);
+            // getIO().emit('jobUpdate', socketJob);
         } else {
-            getIO().volatile.emit('jobUpdate', socketJob);
+            // getIO().volatile.emit('jobUpdate', socketJob);
         }
     }
 
