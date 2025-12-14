@@ -25,6 +25,7 @@ export const useManagmentStore = defineStore('managment', {
             this.loading = false;
         },
         updateJob(job: (Job & timestamped)) {
+            console.log('Updating Job', job);
             const index = this.jobs.findIndex((j) => j.UUID === job.UUID)
             if (index !== -1) {
                 this.jobs[index] = { ...this.jobs[index], ...job }

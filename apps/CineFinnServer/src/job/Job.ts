@@ -53,11 +53,23 @@ export class Job {
         };
     }
 
-    sendSocketUpdate(immediate = false) {
+    async sendSocketUpdate(immediate = false) {
         //TODO: Broadcast to allegebale clients
         const socketJob = JSON.parse(JSON.stringify(this.toDB()));
         socketJob.data = {};
         socketJob.logs = socketJob.logs.slice(-10);
+        (await getIO().fetchSockets()).forEach(socket => {
+            if (socket.data.auth.type === 'client') {
+                if (immediate) {
+                    console.log('Sending Socket Update ', socket.data.auth.user.username)
+                    socket.emit('jobUpdate', socketJob);
+                    // getIO().emit('jobUpdate', socketJob);
+                } else {
+                    // getIO().volatile.emit('jobUpdate', socketJob);
+                }
+
+            }
+        });
         // getIO().emit('jobUpdate', socketJob);
         if (immediate) {
             // getIO().emit('jobUpdate', socketJob);

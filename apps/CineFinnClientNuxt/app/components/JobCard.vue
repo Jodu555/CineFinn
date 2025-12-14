@@ -11,7 +11,7 @@
 					</div>
 				</div>
 				<div class="text-muted" style="overflow: scroll; overflow-x: scroll; max-height: 200px">
-					<p v-for="line in currentJob!.logs.reverse().slice(0, 3)" :key="line" class="mb-0">{{ line.slice(0,
+					<p v-for="line in reversedLogs" :key="line" class="mb-0">{{ line.slice(0,
 						100) }}</p>
 				</div>
 			</div>
@@ -65,6 +65,18 @@ async function run(id: JobType) {
 const currentJob = computed(() => managmentStore.jobs.sort((a, b) => b.created_at - a.created_at).find((x) => x.type === props.jobType));
 
 const isRunning = computed(() => currentJob.value?.finished_at == 0 && currentJob.value?.failed_at == 0);
+
+const reversedLogs = computed(() => {
+	// 1. Get the current logs array
+	const logs = currentJob.value?.logs || []
+
+	// 2. Use a spread operator to create a copy before reversing
+	// This prevents mutating the reactive store state directly (which is good practice)
+	const reversed = [...logs].reverse()
+
+	// 3. Return the sliced array. This calculation only runs when logs changes.
+	return reversed.slice(0, 3)
+})
 
 const jobPosNegCompletedAt = computed(() => {
 	if (currentJob.value == undefined) {
