@@ -57,7 +57,7 @@ class Aniworld {
 
     parseEntityInformations(data: string): { numberOfSeasons: number; hasMovies: boolean; } {
         const { document } = new jsdom.JSDOM(data).window;
-        const seasonsUl = [...document.querySelectorAll('span')].find((e) => e.textContent.includes('Staffeln:'))!.parentElement!.parentElement;
+        const seasonsUl = [...document.querySelectorAll('span')].find((e) => e.textContent!.includes('Staffeln:'))!.parentElement!.parentElement;
         const seasonsTab = [...seasonsUl!.querySelectorAll('li')].map((e) => e.querySelector('a')?.title).filter((e) => e != undefined);
 
         const numberOfSeasons = seasonsTab.filter((e) => e.includes('Staffel')).length;
