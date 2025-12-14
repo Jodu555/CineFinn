@@ -183,7 +183,7 @@ const io = new Server<
         methods: ['GET', 'POST'],
     },
 });
-export type definedSocket = Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData<Account | (Account & timestamped)>>
+export type definedSocket = Socket<AnythingToServerEvents, ServerToAnythingEvents, InterServerEvents, SocketData<Account | (Account & timestamped)>>
 setIO(io);
 setIORedis(
     new Redis({

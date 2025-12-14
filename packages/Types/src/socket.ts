@@ -1,3 +1,5 @@
+import fs = require('fs');
+
 import type database = require("./database");
 
 export type SocketAuthType = 'client' | 'scraper' | 'subsystem';
@@ -62,11 +64,15 @@ export interface ScraperToServerEvents {
 }
 
 export interface SubSystemToServerEvents {
-
+    'video-chunk': (obj: { chunk: string | Buffer; requestId: string }) => void;
+    'video-chunk-end': (obj: { requestId: string }) => void;
+    'video-chunk-error': (obj: { error: string; requestId: string }) => void;
 }
 
 export interface ServerToSubSystemEvents {
     'listFiles': (callback: (files: string[]) => void) => void;
+    'videoStats': (obj: { filePath: string }, callback: (stats: fs.Stats) => void) => void;
+    'video-range': (obj: { start: number, end: number, filePath: string, requestId: string }) => void;
 }
 
 
