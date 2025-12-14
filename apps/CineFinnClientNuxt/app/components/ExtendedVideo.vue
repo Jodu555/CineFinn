@@ -6,14 +6,9 @@
 		</div> -->
 		<div style="margin-top: 0.5%" class="video-container paused" data-volume-level="high">
 			<img class="thumbnail-img" />
-			<!-- <div v-if="entityObject && settings.showVideoTitleContainer.value" class="video-title-container">
-				<p v-if="currentMovie == -1">
-					{{ entityObject.primaryName }} - {{ String((entityObject as SerieEpisode).season).padStart(2, '0') }}x{{
-						String((entityObject as SerieEpisode).episode).padStart(2, '0')
-					}}
-				</p>
-				<p v-if="currentMovie !== -1">{{ entityObject.primaryName }}</p>
-			</div> -->
+			<div v-if="videoTitle && settings.showVideoTitleContainer.value" class="video-title-container">
+				<p>{{ videoTitle }}</p>
+			</div>
 
 			<font-awesome-icon class="skip skip-left" size="2xl" icon="fa-solid fa-backward" />
 			<div class="middle-play">
@@ -24,34 +19,29 @@
 			</div>
 			<font-awesome-icon class="skip skip-right" size="2xl" icon="fa-solid fa-forward" />
 
-			<div :class="{ 'btn-intro-skip-container': true, enabled: isInterceptingWithIntro || isInterceptingWithOutro }">
+			<div
+				:class="{ 'btn-intro-skip-container': true, enabled: isInterceptingWithIntro || isInterceptingWithOutro }">
 				<button type="button" @click="skipSegment" class="btn btn-light">
-					Skip {{ isInterceptingWithIntro ? 'Intro' : 'Outro' }} <font-awesome-icon size="lg" icon="fa-solid fa-forward" />
+					Skip {{ isInterceptingWithIntro ? 'Intro' : 'Outro' }} <font-awesome-icon size="lg"
+						icon="fa-solid fa-forward" />
 				</button>
 			</div>
 
 			<div v-show="!dataLoading" class="video-controls-container">
 				<div class="timeline-container" ref="timelineContainerRef">
 					<div class="timeline">
-						<div
-							v-for="segment in segmentData"
-							class="timeline-intro-skip"
-							:style="{
-								'--intro-skip-start': segment.startms / videoData.duration,
-								'--intro-skip-end': segment.endms / videoData.duration,
-							}"
-						></div>
+						<div v-for="segment in segmentData" class="timeline-intro-skip" :style="{
+							'--intro-skip-start': segment.startms / videoData.duration,
+							'--intro-skip-end': segment.endms / videoData.duration,
+						}"></div>
 
 						<template v-if="videoData.buffered">
-							<div
-								v-for="i in videoData.buffered.length"
+							<div v-for="i in videoData.buffered.length"
 								v-show="Math.round(Math.abs(videoData.buffered.start(i - 1) - videoData.buffered.end(i - 1))) > 10"
-								class="timeline-buffer"
-								:style="{
+								class="timeline-buffer" :style="{
 									'--buffer-start': videoData.buffered.start(i - 1) / videoData.duration,
 									'--buffer-end': videoData.buffered.end(i - 1) / videoData.duration,
-								}"
-							></div>
+								}"></div>
 						</template>
 
 						<img class="preview-img" />
@@ -72,19 +62,16 @@
 					<div class="volume-container">
 						<button class="mute-btn">
 							<svg class="volume-high-icon" viewBox="0 0 24 24">
-								<path
-									fill="currentColor"
-									d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z"
-								/>
+								<path fill="currentColor"
+									d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" />
 							</svg>
 							<svg class="volume-low-icon" viewBox="0 0 24 24">
-								<path fill="currentColor" d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
+								<path fill="currentColor"
+									d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
 							</svg>
 							<svg class="volume-muted-icon" viewBox="0 0 24 24">
-								<path
-									fill="currentColor"
-									d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z"
-								/>
+								<path fill="currentColor"
+									d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z" />
 							</svg>
 						</button>
 						<input class="volume-slider" type="range" min="0" max="1" step="any" value="1" />
@@ -94,55 +81,52 @@
 						/
 						<div class="total-time"></div>
 					</div>
-					<button v-if="!inSyncRoom && screenWidth >= 470" title="RMVC Controls" data-bs-toggle="modal" data-bs-target="#rmvcModal">
+					<!-- <button v-if="!inSyncRoom && screenWidth >= 470" title="RMVC Controls" data-bs-toggle="modal"
+						data-bs-target="#rmvcModal">
 						<font-awesome-icon icon="fa-solid fa-network-wired" />
 					</button>
 					<button v-if="!inSyncRoom" title="Share Video" data-bs-toggle="modal" data-bs-target="#shareModal">
 						<font-awesome-icon icon="fa-solid fa-share" size="lg" />
-					</button>
+					</button> -->
 					<button v-if="screenWidth >= 480" title="Previous Episode" @click="switchTo(-1)">
 						<svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path
-								fill-rule="evenodd"
-								clip-rule="evenodd"
+							<path fill-rule="evenodd" clip-rule="evenodd"
 								d="M0 18H2L2 0H0L0 18ZM17.7139 17.3827C18.7133 17.9977 20 17.2787 20 16.1052L20 1.8948C20 0.7213 18.7133 0.00230002 17.7139 0.6173L6.1679 7.7225C5.2161 8.3082 5.2161 9.6918 6.1679 10.2775L17.7139 17.3827ZM18 2.7896V15.2104L7.908 9L18 2.7896Z"
-								fill="currentColor"
-							/>
+								fill="currentColor" />
 						</svg>
 					</button>
 					<button title="Next Episode" @click="switchTo(1)">
 						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path
-								fill-rule="evenodd"
-								clip-rule="evenodd"
+							<path fill-rule="evenodd" clip-rule="evenodd"
 								d="M22 3H20V21H22V3ZM4.28615 3.61729C3.28674 3.00228 2 3.7213 2 4.89478V19.1052C2 20.2787 3.28674 20.9977 4.28615 20.3827L15.8321 13.2775C16.7839 12.6918 16.7839 11.3082 15.8321 10.7225L4.28615 3.61729ZM4 18.2104V5.78956L14.092 12L4 18.2104Z"
-								fill="currentColor"
-							></path>
+								fill="currentColor"></path>
 						</svg>
 					</button>
 					<button v-if="screenWidth >= 380" title="Toggle Video Speed" class="speed-btn wide-btn">1x</button>
 					<button title="Toggle Mini Player" class="mini-player-btn">
 						<svg viewBox="0 0 24 24">
-							<path
-								fill="currentColor"
-								d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-10-7h9v6h-9z"
-							/>
+							<path fill="currentColor"
+								d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-10-7h9v6h-9z" />
 						</svg>
 					</button>
 					<button v-if="screenWidth >= 450" title="Toggle Theatre Player" class="theater-btn">
 						<svg class="tall" viewBox="0 0 24 24">
-							<path fill="currentColor" d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z" />
+							<path fill="currentColor"
+								d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z" />
 						</svg>
 						<svg class="wide" viewBox="0 0 24 24">
-							<path fill="currentColor" d="M19 7H5c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 8H5V9h14v6z" />
+							<path fill="currentColor"
+								d="M19 7H5c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 8H5V9h14v6z" />
 						</svg>
 					</button>
 					<button title="Toggle Fullscreen Player" class="full-screen-btn">
 						<svg class="open" viewBox="0 0 24 24">
-							<path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
+							<path fill="currentColor"
+								d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
 						</svg>
 						<svg class="close" viewBox="0 0 24 24">
-							<path fill="currentColor" d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
+							<path fill="currentColor"
+								d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
 						</svg>
 					</button>
 				</div>
@@ -154,30 +138,33 @@
 				</div>
 			</div>
 
-			<pre v-if="true" class="internal-video-devinfos">
-                VideoLoading: {{ videoLoading }} 
-                ReadyState: {{ videoData.readyState }} 
-                CurrentTime: {{ videoData.currentTime }}ms
-                Duration: {{ videoData.duration }}ms
-                Progress: {{ videoData.duration - videoData.currentTime }}ms
-                Volume: {{ videoData.volume }}
-                Quality: T{{ videoData.quality?.totalVideoFrames }} / D{{ videoData.quality?.droppedVideoFrames }} / C{{ videoData.quality?.corruptedVideoFrames }}
-                IntroData: {{ JSON.stringify(segmentData) }}
-                AlreadySkipped: {{ JSON.stringify(alreadySkipped) }}
-                Buffers: 
-                {{ videoData.bufferedPercentage }}% / 100%
-                <div v-if="videoData.buffered" class="internal-video-devinfos-child">
-                    <span v-for="i in videoData.buffered.length">
-                        {{ videoData.buffered.start(i - 1) }}ms - {{ videoData.buffered.end(i - 1) }}ms = {{ Math.round(Math.abs(videoData.buffered.start(i - 1) - videoData.buffered.end(i - 1))) }}ms
-                    </span>
-                </div>
-            Seekable: 
-                <div v-if="videoData.seekable" class="internal-video-devinfos-child">
-                    <span v-for="i in videoData.seekable?.length">
-                        {{ videoData.seekable.start(i - 1) }}ms - {{ videoData.seekable.end(i - 1) }}ms = {{ Math.round(Math.abs(videoData.seekable.start(i - 1) - videoData.seekable.end(i - 1))) }}ms
-                    </span>
-                </div>
-			</pre>
+			<pre v-if="settings.developerMode.value" class="internal-video-devinfos">
+	VideoLoading: {{ videoLoading }}
+	ReadyState: {{ videoData.readyState }}
+	CurrentTime: {{ videoData.currentTime }}ms
+	Duration: {{ videoData.duration }}ms
+	Progress: {{ videoData.duration - videoData.currentTime }}ms
+	Volume: {{ videoData.volume }}
+	Quality: T{{ videoData.quality?.totalVideoFrames }} / D{{ videoData.quality?.droppedVideoFrames }} / C{{
+		videoData.quality?.corruptedVideoFrames }}
+	IntroData: {{ JSON.stringify(segmentData) }}
+	AlreadySkipped: {{ JSON.stringify(alreadySkipped) }}
+	Buffers:
+	{{ videoData.bufferedPercentage }}% / 100%
+	<div v-if="videoData.buffered" class="internal-video-devinfos-child">
+		<span v-for="i in videoData.buffered.length">
+			{{ videoData.buffered.start(i - 1) }}ms - {{ videoData.buffered.end(i - 1) }}ms = {{
+				Math.round(Math.abs(videoData.buffered.start(i - 1) - videoData.buffered.end(i - 1))) }}ms
+		</span>
+	</div>
+	Seekable:
+	<div v-if="videoData.seekable" class="internal-video-devinfos-child">
+		<span v-for="i in videoData.seekable?.length">
+			{{ videoData.seekable.start(i - 1) }}ms - {{ videoData.seekable.end(i - 1) }}ms = {{
+				Math.round(Math.abs(videoData.seekable.start(i - 1) - videoData.seekable.end(i - 1))) }}ms
+		</span>
+	</div>
+</pre>
 
 			<video ref="videoRef" preload="auto" oncontextmenu="return false" playsinline :src="videoSrc"></video>
 		</div>
@@ -186,14 +173,11 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount, reactive } from 'vue';
-// import { mapState, mapWritableState, mapActions } from 'pinia';
 import { throttle } from '@/utils/debounceAndThrottle';
+import type { DetailedEpisode, DetailedMovie } from '@cinefinn/types/database';
+import useAPIURL from '~/hooks/useAPIURL';
 // import ShareModal from '@/components/Watch/ShareModal.vue';
 // import RmvcModal from '@/components/Watch/RmvcModal.vue';
-// import { useAuthStore } from '@/stores/auth.store';
-// import { useWatchStore } from '@/stores/watch.store';
-// import { useAxios, useBaseURL } from '@/utils';
-// import type { SerieEpisode } from '@Types/classes';
 
 interface Segment {
 	type: 'intro' | 'outro';
@@ -239,11 +223,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 // Stores
 const authStore = useAuthStore();
-// const watchStore = useWatchStore();
-// const { settings } = storeToRefs(authStore);
+const indexStore = useIndexStore();
 const settings = computed(() => authStore.user.settings);
-// const { currentSeries, currentMovie, currentLanguage, videoSrc, entityObject } = storeToRefs(watchStore);
-// const { updateSettings } = authStore;
 
 // Refs
 const videoRef = ref<HTMLVideoElement>();
@@ -255,6 +236,17 @@ const dataLoading = ref(false);
 const screenWidth = ref(window.innerWidth);
 const segmentData = ref<Segment[]>([]);
 const alreadySkipped = ref<string[]>([]);
+
+const videoTitle = computed(() => {
+	if (indexStore.selectedEntity?.UUID.startsWith('MO-')) {
+		return (indexStore.selectedEntity as DetailedMovie).primaryName;
+	} else {
+		const episode = (indexStore.selectedEntity as DetailedEpisode)
+		const prettySeasonIndex = String(episode.season_IDX).padStart(2, '0');
+		const prettyEpisodeIndex = String(episode.episode_IDX).padStart(2, '0');
+		return `${indexStore.detailedSerie?.title} - ${prettySeasonIndex}x${prettyEpisodeIndex}`;
+	}
+})
 
 const videoData = reactive<VideoData>({
 	readyState: 0,
@@ -313,9 +305,9 @@ const updateVueVideoData = () => {
 		for (let i = 0; i < videoRef.value.buffered.length; i++) {
 			try {
 				bufferedTime += videoRef.value.buffered.end(i) - videoRef.value.buffered.start(i);
-			} catch {}
+			} catch { }
 		}
-	} catch {}
+	} catch { }
 
 	const bufferedPercentage = videoRef.value.duration ? ((bufferedTime / videoRef.value.duration) * 100).toFixed(2) : '0';
 
@@ -335,7 +327,7 @@ const updateVueVideoData = () => {
 const generatePreviewImageURL = (previewImgNumber: number): string => {
 	// if (!currentSeries.value || currentSeries.value.ID === '-1') return '';
 	// Implementation omitted in original - return empty or real url if you have one
-	return '';
+	return `${useAPIURL()}/images/${indexStore.detailedSerie?.UUID}/${indexStore.selectedWatchableEntity?.UUID}/previewImages/${previewImgNumber}`;
 };
 
 const skipSegment = () => {
@@ -387,10 +379,10 @@ function removeAllListeners() {
 }
 
 // These will be set during initialization
-let skip: (duration: number, set?: boolean, server?: boolean) => void = () => {};
-let skipPercent: (percent: number) => void = () => {};
-let togglePlay: () => void = () => {};
-let cleanup: () => void = () => {};
+let skip: (duration: number, set?: boolean, server?: boolean) => void = () => { };
+let skipPercent: (percent: number) => void = () => { };
+let togglePlay: () => void = () => { };
+let cleanup: () => void = () => { };
 
 const handleResize = () => {
 	screenWidth.value = window.innerWidth;
@@ -641,7 +633,7 @@ const initializeVideoControls = () => {
 		if (videoContainer.classList.contains('mini-player')) {
 			document.exitPictureInPicture();
 		} else {
-			video.requestPictureInPicture().catch(() => {});
+			video.requestPictureInPicture().catch(() => { });
 		}
 	};
 
@@ -689,13 +681,13 @@ const initializeVideoControls = () => {
 	addListener(timelineContainer, 'pointerup', (ev: PointerEvent) => {
 		try {
 			(timelineContainer as HTMLElement).releasePointerCapture(ev.pointerId);
-		} catch {}
+		} catch { }
 		endScrub(ev.clientX);
 	});
 	addListener(timelineContainer, 'pointercancel', (ev: PointerEvent) => {
 		try {
 			(timelineContainer as HTMLElement).releasePointerCapture(ev.pointerId);
-		} catch {}
+		} catch { }
 		endScrub(ev.clientX || lastClientX);
 	});
 
@@ -723,11 +715,11 @@ const initializeVideoControls = () => {
 				video.load();
 				try {
 					await video.play();
-				} catch {}
+				} catch { }
 				videoLoading.value = false;
 				video.currentTime = time;
 			}
-		}, 15000);
+		}, 10000);
 	};
 	const onError = () => {
 		videoLoading.value = true;
@@ -749,6 +741,7 @@ const initializeVideoControls = () => {
 		percent = isNaN(percent) ? 0 : percent;
 		timelineContainer.style.setProperty('--progress-position', String(percent));
 	};
+	video.volume = settings.value.volume.value;
 	const onVolumeChange = () => {
 		if (!volumeSlider) return;
 		volumeSlider.value = String(video.volume);
@@ -761,6 +754,11 @@ const initializeVideoControls = () => {
 			volumeLevel = 'high';
 		} else {
 			volumeLevel = 'low';
+		}
+
+		if (video.volume !== settings.value.volume.value && video.volume !== 0) {
+			settings.value.volume.value = video.volume;
+			useSocket().emit('updateSettings', authStore.user.settings);
 		}
 
 		videoContainer.dataset.volumeLevel = volumeLevel;

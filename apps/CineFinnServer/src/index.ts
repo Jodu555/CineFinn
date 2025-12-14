@@ -34,7 +34,7 @@ const app = new Hono({
 })
     .use(cors())
     .use(trimTrailingSlash())
-    .use(ownLogger(console.log, ['/socket.io', '/video']))
+    .use(ownLogger(console.log, ['/socket.io', '/video', '/images']))
     .use('*', registerMetrics)
     .get('/metrics', printMetrics)
     .get('/health', (c) => {

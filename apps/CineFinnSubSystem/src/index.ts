@@ -103,8 +103,8 @@ const map = new Map<
 >();
 
 socket.on('videoStats', ({ filePath }, callback) => {
-    console.log('Got Stats for:', filePath);
     const stats = fs.statSync(filePath);
+    console.log('Got Stats for:', filePath, stats);
     callback(stats);
 });
 
@@ -165,95 +165,3 @@ socket.on('video-range', ({ filePath, start, end, requestId }: VideoRangeRequest
         socket.emit('video-chunk-error', { error: error.message, requestId });
     });
 });
-
-// interface TransmitData {
-// 	fd: number;
-// 	transmitID: string;
-// 	path: string;
-// 	size: number;
-// 	packetCount: number;
-// 	cumSize: number;
-// 	stream: fs.WriteStream;
-// 	hash: crypto.Hash;
-// 	startTime: number;
-// }
-
-// const streamMap = new Map<string, TransmitData>();
-
-// socket.on('openStream', ({ transmitID, fd, size, remotePath }) => {
-// 	const alteredPath = path.join(config.entrypoint, remotePath);
-// 	console.log('Started Recieving Packets', transmitID, fd, size);
-// 	fs.mkdirSync(path.join(alteredPath, '..'), { recursive: true });
-// 	const stream = fs.createWriteStream(alteredPath);
-
-// 	const hash = crypto.createHash('md5');
-// 	streamMap.set(transmitID, {
-// 		transmitID,
-// 		fd,
-// 		path: alteredPath,
-// 		size,
-// 		packetCount: 0,
-// 		cumSize: 0,
-// 		stream,
-// 		hash,
-// 		startTime: Date.now(),
-// 	} satisfies TransmitData);
-// });
-
-// socket.on('dataStream', ({ transmitID, fd, data }) => {
-// 	const obj = streamMap.get(transmitID);
-// 	if (obj.fd !== fd) {
-// 		console.log('We somehow fucked up really bad');
-// 		return;
-// 	}
-// 	obj.packetCount++;
-// 	obj.cumSize += data.length;
-// 	// console.log(((obj.cumSize / obj.size) * 100).toFixed(2) + '%');
-// 	obj.hash.update(data);
-// 	obj.stream.write(data);
-// });
-
-// socket.on('closeStream', async ({ transmitID, fd, packetCount, fingerprint }, callback) => {
-// 	console.log('Finished, Recieving Packets', transmitID, fd);
-
-// 	const obj = streamMap.get(transmitID);
-// 	if (obj.fd !== fd) {
-// 		console.log('We somehow fucked up really bad');
-// 		return;
-// 	}
-// 	const localPrint = obj.hash.digest('hex');
-// 	obj.stream.close();
-// 	const stats = fs.statSync(obj.path);
-
-// 	console.log('Validating fingerprint!');
-// 	console.log('Expect:', fingerprint);
-// 	console.log('Actual:', localPrint);
-
-// 	let valid = false;
-// 	const elapsedTimeMS = Date.now() - obj.startTime;
-
-// 	const cleanup = () => {
-// 		streamMap.delete(transmitID);
-// 	};
-
-// 	if (fingerprint != localPrint) {
-// 		console.error('ERROR: Fingerprint mismatch!!!');
-// 		callback({
-// 			fingerprintValidation: valid,
-// 			elapsedTimeMS: elapsedTimeMS,
-// 		});
-// 		cleanup();
-// 		return;
-// 	}
-// 	if (obj.packetCount == packetCount && fingerprint == localPrint) {
-// 		valid = true;
-// 		console.log('Theoretical Count:', obj.size, packetCount);
-// 		console.log('Actual Count:     ', stats.size, obj.packetCount);
-// 		console.log('Took:', elapsedTimeMS / 1000, 's');
-// 	}
-// 	callback({
-// 		fingerprintValidation: valid,
-// 		elapsedTimeMS: elapsedTimeMS,
-// 	});
-// 	cleanup();
-// });
