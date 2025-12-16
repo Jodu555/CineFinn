@@ -42,6 +42,7 @@ export interface ServerToClientEvents {
     jobUpdate: (obj: (database.Job & database.timestamped)) => void;
     watchListUpdate: (obj: database.WatchHistory[]) => void;
     settingsUpdate: (obj: database.SettingsObject) => void;
+    seriesReload: (obj: database.FrontendSeries[]) => void;
 }
 
 export interface ServerToScraperEvents {

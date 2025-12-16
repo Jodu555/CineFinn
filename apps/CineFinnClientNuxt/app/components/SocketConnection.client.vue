@@ -26,6 +26,7 @@ onMounted(() => {
 	socket.on('jobUpdate', managmentStore.updateJob);
 	socket.on('watchListUpdate', indexStore.updateWatchList);
 	socket.on('settingsUpdate', authStore.updateSettings);
+	socket.on('seriesReload', indexStore.reloadSeries);
 	if (socket.connected) {
 		onConnect();
 	}

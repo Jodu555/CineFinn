@@ -28,9 +28,8 @@ export const cachingMiddleware = <T extends StorageValue>(storage: Storage<T>, k
     })
 };
 
-const router = new Hono()
-    .get('/', authMiddleware, cachingMiddleware(undetailedIndexStorage, (c) => 'undetailedIndex'), async (c) => {
-        const result = (await queryDatabase(`
+export async function getFrontEndSeries() {
+    const result = (await queryDatabase(`
         SELECT 
             series.*,
             (SELECT COALESCE(CONCAT('[', GROUP_CONCAT(
@@ -55,27 +54,33 @@ const router = new Hono()
             ), ']'), '[]') FROM movies m WHERE m.serie_UUID = series.UUID) AS movies_array
         FROM series
         `)).map((row: any) => {
-            try {
-                const seasons = JSON.parse(row.seasons_array) as Season[];
-                const movies = row.movies_array != undefined ? JSON.parse(row.movies_array) as Movie[] : [] as Movie[];
-                const obj = {
-                    ...row,
-                    tags: JSON.parse(row.tags),
-                    infos: JSON.parse(row.infos),
-                    refs: JSON.parse(row.refs),
-                    seasons: seasons.sort((a, b) => a.season_IDX - b.season_IDX),
-                    movies: movies.sort((a, b) => a.movie_IDX - b.movie_IDX),
-                } as FrontendSeries & { seasons_array?: string; movies_array?: string };
-                delete obj.seasons_array;
-                delete obj.movies_array;
-                return obj as FrontendSeries;
-            } catch (error) {
-                console.log(error);
-                console.log(row);
+        try {
+            const seasons = JSON.parse(row.seasons_array) as Season[];
+            const movies = row.movies_array != undefined ? JSON.parse(row.movies_array) as Movie[] : [] as Movie[];
+            const obj = {
+                ...row,
+                tags: JSON.parse(row.tags),
+                infos: JSON.parse(row.infos),
+                refs: JSON.parse(row.refs),
+                seasons: seasons.sort((a, b) => a.season_IDX - b.season_IDX),
+                movies: movies.sort((a, b) => a.movie_IDX - b.movie_IDX),
+            } as FrontendSeries & { seasons_array?: string; movies_array?: string };
+            delete obj.seasons_array;
+            delete obj.movies_array;
+            return obj as FrontendSeries;
+        } catch (error) {
+            console.log(error);
+            console.log(row);
 
-            }
-            return null;
-        }).filter((x) => x != null);
+        }
+        return null;
+    }).filter((x) => x != null);
+    return result;
+}
+
+const router = new Hono()
+    .get('/', authMiddleware, cachingMiddleware(undetailedIndexStorage, (c) => 'undetailedIndex'), async (c) => {
+        const result = await getFrontEndSeries();
         return c.json(result);
     })
     .get('/all', authMiddleware, async (c) => {

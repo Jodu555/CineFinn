@@ -7,6 +7,7 @@ import { app, type definedSocket } from "../index.js";
 import { accountsTable } from "../database.js";
 import { debounce, getIO } from "../utils.js";
 import { compareSettings } from "../utils/settings.js";
+import { getFrontEndSeries } from "../routes/index.js";
 
 type LocalAuthData = SocketAuthDataClient<Account | Account & timestamped>;
 
@@ -62,6 +63,14 @@ async function connectionFunction(socket: definedSocket) {
 
     socket.on('disconnect', () => {
         console.log(socket.id, 'user disconnected');
+    });
+}
+
+export async function sendSeriesReloadToAll() {
+    const sockets = await getIO().fetchSockets();
+    const frontendSeries = await getFrontEndSeries();
+    sockets.filter(s => s.data.auth.type === 'client').forEach(async s => {
+        s.emit('seriesReload', frontendSeries);
     });
 }
 

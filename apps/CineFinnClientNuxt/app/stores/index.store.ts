@@ -127,5 +127,8 @@ export const useIndexStore = defineStore('index', {
         setSelectedWatchableEntity(entity: WatchableEntity | null) {
             this.selectedWatchableEntity = entity;
         },
+        reloadSeries(series: FrontendSeries[]) {
+            this.series = series;
+        }
     }
 });

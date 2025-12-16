@@ -13,6 +13,7 @@ import type { Langs } from '@cinefinn/types/database';
 import { indexStorage } from '../routes/index.js';
 import { app } from '../index.js';
 import { getIO } from '../utils.js';
+import { sendSeriesReloadToAll } from '../sockets/client.socket.js';
 
 
 // export async function crawl(job: Job) {
@@ -662,10 +663,11 @@ export async function crawl(job: Job) {
     await indexStorage.clear();
     job.timeEnd('Invlaidating Cache');
 
-    app.request('/index/all', {
+    await app.request('/index/all', {
         headers: { 'auth-token': getConfig().system.PUBLIC_API_AUTH_TOKEN },
     });
 
+    await sendSeriesReloadToAll();
 
     await job.success();
 }

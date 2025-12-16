@@ -4,6 +4,7 @@ import { getConfig } from "../config.js";
 import { queryDatabase } from "../utils.js";
 import { seriesTable, watchableEntitysTable } from "../database.js";
 import type { definedSocket } from "../index.js";
+import { sendSeriesReloadToAll } from "./client.socket.js";
 
 async function authFunction(authHandshake: AuthHandshakeSubsystem): Promise<SocketAuthDataSubsystem> {
     console.log('subsystem auth');
@@ -29,6 +30,10 @@ async function connectionFunction(socket: definedSocket) {
     const socketAuthData = socket.data.auth as SocketAuthDataSubsystem;
     console.log('subsystem connected');
     await toggleSeriesesForSubSystem(socketAuthData.id, false)
+
+    socket.on('disconnect', async () => {
+        await toggleSeriesesForSubSystem(socketAuthData.id, true)
+    })
 }
 
 export async function getKnownSubSystems() {
@@ -49,6 +54,7 @@ export async function toggleSeriesesForSubSystem(subID: string, disabled: boolea
     for (const seriesID of seriesIDs) {
         await seriesTable.update({ UUID: seriesID }, { infos: { disabled } });
     }
+    sendSeriesReloadToAll();
     console.log(`Toggling Serieses(${seriesIDs.size}) for SubSystem: ${subID} to Disabled: ${disabled}`);
 }
 
