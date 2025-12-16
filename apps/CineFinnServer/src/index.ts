@@ -26,6 +26,7 @@ import { getConfig } from './config.js';
 import { compareSettings } from './utils/settings.js';
 import os from "os";
 import { setupSocketIO } from './sockets/index.js';
+import { getKnownSubSystems, toggleSeriesesForSubSystem } from './sockets/subsystem.socket.js';
 
 
 const { printMetrics, registerMetrics } = prometheus();
@@ -132,6 +133,17 @@ const httpServer = serve({
     }, 10000 * 30);
 
     getEmailManager();
+
+    const knownSubSystems = await getKnownSubSystems();
+    const subSystemSockets = (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'subsystem');
+    for (const subSystem of knownSubSystems) {
+        //The Second filter is needed because typescript does not understand that the socket has already been narrowed to the correct type
+        if (subSystemSockets.find(s => s.data.auth.type === 'subsystem' && s.data.auth.id === subSystem)) {
+            await toggleSeriesesForSubSystem(subSystem, false);
+        } else {
+            await toggleSeriesesForSubSystem(subSystem, true);
+        }
+    }
 
     // console.log('Fixing Seasons');
     // const seasons = await seasonsTable.get();

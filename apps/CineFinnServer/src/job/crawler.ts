@@ -467,7 +467,7 @@ export async function crawl(job: Job) {
     }
 
     // ---- Helper: get-or-create watchable entity
-    async function ensureWatchable(watchableUUID: string, lang: string, file: SubFile): Promise<WatchableRow> {
+    async function ensureWatchable(watchableUUID: string, serieUUID: string, lang: string, file: SubFile): Promise<WatchableRow> {
         const key = `${watchableUUID}::${lang}::${file.subID}`;
         const cached = watchableByKey.get(key);
         if (cached) return cached;
@@ -487,6 +487,7 @@ export async function crawl(job: Job) {
             }
             const created = await watchableEntitysTable.create({
                 UUID: generateEntityID(),
+                serie_UUID: serieUUID,
                 watchable_UUID: watchableUUID,
                 lang: lang as Langs,
                 subID: file.subID,
@@ -574,7 +575,7 @@ export async function crawl(job: Job) {
         }
 
         // create / ensure watchable entity (file lang)
-        await ensureWatchable(watchableUUID, parsedData.language, subFile);
+        await ensureWatchable(watchableUUID, serie.UUID, parsedData.language, subFile);
     }
 
     // Choose concurrency based on environment; default to 20 concurrent workers

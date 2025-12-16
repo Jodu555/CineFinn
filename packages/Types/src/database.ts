@@ -185,6 +185,7 @@ export type Langs = 'GerDub' | 'GerSub' | 'EngDub' | 'EngSub' | 'JapDub' | 'EngS
 
 export interface WatchableEntity {
     UUID: string;
+    serie_UUID: string;
     watchable_UUID: string;
     lang: Langs;
     subID: string;

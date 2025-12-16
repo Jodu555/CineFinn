@@ -244,7 +244,7 @@ async function createTables() {
         },
         UUID: UUID_FIELD,
         watchable_UUID: UUID_FIELD,
-        // serie_UUID: UUID_FIELD, //Maybe implement this, this would make so much so much easier
+        serie_UUID: UUID_FIELD, //Maybe implement this, this would make so much so much easier
         lang: {
             type: 'varchar(10)',
             null: false,

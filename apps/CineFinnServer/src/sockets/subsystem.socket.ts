@@ -1,6 +1,9 @@
 import type { AuthHandshakeSubsystem, SocketAuthDataSubsystem } from "@cinefinn/types/socket";
 import type { SocketConsumerMeta } from "./index.js";
 import { getConfig } from "../config.js";
+import { queryDatabase } from "../utils.js";
+import { seriesTable, watchableEntitysTable } from "../database.js";
+import type { definedSocket } from "../index.js";
 
 async function authFunction(authHandshake: AuthHandshakeSubsystem): Promise<SocketAuthDataSubsystem> {
     console.log('subsystem auth');
@@ -22,8 +25,31 @@ async function authFunction(authHandshake: AuthHandshakeSubsystem): Promise<Sock
     }
 }
 
-async function connectionFunction() {
+async function connectionFunction(socket: definedSocket) {
+    const socketAuthData = socket.data.auth as SocketAuthDataSubsystem;
     console.log('subsystem connected');
+    await toggleSeriesesForSubSystem(socketAuthData.id, false)
+}
+
+export async function getKnownSubSystems() {
+    const subIDs = new Set<string>();
+    const rows = await queryDatabase(`SELECT * FROM watchableEntitys WHERE subID != 'main'`);
+    rows.forEach(row => {
+        subIDs.add(row.subID);
+    });
+    return [...subIDs];
+}
+
+export async function toggleSeriesesForSubSystem(subID: string, disabled: boolean) {
+    const seriesIDs = new Set<string>();
+    const entitys = await watchableEntitysTable.get({ subID })
+    for (const entity of entitys) {
+        seriesIDs.add(entity.serie_UUID);
+    }
+    for (const seriesID of seriesIDs) {
+        await seriesTable.update({ UUID: seriesID }, { infos: { disabled } });
+    }
+    console.log(`Toggling Serieses(${seriesIDs.size}) for SubSystem: ${subID} to Disabled: ${disabled}`);
 }
 
 
