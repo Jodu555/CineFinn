@@ -92,7 +92,7 @@ export const useIndexStore = defineStore('index', {
         async updateWatchList(watchList: WatchHistory[]) {
             this.watchHistory = watchList;
         },
-        setSelectedWatchableEntityUUID(entityUUID: string | null) {
+        setSelectedWatchableEntityUUID(entityUUID: string | null, language?: string) {
             // console.log('setSelectedWatchableEntityUUID', entityUUID);
 
             const preferredLanguageList = ['GerDub', 'EngDub', 'GerSub', 'EngSub'];
@@ -115,7 +115,12 @@ export const useIndexStore = defineStore('index', {
                 return;
             }
 
-            const preferredLanguage = preferredLanguageList.find(l => entity.watchableEntitys.find(we => we.lang === l));
+            let preferredLanguage = preferredLanguageList.find(l => entity.watchableEntitys.find(we => we.lang === l));
+            if (language) {
+                if (entity.watchableEntitys.find(we => we.lang === language)) {
+                    preferredLanguage = language;
+                }
+            }
 
             this.selectedWatchableEntity = entity.watchableEntitys.find(we => we.lang === preferredLanguage)!;
         },

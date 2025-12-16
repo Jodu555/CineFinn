@@ -3,6 +3,8 @@
 		<pre v-if="DEVELOPER_MODE">
 		{{ indexStore.selectedWatchableEntity }}
 		</pre>
+		<EntityActionsInformation v-if="showVideo" class="container" :switch-to="switchTo"
+			:change-language="changeLanguage" />
 		<ClientOnly>
 			<ExtendedVideo v-if="showVideo" :videoSrc="videoSrc" :switch-to="switchTo" :can-play="true" :events="{}"
 				:send-video-time-update="sendVideoTimeUpdate" />
@@ -581,6 +583,7 @@ const getEpisodeProgress = (episodeUUID: string) => {
 const isMovieWatched = (movieUUID: string) => {
 	return getMovieProgress(movieUUID) > 95;
 };
+
 const getMovieProgress = (movieUUID: string) => {
 	console.log(`getMovieProgress: ${movieUUID}`);
 
@@ -632,6 +635,11 @@ const switchTo = (vel: number) => {
 		// selectedSeason.value = arr[arrptr]![idxptr]!.season_UUID;
 
 	}
+};
+
+const changeLanguage = (lang: string) => {
+	if (indexStore.selectedEntity == null) return;
+	indexStore.setSelectedWatchableEntityUUID(indexStore.selectedEntity.UUID, lang);
 };
 
 function multiDimSwitcher<T>(dimArr: T[][], arrptr: number, idxptr: number, velocity: number) {

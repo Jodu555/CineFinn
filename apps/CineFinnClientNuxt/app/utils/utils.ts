@@ -18,3 +18,42 @@ export const validateEmail = (email: string) => {
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     );
 };
+
+export const langDetails = {
+  gerdub: {
+    title: 'Deutsch/German',
+    alt: 'Deutsche Sprache, Deutsche Flagge, Flagge, Flag',
+  },
+  gersub: {
+    title: 'Japanisch mit deutschen Untertiteln',
+    alt: 'Deutsche Flagge, Flagge, Untertitel, Flag',
+  },
+  engdub: {
+    title: 'Englisch/English',
+    alt: 'Englische Sprache, Englische Flagge, Flagge, Flag',
+  },
+  engsub: {
+    title: 'Japanisch mit englischen Untertiteln',
+    alt: 'Englische Flagge, Flagge, Untertitel, Flag',
+  },
+  japdub: {
+    title: 'Japanisch/Japanese',
+    alt: 'Japanische Flagge, Flagge, Original, Flag',
+  },
+  engsubk: {
+    title: 'Koreanisch mit englischen Untertiteln',
+    alt: 'Englische Flagge, Flagge, Untertitel, Flag, Koreanisch, Korean',
+  },
+  gersubk: {
+    title: 'Koreanisch mit deutschen Untertiteln',
+    alt: 'Deutsche Flagge, Flagge, Untertitel, Flag, Koreanisch, Korean',
+  },
+  engsubc: {
+    title: 'Chinesisch mit englischen Untertiteln',
+    alt: 'Englische Flagge, Flagge, Untertitel, Flag, Chinesisch, Chinese',
+  },
+  gersubc: {
+    title: 'Chinesisch mit deutschen Untertiteln',
+    alt: 'Deutsche Flagge, Flagge, Untertitel, Flag, Chinesisch, Chinese',
+  },
+} as Record<string, { title: string; alt: string; }>;
