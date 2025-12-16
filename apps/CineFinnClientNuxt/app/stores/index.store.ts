@@ -127,8 +127,12 @@ export const useIndexStore = defineStore('index', {
         setSelectedWatchableEntity(entity: WatchableEntity | null) {
             this.selectedWatchableEntity = entity;
         },
-        reloadSeries(series: FrontendSeries[]) {
+        async reloadSeries(series: FrontendSeries[]) {
             this.series = series;
+            this.detailedPrefetchedSeriesObj = {};
+            if (this.detailedSerie != null) {
+                await this.loadDetailedSeasonInfo(this.detailedSerie.UUID);
+            }
         }
     }
 });

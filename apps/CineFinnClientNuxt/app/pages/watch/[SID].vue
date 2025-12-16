@@ -66,9 +66,8 @@
 								</div>
 							</div>
 						</div>
-
 						<!-- Episodes/Movies Section -->
-						<div v-if="hasSeasons || hasMovies" class="mb-4">
+						<div v-if="(hasSeasons || hasMovies) && !isDisabled" class="mb-4">
 							<pre v-if="DEVELOPER_MODE">
 								{{ { activeTab, hasSeasons, hasMovies } }}
 							</pre>
@@ -313,6 +312,19 @@
 								</div>
 							</div>
 						</div>
+						<div class="text-center" v-if="isDisabled">
+							<h2 class="text-danger">It Seems there is currently no video data for this Series</h2>
+							<p class="text-danger mb-0">
+								It either got removed, or is on a node which is currently un reachable, or is currently
+								being
+								transcoded
+							</p>
+							<p class="text-danger">Please check back later and if this issue persists please contact the
+								Administrator</p>
+							<NuxtLink type="button" to="/" class="mt-3 mb-4 btn btn-outline-primary btn-lg">Go Watch
+								something
+								else</NuxtLink>
+						</div>
 					</div>
 
 					<!-- Related Content Sidebar -->
@@ -416,6 +428,8 @@ const coverURL = computed(() => {
 const hasSeasons = computed(() => series.value?.seasons && series.value.seasons.length > 0);
 
 const hasMovies = computed(() => series.value?.movies && series.value.movies.length > 0);
+
+const isDisabled = computed(() => series.value?.infos.disabled);
 
 const currentDetailedSeasonData = computed(() => {
 	return indexStore.detailedSeasons.find((s) => s.UUID === selectedSeason.value);

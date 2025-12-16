@@ -28,9 +28,9 @@
 							<li><router-link class="dropdown-item" active-class="active" to="/anidb">AniDB</router-link></li>
 						</ul>
 					</li> -->
-					<!-- <li v-if="false" class="nav-item">
-						<router-link class="nav-link" active-class="active" to="/vote">Voting</router-link>
-					</li> -->
+					<li class="nav-item">
+						<router-link class="nav-link" active-class="active" to="/playlists">Playlists</router-link>
+					</li>
 					<!-- <li class="nav-item">
 						<router-link class="nav-link" active-class="active" to="/rmvc">RMVC</router-link>
 					</li> -->
