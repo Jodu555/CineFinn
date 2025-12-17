@@ -43,6 +43,8 @@ When all the boxes are checked, I will deploy the MVP to a testing environment a
 - [ ] Scraper
 - [ ] SubSystem
 - [ ] Admin System
+  - [ ] Make Most of the Config Values like register and register token configurable
+  - [ ] Have a way to view emails and the status of them
 - [ ] Playlist System
 - [ ] Sync System
 
