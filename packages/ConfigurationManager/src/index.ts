@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import 'dotenv/config';
 
 export function setupConfigurationManagment<CI extends { version: string }>(defaultConfig: CI, cliOptions: string[][]): CI {
     const cfgPath = path.join('.', 'config.json');
@@ -10,14 +11,18 @@ export function setupConfigurationManagment<CI extends { version: string }>(defa
     }
     const cliParsedConfig = parse(cliOptions) as Partial<CI>;
 
+    const envParsedConfig = parseEnvironmentVariables() as Partial<CI>;
+
     const loadedConfig: CI = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
     if (loadedConfig?.version !== defaultConfig?.version) {
         console.error('Config version mismatch! It could be that your config is outdated. Exiting...');
         process.exit(1);
     }
 
+    //This means the priority wanders from the json file to the cli arguments to the env variables
     const res = mergeDeep(defaultConfig, mergeDeep(loadedConfig, cliParsedConfig)) as CI;
-    return res;
+    const final = mergeDeep(res, envParsedConfig) as CI;
+    return final;
 }
 
 function parse(options: string[][]) {
@@ -45,6 +50,36 @@ function parse(options: string[][]) {
             }
         }
     });
+    return obj;
+}
+
+function parseEnvironmentVariables() {
+    const obj = {} as any;
+    const envs = Object.entries(process.env);
+    envs.forEach(([arg, value]) => {
+        if (arg.startsWith('CINFINN_')) {
+            console.log(arg);
+            arg = arg.replace('CINFINN_', '');
+            if (arg.startsWith('_')) arg = arg.replace('_', '');
+            if (arg.includes('_')) {
+                const parts = arg.split('_');
+                let subObj = obj;
+                while (parts.length > 0) {
+                    const current = parts.shift();
+                    if (parts.length == 0) {
+                        subObj[current!] = value;
+                    } else {
+                        subObj[current!] = subObj[current!] ?? {};
+                        subObj = subObj[current!];
+                    }
+                }
+            } else {
+                obj[arg] = value;
+            }
+        }
+    });
+    console.log(obj);
+
     return obj;
 }
 

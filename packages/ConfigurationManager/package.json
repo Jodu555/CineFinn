@@ -14,5 +14,8 @@
 	"packageManager": "pnpm@10.18.1",
 	"devDependencies": {
 		"@types/node": "^24.10.1"
+	},
+	"dependencies": {
+		"dotenv": "^17.2.3"
 	}
 }
