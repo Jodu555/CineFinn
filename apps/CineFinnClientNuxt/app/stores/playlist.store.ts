@@ -35,17 +35,6 @@ export const usePlaylistStore = defineStore('playlist', {
             await this.loadPlaylists();
             this.loading = false;
         },
-        async deletePlaylist(id: string) {
-            this.loading = true;
-            const response = await $fetch<FrontendPlaylist>(useAPIURL() + '/playlists/' + id, {
-                method: 'DELETE',
-                headers: {
-                    'auth-token': useAuthStore().authToken,
-                },
-            });
-            await this.loadPlaylists();
-            this.loading = false;
-        },
         async updatePlaylist(id: string, body: { name: string, description: string }) {
             this.loading = true;
             const response = await $fetch<FrontendPlaylist>(useAPIURL() + '/playlists/' + id, {
@@ -57,6 +46,40 @@ export const usePlaylistStore = defineStore('playlist', {
                     name: body.name,
                     description: body.description,
                 }),
+            });
+            await this.loadPlaylists();
+            this.loading = false;
+        },
+        async deletePlaylist(id: string) {
+            this.loading = true;
+            const response = await $fetch<FrontendPlaylist>(useAPIURL() + '/playlists/' + id, {
+                method: 'DELETE',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+            });
+            await this.loadPlaylists();
+            this.loading = false;
+        },
+
+        async addToPlaylist(playlistUUID: string, itemUUID: string) {
+            this.loading = true;
+            const response = await $fetch<FrontendPlaylist>(useAPIURL() + '/playlists/' + playlistUUID + '/' + itemUUID, {
+                method: 'PUT',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+            });
+            await this.loadPlaylists();
+            this.loading = false;
+        },
+        async removeFromPlaylist(playlistUUID: string, itemUUID: string) {
+            this.loading = true;
+            const response = await $fetch<FrontendPlaylist>(useAPIURL() + '/playlists/' + playlistUUID + '/' + itemUUID, {
+                method: 'DELETE',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
             });
             await this.loadPlaylists();
             this.loading = false;
