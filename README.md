@@ -29,9 +29,9 @@ it is the successor to the CineFinn v1 Project which is now deprecated and will 
 - [x] Create ConfigugrationManager package
 - [ ] Use the configugrationManager in all the app's
   - [x] Server
-  - [ ] Scraper
+  - [x] Scraper
   - [ ] PreviewImageGenerator
-  - [ ] SubSystem
+  - [x] SubSystem
 
 Note: The JobSystem does not mean to already write the consumers for the jobs. It just means that the server will create a necessary job!
 
@@ -41,11 +41,11 @@ When all the boxes are checked, I will deploy the MVP to a testing environment a
 
 - [ ] Preview Image Generation
 - [ ] Scraper
-- [ ] SubSystem
+- [x] SubSystem
 - [ ] Admin System
   - [ ] Make Most of the Config Values like register and register token configurable
   - [ ] Have a way to view emails and the status of them
-- [ ] Playlist System
+- [x] Playlist System
 - [ ] Sync System
 
 ## Word Explanation:
