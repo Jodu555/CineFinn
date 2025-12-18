@@ -22,7 +22,7 @@ export const usePlaylistStore = defineStore('playlist', {
         },
         async createPlaylist(name: string, description: string) {
             this.loading = true;
-            const response = await $fetch<FrontendPlaylist>(useAPIURL() + '/playlists', {
+            const response = await $fetch<{ message: string, playlistUUID: string }>(useAPIURL() + '/playlists', {
                 method: 'POST',
                 headers: {
                     'auth-token': useAuthStore().authToken,
@@ -34,6 +34,7 @@ export const usePlaylistStore = defineStore('playlist', {
             });
             await this.loadPlaylists();
             this.loading = false;
+            return response;
         },
         async updatePlaylist(id: string, body: { name: string, description: string }) {
             this.loading = true;

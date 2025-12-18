@@ -55,10 +55,12 @@
 								<!-- <p class="text-muted mb-4">{{ series.infos.description }}</p> -->
 
 								<div class="d-flex gap-3">
-									<button class="btn btn-outline-primary">
+									<AddToPlaylistDialog :item-u-u-i-d="series.UUID" :content-title="series.title"
+										open-button-text="Add to Watchlist" open-button-color="outline-primary" />
+									<!-- <button class="btn btn-outline-primary">
 										<font-awesome-icon :icon="['fas', 'plus']" class="me-2" />
 										Add to Watchlist
-									</button>
+									</button> -->
 									<!-- <button class="btn btn-outline-light" v-if="SHOW_RATING">
 									<font-awesome-icon :icon="['far', 'star']" class="me-2" />
 									Rate
@@ -383,6 +385,7 @@
 <script setup lang="ts">
 import type { DetailedEpisode } from '@cinefinn/types/database';
 import { ref, computed, watch } from 'vue';
+import AddToPlaylistDialog from '~/components/AddToPlaylistDialog.vue';
 import ExtendedVideo from '~/components/ExtendedVideo.vue';
 import useAPIURL from '~/hooks/useAPIURL';
 
