@@ -259,7 +259,7 @@ const streamingContent: StreamingContent[] = [
     },
 ];
 
-const playlists = ref<Playlist[]>([]);
+const playlists = computed(() => playlistStore.playlists);
 const selectedPlaylist = ref<Playlist | null>(null);
 const editingPlaylist = ref<Playlist | null>(null);
 const deletePlaylistId = ref<string | null>(null);
@@ -269,31 +269,19 @@ const newPlaylistDescription = ref('');
 
 const handleCreatePlaylist = () => {
     if (!newPlaylistName.value.trim()) return;
-
-    const newPlaylist: Playlist = {
-        id: `playlist-${Date.now()}`,
-        name: newPlaylistName.value,
-        description: newPlaylistDescription.value,
-        createdAt: new Date().toISOString(),
-        itemIds: [1, 2],
-    };
-
-    playlistStore.playlists.push(newPlaylist);
-
-    // savePlaylist(newPlaylist);
+    playlistStore.createPlaylist(newPlaylistName.value, newPlaylistDescription.value);
     newPlaylistName.value = '';
     newPlaylistDescription.value = '';
     createDialogOpen.value = false;
-    // loadPlaylists();
 };
 
 const handleUpdatePlaylist = () => {
     if (!editingPlaylist.value || !editingPlaylist.value.name.trim()) return;
 
-    // savePlaylist(editingPlaylist.value);
-    if (selectedPlaylist.value?.id === editingPlaylist.value.id) {
-        selectedPlaylist.value = editingPlaylist.value;
-    }
+    playlistStore.updatePlaylist(editingPlaylist.value.id, {
+        name: editingPlaylist.value.name,
+        description: editingPlaylist.value.description,
+    });
     editingPlaylist.value = null;
     // loadPlaylists();
 };
