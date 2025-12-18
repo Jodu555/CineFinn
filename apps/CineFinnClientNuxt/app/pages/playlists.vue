@@ -5,9 +5,9 @@
             <div class="container py-3">
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center gap-3">
-                        <button class="btn btn-link text-decoration-none p-2" @click="goBack">
+                        <NuxtLink class="btn btn-link text-decoration-none p-2" to="/">
                             <font-awesome-icon :icon="['fas', 'arrow-left']" size="lg" />
-                        </button>
+                        </NuxtLink>
                         <h1 class="h3 mb-0 fw-bold text-primary">My Playlists</h1>
                     </div>
 
@@ -42,14 +42,15 @@
                 <div class="col-lg-4">
                     <h2 class="h5 fw-semibold mb-3">All Playlists ({{ playlists.length }})</h2>
                     <div class="d-flex flex-column gap-3">
-                        <div v-for="playlist in playlists" :key="playlist.id" class="card cursor-pointer transition-all"
-                            :class="selectedPlaylist?.id === playlist.id ? 'border-primary bg-primary bg-opacity-10' : ''"
-                            @click="selectedPlaylist = playlist" style="cursor: pointer">
+                        <div v-for="playlist in playlists" :key="playlist.UUID"
+                            class="card cursor-pointer transition-all"
+                            :class="selectedPlaylistUUID === playlist.UUID ? 'border-primary bg-primary bg-opacity-10' : ''"
+                            @click="selectedPlaylistUUID = playlist.UUID" style="cursor: pointer">
                             <div class="card-body">
                                 <div class="d-flex align-items-start justify-content-between">
                                     <div class="flex-grow-1 overflow-hidden">
                                         <h3 class="h6 fw-semibold text-truncate mb-1">{{ playlist.name }}</h3>
-                                        <p class="text-muted small mb-0">{{ playlist.itemIds.length }} items</p>
+                                        <p class="text-muted small mb-0">{{ playlist.items.length }} items</p>
                                     </div>
                                     <div class="d-flex gap-1 ms-2">
                                         <button class="btn btn-sm btn-link text-secondary p-1"
@@ -57,7 +58,7 @@
                                             <font-awesome-icon :icon="['fas', 'edit']" />
                                         </button>
                                         <button class="btn btn-sm btn-link text-danger p-1"
-                                            @click.stop="deletePlaylistId = playlist.id">
+                                            @click.stop="deletePlaylistId = playlist.UUID">
                                             <font-awesome-icon :icon="['fas', 'trash']" />
                                         </button>
                                     </div>
@@ -74,19 +75,20 @@
                             <h2 class="h4 fw-bold mb-2">{{ selectedPlaylist.name }}</h2>
                             <p v-if="selectedPlaylist.description" class="text-muted">{{ selectedPlaylist.description }}
                             </p>
-                            <p class="text-muted small mt-2">Created {{ formatDate(selectedPlaylist.createdAt) }}</p>
+                            <p class="text-muted small mt-2">Created {{ formatDate(selectedPlaylist.created_at) }}
+                            </p>
                         </div>
 
                         <!-- Empty Playlist -->
-                        <div v-if="selectedPlaylist.itemIds.length === 0"
+                        <div v-if="selectedPlaylist.items.length === 0"
                             class="text-center py-5 border border-2 border-dashed rounded">
                             <p class="text-muted mb-3">This playlist is empty</p>
-                            <button class="btn btn-outline-primary" @click="goBack">Browse Content</button>
+                            <NuxtLink class="btn btn-outline-primary" to="/">Browse Content</NuxtLink>
                         </div>
 
                         <!-- Playlist Items -->
                         <div v-else class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3">
-                            <div v-for="item in getPlaylistItems(selectedPlaylist)" :key="item.id" class="col">
+                            <div v-for="item in selectedPlaylistItems" :key="item.UUID" class="col">
                                 <div class="card border-0 shadow-sm position-relative playlist-item-card">
                                     <div class="position-relative overflow-hidden rounded">
                                         <img :src="item.cover || '/placeholder.svg'" :alt="item.title"
@@ -94,14 +96,14 @@
                                         <div
                                             class="playlist-item-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
                                             <button class="btn btn-secondary rounded-circle"
-                                                style="width: 48px; height: 48px" @click="watchItem(item.id)">
+                                                style="width: 48px; height: 48px" @click="watchItem(item.UUID)">
                                                 <font-awesome-icon :icon="['fas', 'play']" />
                                             </button>
                                         </div>
                                         <div class="position-absolute top-0 end-0 m-2 playlist-item-remove">
                                             <button class="btn btn-secondary btn-sm rounded-circle"
                                                 style="width: 32px; height: 32px"
-                                                @click.stop="handleRemoveFromPlaylist(selectedPlaylist.id, item.id)">
+                                                @click.stop="handleRemoveFromPlaylist(selectedPlaylist.UUID, item.UUID)">
                                                 <font-awesome-icon :icon="['fas', 'trash']" size="sm" />
                                             </button>
                                         </div>
@@ -218,6 +220,7 @@
 </template>
 
 <script setup lang="ts">
+import type { FrontendPlaylist } from '@cinefinn/types/database';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -226,42 +229,15 @@ definePageMeta({
 });
 
 const playlistStore = usePlaylistStore();
+const indexStore = useIndexStore();
 await callOnce('loadPlaylists', async () => await playlistStore.loadPlaylists(), { mode: 'navigation' });
 
 
 const router = useRouter();
 
-interface StreamingContent {
-    id: number;
-    title: string;
-    year: number;
-    type: string;
-    cover: string;
-    rating: number;
-}
-
-const streamingContent: StreamingContent[] = [
-    {
-        id: 1,
-        title: 'Irregular at Magic High School',
-        year: 5555,
-        type: 'anime',
-        cover: 'https://cinema-api.jodu555.de/images/814f331c/cover.jpg?auth-token=f59e638d-8927-46ab-9759-81d6fc98dfa5',
-        rating: 10,
-    },
-    {
-        id: 2,
-        title: 'The Honor at Magic High School',
-        year: 5555,
-        type: 'anime',
-        cover: 'https://cinema-api.jodu555.de/images/325ec6e5/cover.jpg?auth-token=f59e638d-8927-46ab-9759-81d6fc98dfa5',
-        rating: 10,
-    },
-];
-
 const playlists = computed(() => playlistStore.playlists);
-const selectedPlaylist = ref<Playlist | null>(null);
-const editingPlaylist = ref<Playlist | null>(null);
+const selectedPlaylistUUID = ref<string>('');
+const editingPlaylist = ref<FrontendPlaylist | null>(null);
 const deletePlaylistId = ref<string | null>(null);
 const createDialogOpen = ref(false);
 const newPlaylistName = ref('');
@@ -277,51 +253,72 @@ const handleCreatePlaylist = () => {
 
 const handleUpdatePlaylist = () => {
     if (!editingPlaylist.value || !editingPlaylist.value.name.trim()) return;
-
-    playlistStore.updatePlaylist(editingPlaylist.value.id, {
+    playlistStore.updatePlaylist(editingPlaylist.value.UUID, {
         name: editingPlaylist.value.name,
         description: editingPlaylist.value.description,
     });
     editingPlaylist.value = null;
-    // loadPlaylists();
 };
 
 const handleDeletePlaylist = () => {
     if (!deletePlaylistId.value) return;
 
     // deletePlaylist(deletePlaylistId.value);
-    if (selectedPlaylist.value?.id === deletePlaylistId.value) {
-        selectedPlaylist.value = null;
+    if (selectedPlaylist.value?.UUID === deletePlaylistId.value) {
+        selectedPlaylistUUID.value = '';
     }
     deletePlaylistId.value = null;
     // loadPlaylists();
 };
 
-const handleRemoveFromPlaylist = (playlistId: string, itemId: number) => {
+const handleRemoveFromPlaylist = (playlistId: string, itemUUID: string) => {
     // removeFromPlaylist(playlistId, itemId);
     // loadPlaylists();
-    if (selectedPlaylist.value?.id === playlistId) {
+    if (selectedPlaylist.value?.UUID === playlistId) {
         // const updated = getPlaylists().find((p) => p.id === playlistId);
         // selectedPlaylist.value = updated || null;
     }
 };
 
-const getPlaylistItems = (playlist: Playlist): StreamingContent[] => {
-    return playlist.itemIds
-        .map((id) => streamingContent.find((item) => item.id === id))
-        .filter((item): item is StreamingContent => item !== undefined);
+const selectedPlaylist = computed(() => {
+    return playlists.value.find((p) => p.UUID === selectedPlaylistUUID.value);
+});
+
+const selectedPlaylistItems = computed(() => {
+    return selectedPlaylist.value?.items
+        .map((id) => {
+            const streamingItem = playlistContent.value.find((item) => item.UUID === id);
+            return streamingItem;
+        })
+        .filter((item): item is PlaylistContent => item !== undefined);
+});
+
+const playlistContent = computed(() => {
+    return indexStore.series.map((s) => {
+        return {
+            UUID: s.UUID,
+            title: s.title,
+            type: s.tags[0],
+            cover: decideSeriesImage(s),
+        } as PlaylistContent;
+    });
+});
+
+interface PlaylistContent {
+    UUID: string;
+    title: string;
+    type: string;
+    cover: string;
+}
+
+const formatDate = (stamp: string | number): string => {
+    const timestamp = typeof stamp === 'string' ? Number(stamp) : stamp;
+
+    return new Date(timestamp).toLocaleString();
 };
 
-const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString();
-};
-
-const goBack = () => {
-    router.push('/');
-};
-
-const watchItem = (itemId: number) => {
-    router.push(`/watch/${itemId}`);
+const watchItem = (itemUUID: string) => {
+    router.push(`/watch/${itemUUID}`);
 };
 
 const closeAllModals = () => {

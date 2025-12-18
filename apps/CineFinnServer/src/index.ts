@@ -27,6 +27,7 @@ import { compareSettings } from './utils/settings.js';
 import os from "os";
 import { setupSocketIO } from './sockets/index.js';
 import { getKnownSubSystems, toggleSeriesesForSubSystem } from './sockets/subsystem.socket.js';
+import { playlistRouter } from './routes/playlist.js';
 
 
 const { printMetrics, registerMetrics } = prometheus();
@@ -54,6 +55,7 @@ const app = new Hono({
     .route('/index', indexRouter)
     .route('/managment', managmentRouter)
     .route('/watch', watchRouter)
+    .route('/playlists', playlistRouter)
     .route('/video', videoRouter)
     .get('/admin/accounts', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const accounts = await accountsTable.get();

@@ -2,7 +2,16 @@
 	<div class="col" style="content-visibility: auto" :id="entity.UUID" @click="clicked">
 		<div class="card" :class="{ 'border-success': highlighted }">
 
-
+			<div v-if="!props.serverRendered">
+				<OptimizedNuxtImg style="width: 100%; height: 100%" :width="'100%'" :height="'100%'"
+					:src="decideSeriesImage(entity)" root-margin="500px" placeholder-height="400px"
+					class="entitycard-img" />
+			</div>
+			<div v-else>
+				<LazyOptimizedNuxtImg :src="decideSeriesImage(entity)" loading="lazy" root-margin="100px"
+					style="width: 100%; height: 100%" :width="'100%'" :height="'100%'" />
+			</div>
+			<!-- 
 			<LazyOptimizedNuxtImg v-if="entity?.infos?.image" :src="buildCoverURL" loading="lazy" root-margin="100px"
 				style="width: 100%; height: 100%" :width="'100%'" :height="'100%'" />
 			<LazyOptimizedNuxtImg v-else-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" loading="lazy"
@@ -14,15 +23,8 @@
 
 			<div v-else class="entitycard-img">
 				<img :style="imgStyle" :src="`https://picsum.photos/seed/movie${randomNumber}/300/400`">
+			</div> -->
 
-			</div>
-
-			<!-- <NuxtImg v-if="entity?.infos?.image" :placeholder="[238, 357]" :src="buildCoverURL" loading="lazy" />
-			<NuxtImg v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" loading="lazy" /> -->
-
-			<!-- <SmartImage v-if="entity?.infos?.image" :src="buildCoverURL" :childclass="'card-img-top'" /> -->
-			<!-- <SmartImage v-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" :childclass="'card-img-top'" /> -->
-			<!-- <img :src="buildCoverURL" alt="" class="card-img-top" loading="lazy" /> -->
 			<div class="card-body" v-if="props.showBody">
 				<h4 class="card-title">{{ entity.infos?.title || entity.infos?.infos || entity.title }}</h4>
 				<div class="card-text">

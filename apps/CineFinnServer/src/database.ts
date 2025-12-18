@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();;
 import { Database, type thingDatabase } from '@jodu555/mysqlapi';
-import type { Account, timestamped, AuthToken, Series, Season, Episode, Movie, WatchableEntity, WatchHistory, SyncRoom, Job, Email } from '@cinefinn/types/database';
+import type { Account, timestamped, AuthToken, Series, Season, Episode, Movie, WatchableEntity, WatchHistory, SyncRoom, Job, Email, Playlist } from '@cinefinn/types/database';
 import { getConfig } from './config.js';
 
 export let database: Database;
@@ -21,6 +21,8 @@ export let watchHistoryTable: thingDatabase<WatchHistory, WatchHistory & timesta
 export let syncRoomsTable: thingDatabase<SyncRoom, SyncRoom & timestamped>;
 
 export let jobsTable: thingDatabase<Job, Job & timestamped>;
+
+export let playlistsTable: thingDatabase<Playlist, Playlist & timestamped>;
 
 export async function connectDatabase() {
     const config = getConfig();
@@ -339,6 +341,33 @@ async function createTables() {
         }
     });
 
+    database.createTable('playlists', {
+        options: {
+            timestamps: true,
+            PK: 'UUID',
+        },
+        UUID: UUID_FIELD,
+        account_UUID: UUID_FIELD,
+        name: {
+            type: 'varchar(64)',
+            null: false,
+        },
+        description: {
+            type: 'text',
+            null: true,
+        },
+        items: {
+            type: 'json',
+            null: false,
+            json: true,
+        },
+        settings: {
+            type: 'json',
+            null: false,
+            json: true,
+        },
+    })
+
     accountsTable = database.get<Account, Account & timestamped>('accounts');
     authTokensTable = database.get<AuthToken>('authtokens');
     emailsTable = database.get<Email, Email & timestamped>('emails');
@@ -354,6 +383,8 @@ async function createTables() {
     syncRoomsTable = database.get<SyncRoom, SyncRoom & timestamped>('syncRooms');
 
     jobsTable = database.get<Job, Job & timestamped>('jobs');
+
+    playlistsTable = database.get<Playlist, Playlist & timestamped>('playlists');
 
 }
 
