@@ -295,11 +295,12 @@ const selectedPlaylistItems = computed(() => {
 
 const playlistContent = computed(() => {
     return indexStore.series.map((s) => {
+        const randomNumber = useState('randomNumber' + s.UUID, () => Math.floor(Math.random() * 1000));
         return {
             UUID: s.UUID,
             title: s.title,
             type: s.tags[0],
-            cover: decideSeriesImage(s),
+            cover: decideSeriesImage(s, randomNumber.value),
         } as PlaylistContent;
     });
 });

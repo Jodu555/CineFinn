@@ -2,6 +2,7 @@
 	<div class="col" style="content-visibility: auto" :id="entity.UUID" @click="clicked">
 		<div class="card" :class="{ 'border-success': highlighted }">
 
+			<!-- <pre>{{ decideSeriesImage(entity, randomNumber) }}</pre> -->
 			<div v-if="!props.serverRendered">
 				<OptimizedNuxtImg style="width: 100%; height: 100%" :width="'100%'" :height="'100%'"
 					:src="decideSeriesImage(entity)" root-margin="500px" placeholder-height="400px"
@@ -11,8 +12,8 @@
 				<LazyOptimizedNuxtImg :src="decideSeriesImage(entity)" loading="lazy" root-margin="100px"
 					style="width: 100%; height: 100%" :width="'100%'" :height="'100%'" />
 			</div>
-			<!-- 
-			<LazyOptimizedNuxtImg v-if="entity?.infos?.image" :src="buildCoverURL" loading="lazy" root-margin="100px"
+
+			<!-- <LazyOptimizedNuxtImg v-if="entity?.infos?.image" :src="buildCoverURL" loading="lazy" root-margin="100px"
 				style="width: 100%; height: 100%" :width="'100%'" :height="'100%'" />
 			<LazyOptimizedNuxtImg v-else-if="entity?.infos?.imageURL" :src="entity.infos.imageURL" loading="lazy"
 				root-margin="100px" style="width: 100%; height: 100%" :width="'100%'" :height="'100%'" />
@@ -34,7 +35,17 @@
 					<small v-if="entity.infos.startDate || entity.infos.endDate" class="text-secondary">{{
 						entity.infos.startDate }} - {{ entity.infos.endDate }}</small>
 				</div>
-				<button @click="goAndWatch" class="btn btn-outline-primary btn-sm">Go & Watch</button>
+
+				<div class="d-flex justify-content-between">
+					<button @click="goAndWatch" class="btn btn-outline-primary btn-sm">Go & Watch</button>
+					<!-- <button class="btn btn-outline-primary bnt-sm" @click="goAndWatch">
+						<font-awesome-icon :icon="['fas', 'play']" size="xl" />
+					</button> -->
+
+					<AddToPlaylistDialog :item-u-u-i-d="entity.UUID" :content-title="entity.title" open-button-text=""
+						open-button-color="outline-primary" icon-size="sm" />
+
+				</div>
 
 				<div v-if="authStore.user.role >= 2" class="d-flex">
 					<p class="ms-auto text-secondary" style="margin-bottom: 0.1rem">ID: {{ entity.UUID }}</p>

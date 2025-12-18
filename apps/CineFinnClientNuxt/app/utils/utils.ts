@@ -21,14 +21,16 @@ export const validateEmail = (email: string) => {
         );
 };
 
-export const decideSeriesImage = (series: FrontendSeries) => {
+export const decideSeriesImage = (series: FrontendSeries, randomNumber?: string | number) => {
+    if (randomNumber == undefined) {
+        randomNumber = useState('randomNumber' + series.UUID, () => Math.floor(Math.random() * 1000)).value;
+    }
     if (series.infos.image) {
         return `https://cinema-api.jodu555.de/images/${series.UUID}/cover.jpg`;
     } else if (series.infos.imageURL) {
         return series.infos.imageURL;
     } else {
-        const randomNumber = useState('randomNumber' + series.UUID, () => Math.floor(Math.random() * 1000));
-        return `https://picsum.photos/seed/movie${randomNumber.value}/300/400`;
+        return `https://picsum.photos/seed/movie${randomNumber}/300/400`;
     }
 };
 
