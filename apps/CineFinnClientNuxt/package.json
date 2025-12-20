@@ -12,6 +12,7 @@
 	"dependencies": {
 		"@artmizu/nuxt-prometheus": "^2.7.0",
 		"@cinefinn/types": "workspace:*",
+		"@formkit/auto-animate": "^0.9.0",
 		"@fortawesome/fontawesome-svg-core": "^7.1.0",
 		"@fortawesome/free-regular-svg-icons": "^7.1.0",
 		"@fortawesome/free-solid-svg-icons": "^7.1.0",
@@ -24,6 +25,7 @@
 		"pinia": "^3.0.3",
 		"socket.io-client": "^4.8.1",
 		"vue": "^3.5.22",
+		"vue-draggable-next": "^2.3.0",
 		"vue-router": "^4.5.1",
 		"vue3-carousel-nuxt": "1.1.6"
 	},
