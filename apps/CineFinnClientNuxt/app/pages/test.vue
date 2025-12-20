@@ -1,53 +1,108 @@
 <template>
-    <div class="shadow-lg p-1 mb-3 mt-1 rounded">
-        <h4 class="ms-3 mb-3">Neu hinzugefügt</h4>
-        <Carousel v-bind="carouselConfig">
-            <Slide v-for="series in [...indexStore.series]" :key="series.UUID">
-                <div class="carusel__item entity-hover" style="height: 100%; width: 100%;">
-                    <EntityCard :server-rendered="true" :seriesID="series.UUID" :show-body="false" :show-footer="false"
-                        :be-clickable="true" class="entity-card" />
-                </div>
-            </Slide>
+    <div>
+        <div v-if="showFranchises" class="container">
+            <div id="carouselExampleCaptions" class="carousel slide">
+                <div class="carousel-indicators">
 
-            <template #addons>
-                <Navigation>
-                    <template #prev>
-                        <font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-left" size="2xl"
-                            style="color:white; margin-left: 1.5rem" />
-                    </template>
-                    <template #next>
-                        <font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-right" size="2xl"
-                            style="color:white; margin-right: 1.5rem;" beat />
-                    </template>
-                </Navigation>
-                <!-- <Pagination /> -->
-            </template>
-        </Carousel>
-    </div>
-    <div class="shadow-lg p-1 mb-3 mt-1 rounded">
-        <h4 class="ms-3 mb-3">Weiterschauen</h4>
-        <Carousel v-bind="carouselConfig">
-            <Slide v-for="series in [...indexStore.series]" :key="series.UUID">
-                <div class="carusel__item entity-hover" style="height: 100%; width: 100%;">
-                    <EntityCard :server-rendered="true" :seriesID="series.UUID" :show-body="false" :show-footer="false"
-                        :be-clickable="true" class="entity-card" />
+                    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active"
+                        aria-current="true" aria-label="Slide 1"></button>
+                    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1"
+                        aria-label="Slide 2"></button>
+                    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2"
+                        aria-label="Slide 3"></button>
                 </div>
-            </Slide>
+                <div class="carousel-inner">
+                    <div v-for="franchise in franchises" class="carousel-item" :class="{ active: franchise.id == 1 }"
+                        :key="franchise.id">
+                        <img :src="franchise.backgroundImage" class="d-block w-100"
+                            style="height: 40vh; object-fit: cover;" :alt="franchise.slug"></img>
+                        <div
+                            style="position: absolute; inset: 0; background-image: linear-gradient(45deg, #000000c7, transparent);">
+                        </div>
+                        <div
+                            style="position: absolute; inset: 0; background-image: linear-gradient(273deg, #000000c7, transparent);">
+                        </div>
+                        <div style="
+                        position: absolute;
+                        bottom: 1.25rem;
+                        left: 10%;
+                        padding-top: 1.25rem;
+                        padding-bottom: 1.25rem;
+                    ">
 
-            <template #addons>
-                <Navigation>
-                    <template #prev>
-                        <font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-left" size="2xl"
-                            style="color:white; margin-left: 1.5rem" />
-                    </template>
-                    <template #next>
-                        <font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-right" size="2xl"
-                            style="color:white; margin-right: 1.5rem;" beat />
-                    </template>
-                </Navigation>
-                <!-- <Pagination /> -->
-            </template>
-        </Carousel>
+                            <img :src="franchise.logo" :alt="franchise.slug"
+                                style="height: 5rem; width: 5rem; object-fit: contain;"></img>
+                            <!-- <h3>{{ franchise.name }}</h3> -->
+                            <p class="text-secondary mt-2 mb-1">{{ franchise.description }}</p>
+                            <p class="text-info mb-2">{{ franchise.contentCount }}</p>
+                            <button class="btn btn-outline-info">More Info</button>
+                        </div>
+                        <!-- <div class="carousel-caption d-none d-md-block color-light">
+                    </div> -->
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions"
+                    data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" style="color:white" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions"
+                    data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </div>
+        <div class="shadow-lg p-1 mb-3 mt-1 rounded">
+            <h4 class="ms-3 mb-3">Neu hinzugefügt</h4>
+            <Carousel v-bind="carouselConfig">
+                <Slide v-for="series in [...indexStore.series]" :key="series.UUID">
+                    <div class="carusel__item entity-hover" style="height: 100%; width: 100%;">
+                        <EntityCard :server-rendered="true" :seriesID="series.UUID" :show-body="false"
+                            :show-footer="false" :be-clickable="true" class="entity-card" />
+                    </div>
+                </Slide>
+
+                <template #addons>
+                    <Navigation>
+                        <template #prev>
+                            <font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-left" size="2xl"
+                                style="color:white; margin-left: 1.5rem" />
+                        </template>
+                        <template #next>
+                            <font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-right" size="2xl"
+                                style="color:white; margin-right: 1.5rem;" beat />
+                        </template>
+                    </Navigation>
+                    <!-- <Pagination /> -->
+                </template>
+            </Carousel>
+        </div>
+        <div class="shadow-lg p-1 mb-3 mt-1 rounded">
+            <h4 class="ms-3 mb-3">Weiterschauen</h4>
+            <Carousel v-bind="carouselConfig">
+                <Slide v-for="series in [...indexStore.series]" :key="series.UUID">
+                    <div class="carusel__item entity-hover" style="height: 100%; width: 100%;">
+                        <EntityCard :server-rendered="true" :seriesID="series.UUID" :show-body="false"
+                            :show-footer="false" :be-clickable="true" class="entity-card" />
+                    </div>
+                </Slide>
+
+                <template #addons>
+                    <Navigation>
+                        <template #prev>
+                            <font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-left" size="2xl"
+                                style="color:white; margin-left: 1.5rem" />
+                        </template>
+                        <template #next>
+                            <font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-right" size="2xl"
+                                style="color:white; margin-right: 1.5rem;" beat />
+                        </template>
+                    </Navigation>
+                    <!-- <Pagination /> -->
+                </template>
+            </Carousel>
+        </div>
     </div>
 </template>
 
@@ -56,6 +111,39 @@
 definePageMeta({
     middleware: 'auth',
 });
+
+const showFranchises = ref(true);
+
+const franchises = ref([
+    {
+        id: 1,
+        name: "Star Wars",
+        slug: "star-wars", // Added slug for routing
+        description: "A galaxy far, far away...",
+        backgroundImage: "https://cinema.jodu555.de/test/star-wars-space-battle-scene-with-starships.jpg",
+        logo: "https://cinema.jodu555.de/test/star-wars-logo.jpg",
+        contentCount: "12 Movies & Series",
+    },
+    {
+        id: 2,
+        name: "Barbie",
+        slug: "barbie", // Added slug for routing
+        description: "Life in plastic, it's fantastic!",
+        // https://cinema.jodu555.de/test/barbie-pink-dreamhouse-fantasy-world.jpg
+        backgroundImage: "https://cinema.jodu555.de/test/barbie-pink-dreamhouse-fantasy-world.jpg",
+        logo: "https://cinema.jodu555.de/test/barbie-logo-pink.jpg",
+        contentCount: "8 Movies & Specials",
+    },
+    {
+        id: 3,
+        name: "Marvel Cinematic Universe",
+        slug: "mcu", // Added slug for routing
+        description: "Earth's Mightiest Heroes",
+        backgroundImage: "https://cinema.jodu555.de/test/marvel-superheroes-action-scene.jpg",
+        logo: "https://cinema.jodu555.de/test/marvel-studios-logo.jpg",
+        contentCount: "30+ Movies & Series",
+    },
+]);
 
 const indexStore = useIndexStore();
 // If you are using PurgeCSS, make sure to whitelist the carousel CSS classes
