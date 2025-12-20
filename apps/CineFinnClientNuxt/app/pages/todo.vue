@@ -5,8 +5,8 @@
             name: !drag ? 'flip-list' : null,
         }" v-bind="dragOptions" @start="drag = true" @end="drag = false" item-key="ID">
             <template v-for="element in list">
-                <li class="list-group-item" v-auto-animate>
-                    <div class="d-flex" v-auto-animate>
+                <li class="list-group-item">
+                    <div class="d-flex">
                         <img v-if="decideImageURL(minimal, element).length > 0" :src="decideImageURL(minimal, element)"
                             class="img-fluid rounded-top me-4 dp-img" alt="" />
                         <div style="width: 100%" v-auto-animate>
@@ -90,14 +90,14 @@
                                             <template v-if="element.scraped !== undefined && element.scraped !== true">
                                                 <br />
                                                 <a target="_blank" :href="element.scraped?.url">{{ element.scraped?.url
-                                                }}</a>
+                                                    }}</a>
                                             </template>
                                             <template
                                                 v-if="element.scrapedZoro !== undefined && element.scrapedZoro !== true">
                                                 <br />
                                                 <a target="_blank" :href="element.scrapedZoro.episodes[0]?.url">{{
                                                     element.scrapedZoro.episodes[0]?.url
-                                                }}</a>
+                                                    }}</a>
                                             </template>
                                             <template
                                                 v-if="element.scrapednewZoro !== undefined && element.scrapednewZoro !== true">
