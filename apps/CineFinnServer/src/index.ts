@@ -14,7 +14,7 @@ import { logger } from 'hono/logger';
 import { ownLogger } from './ownLogger.js';
 import { managmentRouter } from './routes/managment.js';
 import { CacheContext } from './LRUCache.js';
-import type { AnythingToServerEvents, AuthHandshake, ClientToServerEvents, InterServerEvents, ServerToAnythingEvents, ServerToClientEvents, SocketAuthDataClient, SocketData } from '@cinefinn/types/socket';
+import type { AnythingToServerEvents, AuthHandshake, ClientToServerEvents, InterServerEvents, ServerToAnythingEvents, ServerToClientEvents, SocketAuthDataClient, SocketAuthDataSubsystem, SocketData } from '@cinefinn/types/socket';
 import { tryCatch } from './tryCatch.js';
 import { type Series, type Season, type Movie, type Account, type timestamped, type DetailedSeries, type DetailedMovie, type DetailedEpisode, type DetailedSeason, type FrontendSeries, Role } from '@cinefinn/types/database';
 import { getIO, queryDatabase, setIO, setIORedis, getEmailManager } from './utils.js';
@@ -26,7 +26,7 @@ import { getConfig } from './config.js';
 import { compareSettings } from './utils/settings.js';
 import os from "os";
 import { setupSocketIO } from './sockets/index.js';
-import { getKnownSubSystems, toggleSeriesesForSubSystem } from './sockets/subsystem.socket.js';
+import { getKnownSubSystems, getSeriesRelatedToSubSystem, toggleSeriesesForSubSystem } from './sockets/subsystem.socket.js';
 import { playlistRouter } from './routes/playlist.js';
 
 
@@ -63,6 +63,31 @@ const app = new Hono({
             delete a.password;
         });
         return c.json(accounts);
+    })
+    .get('/admin/subsystems', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+        const knownSubSystems = await getKnownSubSystems()
+
+        const allSockets = await getIO().fetchSockets()
+        const subsystems = knownSubSystems.map(async subID => {
+            const subSystemSocket = allSockets.find(sock => {
+                return sock.data.auth.type === 'subsystem' && sock.data.auth.id === subID
+            });
+            const subData = (subSystemSocket?.data.auth as SocketAuthDataSubsystem);
+            const series = await getSeriesRelatedToSubSystem(subID);
+            if (subData == undefined) {
+                return {
+                    id: subID,
+                    name: subID,
+                    series
+                };
+            } else {
+                return {
+                    ...subData,
+                    series
+                }
+            }
+        });
+        return c.json(await Promise.all(subsystems));
     });
 
 // app.get('*', async (c, next) => {

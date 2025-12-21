@@ -45,17 +45,22 @@ export async function getKnownSubSystems() {
     return [...subIDs];
 }
 
-export async function toggleSeriesesForSubSystem(subID: string, disabled: boolean) {
+export async function getSeriesRelatedToSubSystem(subID: string) {
     const seriesIDs = new Set<string>();
     const entitys = await watchableEntitysTable.get({ subID })
     for (const entity of entitys) {
         seriesIDs.add(entity.serie_UUID);
     }
+    return [...seriesIDs];
+}
+
+export async function toggleSeriesesForSubSystem(subID: string, disabled: boolean) {
+    const seriesIDs = await getSeriesRelatedToSubSystem(subID);
     for (const seriesID of seriesIDs) {
         await seriesTable.update({ UUID: seriesID }, { infos: { disabled } });
     }
     sendSeriesReloadToAll();
-    console.log(`Toggling Serieses(${seriesIDs.size}) for SubSystem: ${subID} to Disabled: ${disabled}`);
+    console.log(`Toggling Serieses(${seriesIDs.length}) for SubSystem: ${subID} to Disabled: ${disabled}`);
 }
 
 
