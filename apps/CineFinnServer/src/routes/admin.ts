@@ -30,11 +30,13 @@ const router = new Hono()
             if (subData == undefined) {
                 return {
                     id: subID,
+                    status: 'offline',
                     name: subID,
                     series
                 };
             } else {
                 return {
+                    status: 'online',
                     ...subData,
                     series
                 }
