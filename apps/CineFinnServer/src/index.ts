@@ -28,6 +28,7 @@ import os from "os";
 import { setupSocketIO } from './sockets/index.js';
 import { getKnownSubSystems, getSeriesRelatedToSubSystem, toggleSeriesesForSubSystem } from './sockets/subsystem.socket.js';
 import { playlistRouter } from './routes/playlist.js';
+import { adminRouter } from './routes/admin.js';
 
 
 const { printMetrics, registerMetrics } = prometheus();
@@ -56,39 +57,8 @@ const app = new Hono({
     .route('/managment', managmentRouter)
     .route('/watch', watchRouter)
     .route('/playlists', playlistRouter)
-    .route('/video', videoRouter)
-    .get('/admin/accounts', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
-        const accounts = await accountsTable.get();
-        accounts.forEach(a => {
-            delete a.password;
-        });
-        return c.json(accounts);
-    })
-    .get('/admin/subsystems', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
-        const knownSubSystems = await getKnownSubSystems()
-
-        const allSockets = await getIO().fetchSockets()
-        const subsystems = knownSubSystems.map(async subID => {
-            const subSystemSocket = allSockets.find(sock => {
-                return sock.data.auth.type === 'subsystem' && sock.data.auth.id === subID
-            });
-            const subData = (subSystemSocket?.data.auth as SocketAuthDataSubsystem);
-            const series = await getSeriesRelatedToSubSystem(subID);
-            if (subData == undefined) {
-                return {
-                    id: subID,
-                    name: subID,
-                    series
-                };
-            } else {
-                return {
-                    ...subData,
-                    series
-                }
-            }
-        });
-        return c.json(await Promise.all(subsystems));
-    });
+    .route('/admin', adminRouter)
+    .route('/video', videoRouter);
 
 // app.get('*', async (c, next) => {
 
