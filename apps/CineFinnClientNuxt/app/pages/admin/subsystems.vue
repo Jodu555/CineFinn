@@ -1,7 +1,16 @@
 <template>
     <div>
+        <h2 class="text-center">SubSystems</h2>
+        <div v-if="loading" class="d-flex justify-content-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        <div v-if="error" class="alert alert-danger" role="alert">
+            <strong>Error:</strong> {{ error }}
+        </div>
         <div class="row row-cols-2 row-cols-lg-5 g-2 g-lg-3 d-flex justify-content-between gap-3">
-            <div v-for="subsystem in data" :key="subsystem.id" class="card mb-3" style="max-width: 540px">
+            <div v-for="subsystem in subsystems" :key="subsystem.id" class="card mb-3" style="max-width: 540px">
                 <div class="card-body">
                     <h5 class="card-title"
                         :class="{ 'text-danger': subsystem.status == 'offline', 'text-success': subsystem.status == 'online' }">
@@ -57,36 +66,13 @@ definePageMeta({
     middleware: 'auth',
 });
 
+const adminStore = useAdminStore();
 
-const { data, status } = await useFetch<SubSystem[]>(useAPIURL() + '/admin/subsystems', {
-    key: 'admin-subsystems',
-    method: 'GET',
-    headers: {
-        'auth-token': useAuthStore().authToken,
-    },
-});
+const loading = computed(() => adminStore.loading);
+const error = computed(() => adminStore.error);
+const subsystems = computed(() => adminStore.subsystems);
 
-
-
-export type SubSystem = OfflineSubSystem | OnlineSubSystem;
-
-export interface OfflineSubSystem {
-    status: 'offline';
-    type: string;
-    id: string;
-}
-
-export interface OnlineSubSystem {
-    status: 'online';
-    type: string;
-    id: string;
-    token: string;
-    ptoken: string;
-    readrate: number;
-    endpoint?: string;
-    series: string[];
-}
-
+// await callOnce('loadSubsystems', () => adminStore.loadSubsystems(), { mode: 'navigation' });
 
 </script>
 

@@ -1,10 +1,13 @@
 <template>
   <div class="container">
     <h1 class="text-center">Accounts ({{ accounts?.length || 0 }})</h1>
-    <div v-if="status === 'pending'" class="d-flex justify-content-center">
+    <div v-if="loading" class="d-flex justify-content-center">
       <div class="spinner-border" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
+    </div>
+    <div v-if="error" class="alert alert-danger" role="alert">
+      <strong>Error:</strong> {{ error }}
     </div>
     <div class="table-responsive">
       <table class="table">
@@ -32,16 +35,17 @@
 </template>
 
 <script lang="ts" setup>
-import type { Account } from '@cinefinn/types/database';
-import useAPIURL from '~/hooks/useAPIURL';
-
-const { status, data: accounts } = await useFetch<Account[]>(useAPIURL() + '/admin/accounts', {
-  key: 'admin-accounts',
-  method: 'GET',
-  headers: {
-    'auth-token': useAuthStore().authToken,
-  },
+definePageMeta({
+  middleware: 'auth',
 });
+
+const adminStore = useAdminStore();
+
+const loading = computed(() => adminStore.loading);
+const error = computed(() => adminStore.error);
+const accounts = computed(() => adminStore.accounts);
+
+// await callOnce('loadAccounts', () => adminStore.loadAccounts(), { mode: 'navigation' });
 
 </script>
 

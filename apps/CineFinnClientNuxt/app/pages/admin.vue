@@ -37,6 +37,15 @@
 definePageMeta({
     middleware: 'auth',
 });
+
+const adminStore = useAdminStore();
+
+const loading = computed(() => adminStore.loading);
+const error = computed(() => adminStore.error);
+
+await callOnce('loadAccounts', () => adminStore.loadAccounts(), { mode: 'navigation' });
+await callOnce('loadSubsystems', () => adminStore.loadSubsystems(), { mode: 'navigation' });
+
 </script>
 
 <style scoped>
