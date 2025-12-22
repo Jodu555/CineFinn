@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { authFullMiddleware } from "../auth.js";
-import { accountsTable } from "../database.js";
-import { getKnownSubSystems, getSeriesRelatedToSubSystem } from "../sockets/subsystem.socket.js";
+import { accountsTable, episodesTable, moviesTable, playlistsTable, seasonsTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../database.js";
+import { getKnownSubSystems, getSeriesRelatedToSubSystem, getSubSystems } from "../sockets/subsystem.socket.js";
 import { getIO } from "../utils.js";
 import type { SocketAuthDataSubsystem } from "@cinefinn/types/socket";
 import { Role } from "@cinefinn/types/database";
@@ -18,31 +18,51 @@ const router = new Hono()
         return c.json(accounts);
     })
     .get('/subsystems', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
-        const knownSubSystems = await getKnownSubSystems()
-
-        const allSockets = await getIO().fetchSockets()
-        const subsystems = knownSubSystems.map(async subID => {
-            const subSystemSocket = allSockets.find(sock => {
-                return sock.data.auth.type === 'subsystem' && sock.data.auth.id === subID
-            });
-            const subData = (subSystemSocket?.data.auth as SocketAuthDataSubsystem);
-            const series = await getSeriesRelatedToSubSystem(subID);
-            if (subData == undefined) {
-                return {
-                    id: subID,
-                    status: 'offline',
-                    name: subID,
-                    series
-                };
-            } else {
-                return {
-                    status: 'online',
-                    ...subData,
-                    series
-                }
-            }
-        });
+        const subsystems = await getSubSystems();
         return c.json(await Promise.all(subsystems));
+    })
+    .get('/overview', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+
+        const [
+            accounts,
+            subsystems,
+            series,
+            seasons,
+            episodes,
+            movies,
+            watchableEntitys,
+            watchHistoryEntrys,
+            playlists,
+            sockets,
+        ] = await Promise.all([
+            accountsTable.count(),
+            getSubSystems(),
+            seriesTable.count(),
+            seasonsTable.count(),
+            episodesTable.count(),
+            moviesTable.count(),
+            watchableEntitysTable.count(),
+            watchHistoryTable.count(),
+            playlistsTable.count(),
+            getIO().fetchSockets(),
+        ]);
+        const overview = {
+            accounts: accounts,
+            subsystems: {
+                all: subsystems.length,
+                offline: subsystems.filter(s => s.status === 'offline').length,
+            },
+            series: series,
+            seasons: seasons,
+            episodes: episodes,
+            movies: movies,
+            watchableEntitys: watchableEntitys,
+            watchHistoryEntrys: watchHistoryEntrys,
+            playlists: playlists,
+            sockets: sockets.length,
+            scraper: sockets.find(s => s.data.auth.type === 'scraper') !== undefined,
+        };
+        return c.json(overview);
     });
 
 export { router as adminRouter };

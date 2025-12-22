@@ -1,26 +1,8 @@
 import type { Account, timestamped } from '@cinefinn/types/database'
+import type { SubSystem } from '@cinefinn/types/socket';
 import type { FetchError } from 'ofetch';
 import { defineStore } from 'pinia'
 import useAPIURL from '~/hooks/useAPIURL';
-
-export type SubSystem = OfflineSubSystem | OnlineSubSystem;
-
-export interface OfflineSubSystem {
-    status: 'offline';
-    type: string;
-    id: string;
-}
-
-export interface OnlineSubSystem {
-    status: 'online';
-    type: string;
-    id: string;
-    token: string;
-    ptoken: string;
-    readrate: number;
-    endpoint?: string;
-    series: string[];
-}
 
 export const useAdminStore = defineStore('admin', {
     state: () => ({

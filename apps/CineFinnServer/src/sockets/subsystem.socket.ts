@@ -1,7 +1,7 @@
-import type { AuthHandshakeSubsystem, SocketAuthDataSubsystem } from "@cinefinn/types/socket";
+import type { AuthHandshakeSubsystem, OfflineSubSystem, OnlineSubSystem, SocketAuthDataSubsystem, SubSystem } from "@cinefinn/types/socket";
 import type { SocketConsumerMeta } from "./index.js";
 import { getConfig } from "../config.js";
-import { queryDatabase } from "../utils.js";
+import { getIO, queryDatabase } from "../utils.js";
 import { seriesTable, watchableEntitysTable } from "../database.js";
 import type { definedSocket } from "../index.js";
 import { sendSeriesReloadToAll } from "./client.socket.js";
@@ -43,6 +43,35 @@ export async function getKnownSubSystems() {
         subIDs.add(row.subID);
     });
     return [...subIDs];
+}
+
+export async function getSubSystems(): Promise<SubSystem[]> {
+    const knownSubSystems = await getKnownSubSystems()
+
+    const allSockets = await getIO().fetchSockets()
+    const subsystems = knownSubSystems.map(async subID => {
+        const subSystemSocket = allSockets.find(sock => {
+            return sock.data.auth.type === 'subsystem' && sock.data.auth.id === subID
+        });
+        const subData = (subSystemSocket?.data.auth as SocketAuthDataSubsystem);
+        const series = await getSeriesRelatedToSubSystem(subID);
+        if (subData == undefined) {
+            return {
+                type: 'subsystem',
+                id: subID,
+                status: 'offline',
+                name: subID,
+                series
+            } as SubSystem;
+        } else {
+            return {
+                status: 'online',
+                ...subData,
+                series
+            } as SubSystem;
+        }
+    });
+    return await Promise.all(subsystems);
 }
 
 export async function getSeriesRelatedToSubSystem(subID: string) {

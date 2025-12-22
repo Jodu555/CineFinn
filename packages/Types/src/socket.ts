@@ -105,3 +105,22 @@ export interface SocketAuthDataSubsystem<U = any> {
     ptoken: string;
     readrate: number;
 }
+
+export type SubSystem = OfflineSubSystem | OnlineSubSystem;
+
+export interface OfflineSubSystem {
+    status: 'offline';
+    type: string;
+    id: string;
+}
+
+export interface OnlineSubSystem {
+    status: 'online';
+    type: string;
+    id: string;
+    token: string;
+    ptoken: string;
+    readrate: number;
+    endpoint?: string;
+    series: string[];
+}
