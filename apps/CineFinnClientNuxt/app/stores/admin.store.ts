@@ -4,14 +4,48 @@ import type { FetchError } from 'ofetch';
 import { defineStore } from 'pinia'
 import useAPIURL from '~/hooks/useAPIURL';
 
+interface Overview {
+    accounts: number,
+    subsystems: {
+        all: number,
+        offline: number,
+    },
+    series: number,
+    seasons: number,
+    episodes: number,
+    movies: number,
+    watchableEntitys: number,
+    watchHistoryEntrys: number,
+    playlists: number,
+    sockets: number,
+    scraper: boolean,
+}
+
 export const useAdminStore = defineStore('admin', {
     state: () => ({
         loading: false,
         error: '',
+        overview: {} as Overview,
         accounts: [] as (Account & timestamped)[],
         subsystems: [] as SubSystem[],
     }),
     actions: {
+        async loadOverview() {
+            this.loading = true;
+            const { data, error } = await tryCatch<Promise<Overview>, FetchError>(() => $fetch<Overview>(useAPIURL() + '/admin/overview', {
+                method: 'GET',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+            }));
+            if (error) {
+                this.error = error.data || 'An unknown error occurred.';
+                return;
+            } else {
+                this.overview = data;
+            }
+            this.loading = false;
+        },
         async loadAccounts() {
             this.loading = true;
             const { data, error } = await tryCatch<Promise<(Account & timestamped)[]>, FetchError>(() => $fetch<(Account & timestamped)[]>(useAPIURL() + '/admin/accounts', {

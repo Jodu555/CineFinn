@@ -43,6 +43,7 @@ const adminStore = useAdminStore();
 const loading = computed(() => adminStore.loading);
 const error = computed(() => adminStore.error);
 
+await callOnce('loadOverview', () => adminStore.loadOverview(), { mode: 'navigation' });
 await callOnce('loadAccounts', () => adminStore.loadAccounts(), { mode: 'navigation' });
 await callOnce('loadSubsystems', () => adminStore.loadSubsystems(), { mode: 'navigation' });
 
