@@ -35,15 +35,23 @@ export async function connectDatabase() {
         connectionLimit: 15,
     });
     await createTables();
-    (database as any).setCallback('accounts-*', async () => {
+
+    const rebAccounts = async () => {
         await sleep(200);
         await rebroadcastAccounts();
-    });
+    };
 
-    (database as any).setCallback('*-*', async () => {
+    (database as any).setCallback('accounts-CREATE', rebAccounts);
+    (database as any).setCallback('accounts-UPDATE', rebAccounts);
+    (database as any).setCallback('accounts-DELETE', rebAccounts);
+
+    const rebOverview = async () => {
         await sleep(200);
         await rebroadcastOverview();
-    });
+    };
+    (database as any).setCallback('*-CREATE', rebOverview);
+    (database as any).setCallback('*-UPDATE', rebOverview);
+    (database as any).setCallback('*-DELETE', rebOverview);
 }
 
 
