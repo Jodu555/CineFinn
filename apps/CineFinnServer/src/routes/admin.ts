@@ -7,7 +7,59 @@ import type { SocketAuthDataSubsystem } from "@cinefinn/types/socket";
 import { Role } from "@cinefinn/types/database";
 
 
+export async function generateOverview() {
+    const [
+        accounts,
+        subsystems,
+        series,
+        seasons,
+        episodes,
+        movies,
+        watchableEntitys,
+        watchHistoryEntrys,
+        playlists,
+        sockets,
+    ] = await Promise.all([
+        accountsTable.count(),
+        getSubSystems(),
+        seriesTable.count(),
+        seasonsTable.count(),
+        episodesTable.count(),
+        moviesTable.count(),
+        watchableEntitysTable.count(),
+        watchHistoryTable.count(),
+        playlistsTable.count(),
+        getIO().fetchSockets(),
+    ]);
+    const overview = {
+        accounts: accounts,
+        subsystems: {
+            all: subsystems.length,
+            offline: subsystems.filter(s => s.status === 'offline').length,
+        },
+        series: series,
+        seasons: seasons,
+        episodes: episodes,
+        movies: movies,
+        watchableEntitys: watchableEntitys,
+        watchHistoryEntrys: watchHistoryEntrys,
+        playlists: playlists,
+        sockets: sockets.length,
+        scraper: sockets.find(s => s.data.auth.type === 'scraper') !== undefined,
+    };
+}
 
+export async function rebroadcastOverview() {
+    // database
+}
+
+export async function rebroadcastAccounts() {
+
+}
+
+export async function rebroadcastSubsystems() {
+
+}
 
 const router = new Hono()
     .get('/accounts', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
@@ -22,46 +74,7 @@ const router = new Hono()
         return c.json(await Promise.all(subsystems));
     })
     .get('/overview', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
-
-        const [
-            accounts,
-            subsystems,
-            series,
-            seasons,
-            episodes,
-            movies,
-            watchableEntitys,
-            watchHistoryEntrys,
-            playlists,
-            sockets,
-        ] = await Promise.all([
-            accountsTable.count(),
-            getSubSystems(),
-            seriesTable.count(),
-            seasonsTable.count(),
-            episodesTable.count(),
-            moviesTable.count(),
-            watchableEntitysTable.count(),
-            watchHistoryTable.count(),
-            playlistsTable.count(),
-            getIO().fetchSockets(),
-        ]);
-        const overview = {
-            accounts: accounts,
-            subsystems: {
-                all: subsystems.length,
-                offline: subsystems.filter(s => s.status === 'offline').length,
-            },
-            series: series,
-            seasons: seasons,
-            episodes: episodes,
-            movies: movies,
-            watchableEntitys: watchableEntitys,
-            watchHistoryEntrys: watchHistoryEntrys,
-            playlists: playlists,
-            sockets: sockets.length,
-            scraper: sockets.find(s => s.data.auth.type === 'scraper') !== undefined,
-        };
+        const overview = await generateOverview();
         return c.json(overview);
     });
 

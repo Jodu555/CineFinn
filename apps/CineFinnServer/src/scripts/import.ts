@@ -85,6 +85,7 @@ async function importSerieses() {
 
                     await watchableEntitysTable.create({
                         UUID: watchableEntityUUID,
+                        serie_UUID: serie.ID,
                         watchable_UUID: episodeUUID,
                         lang: lang,
                         subID: episode.subID || 'main',
@@ -124,6 +125,7 @@ async function importSerieses() {
 
                 await watchableEntitysTable.create({
                     UUID: watchableEntityUUID,
+                    serie_UUID: serie.ID,
                     watchable_UUID: movieUUID,
                     lang: lang,
                     subID: movie.subID || 'main',
@@ -141,7 +143,7 @@ async function importSerieses() {
 async function importAccounts() {
     const oldDB = Database.createDatabase(process.env.OLD_DB_HOST!, process.env.OLD_DB_USERNAME!, process.env.OLD_DB_PASSWORD!, process.env.OLD_DB_DATABASE!);
     await oldDB.connect();
-    const accounts = await oldDB.get('accounts').get({}) as { UUID: string; username: string; password: string; email: string; role: number; settings: string; activityDetails: string }[];
+    const accounts = await oldDB.get('accounts').get({}) as { UUID: string; username: string; password: string; email: string; role: number; settings: string; activityDetails: string; }[];
     console.log(accounts);
     for (const account of accounts) {
         await accountsTable.create({

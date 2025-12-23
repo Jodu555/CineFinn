@@ -5,6 +5,7 @@ import { getIO, queryDatabase } from "../utils.js";
 import { seriesTable, watchableEntitysTable } from "../database.js";
 import type { definedSocket } from "../index.js";
 import { sendSeriesReloadToAll } from "./client.socket.js";
+import { rebroadcastSubsystems } from '../routes/admin.js';
 
 async function authFunction(authHandshake: AuthHandshakeSubsystem): Promise<SocketAuthDataSubsystem> {
     console.log('subsystem auth');
@@ -23,17 +24,20 @@ async function authFunction(authHandshake: AuthHandshakeSubsystem): Promise<Sock
         id: authHandshake.id,
         ptoken: authHandshake.ptoken,
         readrate: authHandshake.readrate,
-    }
+    };
 }
 
 async function connectionFunction(socket: definedSocket) {
     const socketAuthData = socket.data.auth as SocketAuthDataSubsystem;
     console.log('subsystem connected');
-    await toggleSeriesesForSubSystem(socketAuthData.id, false)
+    await toggleSeriesesForSubSystem(socketAuthData.id, false);
+
+    await rebroadcastSubsystems();
 
     socket.on('disconnect', async () => {
-        await toggleSeriesesForSubSystem(socketAuthData.id, true)
-    })
+        await toggleSeriesesForSubSystem(socketAuthData.id, true);
+        await rebroadcastSubsystems();
+    });
 }
 
 export async function getKnownSubSystems() {
@@ -46,12 +50,12 @@ export async function getKnownSubSystems() {
 }
 
 export async function getSubSystems(): Promise<SubSystem[]> {
-    const knownSubSystems = await getKnownSubSystems()
+    const knownSubSystems = await getKnownSubSystems();
 
-    const allSockets = await getIO().fetchSockets()
+    const allSockets = await getIO().fetchSockets();
     const subsystems = knownSubSystems.map(async subID => {
         const subSystemSocket = allSockets.find(sock => {
-            return sock.data.auth.type === 'subsystem' && sock.data.auth.id === subID
+            return sock.data.auth.type === 'subsystem' && sock.data.auth.id === subID;
         });
         const subData = (subSystemSocket?.data.auth as SocketAuthDataSubsystem);
         const series = await getSeriesRelatedToSubSystem(subID);
@@ -76,7 +80,7 @@ export async function getSubSystems(): Promise<SubSystem[]> {
 
 export async function getSeriesRelatedToSubSystem(subID: string) {
     const seriesIDs = new Set<string>();
-    const entitys = await watchableEntitysTable.get({ subID })
+    const entitys = await watchableEntitysTable.get({ subID });
     for (const entity of entitys) {
         seriesIDs.add(entity.serie_UUID);
     }
@@ -99,4 +103,4 @@ export default {
         authFunction,
         connectionFunction,
     } satisfies SocketConsumerMeta,
-}
+};

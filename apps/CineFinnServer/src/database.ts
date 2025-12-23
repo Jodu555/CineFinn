@@ -3,6 +3,7 @@ dotenv.config();;
 import { Database, type thingDatabase } from '@jodu555/mysqlapi';
 import type { Account, timestamped, AuthToken, Series, Season, Episode, Movie, WatchableEntity, WatchHistory, SyncRoom, Job, Email, Playlist } from '@cinefinn/types/database';
 import { getConfig } from './config.js';
+import { rebroadcastAccounts, rebroadcastOverview } from './routes/admin.js';
 
 export let database: Database;
 
@@ -24,6 +25,8 @@ export let jobsTable: thingDatabase<Job, Job & timestamped>;
 
 export let playlistsTable: thingDatabase<Playlist, Playlist & timestamped>;
 
+export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export async function connectDatabase() {
     const config = getConfig();
     database = Database.createDatabase(config.database.host, config.database.username, config.database.password, config.database.database);
@@ -32,6 +35,15 @@ export async function connectDatabase() {
         connectionLimit: 15,
     });
     await createTables();
+    (database as any).setCallback('accounts-*', async () => {
+        await sleep(200);
+        await rebroadcastAccounts();
+    });
+
+    (database as any).setCallback('*-*', async () => {
+        await sleep(200);
+        await rebroadcastOverview();
+    });
 }
 
 
@@ -366,7 +378,7 @@ async function createTables() {
             null: false,
             json: true,
         },
-    })
+    });
 
     accountsTable = database.get<Account, Account & timestamped>('accounts');
     authTokensTable = database.get<AuthToken>('authtokens');
