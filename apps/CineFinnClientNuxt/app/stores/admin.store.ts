@@ -62,6 +62,12 @@ export const useAdminStore = defineStore('admin', {
         },
         async updateOverview(overview: Partial<Overview>) {
             this.overview = { ...this.overview, ...overview };
+        },
+        async updateSubsystems(subsystems: SubSystem[]) {
+            this.subsystems = subsystems;
+        },
+        async updateAccounts(accounts: (Account & timestamped)[]) {
+            this.accounts = accounts;
         }
     }
 });

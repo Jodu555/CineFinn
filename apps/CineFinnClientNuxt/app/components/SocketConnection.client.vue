@@ -29,8 +29,8 @@ onMounted(() => {
 	socket.on('settingsUpdate', authStore.updateSettings);
 	socket.on('seriesReload', indexStore.reloadSeries);
 	socket.on('adminOverview', adminStore.updateOverview);
-	// socket.on('adminAccounts', adminStore.updateAccounts);
-	// socket.on('adminSubsystems', adminStore.updateSubsystems);
+	socket.on('adminAccounts', adminStore.updateAccounts);
+	socket.on('adminSubsystems', adminStore.updateSubsystems);
 	if (socket.connected) {
 		onConnect();
 	}

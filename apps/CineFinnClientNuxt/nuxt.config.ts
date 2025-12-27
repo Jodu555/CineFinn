@@ -45,11 +45,25 @@ export default defineNuxtConfig({
     verbose: true,
     prefix: 'cinefinn_client_',
   },
+  umami: {
+    enabled: true,
+    id: '3fdb9fab-ac24-4d0f-afc7-a332f79b50f6',
+    host: 'https://umami.jodu555.de',
+    autoTrack: true,
+    useDirective: true,
+    ignoreLocalhost: false,
+    // proxy: 'cloak',
+    // excludeQueryParams: false,
+    // domains: ['cool-site.app', 'my-space.site'],
+    // customEndpoint: '/my-custom-endpoint',
+    // logErrors: true,
+  },
   modules: [
     '@pinia/nuxt',
     '@nuxt/image',
     '@artmizu/nuxt-prometheus',
     'vue3-carousel-nuxt',
     '@formkit/auto-animate',
+    'nuxt-umami'
   ],
 });

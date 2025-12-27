@@ -63,11 +63,26 @@ export async function rebroadcastOverview() {
 }
 
 export async function rebroadcastAccounts() {
-
+    const sockets = await getIO().fetchSockets();
+    const accounts = await accountsTable.get();
+    accounts.forEach(a => {
+        delete a.password;
+    });
+    sockets.forEach((socket) => {
+        if (socket.data.auth.type === 'client' && socket.data.auth.user.role >= Role.Mod) {
+            socket.emit('adminAccounts', accounts);
+        }
+    });
 }
 
 export async function rebroadcastSubsystems() {
-
+    const sockets = await getIO().fetchSockets();
+    const subsystems = await getSubSystems();
+    sockets.forEach((socket) => {
+        if (socket.data.auth.type === 'client' && socket.data.auth.user.role >= Role.Mod) {
+            socket.emit('adminSubsystems', subsystems);
+        }
+    });
 }
 
 const router = new Hono()
