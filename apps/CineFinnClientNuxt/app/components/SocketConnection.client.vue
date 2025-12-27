@@ -18,6 +18,7 @@ const socket = useSocket();
 const managmentStore = useManagmentStore();
 const indexStore = useIndexStore();
 const authStore = useAuthStore();
+const adminStore = useAdminStore();
 
 onMounted(() => {
 	socket.connect();
@@ -27,6 +28,9 @@ onMounted(() => {
 	socket.on('watchListUpdate', indexStore.updateWatchList);
 	socket.on('settingsUpdate', authStore.updateSettings);
 	socket.on('seriesReload', indexStore.reloadSeries);
+	socket.on('adminOverview', adminStore.updateOverview);
+	// socket.on('adminAccounts', adminStore.updateAccounts);
+	// socket.on('adminSubsystems', adminStore.updateSubsystems);
 	if (socket.connected) {
 		onConnect();
 	}
@@ -50,13 +54,16 @@ function onConnect() {
 	});
 }
 
-watch(() => router.currentRoute.value.fullPath, (newURL) => {
-	if (isConnected.value) {
-		socket.emit('state', {
-			url: newURL,
-		});
+watch(
+	() => router.currentRoute.value.fullPath,
+	(newURL) => {
+		if (isConnected.value) {
+			socket.emit('state', {
+				url: newURL,
+			});
+		}
 	}
-});
+);
 
 function onDisconnect() {
 	isConnected.value = false;

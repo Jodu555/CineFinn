@@ -43,6 +43,9 @@ export interface ServerToClientEvents {
     watchListUpdate: (obj: database.WatchHistory[]) => void;
     settingsUpdate: (obj: database.SettingsObject) => void;
     seriesReload: (obj: database.FrontendSeries[]) => void;
+    adminOverview: (obj: Overview) => void;
+    adminAccounts: (obj: (database.Account & database.timestamped)[]) => void;
+    adminSubsystems: (obj: SubSystem[]) => void;
 }
 
 export interface ServerToScraperEvents {
@@ -50,7 +53,7 @@ export interface ServerToScraperEvents {
 }
 
 export interface ClientToServerEvents {
-    state: (obj: { url: string }) => void;
+    state: (obj: { url: string; }) => void;
     updateTime: (obj: { watchableUUID: string; time: number; }) => void;
     updateSettings: (obj: database.SettingsObject) => void;
     resetSettings: () => void;
@@ -65,15 +68,15 @@ export interface ScraperToServerEvents {
 }
 
 export interface SubSystemToServerEvents {
-    'video-chunk': (obj: { chunk: string | Buffer; requestId: string }) => void;
-    'video-chunk-end': (obj: { requestId: string }) => void;
-    'video-chunk-error': (obj: { error: string; requestId: string }) => void;
+    'video-chunk': (obj: { chunk: string | Buffer; requestId: string; }) => void;
+    'video-chunk-end': (obj: { requestId: string; }) => void;
+    'video-chunk-error': (obj: { error: string; requestId: string; }) => void;
 }
 
 export interface ServerToSubSystemEvents {
     'listFiles': (callback: (files: string[]) => void) => void;
-    'videoStats': (obj: { filePath: string }, callback: (stats: fs.Stats) => void) => void;
-    'video-range': (obj: { start: number, end: number, filePath: string, requestId: string }) => void;
+    'videoStats': (obj: { filePath: string; }, callback: (stats: fs.Stats) => void) => void;
+    'video-range': (obj: { start: number, end: number, filePath: string, requestId: string; }) => void;
 }
 
 
@@ -90,7 +93,7 @@ export type SocketAuthData<U = any> = SocketAuthDataClient<U> | SocketAuthDataSc
 export interface SocketAuthDataClient<U = any> {
     type: 'client';
     token: string;
-    user: U
+    user: U;
 }
 
 export interface SocketAuthDataScraper<U = any> {
@@ -123,4 +126,22 @@ export interface OnlineSubSystem {
     readrate: number;
     endpoint?: string;
     series: string[];
+}
+
+export interface Overview {
+    accounts: number,
+    subsystems: {
+        all: number,
+        online: number,
+        offline: number,
+    },
+    series: number,
+    seasons: number,
+    episodes: number,
+    movies: number,
+    watchableEntitys: number,
+    watchHistoryEntrys: number,
+    playlists: number,
+    sockets: number,
+    scraper: boolean,
 }

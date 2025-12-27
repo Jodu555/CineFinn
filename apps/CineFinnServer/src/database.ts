@@ -46,6 +46,8 @@ export async function connectDatabase() {
     (database as any).setCallback('accounts-DELETE', rebAccounts);
 
     const rebOverview = async () => {
+        console.log('Overview Rebroadcast');
+
         await sleep(200);
         await rebroadcastOverview();
     };

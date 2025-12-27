@@ -6,6 +6,7 @@ import { getIO } from "../utils.js";
 import clientSocket from "./client.socket.js";
 import scraperSocket from "./scraper.socket.js";
 import subsystemSocket from "./subsystem.socket.js";
+import { rebroadcastOverview } from '../routes/admin.js';
 
 export async function setupSocketIO() {
 
@@ -57,7 +58,12 @@ async function setupSocketConnection() {
         }
         if (socketConsumer) {
             await socketConsumer.connectionFunction(socket);
+            await rebroadcastOverview();
         }
+
+        socket.on('disconnect', async () => {
+            await rebroadcastOverview();
+        });
 
     });
 }

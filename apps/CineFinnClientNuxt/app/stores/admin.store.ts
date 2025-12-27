@@ -1,25 +1,8 @@
-import type { Account, timestamped } from '@cinefinn/types/database'
-import type { SubSystem } from '@cinefinn/types/socket';
+import type { Account, timestamped } from '@cinefinn/types/database';
+import type { Overview, SubSystem } from '@cinefinn/types/socket';
 import type { FetchError } from 'ofetch';
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
 import useAPIURL from '~/hooks/useAPIURL';
-
-interface Overview {
-    accounts: number,
-    subsystems: {
-        all: number,
-        offline: number,
-    },
-    series: number,
-    seasons: number,
-    episodes: number,
-    movies: number,
-    watchableEntitys: number,
-    watchHistoryEntrys: number,
-    playlists: number,
-    sockets: number,
-    scraper: boolean,
-}
 
 export const useAdminStore = defineStore('admin', {
     state: () => ({
@@ -76,6 +59,9 @@ export const useAdminStore = defineStore('admin', {
                 this.subsystems = data;
             }
             this.loading = false;
+        },
+        async updateOverview(overview: Partial<Overview>) {
+            this.overview = { ...this.overview, ...overview };
         }
     }
-})
+});
