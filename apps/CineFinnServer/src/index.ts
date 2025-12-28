@@ -142,6 +142,27 @@ const httpServer = serve({
         }
     }
 
+    const watchableEntitys = await watchableEntitysTable.get();
+
+    const map = new Map<string, Record<string, number>>();
+    for (const watchableEntity of watchableEntitys) {
+        const obj = {
+            ...map.get(watchableEntity.serie_UUID),
+            [watchableEntity.subID]: (map.get(watchableEntity.serie_UUID)?.[watchableEntity.subID] ?? 0) + 1,
+        }
+        map.set(watchableEntity.serie_UUID, obj);
+    }
+
+    // console.log(map);
+
+    for (const [serieUUID, subMap] of map) {
+        console.log(serieUUID, subMap);
+        if(Object.keys(subMap).length > 1)  {
+            console.log(`Serie ${serieUUID} exists in multiple subsystems: ${subMap}`);
+        }
+    }
+    
+
     // console.log('Fixing Seasons');
     // const seasons = await seasonsTable.get();
     // for await (const season of seasons) {

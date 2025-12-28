@@ -17,7 +17,7 @@ interface Segment {
 }
 
 async function run() {
-    await connectDatabase();
+    await connectDatabase(true);
 
 
 
@@ -25,7 +25,7 @@ async function run() {
     // console.log(await seriesTable.get({}));
 
 
-    // await importSerieses();
+    await importSerieses();
     await importAccounts();
     await importWatchHistory();
 }

@@ -3,7 +3,7 @@ dotenv.config();;
 import { Database, type thingDatabase } from '@jodu555/mysqlapi';
 import type { Account, timestamped, AuthToken, Series, Season, Episode, Movie, WatchableEntity, WatchHistory, SyncRoom, Job, Email, Playlist } from '@cinefinn/types/database';
 import { getConfig } from './config.js';
-import { rebroadcastAccounts, rebroadcastOverview } from './routes/admin.js';
+
 
 export let database: Database;
 
@@ -27,7 +27,7 @@ export let playlistsTable: thingDatabase<Playlist, Playlist & timestamped>;
 
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export async function connectDatabase() {
+export async function connectDatabase(clean: boolean = false) {
     const config = getConfig();
     database = Database.createDatabase(config.database.host, config.database.username, config.database.password, config.database.database);
     // database = Database.createDatabase(process.env.DB_HOST!, process.env.DB_USERNAME!, process.env.DB_PASSWORD!, process.env.DB_DATABASE!);
@@ -36,9 +36,15 @@ export async function connectDatabase() {
     });
     await createTables();
 
+    if (clean === true) return;
+
+    // import { rebroadcastAccounts, rebroadcastOverview } from './routes/admin.js';
+    // const { rebroadcastAccounts, rebroadcastOverview } = await import('./routes/admin.js')
+    const adminRouter = await import('./routes/admin.js');
+
     const rebAccounts = async () => {
         await sleep(200);
-        await rebroadcastAccounts();
+        await adminRouter.rebroadcastAccounts();
     };
 
     (database as any).setCallback('accounts-CREATE', rebAccounts);
@@ -49,7 +55,7 @@ export async function connectDatabase() {
         console.log('Overview Rebroadcast');
 
         await sleep(200);
-        await rebroadcastOverview();
+        await adminRouter.rebroadcastOverview();
     };
     (database as any).setCallback('*-CREATE', rebOverview);
     (database as any).setCallback('*-UPDATE', rebOverview);
