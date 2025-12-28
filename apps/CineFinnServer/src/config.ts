@@ -1,4 +1,4 @@
-import { setupConfigurationManagment } from "@cinefinn/configuration-manager";
+import { setupConfigurationManagment, updateConfigurationManagment } from "@cinefinn/configuration-manager";
 
 const cliOptions = [['identifier', 'I'], ['entrypoint', 'E'], ['port', 'P'], ['endpoint'], ['core-url'], ['core-token']];
 
@@ -44,11 +44,11 @@ interface Config {
     proxyAPIs: {
         segmentapi: {
             url: string;
-        }
+        };
         anidbapi: {
             url: string;
-        }
-    }
+        };
+    };
 }
 
 const defaultConfig: Config = {
@@ -109,4 +109,8 @@ export function getConfig() {
         config = setupConfigurationManagment<Config>(defaultConfig, cliOptions);
     }
     return config;
+}
+
+export function updateConfig(updated: Partial<Config>) {
+    return updateConfigurationManagment<Config>(updated);
 }
