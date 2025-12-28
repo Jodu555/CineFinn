@@ -100,16 +100,16 @@ const httpServer = serve({
     await connectDatabase();
     const adminUser = await accountsTable.getOne({
         role: 3
-    })
+    });
     if (adminUser != undefined) {
         const adminToken = await authTokensTable.getOne({
             TOKEN: 'SECR-DEV',
-        })
+        });
         if (adminToken == undefined) {
             authTokensTable.create({
                 TOKEN: 'SECR-DEV',
                 account_UUID: adminUser.UUID,
-            })
+            });
             return;
         }
     } else {
@@ -179,7 +179,7 @@ function geFileRuntime(watchableUUID: string) {
             const runtime = parseFloat(stdout);
             resolve(runtime);
         });
-    })
+    });
 }
 
 const io = new Server<
@@ -192,7 +192,7 @@ const io = new Server<
         methods: ['GET', 'POST'],
     },
 });
-export type definedSocket = Socket<AnythingToServerEvents, ServerToAnythingEvents, InterServerEvents, SocketData<Account | (Account & timestamped)>>
+export type definedSocket = Socket<AnythingToServerEvents, ServerToAnythingEvents, InterServerEvents, SocketData<Account | (Account & timestamped)>>;
 setIO(io);
 setIORedis(
     new Redis({
@@ -206,4 +206,19 @@ setupSocketIO();
 
 export {
     app,
-}
+};
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    // process.exit(1);
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+    // process.exit(1);
+});
+
+process.on('SIGINT', () => {
+    console.log('Received SIGINT. Shutting down gracefully.');
+    process.exit(0);
+});
