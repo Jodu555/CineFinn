@@ -315,21 +315,6 @@ const moveToDoToBottom = (ID: string) => {
     // change();
 };
 
-const addEmptyItem = () => {
-    // const ID = String(Math.round(Math.random() * 10 ** 6));
-    // const item = {
-    // 	name: '',
-    // 	creator: auth.userInfo.UUID,
-    // 	edited: false,
-    // 	categorie: 'Aniworld',
-    // 	references: { aniworld: '', zoro: '', sto: '' },
-    // 	order: -1,
-    // 	ID,
-    // } as TodoItem;
-    // state.list.push(item);
-    // change();
-};
-
 const deleteTodo = async (ID: string) => {
     // const { isConfirmed: confirmed } = await instance.$swal({
     // 	title: 'Error!',
@@ -427,13 +412,6 @@ const save = () => {
     pushTodoListUpdate();
 };
 
-function deleteScrapeInfos(item: TodoItem) {
-    delete item?.scrapingError;
-    for (const scraper of scrapers) {
-        delete item?.[scraper.scrapeKey];
-    }
-    return item;
-}
 
 const deleteOrRetryScrapeTodo = (ID: string) => {
     // state.list = state.list.map((x) => {
@@ -443,14 +421,6 @@ const deleteOrRetryScrapeTodo = (ID: string) => {
     // 	} else {
     // 		return x;
     // 	}
-    // });
-    // pushTodoListUpdate();
-};
-
-const rescrapeAllItems = () => {
-    // state.list = state.list.map((x) => {
-    // 	x = deleteScrapeInfos(x);
-    // 	return x;
     // });
     // pushTodoListUpdate();
 };
