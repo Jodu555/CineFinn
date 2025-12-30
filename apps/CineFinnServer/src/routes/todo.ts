@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { authFullMiddleware } from "../auth.js";
-import { Role } from "@cinefinn/types/database";
+import { Role, type RefRef, type ScrapeInfo, type TodoItem, type TodoReferences, type ValueOf } from "@cinefinn/types/database";
 import type { AniWorldSeriesInformations } from "@cinefinn/types/scrapers";
 import { tryCatch } from "../tryCatch.js";
 import { isScraperSocketConnected } from "../sockets/scraper.socket.js";
@@ -8,46 +8,6 @@ import { createStorage } from "unstorage";
 import fsDriver from "unstorage/drivers/fs";
 import { unescape } from "querystring";
 import { getIO } from "../utils.js";
-
-type ValueOf<T> = T[keyof T];
-
-export type TodoReferences = Record<keyof RefRef, string>;
-
-export type RefRef = {
-    'aniworld': undefined | AniWorldSeriesInformations;
-    'sto': undefined | AniWorldSeriesInformations;
-};
-
-export interface TodoItem {
-    ID: string;
-    order: number;
-    name: string;
-    creator: string;
-    categorie: 'Aniworld' | 'STO' | 'KDrama';
-    references: TodoReferences;
-    scrapingInfo?: {
-        [key in keyof Partial<RefRef>]: ScrapeInfo<key>;
-    };
-    edited?: boolean;
-}
-
-type ScrapeInfo<K extends keyof RefRef> = ScrapeInfoDefaults<K> & (LoadingErrorScrapeInfo | SuccessScrapeInfo<K>);
-
-type ScrapeInfoDefaults<K> = {
-    key: K;
-    scrapedAt: number;
-    message: string;
-}
-
-type LoadingErrorScrapeInfo = {
-    state: 'loading' | 'error';
-    data: undefined;
-};
-
-type SuccessScrapeInfo<K extends keyof RefRef> = {
-    state: 'success';
-    data: RefRef[K];
-};
 
 interface ScraperDefinition {
     referenceKey: keyof TodoReferences;

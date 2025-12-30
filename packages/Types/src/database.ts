@@ -1,3 +1,6 @@
+import type { AniWorldSeriesInformations } from "./scrapers.js";
+
+export type ValueOf<T> = T[keyof T];
 export interface timestamped {
     created_at: number;
     updated_at: number;
@@ -259,3 +262,44 @@ export type FrontendPlaylist = Playlist & timestamped;
 export interface PlaylistSettings {
     sendEmailOnUpdate: boolean;
 }
+
+
+
+
+export type TodoReferences = Record<keyof RefRef, string>;
+
+export type RefRef = {
+    'aniworld': undefined | AniWorldSeriesInformations;
+    'sto': undefined | AniWorldSeriesInformations;
+};
+
+export interface TodoItem {
+    ID: string;
+    order: number;
+    name: string;
+    creator: string;
+    categorie: 'Aniworld' | 'STO' | 'KDrama';
+    references: TodoReferences;
+    scrapingInfo?: {
+        [key in keyof Partial<RefRef>]: ScrapeInfo<key>;
+    };
+    edited?: boolean;
+}
+
+export type ScrapeInfo<K extends keyof RefRef> = ScrapeInfoDefaults<K> & (LoadingErrorScrapeInfo | SuccessScrapeInfo<K>);
+
+type ScrapeInfoDefaults<K> = {
+    key: K;
+    scrapedAt: number;
+    message: string;
+}
+
+type LoadingErrorScrapeInfo = {
+    state: 'loading' | 'error';
+    data: undefined;
+};
+
+type SuccessScrapeInfo<K extends keyof RefRef> = {
+    state: 'success';
+    data: RefRef[K];
+};

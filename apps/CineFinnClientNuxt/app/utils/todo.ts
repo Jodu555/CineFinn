@@ -1,3 +1,4 @@
+import type { RefRef, TodoItem, TodoReferences } from '@cinefinn/types/database';
 import type { AniWorldEntity, AniWorldSeriesInformations } from '@cinefinn/types/scrapers';
 import type { Ref } from 'vue';
 
@@ -90,31 +91,31 @@ export const scrapers = [
     // },
 ] satisfies ScraperDefinition[];
 
-export type TodoReferences = Record<keyof RefRef, string>;
+// export type TodoReferences = Record<keyof RefRef, string>;
 
-export type RefRef = {
-    'aniworld': undefined | AniWorldSeriesInformations;
-    'sto': undefined | AniWorldSeriesInformations;
-};
+// export type RefRef = {
+//     'aniworld': undefined | AniWorldSeriesInformations;
+//     'sto': undefined | AniWorldSeriesInformations;
+// };
 
-export interface TodoItem {
-    ID: string;
-    order: number;
-    name: string;
-    creator?: string;
-    categorie: 'Aniworld' | 'STO' | 'KDrama';
-    references: TodoReferences;
-    scrapingInfo?: {
-        [key in keyof Partial<TodoReferences>]: {
-            key: key;
-            message: string;
-            state: 'loading' | 'success' | 'error';
-            scrapedAt: number;
-            data: RefRef[key];
-        };
-    };
-    edited?: boolean;
-}
+// export interface TodoItem {
+//     ID: string;
+//     order: number;
+//     name: string;
+//     creator?: string;
+//     categorie: 'Aniworld' | 'STO' | 'KDrama';
+//     references: TodoReferences;
+//     scrapingInfo?: {
+//         [key in keyof Partial<TodoReferences>]: {
+//             key: key;
+//             message: string;
+//             state: 'loading' | 'success' | 'error';
+//             scrapedAt: number;
+//             data: RefRef[key];
+//         };
+//     };
+//     edited?: boolean;
+// }
 
 const item = {
     ID: '1',
@@ -132,18 +133,7 @@ const item = {
             message: 'Loading...',
             state: 'loading',
             scrapedAt: 0,
-            data: {
-                url: '',
-                informations: {
-                    infos: '',
-                    startDate: '',
-                    endDate: '',
-                    description: '',
-                    image: ''
-                },
-                hasMovies: false,
-                seasons: []
-            },
+            data: undefined,
         },
     },
     edited: false,

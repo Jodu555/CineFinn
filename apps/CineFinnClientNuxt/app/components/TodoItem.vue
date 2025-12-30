@@ -137,7 +137,7 @@
                                 <small class="text-danger" style="cursor: pointer"
                                     @click="todoStore.deleteOrRetryScrapeTodo(element.ID, scrapeInfo.key)"><u>Retry {{
                                         scrapeInfo.key
-                                        }}</u></small>
+                                    }}</u></small>
                             </div>
 
                             <span v-if="scrapeInfo?.state === 'error'" class="h6 text-danger mb-0">
@@ -297,6 +297,8 @@
 </template>
 
 <script lang="ts" setup>
+import type { TodoItem } from '@cinefinn/types/database';
+
 
 const props = withDefaults(defineProps<{
     element: TodoItem;
