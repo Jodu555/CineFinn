@@ -1,4 +1,4 @@
-import type { Account, timestamped } from '@cinefinn/types/database';
+import type { Account, Email, timestamped } from '@cinefinn/types/database';
 import type { Overview, SubSystem } from '@cinefinn/types/socket';
 import type { FetchError } from 'ofetch';
 import { defineStore } from 'pinia';
@@ -11,6 +11,7 @@ export const useAdminStore = defineStore('admin', {
         overview: {} as Overview,
         accounts: [] as (Account & timestamped)[],
         subsystems: [] as SubSystem[],
+        emails: [] as (Email & timestamped)[],
     }),
     actions: {
         async loadOverview() {
@@ -57,6 +58,22 @@ export const useAdminStore = defineStore('admin', {
                 this.error = error.data || 'An unknown error occurred.';
             } else {
                 this.subsystems = data;
+            }
+            this.loading = false;
+        },
+        async loadEmails() {
+            this.loading = true;
+            const { data, error } = await tryCatch<Promise<(Email & timestamped)[]>, FetchError>(() => $fetch<(Email & timestamped)[]>(useAPIURL() + '/admin/emails', {
+                method: 'GET',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+            }));
+            if (error) {
+                this.error = error.data || 'An unknown error occurred.';
+                return;
+            } else {
+                this.emails = data;
             }
             this.loading = false;
         },

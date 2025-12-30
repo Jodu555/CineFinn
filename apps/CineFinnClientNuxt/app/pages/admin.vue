@@ -23,6 +23,11 @@
                                 to="/admin/subsystems"><span class="ms-1 d-none d-sm-inline">SubSystems</span>
                             </NuxtLink>
                         </li>
+                        <li>
+                            <NuxtLink class="nav-link px-0 align-middle" exact-active-class="active" to="/admin/emails">
+                                <span class="ms-1 d-none d-sm-inline">Emails</span>
+                            </NuxtLink>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -46,6 +51,7 @@ const error = computed(() => adminStore.error);
 await callOnce('loadOverview', () => adminStore.loadOverview(), { mode: 'navigation' });
 await callOnce('loadAccounts', () => adminStore.loadAccounts(), { mode: 'navigation' });
 await callOnce('loadSubsystems', () => adminStore.loadSubsystems(), { mode: 'navigation' });
+await callOnce('loadEmails', () => adminStore.loadEmails(), { mode: 'navigation' });
 
 </script>
 

@@ -1,10 +1,11 @@
 import { Hono } from "hono";
 import { authFullMiddleware } from "../auth.js";
-import { accountsTable, episodesTable, moviesTable, playlistsTable, seasonsTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../database.js";
+import { accountsTable, emailsTable, episodesTable, moviesTable, playlistsTable, seasonsTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../database.js";
 import { getKnownSubSystems, getSeriesRelatedToSubSystem, getSubSystems } from "../sockets/subsystem.socket.js";
 import { getIO } from "../utils.js";
 import type { Overview, SocketAuthDataSubsystem } from "@cinefinn/types/socket";
 import { Role } from "@cinefinn/types/database";
+import { generateEmailID } from "../utils/IdGenerators.js";
 
 
 export async function generateOverview() {
@@ -100,6 +101,10 @@ const router = new Hono()
     .get('/overview', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const overview = await generateOverview();
         return c.json(overview);
+    })
+    .get('/emails', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+        const emails = await emailsTable.get();
+        return c.json(emails);
     });
 
 export { router as adminRouter };
