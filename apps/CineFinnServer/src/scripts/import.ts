@@ -214,7 +214,7 @@ async function importWatchHistory() {
                 watchable_UUID: watchableEM.UUID,
                 watchTime: +watchable.time,
             });
-            console.log(`=> Added watchHistory entity ${watchString.account_UUID} S${watchable.season}E${watchable.episode} (${watchable.ID})`);
+            console.log(`=> Added watchHistory entity ${watchString.account_UUID} S${watchable.season}E${watchable.episode} M${watchable.movie} (${watchable.ID})`);
         }
     }
 }
