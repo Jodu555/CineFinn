@@ -182,12 +182,17 @@ export function decideImageURL(minimal: boolean, element: TodoItem) {
     return '';
 }
 
-const cache = new Map<string, any>();
+type LanguageDevision = {
+    total: number
+    devision: Record<string, number>
+}
 
-export function languageDevision(element: TodoItem) {
+const cache = new Map<string, LanguageDevision>();
+
+export function languageDevision(element: TodoItem): LanguageDevision {
     if (cache.has(element.ID)) {
         // console.log('Getting from Cache', element.ID);
-        return cache.get(element.ID);
+        return cache.get(element.ID)!;
     } else {
         const newDevision = newLanguageDevision(element);
         // const oldDevision = oldLanguageDevision(element);

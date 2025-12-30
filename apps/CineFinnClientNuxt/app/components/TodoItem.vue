@@ -15,7 +15,7 @@
                                 <font-awesome-icon :icon="['fa-solid', 'fa-pen']" size="lg" />
                             </button>
                             <button v-if="authStore.user.role >= 2 && !element.edited" title="Use" type="button"
-                                @click="useTodo(element.ID)" class="btn btn-outline-success me-3">
+                                @click="todoStore.useTodo(element.ID)" class="btn btn-outline-success me-3">
                                 <font-awesome-icon :icon="['fa-solid', 'fa-check']" size="lg" />
                             </button>
                             <button v-if="authStore.user.role >= 2 && !element.edited" title="Delete" type="button"
@@ -56,14 +56,14 @@
                             class="h6">M</a> -->
                     </div>
 
-                    <ul v-if="!minimal && languageDevision(element).total != -1">
-                        <li>Episodes: {{ languageDevision(element).total }}</li>
+                    <ul v-if="!minimal && languageDevisionC.total != -1">
+                        <li>Episodes: {{ languageDevisionC.total }}</li>
                         <li>
                             &nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk:
-                            {{ numWithFP((languageDevision(element).total * constants.mbperEpisode) / 1024, 1)
+                            {{ numWithFP((languageDevisionC.total * constants.mbperEpisode) / 1024, 1)
                             }}GB
                         </li>
-                        <li v-for="[key, value] in Object.entries(languageDevision(element).devision)">
+                        <li v-for="[key, value] in Object.entries(languageDevisionC.devision)">
                             &nbsp;&nbsp;&nbsp;&nbsp;{{ key }}: {{ value }}%
                         </li>
                         <template v-if="hasMovies">
@@ -137,7 +137,7 @@
                                 <small class="text-danger" style="cursor: pointer"
                                     @click="todoStore.deleteOrRetryScrapeTodo(element.ID, scrapeInfo.key)"><u>Retry {{
                                         scrapeInfo.key
-                                    }}</u></small>
+                                        }}</u></small>
                             </div>
 
                             <span v-if="scrapeInfo?.state === 'error'" class="h6 text-danger mb-0">
@@ -332,6 +332,8 @@ const hasMovies = computed(() => {
         return true;
 });
 
+const languageDevisionC = computed(() => languageDevision(props.element));
+
 const numWithFP = (num: string | number, pts: number): number => {
     if (typeof num == 'number') num = String(num);
     return parseFloat(parseFloat(num).toFixed(pts));
@@ -341,84 +343,6 @@ const constants = reactive({
     mbperEpisode: 350,
     mbperMovie: 2048,
 });
-
-const useTodo = async (ID: string) => {
-    // const { isConfirmed: confirmed } = await instance.$swal({
-    // 	title: 'Super!',
-    // 	text: 'Do you really want to USE this Todo?',
-    // 	icon: 'success',
-    // 	showCancelButton: true,
-    // 	cancelButtonText: 'No im not sure anymore!',
-    // 	confirmButtonText: 'Yes im sure!',
-    // });
-    // if (confirmed) {
-    // 	const todoObject = state.list.find((x) => x.ID == ID);
-    // 	if (!todoObject) {
-    // 		instance.$swal({
-    // 			toast: true,
-    // 			position: 'top-end',
-    // 			showConfirmButton: false,
-    // 			timer: 3000,
-    // 			icon: 'error',
-    // 			title: `Todo Item with ID ${ID} not found`,
-    // 			timerProgressBar: true,
-    // 		});
-    // 		return;
-    // 	}
-    // 	const seriesObject = {
-    // 		categorie: todoObject.categorie,
-    // 		title: todoObject.name,
-    // 		movies: [] as SerieMovie[],
-    // 		seasons: [] as SerieEpisode[][],
-    // 		references: todoObject.references,
-    // 		infos: {} as SerieInfo,
-    // 	};
-
-    // 	if (todoObject.scraped !== true && todoObject.scraped != undefined) {
-    // 		seriesObject.infos = JSON.parse(JSON.stringify(todoObject.scraped?.informations)) satisfies SerieInfo;
-    // 		delete seriesObject?.infos?.image;
-    // 	}
-    // 	const response = await useAxios().post('/index/', seriesObject);
-
-    // 	if (response.status !== 200) {
-    // 		instance.$swal({
-    // 			toast: true,
-    // 			position: 'top-end',
-    // 			showConfirmButton: false,
-    // 			timer: 3000,
-    // 			icon: 'error',
-    // 			title: `${response.data.error.message || 'An Error occurd'}`,
-    // 			timerProgressBar: true,
-    // 		});
-    // 	} else {
-    // 		if (response.data.ID !== undefined) {
-    // 			const serieID = response.data.ID;
-
-    // 			const imageUrl = decideImageURL(false, todoObject);
-
-    // 			const imageResponse = await useAxios().post(`/index/${serieID}/cover`, { imageUrl });
-
-    // 			if (imageResponse.status !== 200) {
-    // 				instance.$swal({
-    // 					toast: true,
-    // 					position: 'top-end',
-    // 					showConfirmButton: false,
-    // 					timer: 3000,
-    // 					icon: 'error',
-    // 					title: `${imageResponse.data.error.message || 'An Error occurd'}`,
-    // 					timerProgressBar: true,
-    // 				});
-    // 			}
-    // 		}
-
-    // 		const newsObject = {
-    // 			content: `Added ${seriesObject.title}`,
-    // 			time: Date.now(),
-    // 		} as DatabaseNewsItem;
-    // 		await useAxios().post('/news/', newsObject);
-    // 	}
-    // }
-};
 
 </script>
 
