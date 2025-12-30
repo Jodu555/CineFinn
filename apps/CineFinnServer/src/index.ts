@@ -157,11 +157,11 @@ const httpServer = serve({
 
     for (const [serieUUID, subMap] of map) {
         console.log(serieUUID, subMap);
-        if(Object.keys(subMap).length > 1)  {
+        if (Object.keys(subMap).length > 1) {
             console.log(`Serie ${serieUUID} exists in multiple subsystems: ${subMap}`);
         }
     }
-    
+
 
     // console.log('Fixing Seasons');
     // const seasons = await seasonsTable.get();

@@ -11,39 +11,39 @@ export const useTodoStore = defineStore('todo', {
         loading: false,
         error: '',
         list: [
-            {
-                ID: '1',
-                order: 1,
-                name: 'John',
-                categorie: 'Aniworld',
-                creator: '1',
-                references: {
-                    aniworld: 'https://aniworld.to/anime/1',
-                    sto: 'https://sto.to/anime/1',
-                },
-            },
-            {
-                ID: '2',
-                order: 2,
-                name: 'Jane',
-                categorie: 'Aniworld',
-                creator: '1',
-                references: {
-                    aniworld: 'https://aniworld.to/anime/2',
-                    sto: 'https://sto.to/anime/2',
-                },
-            },
-            {
-                ID: '3',
-                order: 3,
-                name: 'Bob',
-                creator: '',
-                categorie: 'Aniworld',
-                references: {
-                    aniworld: 'https://aniworld.to/anime/3',
-                    sto: 'https://sto.to/anime/3',
-                },
-            },
+            // {
+            //     ID: '1',
+            //     order: 1,
+            //     name: 'John',
+            //     categorie: 'Aniworld',
+            //     creator: '1',
+            //     references: {
+            //         aniworld: 'https://aniworld.to/anime/1',
+            //         sto: 'https://sto.to/anime/1',
+            //     },
+            // },
+            // {
+            //     ID: '2',
+            //     order: 2,
+            //     name: 'Jane',
+            //     categorie: 'Aniworld',
+            //     creator: '1',
+            //     references: {
+            //         aniworld: 'https://aniworld.to/anime/2',
+            //         sto: 'https://sto.to/anime/2',
+            //     },
+            // },
+            // {
+            //     ID: '3',
+            //     order: 3,
+            //     name: 'Bob',
+            //     creator: '',
+            //     categorie: 'Aniworld',
+            //     references: {
+            //         aniworld: 'https://aniworld.to/anime/3',
+            //         sto: 'https://sto.to/anime/3',
+            //     },
+            // },
         ] as TodoItem[],
         permittedAccounts: [
             {
@@ -63,18 +63,19 @@ export const useTodoStore = defineStore('todo', {
     actions: {
         async loadTodoList() { },
         async addEmptyItem() {
-            // const ID = String(Math.round(Math.random() * 10 ** 6));
-            // const item = {
-            // 	name: '',
-            // 	creator: auth.userInfo.UUID,
-            // 	edited: false,
-            // 	categorie: 'Aniworld',
-            // 	references: { aniworld: '', zoro: '', sto: '' },
-            // 	order: -1,
-            // 	ID,
-            // } as TodoItem;
-            // state.list.push(item);
-            // change();
+            const authStore = useAuthStore();
+            const ID = String(Math.round(Math.random() * 10 ** 6));
+            const item = {
+                name: '',
+                creator: authStore.user.UUID,
+                edited: false,
+                categorie: 'Aniworld',
+                references: { aniworld: '', zoro: '', sto: '' },
+                order: -1,
+                ID,
+            } as TodoItem;
+            this.list.push(item);
+            this.change();
         },
         onListChange(event: any) {
             this.change();

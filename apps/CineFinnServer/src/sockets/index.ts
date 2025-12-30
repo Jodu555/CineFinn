@@ -38,6 +38,7 @@ async function setupSocketAuthMiddleware() {
         }
         const result = await tryCatch(() => socketConsumer.authFunction(authHanshake));
         if (result.error != null) {
+            console.log('Error while authorizing', result.error);
             return next(result.error);
         } else {
             socket.data = {

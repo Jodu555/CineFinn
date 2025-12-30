@@ -1,5 +1,24 @@
 <template>
     <div class="container">
+        <br />
+
+        <div class="d-flex justify-content-between">
+            <button v-if="authStore.user.role >= 2" class="btn btn-outline-primary mb-5"
+                @click="todoStore.addEmptyItem()">Add
+                Item</button>
+
+            <button class="btn btn-outline-warning mb-5" @click="todoStore.minimal = !todoStore.minimal">Minimal
+                View</button>
+
+            <button v-if="authStore.user.role >= 2" class="btn btn-outline-danger mb-5"
+                @click="todoStore.rescrapeAllItems()">Rescrape All Items</button>
+        </div>
+
+        <div v-if="todoStore.loading" class="d-flex justify-content-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
         <VueDraggableNext v-model="todoStore.list" @change="todoStore.onListChange" class="list-group" tag="ul"
             :component-data="{
                 tag: 'ul',
