@@ -29,7 +29,10 @@
 						</ul>
 					</li> -->
 					<li class="nav-item">
-						<router-link class="nav-link" active-class="active" to="/playlists">Playlists</router-link>
+						<NuxtLink class="nav-link" active-class="active" to="/playlists">Playlists</NuxtLink>
+					</li>
+					<li class="nav-item">
+						<NuxtLink class="nav-link" active-class="active" to="/todo">Todo</NuxtLink>
 					</li>
 					<!-- <li class="nav-item">
 						<router-link class="nav-link" active-class="active" to="/rmvc">RMVC</router-link>

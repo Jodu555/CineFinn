@@ -5,276 +5,8 @@
             name: !drag ? 'flip-list' : null,
         }" v-bind="dragOptions" @start="drag = true" @end="drag = false" item-key="ID">
             <template v-for="element in list">
-                <li class="list-group-item">
-                    <div class="d-flex">
-                        <img v-if="decideImageURL(minimal, element).length > 0" :src="decideImageURL(minimal, element)"
-                            class="img-fluid rounded-top me-4 dp-img" alt="" />
-                        <div style="width: 100%" v-auto-animate>
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    {{ element.name }} -
-                                    {{ element.categorie }}
-                                    <span class="badge bg-primary mx-2 me-3">{{ element.order }}</span>
-                                    <button v-if="authStore.user.role >= 2 && !element.edited" title="Edit"
-                                        type="button" @click="element.edited = true"
-                                        class="btn btn-outline-primary me-3">
-                                        <font-awesome-icon :icon="['fa-solid', 'fa-pen']" size="lg" />
-                                    </button>
-                                    <button v-if="authStore.user.role >= 2 && !element.edited" title="Use" type="button"
-                                        @click="useTodo(element.ID)" class="btn btn-outline-success me-3">
-                                        <font-awesome-icon :icon="['fa-solid', 'fa-check']" size="lg" />
-                                    </button>
-                                    <button v-if="authStore.user.role >= 2 && !element.edited" title="Delete"
-                                        type="button" @click="deleteTodo(element.ID)" class="btn btn-outline-danger">
-                                        <font-awesome-icon :icon="['fa-solid', 'fa-trash']" size="lg" />
-                                    </button>
-                                </div>
-                                <div>
-                                    <!-- Bring to Top -->
-                                    <button
-                                        v-if="authStore.user.role >= 2 && !element.edited && element.order > 6 && authStore.user.role > 2"
-                                        title="Bring to top" @click="moveToDoToTop(element.ID)" type="button"
-                                        class="btn btn-outline-info me-2">
-                                        <font-awesome-icon icon="fa-solid fa-up-long" />
-                                    </button>
-                                    <!-- Bring to Bottom -->
-                                    <button
-                                        v-if="authStore.user.role >= 2 && !element.edited && element.order <= list.length / 1.2"
-                                        title="Bring to Bottom" @click="moveToDoToBottom(element.ID)" type="button"
-                                        class="btn btn-outline-warning">
-                                        <font-awesome-icon icon="fa-solid fa-down-long" />
-                                    </button>
-                                    <button v-if="element.edited" type="button" @click="element.edited = false"
-                                        class="btn btn-close"></button>
-                                </div>
-                            </div>
-                            <!-- <h5>Infos</h5> -->
-                            <span v-if="permittedAccounts.find((x) => x.UUID == element.creator) != null">- {{
-                                permittedAccounts.find((x) => x.UUID == element.creator)?.username}}</span>
-                            <div v-if="authStore.user.role > 2" style="width: 15%"
-                                class="d-flex justify-content-around">
-                                <a v-if="element.references.aniworld" target="_blank"
-                                    :href="element.references.aniworld" class="h6">A</a>
-                                <span v-if="element.references.zoro" class="h6">Z</span>
-                                <a v-if="element.references.anix" target="_blank" :href="element.references.anix"
-                                    class="h6">AX</a>
-                                <a v-if="element.references.sto" target="_blank" :href="element.references.sto"
-                                    class="h6">S</a>
-                                <a v-if="element.references.myasiantv" target="_blank"
-                                    :href="element.references.myasiantv" class="h6">M</a>
-                            </div>
-
-                            <ul v-if="!minimal && languageDevision(element).total != -1">
-                                <li>Episodes: {{ languageDevision(element).total }}</li>
-                                <li>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk:
-                                    {{ numWithFP((languageDevision(element).total * constants.mbperEpisode) / 1024, 1)
-                                    }}GB
-                                </li>
-                                <li v-for="[key, value] in Object.entries(languageDevision(element).devision)">
-                                    &nbsp;&nbsp;&nbsp;&nbsp;{{ key }}: {{ value }}%
-                                </li>
-                                <template
-                                    v-if="element.scraped != undefined && element.scraped !== true && element.scraped?.movies != undefined">
-                                    <li>Movies: {{ element.scraped?.movies?.length }}</li>
-                                    <li>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk:
-                                        {{ numWithFP((element.scraped?.movies?.length * constants.mbperMovie) / 1024, 1)
-                                        }}GB
-                                    </li>
-                                </template>
-                                <li v-if="authStore.user.role > 1">
-                                    <em>
-                                        <div>
-                                            Source:
-                                            <template v-if="element.scraped !== undefined && element.scraped !== true">
-                                                <br />
-                                                <a target="_blank" :href="element.scraped?.url">{{ element.scraped?.url
-                                                    }}</a>
-                                            </template>
-                                            <template
-                                                v-if="element.scrapedZoro !== undefined && element.scrapedZoro !== true">
-                                                <br />
-                                                <a target="_blank" :href="element.scrapedZoro.episodes[0]?.url">{{
-                                                    element.scrapedZoro.episodes[0]?.url
-                                                    }}</a>
-                                            </template>
-                                            <template
-                                                v-if="element.scrapednewZoro !== undefined && element.scrapednewZoro !== true">
-                                                <br />
-                                                <a target="_blank"
-                                                    :href="element.scrapednewZoro.seasons[0]?.[0]?.url">{{
-                                                        element.scrapednewZoro.seasons[0]?.[0]?.url
-                                                    }}</a>
-                                            </template>
-                                            <template
-                                                v-if="element.scrapedAnix !== undefined && element.scrapedAnix !== true">
-                                                <br />
-                                                <a target="_blank"
-                                                    :href="`https://anix.to/anime/${element.references.anix}`">{{
-                                                        `https://anix.to/anime/${element.references.anix}`
-                                                    }}</a>
-                                            </template>
-                                            <template
-                                                v-if="element.scrapedMyasiantv !== undefined && element.scrapedMyasiantv !== true">
-                                                <br />
-                                                <a target="_blank" :href="element.scrapedMyasiantv.url">{{
-                                                    element.scrapedMyasiantv.url }}</a>
-                                            </template>
-                                        </div>
-                                        <br />
-                                        <p v-if="authStore.user.role > 1" style="cursor: pointer"
-                                            @click="deleteOrRetryScrapeTodo(element.ID)">
-                                            <u>Delete Scraped infos</u>
-                                        </p>
-                                    </em>
-                                </li>
-                            </ul>
-
-                            <div v-if="element.scraped == true" class="m-3 d-flex justify-content-between">
-                                <div class="spinner-border text-warning spinner-border-xs" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                                <small class="text-danger" style="cursor: pointer"
-                                    @click="deleteOrRetryScrapeTodo(element.ID)"><u>Retry</u></small>
-                            </div>
-
-                            <span v-if="element.scrapingError" class="h6 text-danger">
-                                <span>!!! {{ element.scrapingError }} !!! &nbsp;&nbsp;&nbsp;&nbsp;
-                                    <small style="cursor: pointer" @click="deleteOrRetryScrapeTodo(element.ID)">
-                                        <u>Retry</u>
-                                    </small>
-                                </span>
-                            </span>
-
-                            <div v-if="element.edited">
-                                <div class="row text-center mt-2 mb-2 align-items-center">
-                                    <div class="col-2">
-                                        <label for="name" class="form-label">Name:</label>
-                                    </div>
-                                    <div class="col-7">
-                                        <input type="text"
-                                            :disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
-                                            class="form-control" id="name" v-model="element.name" />
-                                    </div>
-                                </div>
-                                <template v-if="authStore.user.role == 2">
-                                    <div class="row text-center mt-2 mb-2 align-items-center">
-                                        <div class="col-2">
-                                            <label for="name" class="form-label">Creator:</label>
-                                        </div>
-                                        <div class="col-1 h5">
-                                            <span>{{permittedAccounts.find((x) => x.UUID ==
-                                                element.creator)?.username}}</span>
-                                        </div>
-                                    </div>
-                                </template>
-                                <template v-else>
-                                    <div class="row text-center mt-2 mb-2 align-items-center">
-                                        <div class="col-2">
-                                            <label for="name" class="form-label">Creator:</label>
-                                        </div>
-                                        <div class="col-3">
-                                            <select v-model="element.creator" style="width: 100%" class="form-select"
-                                                aria-label="Default select example">
-                                                <option selected disabled>From</option>
-                                                <option v-for="account in permittedAccounts" :value="account.UUID">
-                                                    {{ account.username }}
-                                                </option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </template>
-                                <div class="row text-center mt-2 mb-2 align-items-center">
-                                    <div class="col-2">
-                                        <label for="name" class="form-label">Kategorie:</label>
-                                    </div>
-                                    <div class="col-3">
-                                        <select v-model="element.categorie" style="width: 100%"
-                                            :disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
-                                            class="form-select" aria-label="Default select example">
-                                            <option selected disabled>Kategorie</option>
-                                            <option>Aniworld</option>
-                                            <option>STO</option>
-                                            <option>K-Drama</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <hr />
-                                <h5>References</h5>
-                                <h6>Anime</h6>
-                                <div class="row text-center align-items-center mb-4">
-                                    <div class="col-2">
-                                        <label for="url" class="form-label">Aniworld:</label>
-                                    </div>
-                                    <div class="col-7">
-                                        <input type="text"
-                                            :disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
-                                            class="form-control" id="url" v-model="element.references.aniworld" />
-                                    </div>
-                                </div>
-                                <div class="row text-center align-items-center mb-4">
-                                    <div class="col-2">
-                                        <label for="url" class="form-label">Zoro:</label>
-                                    </div>
-                                    <div class="col-7">
-                                        <input type="text"
-                                            :disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
-                                            class="form-control" id="url" v-model="element.references.zoro" />
-                                    </div>
-                                </div>
-                                <div class="row text-center align-items-center">
-                                    <div class="col-2">
-                                        <label for="url" class="form-label">Anix:</label>
-                                    </div>
-                                    <div class="col-7">
-                                        <input type="text"
-                                            :disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
-                                            class="form-control" id="url" v-model="element.references.anix" />
-                                    </div>
-                                </div>
-                                <hr />
-                                <h6>STO</h6>
-                                <div class="row text-center align-items-center mb-4">
-                                    <div class="col-2">
-                                        <label for="url" class="form-label">STO:</label>
-                                    </div>
-                                    <div class="col-7">
-                                        <input type="text"
-                                            :disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
-                                            class="form-control" id="url" v-model="element.references.sto" />
-                                    </div>
-                                </div>
-                                <hr />
-                                <h6>K-Drama</h6>
-                                <div class="row text-center align-items-center mb-4">
-                                    <div class="col-2">
-                                        <label for="url" class="form-label">MyAsianTV:</label>
-                                    </div>
-                                    <div class="col-7">
-                                        <input type="text"
-                                            :disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
-                                            class="form-control" id="url" v-model="element.references.myasiantv" />
-                                    </div>
-                                </div>
-
-                                <div class="d-flex justify-content-end">
-                                    <button type="button" @click="element.edited = false"
-                                        class="btn btn-outline-danger mx-2">Cancel</button>
-                                    <button type="button" @click="
-                                        element.edited = false;
-                                    save();
-                                    " class="btn btn-outline-success">
-                                        Save
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-2 d-flex justify-content-end">
-                        <small>- {{ element.ID }}</small>
-                    </div>
-                </li>
+                <TodoItem :element="element" :minimal="minimal" :list-length="list.length"
+                    :permitted-accounts="permittedAccounts" :drag="drag" />
             </template>
         </VueDraggableNext>
 
@@ -294,12 +26,6 @@ const authStore = useAuthStore();
 const drag = ref(false);
 
 const minimal = ref(false);
-
-interface permAcc {
-    UUID: string;
-    username: string;
-    role: number;
-}
 
 const permittedAccounts = ref<permAcc[]>([
     {
@@ -359,16 +85,6 @@ const list = ref<TodoItem[]>([
         },
     },
 ])
-
-const numWithFP = (num: string | number, pts: number): number => {
-    if (typeof num == 'number') num = String(num);
-    return parseFloat(parseFloat(num).toFixed(pts));
-};
-
-const constants = reactive({
-    mbperEpisode: 350,
-    mbperMovie: 2048,
-});
 
 const moveToDoToTop = (ID: string) => {
     // const index = state.list.findIndex((x) => x.ID == ID);
@@ -569,7 +285,10 @@ const dragOptions = computed(() => {
 
 // Handle changes
 const onListChange = (event: any) => {
-    console.log('List changed:', event)
+    list.value = list.value.map((x, i) => {
+        x.order = i + 1;
+        return x;
+    });
 }
 </script>
 

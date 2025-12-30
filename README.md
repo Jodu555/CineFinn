@@ -44,7 +44,7 @@ When all the boxes are checked, I will deploy the MVP to a testing environment a
 - [x] SubSystem
 - [ ] Admin System
   - [ ] Make Most of the Config Values like register and register token configurable
-  - [ ] Have a way to view emails and the status of them
+  - [x] Have a way to view emails and the status of them
 - [x] Playlist System
 - [ ] Sync System
 
