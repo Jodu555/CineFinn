@@ -4,6 +4,10 @@ import { Role } from "@cinefinn/types/database";
 import type { AniWorldSeriesInformations } from "@cinefinn/types/scrapers";
 import { tryCatch } from "../tryCatch.js";
 import { isScraperSocketConnected } from "../sockets/scraper.socket.js";
+import { createStorage } from "unstorage";
+import fsDriver from "unstorage/drivers/fs";
+import { unescape } from "querystring";
+import { getIO } from "../utils.js";
 
 type ValueOf<T> = T[keyof T];
 
@@ -18,14 +22,16 @@ export interface TodoItem {
     ID: string;
     order: number;
     name: string;
-    creator?: string;
+    creator: string;
     categorie: 'Aniworld' | 'STO' | 'KDrama';
     references: TodoReferences;
     scrapingInfo?: {
-        [key in keyof Partial<TodoReferences>]: ScrapeInfoDefaults<key> & (LoadingErrorScrapeInfo | SuccessScrapeInfo<key>);
+        [key in keyof Partial<RefRef>]: ScrapeInfo<key>;
     };
     edited?: boolean;
 }
+
+type ScrapeInfo<K extends keyof RefRef> = ScrapeInfoDefaults<K> & (LoadingErrorScrapeInfo | SuccessScrapeInfo<K>);
 
 type ScrapeInfoDefaults<K> = {
     key: K;
@@ -55,18 +61,20 @@ const scrapers = [
         referenceKey: 'aniworld',
         scrapeKey: 'aniworld',
         scrapeFunction: async (url: string) => {
-            return {
-                url: url,
-                informations: {
-                    infos: '',
-                    startDate: '',
-                    endDate: '',
-                    description: '',
-                    image: ''
-                },
-                hasMovies: false,
-                seasons: []
-            };
+            const sockets = await getIO().fetchSockets();
+            const scraperSocket = sockets.find(s => s.data.auth.type === 'scraper');
+            if (scraperSocket == undefined) {
+                throw new Error('Scraper Socket not found');
+            }
+            const data = await new Promise<AniWorldSeriesInformations | void>((resolve, reject) => {
+                scraperSocket.emit('scrape:aniworld', url, (data) => resolve(data));
+            })
+
+            if (data == undefined) {
+                throw new Error('Scraper Socket did not return data');
+            }
+
+            return data;
         },
     },
     {
@@ -90,9 +98,26 @@ const scrapers = [
 
 ] satisfies ScraperDefinition[];
 
+const todoStorage = createStorage<TodoItem[]>({
+    driver: fsDriver({
+        base: './temp/todoStorage',
+    })
+})
+
+const mainTestKey = 'test';
+
+
+const todoScrapeJobs = [] as {
+    todoID: string;
+    scrapeKey: keyof RefRef;
+    func: (() => Promise<ScrapeInfo<keyof RefRef>>)
+}[];
+
 const router = new Hono()
     .get('/', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
-        return c.json([]);
+        const todos = await todoStorage.get(mainTestKey) || [];
+
+        return c.json(todos);
     })
     .post('/', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
 
@@ -118,40 +143,71 @@ const router = new Hono()
                     console.log('Scraper not found', reference);
                     continue;
                 }
-                let scrapeInfo = todo.scrapingInfo?.[scraper.scrapeKey];
-                if (scrapeInfo?.state === 'success') {
+                let scraperInfo = todo.scrapingInfo?.[scraper.scrapeKey];
+                if (scraperInfo?.state === 'success') {
                     continue;
                 }
 
-                if (!isScraperSocketConnected) {
-                    console.log('Scraper not connected');
-                    continue;
-                }
+                // if (!isScraperSocketConnected) {
+                //     console.log('Scraper not connected');
+                //     continue;
+                // }
+                if (scraperInfo == undefined) {
+                    console.log('Starting Scraper', scraper.scrapeKey);
 
-                if (scrapeInfo == undefined) {
-                    scrapeInfo = {
+                    scraperInfo = {
                         key: scraper.scrapeKey,
                         message: 'Loading...',
                         state: 'loading',
                         scrapedAt: Date.now(),
                         data: undefined,
                     }
-                    new Promise(async (resolve, reject) => {
+
+                    const promiseFn = async (): Promise<ScrapeInfo<keyof RefRef>> => {
                         const { data, error } = await tryCatch<Promise<AniWorldSeriesInformations>, Error>(() => scraper.scrapeFunction(url));
                         if (error) {
-                            scrapeInfo!.state = 'error';
-                            scrapeInfo!.message = error.message;
-                            return resolve(scrapeInfo);
+                            scraperInfo!.state = 'error';
+                            scraperInfo!.message = error.message;
+                            return scraperInfo!;
                         }
-                        scrapeInfo!.state = 'success';
-                        scrapeInfo!.message = 'Success';
-                        scrapeInfo!.data = data;
-                        return resolve(scrapeInfo);
-                    });
+                        scraperInfo!.state = 'success';
+                        scraperInfo!.message = 'Success';
+                        scraperInfo!.data = data;
+                        return scraperInfo!;
+                    };
+                    todoScrapeJobs.push({ todoID: todo.ID, scrapeKey: scraper.scrapeKey, func: promiseFn });
+
+                    if (todo.scrapingInfo == undefined) {
+                        todo.scrapingInfo = {} as TodoItem['scrapingInfo'];
+                    }
+
+                    console.log(todo);
+                    console.log(scraperInfo);
+
+                    todo.scrapingInfo![scraper.scrapeKey] = scraperInfo as any;
+
                 }
             }
+            await todoStorage.set(mainTestKey, todos);
         }
 
+        console.log(todos);
 
+        (async () => {
+            for (const { todoID, scrapeKey, func } of todoScrapeJobs) {
+                const result = await func();
+                const todos = await todoStorage.get(mainTestKey) || [];
+                await todoStorage.set(mainTestKey, todos.map(t => {
+                    if (t.ID == todoID) {
+                        //@ts-expect-error
+                        t.scrapingInfo![scrapeKey] = result;
+                    }
+                    return t;
+                }));
+            }
+            console.log('Scraping Done');
+        })()
         return c.json(todos);
     })
+
+export { router as todoRouter };

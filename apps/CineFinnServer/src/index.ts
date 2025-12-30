@@ -29,6 +29,7 @@ import { setupSocketIO } from './sockets/index.js';
 import { getKnownSubSystems, getSeriesRelatedToSubSystem, toggleSeriesesForSubSystem } from './sockets/subsystem.socket.js';
 import { playlistRouter } from './routes/playlist.js';
 import { adminRouter } from './routes/admin.js';
+import { todoRouter } from './routes/todo.js';
 
 
 const { printMetrics, registerMetrics } = prometheus();
@@ -58,6 +59,7 @@ const app = new Hono({
     .route('/watch', watchRouter)
     .route('/playlists', playlistRouter)
     .route('/admin', adminRouter)
+    .route('/todo', todoRouter)
     .route('/video', videoRouter);
 
 // app.get('*', async (c, next) => {

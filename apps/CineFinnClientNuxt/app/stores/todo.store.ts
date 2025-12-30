@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import useAPIURL from '~/hooks/useAPIURL';
 
 export interface permAcc {
     UUID: string;
@@ -56,12 +57,27 @@ export const useTodoStore = defineStore('todo', {
                 username: 'Jane',
                 role: 1,
             },
+            {
+                UUID: '4f43fc81-6d19-4c51-8e8e-f56513c92e16',
+                username: 'Jodu',
+                role: 2,
+            }
         ] as permAcc[],
         minimal: false,
         drag: false,
     }),
     actions: {
-        async loadTodoList() { },
+        async loadTodoList() {
+            this.loading = true;
+            const todos = await $fetch<TodoItem[]>(useAPIURL() + '/todo', {
+                method: 'GET',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+            });
+            this.list = todos;
+            this.loading = false;
+        },
         async addEmptyItem() {
             const authStore = useAuthStore();
             const ID = String(Math.round(Math.random() * 10 ** 6));
@@ -80,13 +96,14 @@ export const useTodoStore = defineStore('todo', {
         onListChange(event: any) {
             this.change();
         },
-        change() {
+        async change() {
             this.list = this.list.map((x, i) => {
                 x.order = i + 1;
                 return x;
             });
+            await this.pushTodoListUpdate();
         },
-        async save() {
+        async saveTodo() {
             await this.pushTodoListUpdate();
         },
         async pushTodoListUpdate() {
@@ -99,23 +116,40 @@ export const useTodoStore = defineStore('todo', {
             // 		text: 'Seems Like you do not have enough Permission to do that',
             // 	});
             // }
-            // const saveList = (JSON.parse(JSON.stringify(state.list)) as TodoItem[]).map((x) => {
-            // 	delete x.edited;
-            // 	return x;
-            // });
+            const saveList = (JSON.parse(JSON.stringify(this.list)) as TodoItem[]).map((x) => {
+                delete x.edited;
+                return x;
+            });
+            const { data, error } = await tryCatch(() => $fetch(useAPIURL() + '/todo', {
+                method: 'POST',
+                body: JSON.stringify(saveList),
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+            }))
+            if (error) {
+                console.log(error);
+                return;
+            }
+            console.log(data);
+
             // useSocket().emit('todoListUpdate', saveList);
         },
         async moveToDoToTop(ID: string) {
-            // const index = state.list.findIndex((x) => x.ID == ID);
-            // const item = state.list.splice(index, 1)[0];
-            // state.list.unshift(item);
-            // change();
+            const index = this.list.findIndex((x) => x.ID == ID);
+            const item = this.list.splice(index, 1)[0];
+            if (item == undefined)
+                return;
+            this.list.unshift(item);
+            await this.change();
         },
         async moveToDoToBottom(ID: string) {
-            // const index = state.list.findIndex((x) => x.ID == ID);
-            // const item = state.list.splice(index, 1)[0];
-            // state.list.push(item);
-            // change();
+            const index = this.list.findIndex((x) => x.ID == ID);
+            const item = this.list.splice(index, 1)[0];
+            if (item == undefined)
+                return;
+            this.list.push(item);
+            await this.change();
         },
         async useTodo(ID: string) {
 
@@ -134,30 +168,28 @@ export const useTodoStore = defineStore('todo', {
             // 	change();
             // }
         },
-        async deleteScrapeInfos(ID: string) {
-            // delete item?.scrapingError;
-            // for (const scraper of scrapers) {
-            //     delete item?.[scraper.scrapeKey];
-            // }
-            // return item;
-        },
-        async deleteOrRetryScrapeTodo(ID: string) {
-            // state.list = state.list.map((x) => {
-            // 	if (x.ID == ID) {
-            // 		x = deleteScrapeInfos(x);
-            // 		return x;
-            // 	} else {
-            // 		return x;
-            // 	}
-            // });
-            // pushTodoListUpdate();
+        async deleteOrRetryScrapeTodo(ID: string, key?: string) {
+            this.list = this.list.map((x) => {
+                if (x.ID == ID) {
+                    if (key == undefined || key == 'all') {
+                        delete x.scrapingInfo;
+                    } else {
+                        //@ts-expect-error
+                        delete x.scrapingInfo?.[key as any];
+                    }
+                    return x;
+                } else {
+                    return x;
+                }
+            });
+            await this.pushTodoListUpdate();
         },
         async rescrapeAllItems() {
-            // state.list = state.list.map((x) => {
-            // 	x = deleteScrapeInfos(x);
-            // 	return x;
-            // });
-            // pushTodoListUpdate();
+            this.list = this.list.map((x) => {
+                delete x.scrapingInfo;
+                return x;
+            });
+            await this.pushTodoListUpdate();
         },
         async updateTodoList(list: TodoItem[]) {
             this.list = list;

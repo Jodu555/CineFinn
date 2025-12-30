@@ -19,7 +19,7 @@
                                 <font-awesome-icon :icon="['fa-solid', 'fa-check']" size="lg" />
                             </button>
                             <button v-if="authStore.user.role >= 2 && !element.edited" title="Delete" type="button"
-                                @click="deleteTodo(element.ID)" class="btn btn-outline-danger">
+                                @click="todoStore.deleteTodo(element.ID)" class="btn btn-outline-danger">
                                 <font-awesome-icon :icon="['fa-solid', 'fa-trash']" size="lg" />
                             </button>
                         </div>
@@ -27,14 +27,14 @@
                             <!-- Bring to Top -->
                             <button
                                 v-if="authStore.user.role >= 2 && !element.edited && element.order > 6 && authStore.user.role > 2"
-                                title="Bring to top" @click="moveToDoToTop(element.ID)" type="button"
+                                title="Bring to top" @click="todoStore.moveToDoToTop(element.ID)" type="button"
                                 class="btn btn-outline-info me-2">
                                 <font-awesome-icon icon="fa-solid fa-up-long" />
                             </button>
                             <!-- Bring to Bottom -->
                             <button
                                 v-if="authStore.user.role >= 2 && !element.edited && element.order <= listLength / 1.2"
-                                title="Bring to Bottom" @click="moveToDoToBottom(element.ID)" type="button"
+                                title="Bring to Bottom" @click="todoStore.moveToDoToBottom(element.ID)" type="button"
                                 class="btn btn-outline-warning">
                                 <font-awesome-icon icon="fa-solid fa-down-long" />
                             </button>
@@ -66,16 +66,18 @@
                         <li v-for="[key, value] in Object.entries(languageDevision(element).devision)">
                             &nbsp;&nbsp;&nbsp;&nbsp;{{ key }}: {{ value }}%
                         </li>
-                        <!-- <template
-                            v-if="element.scraped != undefined && element.scraped !== true && element.scraped?.movies != undefined">
-                            <li>Movies: {{ element.scraped?.movies?.length }}</li>
+                        <template v-if="hasMovies">
+                            <li>Movies: {{ element.scrapingInfo?.['aniworld']?.data?.movies?.length ||
+                                element.scrapingInfo?.['sto']?.data?.movies?.length || 0 }}</li>
                             <li>
                                 &nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk:
-                                {{ numWithFP((element.scraped?.movies?.length * constants.mbperMovie) / 1024, 1)
+                                {{ numWithFP(((element.scrapingInfo?.['aniworld']?.data?.movies?.length ||
+                                    element.scrapingInfo?.['sto']?.data?.movies?.length || 0) * constants.mbperMovie) /
+                                    1024, 1)
                                 }}GB
                             </li>
-                        </template> -->
-                        <li v-if="authStore.user.role > 1">
+                        </template>
+                        <div v-if="authStore.user.role > 1">
                             <em>
                                 <!-- <div>
                                             Source:
@@ -116,32 +118,42 @@
                                         </div> -->
                                 <br />
                                 <p v-if="authStore.user.role > 1" style="cursor: pointer"
-                                    @click="deleteOrRetryScrapeTodo(element.ID, 'all')">
-                                    <u>Delete Scraped infos</u>
+                                    @click="todoStore.deleteOrRetryScrapeTodo(element.ID, 'all')">
+                                    <u>Delete All Scraped infos</u>
                                 </p>
                             </em>
-                        </li>
+                        </div>
                     </ul>
-
-
-                    <div v-for="scrapeInfo in element.scrapingInfo">
+                    <div v-for="[key, scrapeInfo] in Object.entries(element.scrapingInfo! || {})">
                         <div v-if="scrapeInfo != undefined">
-                            <p>{{ scrapeInfo.key }}</p>
+                            <p class="mb-0" style="text-transform: capitalize;">{{ key }}: {{ new
+                                Date(scrapeInfo.scrapedAt).toLocaleString() }}
+                                ({{
+                                    scrapeInfo.message }})</p>
                             <div v-if="scrapeInfo?.state === 'loading'" class="m-3 d-flex justify-content-between">
                                 <div class="spinner-border text-warning spinner-border-xs" role="status">
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
                                 <small class="text-danger" style="cursor: pointer"
-                                    @click="deleteOrRetryScrapeTodo(element.ID, scrapeInfo.key)"><u>Retry {{
+                                    @click="todoStore.deleteOrRetryScrapeTodo(element.ID, scrapeInfo.key)"><u>Retry {{
                                         scrapeInfo.key
-                                    }}</u></small>
+                                        }}</u></small>
                             </div>
 
-                            <span v-if="scrapeInfo?.state === 'error'" class="h6 text-danger">
+                            <span v-if="scrapeInfo?.state === 'error'" class="h6 text-danger mb-0">
                                 <span>!!! {{ scrapeInfo.message }} !!! &nbsp;&nbsp;&nbsp;&nbsp;
                                     <small style="cursor: pointer"
-                                        @click="deleteOrRetryScrapeTodo(element.ID, scrapeInfo.key)">
+                                        @click="todoStore.deleteOrRetryScrapeTodo(element.ID, scrapeInfo.key)">
                                         <u>Retry {{ scrapeInfo.key }}</u>
+                                    </small>
+                                </span>
+                            </span>
+
+                            <span v-if="scrapeInfo?.state === 'success'" class="h6 text-success mt-0">
+                                <span>Success: "{{ scrapeInfo.message }}" &nbsp;&nbsp;&nbsp;&nbsp;
+                                    <small class="text-secondary" style="cursor: pointer"
+                                        @click="todoStore.deleteOrRetryScrapeTodo(element.ID, scrapeInfo.key)">
+                                        <u>Rescrape {{ scrapeInfo.key }}</u>
                                     </small>
                                 </span>
                             </span>
@@ -269,7 +281,7 @@
                                 class="btn btn-outline-danger mx-2">Cancel</button>
                             <button type="button" @click="
                                 element.edited = false;
-                            save();
+                            todoStore.saveTodo();
                             " class="btn btn-outline-success">
                                 Save
                             </button>
@@ -298,11 +310,24 @@ const props = withDefaults(defineProps<{
 });
 
 const authStore = useAuthStore();
+const todoStore = useTodoStore();
 
 const [parent, enable] = useAutoAnimate();
 
 watch(() => props.drag, (val) => {
     enable(!val);
+});
+
+const hasMovies = computed(() => {
+
+    if (props.element.scrapingInfo == undefined)
+        return false;
+
+    if (props.element.scrapingInfo['aniworld'] != undefined && props.element.scrapingInfo['aniworld'].state === 'success')
+        return true;
+
+    if (props.element.scrapingInfo['sto'] != undefined && props.element.scrapingInfo['sto'].state === 'success')
+        return true;
 });
 
 const numWithFP = (num: string | number, pts: number): number => {
@@ -314,35 +339,6 @@ const constants = reactive({
     mbperEpisode: 350,
     mbperMovie: 2048,
 });
-
-const moveToDoToTop = (ID: string) => {
-    // const index = state.list.findIndex((x) => x.ID == ID);
-    // const item = state.list.splice(index, 1)[0];
-    // state.list.unshift(item);
-    // change();
-};
-
-const moveToDoToBottom = (ID: string) => {
-    // const index = state.list.findIndex((x) => x.ID == ID);
-    // const item = state.list.splice(index, 1)[0];
-    // state.list.push(item);
-    // change();
-};
-
-const deleteTodo = async (ID: string) => {
-    // const { isConfirmed: confirmed } = await instance.$swal({
-    // 	title: 'Error!',
-    // 	text: 'Do you really want to DELETE this Todo?',
-    // 	icon: 'warning',
-    // 	showCancelButton: true,
-    // 	cancelButtonText: 'No im not sure anymore!',
-    // 	confirmButtonText: 'Yes im sure!',
-    // });
-    // if (confirmed) {
-    // 	state.list = state.list.filter((x) => x.ID != ID);
-    // 	change();
-    // }
-};
 
 const useTodo = async (ID: string) => {
     // const { isConfirmed: confirmed } = await instance.$swal({
@@ -422,40 +418,20 @@ const useTodo = async (ID: string) => {
     // }
 };
 
-const save = () => {
-    pushTodoListUpdate();
-};
-
-
-const deleteOrRetryScrapeTodo = (ID: string, key: string) => {
-    // state.list = state.list.map((x) => {
-    // 	if (x.ID == ID) {
-    // 		x = deleteScrapeInfos(x);
-    // 		return x;
-    // 	} else {
-    // 		return x;
-    // 	}
-    // });
-    // pushTodoListUpdate();
-};
-
-const pushTodoListUpdate = async () => {
-    // console.log(auth.userInfo.role, 2, auth.userInfo.role >= 2);
-    // if (!(auth.userInfo.role >= 2)) {
-    // 	console.log('Fire');
-    // 	instance.$swal({
-    // 		icon: 'error',
-    // 		title: 'Oops...',
-    // 		text: 'Seems Like you do not have enough Permission to do that',
-    // 	});
-    // }
-    // const saveList = (JSON.parse(JSON.stringify(state.list)) as TodoItem[]).map((x) => {
-    // 	delete x.edited;
-    // 	return x;
-    // });
-    // useSocket().emit('todoListUpdate', saveList);
-};
-
 </script>
 
-<style></style>
+<style scoped>
+.dp-img {
+    /* max-width: 18rem;
+    min-width: 17rem;
+    min-height: 24rem;
+    max-height: 20rem; */
+    max-width: 15rem;
+    min-width: 14rem;
+    min-height: 20rem;
+    max-height: 22rem;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 25px;
+}
+</style>

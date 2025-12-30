@@ -1,6 +1,7 @@
 import fs = require('fs');
 
 import type database = require("./database");
+import type scrapers = require("./scrapers");
 
 export type SocketAuthType = 'client' | 'scraper' | 'subsystem';
 
@@ -50,6 +51,8 @@ export interface ServerToClientEvents {
 
 export interface ServerToScraperEvents {
     'job:checkForUpdates': (index: [database.DetailedSeries], callback: (chanedSeries: database.DetailedSeries[]) => void) => void;
+    'scrape:aniworld': (url: string, callback: (informations: scrapers.AniWorldSeriesInformations | void) => void) => void;
+    'scrape:sto': (url: string, callback: (informations: scrapers.AniWorldSeriesInformations | void) => void) => void;
 }
 
 export interface ClientToServerEvents {

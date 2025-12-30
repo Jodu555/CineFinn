@@ -4,6 +4,7 @@ import type { AuthHandshake, ScraperToServerEvents, ServerToScraperEvents, } fro
 import type { DetailedSeries, IgnoranceItem } from '@cinefinn/types/database';
 import { compareForNewReleases } from './utils/compare.js';
 import axios from 'axios';
+import Aniworld from './class/Aniworld.js';
 
 const config = getConfig();
 
@@ -23,7 +24,7 @@ socket = io(config.CORE.URL, {
 
 socket.on('connect', () => {
     console.log('Connected to Core');
-    checkForUpdates([]);
+    // checkForUpdates([]);
 });
 
 socket.on('disconnect', () => {
@@ -33,6 +34,20 @@ socket.on('disconnect', () => {
 socket.on('job:checkForUpdates', (cb) => {
     console.log('job:checkForUpdates');
     // cb(0);
+});
+
+socket.on('scrape:aniworld', async (url, cb) => {
+    console.log('scrape:aniworld', url);
+    const aniworld = new Aniworld(url);
+    const informations = await aniworld.parseInformations();
+    cb(informations);
+});
+
+socket.on('scrape:sto', async (url, cb) => {
+    console.log('scrape:sto', url);
+    const aniworld = new Aniworld(url);
+    const informations = await aniworld.parseInformations();
+    cb(informations);
 });
 
 async function checkForUpdates(index: DetailedSeries[]) {

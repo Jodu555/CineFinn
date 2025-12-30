@@ -19,6 +19,11 @@
                 <span class="visually-hidden">Loading...</span>
             </div>
         </div>
+
+        <!-- <pre>
+            {{ todoStore.list }}
+        </pre> -->
+
         <VueDraggableNext v-model="todoStore.list" @change="todoStore.onListChange" class="list-group" tag="ul"
             :component-data="{
                 tag: 'ul',
@@ -43,6 +48,8 @@ definePageMeta({
 
 const authStore = useAuthStore();
 const todoStore = useTodoStore();
+
+await callOnce('loadTodoList', () => todoStore.loadTodoList(), { mode: 'navigation' });
 
 const permittedAccounts = computed(() => todoStore.permittedAccounts);
 

@@ -176,7 +176,7 @@ export function decideImageURL(minimal: boolean, element: TodoItem) {
         const scrapeInfo = element.scrapingInfo?.[scraper.scrapeKey];
         // console.log(element, scraper.scrapeKey, scrapeInfo);
         if (scrapeInfo != undefined && scrapeInfo.state === 'success') {
-            const img = lookDeep(scrapeInfo, scraper.imagePath);
+            const img = lookDeep(scrapeInfo.data, scraper.imagePath);
             // console.log(img);
             if (img && typeof img == 'string') {
                 console.log(new URL(img).protocol);
@@ -230,9 +230,9 @@ function newLanguageDevision(element: TodoItem) {
 
     for (const scraper of scrapers) {
         const scrapeInfo = element.scrapingInfo?.[scraper.scrapeKey];
-        if (scrapeInfo == undefined || scrapeInfo.state === 'success' || scraper.seasonsPath == undefined || scraper.episodeCallback == undefined)
+        if (scrapeInfo == undefined || scrapeInfo.state === 'loading' || scrapeInfo.state === 'error' || scraper.seasonsPath == undefined || scraper.episodeCallback == undefined)
             continue;
-        const episodes = lookDeep(scrapeInfo, scraper.seasonsPath);
+        const episodes = lookDeep(scrapeInfo.data, scraper.seasonsPath);
         // if (element.ID == '29062') {
         //     console.log('LOG', element, scraper, scraper.referenceKey, episodes);
         //     console.log(scraper.seasonsPath, scrapeInfo);
