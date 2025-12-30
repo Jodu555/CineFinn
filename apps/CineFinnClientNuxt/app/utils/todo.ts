@@ -90,24 +90,9 @@ export const scrapers = [
     // },
 ] satisfies ScraperDefinition[];
 
-export type TodoReferences = Record<'aniworld' | 'zoro' | 'anix' | 'sto' | 'myasiantv', string>;
+export type TodoReferences = Record<keyof RefRef, string>;
 
-
-// export interface TodoItem {
-//     ID: string;
-//     order: number;
-//     name: string;
-//     creator?: string;
-//     categorie: 'Aniworld' | 'STO' | 'KDrama';
-//     references: TodoReferences;
-//     scraped?: AniWorldSeriesInformations | true;
-//     scrapingError?: string;
-//     edited?: boolean;
-// }
-
-export type NewTodoReferences = Record<'aniworld' | 'sto', string>;
-
-type RefRef = {
+export type RefRef = {
     'aniworld': undefined | AniWorldSeriesInformations;
     'sto': undefined | AniWorldSeriesInformations;
 };
@@ -118,20 +103,16 @@ export interface TodoItem {
     name: string;
     creator?: string;
     categorie: 'Aniworld' | 'STO' | 'KDrama';
-    references: NewTodoReferences;
+    references: TodoReferences;
     scrapingInfo?: {
-        [key in keyof Partial<NewTodoReferences>]: {
+        [key in keyof Partial<TodoReferences>]: {
             key: key;
             message: string;
-            state: 'idle' | 'loading' | 'success' | 'error';
+            state: 'loading' | 'success' | 'error';
             scrapedAt: number;
             data: RefRef[key];
         };
     };
-    // scrapingData: {
-    //     aniworld?: AniWorldSeriesInformations;
-    //     sto?: AniWorldSeriesInformations;
-    // };
     edited?: boolean;
 }
 
@@ -149,7 +130,7 @@ const item = {
         aniworld: {
             key: 'aniworld',
             message: 'Loading...',
-            state: 'idle',
+            state: 'loading',
             scrapedAt: 0,
             data: {
                 url: '',
