@@ -19,10 +19,7 @@ export const useTodoStore = defineStore('todo', {
                 creator: '1',
                 references: {
                     aniworld: 'https://aniworld.to/anime/1',
-                    zoro: 'https://zoro.to/anime/1',
-                    anix: 'https://anix.to/anime/1',
                     sto: 'https://sto.to/anime/1',
-                    myasiantv: 'https://myasiantv.se/anime/1',
                 },
             },
             {
@@ -33,10 +30,7 @@ export const useTodoStore = defineStore('todo', {
                 creator: '1',
                 references: {
                     aniworld: 'https://aniworld.to/anime/2',
-                    zoro: 'https://zoro.to/anime/2',
-                    anix: 'https://anix.to/anime/2',
                     sto: 'https://sto.to/anime/2',
-                    myasiantv: 'https://myasiantv.se/anime/2',
                 },
             },
             {
@@ -47,10 +41,7 @@ export const useTodoStore = defineStore('todo', {
                 categorie: 'Aniworld',
                 references: {
                     aniworld: 'https://aniworld.to/anime/3',
-                    zoro: 'https://zoro.to/anime/3',
-                    anix: 'https://anix.to/anime/3',
                     sto: 'https://sto.to/anime/3',
-                    myasiantv: 'https://myasiantv.se/anime/3',
                 },
             },
         ] as TodoItem[],

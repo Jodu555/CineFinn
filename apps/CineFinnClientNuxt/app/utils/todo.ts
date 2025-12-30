@@ -4,7 +4,7 @@ import type { Ref } from 'vue';
 export const scrapers = [
     {
         referenceKey: 'aniworld',
-        scrapeKey: 'scraped',
+        scrapeKey: 'aniworld',
         imagePath: ['informations', 'image'],
         seasonsPath: ['seasons'],
         episodeCallback: (episode: AniWorldEntity) => {
@@ -15,7 +15,7 @@ export const scrapers = [
     },
     {
         referenceKey: 'sto',
-        scrapeKey: 'scraped',
+        scrapeKey: 'sto',
         imagePath: ['informations', 'image'],
         // seasonsPath: ['seasons'],
         // episodeCallback: (episode: AniWorldEntity) => {
@@ -93,17 +93,17 @@ export const scrapers = [
 export type TodoReferences = Record<'aniworld' | 'zoro' | 'anix' | 'sto' | 'myasiantv', string>;
 
 
-export interface TodoItem {
-    ID: string;
-    order: number;
-    name: string;
-    creator?: string;
-    categorie: 'Aniworld' | 'STO' | 'KDrama';
-    references: TodoReferences;
-    scraped?: AniWorldSeriesInformations | true;
-    scrapingError?: string;
-    edited?: boolean;
-}
+// export interface TodoItem {
+//     ID: string;
+//     order: number;
+//     name: string;
+//     creator?: string;
+//     categorie: 'Aniworld' | 'STO' | 'KDrama';
+//     references: TodoReferences;
+//     scraped?: AniWorldSeriesInformations | true;
+//     scrapingError?: string;
+//     edited?: boolean;
+// }
 
 export type NewTodoReferences = Record<'aniworld' | 'sto', string>;
 
@@ -112,20 +112,21 @@ type RefRef = {
     'sto': undefined | AniWorldSeriesInformations;
 };
 
-export interface NewTodoItem {
+export interface TodoItem {
     ID: string;
     order: number;
     name: string;
     creator?: string;
     categorie: 'Aniworld' | 'STO' | 'KDrama';
     references: NewTodoReferences;
-    scrapingInfo: {
+    scrapingInfo?: {
         [key in keyof Partial<NewTodoReferences>]: {
+            key: key;
             message: string;
             state: 'idle' | 'loading' | 'success' | 'error';
             scrapedAt: number;
             data: RefRef[key];
-        } | undefined;
+        };
     };
     // scrapingData: {
     //     aniworld?: AniWorldSeriesInformations;
@@ -146,6 +147,7 @@ const item = {
     },
     scrapingInfo: {
         aniworld: {
+            key: 'aniworld',
             message: 'Loading...',
             state: 'idle',
             scrapedAt: 0,
@@ -164,12 +166,12 @@ const item = {
         },
     },
     edited: false,
-} satisfies NewTodoItem;
+} satisfies TodoItem;
 
 
 interface ScraperDefinition {
     referenceKey: keyof TodoReferences;
-    scrapeKey: keyof TodoItem;
+    scrapeKey: keyof RefRef;
     imagePath: string[];
     seasonsPath?: string[];
     episodeCallback?: (episode: any) => { langs: string[]; };
@@ -190,9 +192,9 @@ export function decideImageURL(minimal: boolean, element: TodoItem) {
     if (minimal) return '';
 
     for (const scraper of scrapers) {
-        const scrapeInfo = element[scraper.scrapeKey] as any;
+        const scrapeInfo = element.scrapingInfo?.[scraper.scrapeKey];
         // console.log(element, scraper.scrapeKey, scrapeInfo);
-        if (scrapeInfo != undefined && scrapeInfo !== true) {
+        if (scrapeInfo != undefined && scrapeInfo.state === 'success') {
             const img = lookDeep(scrapeInfo, scraper.imagePath);
             // console.log(img);
             if (img && typeof img == 'string') {
@@ -207,37 +209,6 @@ export function decideImageURL(minimal: boolean, element: TodoItem) {
         }
     }
     return '';
-    // if (
-    // 	element.scraped != undefined &&
-    // 	element.scraped !== true &&
-    // 	element.scraped.informations.image &&
-    // 	typeof element.scraped.informations.image == 'string'
-    // ) {
-    // 	return element.scraped.informations.image;
-    // }
-    // if (
-    // 	element.scrapednewZoro != undefined &&
-    // 	element.scrapednewZoro !== true &&
-    // 	element.scrapednewZoro.image &&
-    // 	typeof element.scrapednewZoro.image == 'string'
-    // ) {
-    // 	return element.scrapednewZoro.image;
-    // }
-
-    // if (element.scrapedAnix != undefined && element.scrapedAnix !== true && element.scrapedAnix.image && typeof element.scrapedAnix.image == 'string') {
-    // 	return element.scrapedAnix.image;
-    // }
-
-    // if (
-    // 	element.scrapedMyasiantv != undefined &&
-    // 	element.scrapedMyasiantv !== true &&
-    // 	element.scrapedMyasiantv.informations.image &&
-    // 	typeof element.scrapedMyasiantv.informations.image == 'string'
-    // ) {
-    // 	return element.scrapedMyasiantv.informations.image;
-    // }
-
-    // return '';
 }
 
 const cache = new Map<string, any>();
@@ -277,8 +248,8 @@ function newLanguageDevision(element: TodoItem) {
     };
 
     for (const scraper of scrapers) {
-        const scrapeInfo = element[scraper.scrapeKey] as any;
-        if (scrapeInfo == undefined || scrapeInfo === true || scraper.seasonsPath == undefined || scraper.episodeCallback == undefined)
+        const scrapeInfo = element.scrapingInfo?.[scraper.scrapeKey];
+        if (scrapeInfo == undefined || scrapeInfo.state === 'success' || scraper.seasonsPath == undefined || scraper.episodeCallback == undefined)
             continue;
         const episodes = lookDeep(scrapeInfo, scraper.seasonsPath);
         // if (element.ID == '29062') {
@@ -321,87 +292,3 @@ function newLanguageDevision(element: TodoItem) {
 
     return { total, devision: out };
 }
-
-// function oldLanguageDevision(element: TodoItem) {
-//     const out: Record<string, number> = {};
-//     let total = -1;
-
-//     const setOrIncrement = (lang: string) => {
-//         if (!out[lang]) {
-//             out[lang] = 1;
-//         } else {
-//             out[lang] += 1;
-//         }
-//     };
-//     if (element.scraped != undefined && element.scraped !== true) {
-//         total = element.scraped.seasons.flat().length;
-//         element.scraped.seasons.flat().forEach((x) => x.langs.forEach((l) => setOrIncrement(l)));
-//     }
-//     if (element.scrapedZoro != undefined && element.scrapedZoro !== true) {
-//         if (total == -1) total = element.scrapedZoro.episodes.length;
-//         const zoroEps = element.scrapedZoro?.episodes;
-//         zoroEps.forEach((e) => {
-//             e.langs.forEach((l) => {
-//                 if (l == 'sub') l = 'EngSub';
-//                 if (l == 'dub') l = 'EngDub';
-//                 setOrIncrement(l);
-//             });
-//         });
-//     }
-//     if (element.scrapednewZoro != undefined && element.scrapednewZoro !== true) {
-//         if (total == -1) total = element.scrapednewZoro?.seasons.flat().length;
-//         const zoroEps = element.scrapednewZoro?.seasons.flat();
-//         zoroEps.forEach((e) => {
-//             e.langs.forEach((l) => {
-//                 if (l == 'sub') l = 'EngSub';
-//                 if (l == 'dub') l = 'EngDub';
-//                 if (l == 'raw') l = 'JapDub';
-//                 setOrIncrement(l);
-//             });
-//         });
-//     }
-//     if (element.scrapedAnix != undefined && element.scrapedAnix !== true) {
-//         if (total == -1) total = element.scrapedAnix?.seasons.flat().length;
-//         const anixEps = element.scrapedAnix?.seasons.flat();
-//         anixEps.forEach((e) => {
-//             e.langs.forEach((l) => {
-//                 if (l == 'sub') l = 'EngSub';
-//                 if (l == 'dub') l = 'EngDub';
-//                 setOrIncrement(l);
-//             });
-//         });
-//     }
-//     if (element.scrapedMyasiantv != undefined && element.scrapedMyasiantv !== true) {
-//         total = element.scrapedMyasiantv.episodes.length;
-//         element.scrapedMyasiantv.episodes.forEach((ep) => {
-//             ep.langs.forEach((l) => {
-//                 if (l == 'Subtitle') {
-//                     setOrIncrement('EngSubK');
-//                 } else {
-//                     setOrIncrement('RawK');
-//                 }
-//             });
-//         });
-//     }
-
-//     for (const [key, value] of Object.entries(out)) {
-//         // if (element.ID == '29062') {
-//         //     console.log('OLD', element.ID, { key, value, total, eq: (value / total) * 100 });
-//         // }
-//         out[key] = Math.min(100, parseFloat(parseFloat(String((value / total) * 100)).toFixed(2)));
-//     }
-
-//     if (out['GerDub'] == 100) {
-//         delete out['GerSub'];
-//         delete out['EngSub'];
-//     } else if (out['GerSub'] == 100 && out['EngSub']) {
-//         delete out['EngSub'];
-//     }
-
-//     // console.log(out);
-//     // if (element.ID == '833746' || element.ID == '135947') {
-//     //     console.log('OLD', element.ID, out, total);
-//     // }
-
-//     return { total, devision: out };
-// }

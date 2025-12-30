@@ -48,12 +48,12 @@
                     <div v-if="authStore.user.role > 2" style="width: 15%" class="d-flex justify-content-around">
                         <a v-if="element.references.aniworld" target="_blank" :href="element.references.aniworld"
                             class="h6">A</a>
-                        <span v-if="element.references.zoro" class="h6">Z</span>
+                        <a v-if="element.references.sto" target="_blank" :href="element.references.sto" class="h6">S</a>
+                        <!-- <span v-if="element.references.zoro" class="h6">Z</span>
                         <a v-if="element.references.anix" target="_blank" :href="element.references.anix"
                             class="h6">AX</a>
-                        <a v-if="element.references.sto" target="_blank" :href="element.references.sto" class="h6">S</a>
                         <a v-if="element.references.myasiantv" target="_blank" :href="element.references.myasiantv"
-                            class="h6">M</a>
+                            class="h6">M</a> -->
                     </div>
 
                     <ul v-if="!minimal && languageDevision(element).total != -1">
@@ -66,7 +66,7 @@
                         <li v-for="[key, value] in Object.entries(languageDevision(element).devision)">
                             &nbsp;&nbsp;&nbsp;&nbsp;{{ key }}: {{ value }}%
                         </li>
-                        <template
+                        <!-- <template
                             v-if="element.scraped != undefined && element.scraped !== true && element.scraped?.movies != undefined">
                             <li>Movies: {{ element.scraped?.movies?.length }}</li>
                             <li>
@@ -74,7 +74,7 @@
                                 {{ numWithFP((element.scraped?.movies?.length * constants.mbperMovie) / 1024, 1)
                                 }}GB
                             </li>
-                        </template>
+                        </template> -->
                         <li v-if="authStore.user.role > 1">
                             <em>
                                 <!-- <div>
@@ -116,28 +116,42 @@
                                         </div> -->
                                 <br />
                                 <p v-if="authStore.user.role > 1" style="cursor: pointer"
-                                    @click="deleteOrRetryScrapeTodo(element.ID)">
+                                    @click="deleteOrRetryScrapeTodo(element.ID, 'all')">
                                     <u>Delete Scraped infos</u>
                                 </p>
                             </em>
                         </li>
                     </ul>
 
-                    <div v-if="element.scraped == true" class="m-3 d-flex justify-content-between">
-                        <div class="spinner-border text-warning spinner-border-xs" role="status">
-                            <span class="visually-hidden">Loading...</span>
+
+                    <div v-for="scrapeInfo in element.scrapingInfo">
+                        <div v-if="scrapeInfo != undefined">
+                            <p>{{ scrapeInfo.key }}</p>
+                            <div v-if="scrapeInfo?.state === 'loading'" class="m-3 d-flex justify-content-between">
+                                <div class="spinner-border text-warning spinner-border-xs" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <small class="text-danger" style="cursor: pointer"
+                                    @click="deleteOrRetryScrapeTodo(element.ID, scrapeInfo.key)"><u>Retry {{
+                                        scrapeInfo.key
+                                    }}</u></small>
+                            </div>
+
+                            <span v-if="scrapeInfo?.state === 'error'" class="h6 text-danger">
+                                <span>!!! {{ scrapeInfo.message }} !!! &nbsp;&nbsp;&nbsp;&nbsp;
+                                    <small style="cursor: pointer"
+                                        @click="deleteOrRetryScrapeTodo(element.ID, scrapeInfo.key)">
+                                        <u>Retry {{ scrapeInfo.key }}</u>
+                                    </small>
+                                </span>
+                            </span>
                         </div>
-                        <small class="text-danger" style="cursor: pointer"
-                            @click="deleteOrRetryScrapeTodo(element.ID)"><u>Retry</u></small>
+                        <div v-else>
+                            This should not happen
+                        </div>
                     </div>
 
-                    <span v-if="element.scrapingError" class="h6 text-danger">
-                        <span>!!! {{ element.scrapingError }} !!! &nbsp;&nbsp;&nbsp;&nbsp;
-                            <small style="cursor: pointer" @click="deleteOrRetryScrapeTodo(element.ID)">
-                                <u>Retry</u>
-                            </small>
-                        </span>
-                    </span>
+
 
                     <div v-if="element.edited">
                         <div class="row text-center mt-2 mb-2 align-items-center">
@@ -205,7 +219,7 @@
                                     class="form-control" id="url" v-model="element.references.aniworld" />
                             </div>
                         </div>
-                        <div class="row text-center align-items-center mb-4">
+                        <!-- <div class="row text-center align-items-center mb-4">
                             <div class="col-2">
                                 <label for="url" class="form-label">Zoro:</label>
                             </div>
@@ -224,7 +238,7 @@
                                     :disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
                                     class="form-control" id="url" v-model="element.references.anix" />
                             </div>
-                        </div>
+                        </div> -->
                         <hr />
                         <h6>STO</h6>
                         <div class="row text-center align-items-center mb-4">
@@ -239,7 +253,7 @@
                         </div>
                         <hr />
                         <h6>K-Drama</h6>
-                        <div class="row text-center align-items-center mb-4">
+                        <!-- <div class="row text-center align-items-center mb-4">
                             <div class="col-2">
                                 <label for="url" class="form-label">MyAsianTV:</label>
                             </div>
@@ -248,7 +262,7 @@
                                     :disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
                                     class="form-control" id="url" v-model="element.references.myasiantv" />
                             </div>
-                        </div>
+                        </div> -->
 
                         <div class="d-flex justify-content-end">
                             <button type="button" @click="element.edited = false"
@@ -413,7 +427,7 @@ const save = () => {
 };
 
 
-const deleteOrRetryScrapeTodo = (ID: string) => {
+const deleteOrRetryScrapeTodo = (ID: string, key: string) => {
     // state.list = state.list.map((x) => {
     // 	if (x.ID == ID) {
     // 		x = deleteScrapeInfos(x);
