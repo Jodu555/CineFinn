@@ -113,6 +113,8 @@ const router = new Hono()
                 //     continue;
                 // }
                 if (scraperInfo == undefined) {
+                    console.log('WHAT THE F???', todo);
+
                     console.log('Starting Scraper', scraper.scrapeKey);
 
                     scraperInfo = {
