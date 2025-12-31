@@ -25,7 +25,37 @@ export default defineNuxtConfig({
           silenceDeprecations: ['color-functions', 'global-builtin', 'import', 'color-functions']
         }
       }
+    },
+    // ... your existing scss config ...
+
+    // 1. Force Vite to pre-bundle these dependencies.
+    // This helps ensure the imports are not treated as external and are preserved.
+    optimizeDeps: {
+      include: [
+        '@fortawesome/vue-fontawesome',
+        '@fortawesome/free-solid-svg-icons',
+        '@fortawesome/free-regular-svg-icons',
+        '@fortawesome/fontawesome-svg-core'
+      ]
+    },
+
+    // 2. Specifically for SSR: Ensure the FontAwesome component 
+    // is not treated as an external module on the server.
+    // This forces the component code into the server bundle, 
+    // ensuring it can access the library correctly.
+    ssr: {
+      noExternal: ['@fortawesome/vue-fontawesome']
     }
+  },
+
+  // Optional: You can also use the legacy 'transpile' which helps 
+  // ensure everything is compiled for the Node.js server environment.
+  build: {
+    transpile: [
+      '@fortawesome/vue-fontawesome',
+      '@fortawesome/free-solid-svg-icons',
+      '@fortawesome/free-regular-svg-icons'
+    ]
   },
   app: {
     head: {
