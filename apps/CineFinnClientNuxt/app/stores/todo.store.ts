@@ -87,7 +87,7 @@ export const useTodoStore = defineStore('todo', {
                 creator: authStore.user.UUID,
                 edited: false,
                 categorie: 'Aniworld',
-                references: { aniworld: '', zoro: '', sto: '' },
+                references: { aniworld: '', zoro: '', sto: '', anix: '' },
                 order: -1,
                 ID,
             } as TodoItem;

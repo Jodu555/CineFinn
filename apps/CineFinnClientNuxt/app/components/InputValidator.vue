@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<label :for="id" class="form-label mt-4">{{ name }}</label>
+		<label v-if="showLabel" :for="id" class="form-label mt-4">{{ name }}</label>
 		<input :disabled="disabled" :type="type" :id="id" :autocomplete="autocomplete" :value="modelValue"
 			@input="$emit('update:modelValue', ($event!.target! as any).value)" :class="{
 				'form-control': true,
@@ -17,6 +17,8 @@ import { defineComponent } from 'vue';
 
 export default defineComponent({
 	props: {
+		canBeEmpty: { type: Boolean, required: false, default: false },
+		showLabel: { type: Boolean, required: false, default: true },
 		type: { type: String, required: true },
 		id: { type: String, required: true },
 		name: { type: String, required: true },
@@ -34,6 +36,9 @@ export default defineComponent({
 			invalidMessage: '',
 		};
 	},
+	mounted() {
+		this.validate();
+	},
 	watch: {
 		modelValue() {
 			this.validate();
@@ -41,6 +46,12 @@ export default defineComponent({
 	},
 	methods: {
 		validate() {
+			if (this.canBeEmpty && this.modelValue == '') {
+				this.internalValid = true;
+				this.invalidMessage = '';
+				this.$emit('update:valid', this.internalValid);
+				return;
+			}
 			const falsey: string[] = [];
 			type RuleFunction = (value: string) => true | string;
 			for (const rule of this.rules as RuleFunction[]) {

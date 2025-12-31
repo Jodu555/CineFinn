@@ -76,6 +76,7 @@ const todoScrapeJobs = [] as {
 const router = new Hono()
     .get('/', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const todos = await todoStorage.get(mainTestKey) || [];
+        console.log(todos);
 
         return c.json(todos);
     })

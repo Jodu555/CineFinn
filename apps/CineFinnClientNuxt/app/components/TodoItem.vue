@@ -144,7 +144,7 @@
                                 <small class="text-danger" style="cursor: pointer"
                                     @click="todoStore.deleteOrRetryScrapeTodo(element.ID, scrapeInfo.key)"><u>Retry {{
                                         scrapeInfo.key
-                                    }}</u></small>
+                                        }}</u></small>
                             </div>
 
                             <span v-if="scrapeInfo?.state === 'error'" class="h6 text-danger mb-0">
@@ -179,9 +179,16 @@
                                     <label for="name" class="form-label">Name:</label>
                                 </div>
                                 <div class="col-7">
-                                    <input type="text"
+                                    <!-- <InputValidator v-model="form.password" v-model:valid="form.passwordValid"
+										type="password" id="password" name="Password" autocomplete="current-password"
+										placeholder="Enter Password" :rules="rules.passwordRules" /> -->
+                                    <input-validator v-model="element.name" v-model:valid="todoNameValid" type="text"
                                         :disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
-                                        class="form-control" id="name" v-model="element.name" />
+                                        id="name" name="Name" autocomplete="todo-name" placeholder="Enter Name"
+                                        :rules="todoNameRules" :show-label="false" />
+                                    <!-- <input type="text"
+                                        :disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
+                                        class="form-control" id="name" v-model="element.name" /> -->
                                 </div>
                             </div>
                             <template v-if="authStore.user.role == 2">
@@ -229,16 +236,21 @@
                         </div>
                         <hr />
                         <h5>References</h5>
-                        <div>
+                        <div v-if="false">
                             <h6>Anime</h6>
                             <div class="row text-center align-items-center mb-4">
                                 <div class="col-2">
                                     <label for="url" class="form-label">Aniworld:</label>
                                 </div>
                                 <div class="col-7">
-                                    <input type="text"
+                                    <input-validator v-model="element.references.aniworld" v-model:valid="aniworldValid"
+                                        type="text" id="url" name="AniworldRef" autocomplete="aniworld-reference"
+                                        placeholder="Enter URL"
                                         :disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
-                                        class="form-control" id="url" v-model="element.references.aniworld" />
+                                        :show-label="false" :rules="aniworldRules" :can-be-empty="true" />
+                                    <!-- <input type="text"
+                                        :disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
+                                        class="form-control" id="url" v-model="element.references.aniworld" /> -->
                                 </div>
                             </div>
                             <!-- <div class="row text-center align-items-center mb-4">
@@ -268,9 +280,14 @@
                                     <label for="url" class="form-label">STO:</label>
                                 </div>
                                 <div class="col-7">
-                                    <input type="text"
+                                    <input-validator v-model="element.references.sto" v-model:valid="stoValid"
+                                        type="text" id="url" name="STORef" autocomplete="sto-reference"
+                                        placeholder="Enter URL"
                                         :disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
-                                        class="form-control" id="url" v-model="element.references.sto" />
+                                        :show-label="false" :rules="stoRules" :can-be-empty="true" />
+                                    <!-- <input type="text"
+                                        :disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
+                                        class="form-control" id="url" v-model="element.references.sto" /> -->
                                 </div>
                             </div>
                             <!-- <hr /> -->
@@ -286,10 +303,33 @@
                                 </div>
                             </div> -->
                         </div>
+                        <div>
+                            <div v-for="refCategorie in categories">
+                                <h6>{{ refCategorie }}</h6>
+
+                                <div v-for="refkey in Object.keys(element.references).filter(x => scrapers.find(y => y.referenceKey == x)?.categorie == refCategorie)"
+                                    class="row text-center align-items-center mb-4">
+                                    <div class="col-2">
+                                        <label for="url" class="form-label" style="text-transform: capitalize;">{{
+                                            refkey }}:</label>
+                                    </div>
+                                    <div class="col-7">
+                                        <input-validator v-model="element.references[refkey as keyof TodoReferences]"
+                                            v-model:valid="valid[refkey as keyof TodoReferences]" type="text" id="url"
+                                            :name="'ref-' + refkey" :autocomplete="'ref' + refkey"
+                                            placeholder="Enter URL"
+                                            :disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
+                                            :show-label="false" :rules="rules[refkey as keyof TodoReferences]"
+                                            :can-be-empty="true" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="d-flex justify-content-end">
                             <button type="button" @click="element.edited = false"
-                                class="btn btn-outline-danger mx-2">Cancel</button>
+                                class="btn btn-outline-danger mx-2">Cancel
+                            </button>
                             <button type="button" @click="
                                 element.edited = false;
                             todoStore.saveTodo();
@@ -308,7 +348,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { TodoItem } from '@cinefinn/types/database';
+import type { TodoItem, TodoReferences } from '@cinefinn/types/database';
+import InputValidator from './InputValidator.vue';
 
 
 const props = withDefaults(defineProps<{
@@ -345,6 +386,47 @@ const hasMovies = computed(() => {
     }
 
 });
+
+const todoNameValid = ref(false);
+
+const todoNameRules = [
+    (v: string) => !!v || 'Name is required',
+    (v: string) => v.length <= 64 || 'Name must be less than 64 characters',
+    (v: string) => /^[-\w^&'@{}[\],$=!#().%+~ ]+$/.test(v) || 'Name must adhere to Windows File/Folder naming Standards',
+    (v: string) => v.at(-1) != ' ' || 'Name must not end with a space',
+];
+
+const categories = computed(() => {
+    const out = new Set<string>();
+    Object.keys(props.element.references).forEach(key => {
+        out.add(scrapers.find(s => s.scrapeKey == key)?.categorie || '');
+    });
+    return [...out];
+});
+
+const valid = reactive<Record<keyof TodoReferences, boolean>>({} as Record<keyof TodoReferences, boolean>);
+const rules = reactive<Record<keyof TodoReferences, ((v: string) => string | true)[]>>({} as Record<keyof TodoReferences, ((v: string) => string | true)[]>);
+
+
+Object.keys(props.element.references).forEach(key => {
+    valid[key as keyof TodoReferences] = false;
+    rules[key as keyof TodoReferences] = scrapers.find(s => s.scrapeKey == key)?.inputValidationRules || [];
+});
+
+
+const aniworldValid = ref(false);
+const aniworldRules = [
+    (v: string) => /^https?:\/\/aniworld\.to\/anime\/stream\/[a-zA-Z0-9\-]+\/?$/.test(v) || 'URL must be a valid Aniworld URL',
+    (v: string) => !v.includes('/filme') || 'URL must be a valid Aniworld URL and cannot be a movie page',
+    (v: string) => !v.includes('/staffel') || 'URL must be a valid Aniworld URL and cannot be an episode page',
+]
+
+const stoValid = ref(false);
+const stoRules = [
+    (v: string) => (/^https?:\/\/sto\.to\/anime\/stream\/[a-zA-Z0-9\-]+\/?$/.test(v) || /^http?:\/\/186\.2\.175\.5\/serie\/stream\/[a-zA-Z0-9\-]+\/?$/.test(v)) || 'URL must be a valid STO URL',
+    (v: string) => !v.includes('/filme') || 'URL must be a valid STO URL and cannot be a movie page',
+    (v: string) => !v.includes('/staffel') || 'URL must be a valid STO URL and cannot be an episode page',
+]
 
 const languageDevisionC = computed(() => languageDevision(props.element));
 

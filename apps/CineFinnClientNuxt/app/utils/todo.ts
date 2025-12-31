@@ -1,9 +1,16 @@
+import { validateEmail } from './utils';
 import type { RefRef, TodoItem, TodoReferences } from '@cinefinn/types/database';
 import type { AniWorldEntity, AniWorldSeriesInformations } from '@cinefinn/types/scrapers';
 import type { Ref } from 'vue';
 
 export const scrapers = [
     {
+        categorie: 'Anime',
+        inputValidationRules: [
+            (v: string) => /^https?:\/\/aniworld\.to\/anime\/stream\/[a-zA-Z0-9\-]+\/?$/.test(v) || 'URL must be a valid Aniworld URL',
+            (v: string) => !v.includes('/filme') || 'URL must be a valid Aniworld URL and cannot be a movie page',
+            (v: string) => !v.includes('/staffel') || 'URL must be a valid Aniworld URL and cannot be an episode page',
+        ],
         referenceKey: 'aniworld',
         scrapeKey: 'aniworld',
         imagePath: ['informations', 'image'],
@@ -15,6 +22,12 @@ export const scrapers = [
         },
     },
     {
+        categorie: 'Serien',
+        inputValidationRules: [
+            (v: string) => (/^https?:\/\/sto\.to\/anime\/stream\/[a-zA-Z0-9\-]+\/?$/.test(v) || /^http?:\/\/186\.2\.175\.5\/serie\/stream\/[a-zA-Z0-9\-]+\/?$/.test(v)) || 'URL must be a valid STO URL',
+            (v: string) => !v.includes('/filme') || 'URL must be a valid STO URL and cannot be a movie page',
+            (v: string) => !v.includes('/staffel') || 'URL must be a valid STO URL and cannot be an episode page',
+        ],
         referenceKey: 'sto',
         scrapeKey: 'sto',
         imagePath: ['informations', 'image'],
@@ -58,18 +71,20 @@ export const scrapers = [
     //     },
     // },
     // {
+    //     categorie: 'Anime',
+    //     inputValidationRules: [],
     //     referenceKey: 'anix',
-    //     scrapeKey: 'scrapedAnix',
+    //     scrapeKey: 'anix',
     //     imagePath: ['image'],
     //     seasonsPath: ['seasons'],
-    //     episodeCallback: (episode: AnixEpisode) => {
+    //     episodeCallback: (episode: any) => {
     //         return {
-    //             langs: episode.langs.map(l => {
+    //             langs: episode.langs.map((l: any) => {
     //                 if (l == 'sub') return 'EngSub';
     //                 if (l == 'dub') return 'EngDub';
     //                 return 'JapDub';
     //             }),
-    //         };
+    //         } as any;
     //     },
     // },
     // {
@@ -91,56 +106,9 @@ export const scrapers = [
     // },
 ] satisfies ScraperDefinition[];
 
-// export type TodoReferences = Record<keyof RefRef, string>;
-
-// export type RefRef = {
-//     'aniworld': undefined | AniWorldSeriesInformations;
-//     'sto': undefined | AniWorldSeriesInformations;
-// };
-
-// export interface TodoItem {
-//     ID: string;
-//     order: number;
-//     name: string;
-//     creator?: string;
-//     categorie: 'Aniworld' | 'STO' | 'KDrama';
-//     references: TodoReferences;
-//     scrapingInfo?: {
-//         [key in keyof Partial<TodoReferences>]: {
-//             key: key;
-//             message: string;
-//             state: 'loading' | 'success' | 'error';
-//             scrapedAt: number;
-//             data: RefRef[key];
-//         };
-//     };
-//     edited?: boolean;
-// }
-
-const item = {
-    ID: '1',
-    order: 1,
-    name: 'John',
-    categorie: 'Aniworld',
-    creator: '1',
-    references: {
-        aniworld: 'https://aniworld.to/anime/1',
-        sto: 'https://sto.to/anime/1',
-    },
-    scrapingInfo: {
-        aniworld: {
-            key: 'aniworld',
-            message: 'Loading...',
-            state: 'loading',
-            scrapedAt: 0,
-            data: undefined,
-        },
-    },
-    edited: false,
-} satisfies TodoItem;
-
-
 interface ScraperDefinition {
+    categorie: string;
+    inputValidationRules: ((v: string) => string | true)[];
     referenceKey: keyof TodoReferences;
     scrapeKey: keyof RefRef;
     imagePath: string[];
@@ -242,7 +210,7 @@ function newLanguageDevision(element: TodoItem) {
 
         episodes.flat().forEach((episode: any) => {
             const cbOutput = scraper.episodeCallback(episode);
-            cbOutput.langs.forEach((l) => {
+            cbOutput.langs.forEach((l: any) => {
                 setOrIncrement(l);
             });
         });
