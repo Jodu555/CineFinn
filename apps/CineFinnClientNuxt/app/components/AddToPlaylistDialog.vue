@@ -123,7 +123,7 @@ const props = withDefaults(
         openButtonColor?: string;
     }>(),
     {
-        iconSize: '',
+        iconSize: 'sm',
         openButtonText: 'Add to Playlist',
         openButtonColor: 'outline-secondary',
     }
