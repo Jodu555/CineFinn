@@ -28,6 +28,11 @@
                                 <span class="ms-1 d-none d-sm-inline">Emails</span>
                             </NuxtLink>
                         </li>
+                        <li>
+                            <NuxtLink class="nav-link px-0 align-middle" exact-active-class="active" to="/admin/config">
+                                <span class="ms-1 d-none d-sm-inline">Config</span>
+                            </NuxtLink>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -52,6 +57,7 @@ await callOnce('loadOverview', () => adminStore.loadOverview(), { mode: 'navigat
 await callOnce('loadAccounts', () => adminStore.loadAccounts(), { mode: 'navigation' });
 await callOnce('loadSubsystems', () => adminStore.loadSubsystems(), { mode: 'navigation' });
 await callOnce('loadEmails', () => adminStore.loadEmails(), { mode: 'navigation' });
+await callOnce('loadConfig', () => adminStore.loadConfig(), { mode: 'navigation' });
 
 </script>
 

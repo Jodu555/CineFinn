@@ -6,6 +6,7 @@ import { getIO } from "../utils.js";
 import type { Overview, SocketAuthDataSubsystem } from "@cinefinn/types/socket";
 import { Role } from "@cinefinn/types/database";
 import { generateEmailID } from "../utils/IdGenerators.js";
+import { getConfig } from "../config.js";
 
 
 export async function generateOverview() {
@@ -105,6 +106,13 @@ const router = new Hono()
     .get('/emails', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const emails = await emailsTable.get();
         return c.json(emails);
+    })
+    .get('/config', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+        const config = getConfig();
+        const redactedConfig = JSON.parse(JSON.stringify(config));
+        redactedConfig.smtp.auth.pass = 'REDACTED';
+        redactedConfig.database.password = 'REDACTED';
+        return c.json(redactedConfig);
     });
 
 export { router as adminRouter };

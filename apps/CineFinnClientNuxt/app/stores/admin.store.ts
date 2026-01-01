@@ -12,6 +12,7 @@ export const useAdminStore = defineStore('admin', {
         accounts: [] as (Account & timestamped)[],
         subsystems: [] as SubSystem[],
         emails: [] as (Email & timestamped)[],
+        config: {} as any,
     }),
     actions: {
         async loadOverview() {
@@ -74,6 +75,22 @@ export const useAdminStore = defineStore('admin', {
                 return;
             } else {
                 this.emails = data;
+            }
+            this.loading = false;
+        },
+        async loadConfig() {
+            this.loading = true;
+            const { data, error } = await tryCatch<Promise<any>, FetchError>(() => $fetch<any>(useAPIURL() + '/admin/config', {
+                method: 'GET',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+            }));
+            if (error) {
+                this.error = error.data || 'An unknown error occurred.';
+                return;
+            } else {
+                this.config = data;
             }
             this.loading = false;
         },
