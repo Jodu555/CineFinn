@@ -1,13 +1,15 @@
 import { Redis } from 'ioredis';
-import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
+import { serve } from '@hono/node-server';
+import { serveStatic } from '@hono/node-server/serve-static'
+
 // import dotenv from 'dotenv';
 // dotenv.config();
 import { Server, Socket } from 'socket.io';
 import { accountsTable, authTokensTable, connectDatabase, database, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable } from './database.js';
 
 import { trimTrailingSlash } from 'hono/trailing-slash';
-import { authFullMiddleware, authRouter, getUser } from './auth.js';
+import { authFullMiddleware, authMiddleware, authRouter, getUser } from './auth.js';
 import { prometheus } from '@hono/prometheus';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
@@ -38,8 +40,17 @@ const app = new Hono({
 })
     .use(cors())
     .use(trimTrailingSlash())
-    .use(ownLogger(console.log, ['/socket.io', '/video', '/images']))
+    .use(ownLogger(console.log, ['/socket.io', '/video']))
     .use('*', registerMetrics)
+    .use('/images/*', authMiddleware, serveStatic({
+        root: getConfig().imagePath,
+        rewriteRequestPath: (path, c) => {
+            return path.replace(/^\/images/, '');
+        },
+        onFound: (_path, c) => {
+            c.header('Cache-Control', `public, immutable, max-age=31536000`)
+        },
+    }))
     .get('/metrics', printMetrics)
     .get('/health', (c) => {
         c.status(200);

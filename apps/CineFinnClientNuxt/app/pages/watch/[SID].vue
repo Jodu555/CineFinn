@@ -421,11 +421,13 @@ const sendVideoTimeUpdate = async (time: number) => {
 
 const coverURL = computed(() => {
 	// const CURRENT_EXTERNAL_API = 'http://localhost:3000';
-	const url = new URL('https://cinema-api.jodu555.de' + `/images/${series.value!.UUID}/cover.jpg`);
+	// const url = new URL('https://cinema-api.jodu555.de' + `/images/${series.value!.UUID}/cover.jpg`);
 
-	url.searchParams.append('auth-token', 'SECR-DEV');
+	// const url = new URL(useAPIURL() + `/images/${series.value!.UUID}/cover.jpg`);
+	// url.searchParams.append('auth-token', 'SECR-DEV');
+	// return url.href;
 
-	return url.href;
+	return decideSeriesImage(series.value!);
 });
 
 const hasSeasons = computed(() => series.value?.seasons && series.value.seasons.length > 0);

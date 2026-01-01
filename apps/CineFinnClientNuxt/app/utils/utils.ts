@@ -1,4 +1,5 @@
 import type { FrontendSeries } from "@cinefinn/types/database";
+import useAPIURL from "~/hooks/useAPIURL";
 
 export function roleIDToName(id: number) {
     switch (id) {
@@ -26,7 +27,10 @@ export const decideSeriesImage = (series: FrontendSeries, randomNumber?: string 
         randomNumber = useState('randomNumber' + series.UUID, () => Math.floor(Math.random() * 1000)).value;
     }
     if (series.infos.image) {
-        return `https://cinema-api.jodu555.de/images/${series.UUID}/cover.jpg`;
+        // return `https://cinema-api.jodu555.de/images/${series.UUID}/cover.jpg`;
+        const url = new URL(useAPIURL() + `/images/${series.UUID}/cover.jpg`);
+        url.searchParams.append('auth-token', 'SECR-DEV');
+        return url.href;
     } else if (series.infos.imageURL) {
         return series.infos.imageURL;
     } else {
