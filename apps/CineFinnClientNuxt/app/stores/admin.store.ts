@@ -94,6 +94,9 @@ export const useAdminStore = defineStore('admin', {
             }
             this.loading = false;
         },
+        async updateConfigValue(key: string, value: any) {
+            //TODO: Implement this
+        },
         async updateOverview(overview: Partial<Overview>) {
             this.overview = { ...this.overview, ...overview };
         },

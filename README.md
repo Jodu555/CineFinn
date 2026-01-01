@@ -14,7 +14,7 @@ it is the successor to the CineFinn v1 Project which is now deprecated and will 
 - [x] User Authentication (Login, Register, Logout)
   - [x] Fix the Cookie issue on token expiration
   - [x] Implement the Settings System
-    - [ ] Implement all the settings handling in the frontend (all that's possible at least)
+    - [x] Implement all the settings handling in the frontend (all that's possible at least)
 - [x] Home Page to find Series
 - [ ] Job system to handle jobs
   - [x] Crawling
@@ -42,8 +42,8 @@ When all the boxes are checked, I will deploy the MVP to a testing environment a
 - [ ] Preview Image Generation
 - [ ] Scraper
 - [x] SubSystem
-- [ ] Admin System
-  - [ ] Make Most of the Config Values like register and register token configurable
+- [x] Admin System
+  - [x] Make Most of the Config Values like register and register token configurable
   - [x] Have a way to view emails and the status of them
 - [x] Playlist System
 - [ ] Sync System

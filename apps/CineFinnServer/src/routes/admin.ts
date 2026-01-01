@@ -114,5 +114,6 @@ const router = new Hono()
         redactedConfig.database.password = 'REDACTED';
         return c.json(redactedConfig);
     });
+//TODO: Implement and update for a key.
 
 export { router as adminRouter };
