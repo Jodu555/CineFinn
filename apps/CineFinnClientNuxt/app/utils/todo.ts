@@ -31,12 +31,12 @@ export const scrapers = [
         referenceKey: 'sto',
         scrapeKey: 'sto',
         imagePath: ['informations', 'image'],
-        // seasonsPath: ['seasons'],
-        // episodeCallback: (episode: AniWorldEntity) => {
-        //     return {
-        //         langs: episode.langs,
-        //     };
-        // },
+        seasonsPath: ['seasons'],
+        episodeCallback: (episode: AniWorldEntity) => {
+            return {
+                langs: episode.langs,
+            };
+        },
     },
     // {
     //     referenceKey: 'zoro',

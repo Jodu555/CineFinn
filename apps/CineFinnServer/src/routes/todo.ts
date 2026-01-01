@@ -41,18 +41,20 @@ const scrapers = [
         referenceKey: 'sto',
         scrapeKey: 'sto',
         scrapeFunction: async (url: string) => {
-            return {
-                url: url,
-                informations: {
-                    infos: '',
-                    startDate: '',
-                    endDate: '',
-                    description: '',
-                    image: ''
-                },
-                hasMovies: false,
-                seasons: []
-            };
+            const sockets = await getIO().fetchSockets();
+            const scraperSocket = sockets.find(s => s.data.auth.type === 'scraper');
+            if (scraperSocket == undefined) {
+                throw new Error('Scraper Socket not found');
+            }
+            const data = await new Promise<AniWorldSeriesInformations | void>((resolve, reject) => {
+                scraperSocket.emit('scrape:aniworld', url, (data) => resolve(data));
+            })
+
+            if (data == undefined) {
+                throw new Error('Scraper Socket did not return data');
+            }
+
+            return data;
         },
     }
 
@@ -113,6 +115,8 @@ const router = new Hono()
                 //     console.log('Scraper not connected');
                 //     continue;
                 // }
+                console.log('WE HERE ? ', reference, scraperInfo);
+
                 if (scraperInfo == undefined) {
                     console.log('WHAT THE F???', todo);
 
@@ -160,13 +164,16 @@ const router = new Hono()
             for (const { todoID, scrapeKey, func } of todoScrapeJobs) {
                 const result = await func();
                 const todos = await todoStorage.get(mainTestKey) || [];
-                await todoStorage.set(mainTestKey, todos.map(t => {
+
+                const newTodos = todos.map(t => {
                     if (t.ID == todoID) {
                         //@ts-expect-error
                         t.scrapingInfo![scrapeKey] = result;
                     }
                     return t;
-                }));
+                });
+
+                await todoStorage.set(mainTestKey, newTodos);
             }
             console.log('Scraping Done');
         })()

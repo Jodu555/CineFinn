@@ -233,18 +233,21 @@ export const useTodoStore = defineStore('todo', {
         },
         //TODO: Implement this
         async deleteTodo(ID: string) {
-            // const { isConfirmed: confirmed } = await instance.$swal({
-            // 	title: 'Error!',
-            // 	text: 'Do you really want to DELETE this Todo?',
-            // 	icon: 'warning',
-            // 	showCancelButton: true,
-            // 	cancelButtonText: 'No im not sure anymore!',
-            // 	confirmButtonText: 'Yes im sure!',
-            // });
-            // if (confirmed) {
-            // 	state.list = state.list.filter((x) => x.ID != ID);
-            // 	change();
-            // }
+            const { $swal } = useNuxtApp();
+            const { isConfirmed: confirmed } = await $swal.fire({
+                title: 'Error!',
+                text: 'Do you really want to DELETE this Todo?',
+                icon: 'warning',
+                showCancelButton: true,
+                cancelButtonText: 'No im not sure anymore!',
+                confirmButtonText: 'Yes im sure!',
+                scrollbarPadding: false,
+                theme: 'bootstrap-5-dark'
+            });
+            if (confirmed) {
+                this.list = this.list.filter((x) => x.ID != ID);
+                this.change();
+            }
         },
         async deleteOrRetryScrapeTodo(ID: string, key?: string) {
             this.list = this.list.map((x) => {
