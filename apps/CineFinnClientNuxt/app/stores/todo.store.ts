@@ -87,8 +87,8 @@ export const useTodoStore = defineStore('todo', {
                 creator: authStore.user.UUID,
                 edited: false,
                 categorie: 'Aniworld',
-                references: { aniworld: '', zoro: '', sto: '', anix: '' },
-                order: -1,
+                refs: { aniworld: '', zoro: '', sto: '', anix: '' },
+                sortOrder: -1,
                 ID,
             } as TodoItem;
             this.list.push(item);
@@ -99,7 +99,7 @@ export const useTodoStore = defineStore('todo', {
         },
         async change() {
             this.list = this.list.map((x, i) => {
-                x.order = i + 1;
+                x.sortOrder = i + 1;
                 return x;
             });
             await this.pushTodoListUpdate();

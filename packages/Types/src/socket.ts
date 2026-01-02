@@ -47,6 +47,7 @@ export interface ServerToClientEvents {
     adminOverview: (obj: Overview) => void;
     adminAccounts: (obj: (database.Account & database.timestamped)[]) => void;
     adminSubsystems: (obj: SubSystem[]) => void;
+    todoListUpdate: (obj: database.TodoItem[]) => void;
 }
 
 export interface ServerToScraperEvents {

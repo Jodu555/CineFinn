@@ -275,11 +275,11 @@ export type RefRef = {
 
 export interface TodoItem {
     ID: string;
-    order: number;
+    sortOrder: number;
     name: string;
     creator: string;
     categorie: 'Aniworld' | 'STO' | 'KDrama';
-    references: TodoReferences;
+    refs: TodoReferences;
     scrapingInfo?: {
         [key in keyof Partial<RefRef>]: ScrapeInfo<key>;
     };

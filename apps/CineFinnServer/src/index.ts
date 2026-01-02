@@ -6,7 +6,7 @@ import { serveStatic } from '@hono/node-server/serve-static'
 // import dotenv from 'dotenv';
 // dotenv.config();
 import { Server, Socket } from 'socket.io';
-import { accountsTable, authTokensTable, connectDatabase, database, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable } from './database.js';
+import { accountsTable, authTokensTable, connectDatabase, database, episodesTable, moviesTable, seasonsTable, seriesTable, todosTable, watchableEntitysTable } from './database.js';
 
 import { trimTrailingSlash } from 'hono/trailing-slash';
 import { authFullMiddleware, authMiddleware, authRouter, getUser } from './auth.js';
@@ -103,6 +103,7 @@ const app = new Hono({
 //     return proxy(newUrl);
 // });
 
+export type definedSocket = Socket<AnythingToServerEvents, ServerToAnythingEvents, InterServerEvents, SocketData<Account | (Account & timestamped)>>;
 
 const httpServer = serve({
     fetch: app.fetch,
@@ -131,6 +132,28 @@ const httpServer = serve({
     console.log(`Server is running on http://localhost:${info.port}`);
     // await crawl();
 
+    const io = new Server<
+        AnythingToServerEvents,
+        ServerToAnythingEvents,
+        InterServerEvents,
+        SocketData<Account | Account & timestamped>
+    >(httpServer, {
+        cors: {
+            methods: ['GET', 'POST'],
+        },
+    });
+
+    setIO(io);
+    setIORedis(
+        new Redis({
+            host: getConfig().redis.host,
+            port: getConfig().redis.port,
+            password: getConfig().redis.password,
+            maxRetriesPerRequest: null,
+        })
+    );
+    setupSocketIO();
+
     // console.log(seasonsTable.database.tables.get('seasons'))
     // console.log(seasonsTable);
 
@@ -155,25 +178,25 @@ const httpServer = serve({
         }
     }
 
-    const watchableEntitys = await watchableEntitysTable.get();
+    // const watchableEntitys = await watchableEntitysTable.get();
 
-    const map = new Map<string, Record<string, number>>();
-    for (const watchableEntity of watchableEntitys) {
-        const obj = {
-            ...map.get(watchableEntity.serie_UUID),
-            [watchableEntity.subID]: (map.get(watchableEntity.serie_UUID)?.[watchableEntity.subID] ?? 0) + 1,
-        }
-        map.set(watchableEntity.serie_UUID, obj);
-    }
+    // const map = new Map<string, Record<string, number>>();
+    // for (const watchableEntity of watchableEntitys) {
+    //     const obj = {
+    //         ...map.get(watchableEntity.serie_UUID),
+    //         [watchableEntity.subID]: (map.get(watchableEntity.serie_UUID)?.[watchableEntity.subID] ?? 0) + 1,
+    //     }
+    //     map.set(watchableEntity.serie_UUID, obj);
+    // }
 
     // console.log(map);
 
-    for (const [serieUUID, subMap] of map) {
-        console.log(serieUUID, subMap);
-        if (Object.keys(subMap).length > 1) {
-            console.log(`Serie ${serieUUID} exists in multiple subsystems: ${subMap}`);
-        }
-    }
+    // for (const [serieUUID, subMap] of map) {
+    //     console.log(serieUUID, subMap);
+    //     if (Object.keys(subMap).length > 1) {
+    //         console.log(`Serie ${serieUUID} exists in multiple subsystems: ${subMap}`);
+    //     }
+    // }
 
 
     // console.log('Fixing Seasons');
@@ -215,28 +238,6 @@ function geFileRuntime(watchableUUID: string) {
         });
     });
 }
-
-const io = new Server<
-    AnythingToServerEvents,
-    ServerToAnythingEvents,
-    InterServerEvents,
-    SocketData<Account | Account & timestamped>
->(httpServer, {
-    cors: {
-        methods: ['GET', 'POST'],
-    },
-});
-export type definedSocket = Socket<AnythingToServerEvents, ServerToAnythingEvents, InterServerEvents, SocketData<Account | (Account & timestamped)>>;
-setIO(io);
-setIORedis(
-    new Redis({
-        host: getConfig().redis.host,
-        port: getConfig().redis.port,
-        password: getConfig().redis.password,
-        maxRetriesPerRequest: null,
-    })
-);
-setupSocketIO();
 
 export {
     app,

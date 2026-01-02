@@ -8,6 +8,7 @@ import { createStorage } from "unstorage";
 import fsDriver from "unstorage/drivers/fs";
 import { unescape } from "querystring";
 import { getIO } from "../utils.js";
+import { todosTable } from "../database.js";
 
 interface ScraperDefinition {
     referenceKey: keyof TodoReferences;
@@ -86,18 +87,26 @@ const router = new Hono()
 
         const todos = await c.req.json() as TodoItem[];
 
+        const touchedIDs = new Set<string>();
+
         for (const todo of todos) {
+            touchedIDs.add(todo.ID);
+
             if (todo.creator == undefined) {
                 console.log('Updating creator', todo.ID, todo.creator);
                 todo.creator = c.var.credentials.user.UUID
             }
 
-            console.log('Checking todo references', todo.references);
-
-            for (const [_reference, url] of Object.entries(todo.references)) {
+            let dbTodo = await todosTable.getOne({ ID: todo.ID });
+            if (dbTodo == undefined) {
+                console.log('Creating new todo', todo.ID);
+                await todosTable.create(todo);
+                dbTodo = await todosTable.getOne({ ID: todo.ID });
+            }
+            for (const [_reference, url] of Object.entries(todo.refs)) {
                 const reference = _reference as keyof TodoReferences;
                 if (url == undefined || url == '') {
-                    todo.references[reference] = '';
+                    todo.refs[reference] = '';
                     continue;
                 }
 
@@ -110,17 +119,12 @@ const router = new Hono()
                 if (scraperInfo?.state === 'success') {
                     continue;
                 }
-
-                // if (!isScraperSocketConnected) {
-                //     console.log('Scraper not connected');
-                //     continue;
-                // }
-                console.log('WE HERE ? ', reference, scraperInfo);
+                if (!isScraperSocketConnected) {
+                    console.log('Scraper not connected');
+                    continue;
+                }
 
                 if (scraperInfo == undefined) {
-                    console.log('WHAT THE F???', todo);
-
-                    console.log('Starting Scraper', scraper.scrapeKey);
 
                     scraperInfo = {
                         key: scraper.scrapeKey,
@@ -149,19 +153,36 @@ const router = new Hono()
                     }
 
                     console.log(todo);
-                    console.log(scraperInfo);
 
                     todo.scrapingInfo![scraper.scrapeKey] = scraperInfo as any;
-
                 }
             }
-            await todoStorage.set(mainTestKey, todos);
-        }
 
-        console.log(todos);
+            if (JSON.stringify(todo) !== JSON.stringify(dbTodo)) {
+                await todosTable.update({ ID: todo.ID }, {
+                    sortOrder: todo.sortOrder,
+                    name: todo.name,
+                    creator: todo.creator,
+                    categorie: todo.categorie,
+                    refs: todo.refs,
+                    scrapingInfo: todo.scrapingInfo,
+                });
+            } else {
+                console.log(todo.ID, 'No Todo Update!!!');
+            }
+
+        }
+        // await todoStorage.set(mainTestKey, todos);
+        const sockets = await getIO().fetchSockets();
+        sockets.filter(s => s.data.auth.type === 'client').forEach(async s => {
+            s.emit('todoListUpdate', todos);
+        });
 
         (async () => {
+            console.log(`There are ${todoScrapeJobs.length} Scrape Jobs to be done!`);
+            let wasWork = false;
             for (const { todoID, scrapeKey, func } of todoScrapeJobs) {
+                wasWork = true;
                 const result = await func();
                 const todos = await todoStorage.get(mainTestKey) || [];
 
@@ -173,9 +194,15 @@ const router = new Hono()
                     return t;
                 });
 
+
                 await todoStorage.set(mainTestKey, newTodos);
+
+                const sockets = await getIO().fetchSockets();
+                sockets.filter(s => s.data.auth.type === 'client').forEach(async s => {
+                    s.emit('todoListUpdate', newTodos);
+                });
             }
-            console.log('Scraping Done');
+            wasWork && console.log('Scraping Jobs Done');
         })()
         return c.json(todos);
     })

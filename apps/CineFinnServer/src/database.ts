@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();;
 import { Database, type thingDatabase } from '@jodu555/mysqlapi';
-import type { Account, timestamped, AuthToken, Series, Season, Episode, Movie, WatchableEntity, WatchHistory, SyncRoom, Job, Email, Playlist } from '@cinefinn/types/database';
+import type { Account, timestamped, AuthToken, Series, Season, Episode, Movie, WatchableEntity, WatchHistory, SyncRoom, Job, Email, Playlist, TodoItem } from '@cinefinn/types/database';
 import { getConfig } from './config.js';
 
 
@@ -24,6 +24,8 @@ export let syncRoomsTable: thingDatabase<SyncRoom, SyncRoom & timestamped>;
 export let jobsTable: thingDatabase<Job, Job & timestamped>;
 
 export let playlistsTable: thingDatabase<Playlist, Playlist & timestamped>;
+
+export let todosTable: thingDatabase<TodoItem, TodoItem & timestamped>;
 
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -70,7 +72,7 @@ const UUID_FIELD = {
 
 async function createTables() {
 
-    database.createTable('accounts', {
+    await database.createTable('accounts', {
         options: {
             timestamps: true,
             PK: 'UUID',
@@ -111,7 +113,7 @@ async function createTables() {
             json: true,
         },
     });
-    database.createTable('authtokens', {
+    await database.createTable('authtokens', {
         options: {
             PK: 'TOKEN',
             K: ['account_UUID'],
@@ -125,7 +127,7 @@ async function createTables() {
             null: false,
         },
     });
-    database.createTable('emails', {
+    await database.createTable('emails', {
         options: {
             PK: 'UUID',
             K: ['account_UUID', 'status'],
@@ -175,7 +177,7 @@ async function createTables() {
         }
     });
 
-    database.createTable('series', {
+    await database.createTable('series', {
         options: {
             timestamps: true,
             PK: 'UUID',
@@ -202,7 +204,7 @@ async function createTables() {
             json: true,
         },
     }); 1;
-    database.createTable('seasons', {
+    await database.createTable('seasons', {
         options: {
             timestamps: true,
             PK: 'UUID',
@@ -222,7 +224,7 @@ async function createTables() {
             null: false,
         }
     });
-    database.createTable('episodes', {
+    await database.createTable('episodes', {
         options: {
             timestamps: true,
             PK: 'UUID',
@@ -243,7 +245,7 @@ async function createTables() {
             null: false,
         },
     });
-    database.createTable('movies', {
+    await database.createTable('movies', {
         options: {
             timestamps: true,
             PK: 'UUID',
@@ -263,7 +265,7 @@ async function createTables() {
             null: false,
         },
     });
-    database.createTable('watchableEntitys', {
+    await database.createTable('watchableEntitys', {
         options: {
             timestamps: true,
             PK: 'UUID',
@@ -302,7 +304,7 @@ async function createTables() {
         }
     });
 
-    database.createTable('watchHistory', {
+    await database.createTable('watchHistory', {
         options: {
             timestamps: true,
             PK: 'UUID',
@@ -318,7 +320,7 @@ async function createTables() {
         },
     });
 
-    database.createTable('syncRooms', {
+    await database.createTable('syncRooms', {
         options: {
             timestamps: true,
             PK: 'UUID',
@@ -334,7 +336,7 @@ async function createTables() {
         },
     });
 
-    database.createTable('jobs', {
+    await database.createTable('jobs', {
         options: {
             timestamps: true,
             PK: 'UUID',
@@ -369,7 +371,7 @@ async function createTables() {
         }
     });
 
-    database.createTable('playlists', {
+    await database.createTable('playlists', {
         options: {
             timestamps: true,
             PK: 'UUID',
@@ -396,6 +398,40 @@ async function createTables() {
         },
     });
 
+    await database.createTable('todos', {
+        options: {
+            timestamps: true,
+            PK: 'ID',
+        },
+        ID: {
+            type: 'varchar(8)',
+            null: false,
+        },
+        sortOrder: {
+            type: 'int',
+            null: false,
+        },
+        name: {
+            type: 'varchar(128)',
+            null: false,
+        },
+        creator: UUID_FIELD,
+        categorie: {
+            type: 'varchar(16)',
+            null: false,
+        },
+        refs: {
+            type: 'json',
+            null: false,
+            json: true,
+        },
+        scrapingInfo: {
+            type: 'json',
+            null: true,
+            json: true,
+        },
+    });
+
     accountsTable = database.get<Account, Account & timestamped>('accounts');
     authTokensTable = database.get<AuthToken>('authtokens');
     emailsTable = database.get<Email, Email & timestamped>('emails');
@@ -413,6 +449,8 @@ async function createTables() {
     jobsTable = database.get<Job, Job & timestamped>('jobs');
 
     playlistsTable = database.get<Playlist, Playlist & timestamped>('playlists');
+
+    todosTable = database.get<TodoItem, TodoItem & timestamped>('todos');
 
 }
 
