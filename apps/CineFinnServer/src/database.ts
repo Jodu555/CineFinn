@@ -3,6 +3,7 @@ dotenv.config();;
 import { Database, type thingDatabase } from '@jodu555/mysqlapi';
 import type { Account, timestamped, AuthToken, Series, Season, Episode, Movie, WatchableEntity, WatchHistory, SyncRoom, Job, Email, Playlist, TodoItem } from '@cinefinn/types/database';
 import { getConfig } from './config.js';
+import { debounce } from './utils.js';
 
 
 export let database: Database;
@@ -34,7 +35,10 @@ export async function connectDatabase(clean: boolean = false) {
     database = Database.createDatabase(config.database.host, config.database.username, config.database.password, config.database.database);
     // database = Database.createDatabase(process.env.DB_HOST!, process.env.DB_USERNAME!, process.env.DB_PASSWORD!, process.env.DB_DATABASE!);
     await database.connect({
-        connectionLimit: 15,
+        connectionLimit: 20,
+        queueLimit: 0,
+        acquireTimeout: 1000000,
+        connectTimeout: 30000,
     });
     await createTables();
 
@@ -49,19 +53,18 @@ export async function connectDatabase(clean: boolean = false) {
         await adminRouter.rebroadcastAccounts();
     };
 
-    (database as any).setCallback('accounts-CREATE', rebAccounts);
-    (database as any).setCallback('accounts-UPDATE', rebAccounts);
-    (database as any).setCallback('accounts-DELETE', rebAccounts);
+    database.setCallback('accounts-CREATE', rebAccounts);
+    database.setCallback('accounts-UPDATE', rebAccounts);
+    database.setCallback('accounts-DELETE', rebAccounts);
 
-    const rebOverview = async () => {
+    const rebOverview = debounce(async () => {
         console.log('Overview Rebroadcast');
-
         await sleep(200);
         await adminRouter.rebroadcastOverview();
-    };
-    (database as any).setCallback('*-CREATE', rebOverview);
-    (database as any).setCallback('*-UPDATE', rebOverview);
-    (database as any).setCallback('*-DELETE', rebOverview);
+    }, 1000);
+    database.setCallback('*-CREATE', rebOverview);
+    database.setCallback('*-UPDATE', rebOverview);
+    database.setCallback('*-DELETE', rebOverview);
 }
 
 

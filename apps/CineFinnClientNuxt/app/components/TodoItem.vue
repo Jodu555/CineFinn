@@ -257,11 +257,13 @@
                                 </div>
                             </div>
                         </div>
-                        {{ canSave }}
-                        {{ {
-                            todoNameValid,
-                            valid
-                        } }}
+                        {{
+                            {
+                                canSave,
+                                todoNameValid,
+                                valid
+                            }
+                        }}
 
                         <div class="d-flex justify-content-end">
                             <button type="button" @click="element.edited = false"
@@ -270,9 +272,7 @@
                             <button type="button" @click="
                                 element.edited = false;
                             todoStore.saveTodo();
-                            " class="btn btn-outline-success" :disabled="!canSave">
-                                Save
-                            </button>
+                            " class="btn btn-outline-success" :disabled="!canSave">Save</button>
                         </div>
                     </div>
                 </div>
@@ -352,7 +352,12 @@ Object.keys(props.element.refs).forEach(key => {
 
 
 const canSave = computed(() => {
-    return todoNameValid && Object.values(valid).every(x => x);
+
+    const refKeys = Object.keys(props.element.refs).filter(x => scrapers.find(y => y.referenceKey == x))
+
+    const refsValid = refKeys.map(x => valid[x as keyof TodoReferences]).every(x => x)
+
+    return todoNameValid.value && refsValid;
 });
 
 const languageDevisionC = computed(() => languageDevision(props.element));

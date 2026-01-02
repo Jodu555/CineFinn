@@ -9,6 +9,7 @@ import fsDriver from "unstorage/drivers/fs";
 import { unescape } from "querystring";
 import { getIO } from "../utils.js";
 import { todosTable } from "../database.js";
+import { all } from "axios";
 
 interface ScraperDefinition {
     referenceKey: keyof TodoReferences;
@@ -78,10 +79,8 @@ const todoScrapeJobs = [] as {
 
 const router = new Hono()
     .get('/', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
-        const todos = await todoStorage.get(mainTestKey) || [];
-        console.log(todos);
-
-        return c.json(todos);
+        const todos = await todosTable.get();
+        return c.json(todos.sort((a, b) => a.sortOrder - b.sortOrder));
     })
     .post('/', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
 
@@ -93,16 +92,16 @@ const router = new Hono()
             touchedIDs.add(todo.ID);
 
             if (todo.creator == undefined) {
-                console.log('Updating creator', todo.ID, todo.creator);
                 todo.creator = c.var.credentials.user.UUID
             }
 
             let dbTodo = await todosTable.getOne({ ID: todo.ID });
             if (dbTodo == undefined) {
-                console.log('Creating new todo', todo.ID);
                 await todosTable.create(todo);
                 dbTodo = await todosTable.getOne({ ID: todo.ID });
             }
+
+
             for (const [_reference, url] of Object.entries(todo.refs)) {
                 const reference = _reference as keyof TodoReferences;
                 if (url == undefined || url == '') {
@@ -167,44 +166,57 @@ const router = new Hono()
                     refs: todo.refs,
                     scrapingInfo: todo.scrapingInfo,
                 });
-            } else {
-                console.log(todo.ID, 'No Todo Update!!!');
             }
-
         }
-        // await todoStorage.set(mainTestKey, todos);
+
+        const allTodos = await todosTable.get();
+        const allTodoIDs = new Set(allTodos.map(t => t.ID));
+        const possibleDeletedIDs = allTodoIDs.difference(touchedIDs);
+
+        for (const possibleDeletedID of possibleDeletedIDs) {
+            const deletedTodo = allTodos.find(t => t.ID === possibleDeletedID);
+            if (deletedTodo == undefined) {
+                console.log('Could not find todo to delete', possibleDeletedID);
+                continue;
+            }
+            if (deletedTodo.creator === c.var.credentials.user.UUID) {
+                await todosTable.delete({ ID: deletedTodo.ID });
+            } else if (c.var.credentials.user.role >= Role.Admin) {
+                await todosTable.delete({ ID: deletedTodo.ID });
+            }
+        }
+
         const sockets = await getIO().fetchSockets();
         sockets.filter(s => s.data.auth.type === 'client').forEach(async s => {
-            s.emit('todoListUpdate', todos);
+            s.emit('todoListUpdate', todos.sort((a, b) => a.sortOrder - b.sortOrder));
+        });
+        setTimeout(handleBackgroundScrapeTodos, 1);
+        return c.json(todos);
+    });
+
+async function handleBackgroundScrapeTodos() {
+    console.log(`There are ${todoScrapeJobs.length} Scrape Jobs to be done!`);
+    let wasWork = false;
+    for (const { todoID, scrapeKey, func } of todoScrapeJobs) {
+        wasWork = true;
+        const result = await func();
+
+        await todosTable.update({ ID: todoID }, {
+            scrapingInfo: {
+                [scrapeKey]: result,
+            }
         });
 
-        (async () => {
-            console.log(`There are ${todoScrapeJobs.length} Scrape Jobs to be done!`);
-            let wasWork = false;
-            for (const { todoID, scrapeKey, func } of todoScrapeJobs) {
-                wasWork = true;
-                const result = await func();
-                const todos = await todoStorage.get(mainTestKey) || [];
+        const preNewTodos = await todosTable.get();
+        const newTodos = preNewTodos.sort((a, b) => a.sortOrder - b.sortOrder);
+        const sockets = await getIO().fetchSockets();
+        sockets.filter(s => s.data.auth.type === 'client').forEach(async s => {
+            s.emit('todoListUpdate', newTodos);
+        });
 
-                const newTodos = todos.map(t => {
-                    if (t.ID == todoID) {
-                        //@ts-expect-error
-                        t.scrapingInfo![scrapeKey] = result;
-                    }
-                    return t;
-                });
-
-
-                await todoStorage.set(mainTestKey, newTodos);
-
-                const sockets = await getIO().fetchSockets();
-                sockets.filter(s => s.data.auth.type === 'client').forEach(async s => {
-                    s.emit('todoListUpdate', newTodos);
-                });
-            }
-            wasWork && console.log('Scraping Jobs Done');
-        })()
-        return c.json(todos);
-    })
+        todoScrapeJobs.splice(todoScrapeJobs.findIndex(j => j.todoID === todoID), 1);
+    }
+    wasWork && console.log('Scraping Jobs Done');
+}
 
 export { router as todoRouter };
