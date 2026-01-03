@@ -95,7 +95,23 @@ export const useAdminStore = defineStore('admin', {
             this.loading = false;
         },
         async updateConfigValue(key: string, value: any) {
-            //TODO: Implement this
+            key = key.replace('config.', '');
+            const { data, error } = await tryCatch<Promise<any>, FetchError>(() => $fetch<any>(useAPIURL() + '/admin/config', {
+                method: 'POST',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+                body: {
+                    key,
+                    value,
+                },
+            }));
+            if (error) {
+                this.error = error.data || 'An unknown error occurred.';
+                return;
+            } else {
+                this.config = data;
+            }
         },
         async updateOverview(overview: Partial<Overview>) {
             this.overview = { ...this.overview, ...overview };

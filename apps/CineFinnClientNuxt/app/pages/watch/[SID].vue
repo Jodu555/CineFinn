@@ -427,8 +427,10 @@ const coverURL = computed(() => {
 	// url.searchParams.append('auth-token', 'SECR-DEV');
 	// return url.href;
 
-	return decideSeriesImage(series.value!);
+	return decideSeriesImage(series.value!, randomNumber.value);
 });
+
+const randomNumber = useState('randomNumber' + series.value!.UUID, () => Math.floor(Math.random() * 1000));
 
 const hasSeasons = computed(() => series.value?.seasons && series.value.seasons.length > 0);
 

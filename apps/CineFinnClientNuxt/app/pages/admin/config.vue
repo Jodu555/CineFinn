@@ -217,11 +217,8 @@ const error = computed(() => adminStore.error || null);
 const config = computed(() => adminStore.config);
 
 // Dummy Update Handler
-const handleUpdate = (key: string, value: any) => {
-    console.log(`Updating ${key} to:`, value);
-    // In a real app, you would dispatch to the store here:
-    // await adminStore.updateConfig({ [key]: value });
-    alert(`Value updated to: ${value}`);
+const handleUpdate = async (key: string, value: any) => {
+    await adminStore.updateConfigValue(key, value);
 };
 
 // --- ConfigItem Component (Render Function) ---

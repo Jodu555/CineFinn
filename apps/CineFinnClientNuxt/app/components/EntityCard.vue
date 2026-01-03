@@ -5,11 +5,11 @@
 			<!-- <pre>{{ decideSeriesImage(entity, randomNumber) }}</pre> -->
 			<div v-if="!props.serverRendered">
 				<OptimizedNuxtImg style="width: 100%; height: 100%" :width="'100%'" :height="'100%'"
-					:src="decideSeriesImage(entity)" root-margin="500px" placeholder-height="400px"
+					:src="decideSeriesImage(entity, randomNumber)" root-margin="500px" placeholder-height="400px"
 					class="entitycard-img" />
 			</div>
 			<div v-else>
-				<LazyOptimizedNuxtImg :src="decideSeriesImage(entity)" loading="lazy" root-margin="100px"
+				<LazyOptimizedNuxtImg :src="decideSeriesImage(entity, randomNumber)" loading="lazy" root-margin="100px"
 					style="width: 100%; height: 100%" :width="'100%'" :height="'100%'" />
 			</div>
 
@@ -67,6 +67,7 @@ const indexStore = useIndexStore();
 // 	highlighted?: boolean;
 // 	noBody?: boolean;
 // }>();
+
 
 const imgStyle = computed(() =>
 	isHydrated.value

@@ -23,9 +23,6 @@ export const validateEmail = (email: string) => {
 };
 
 export const decideSeriesImage = (series: FrontendSeries, randomNumber?: string | number) => {
-    if (randomNumber == undefined) {
-        randomNumber = useState('randomNumber' + series.UUID, () => Math.floor(Math.random() * 1000)).value;
-    }
     if (series.infos.image) {
         // return `https://cinema-api.jodu555.de/images/${series.UUID}/cover.jpg`;
         const url = new URL(useAPIURL() + `/images/${series.UUID}/cover.jpg`);
