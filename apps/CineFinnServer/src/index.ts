@@ -32,7 +32,8 @@ import { getKnownSubSystems, getSeriesRelatedToSubSystem, toggleSeriesesForSubSy
 import { playlistRouter } from './routes/playlist.js';
 import { adminRouter } from './routes/admin.js';
 import { todoRouter } from './routes/todo.js';
-
+import axios from 'axios';
+import { proxyRouter } from './routes/proxys.js';
 
 const { printMetrics, registerMetrics } = prometheus();
 const app = new Hono({
@@ -71,6 +72,7 @@ const app = new Hono({
     .route('/playlists', playlistRouter)
     .route('/admin', adminRouter)
     .route('/todo', todoRouter)
+    .route('', proxyRouter)
     .route('/video', videoRouter);
 
 // app.get('*', async (c, next) => {

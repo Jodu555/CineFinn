@@ -2,7 +2,7 @@
     <div>
         <li class="list-group-item">
             <div class="d-flex">
-                <img v-if="decideImageURL(minimal, element).length > 0" :src="decideImageURL(minimal, element)"
+                <img v-if="decideImageURL(element).length > 0" :src="decideImageURL(element)"
                     class="img-fluid rounded-top me-4 dp-img" alt="" />
                 <div style="width: 100%" ref="parent">
                     <div class="d-flex justify-content-between">
@@ -143,7 +143,7 @@
                                 <small class="text-danger" style="cursor: pointer"
                                     @click="todoStore.deleteOrRetryScrapeTodo(element.ID, scrapeInfo.key)"><u>Retry {{
                                         scrapeInfo.key
-                                        }}</u></small>
+                                    }}</u></small>
                             </div>
 
                             <span v-if="scrapeInfo?.state === 'error'" class="h6 text-danger mb-0">

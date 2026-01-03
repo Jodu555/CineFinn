@@ -2,6 +2,7 @@ import { validateEmail } from './utils';
 import type { RefRef, TodoItem, TodoReferences } from '@cinefinn/types/database';
 import type { AniWorldEntity, AniWorldSeriesInformations } from '@cinefinn/types/scrapers';
 import type { Ref } from 'vue';
+import useAPIURL from '~/hooks/useAPIURL';
 
 export const scrapers = [
     {
@@ -127,8 +128,7 @@ function lookDeep(obj: any, keys: string[]) {
     return current;
 }
 
-export function decideImageURL(minimal: boolean, element: TodoItem) {
-    if (minimal) return '';
+export function decideImageURL(element: TodoItem) {
 
     for (const scraper of scrapers) {
         const scrapeInfo = element.scrapingInfo?.[scraper.scrapeKey];
@@ -137,9 +137,10 @@ export function decideImageURL(minimal: boolean, element: TodoItem) {
             const img = lookDeep(scrapeInfo.data, scraper.imagePath);
             // console.log(img);
             if (img && typeof img == 'string') {
-                console.log(new URL(img).protocol);
+                const authStore = useAuthStore();
+                return `${useAPIURL()}/imageRewrite?auth-token=${authStore.authToken}&url=${encodeURIComponent(img)}`;
+                // console.log(new URL(img).protocol);
                 // if (new URL(img).protocol == 'http:') {
-                // return `${useBaseURL()}/imageRewriteSSL?auth-token=${}&url=${encodeURIComponent(img)}`;
                 // return `${useBaseURL()}/imageRewriteSSL?url=${encodeURIComponent(img)}`;
                 // }
 
