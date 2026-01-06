@@ -27,3 +27,7 @@ export const generateEntityID = () => {
 export const generateEmailID = () => {
     return `MAIL-${generateID()}`;
 };
+
+export const generateWatchHistoryID = () => {
+    return `WH-${generateID()}`;
+};

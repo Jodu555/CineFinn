@@ -3,6 +3,7 @@ import { authFullMiddleware, authMiddleware, type AuthedVars } from '../auth.js'
 import { episodesTable, moviesTable, seasonsTable, watchableEntitysTable, watchHistoryTable } from '../database.js';
 import { getIO, watchableUUIDToWatchable } from '../utils.js';
 import type { Episode, Movie } from '@cinefinn/types/database';
+import { generateWatchHistoryID } from '../utils/IdGenerators.js';
 
 
 
@@ -42,7 +43,7 @@ const router = new Hono()
 
             if (watchHistory == undefined) {
                 await watchHistoryTable.create({
-                    UUID: crypto.randomUUID(),
+                    UUID: generateWatchHistoryID(),
                     account_UUID: user.UUID,
                     series_UUID: episode.serie_UUID,
                     watchable_UUID: episode.UUID,
@@ -103,7 +104,7 @@ const router = new Hono()
         const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, watchable_UUID: watchable.UUID, unique: true });
         if (watchHistory == undefined) {
             await watchHistoryTable.create({
-                UUID: crypto.randomUUID(),
+                UUID: generateWatchHistoryID(),
                 account_UUID: user.UUID,
                 series_UUID: watchable.serie_UUID,
                 watchable_UUID: watchable.UUID,
