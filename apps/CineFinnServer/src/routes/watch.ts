@@ -19,30 +19,48 @@ const router = new Hono()
         const seasonUUID = c.req.param('seasonUUID');
         const bool = c.req.param('bool') === 'true';
 
-        const seasonInfo = await seasonsTable.getOne({ UUID: seasonUUID });
-        if (seasonInfo == undefined) {
+        console.log('Marking', bool);
+
+
+        const episodes = await episodesTable.get({ season_UUID: seasonUUID });
+        if (episodes.length == 0) {
             return c.json({
-                message: 'Season not found',
+                message: 'No episodes found',
             });
         }
-        const episodes = await episodesTable.get({ season_UUID: seasonUUID });
 
-        for (const episode of episodes) {
+        const promises = episodes.map(async (episode) => {
             const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, watchable_UUID: episode.UUID, unique: true });
+
+            const watchableEntities = await watchableEntitysTable.get({ watchable_UUID: episode.UUID });
+            const averageRuntime = watchableEntities.map(we => {
+                return we.runtime === -1 ? 500 : we.runtime;
+            }).reduce((prev, curr) => prev + curr, 0) / watchableEntities.length;
+
+            console.log('Average Runtime', episode.UUID, averageRuntime);
+
+
             if (watchHistory == undefined) {
                 await watchHistoryTable.create({
                     UUID: crypto.randomUUID(),
                     account_UUID: user.UUID,
-                    series_UUID: seasonInfo.serie_UUID,
+                    series_UUID: episode.serie_UUID,
                     watchable_UUID: episode.UUID,
-                    watchTime: bool ? 0 : 500,
+                    watchTime: bool ? averageRuntime : 0,
                 });
             } else {
+                const finalTime = Math.max(watchHistory.watchTime, bool ? averageRuntime : 0);
                 await watchHistoryTable.update({ UUID: watchHistory.UUID }, {
-                    watchTime: bool ? 0 : 500,
+                    watchTime: finalTime,
                 });
             }
-        }
+        });
+        await Promise.all(promises);
+
+        (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'client' && s.data.auth.user.UUID === user.UUID).forEach(async s => {
+            const watchList = await watchHistoryTable.get({ series_UUID: episodes[0].serie_UUID, account_UUID: user.UUID });
+            s.emit('watchListUpdate', watchList)
+        });
 
         return c.json(episodes);
     })

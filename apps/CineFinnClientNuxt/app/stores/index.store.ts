@@ -133,6 +133,33 @@ export const useIndexStore = defineStore('index', {
             if (this.detailedSerie != null) {
                 await this.loadDetailedSeasonInfo(this.detailedSerie.UUID);
             }
-        }
+        },
+        async markSeasonWatched(seasonUUID: string, watched: boolean) {
+            const { $swal } = useNuxtApp();
+            const { data, error } = await tryCatch<Promise<DetailedSeason[]>, Error>(() => $fetch<DetailedSeason[]>(`${useAPIURL()}/watch/markSeason/${seasonUUID}/${watched}`, {
+                method: 'POST',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+            }));
+            if (error) {
+                console.log(error);
+
+                $swal.fire({
+                    title: 'Error',
+                    text: 'An error occurred while marking the season as ' + (watched ? 'watched' : 'unwatched'),
+                    icon: 'error',
+                    confirmButtonText: 'Ok',
+                });
+                return;
+            }
+            // $swal.fire({
+            //     title: 'Success',
+            //     text: 'Season marked as ' + (watched ? 'watched' : 'unwatched'),
+            //     icon: 'success',
+            //     confirmButtonText: 'Ok',
+            // });
+
+        },
     }
 });

@@ -59,7 +59,7 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      style: devBootstrapCss ? [{ children: devBootstrapCss } as any] : [],
+      // style: devBootstrapCss ? [{ children: devBootstrapCss } as any] : [],
       bodyAttrs: {
         'data-bs-theme': 'dark'
       },

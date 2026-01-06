@@ -109,19 +109,50 @@
 												</option>
 											</select>
 										</div>
+										<div
+											class="d-flex align-items-center gap-2 w-100 justify-content-center justify-content-sm-end">
+											<!-- Dropdown Menu -->
+											<div class="dropdown flex-shrink-0 me-2">
+												<!-- Removed 'btn-sm' here to match the size of the view mode buttons -->
+												<button class="btn btn-outline-secondary dropdown-toggle bg-transparent"
+													type="button" data-bs-toggle="dropdown" aria-expanded="false">
+													<font-awesome-icon :icon="['fas', 'check']" class="me-2" />
+													Mark Season
+												</button>
+												<ul class="dropdown-menu dropdown-menu-end">
+													<li>
+														<button class="dropdown-item d-flex align-items-center"
+															type="button" @click="handleMarkSeasonWatched(true)">
+															<font-awesome-icon :icon="['fas', 'check']"
+																class="me-2 text-success" />
+															Mark as Watched
+														</button>
+													</li>
+													<li>
+														<button class="dropdown-item d-flex align-items-center"
+															type="button" @click="handleMarkSeasonWatched(false)">
+															<font-awesome-icon :icon="['fas', 'xmark']"
+																class="me-2 text-secondary" />
+															Mark as Unwatched
+														</button>
+													</li>
+												</ul>
+											</div>
 
-										<div class="btn-group" role="group">
-											<button type="button"
-												:class="['btn', viewMode === 'list' ? 'btn-primary' : 'btn-outline-secondary']"
-												@click="viewMode = 'list'">
-												<font-awesome-icon :icon="['fas', 'list']" />
-											</button>
-											<button type="button"
-												:class="['btn', viewMode === 'compact' ? 'btn-primary' : 'btn-outline-secondary']"
-												@click="viewMode = 'compact'">
-												<font-awesome-icon :icon="['fas', 'grip']" />
-											</button>
+											<div class="btn-group" role="group">
+												<button type="button"
+													:class="['btn', viewMode === 'list' ? 'btn-primary' : 'btn-outline-secondary']"
+													@click="viewMode = 'list'">
+													<font-awesome-icon :icon="['fas', 'list']" />
+												</button>
+												<button type="button"
+													:class="['btn', viewMode === 'compact' ? 'btn-primary' : 'btn-outline-secondary']"
+													@click="viewMode = 'compact'">
+													<font-awesome-icon :icon="['fas', 'grip']" />
+												</button>
+											</div>
 										</div>
+
 									</div>
 
 									<!-- List View -->
@@ -383,7 +414,7 @@
 </template>
 
 <script setup lang="ts">
-import type { DetailedEpisode } from '@cinefinn/types/database';
+import type { DetailedEpisode, DetailedSeason } from '@cinefinn/types/database';
 import { ref, computed, watch } from 'vue';
 import AddToPlaylistDialog from '~/components/AddToPlaylistDialog.vue';
 import ExtendedVideo from '~/components/ExtendedVideo.vue';
@@ -661,6 +692,13 @@ const switchTo = (vel: number) => {
 const changeLanguage = (lang: string) => {
 	if (indexStore.selectedEntity == null) return;
 	indexStore.setSelectedWatchableEntityUUID(indexStore.selectedEntity.UUID, lang);
+};
+
+const handleMarkSeasonWatched = async (watched: boolean) => {
+	const seasonUUID = selectedSeason.value;
+	if (seasonUUID == undefined) return;
+
+	await indexStore.markSeasonWatched(seasonUUID, watched);
 };
 
 function multiDimSwitcher<T>(dimArr: T[][], arrptr: number, idxptr: number, velocity: number) {
