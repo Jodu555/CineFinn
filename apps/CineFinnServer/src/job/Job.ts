@@ -38,6 +38,9 @@ export class Job {
         }
         return Job.fromDB(dbJob);
     }
+    static fromDummy(type: JobType) {
+        return new Job(crypto.randomUUID(), type, {}, [], {}, 0, 0, -1);
+    }
 
     toDB(): IJob & timestamped {
         return {
@@ -79,6 +82,7 @@ export class Job {
     }
 
     async save(immediate = true) {
+        if (this.created_at == -1) return;
 
         // if (immediate == false) {
         //     const socketJob = JSON.parse(JSON.stringify(this.toDB()));

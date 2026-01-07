@@ -479,9 +479,10 @@ export async function crawl(job: Job) {
             let existing = await watchableEntitysTable.getOne({ watchable_UUID: watchableUUID, lang: lang as Langs, unique: true });
             if (existing) {
                 if (existing.subID !== file.subID) {
-                    console.log('SubID mismatch', existing.subID, file.subID);
-                    await watchableEntitysTable.update({ UUID: existing.UUID }, { subID: file.subID });
+                    console.log('SubID mismatch', existing.subID, file.subID, file);
+                    await watchableEntitysTable.update({ UUID: existing.UUID }, { subID: file.subID, filePath: file.path });
                     existing.subID = file.subID;
+                    existing.filePath = file.path;
                 }
                 watchableByKey.set(key, existing);
                 return existing;
@@ -653,6 +654,8 @@ export async function crawl(job: Job) {
     //     info: Array.from(touchedSeasonsSet)
     // });
 
+    await handleSubSystemProminence(job);
+
     job.time('Clearing Cache');
     try { crawlerEpisodesCache.clear(); } catch (e) { }
     try { crawlerSeriesSeasonsCache.clear(); } catch (e) { }
@@ -670,4 +673,72 @@ export async function crawl(job: Job) {
     await sendSeriesReloadToAll();
 
     await job.success();
+}
+
+export async function handleSubSystemProminence(job: Job) {
+    const watchableEntitys = await watchableEntitysTable.get();
+
+    const map = new Map<string, Record<string, number>>();
+    for (const watchableEntity of watchableEntitys) {
+        const obj = {
+            ...map.get(watchableEntity.serie_UUID),
+            [watchableEntity.subID]: (map.get(watchableEntity.serie_UUID)?.[watchableEntity.subID] ?? 0) + 1,
+        }
+        map.set(watchableEntity.serie_UUID, obj);
+    }
+
+    const getProminentSub = (subMap: Record<string, number>) => {
+        let prominentSub = '';
+        let maxCount = 0;
+        for (const [sub, count] of Object.entries(subMap)) {
+            if (count > maxCount) {
+                prominentSub = sub;
+                maxCount = count;
+            }
+        }
+        return prominentSub;
+    }
+
+    for (const [serieUUID, subMap] of map) {
+        if (Object.keys(subMap).length > 1) {
+            job.log(`Serie ${serieUUID} exists in multiple subsystems: ${JSON.stringify(subMap)}`);
+            const prominentSub = getProminentSub(subMap);
+            if (!prominentSub) {
+                continue;
+            }
+            job.log(`Prominent sub: ${prominentSub}`);
+            watchableEntitys.filter(x => x.serie_UUID === serieUUID && x.subID !== prominentSub).forEach(watchableEntity => {
+                job.log(`Moving ${watchableEntity.UUID} from ${watchableEntity.subID} to ${prominentSub}`);
+                movingItems.push({
+                    ID: watchableEntity.UUID,
+                    serie_UUID: serieUUID,
+                    fromSubID: watchableEntity.subID,
+                    toSubID: prominentSub,
+                    watchableEntityUUID: watchableEntity.UUID,
+                    meta: {
+                        progress: 0,
+                        isMoving: true,
+                        result: '',
+                        isAdditional: false,
+                    }
+                });
+            });
+        }
+    }
+}
+
+const movingItems = [] as MovingItem[];
+
+export interface MovingItem {
+    ID: string;
+    serie_UUID: string;
+    fromSubID: string;
+    toSubID: string;
+    watchableEntityUUID: string;
+    meta: {
+        progress: number;
+        isMoving: boolean;
+        result: string;
+        isAdditional: boolean;
+    };
 }

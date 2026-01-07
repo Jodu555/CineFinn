@@ -34,6 +34,8 @@ import { adminRouter } from './routes/admin.js';
 import { todoRouter } from './routes/todo.js';
 import axios from 'axios';
 import { proxyRouter } from './routes/proxys.js';
+import { handleSubSystemProminence } from './job/crawler.js';
+import { Job } from './job/Job.js';
 
 const { printMetrics, registerMetrics } = prometheus();
 const app = new Hono({
@@ -180,25 +182,7 @@ const httpServer = serve({
         }
     }
 
-    // const watchableEntitys = await watchableEntitysTable.get();
-
-    // const map = new Map<string, Record<string, number>>();
-    // for (const watchableEntity of watchableEntitys) {
-    //     const obj = {
-    //         ...map.get(watchableEntity.serie_UUID),
-    //         [watchableEntity.subID]: (map.get(watchableEntity.serie_UUID)?.[watchableEntity.subID] ?? 0) + 1,
-    //     }
-    //     map.set(watchableEntity.serie_UUID, obj);
-    // }
-
-    // console.log(map);
-
-    // for (const [serieUUID, subMap] of map) {
-    //     console.log(serieUUID, subMap);
-    //     if (Object.keys(subMap).length > 1) {
-    //         console.log(`Serie ${serieUUID} exists in multiple subsystems: ${subMap}`);
-    //     }
-    // }
+    await handleSubSystemProminence(Job.fromDummy('crawl'));
 
 
     // console.log('Fixing Seasons');
