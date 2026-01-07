@@ -38,9 +38,6 @@ const router = new Hono()
                 return we.runtime === -1 ? 500 : we.runtime;
             }).reduce((prev, curr) => prev + curr, 0) / watchableEntities.length;
 
-            console.log('Average Runtime', episode.UUID, averageRuntime);
-
-
             if (watchHistory == undefined) {
                 await watchHistoryTable.create({
                     UUID: generateWatchHistoryID(),
@@ -50,7 +47,7 @@ const router = new Hono()
                     watchTime: bool ? averageRuntime : 0,
                 });
             } else {
-                const finalTime = Math.max(watchHistory.watchTime, bool ? averageRuntime : 0);
+                const finalTime = bool ? Math.max(watchHistory.watchTime, bool ? averageRuntime : 0) : 0;
                 await watchHistoryTable.update({ UUID: watchHistory.UUID }, {
                     watchTime: finalTime,
                 });

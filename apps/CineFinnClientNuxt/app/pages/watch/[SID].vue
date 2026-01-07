@@ -5,6 +5,9 @@
 		</pre>
 		<EntityActionsInformation v-if="showVideo" class="container" :switch-to="switchTo"
 			:change-language="changeLanguage" />
+		<div v-auto-animate v-if="showLatestWatchButton" class="text-center mb-2">
+			<button @click="skipToLatestTime" class="btn btn-outline-info">Jump to Latest watch position!</button>
+		</div>
 		<ClientOnly>
 			<ExtendedVideo v-if="showVideo" :videoSrc="videoSrc" :switch-to="switchTo" :can-play="true" :events="{}"
 				:send-video-time-update="sendVideoTimeUpdate" />
@@ -570,6 +573,27 @@ const videoSrc = computed(() => {
 	return '';
 });
 
+const forceHideLatestWatchButton = ref(false);
+
+const showLatestWatchButton = computed(() => {
+	if (authStore.user.settings.showLatestWatchButton.value == false) return false;
+	if (forceHideLatestWatchButton.value) return false;
+
+
+	const watchHistorySegment = indexStore.watchHistory.find((w) => w.watchable_UUID === indexStore.selectedWatchableEntity?.watchable_UUID);
+	return watchHistorySegment !== undefined;
+});
+
+const skipToLatestTime = () => {
+	const watchHistorySegment = indexStore.watchHistory.find((w) => w.watchable_UUID === indexStore.selectedWatchableEntity?.watchable_UUID);
+
+	const video = document.querySelector('video');
+	if (video && watchHistorySegment) {
+		video.currentTime = watchHistorySegment.watchTime;
+		forceHideLatestWatchButton.value = true;
+	}
+};
+
 const handleEpisodeClick = (episodeUUID: string) => {
 	const router = useRouter();
 	const prevQuery = JSON.parse(JSON.stringify(route.query));
@@ -615,7 +639,7 @@ const isCurrentMovie = (movieUUID: string) => {
 };
 
 const isEpisodeWatched = (episodeUUID: string) => {
-	return getEpisodeProgress(episodeUUID) > 95;
+	return getEpisodeProgress(episodeUUID) > 90;
 };
 const getEpisodeProgress = (episodeUUID: string) => {
 	const watchHistory = indexStore.watchHistory.find((w) => w.watchable_UUID === episodeUUID);
@@ -627,13 +651,17 @@ const getEpisodeProgress = (episodeUUID: string) => {
 		return 0;
 	}
 	const totalRuntime = episode.watchableEntitys.reduce((prev, curr) => prev + curr.runtime, 0) / episode.watchableEntitys.length;
+	if (totalRuntime === -1 && watchHistory.watchTime >= 500) {
+		return 95;
+	}
+
 	const watchTime = Math.max(0, Math.min(watchHistory.watchTime, totalRuntime));
 	const percent = (watchTime / totalRuntime) * 100;
 	return percent;
 };
 
 const isMovieWatched = (movieUUID: string) => {
-	return getMovieProgress(movieUUID) > 95;
+	return getMovieProgress(movieUUID) > 90;
 };
 
 const getMovieProgress = (movieUUID: string) => {
@@ -650,6 +678,10 @@ const getMovieProgress = (movieUUID: string) => {
 	}
 	console.log(`movie:`, movie);
 	const totalRuntime = movie.watchableEntitys.reduce((prev, curr) => prev + curr.runtime, 0) / movie.watchableEntitys.length;
+	if (totalRuntime === -1 && watchHistory.watchTime >= 500) {
+		return 95;
+	}
+
 	const watchTime = Math.max(0, Math.min(watchHistory.watchTime, totalRuntime));
 	const percent = (watchTime / totalRuntime) * 100;
 	console.log({
