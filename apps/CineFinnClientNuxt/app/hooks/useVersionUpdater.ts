@@ -1,4 +1,4 @@
-function useVersionUpdater() {
+export function useVersionUpdater() {
     const isNewVersionAvailable = ref(false);
     const nuxtApp = useNuxtApp();
     nuxtApp.hook('app:manifest:update', (manifest) => {

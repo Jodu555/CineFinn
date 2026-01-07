@@ -53,11 +53,19 @@ const adminStore = useAdminStore();
 const loading = computed(() => adminStore.loading);
 const error = computed(() => adminStore.error);
 
-await callOnce('loadOverview', () => adminStore.loadOverview(), { mode: 'navigation' });
-await callOnce('loadAccounts', () => adminStore.loadAccounts(), { mode: 'navigation' });
-await callOnce('loadSubsystems', () => adminStore.loadSubsystems(), { mode: 'navigation' });
-await callOnce('loadEmails', () => adminStore.loadEmails(), { mode: 'navigation' });
-await callOnce('loadConfig', () => adminStore.loadConfig(), { mode: 'navigation' });
+await Promise.all([
+    callOnce('loadOverview', () => adminStore.loadOverview(), { mode: 'navigation' }),
+    callOnce('loadAccounts', () => adminStore.loadAccounts(), { mode: 'navigation' }),
+    callOnce('loadSubsystems', () => adminStore.loadSubsystems(), { mode: 'navigation' }),
+    callOnce('loadEmails', () => adminStore.loadEmails(), { mode: 'navigation' }),
+    callOnce('loadConfig', () => adminStore.loadConfig(), { mode: 'navigation' }),
+]);
+
+// await callOnce('loadOverview', () => adminStore.loadOverview(), { mode: 'navigation' });
+// await callOnce('loadAccounts', () => adminStore.loadAccounts(), { mode: 'navigation' });
+// await callOnce('loadSubsystems', () => adminStore.loadSubsystems(), { mode: 'navigation' });
+// await callOnce('loadEmails', () => adminStore.loadEmails(), { mode: 'navigation' });
+// await callOnce('loadConfig', () => adminStore.loadConfig(), { mode: 'navigation' });
 
 </script>
 
