@@ -88,12 +88,12 @@ const editSeriesSchema = z.object({
         image: z.boolean().optional(),
         imageURL: z.string().optional(),
         description: z.string().optional(),
-    }),
+    }).optional(),
     refs: z.object({
         aniworld: z.string().optional(),
         zoro: z.string().optional(),
         sto: z.string().optional(),
-    }),
+    }).optional(),
     tags: z.array(z.string()).optional(),
     title: z.string().optional(),
 });
@@ -421,25 +421,19 @@ const router = new Hono()
         const user = c.get('credentials').user;
         const seriesID = c.req.param('seriesID');
         const body = await c.req.json();
-        console.log(body);
         const editSeriesData = editSeriesSchema.parse(body);
 
-        await seriesTable.update({ UUID: seriesID }, {
-            infos: {
-                infos: editSeriesData.infos.infos,
-                startDate: editSeriesData.infos.startDate,
-                endDate: editSeriesData.infos.endDate,
-                image: editSeriesData.infos.image,
-                imageURL: editSeriesData.infos.imageURL,
-                description: editSeriesData.infos.description,
-            },
-            refs: {
-                aniworld: editSeriesData.refs.aniworld || '',
-                zoro: editSeriesData.refs.zoro || '',
-                sto: editSeriesData.refs.sto || '',
-            },
-            title: editSeriesData.title,
+        const updatable = {} as any;
+
+        Object.entries(editSeriesData).forEach(([key, value]) => {
+            if (value !== undefined) {
+                (updatable as any)[key] = value;
+            }
         });
+
+        delete updatable['UUID'];
+
+        await seriesTable.update({ UUID: seriesID }, updatable);
 
         await sendSeriesReloadToAll()
 

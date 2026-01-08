@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<pre v-if="DEVELOPER_MODE">
+		<pre v-if="authStore.user.settings.developerMode.value">
 		{{ indexStore.selectedWatchableEntity }}
 		</pre>
 		<EntityActionsInformation v-if="showVideo" class="container" :switch-to="switchTo"
@@ -26,54 +26,98 @@
 										style="width: 128px; height: 192px; object-fit: cover" />
 								</div>
 							</div>
+							<!-- Right Column: Content -->
 							<div class="col">
-								<h1 @click="DEVELOPER_MODE = !DEVELOPER_MODE"
-									class="display-5 fw-bold mb-3 text-center text-sm-center text-md-start">
-									{{ series.infos.title || series.title }}
-								</h1>
 
-								<div
-									class="d-flex flex-wrap align-items-center justify-content-center justify-content-sm-center justify-content-md-start gap-3 mb-3">
-									<span class="badge bg-secondary">{{ series.infos.startDate }}</span>
-									<span class="badge bg-primary">{{ series.tags[0]!.toUpperCase() }}</span>
-									<!-- <div class="d-flex align-items-center" v-if="SHOW_RATING">
-									<font-awesome-icon :icon="['fas', 'star']" class="text-warning me-1" />
-									<span class="fw-medium">{{ content.rating }}</span>
+								<!-- VIEW MODE -->
+								<div v-if="!isEditing">
+									<h1 class="display-5 fw-bold mb-3 text-center text-sm-center text-md-start">
+										{{ displayTitle }}
+									</h1>
+
+									<div
+										class="d-flex flex-wrap align-items-center justify-content-center justify-content-sm-center justify-content-md-start gap-3 mb-3">
+										<span class="badge bg-secondary">{{ series.infos.startDate }}</span>
+										<!-- Show the first tag if available -->
+										<span class="badge bg-primary" v-if="series.tags && series.tags.length > 0">
+											{{ series.tags[0]!.toUpperCase() }}
+										</span>
+									</div>
+
+									<ElongatedText class="text-muted mb-4 text-center text-xs-center text-md-start"
+										:text="series.infos.description || 'No Description available yet...'"
+										:max-length="200"></ElongatedText>
+
+									<div class="d-flex gap-3">
+										<!-- Existing Button -->
+										<AddToPlaylistDialog :item-u-u-i-d="series.UUID" :content-title="series.title"
+											open-button-text="Add to Watchlist" open-button-color="outline-primary" />
+
+										<!-- New Edit Button -->
+										<button @click="enterEditMode" v-if="authStore.user.role >= Role.Mod"
+											class="btn btn-outline-secondary">
+											<font-awesome-icon :icon="['fas', 'pen-to-square']" class="me-2" />
+											Edit
+										</button>
+									</div>
 								</div>
-								<span class="text-muted">
-									<font-awesome-icon :icon="['far', 'clock']" class="me-1" />
-									{{ content.duration }}
-								</span> -->
+
+								<!-- EDIT MODE -->
+								<div v-else>
+									<!-- Title Input -->
+									<div class="mb-3">
+										<label class="form-label text-muted small">Title</label>
+										<input type="text" class="form-control form-control-lg fw-bold"
+											v-model="editForm.title" />
+									</div>
+
+									<!-- Dates Row -->
+									<div class="row g-2 mb-3">
+										<div class="col-md-6">
+											<label class="form-label text-muted small">Start Date</label>
+											<input type="text" class="form-control" v-model="editForm.startDate" />
+										</div>
+										<div class="col-md-6">
+											<label class="form-label text-muted small">End Date</label>
+											<input type="text" class="form-control" v-model="editForm.endDate" />
+										</div>
+									</div>
+
+									<!-- Tags Input -->
+									<div class="mb-3">
+										<label class="form-label text-muted small">Tags (comma separated)</label>
+										<input type="text" class="form-control" placeholder="Action, Drama, 2024"
+											v-model="editForm.tags" />
+									</div>
+
+									<!-- Description Textarea -->
+									<div class="mb-3">
+										<label class="form-label text-muted small">Description</label>
+										<textarea class="form-control" rows="4"
+											v-model="editForm.description"></textarea>
+									</div>
+
+									<!-- Action Buttons -->
+									<div class="d-flex gap-3">
+										<!-- Save Button -->
+										<button @click="saveChanges" class="btn btn-primary">
+											<font-awesome-icon :icon="['fas', 'check']" class="me-2" />
+											Save Changes
+										</button>
+
+										<!-- Cancel Button -->
+										<button @click="cancelEdit" class="btn btn-outline-secondary">
+											<font-awesome-icon :icon="['fas', 'xmark']" class="me-2 text-secondary" />
+											Cancel
+										</button>
+									</div>
 								</div>
 
-								<!-- <div v-if="false" class="d-flex flex-wrap gap-2 mb-3">
-								<span v-for="genre in content.genre" :key="genre" class="badge border border-secondary text-white">
-									{{ genre }}
-								</span>
-							</div> -->
-
-								<ElongatedText class="text-muted mb-4 text-center text-xs-center text-md-start"
-									:text="series.infos.description || 'No Description available yet...'"
-									:max-length="200"></ElongatedText>
-								<!-- <p class="text-muted mb-4">{{ series.infos.description }}</p> -->
-
-								<div class="d-flex gap-3">
-									<AddToPlaylistDialog :item-u-u-i-d="series.UUID" :content-title="series.title"
-										open-button-text="Add to Watchlist" open-button-color="outline-primary" />
-									<!-- <button class="btn btn-outline-primary">
-										<font-awesome-icon :icon="['fas', 'plus']" class="me-2" />
-										Add to Watchlist
-									</button> -->
-									<!-- <button class="btn btn-outline-light" v-if="SHOW_RATING">
-									<font-awesome-icon :icon="['far', 'star']" class="me-2" />
-									Rate
-								</button> -->
-								</div>
 							</div>
 						</div>
 						<!-- Episodes/Movies Section -->
 						<div v-if="(hasSeasons || hasMovies) && !isDisabled" class="mb-4">
-							<pre v-if="DEVELOPER_MODE">
+							<pre v-if="authStore.user.settings.developerMode.value">
 								{{ { activeTab, hasSeasons, hasMovies } }}
 							</pre>
 							<div class="d-flex justify-content-center">
@@ -397,11 +441,11 @@
 					</div>
 				</div>
 			</div>
-			<pre v-if="DEVELOPER_MODE">
+			<pre v-if="authStore.user.settings.developerMode.value">
 			selectedWatchableEntity: {{ indexStore.selectedWatchableEntity }}
 			selectedEntity: {{ indexStore.selectedEntity }}
 			</pre>
-			<pre v-if="DEVELOPER_MODE">
+			<pre v-if="authStore.user.settings.developerMode.value">
             activeTab: {{ activeTab }}
             viewMode: {{ viewMode }}
 			showVideo: {{ showVideo }}
@@ -417,15 +461,11 @@
 </template>
 
 <script setup lang="ts">
-import type { DetailedEpisode, DetailedSeason } from '@cinefinn/types/database';
+import { Role, type DetailedEpisode, type DetailedSeason } from '@cinefinn/types/database';
 import { ref, computed, watch } from 'vue';
 import AddToPlaylistDialog from '~/components/AddToPlaylistDialog.vue';
 import ExtendedVideo from '~/components/ExtendedVideo.vue';
 import useAPIURL from '~/hooks/useAPIURL';
-
-// console.log('[SID] Created');
-
-const DEVELOPER_MODE = ref(false);
 
 definePageMeta({
 	middleware: 'auth',
@@ -441,6 +481,12 @@ const series = computed(() => indexStore.series.find((s) => s.UUID === route.par
 await callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string), { mode: 'navigation' });
 callOnce('loadWatchHistory', async () => await indexStore.loadWatchHistory(route.params.SID as string), { mode: 'navigation' });
 
+const coverURL = computed(() => {
+	return decideSeriesImage(series.value!, randomNumber.value);
+});
+
+const displayTitle = computed(() => series.value?.infos.title || series.value?.title);
+
 const sendVideoTimeUpdate = async (time: number) => {
 	console.log('Sending time update to server', time);
 	// useAxios().post(`/watch/updateTime/${currentEpisodeUUID.value}/${time}`, {});
@@ -453,16 +499,51 @@ const sendVideoTimeUpdate = async (time: number) => {
 	// await $fetch(`${useAPIURL()}/watch/updateTime/${indexStore.selectedWatchableEntity?.UUID.replace('#', '-')}/${time}`);
 };
 
-const coverURL = computed(() => {
-	// const CURRENT_EXTERNAL_API = 'http://localhost:3000';
-	// const url = new URL('https://cinema-api.jodu555.de' + `/images/${series.value!.UUID}/cover.jpg`);
+const isEditing = ref(false);
 
-	// const url = new URL(useAPIURL() + `/images/${series.value!.UUID}/cover.jpg`);
-	// url.searchParams.append('auth-token', 'SECR-DEV');
-	// return url.href;
-
-	return decideSeriesImage(series.value!, randomNumber.value);
+// Temporary form data to avoid modifying the original series until "Save" is clicked
+const editForm = ref({
+	title: '',
+	startDate: '',
+	endDate: '',
+	tags: '',
+	description: ''
 });
+
+// --- Methods ---
+
+const enterEditMode = () => {
+	// Populate form with current data
+	editForm.value = {
+		title: displayTitle.value!,
+		startDate: series.value!.infos.startDate || '',
+		endDate: series.value!.infos.endDate || '', // Added end date support
+		// Convert tags array to comma-separated string for editing
+		tags: series.value!.tags ? series.value!.tags.join(', ') : '',
+		description: series.value!.infos.description || ''
+	};
+	isEditing.value = true;
+};
+
+const cancelEdit = () => {
+	isEditing.value = false;
+};
+
+const saveChanges = async () => {
+
+	await indexStore.updateSeries(series.value!.UUID, {
+		tags: editForm.value.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
+		infos: {
+			title: editForm.value.title,
+			startDate: editForm.value.startDate,
+			endDate: editForm.value.endDate,
+			description: editForm.value.description,
+		},
+		refs: series.value!.refs,
+	});
+
+	isEditing.value = false;
+};
 
 const randomNumber = useState('randomNumber' + series.value!.UUID, () => Math.floor(Math.random() * 1000));
 
