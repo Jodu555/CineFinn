@@ -11,7 +11,7 @@ open http://localhost:3000
 
 > After giving it some more thought getting Feature Parity might not be what i want at least not 1:1 the same responses
 > Since i already Completely reworked the whole crawler and the whole indexing system the same json response would be actually careless
-> Sicne i would throw so much data away that would be highly useful to the 
+> Sicne i would throw so much data away that would be highly useful to the
 
 I changed my mind again... Feature Parity is an illusion.
 I will build out this backend the way i see fit and then will just Build a new Frontend for it.
@@ -20,24 +20,31 @@ No bending over backwards to have it behave and expect the same responses as the
 ### Routes
 
 #### Static
-/images
+
+- [x] /images
 
 #### Proxys
+
 - [ ] /segments
 - [ ] /bullboard
 - [ ] /anidb
-- [ ] /imageRewriteSSL
+- [x] /imageRewriteSSL => /imageRewrite
 - [ ] /MAIN_PROXY
 
 #### Video Streaming Route
+
 /video
-- [ ] GET /video
+
+- [x] GET /video
 
 #### JSON
+
 /status
+
 - [ ] GET /status
 
 /managment
+
 - [x] GET /managment/jobs/info
 - [x] GET /managment/job/img/generate
 - [x] GET /managment/job/checkForUpdates-smart
@@ -45,66 +52,73 @@ No bending over backwards to have it behave and expect the same responses as the
 - [x] GET /managment/job/crawl
 
 /news
+
 - [ ] GET /news
-POST /news
+      POST /news
 
 /index
-- [ ] GET /index
+
+- [x] GET /index
 - [ ] POST /index
-- [ ] GET /index/all
-- [ ] GET /index/:ID
+- [x] GET /index/all
+- [x] GET /index/:ID
 - [ ] PATCH /index/:ID
 - [ ] POST /index/:ID/cover
 
 /previewImages
+
 - [ ] POST /previewImages/createPresignedURL
 - [ ] POST /previewImages/deletePresignedURL
 - [ ] POST /previewImages/upload
 
 /watch
-- [ ] GET /watch/info
-- [ ] GET /watch/mark/:seriesID/season/:seasonID/:bool => POST /watch/toggleSeason {seriesID: string, seasonID: number, toggle: boolean}
-- [ ] GET /watch/mark/:seriesID/season/:seasonID/:bool
-- [ ] 												   => POST /watch/updateTime {WEID: string, time: number}
+
+- [x] GET /watch/info
+- [x] GET /watch/mark/:seriesID/season/:seasonID/:bool => POST /watch/toggleSeason {seriesID: string, seasonID: number, toggle: boolean}
+- [x] GET /watch/mark/:seriesID/season/:seasonID/:bool
+- [x]     											   => POST /watch/updateTime {WEID: string, time: number}
 
 /recommendation
+
 - [ ] GET /recommendation
 
 /room
+
 - [ ] GET /room
 - [ ] GET /room/:id
 - [ ] GET /room/:id/headsup
 
 /todo
 
-- [ ] GET /todo
+- [x] GET /todo
 - [ ] GET /todo/permittedAccounts
 
 /ignorelist
+
 - [ ] GET /ignorelist
 - [ ] PUT /ignorelist/item
 - [ ] DELETE /ignorelist/item/:ID
 
-
 /admin
-- [ ] GET /admin/accounts
-- [ ] GET /admin/subsystems
+
+- [x] GET /admin/accounts
+- [x] GET /admin/subsystems
 - [ ] DELETE /admin/subsystems/movingItem
 - [ ] POST /admin/subsystems/movingItem
-- [ ] GET /admin/overview
-
+- [x] GET /admin/overview
 
 ### Concepts
+
 - [x] Auth (Login, Logout, Register, Info)
-- [ ] Indexing
-- [ ] WatchTime
+- [x] Indexing
+- [x] WatchTime
 - [ ] SyncSystem
 - [ ] Admin
-    - [ ] Overview
-    - [ ] Accounts
-    - [ ] Jobs
-    - [ ] SubSystems
-    - [ ] IgnoreList
+  - [x] Overview
+  - [x] Accounts
+  - [ ] Jobs
+  - [ ] SubSystems
+  - [ ] IgnoreList
 - [ ] Recommendation
 - [ ] PreviewImages
-- [ ] Video Streaming
+- [x] Video Streaming

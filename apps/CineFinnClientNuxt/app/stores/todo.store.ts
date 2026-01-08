@@ -12,41 +12,7 @@ export const useTodoStore = defineStore('todo', {
     state: () => ({
         loading: false,
         error: '',
-        list: [
-            // {
-            //     ID: '1',
-            //     order: 1,
-            //     name: 'John',
-            //     categorie: 'Aniworld',
-            //     creator: '1',
-            //     references: {
-            //         aniworld: 'https://aniworld.to/anime/1',
-            //         sto: 'https://sto.to/anime/1',
-            //     },
-            // },
-            // {
-            //     ID: '2',
-            //     order: 2,
-            //     name: 'Jane',
-            //     categorie: 'Aniworld',
-            //     creator: '1',
-            //     references: {
-            //         aniworld: 'https://aniworld.to/anime/2',
-            //         sto: 'https://sto.to/anime/2',
-            //     },
-            // },
-            // {
-            //     ID: '3',
-            //     order: 3,
-            //     name: 'Bob',
-            //     creator: '',
-            //     categorie: 'Aniworld',
-            //     references: {
-            //         aniworld: 'https://aniworld.to/anime/3',
-            //         sto: 'https://sto.to/anime/3',
-            //     },
-            // },
-        ] as TodoItem[],
+        list: [] as TodoItem[],
         permittedAccounts: [
             {
                 UUID: '1',
@@ -231,7 +197,6 @@ export const useTodoStore = defineStore('todo', {
             // 	}
             // }
         },
-        //TODO: Implement this
         async deleteTodo(ID: string) {
             const { $swal } = useNuxtApp();
             const { isConfirmed: confirmed } = await $swal.fire({

@@ -57,7 +57,6 @@ export class Job {
     }
 
     async sendSocketUpdate(immediate = false) {
-        //TODO: Broadcast to allegebale clients
         const socketJob = JSON.parse(JSON.stringify(this.toDB()));
         socketJob.data = {};
         socketJob.logs = socketJob.logs.slice(-10);

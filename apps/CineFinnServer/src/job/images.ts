@@ -28,7 +28,7 @@ export async function generatePreviewImages(job: Job) {
     const generatorEpisodesCache = new CacheContext('crawler-generator-episodes', 250);
     const generatorSeriesCache = new CacheContext('crawler-generator-series', 500);
 
-    const watchableEntities = await watchableEntitysTable.get({});
+    const watchableEntities = await watchableEntitysTable.get();
 
 
     const queuedJobs: QueuedPreviewImageGenerationJob[] = [];
