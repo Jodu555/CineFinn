@@ -89,8 +89,6 @@ function parseEnvironmentVariables() {
             }
         }
     });
-    console.log(obj);
-
     return obj;
 }
 

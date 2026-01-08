@@ -104,8 +104,6 @@ let config: Config;
 
 export function getConfig() {
     if (config == undefined) {
-        console.log('setted up config');
-
         config = setupConfigurationManagment<Config>(defaultConfig, cliOptions);
     }
     return config;
