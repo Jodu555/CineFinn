@@ -121,7 +121,7 @@ export type EmailStatus = 'PENDING' | 'SENT';
 
 export interface Series {
     UUID: string;
-    tags: string;
+    tags: [string];
     title: string;
     infos: SeriesInfos;
     refs: SeriesRefs;
@@ -149,7 +149,7 @@ export interface DetailedMovie extends Movie {
     watchableEntitys: WatchableEntity[];
 }
 
-export type SeriesRefs = Record<'aniworld' | 'zoro' | 'sto' | string, string | Record<string, string>>;
+export type SeriesRefs = Record<'aniworld' | 'zoro' | 'sto' | string, string>;
 
 export interface SeriesInfos {
     image?: boolean;

@@ -1,12 +1,14 @@
-import type { FrontendSeries, Season, Movie, DetailedEpisode, DetailedSeason, DetailedMovie, DetailedSeries, Episode } from "@cinefinn/types/database";
+import { type FrontendSeries, type Season, type Movie, type DetailedEpisode, type DetailedSeason, type DetailedMovie, type DetailedSeries, type Episode, Role } from "@cinefinn/types/database";
 import { Hono, type Context } from "hono";
 import { database, seriesTable, seasonsTable, episodesTable, watchableEntitysTable, moviesTable } from "../database.js";
-import { authMiddleware } from "../auth.js";
+import { authFullMiddleware, authMiddleware } from "../auth.js";
 import { forEachNonBlocking, forEachNonBlockingAsync, queryDatabase } from "../utils.js";
 import { createStorage, prefixStorage } from "unstorage";
 import pLimit from 'p-limit';
 import { createMiddleware } from "hono/factory";
 import type { Storage, StorageValue } from "unstorage";
+import z from "zod";
+import { sendSeriesReloadToAll } from "../sockets/client.socket.js";
 
 
 
@@ -77,6 +79,24 @@ export async function getFrontEndSeries() {
     }).filter((x) => x != null);
     return result;
 }
+
+const editSeriesSchema = z.object({
+    infos: z.object({
+        infos: z.string().optional(),
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+        image: z.boolean().optional(),
+        imageURL: z.string().optional(),
+        description: z.string().optional(),
+    }),
+    refs: z.object({
+        aniworld: z.string().optional(),
+        zoro: z.string().optional(),
+        sto: z.string().optional(),
+    }),
+    tags: z.array(z.string()).optional(),
+    title: z.string().optional(),
+});
 
 const router = new Hono()
     .get('/', authMiddleware, cachingMiddleware(undetailedIndexStorage, (c) => 'undetailedIndex'), async (c) => {
@@ -396,6 +416,36 @@ const router = new Hono()
         // };
 
         // return c.json(finalOutput as DetailedSeries);
+    })
+    .patch('/:seriesID', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+        const user = c.get('credentials').user;
+        const seriesID = c.req.param('seriesID');
+        const body = await c.req.json();
+        console.log(body);
+        const editSeriesData = editSeriesSchema.parse(body);
+
+        await seriesTable.update({ UUID: seriesID }, {
+            infos: {
+                infos: editSeriesData.infos.infos,
+                startDate: editSeriesData.infos.startDate,
+                endDate: editSeriesData.infos.endDate,
+                image: editSeriesData.infos.image,
+                imageURL: editSeriesData.infos.imageURL,
+                description: editSeriesData.infos.description,
+            },
+            refs: {
+                aniworld: editSeriesData.refs.aniworld || '',
+                zoro: editSeriesData.refs.zoro || '',
+                sto: editSeriesData.refs.sto || '',
+            },
+            title: editSeriesData.title,
+        });
+
+        await sendSeriesReloadToAll()
+
+        return c.json({
+            message: 'Successfully updated series',
+        });
     });
 
 export { router as indexRouter, indexStorage, fullIndexStorage, undetailedIndexStorage };

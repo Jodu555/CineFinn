@@ -336,7 +336,7 @@ export async function crawl(job: Job) {
                     disabled: false,
                 },
                 refs: {},
-                tags: JSON.stringify([categorie]),
+                tags: [categorie],
             });
             seriesByTitle.set(title, created);
             // Invalidate any cache entry if you were using external CacheContext

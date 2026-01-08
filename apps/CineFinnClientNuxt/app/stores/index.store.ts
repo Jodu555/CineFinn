@@ -161,5 +161,40 @@ export const useIndexStore = defineStore('index', {
             // });
 
         },
+        async updateSeries(seriesID: string, series: any) {
+            const { $swal } = useNuxtApp();
+            const { data, error } = await tryCatch<Promise<void>, Error>(() => $fetch<void>(`${useAPIURL()}/index/${seriesID}`, {
+                method: 'PATCH',
+                body: JSON.stringify(series),
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+            }));
+            if (error) {
+                console.log(error);
+
+                $swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    title: 'Error',
+                    text: 'An error occurred while updating the series',
+                    icon: 'error',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                });
+                return;
+            }
+            $swal.fire({
+                toast: true,
+                position: 'top-end',
+                title: 'Success',
+                text: 'Series updated',
+                icon: 'success',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false,
+            });
+        },
     }
 });
