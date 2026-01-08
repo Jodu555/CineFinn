@@ -37,11 +37,20 @@
 
 									<div
 										class="d-flex flex-wrap align-items-center justify-content-center justify-content-sm-center justify-content-md-start gap-3 mb-3">
-										<span class="badge bg-secondary">{{ series.infos.startDate }}</span>
-										<!-- Show the first tag if available -->
-										<span class="badge bg-primary" v-if="series.tags && series.tags.length > 0">
-											{{ series.tags[0]!.toUpperCase() }}
-										</span>
+										<div>
+											<span class="badge bg-secondary">{{ series.infos.startDate }}</span>
+											<span
+												v-if="series.infos.startDate?.length! > 0 && series.infos.endDate?.length! > 0"
+												class="ms-1 me-1 h5">&rarr;</span>
+											<span class="badge bg-secondary">{{ series.infos.endDate }}</span>
+										</div>
+
+										<div v-if="series.tags && series.tags.length > 0">
+											<span class="badge bg-primary me-2"
+												v-for="(tag, idx) in series.tags.slice(0, 1)" :key="idx">
+												{{ idx == 0 ? tag.toUpperCase() : tag }}
+											</span>
+										</div>
 									</div>
 
 									<ElongatedText class="text-muted mb-4 text-center text-xs-center text-md-start"
@@ -100,14 +109,14 @@
 									<!-- Action Buttons -->
 									<div class="d-flex gap-3">
 										<!-- Save Button -->
-										<button @click="saveChanges" class="btn btn-primary">
+										<button @click="saveChanges" class="btn btn-outline-primary">
 											<font-awesome-icon :icon="['fas', 'check']" class="me-2" />
 											Save Changes
 										</button>
 
 										<!-- Cancel Button -->
 										<button @click="cancelEdit" class="btn btn-outline-secondary">
-											<font-awesome-icon :icon="['fas', 'xmark']" class="me-2 text-secondary" />
+											<font-awesome-icon :icon="['fas', 'xmark']" class="me-2" />
 											Cancel
 										</button>
 									</div>

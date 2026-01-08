@@ -90,7 +90,10 @@ export async function getSeriesRelatedToSubSystem(subID: string) {
 export async function toggleSeriesesForSubSystem(subID: string, disabled: boolean) {
     const seriesIDs = await getSeriesRelatedToSubSystem(subID);
     for (const seriesID of seriesIDs) {
-        await seriesTable.update({ UUID: seriesID }, { infos: { disabled } });
+        const series = await seriesTable.getOne({ UUID: seriesID });
+        if (series == undefined) continue;
+        series.infos.disabled = disabled;
+        await seriesTable.update({ UUID: seriesID }, { infos: series.infos });
     }
     sendSeriesReloadToAll();
     console.log(`Toggling Serieses(${seriesIDs.length}) for SubSystem: ${subID} to Disabled: ${disabled}`);

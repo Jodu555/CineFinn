@@ -1,6 +1,6 @@
 import { type FrontendSeries, type Season, type Movie, type DetailedEpisode, type DetailedSeason, type DetailedMovie, type DetailedSeries, type Episode, Role } from "@cinefinn/types/database";
 import { Hono, type Context } from "hono";
-import { database, seriesTable, seasonsTable, episodesTable, watchableEntitysTable, moviesTable } from "../database.js";
+import { database, seriesTable, seasonsTable, episodesTable, watchableEntitysTable, moviesTable, sleep } from "../database.js";
 import { authFullMiddleware, authMiddleware } from "../auth.js";
 import { forEachNonBlocking, forEachNonBlockingAsync, queryDatabase } from "../utils.js";
 import { createStorage, prefixStorage } from "unstorage";
@@ -73,7 +73,6 @@ export async function getFrontEndSeries() {
         } catch (error) {
             console.log(error);
             console.log(row);
-
         }
         return null;
     }).filter((x) => x != null);
@@ -420,6 +419,12 @@ const router = new Hono()
     .patch('/:seriesID', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const user = c.get('credentials').user;
         const seriesID = c.req.param('seriesID');
+        const series = await seriesTable.getOne({ UUID: seriesID });
+        if (series == undefined) {
+            return c.json({
+                message: 'Series not found',
+            });
+        }
         const body = await c.req.json();
         const editSeriesData = editSeriesSchema.parse(body);
 
@@ -432,8 +437,21 @@ const router = new Hono()
         });
 
         delete updatable['UUID'];
+        delete updatable['created_at'];
+        delete updatable['updated_at'];
+
+        if (updatable.infos !== undefined) {
+            updatable.infos = {
+                ...series.infos,
+                ...updatable.infos,
+            };
+        }
 
         await seriesTable.update({ UUID: seriesID }, updatable);
+
+        await fullIndexStorage.removeItem(`fullIndex-${seriesID}`);
+        await undetailedIndexStorage.removeItem('undetailedIndex');
+
 
         await sendSeriesReloadToAll()
 
