@@ -1,4 +1,4 @@
-import type { TodoItem } from '@cinefinn/types/database';
+import type { Series, SeriesInfos, TodoItem } from '@cinefinn/types/database';
 import { defineStore } from 'pinia'
 import useAPIURL from '~/hooks/useAPIURL';
 
@@ -121,81 +121,101 @@ export const useTodoStore = defineStore('todo', {
         },
         //TODO: Implement this
         async useTodo(ID: string) {
-            // const { isConfirmed: confirmed } = await instance.$swal({
-            // 	title: 'Super!',
-            // 	text: 'Do you really want to USE this Todo?',
-            // 	icon: 'success',
-            // 	showCancelButton: true,
-            // 	cancelButtonText: 'No im not sure anymore!',
-            // 	confirmButtonText: 'Yes im sure!',
-            // });
-            // if (confirmed) {
-            // 	const todoObject = state.list.find((x) => x.ID == ID);
-            // 	if (!todoObject) {
-            // 		instance.$swal({
-            // 			toast: true,
-            // 			position: 'top-end',
-            // 			showConfirmButton: false,
-            // 			timer: 3000,
-            // 			icon: 'error',
-            // 			title: `Todo Item with ID ${ID} not found`,
-            // 			timerProgressBar: true,
-            // 		});
-            // 		return;
-            // 	}
-            // 	const seriesObject = {
-            // 		categorie: todoObject.categorie,
-            // 		title: todoObject.name,
-            // 		movies: [] as SerieMovie[],
-            // 		seasons: [] as SerieEpisode[][],
-            // 		references: todoObject.references,
-            // 		infos: {} as SerieInfo,
-            // 	};
+            const { $swal } = useNuxtApp();
+            const { isConfirmed: confirmed } = await $swal.fire({
+                title: 'Super!',
+                text: 'Do you really want to USE this Todo?',
+                icon: 'success',
+                showCancelButton: true,
+                cancelButtonText: 'No im not sure anymore!',
+                confirmButtonText: 'Yes im sure!',
+            });
+            if (confirmed) {
+                const todoObject = this.list.find((x) => x.ID == ID);
+                if (!todoObject) {
+                    $swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        icon: 'error',
+                        title: `Todo Item with ID ${ID} not found`,
+                        timerProgressBar: true,
+                    });
+                    return;
+                }
+                const seriesObject = {
+                    tags: [todoObject.categorie],
+                    title: todoObject.name,
+                    refs: todoObject.refs,
+                    infos: {} as SeriesInfos,
+                } satisfies Omit<Series, 'UUID'>;
 
-            // 	if (todoObject.scraped !== true && todoObject.scraped != undefined) {
-            // 		seriesObject.infos = JSON.parse(JSON.stringify(todoObject.scraped?.informations)) satisfies SerieInfo;
-            // 		delete seriesObject?.infos?.image;
-            // 	}
-            // 	const response = await useAxios().post('/index/', seriesObject);
+                if (todoObject.scrapingInfo?.aniworld?.state === 'success' && todoObject.scrapingInfo?.aniworld?.data !== undefined) {
+                    seriesObject.infos = JSON.parse(JSON.stringify(todoObject.scrapingInfo?.aniworld?.data?.informations)) satisfies SeriesInfos;
+                    delete seriesObject?.infos?.image;
+                }
 
-            // 	if (response.status !== 200) {
-            // 		instance.$swal({
-            // 			toast: true,
-            // 			position: 'top-end',
-            // 			showConfirmButton: false,
-            // 			timer: 3000,
-            // 			icon: 'error',
-            // 			title: `${response.data.error.message || 'An Error occurd'}`,
-            // 			timerProgressBar: true,
-            // 		});
-            // 	} else {
-            // 		if (response.data.ID !== undefined) {
-            // 			const serieID = response.data.ID;
+                if (todoObject.scrapingInfo?.sto?.state === 'success' && todoObject.scrapingInfo?.sto?.data !== undefined) {
+                    seriesObject.infos = JSON.parse(JSON.stringify(todoObject.scrapingInfo?.sto?.data?.informations)) satisfies SeriesInfos;
+                    delete seriesObject?.infos?.image;
+                }
 
-            // 			const imageUrl = decideImageURL(false, todoObject);
+                const { data, error } = await tryCatch(() => $fetch<Series>(useAPIURL() + '/index/', {
+                    method: 'POST',
+                    body: JSON.stringify(seriesObject),
+                    headers: {
+                        'auth-token': useAuthStore().authToken,
+                    },
+                }));
 
-            // 			const imageResponse = await useAxios().post(`/index/${serieID}/cover`, { imageUrl });
+                if (error) {
+                    $swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        icon: 'error',
+                        title: `${error.message || 'An Error occurd'}`,
+                        timerProgressBar: true,
+                    });
+                    return;
+                }
 
-            // 			if (imageResponse.status !== 200) {
-            // 				instance.$swal({
-            // 					toast: true,
-            // 					position: 'top-end',
-            // 					showConfirmButton: false,
-            // 					timer: 3000,
-            // 					icon: 'error',
-            // 					title: `${imageResponse.data.error.message || 'An Error occurd'}`,
-            // 					timerProgressBar: true,
-            // 				});
-            // 			}
-            // 		}
+                if (data.UUID == undefined) return;
 
-            // 		const newsObject = {
-            // 			content: `Added ${seriesObject.title}`,
-            // 			time: Date.now(),
-            // 		} as DatabaseNewsItem;
-            // 		await useAxios().post('/news/', newsObject);
-            // 	}
-            // }
+                const imageUrl = decideImageURL(todoObject);
+
+
+                const { data: imageData, error: imageError } = await tryCatch(() => $fetch<string>(useAPIURL() + `/index/${data.UUID}/cover`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        imageUrl: imageUrl,
+                    }),
+                    headers: {
+                        'auth-token': useAuthStore().authToken
+                    }
+                }));
+
+                if (imageError) {
+                    $swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        icon: 'error',
+                        title: `${imageError.message || 'An Error occurd'}`,
+                        timerProgressBar: true,
+                    });
+                }
+
+                // const newsObject = {
+                // 	content: `Added ${seriesObject.title}`,
+                // 	time: Date.now(),
+                // } as DatabaseNewsItem;
+                // await useAxios().post('/news/', newsObject);
+
+            }
         },
         async deleteTodo(ID: string) {
             const { $swal } = useNuxtApp();

@@ -121,7 +121,7 @@ export type EmailStatus = 'PENDING' | 'SENT';
 
 export interface Series {
     UUID: string;
-    tags: [string];
+    tags: string[];
     title: string;
     infos: SeriesInfos;
     refs: SeriesRefs;

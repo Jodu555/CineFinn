@@ -1,4 +1,4 @@
-import { type FrontendSeries, type Season, type Movie, type DetailedEpisode, type DetailedSeason, type DetailedMovie, type DetailedSeries, type Episode, Role } from "@cinefinn/types/database";
+import { type FrontendSeries, type Season, type Movie, type DetailedEpisode, type DetailedSeason, type DetailedMovie, type DetailedSeries, type Episode, Role, type Series } from "@cinefinn/types/database";
 import { Hono, type Context } from "hono";
 import { database, seriesTable, seasonsTable, episodesTable, watchableEntitysTable, moviesTable, sleep } from "../database.js";
 import { authFullMiddleware, authMiddleware } from "../auth.js";
@@ -9,6 +9,7 @@ import { createMiddleware } from "hono/factory";
 import type { Storage, StorageValue } from "unstorage";
 import z from "zod";
 import { sendSeriesReloadToAll } from "../sockets/client.socket.js";
+import { generateSeriesID } from "../utils/IdGenerators.js";
 
 
 
@@ -95,6 +96,25 @@ const editSeriesSchema = z.object({
     }).optional(),
     tags: z.array(z.string()).optional(),
     title: z.string().optional(),
+});
+
+
+const newSeriesSchema = z.object({
+    title: z.string(),
+    infos: z.object({
+        infos: z.string().optional(),
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+        image: z.boolean().optional(),
+        imageURL: z.string().optional(),
+        description: z.string().optional(),
+    }).optional(),
+    refs: z.object({
+        aniworld: z.string().optional(),
+        zoro: z.string().optional(),
+        sto: z.string().optional(),
+    }).optional(),
+    tags: z.array(z.string()).optional(),
 });
 
 const router = new Hono()
@@ -458,6 +478,30 @@ const router = new Hono()
         return c.json({
             message: 'Successfully updated series',
         });
+    })
+    .post('/', authFullMiddleware((user) => user.role >= Role.Admin), async (c) => {
+        const user = c.get('credentials').user;
+        const body = await c.req.json();
+        const newSeriesData = newSeriesSchema.parse(body);
+
+        if (newSeriesData.infos !== undefined) {
+            (newSeriesData.infos as any).disabled = true;
+        }
+
+        const series = {
+            UUID: generateSeriesID(),
+            title: newSeriesData.title,
+            infos: newSeriesData.infos || { disabled: true },
+            refs: newSeriesData.refs || {},
+            tags: newSeriesData.tags || [],
+        } satisfies Series;
+
+        console.log(series);
+
+
+        // const newSeries = await seriesTable.create(series);
+
+        return c.json(series);
     });
 
 export { router as indexRouter, indexStorage, fullIndexStorage, undetailedIndexStorage };
