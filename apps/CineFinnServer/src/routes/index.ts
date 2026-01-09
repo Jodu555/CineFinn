@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { type FrontendSeries, type Season, type Movie, type DetailedEpisode, type DetailedSeason, type DetailedMovie, type DetailedSeries, type Episode, Role, type Series } from "@cinefinn/types/database";
 import { Hono, type Context } from "hono";
 import { database, seriesTable, seasonsTable, episodesTable, watchableEntitysTable, moviesTable, sleep } from "../database.js";
@@ -10,6 +12,7 @@ import type { Storage, StorageValue } from "unstorage";
 import z from "zod";
 import { sendSeriesReloadToAll } from "../sockets/client.socket.js";
 import { generateSeriesID } from "../utils/IdGenerators.js";
+import { getConfig } from "../config.js";
 
 
 
@@ -76,7 +79,7 @@ export async function getFrontEndSeries() {
             console.log(row);
         }
         return null;
-    }).filter((x) => x != null);
+    }).filter((x) => x != null).sort((a, b) => (a as any).created_at - (b as any).created_at);
     return result;
 }
 
@@ -98,7 +101,6 @@ const editSeriesSchema = z.object({
     title: z.string().optional(),
 });
 
-
 const newSeriesSchema = z.object({
     title: z.string(),
     infos: z.object({
@@ -115,6 +117,10 @@ const newSeriesSchema = z.object({
         sto: z.string().optional(),
     }).optional(),
     tags: z.array(z.string()).optional(),
+});
+
+const newCoverSchema = z.object({
+    imageUrl: z.url(),
 });
 
 const router = new Hono()
@@ -436,10 +442,10 @@ const router = new Hono()
 
         // return c.json(finalOutput as DetailedSeries);
     })
-    .patch('/:seriesID', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+    .patch('/:S-UUID', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const user = c.get('credentials').user;
-        const seriesID = c.req.param('seriesID');
-        const series = await seriesTable.getOne({ UUID: seriesID });
+        const seriesUUID = c.req.param('S-UUID');
+        const series = await seriesTable.getOne({ UUID: seriesUUID });
         if (series == undefined) {
             return c.json({
                 message: 'Series not found',
@@ -467,9 +473,9 @@ const router = new Hono()
             };
         }
 
-        await seriesTable.update({ UUID: seriesID }, updatable);
+        await seriesTable.update({ UUID: seriesUUID }, updatable);
 
-        await fullIndexStorage.removeItem(`fullIndex-${seriesID}`);
+        await fullIndexStorage.removeItem(`fullIndex-${seriesUUID}`);
         await undetailedIndexStorage.removeItem('undetailedIndex');
 
 
@@ -496,12 +502,56 @@ const router = new Hono()
             tags: newSeriesData.tags || [],
         } satisfies Series;
 
-        console.log(series);
-
-
-        // const newSeries = await seriesTable.create(series);
-
+        console.log('Created new series', series);
+        await seriesTable.create(series);
+        await undetailedIndexStorage.removeItem('undetailedIndex');
         return c.json(series);
+    })
+    .post('/:S-UUID/cover', authFullMiddleware((user) => user.role >= Role.Admin), async (c) => {
+        const user = c.get('credentials').user;
+        const seriesUUID = c.req.param('S-UUID');
+        const series = await seriesTable.getOne({ UUID: seriesUUID });
+        if (series == undefined) {
+            return c.json({
+                message: 'Series not found',
+            });
+        }
+        const body = await c.req.json();
+        const newCoverData = newCoverSchema.parse(body);
+
+        const file = await downloadImage(newCoverData.imageUrl);
+
+        const imagePath = path.join(getConfig().imagePath, seriesUUID, 'cover.jpg');
+        fs.mkdirSync(path.dirname(imagePath), { recursive: true });
+
+        const blob = await file.bytes();
+        fs.writeFileSync(imagePath, blob);
+
+        console.log(`Dowloaded for ${series.UUID} cover image from ${newCoverData.imageUrl} to ${imagePath}`);
+
+
+        await seriesTable.update({ UUID: seriesUUID }, {
+            infos: {
+                ...series.infos,
+                image: true,
+            },
+        });
+
+        await fullIndexStorage.removeItem(`fullIndex-${seriesUUID}`);
+        await undetailedIndexStorage.removeItem('undetailedIndex');
+
+        return c.json({
+            message: 'Successfully updated series cover',
+        });
     });
+
+async function downloadImage(url: string) {
+    console.log(url);
+    const response = await fetch(url);
+    const blob = await response.blob();
+    console.log(blob);
+    const file = new File([blob], 'cover.jpg', { type: 'image/jpeg' });
+    return file;
+}
 
 export { router as indexRouter, indexStorage, fullIndexStorage, undetailedIndexStorage };
