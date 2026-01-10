@@ -546,10 +546,8 @@ const router = new Hono()
     });
 
 async function downloadImage(url: string) {
-    console.log(url);
     const response = await fetch(url);
     const blob = await response.blob();
-    console.log(blob);
     const file = new File([blob], 'cover.jpg', { type: 'image/jpeg' });
     return file;
 }

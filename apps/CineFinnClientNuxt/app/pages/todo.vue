@@ -49,7 +49,10 @@ definePageMeta({
 const authStore = useAuthStore();
 const todoStore = useTodoStore();
 
-await callOnce('loadTodoList', () => todoStore.loadTodoList(), { mode: 'navigation' });
+await Promise.all([
+    callOnce('loadTodoList', () => todoStore.loadTodoList(), { mode: 'navigation' }),
+    callOnce('loadPermittedAccounts', () => todoStore.loadPermittedAccounts(), { mode: 'navigation' }),
+]);
 
 const permittedAccounts = computed(() => todoStore.permittedAccounts);
 

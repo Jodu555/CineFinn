@@ -13,23 +13,7 @@ export const useTodoStore = defineStore('todo', {
         loading: false,
         error: '',
         list: [] as TodoItem[],
-        permittedAccounts: [
-            {
-                UUID: '1',
-                username: 'John',
-                role: 1,
-            },
-            {
-                UUID: '2',
-                username: 'Jane',
-                role: 1,
-            },
-            {
-                UUID: '4f43fc81-6d19-4c51-8e8e-f56513c92e16',
-                username: 'Jodu',
-                role: 2,
-            }
-        ] as permAcc[],
+        permittedAccounts: [] as permAcc[],
         minimal: false,
         drag: false,
     }),
@@ -44,6 +28,19 @@ export const useTodoStore = defineStore('todo', {
             });
             this.list = todos;
             this.loading = false;
+        },
+        async loadPermittedAccounts() {
+            const { data, error } = await tryCatch(() => $fetch<permAcc[]>(useAPIURL() + '/todo/permittedAccounts', {
+                method: 'GET',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+            }));
+            if (error) {
+                console.log(error);
+                return;
+            }
+            this.permittedAccounts = data || [];
         },
         async addEmptyItem() {
             const authStore = useAuthStore();

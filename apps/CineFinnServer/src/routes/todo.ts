@@ -8,7 +8,7 @@ import { createStorage } from "unstorage";
 import fsDriver from "unstorage/drivers/fs";
 import { unescape } from "querystring";
 import { getIO } from "../utils.js";
-import { todosTable } from "../database.js";
+import { accountsTable, todosTable } from "../database.js";
 import { all } from "axios";
 
 interface ScraperDefinition {
@@ -62,13 +62,13 @@ const scrapers = [
 
 ] satisfies ScraperDefinition[];
 
-const todoStorage = createStorage<TodoItem[]>({
-    driver: fsDriver({
-        base: './temp/todoStorage',
-    })
-})
+// const todoStorage = createStorage<TodoItem[]>({
+//     driver: fsDriver({
+//         base: './temp/todoStorage',
+//     })
+// })
 
-const mainTestKey = 'test';
+// const mainTestKey = 'test';
 
 
 const todoScrapeJobs = [] as {
@@ -81,6 +81,17 @@ const router = new Hono()
     .get('/', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const todos = await todosTable.get();
         return c.json(todos.sort((a, b) => a.sortOrder - b.sortOrder));
+    })
+    .get('/permittedAccounts', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+        const accounts = await accountsTable.get();
+
+        const permittedAccounts = accounts.filter(acc => acc.role >= Role.Mod).map(acc => ({
+            UUID: acc.UUID,
+            username: acc.username,
+            role: acc.role,
+        }));
+
+        return c.json(permittedAccounts);
     })
     .post('/', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
 
