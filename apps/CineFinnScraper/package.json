@@ -15,11 +15,14 @@
 	"dependencies": {
 		"@cinefinn/configuration-manager": "workspace:*",
 		"@cinefinn/types": "workspace:*",
+		"@hono/node-server": "^1.19.5",
 		"axios": "^1.13.1",
 		"cheerio": "^1.1.2",
+		"hono": "^4.10.3",
 		"jsdom": "^27.2.0",
 		"promise-limit": "^2.7.0",
 		"sanitize-filename": "^1.6.3",
+		"socket.io": "^4.8.1",
 		"socket.io-client": "^4.8.1"
 	},
 	"devDependencies": {

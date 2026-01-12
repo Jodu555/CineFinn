@@ -4,12 +4,14 @@ import * as fs from 'fs';
 import Aniworld from '../class/Aniworld.js';
 import promiseLimit from 'promise-limit';
 import sanitizeFilename from 'sanitize-filename';
+import { io } from '../index.js';
+import type { Socket } from 'socket.io-client';
 
 
 function sanitizeFileName(str: string): string {
     return sanitizeFilename(str, { replacement: ' ' }).replace(/  +/g, ' ');
 }
-interface AniWorldSerieCompare extends AniWorldSeriesInformations {
+export interface AniWorldSerieCompare extends AniWorldSeriesInformations {
     UUID: string;
     title: string;
     references: SeriesRefs;
@@ -85,41 +87,155 @@ async function compareForNewReleasesProvider(name: string, filename: string, com
     return output;
 }
 
+function splitArrayIntoNChunks<T>(array: T[], n: number): T[][] {
+    const result: T[][] = [];
+    const chunkSize = Math.ceil(array.length / n);
+    for (let i = 0; i < array.length; i += chunkSize) {
+        const chunk = array.slice(i, i + chunkSize);
+        result.push(chunk);
+    }
+    return result;
+}
+
 async function compareForNewReleasesAniWorldOrSTO(
     series: DetailedSeries[],
     ignoranceList: IgnoranceItem[],
     refKey: 'aniworld' | 'sto',
     inherit: boolean = true
 ): Promise<ExtendedEpisodeDownload[]> {
+
     const debug = false;
     const limit = promiseLimit<AniWorldSerieCompare>(10);
     const data = series.filter((x) => x.refs?.aniworld && !ignoranceList.find((v) => v.UUID == x.UUID && !v.lang));
 
-    const compare: AniWorldSerieCompare[] = await Promise.all(
-        data.map(async (serie) => {
-            return limit(() => {
-                return new Promise<AniWorldSerieCompare>(async (res, _) => {
-                    const ref = serie.refs[refKey];
-                    if (typeof ref !== 'string') {
-                        return;
-                    }
-                    const world = new Aniworld(ref)
-                    const out = await world.parseInformations();
-                    if (out == undefined) {
-                        console.log('Error parsing Aniworld', serie.refs.aniworld);
-                        return;
-                    }
-                    res({
-                        UUID: serie.UUID,
-                        title: serie.title,
-                        references: serie.refs,
-                        ...out,
-                    });
+    const sockets = await io.fetchSockets();
 
+    // +1 For the main thread
+    const chunks = splitArrayIntoNChunks(data, sockets.length + 1);
+
+    const localChunk = chunks.shift() || [];
+
+    // Start socket processing immediately
+    const socketPromises = chunks.map((chunk, idx) => {
+        return new Promise<AniWorldSerieCompare[]>((resolve, reject) => {
+            const socket = sockets[idx % sockets.length];
+
+            // Set up timeout to prevent blocking indefinitely
+            const timeout = setTimeout(() => {
+                (socket as any as Socket).off('scrapeChunkResult', scrapeResultFn);
+                reject(new Error(`Socket ${idx} timed out after 5 minutes`));
+            }, 5 * 60 * 1000); // 5 minute should be more than enough
+
+            const scrapeResultFn = (compares: AniWorldSerieCompare[]) => {
+                clearTimeout(timeout);
+                (socket as any as Socket).off('scrapeChunkResult', scrapeResultFn);
+                resolve(compares);
+            };
+
+            (socket as any as Socket).on('scrapeChunkResult', scrapeResultFn);
+
+            console.log('Sent', chunk.length, 'Series to socket', idx, socket.id);
+
+            socket.emit('scrapeChunk', chunk, refKey, (data: any) => {
+                if (debug) {
+                    console.log(`Socket ${idx} acknowledged chunk:`, data);
+                }
+            });
+        });
+    });
+
+    // Process local chunk in parallel while the sockets crunch themselve
+    const localComparePromise = Promise.all(
+        localChunk.map(async (serie) => {
+            return limit(() => {
+                return new Promise<AniWorldSerieCompare>(async (resolve, reject) => {
+                    try {
+                        const ref = serie.refs[refKey];
+                        if (typeof ref !== 'string') {
+                            return resolve(null as any);
+                        }
+
+                        const world = new Aniworld(ref);
+                        const out = await world.parseInformations();
+
+                        if (out == undefined) {
+                            console.log('Error parsing Aniworld', serie.refs.aniworld);
+                            return resolve(null as any);
+                        }
+
+                        resolve({
+                            UUID: serie.UUID,
+                            title: serie.title,
+                            references: serie.refs,
+                            ...out,
+                        });
+                    } catch (error) {
+                        console.error('Error processing serie:', serie.UUID, error);
+                        reject(error);
+                    }
                 });
             });
         })
     );
+
+    // Wait for both local crunching AND all socket workers to complete their work
+    const [localCompare, ...socketCompares] = await Promise.all([
+        localComparePromise,
+        ...socketPromises
+    ]);
+
+    const compare = [
+        ...localCompare,
+        ...socketCompares.flat()
+    ].filter(Boolean) as AniWorldSerieCompare[];
+
+    console.log(compare);
+    console.log('Compare done');
+    return null as any;
+
+
+    // const socketPromises = chunks.map((chunk, idx) => {
+    //     return new Promise<AniWorldSerieCompare[]>((resolve, reject) => {
+    //         const socket = sockets[idx % sockets.length];
+
+    //         const scrapeResultFn = async (compares: AniWorldSerieCompare[]) => {
+    //             resolve(compares);
+    //         };
+    //         (socket as any as Socket).on('scrapeChunkResult', scrapeResultFn);
+
+    //         socket.emit('scrapeChunk', chunk, (data: any) => {
+    //             console.log('Received Aniworld Data', data);
+    //         });
+    //     })
+    // });
+
+    // const socketCompares = await Promise.all(socketPromises);
+
+    // const compare: AniWorldSerieCompare[] = await Promise.all(
+    //     localChunk.map(async (serie) => {
+    //         return limit(() => {
+    //             return new Promise<AniWorldSerieCompare>(async (res, _) => {
+    //                 const ref = serie.refs[refKey];
+    //                 if (typeof ref !== 'string') {
+    //                     return;
+    //                 }
+    //                 const world = new Aniworld(ref)
+    //                 const out = await world.parseInformations();
+    //                 if (out == undefined) {
+    //                     console.log('Error parsing Aniworld', serie.refs.aniworld);
+    //                     return;
+    //                 }
+    //                 res({
+    //                     UUID: serie.UUID,
+    //                     title: serie.title,
+    //                     references: serie.refs,
+    //                     ...out,
+    //                 });
+
+    //             });
+    //         });
+    //     }),
+    // );
     const outputDlList: ExtendedEpisodeDownload[] = [];
 
     /**

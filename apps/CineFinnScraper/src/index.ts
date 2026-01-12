@@ -1,17 +1,100 @@
-import { io, Socket } from 'socket.io-client';
+import { io as Client, Socket } from 'socket.io-client';
 import { getConfig } from './config.js';
 import type { AuthHandshake, ScraperToServerEvents, ServerToScraperEvents, } from '@cinefinn/types/socket';
 import type { DetailedSeries, IgnoranceItem } from '@cinefinn/types/database';
 import { compareForNewReleases } from './utils/compare.js';
 import axios from 'axios';
 import Aniworld from './class/Aniworld.js';
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { serve } from '@hono/node-server';
+import { trimTrailingSlash } from 'hono/trailing-slash';
+import { Server } from 'socket.io';
+
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const config = getConfig();
+
+const app = new Hono({
+    strict: false,
+})
+    .use(cors())
+    .use(trimTrailingSlash());
+
+export let io: Server;
+
+const httpServer = serve({
+    fetch: app.fetch,
+    port: config.PORT,
+}, async (info) => {
+    console.log(info);
+    io = new Server(httpServer, {
+        cors: {
+            methods: ['GET', 'POST'],
+        },
+    });
+
+    io.use((socket, next) => {
+        const handshake = socket.handshake;
+        if (handshake.auth.type === 'scraperClient' && handshake.auth.authToken === config.SCRAPER_CLIENT_TOKEN) {
+            next();
+        } else {
+            next(new Error('Unauthorized'));
+        }
+    });
+
+    io.on('connection', (socket) => {
+        console.log('New Scraper Client Connected');
+        socket.on('disconnect', () => {
+            console.log('Scraper Client Disconnected');
+        });
+    });
+
+    const mockIndex: DetailedSeries[] = [
+        {
+            UUID: 'S-IRREG',
+            title: 'Irregular',
+            seasons: [],
+            movies: [],
+            infos: {},
+            refs: {
+                aniworld: 'https://aniworld.to/anime/stream/the-irregular-at-magic-high-school',
+            },
+            tags: [],
+        },
+        {
+            UUID: 'S-DALV',
+            title: 'Date a Live',
+            seasons: [],
+            movies: [],
+            infos: {},
+            refs: {
+                aniworld: 'https://aniworld.to/anime/stream/date-a-live',
+            },
+            tags: [],
+        },
+        {
+            UUID: 'S-ASTERISK',
+            title: 'Asterisk War',
+            seasons: [],
+            movies: [],
+            infos: {},
+            refs: {
+                aniworld: 'https://aniworld.to/anime/stream/the-asterisk-war',
+            },
+            tags: [],
+        }
+    ];
+
+    await wait(1000 * 10)
+    const output = await compareForNewReleases(mockIndex, [], { aniworld: true, sto: false, zoro: false });
+
+});
 
 let socket: Socket<ServerToScraperEvents, ScraperToServerEvents> | null = null;
 
 
-socket = io(config.CORE.URL, {
+socket = Client(config.CORE.URL, {
     transports: ['websocket'],
     reconnection: true,
     upgrade: true,
