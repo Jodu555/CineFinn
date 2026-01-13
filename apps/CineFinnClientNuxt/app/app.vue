@@ -26,12 +26,14 @@ onMounted(() => {
 });
 
 watch(
-	() => authStore.loggedIn,
+	() => authStore.user,
 	(newValue) => {
-		umIdentify({
-			UUID: authStore.user.UUID,
-			username: authStore.user.username,
-		});
+		if (newValue !== null && newValue.UUID !== undefined && newValue.UUID !== '' && newValue.username != undefined) {
+			umIdentify({
+				UUID: newValue.UUID,
+				username: newValue.username,
+			});
+		}
 	}
 );
 

@@ -22,6 +22,7 @@ const adminStore = useAdminStore();
 const todoStore = useTodoStore();
 
 onMounted(() => {
+	if (authStore.loggedIn !== true) return;
 	socket.connect();
 
 	socket.on('disconnect', onDisconnect);
@@ -55,6 +56,17 @@ function onConnect() {
 		url: router.currentRoute.value.fullPath,
 	});
 }
+
+watch(
+	() => authStore.loggedIn,
+	(loggedIn) => {
+		if (loggedIn) {
+			socket.connect();
+		} else {
+			socket.disconnect();
+		}
+	}
+);
 
 watch(
 	() => router.currentRoute.value.fullPath,

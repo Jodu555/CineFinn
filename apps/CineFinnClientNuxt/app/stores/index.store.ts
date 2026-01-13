@@ -16,20 +16,32 @@ export const useIndexStore = defineStore('index', {
     actions: {
         async loadSeries() {
             this.loading = true;
-            const { data, status } = await useFetch<FrontendSeries[]>(`${useAPIURL()}/index`, {
-                key: 'index',
+            const { data, error } = await tryCatch<Promise<FrontendSeries[]>, Error>(() => $fetch<FrontendSeries[]>(`${useAPIURL()}/index`, {
                 method: 'GET',
                 headers: {
                     'auth-token': useAuthStore().authToken,
                 },
-            });
-            if (status.value == 'success') {
-                this.series = data.value!;
+            }));
+            if (error) {
                 this.loading = false;
             } else {
-                // alert('Error loading Series ' + status.value);
+                this.series = data!;
                 this.loading = false;
             }
+            // const { data, status } = await useFetch<FrontendSeries[]>(`${useAPIURL()}/index`, {
+            //     key: 'index',
+            //     method: 'GET',
+            //     headers: {
+            //         'auth-token': useAuthStore().authToken,
+            //     },
+            // });
+            // if (status.value == 'success') {
+            //     this.series = data.value!;
+            //     this.loading = false;
+            // } else {
+            //     // alert('Error loading Series ' + status.value);
+
+            // }
         },
         async loadDetailedSeasonInfo(seriesID: string) {
             this.loading = true;

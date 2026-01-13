@@ -66,8 +66,8 @@ export const useAuthStore = defineStore('auth', {
 
                 console.log('Authenticating user', response.UUID, response.username, response.role, response.status);
                 // useCookie('auth-token').value = this.authToken;
-                this.loggedIn = true;
                 this.user = response;
+                this.loggedIn = true;
 
                 if (redirectToSlash) {
                     await useIndexStore().loadSeries();
@@ -94,8 +94,8 @@ export const useAuthStore = defineStore('auth', {
             const authCookie = useCookie('auth-token');
             authCookie.value = '';
             this.authToken = '';
-            this.loggedIn = false;
             this.user = null as any as Account;
+            this.loggedIn = false;
 
             useAuthStore().$reset();
             useIndexStore().$reset();
