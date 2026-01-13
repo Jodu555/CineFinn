@@ -86,8 +86,8 @@ const httpServer = serve({
         }
     ];
 
-    await wait(1000 * 10)
-    const output = await compareForNewReleases(mockIndex, [], { aniworld: true, sto: false, zoro: false });
+    // await wait(1000 * 10)
+    // const output = await compareForNewReleases(mockIndex, [], { aniworld: true, sto: false, zoro: false });
 
 });
 

@@ -33,39 +33,43 @@ const limit = promiseLimit<AniWorldSerieCompare>(10);
 
 socket.on('scrapeChunk', async (seriesList: DetailedSeries[], refKey: string, cb) => {
     console.log('Received scrapeChunk with', seriesList.length, 'series');
-    const output = await Promise.all(seriesList.map(async (serie) => {
-        return limit(() => {
-            return new Promise<AniWorldSerieCompare>(async (resolve, reject) => {
-                try {
-                    const ref = serie.refs[refKey];
-                    if (typeof ref !== 'string') {
-                        return resolve(null as any);
+    try {
+        const output = await Promise.all(seriesList.map(async (serie) => {
+            return limit(() => {
+                return new Promise<AniWorldSerieCompare>(async (resolve, reject) => {
+                    try {
+                        const ref = serie.refs[refKey];
+                        if (typeof ref !== 'string') {
+                            return resolve(null as any);
+                        }
+
+                        const world = new Aniworld(ref);
+                        const out = await world.parseInformations();
+
+                        if (out == undefined) {
+                            console.log('Error parsing Aniworld', serie.refs.aniworld);
+                            return resolve(null as any);
+                        }
+
+                        resolve({
+                            UUID: serie.UUID,
+                            title: serie.title,
+                            references: serie.refs,
+                            ...out,
+                        });
+                    } catch (error) {
+                        console.error('Error processing serie:', serie.UUID, error);
+                        reject(error);
                     }
-
-                    const world = new Aniworld(ref);
-                    const out = await world.parseInformations();
-
-                    if (out == undefined) {
-                        console.log('Error parsing Aniworld', serie.refs.aniworld);
-                        return resolve(null as any);
-                    }
-
-                    resolve({
-                        UUID: serie.UUID,
-                        title: serie.title,
-                        references: serie.refs,
-                        ...out,
-                    });
-                } catch (error) {
-                    console.error('Error processing serie:', serie.UUID, error);
-                    reject(error);
-                }
+                });
             });
-        });
-    }));
-    console.log('Completed scrapeChunk, sending back results');
-    cb(true);
-    socket.emit('scrapeChunkResult', output);
+        }));
+        console.log('Completed scrapeChunk, sending back results');
+        cb(true);
+        socket.emit('scrapeChunkResult', output);
+    } catch (error) {
+        cb(false);
+    }
 });
 
 socket.connect();

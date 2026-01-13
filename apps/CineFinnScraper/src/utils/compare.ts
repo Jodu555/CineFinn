@@ -136,9 +136,13 @@ async function compareForNewReleasesAniWorldOrSTO(
 
             console.log('Sent', chunk.length, 'Series to socket', idx, socket.id);
 
-            socket.emit('scrapeChunk', chunk, refKey, (data: any) => {
+            socket.emit('scrapeChunk', chunk, refKey, (success: boolean) => {
                 if (debug) {
                     console.log(`Socket ${idx} acknowledged chunk:`, data);
+                }
+                if (!success) {
+                    console.log('Socket', idx, 'did not send all data');
+                    reject(new Error('Socket did not send all data'));
                 }
             });
         });
@@ -189,53 +193,8 @@ async function compareForNewReleasesAniWorldOrSTO(
         ...socketCompares.flat()
     ].filter(Boolean) as AniWorldSerieCompare[];
 
-    console.log(compare);
-    console.log('Compare done');
-    return null as any;
+    console.log(compare.length, 'Series compared from', data.length, 'Series');
 
-
-    // const socketPromises = chunks.map((chunk, idx) => {
-    //     return new Promise<AniWorldSerieCompare[]>((resolve, reject) => {
-    //         const socket = sockets[idx % sockets.length];
-
-    //         const scrapeResultFn = async (compares: AniWorldSerieCompare[]) => {
-    //             resolve(compares);
-    //         };
-    //         (socket as any as Socket).on('scrapeChunkResult', scrapeResultFn);
-
-    //         socket.emit('scrapeChunk', chunk, (data: any) => {
-    //             console.log('Received Aniworld Data', data);
-    //         });
-    //     })
-    // });
-
-    // const socketCompares = await Promise.all(socketPromises);
-
-    // const compare: AniWorldSerieCompare[] = await Promise.all(
-    //     localChunk.map(async (serie) => {
-    //         return limit(() => {
-    //             return new Promise<AniWorldSerieCompare>(async (res, _) => {
-    //                 const ref = serie.refs[refKey];
-    //                 if (typeof ref !== 'string') {
-    //                     return;
-    //                 }
-    //                 const world = new Aniworld(ref)
-    //                 const out = await world.parseInformations();
-    //                 if (out == undefined) {
-    //                     console.log('Error parsing Aniworld', serie.refs.aniworld);
-    //                     return;
-    //                 }
-    //                 res({
-    //                     UUID: serie.UUID,
-    //                     title: serie.title,
-    //                     references: serie.refs,
-    //                     ...out,
-    //                 });
-
-    //             });
-    //         });
-    //     }),
-    // );
     const outputDlList: ExtendedEpisodeDownload[] = [];
 
     /**
