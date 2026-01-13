@@ -57,13 +57,17 @@ export async function generateOverview() {
 
 export async function rebroadcastOverview() {
     // database
-    const sockets = await getIO().fetchSockets();
-    const overview = await generateOverview();
-    sockets.forEach((socket) => {
-        if (socket.data.auth.type === 'client' && socket.data.auth.user.role >= Role.Mod) {
-            socket.emit('adminOverview', overview);
-        }
-    });
+    try {
+        const sockets = await getIO().fetchSockets();
+        const overview = await generateOverview();
+        sockets.forEach((socket) => {
+            if (socket.data.auth.type === 'client' && socket.data.auth.user.role >= Role.Mod) {
+                socket.emit('adminOverview', overview);
+            }
+        });
+    } catch (error) {
+
+    }
 }
 
 export async function rebroadcastAccounts() {

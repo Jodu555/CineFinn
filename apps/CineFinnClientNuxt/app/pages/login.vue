@@ -41,10 +41,14 @@
 										type="password" id="password" name="Password" autocomplete="current-password"
 										placeholder="Enter Password" :rules="rules.passwordRules" />
 								</div>
-								<button type="submit" :disabled="!(form.usernameValid && form.passwordValid)"
-									class="mt-4 btn btn-primary">
-									Login
-								</button>
+								<div class="d-flex justify-content-between">
+									<button type="submit" :disabled="!(form.usernameValid && form.passwordValid)"
+										class="mt-4 btn btn-primary">
+										Login
+									</button>
+									<nuxt-link to="/forgotPassword" class="mt-4">Fogot
+										Password?</nuxt-link>
+								</div>
 							</fieldset>
 						</form>
 					</div>

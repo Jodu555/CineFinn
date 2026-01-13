@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { createMiddleware } from 'hono/factory';
-import { accountsTable, authTokensTable, database, } from './database.js';
+import { accountsTable, authTokensTable, database, emailsTable, } from './database.js';
 import bcrypt from 'bcryptjs';
 import { randomUUID } from 'node:crypto';
 import { HTTPException } from 'hono/http-exception';
@@ -9,6 +9,7 @@ import type { Account } from '@cinefinn/types/database';
 import { getConfig } from './config.js';
 import { compareSettings, defaultSettings } from './utils/settings.js';
 import { getEmailManager } from './utils.js';
+import type { DataType } from './utils/EmailManager.js';
 
 const registerLoginSchema = z.object({
     username: z.string().min(3).max(15).trim().regex(/^[a-zA-Z0-9]+$/, {
@@ -32,6 +33,21 @@ const onboardingSchemaStepOne = z.object({
 const onboardingSchemaStepTwo = z.object({
     email: z.email(),
     verificationCode: z.string().min(4).max(6).trim(),
+});
+
+const fotgotPasswordSchemaStage1 = z.object({
+    email: z.email(),
+});
+
+const fotgotPasswordSchemaStage2 = z.object({
+    email: z.email(),
+    token: z.string().min(5).max(15),
+});
+
+const fotgotPasswordSchemaStage3 = z.object({
+    email: z.email(),
+    token: z.string().min(5).max(15),
+    newPassword: z.string().min(4).max(128).trim(),
 });
 
 export async function getUser(token: string) {
@@ -220,5 +236,91 @@ export const authRouter = new Hono()
         await accountsTable.update({ UUID: user.UUID }, { status: 'active', emailVerifyCode: '' });
         return c.json({
             message: 'Successfully updated verification code',
+        });
+    }).post('/forgotPassword', async (c) => {
+        const jsonBody = await c.req.json();
+        const forgotPasswordData = fotgotPasswordSchemaStage1.parse(jsonBody);
+        const user = await accountsTable.getOne({ email: forgotPasswordData.email, unique: true });
+        if (user == undefined) {
+            throw new HTTPException(400, {
+                message: 'Invalid email!',
+            });
+        }
+        const forgotPasswordToken = Math.floor(1000 + Math.random() * 999999).toString();
+        await getEmailManager().sendEmail(user.UUID, 'PASSWORD_RESET', { forgotPasswordToken: forgotPasswordToken });
+        return c.json({
+            message: 'Successfully sent reset token',
+        });
+    }).put('/forgotPassword', async (c) => {
+        const jsonBody = await c.req.json();
+        const forgotPasswordData = fotgotPasswordSchemaStage2.parse(jsonBody);
+        const user = await accountsTable.getOne({ email: forgotPasswordData.email, unique: true });
+        if (user == undefined) {
+            throw new HTTPException(400, {
+                message: 'Invalid email!',
+            });
+        }
+
+        const emails = await emailsTable.get({
+            account_UUID: user.UUID,
+            email_type: 'PASSWORD_RESET',
+            unique: true,
+        });
+
+        emails.sort((a, b) => b.sent_at - a.sent_at);
+
+        if (emails.length == 0 || emails[0].data == '') {
+            throw new HTTPException(400, {
+                message: 'No reset token found, please request a new one!',
+            });
+        }
+
+        const emailData = emails[0].data as any as DataType<'PASSWORD_RESET'>;
+
+        if (emailData.forgotPasswordToken !== forgotPasswordData.token) {
+            throw new HTTPException(400, {
+                message: 'Invalid reset token!',
+            });
+        }
+        return c.json({
+            message: 'Valid reset token',
+        });
+    }).patch('/forgotPassword', async (c) => {
+        const jsonBody = await c.req.json();
+        const forgotPasswordData = fotgotPasswordSchemaStage3.parse(jsonBody);
+        const user = await accountsTable.getOne({ email: forgotPasswordData.email, unique: true });
+        if (user == undefined) {
+            throw new HTTPException(400, {
+                message: 'Invalid email!',
+            });
+        }
+
+        const emails = await emailsTable.get({
+            account_UUID: user.UUID,
+            email_type: 'PASSWORD_RESET',
+            unique: true,
+        });
+
+        emails.sort((a, b) => b.sent_at - a.sent_at);
+
+        if (emails.length == 0 || emails[0].data == '') {
+            throw new HTTPException(400, {
+                message: 'No reset token found, please request a new one!',
+            });
+        }
+
+        const emailData = emails[0].data as any as DataType<'PASSWORD_RESET'>;
+
+        if (emailData.forgotPasswordToken !== forgotPasswordData.token) {
+            throw new HTTPException(400, {
+                message: 'Invalid reset token!',
+            });
+        }
+        const newPassword = await bcrypt.hash(forgotPasswordData.newPassword, 8);
+        await accountsTable.update({ UUID: user.UUID }, {
+            password: newPassword,
+        });
+        return c.json({
+            message: 'Successfully reset password',
         });
     });
