@@ -1,4 +1,4 @@
-import type { AuthHandshakeSubsystem, OfflineSubSystem, OnlineSubSystem, SocketAuthDataSubsystem, SubSystem } from "@cinefinn/types/socket";
+import type { AuthHandshakeSubsystem, DiskStats, OfflineSubSystem, OnlineSubSystem, SocketAuthDataSubsystem, SubSystem } from "@cinefinn/types/socket";
 import type { SocketConsumerMeta } from "./index.js";
 import { getConfig } from "../config.js";
 import { getIO, queryDatabase } from "../utils.js";
@@ -27,15 +27,24 @@ async function authFunction(authHandshake: AuthHandshakeSubsystem): Promise<Sock
     };
 }
 
+export const subSocketDiskStatsMap = new Map<string, any>()
+
 async function connectionFunction(socket: definedSocket) {
     const socketAuthData = socket.data.auth as SocketAuthDataSubsystem;
     console.log('subsystem connected');
+    socket.on('diskStats', (stats: DiskStats) => {
+        console.log('Recieved diskStats', stats);
+        subSocketDiskStatsMap.set(socketAuthData.id, stats);
+        rebroadcastSubsystems();
+    });
+
     await toggleSeriesesForSubSystem(socketAuthData.id, false);
 
     await rebroadcastSubsystems();
 
     socket.on('disconnect', async () => {
         await toggleSeriesesForSubSystem(socketAuthData.id, true);
+        subSocketDiskStatsMap.delete(socketAuthData.id);
         await rebroadcastSubsystems();
     });
 }
@@ -52,6 +61,9 @@ export async function getKnownSubSystems() {
 export async function getSubSystems(): Promise<SubSystem[]> {
     const knownSubSystems = await getKnownSubSystems();
 
+    console.log(subSocketDiskStatsMap);
+
+
     const allSockets = await getIO().fetchSockets();
     const subsystems = knownSubSystems.map(async subID => {
         const subSystemSocket = allSockets.find(sock => {
@@ -65,13 +77,14 @@ export async function getSubSystems(): Promise<SubSystem[]> {
                 id: subID,
                 status: 'offline',
                 name: subID,
-                series
+                series,
             } as SubSystem;
         } else {
             return {
                 status: 'online',
                 ...subData,
-                series
+                series,
+                diskStats: subSocketDiskStatsMap.get(subID) || null,
             } as SubSystem;
         }
     });

@@ -75,6 +75,7 @@ export interface SubSystemToServerEvents {
     'video-chunk': (obj: { chunk: string | Buffer; requestId: string; }) => void;
     'video-chunk-end': (obj: { requestId: string; }) => void;
     'video-chunk-error': (obj: { error: string; requestId: string; }) => void;
+    'diskStats': (obj: DiskStats) => void;
 }
 
 export interface ServerToSubSystemEvents {
@@ -121,6 +122,12 @@ export interface OfflineSubSystem {
     id: string;
 }
 
+export interface DiskStats {
+    toalSize: number;
+    availableSize: number;
+    freeSize: number;
+}
+
 export interface OnlineSubSystem {
     status: 'online';
     type: string;
@@ -130,6 +137,7 @@ export interface OnlineSubSystem {
     readrate: number;
     endpoint?: string;
     series: string[];
+    diskStats: DiskStats | null;
 }
 
 export interface Overview {

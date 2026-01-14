@@ -9,8 +9,7 @@ const config = getConfig();
 
 const ptoken = crypto.randomUUID().replaceAll('-', '');
 
-let socket: Socket<ServerToSubSystemEvents, SubSystemToServerEvents> | null = null;
-socket = io(config.core.url, {
+const socket = io(config.core.url, {
     auth: {
         type: 'subsystem',
         authToken: config.core.token,
@@ -19,7 +18,7 @@ socket = io(config.core.url, {
         ptoken,
         readrate: config.experimental.readrate || 0,
     } satisfies AuthHandshakeSubsystem,
-});
+}) as Socket<ServerToSubSystemEvents, SubSystemToServerEvents>;
 
 socket.on('connect_error', (error) => {
     console.log('Socket Connect Error: ', error.message); // prints the message associated with the error
@@ -37,10 +36,10 @@ socket.on('connect', async () => {
     console.log('Loaded', files.length, 'files from:', config.entrypoint);
 
     console.log('Current pToken:', ptoken);
-    test();
+    sendDiskStats();
 });
 
-function test() {
+function sendDiskStats() {
 
     const stats = fs.statfsSync(config.entrypoint);
 
@@ -50,9 +49,19 @@ function test() {
     const freeSize = stats.bfree * stats.bsize;
 
     // Convert to GB for readability
-    console.log('Total size:', (totalSize / (1024 ** 3)).toFixed(2), 'GB');
-    console.log('Available size:', (availableSize / (1024 ** 3)).toFixed(2), 'GB');
-    console.log('Free size:', (freeSize / (1024 ** 3)).toFixed(2), 'GB');
+    console.log('Total size:', formatBytes(totalSize));
+    console.log('Available size:', formatBytes(availableSize));
+    console.log('Free size:', formatBytes(freeSize));
+    socket.emit('diskStats', {
+        toalSize: totalSize,
+        availableSize: availableSize,
+        freeSize: freeSize,
+    });
+}
+
+function formatBytes(bytes: number, decimals: number = 2, iec: boolean = false) {
+    const { value, unit } = bytesToUnit(bytes, iec);
+    return `${value.toFixed(decimals)} ${unit}`;
 }
 
 function bytesToUnit(bytes: number, iec: boolean = false): { value: number; unit: string } {

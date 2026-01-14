@@ -39,14 +39,76 @@
                                 Series: {{ subsystem.status == 'offline' ? 'Offline' :
                                     subsystem.series.length }}
                             </li>
+                            <li v-if="subsystem.status == 'online'" class="list-group-item">
+                                Disk Usage:
+                                <div class="progress mt-2 mb-1" style="height: 25px;">
+                                    <div class="progress-bar" :class="getBarColor(subsystem.diskStats)"
+                                        role="progressbar"
+                                        :style="{ width: `${getUsagePercentage(subsystem.diskStats)}%` }"
+                                        aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                                        {{ getUsagePercentage(subsystem.diskStats).toFixed(2) }}%
+                                    </div>
+                                </div>
+                                <span>
+                                    Used: {{
+                                        formatBytes(
+                                            subsystem.diskStats!.toalSize - subsystem.diskStats!.freeSize
+                                        )
+                                    }}
+                                </span>
+                                <br />
+                                <span>
+                                    Free: {{
+                                        formatBytes(
+                                            subsystem.diskStats!.freeSize
+                                        )
+                                    }}
+                                </span>
+                            </li>
                         </ul>
                         <div v-if="subsystem.status == 'online'" class="d-grid gap-2">
-                            <button type="button" disabled @click="
-                                toggleShowSeries = true;
-                            selectedSubSystem = subsystem.id;
-                            " class="btn btn-outline-primary mt-2">
+                            <button type="button" @click="showSeriesModal(subsystem.id);"
+                                class="btn btn-outline-primary mt-2">
                                 List
                             </button>
+                            <Modal v-model="toggleShowSeriesModal" :title="`List Series ${selectedShowSeriesSubSystem}`"
+                                size="lg">
+                                <div class="mb-3 ms-5 me-5">
+                                    <label for="searchTerm" class="form-label">Search</label>
+                                    <input v-model="searchTerm" type="text" class="form-control" id="searchTerm"
+                                        aria-describedby="helpId" placeholder="Name or ID" />
+                                    <small id="helpId" class="form-text text-secondary">Name or ID of the Series</small>
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <table class="table" style="width: 75%; max-width: 85%">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">ID</th>
+                                                <th scope="col">Title</th>
+                                                <th scope="col">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="serie in getSeriesList(subsystem.series).filter(
+                                                (x) =>
+                                                    x?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                                    x?.UUID.toLowerCase().startsWith(searchTerm.toLowerCase())
+                                            )">
+                                                <template v-if="serie !== undefined">
+                                                    <td scope="row">{{ serie.UUID }}</td>
+                                                    <td>{{ serie.title }}</td>
+                                                    <td>-</td>
+                                                </template>
+                                                <template v-else>
+                                                    <td scope="row">-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                </template>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </Modal>
                         </div>
                     </div>
                 </div>
@@ -56,23 +118,83 @@
 </template>
 
 <script lang="ts" setup>
-import useAPIURL from '~/hooks/useAPIURL';
-
-const toggleShowSeries = ref(false);
-const selectedSubSystem = ref('');
-
+import type { DiskStats } from '@cinefinn/types/socket';
+import Modal from '~/components/Modal.vue';
 
 definePageMeta({
     middleware: 'auth',
 });
 
+const indexStore = useIndexStore();
 const adminStore = useAdminStore();
 
 const loading = computed(() => adminStore.loading);
 const error = computed(() => adminStore.error);
 const subsystems = computed(() => adminStore.subsystems);
 
+
+const toggleShowSeriesModal = ref(false);
+const selectedShowSeriesSubSystem = ref('');
+const searchTerm = ref('');
+
+function showSeriesModal(subSystem: string) {
+    selectedShowSeriesSubSystem.value = subSystem;
+    toggleShowSeriesModal.value = true;
+}
+
+function getSeriesList(seriesIDs: string[]) {
+    return seriesIDs.map((id) => indexStore.series.find((s) => s.UUID === id));
+}
+
 // await callOnce('loadSubsystems', () => adminStore.loadSubsystems(), { mode: 'navigation' });
+
+function getBarColor(diskStats: DiskStats | null) {
+    if (diskStats == null) return 'bg-primary-subtle';
+
+    const usagePercentage = getUsagePercentage(diskStats);
+
+    if (usagePercentage > 90) {
+        return 'bg-danger-subtle';
+    }
+    if (usagePercentage > 50) {
+        return 'bg-warning-subtle';
+    }
+    if (usagePercentage > 20) {
+        return 'bg-success-subtle';
+    }
+
+    return 'bg-primary-subtle';
+}
+
+function getUsagePercentage(diskStats: DiskStats | null) {
+    if (diskStats == null) return 0;
+    return Math.abs(((diskStats.freeSize / diskStats.toalSize) - 1) * 100);
+}
+
+function formatBytes(bytes: number, decimals: number = 2, iec: boolean = false) {
+    const { value, unit } = bytesToUnit(bytes, iec);
+    return `${value.toFixed(decimals)} ${unit}`;
+}
+
+function bytesToUnit(bytes: number, iec: boolean = false): { value: number; unit: string } {
+    const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    const iecUnits = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+
+    const devider = iec ? 1024 : 1000;
+    const unitArr = iec ? iecUnits : units;
+
+    let unitIndex = 0;
+    let value = bytes;
+    while (value >= devider && unitIndex < unitArr.length - 1) {
+        value /= devider;
+        unitIndex++;
+    }
+    return {
+        value,
+        unit: unitArr[unitIndex]!,
+    };
+}
 
 </script>
 
