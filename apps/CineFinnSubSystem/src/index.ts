@@ -1,42 +1,11 @@
 import fs, { ReadStream } from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { setupConfigurationManagment } from '@cinefinn/configuration-manager';
 import type { AuthHandshake, AuthHandshakeSubsystem, ServerToSubSystemEvents, SubSystemToServerEvents } from '@cinefinn/types/socket';
 import { io, Socket } from 'socket.io-client';
-const cliOptions = [['identifier', 'I'], ['entrypoint', 'E'], ['port', 'P'], ['endpoint'], ['core-url'], ['core-token']];
+import { getConfig } from './config.js';
 
-interface Config {
-    version: string;
-    identifier: string;
-    entrypoint: string;
-    port: number;
-    endpoint: string | boolean;
-    experimental: {
-        readrate: number;
-    };
-    core: {
-        url: string;
-        token: string;
-    };
-}
-
-const defaultConfig: Config = {
-    version: '1.0.1',
-    identifier: 'local-kdrama',
-    entrypoint: '/home/Media/K-Drama',
-    port: 9999,
-    endpoint: false, //Means enable Socket Transmission
-    experimental: {
-        readrate: 0,
-    },
-    core: {
-        url: 'http://localhost:3100',
-        token: 'SUPER-SECURE-CORE-TOKEN',
-    },
-};
-
-const config = setupConfigurationManagment(defaultConfig, cliOptions);
+const config = getConfig();
 
 const ptoken = crypto.randomUUID().replaceAll('-', '');
 
@@ -68,7 +37,43 @@ socket.on('connect', async () => {
     console.log('Loaded', files.length, 'files from:', config.entrypoint);
 
     console.log('Current pToken:', ptoken);
+    test();
 });
+
+function test() {
+
+    const stats = fs.statfsSync(config.entrypoint);
+
+    // Calculate sizes in bytes
+    const totalSize = stats.blocks * stats.bsize;
+    const availableSize = stats.bavail * stats.bsize;
+    const freeSize = stats.bfree * stats.bsize;
+
+    // Convert to GB for readability
+    console.log('Total size:', (totalSize / (1024 ** 3)).toFixed(2), 'GB');
+    console.log('Available size:', (availableSize / (1024 ** 3)).toFixed(2), 'GB');
+    console.log('Free size:', (freeSize / (1024 ** 3)).toFixed(2), 'GB');
+}
+
+function bytesToUnit(bytes: number, iec: boolean = false): { value: number; unit: string } {
+    const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    const iecUnits = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+
+    const devider = iec ? 1024 : 1000;
+    const unitArr = iec ? iecUnits : units;
+
+    let unitIndex = 0;
+    let value = bytes;
+    while (value >= devider && unitIndex < unitArr.length - 1) {
+        value /= devider;
+        unitIndex++;
+    }
+    return {
+        value,
+        unit: unitArr[unitIndex],
+    };
+}
 
 socket.on('listFiles', async (callback) => {
     const { files, dirs } = await listFilesAsync(config.entrypoint);

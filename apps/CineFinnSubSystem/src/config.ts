@@ -1,0 +1,41 @@
+import { setupConfigurationManagment } from "@cinefinn/configuration-manager";
+
+interface Config {
+    version: string;
+    identifier: string;
+    entrypoint: string;
+    port: number;
+    endpoint: string | boolean;
+    experimental: {
+        readrate: number;
+    };
+    core: {
+        url: string;
+        token: string;
+    };
+}
+
+const defaultConfig: Config = {
+    version: '1.0.1',
+    identifier: 'local-kdrama',
+    entrypoint: '/home/Media/K-Drama',
+    port: 9999,
+    endpoint: false, //Means enable Socket Transmission
+    experimental: {
+        readrate: 0,
+    },
+    core: {
+        url: 'http://localhost:3100',
+        token: 'SUPER-SECURE-CORE-TOKEN',
+    },
+};
+
+let config: Config;
+
+export function getConfig() {
+    if (config == undefined) {
+        const cliOptions = [['identifier', 'I'], ['entrypoint', 'E'], ['port', 'P'], ['endpoint'], ['core-url'], ['core-token']];
+        config = setupConfigurationManagment(defaultConfig, cliOptions);
+    }
+    return config;
+}
