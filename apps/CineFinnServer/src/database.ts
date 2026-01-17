@@ -58,7 +58,6 @@ export async function connectDatabase(clean: boolean = false) {
     database.setCallback('accounts-DELETE', rebAccounts);
 
     const rebOverview = debounce(async () => {
-        console.log('Overview Rebroadcast');
         await sleep(200);
         await adminRouter.rebroadcastOverview();
     }, 1000);

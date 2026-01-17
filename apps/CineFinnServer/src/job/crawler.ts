@@ -729,6 +729,8 @@ export async function handleSubSystemProminence(job: Job) {
 
 const movingItems = [] as MovingItem[];
 
+export const getMovingItems = () => movingItems;
+
 export interface MovingItem {
     ID: string;
     serie_UUID: string;

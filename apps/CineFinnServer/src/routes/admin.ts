@@ -9,6 +9,7 @@ import { generateEmailID } from "../utils/IdGenerators.js";
 import { getConfig, updateConfig } from "../config.js";
 import z from "zod";
 import { HTTPException } from "hono/http-exception";
+import { getMovingItems } from "../job/crawler.js";
 
 
 export async function generateOverview() {
@@ -112,7 +113,10 @@ const router = new Hono()
         const subsystems = await getSubSystems();
         return c.json(await Promise.all(subsystems));
     })
-    .get('/overview', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+    .get('/subsystems/movingItems', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+        const movingItems = getMovingItems();
+        return c.json(movingItems);
+    }).get('/overview', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const overview = await generateOverview();
         return c.json(overview);
     })

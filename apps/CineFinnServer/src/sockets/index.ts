@@ -30,7 +30,7 @@ async function setupSocketAuthMiddleware() {
     const io = getIO();
     io.use(async (socket, next) => {
         const authHanshake = socket.handshake.auth as AuthHandshake;
-        console.log('Trying to authorize ', socket.id, authHanshake);
+        // console.log('Trying to authorize ', socket.id, authHanshake);
         const socketConsumer = socketRegistry.get(authHanshake.type);
         if (!socketConsumer) {
             console.log('Unknown socket type', authHanshake.type);
@@ -38,7 +38,7 @@ async function setupSocketAuthMiddleware() {
         }
         const result = await tryCatch(() => socketConsumer.authFunction(authHanshake));
         if (result.error != null) {
-            console.log('Error while authorizing', result.error);
+            // console.log('Error while authorizing', result.error);
             return next(result.error);
         } else {
             socket.data = {

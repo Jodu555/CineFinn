@@ -8,7 +8,6 @@ import { sendSeriesReloadToAll } from "./client.socket.js";
 import { rebroadcastSubsystems } from '../routes/admin.js';
 
 async function authFunction(authHandshake: AuthHandshakeSubsystem): Promise<SocketAuthDataSubsystem> {
-    console.log('subsystem auth');
     const { authToken: token } = authHandshake;
 
     if (token === undefined) {
@@ -31,9 +30,8 @@ export const subSocketDiskStatsMap = new Map<string, any>()
 
 async function connectionFunction(socket: definedSocket) {
     const socketAuthData = socket.data.auth as SocketAuthDataSubsystem;
-    console.log('subsystem connected');
+    console.log('Subsystem connected', socketAuthData.id);
     socket.on('diskStats', (stats: DiskStats) => {
-        console.log('Recieved diskStats', stats);
         subSocketDiskStatsMap.set(socketAuthData.id, stats);
         rebroadcastSubsystems();
     });
@@ -60,10 +58,6 @@ export async function getKnownSubSystems() {
 
 export async function getSubSystems(): Promise<SubSystem[]> {
     const knownSubSystems = await getKnownSubSystems();
-
-    console.log(subSocketDiskStatsMap);
-
-
     const allSockets = await getIO().fetchSockets();
     const subsystems = knownSubSystems.map(async subID => {
         const subSystemSocket = allSockets.find(sock => {
