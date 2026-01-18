@@ -137,7 +137,7 @@
                     </h5>
                 </div>
                 <!-- <h5>{{ item.fromSubID }} => p{{ item.toSubID }}</h5> -->
-                <div class="d-flex gap-3">
+                <div class="d-flex gap-3 mb-2">
                     <button v-if="item.meta.movingStarted == 0" @click="moveItem(item.ID)" type="button"
                         class="btn btn-outline-warning">Move</button>
                 </div>

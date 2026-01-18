@@ -47,6 +47,7 @@ export interface ServerToClientEvents {
     adminOverview: (obj: Overview) => void;
     adminAccounts: (obj: (database.Account & database.timestamped)[]) => void;
     adminSubsystems: (obj: SubSystem[]) => void;
+    adminMovingItems: (obj: database.MovingItem[]) => void;
     todoListUpdate: (obj: database.TodoItem[]) => void;
 }
 

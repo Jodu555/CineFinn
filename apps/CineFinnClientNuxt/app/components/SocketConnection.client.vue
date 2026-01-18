@@ -22,9 +22,6 @@ const adminStore = useAdminStore();
 const todoStore = useTodoStore();
 
 onMounted(() => {
-	if (authStore.loggedIn !== true) return;
-	socket.connect();
-
 	socket.on('disconnect', onDisconnect);
 	socket.on('jobUpdate', managmentStore.updateJob);
 	socket.on('watchListUpdate', indexStore.updateWatchList);
@@ -33,7 +30,12 @@ onMounted(() => {
 	socket.on('adminOverview', adminStore.updateOverview);
 	socket.on('adminAccounts', adminStore.updateAccounts);
 	socket.on('adminSubsystems', adminStore.updateSubsystems);
+	socket.on('adminMovingItems', adminStore.updateMovingItems);
 	socket.on('todoListUpdate', todoStore.updateTodoList);
+
+	if (authStore.loggedIn !== true) return;
+	socket.connect();
+
 	if (socket.connected) {
 		onConnect();
 	}

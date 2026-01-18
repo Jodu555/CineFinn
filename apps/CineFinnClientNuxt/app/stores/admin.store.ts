@@ -79,6 +79,9 @@ export const useAdminStore = defineStore('admin', {
             }
             this.loading = false;
         },
+        async moveItem(itemID: string) {
+
+        },
         async loadEmails() {
             this.loading = true;
             const { data, error } = await tryCatch<Promise<(Email & timestamped)[]>, FetchError>(() => $fetch<(Email & timestamped)[]>(useAPIURL() + '/admin/emails', {
@@ -135,6 +138,9 @@ export const useAdminStore = defineStore('admin', {
         },
         async updateSubsystems(subsystems: SubSystem[]) {
             this.subsystems = subsystems;
+        },
+        async updateMovingItems(movingItems: MovingItem[]) {
+            this.movingItems = movingItems;
         },
         async updateAccounts(accounts: (Account & timestamped)[]) {
             this.accounts = accounts;

@@ -94,6 +94,16 @@ export async function rebroadcastSubsystems() {
     });
 }
 
+export async function rebroadcastMovingItems() {
+    const sockets = await getIO().fetchSockets();
+    const movingItems = getMovingItems();
+    sockets.forEach((socket) => {
+        if (socket.data.auth.type === 'client' && socket.data.auth.user.role >= Role.Mod) {
+            socket.emit('adminMovingItems', movingItems);
+        }
+    });
+}
+
 function redactConfig(config: ReturnType<typeof getConfig>): ReturnType<typeof getConfig> {
     const redactedConfig = JSON.parse(JSON.stringify(config));
     redactedConfig.smtp.auth.pass = 'REDACTED';
