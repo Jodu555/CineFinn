@@ -1,11 +1,19 @@
 import type { AuthHandshakeSubsystem, DiskStats, OfflineSubSystem, OnlineSubSystem, SocketAuthDataSubsystem, SubSystem } from "@cinefinn/types/socket";
 import type { SocketConsumerMeta } from "./index.js";
 import { getConfig } from "../config.js";
-import { getIO, queryDatabase } from "../utils.js";
+import { calculateMD5, getIO, queryDatabase } from "../utils.js";
 import { seriesTable, watchableEntitysTable } from "../database.js";
 import type { definedSocket } from "../index.js";
 import { sendSeriesReloadToAll } from "./client.socket.js";
 import { rebroadcastSubsystems } from '../routes/admin.js';
+import type { MovingItem } from "@cinefinn/types/database";
+import fs from 'fs';
+import { pipeline } from 'stream';
+import { promisify } from 'util';
+import { Transform } from 'stream';
+import { tryCatch } from "../tryCatch.js";
+
+const pipelineAsync = promisify(pipeline);
 
 async function authFunction(authHandshake: AuthHandshakeSubsystem): Promise<SocketAuthDataSubsystem> {
     const { authToken: token } = authHandshake;
@@ -106,6 +114,151 @@ export async function toggleSeriesesForSubSystem(subID: string, disabled: boolea
     console.log(`Toggling Serieses(${seriesIDs.length}) for SubSystem: ${subID} to Disabled: ${disabled}`);
 }
 
+export async function processMovingItem(movingItem: MovingItem) {
+
+    if (movingItem.fromSubID === 'main' && movingItem.toSubID !== 'main') {
+        sendMovingItemToSubSystem(movingItem);
+    } else if (movingItem.fromSubID !== 'main' && movingItem.toSubID === 'main') {
+        // recieveMovingItemFromSubSystem(movingItem);
+    }
+
+}
+
+export async function getSubSocketByID(subID: string) {
+    const subSystemSocket = (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'subsystem' && s.data.auth.id === subID)[0];
+    if (subSystemSocket == undefined) {
+        throw new Error('SubSystem not found');
+    }
+    return subSystemSocket as any as definedSocket;
+}
+
+class ThrottleStream extends Transform {
+    private bytesPerSecond: number;
+    private lastTime: number;
+    private bytesWritten: number;
+
+    constructor(bytesPerSecond: number) {
+        super();
+        this.bytesPerSecond = bytesPerSecond;
+        this.lastTime = Date.now();
+        this.bytesWritten = 0;
+    }
+
+    async _transform(
+        chunk: Buffer,
+        encoding: BufferEncoding,
+        callback: (error?: Error | null) => void
+    ): Promise<void> {
+        const now = Date.now();
+        const elapsed = (now - this.lastTime) / 1000;
+        this.bytesWritten += chunk.length;
+
+        const expectedTime = this.bytesWritten / this.bytesPerSecond;
+        const delay = Math.max(0, (expectedTime - elapsed) * 1000);
+
+        if (delay > 10) {
+            setTimeout(() => {
+                this.push(chunk);
+                callback();
+            }, delay);
+        } else {
+            this.push(chunk);
+            callback();
+        }
+    }
+}
+
+export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
+    const { data: subSystemSocket, error } = await tryCatch(() => getSubSocketByID(movingItem.toSubID));
+    if (error) {
+        console.log(`SubSystem ${movingItem.toSubID} not found`);
+        return;
+    }
+
+    const watchableEntity = await watchableEntitysTable.getOne({ UUID: movingItem.watchableEntityUUID });
+    if (watchableEntity == undefined) {
+        console.log(`WatchableEntity ${movingItem.watchableEntityUUID} not found`);
+        return;
+    }
+
+    const filePath = watchableEntity.filePath;
+    if (filePath == undefined) {
+        console.log(`FilePath for WatchableEntity ${movingItem.watchableEntityUUID} not found`);
+        return;
+    }
+
+    console.log(`Starting file transfer to client: ${filePath}`);
+
+    try {
+        // Check if file exists
+        if (!fs.existsSync(filePath)) {
+            throw new Error(`File not found: ${filePath}`);
+        }
+
+        const stats = fs.statSync(filePath);
+        const fileSize = stats.size;
+        const md5 = await calculateMD5(filePath);
+        const filename = filePath.split('/').pop() || 'unknown';
+
+        subSystemSocket.emit('file_start', {
+            filename,
+            size: fileSize,
+            md5,
+        });
+
+        const readStream = fs.createReadStream(filePath, {
+            highWaterMark: 64 * 1024,
+        });
+
+        // 10 MB/s
+        const bandwidth = 10 * 1024 * 1024
+        const throttle = new ThrottleStream(bandwidth);
+
+        let bytesSent = 0;
+        let canSend = true;
+
+        const sendChunk = (): Promise<void> => {
+            return new Promise((resolve) => {
+                if (!canSend) {
+                    subSystemSocket.once('ack', () => {
+                        canSend = true;
+                        resolve();
+                    });
+                } else {
+                    resolve();
+                }
+            });
+        };
+
+        subSystemSocket.on('ack', () => {
+            canSend = true;
+        });
+
+        throttle.on('data', async (chunk: Buffer) => {
+            readStream.pause();
+
+            await sendChunk();
+
+            canSend = false;
+            subSystemSocket.emit('file_chunk', chunk);
+
+            bytesSent += chunk.length;
+            const progress = ((bytesSent / fileSize) * 100).toFixed(2);
+            console.log(`Progress: ${progress}%`);
+
+            readStream.resume();
+        });
+
+        await pipelineAsync(readStream, throttle);
+
+        subSystemSocket.emit('file_end');
+        console.log('File transfer complete');
+    } catch (err) {
+        const error = err as Error;
+        console.error('Error sending file:', error);
+        subSystemSocket.emit('file_error', { message: error.message });
+    }
+}
 
 export default {
     meta: {

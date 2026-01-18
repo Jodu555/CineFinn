@@ -77,12 +77,54 @@ export interface SubSystemToServerEvents {
     'video-chunk-end': (obj: { requestId: string; }) => void;
     'video-chunk-error': (obj: { error: string; requestId: string; }) => void;
     'diskStats': (obj: DiskStats) => void;
+    client_info: (info: ClientInfo) => void;
+    request_file: (data: RequestFileData) => void;
+    file_chunk: (data: FileChunkData) => void;
+    ack: () => void;
 }
 
 export interface ServerToSubSystemEvents {
     'listFiles': (callback: (files: string[]) => void) => void;
     'videoStats': (obj: { filePath: string; }, callback: (stats: fs.Stats) => void) => void;
     'video-range': (obj: { start: number, end: number, filePath: string, requestId: string; }) => void;
+    file_start: (data: FileStartData) => void;
+    file_chunk: (chunk: Buffer) => void;
+    file_end: () => void;
+    file_error: (data: ErrorData) => void;
+    upload_ack: () => void;
+    upload_complete: (data: UploadCompleteData) => void;
+    upload_error: (data: ErrorData) => void;
+}
+
+export interface FileStartData {
+    filename: string;
+    size: number;
+    md5: string;
+}
+
+export interface ErrorData {
+    message: string;
+}
+
+export interface UploadCompleteData {
+    valid: boolean;
+    md5: string;
+}
+
+export interface ClientInfo {
+    bandwidth: number;
+}
+
+export interface RequestFileData {
+    filePath: string;
+}
+
+export interface FileChunkData {
+    filename: string;
+    chunk: Buffer;
+    isFirst: boolean;
+    isLast: boolean;
+    md5: string;
 }
 
 

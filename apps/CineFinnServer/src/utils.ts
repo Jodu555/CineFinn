@@ -5,6 +5,8 @@ import { CacheContext } from './LRUCache.js';
 import { database, episodesTable, moviesTable } from './database.js';
 import { Redis } from 'ioredis';
 import EmailManager from './utils/EmailManager.js';
+import crypto from 'crypto';
+import fs from 'fs';
 
 let io: Server<AnythingToServerEvents,
     ServerToAnythingEvents,
@@ -109,4 +111,17 @@ export function debounce(cb: Function, delay = 1000) {
             cb(...args);
         }, delay);
     };
+}
+
+export function calculateMD5(filePath: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const hash = crypto.createHash('md5');
+        const stream = fs.createReadStream(filePath);
+
+        stream.on('data', (chunk: any) => {
+            hash.update(chunk)
+        });
+        stream.on('end', () => resolve(hash.digest('hex')));
+        stream.on('error', reject);
+    });
 }

@@ -7,6 +7,7 @@ import { getIO } from '../utils.js';
 import type { WatchableEntity } from '@cinefinn/types/database';
 import { tryCatch } from '../tryCatch.js';
 import type { definedSocket } from '../index.js';
+import { getSubSocketByID } from '../sockets/subsystem.socket.js';
 
 
 
@@ -133,14 +134,6 @@ const router = new Hono()
 const testMap = new Map<string, { time: number; }>();
 
 const countMap = new Map<string, number>();
-
-async function getSubSocketByID(subID: string) {
-    const subSystemSocket = (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'subsystem' && s.data.auth.id === subID)[0];
-    if (subSystemSocket == undefined) {
-        throw new Error('SubSystem not found');
-    }
-    return subSystemSocket as any as definedSocket;
-}
 
 async function createVideoStreamOverSocket(
     subID: string,
