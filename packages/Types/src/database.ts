@@ -303,3 +303,18 @@ type SuccessScrapeInfo<K extends keyof RefRef> = {
     state: 'success';
     data: RefRef[K];
 };
+
+
+export interface MovingItem {
+    ID: string;
+    serie_UUID: string;
+    fromSubID: string;
+    toSubID: string;
+    watchableEntityUUID: string;
+    meta: {
+        progress: number;
+        movingStarted: number;
+        result: string;
+        isAdditional: boolean; // Wether the Item was system generated or additionally by an admin
+    };
+}

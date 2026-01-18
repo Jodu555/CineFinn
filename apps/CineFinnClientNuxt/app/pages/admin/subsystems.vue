@@ -114,6 +114,48 @@
                 </div>
             </div>
         </div>
+        <div v-auto-animate v-for="item in adminStore.movingItems" :key="item.ID" class="row">
+            <div class="col-auto ms-5 me-auto">
+                <h4 class="mb-1">
+                    #{{ item.serie_UUID }} -- {{ item.ID }} - {{ item.meta.isAdditional ?
+                        'Additional' :
+                        'System' }}
+                </h4>
+                <div class="d-flex gap-2">
+                    <h5 :class="{
+                        'text-success': isSubSystemOnline(item.fromSubID),
+                        'text-danger': !isSubSystemOnline(item.fromSubID),
+                    }">
+                        {{ item.fromSubID }}
+                    </h5>
+                    <h5>=></h5>
+                    <h5 :class="{
+                        'text-success': isSubSystemOnline(item.toSubID),
+                        'text-danger': !isSubSystemOnline(item.toSubID),
+                    }">
+                        {{ item.toSubID }}
+                    </h5>
+                </div>
+                <!-- <h5>{{ item.fromSubID }} => p{{ item.toSubID }}</h5> -->
+                <div class="d-flex gap-3">
+                    <button v-if="item.meta.movingStarted == 0" @click="moveItem(item.ID)" type="button"
+                        class="btn btn-outline-warning">Move</button>
+                </div>
+            </div>
+            <div class="ms-5 mb-3" style="width: 95%" v-if="item.meta.movingStarted !== 0">
+                <div class="progress mt-2 mb-2" style="height: 30px">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar"
+                        :style="{ width: `${item.meta.progress}%` }" :aria-valuenow="item.meta.progress"
+                        aria-valuemin="0" aria-valuemax="100">
+                        <span class="h5 mt-2">{{ item.meta.progress }}%</span>
+                    </div>
+                </div>
+                <div>
+                    <span class="text-center text-warning h6">- {{ item.meta.result }}</span>
+                </div>
+            </div>
+            <hr />
+        </div>
     </div>
 </template>
 
@@ -144,6 +186,16 @@ function showSeriesModal(subSystem: string) {
 
 function getSeriesList(seriesIDs: string[]) {
     return seriesIDs.map((id) => indexStore.series.find((s) => s.UUID === id));
+}
+
+function isSubSystemOnline(subID: string) {
+    if (subID == 'main') return true;
+    const subsystem = adminStore.subsystems.find((x) => x.id == subID);
+    return subsystem != undefined && subsystem.status == 'online';
+}
+
+function moveItem(itemID: string) {
+
 }
 
 // await callOnce('loadSubsystems', () => adminStore.loadSubsystems(), { mode: 'navigation' });

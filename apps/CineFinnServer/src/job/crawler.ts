@@ -9,7 +9,7 @@ import { CacheContext } from '../LRUCache.js';
 import { Job } from './Job.js';
 import { getConfig } from '../config.js';
 import { generateSeriesID, generateMovieID, generateSeasonID, generateEpisodeID, generateEntityID } from '../utils/IdGenerators.js';
-import type { Langs } from '@cinefinn/types/database';
+import type { Langs, MovingItem } from '@cinefinn/types/database';
 import { indexStorage } from '../routes/index.js';
 import { app } from '../index.js';
 import { getIO } from '../utils.js';
@@ -717,7 +717,7 @@ export async function handleSubSystemProminence(job: Job) {
                     watchableEntityUUID: watchableEntity.UUID,
                     meta: {
                         progress: 0,
-                        isMoving: true,
+                        movingStarted: 0,
                         result: '',
                         isAdditional: false,
                     }
@@ -730,17 +730,3 @@ export async function handleSubSystemProminence(job: Job) {
 const movingItems = [] as MovingItem[];
 
 export const getMovingItems = () => movingItems;
-
-export interface MovingItem {
-    ID: string;
-    serie_UUID: string;
-    fromSubID: string;
-    toSubID: string;
-    watchableEntityUUID: string;
-    meta: {
-        progress: number;
-        isMoving: boolean;
-        result: string;
-        isAdditional: boolean;
-    };
-}
