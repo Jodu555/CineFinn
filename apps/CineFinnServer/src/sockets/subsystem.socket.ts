@@ -68,9 +68,7 @@ export async function getSubSystems(): Promise<SubSystem[]> {
     const knownSubSystems = await getKnownSubSystems();
     const allSockets = await getIO().fetchSockets();
     const subsystems = knownSubSystems.map(async subID => {
-        const subSystemSocket = allSockets.find(sock => {
-            return sock.data.auth.type === 'subsystem' && sock.data.auth.id === subID;
-        });
+        const { data: subSystemSocket, error } = await tryCatch(() => getSubSocketByID(subID));
         const subData = (subSystemSocket?.data.auth as SocketAuthDataSubsystem);
         const series = await getSeriesRelatedToSubSystem(subID);
         if (subData == undefined) {
@@ -82,6 +80,13 @@ export async function getSubSystems(): Promise<SubSystem[]> {
                 series,
             } as SubSystem;
         } else {
+
+            const diskStats = subSocketDiskStatsMap.get(subID);
+
+            if (diskStats == undefined) {
+                subSystemSocket?.emit('getDiskStats');
+            }
+
             return {
                 status: 'online',
                 ...subData,

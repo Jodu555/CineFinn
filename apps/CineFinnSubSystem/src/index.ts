@@ -39,6 +39,10 @@ socket.on('connect', async () => {
     sendDiskStats();
 });
 
+socket.on('getDiskStats', async () => {
+    sendDiskStats();
+});
+
 function sendDiskStats() {
 
     const stats = fs.statfsSync(config.entrypoint);

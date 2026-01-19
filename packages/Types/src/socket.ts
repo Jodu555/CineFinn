@@ -87,6 +87,7 @@ export interface ServerToSubSystemEvents {
     'listFiles': (callback: (files: string[]) => void) => void;
     'videoStats': (obj: { filePath: string; }, callback: (stats: fs.Stats) => void) => void;
     'video-range': (obj: { start: number, end: number, filePath: string, requestId: string; }) => void;
+    getDiskStats: () => void;
     file_start: (data: FileStartData) => void;
     file_chunk: (chunk: Buffer) => void;
     file_end: () => void;

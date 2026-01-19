@@ -39,7 +39,7 @@
                                 Series: {{ subsystem.status == 'offline' ? 'Offline' :
                                     subsystem.series.length }}
                             </li>
-                            <li v-if="subsystem.status == 'online'" class="list-group-item">
+                            <li v-if="subsystem.status == 'online' && subsystem.diskStats" class="list-group-item">
                                 Disk Usage:
                                 <div class="progress mt-2 mb-1" style="height: 25px;">
                                     <div class="progress-bar" :class="getBarColor(subsystem.diskStats)"
@@ -52,7 +52,7 @@
                                 <span>
                                     Used: {{
                                         formatBytes(
-                                            subsystem.diskStats!.toalSize - subsystem.diskStats!.freeSize
+                                            subsystem.diskStats.toalSize - subsystem.diskStats!.freeSize
                                         )
                                     }}
                                 </span>
