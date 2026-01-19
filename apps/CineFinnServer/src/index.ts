@@ -28,13 +28,13 @@ import { getConfig } from './config.js';
 import { compareSettings } from './utils/settings.js';
 import os from "os";
 import { setupSocketIO } from './sockets/index.js';
-import { getKnownSubSystems, getSeriesRelatedToSubSystem, toggleSeriesesForSubSystem } from './sockets/subsystem.socket.js';
+import { getKnownSubSystems, getSeriesRelatedToSubSystem, processMovingItem, toggleSeriesesForSubSystem } from './sockets/subsystem.socket.js';
 import { playlistRouter } from './routes/playlist.js';
 import { adminRouter } from './routes/admin.js';
 import { todoRouter } from './routes/todo.js';
 import axios from 'axios';
 import { proxyRouter } from './routes/proxys.js';
-import { handleSubSystemProminence } from './job/crawler.js';
+import { getMovingItems, handleSubSystemProminence } from './job/crawler.js';
 import { Job } from './job/Job.js';
 
 const { printMetrics, registerMetrics } = prometheus();
@@ -184,6 +184,16 @@ const httpServer = serve({
 
     await handleSubSystemProminence(Job.fromDummy('crawl'));
 
+    const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+    // console.log('Waiting for 1 minute');
+    // await wait(1000 * 60 * 1);
+    // console.log('Waited for 1 minute');
+
+    // const testMovingItem = getMovingItems().find(m => m.ID === 'WE-56644ca7');
+    // if (testMovingItem != undefined) {
+    //     processMovingItem(testMovingItem);
+    // }
 
     // console.log('Fixing Seasons');
     // const seasons = await seasonsTable.get();

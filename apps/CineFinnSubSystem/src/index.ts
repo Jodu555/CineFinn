@@ -1,7 +1,7 @@
 import fs, { ReadStream } from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import type { AuthHandshake, AuthHandshakeSubsystem, ServerToSubSystemEvents, SubSystemToServerEvents } from '@cinefinn/types/socket';
+import type { AuthHandshake, AuthHandshakeSubsystem, ErrorData, FileStartData, ServerToSubSystemEvents, SubSystemToServerEvents } from '@cinefinn/types/socket';
 import { io, Socket } from 'socket.io-client';
 import { getConfig } from './config.js';
 
@@ -182,4 +182,94 @@ socket.on('video-range', ({ filePath, start, end, requestId }: VideoRangeRequest
         console.error('Error reading video file:', error);
         socket.emit('video-chunk-error', { error: error.message, requestId });
     });
+});
+
+
+interface DownloadSession {
+    stream: fs.WriteStream;
+    hash: crypto.Hash;
+    expectedMD5: string;
+    bytesReceived: number;
+    totalSize: number;
+}
+
+let currentDownload: DownloadSession | null = null;
+
+socket.on('file_start', (data) => {
+    console.log(`Receiving file: ${data.filename} (${data.size} bytes)`);
+
+    const downloadStream = fs.createWriteStream(`${path.join(getConfig().entrypoint, data.filename)}`);
+    const downloadHash = crypto.createHash('md5');
+
+    currentDownload = {
+        stream: downloadStream,
+        hash: downloadHash,
+        expectedMD5: data.md5,
+        bytesReceived: 0,
+        totalSize: data.size,
+    };
+
+    downloadStream.on('drain', () => {
+        socket.emit('ack');
+    });
+});
+
+socket.on('file_chunk', (chunk: Buffer) => {
+    if (!currentDownload) {
+        console.error('Received chunk but no active download session');
+        return;
+    }
+
+    const canWrite = currentDownload.stream.write(chunk);
+    currentDownload.hash.update(chunk);
+    currentDownload.bytesReceived += chunk.length;
+
+    // Log progress
+    const progress = (
+        (currentDownload.bytesReceived / currentDownload.totalSize) *
+        100
+    ).toFixed(2);
+    console.log(`Download progress: ${progress}%`);
+
+    if (canWrite) {
+        socket.emit('ack');
+    }
+    // If canWrite is false, we'll emit ack on 'drain' event
+});
+
+socket.on('file_end', async () => {
+    if (!currentDownload) {
+        console.error('Received file_end but no active download session');
+        return;
+    }
+
+    const session = currentDownload;
+    session.stream.end();
+
+    await new Promise<void>((resolve) =>
+        session.stream.once('finish', resolve)
+    );
+
+    const calculatedMD5 = session.hash.digest('hex');
+    const isValid = calculatedMD5 === session.expectedMD5;
+
+    console.log(`Download complete!`);
+    console.log(`Expected MD5: ${session.expectedMD5}`);
+    console.log(`Calculated MD5: ${calculatedMD5}`);
+    console.log(`File integrity: ${isValid ? 'VALID' : 'CORRUPTED'}`);
+    console.log(`Total bytes received: ${session.bytesReceived}`);
+
+    currentDownload = null;
+
+    // Example: After receiving a file, send one back to server
+    // setTimeout(() => {
+    //     sendFileToServer('./upload-test.bin').catch((err) => {
+    //         console.error('Error in delayed upload:', err);
+    //     });
+    // }, 2000);
+});
+
+socket.on('file_error', (data: ErrorData) => {
+    console.error('File transfer error:', data.message);
+    currentDownload = null;
 });

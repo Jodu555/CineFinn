@@ -8,6 +8,7 @@ import { sendSeriesReloadToAll } from "./client.socket.js";
 import { rebroadcastSubsystems } from '../routes/admin.js';
 import type { MovingItem } from "@cinefinn/types/database";
 import fs from 'fs';
+import path from 'path';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 import { Transform } from 'stream';
@@ -203,7 +204,7 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
         const stats = fs.statSync(filePath);
         const fileSize = stats.size;
         const md5 = await calculateMD5(filePath);
-        const filename = filePath.split('/').pop() || 'unknown';
+        const filename = path.parse(filePath).base;
 
         subSystemSocket.emit('file_start', {
             filename,
