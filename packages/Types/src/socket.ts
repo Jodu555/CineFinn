@@ -90,7 +90,7 @@ export interface ServerToSubSystemEvents {
     getDiskStats: () => void;
     file_start: (data: FileStartData) => void;
     file_chunk: (chunk: Buffer) => void;
-    file_end: () => void;
+    file_end: (callback: (finalPath: string | false) => void) => void;
     file_error: (data: ErrorData) => void;
     upload_ack: () => void;
     upload_complete: (data: UploadCompleteData) => void;
@@ -101,6 +101,7 @@ export interface FileStartData {
     filename: string;
     size: number;
     md5: string;
+    resultPath: string;
 }
 
 export interface ErrorData {

@@ -1,12 +1,12 @@
 import type { AuthHandshakeSubsystem, DiskStats, OfflineSubSystem, OnlineSubSystem, SocketAuthDataSubsystem, SubSystem } from "@cinefinn/types/socket";
 import type { SocketConsumerMeta } from "./index.js";
 import { getConfig } from "../config.js";
-import { calculateMD5, getIO, queryDatabase } from "../utils.js";
+import { calculateMD5, getIO, queryDatabase, watchableUUIDToWatchable } from "../utils.js";
 import { seriesTable, watchableEntitysTable } from "../database.js";
 import type { definedSocket } from "../index.js";
 import { sendSeriesReloadToAll } from "./client.socket.js";
 import { rebroadcastSubsystems } from '../routes/admin.js';
-import type { MovingItem } from "@cinefinn/types/database";
+import type { Episode, Movie, MovingItem, timestamped } from "@cinefinn/types/database";
 import fs from 'fs';
 import path from 'path';
 import { pipeline } from 'stream';
@@ -187,6 +187,30 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
         return;
     }
 
+    const series = await seriesTable.getOne({ UUID: watchableEntity.serie_UUID });
+    if (series == undefined) {
+        console.log(`Serie ${watchableEntity.serie_UUID} not found`);
+        return;
+    }
+
+    const watchable = await watchableUUIDToWatchable(watchableEntity.watchable_UUID);
+    if (watchable == undefined) {
+        console.log(`Watchable ${movingItem.watchableEntityUUID} not found`);
+        return;
+    }
+
+    let resultPath = '';
+
+    if (watchable.UUID.startsWith('EP-')) {
+        const episode = watchable as Episode & timestamped;
+        resultPath = path.join(resultPath, series.tags[0], series.title, `Season-${episode.season_IDX}`,)
+    }
+    if (watchable.UUID.startsWith('MO-')) {
+        const movie = watchable as Movie & timestamped;
+        resultPath = path.join(resultPath, series.tags[0], series.title, 'Movies')
+    }
+
+
     const filePath = watchableEntity.filePath;
     if (filePath == undefined) {
         console.log(`FilePath for WatchableEntity ${movingItem.watchableEntityUUID} not found`);
@@ -210,6 +234,7 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
             filename,
             size: fileSize,
             md5,
+            resultPath: path.join(resultPath, filename),
         });
 
         const readStream = fs.createReadStream(filePath, {
@@ -217,7 +242,7 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
         });
 
         // 10 MB/s
-        const bandwidth = 10 * 1024 * 1024
+        const bandwidth = 5 * 1024 * 1024
         const throttle = new ThrottleStream(bandwidth);
 
         let bytesSent = 0;
@@ -257,8 +282,22 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
 
         await pipelineAsync(readStream, throttle);
 
-        subSystemSocket.emit('file_end');
-        console.log('File transfer complete');
+        const finalPath = await new Promise<string>((resolve, reject) => {
+            subSystemSocket.emit('file_end', (finalPath) => {
+                if (finalPath === false) {
+                    reject(new Error('File transfer failed'));
+                } else {
+                    resolve(finalPath);
+                }
+            });
+        });
+        console.log('File transfer complete', finalPath);
+
+        if (finalPath) {
+            watchableEntitysTable.update({ UUID: watchableEntity.UUID }, { filePath: resultPath, subID: movingItem.toSubID });
+            fs.rmSync(filePath, { recursive: true });
+        }
+
     } catch (err) {
         const error = err as Error;
         console.error('Error sending file:', error);

@@ -191,6 +191,7 @@ interface DownloadSession {
     expectedMD5: string;
     bytesReceived: number;
     totalSize: number;
+    expectedPath: string;
 }
 
 let currentDownload: DownloadSession | null = null;
@@ -198,7 +199,8 @@ let currentDownload: DownloadSession | null = null;
 socket.on('file_start', (data) => {
     console.log(`Receiving file: ${data.filename} (${data.size} bytes)`);
 
-    const downloadStream = fs.createWriteStream(`${path.join(getConfig().entrypoint, data.filename)}`);
+    const downloadPath = `${path.join(getConfig().entrypoint, data.resultPath)}`;
+    const downloadStream = fs.createWriteStream(``);
     const downloadHash = crypto.createHash('md5');
 
     currentDownload = {
@@ -207,6 +209,7 @@ socket.on('file_start', (data) => {
         expectedMD5: data.md5,
         bytesReceived: 0,
         totalSize: data.size,
+        expectedPath: downloadPath,
     };
 
     downloadStream.on('drain', () => {
@@ -237,7 +240,7 @@ socket.on('file_chunk', (chunk: Buffer) => {
     // If canWrite is false, we'll emit ack on 'drain' event
 });
 
-socket.on('file_end', async () => {
+socket.on('file_end', async (callback) => {
     if (!currentDownload) {
         console.error('Received file_end but no active download session');
         return;
@@ -258,15 +261,9 @@ socket.on('file_end', async () => {
     console.log(`Calculated MD5: ${calculatedMD5}`);
     console.log(`File integrity: ${isValid ? 'VALID' : 'CORRUPTED'}`);
     console.log(`Total bytes received: ${session.bytesReceived}`);
+    callback(isValid ? session.expectedPath : false);
 
     currentDownload = null;
-
-    // Example: After receiving a file, send one back to server
-    // setTimeout(() => {
-    //     sendFileToServer('./upload-test.bin').catch((err) => {
-    //         console.error('Error in delayed upload:', err);
-    //     });
-    // }, 2000);
 });
 
 socket.on('file_error', (data: ErrorData) => {
