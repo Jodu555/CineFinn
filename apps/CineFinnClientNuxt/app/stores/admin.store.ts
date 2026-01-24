@@ -79,7 +79,31 @@ export const useAdminStore = defineStore('admin', {
             }
             this.loading = false;
         },
+        async deepAddMoveItems(itemIds: string[]) {
+            const { data, error } = await tryCatch<Promise<MovingItem[]>, FetchError>(() => $fetch<MovingItem[]>(useAPIURL() + '/admin/subsystems/movingItems', {
+                method: 'POST',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+                body: {
+                    IDs: itemIds,
+                },
+            }));
+            if (error) {
+                this.error = error.data || 'An unknown error occurred.';
+                return;
+            }
+        },
         async moveItem(itemID: string) {
+            await this.deepAddMoveItems([itemID]);
+        },
+        async moveAllItems() {
+            await this.deepAddMoveItems(this.movingItems.map((x) => x.ID));
+        },
+        async moveAllAdditionalItems() {
+            await this.deepAddMoveItems(this.movingItems.filter((x) => x.meta.isAdditional).map((x) => x.ID));
+        },
+        async removeAdditionalItems() {
 
         },
         async loadEmails() {

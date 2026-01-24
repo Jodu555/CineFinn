@@ -14,6 +14,7 @@ import { indexStorage } from '../routes/index.js';
 import { app } from '../index.js';
 import { getIO } from '../utils.js';
 import { sendSeriesReloadToAll } from '../sockets/client.socket.js';
+import { getMovingItems } from '../utils/movingItems.js';
 
 
 // export async function crawl(job: Job) {
@@ -709,7 +710,7 @@ export async function handleSubSystemProminence(job: Job) {
             job.log(`Prominent sub: ${prominentSub}`);
             watchableEntitys.filter(x => x.serie_UUID === serieUUID && x.subID !== prominentSub).forEach(watchableEntity => {
                 job.log(`Moving ${watchableEntity.UUID} from ${watchableEntity.subID} to ${prominentSub}`);
-                movingItems.push({
+                getMovingItems().push({
                     ID: watchableEntity.UUID,
                     serie_UUID: serieUUID,
                     fromSubID: watchableEntity.subID,
@@ -726,7 +727,3 @@ export async function handleSubSystemProminence(job: Job) {
         }
     }
 }
-
-const movingItems = [] as MovingItem[];
-
-export const getMovingItems = () => movingItems;

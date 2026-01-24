@@ -9,7 +9,7 @@ import { generateEmailID } from "../utils/IdGenerators.js";
 import { getConfig, updateConfig } from "../config.js";
 import z from "zod";
 import { HTTPException } from "hono/http-exception";
-import { getMovingItems } from "../job/crawler.js";
+import { getMovingItems, prepareProcessMovingItem } from "../utils/movingItems.js";
 
 
 export async function generateOverview() {
@@ -111,6 +111,10 @@ function redactConfig(config: ReturnType<typeof getConfig>): ReturnType<typeof g
     return redactedConfig;
 }
 
+const processMovingItemsSchema = z.object({
+    IDs: z.array(z.string()),
+});
+
 const router = new Hono()
     .get('/accounts', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const accounts = await accountsTable.get();
@@ -126,7 +130,16 @@ const router = new Hono()
     .get('/subsystems/movingItems', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const movingItems = getMovingItems();
         return c.json(movingItems);
-    }).get('/overview', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+    })
+    .post('/subsystems/movingItems', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+        const body = await c.req.json();
+        const processMovingItemsBody = processMovingItemsSchema.parse(body);
+        for (const toProcessID of processMovingItemsBody.IDs) {
+            prepareProcessMovingItem(toProcessID);
+        }
+        return c.json(getMovingItems());
+    })
+    .get('/overview', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const overview = await generateOverview();
         return c.json(overview);
     })
