@@ -86,7 +86,7 @@ export async function prepareProcessMovingItem(ID: string) {
 
 export async function processMovingItem(movingItem: MovingItem) {
     if (movingItem.fromSubID === 'main' && movingItem.toSubID !== 'main') {
-        sendMovingItemToSubSystem(movingItem);
+        await sendMovingItemToSubSystem(movingItem);
     } else if (movingItem.fromSubID !== 'main' && movingItem.toSubID === 'main') {
         console.log('Not implemented!');
         // recieveMovingItemFromSubSystem(movingItem);
@@ -172,7 +172,9 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
         return;
     }
 
-    console.log(`Starting file transfer to client: ${filePath}`);
+    console.log(`Starting file transfer to client: ${movingItem.toSubID} ${movingItem.watchableEntityUUID}`);
+    console.log(`Local Path: ${filePath}`);
+
 
     try {
         // Check if file exists
@@ -262,6 +264,9 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
         if (finalPath) {
             watchableEntitysTable.update({ UUID: watchableEntity.UUID }, { filePath: resultPath, subID: movingItem.toSubID });
             fs.rmSync(filePath, { recursive: true });
+            const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+            // Wait a bit so the user can see the result of the transfer
+            await wait(1000 * 5);
             const index = getMovingItems().findIndex(m => m.ID === movingItem.ID);
             getMovingItems().splice(index, 1);
             await rebroadcastMovingItems();

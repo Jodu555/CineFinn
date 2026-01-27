@@ -198,9 +198,9 @@ let currentDownload: DownloadSession | null = null;
 
 socket.on('file_start', (data) => {
     console.log(`Receiving file: ${data.filename} (${data.size} bytes)`);
-
     const downloadPath = `${path.join(getConfig().entrypoint, data.resultPath)}`;
-    const downloadStream = fs.createWriteStream(``);
+    console.log(`Download Path: ${downloadPath}`);
+    const downloadStream = fs.createWriteStream(downloadPath);
     const downloadHash = crypto.createHash('md5');
 
     currentDownload = {
@@ -269,4 +269,15 @@ socket.on('file_end', async (callback) => {
 socket.on('file_error', (data: ErrorData) => {
     console.error('File transfer error:', data.message);
     currentDownload = null;
+});
+
+
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+    // process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    // process.exit(1);
 });
