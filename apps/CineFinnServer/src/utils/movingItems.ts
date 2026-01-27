@@ -200,6 +200,8 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
             highWaterMark: 64 * 1024,
         });
 
+        //TODO: Change this to the actual readrate or better change the name of it to have bandwith in MB/s and then guess the readrate from it.
+        // subSystemSocket.data.auth.readrate;
         // 10 MB/s
         const bandwidth = 5 * 1024 * 1024
         const throttle = new ThrottleStream(bandwidth);
@@ -235,8 +237,8 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
 
             bytesSent += chunk.length;
             const progress = ((bytesSent / fileSize) * 100).toFixed(2);
-            if (+progress - lastProgress > 0.5) {
-                console.log(`Progress: ${progress}%`);
+            if (+progress - lastProgress > 0.5 || +progress === 100) {
+                // console.log(`Progress: ${progress}%`);
                 lastProgress = +progress;
                 movingItem.meta.progress = +progress;
                 await rebroadcastMovingItems();

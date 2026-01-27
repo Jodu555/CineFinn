@@ -1,4 +1,4 @@
-import type { AuthHandshakeSubsystem, DiskStats, OfflineSubSystem, OnlineSubSystem, SocketAuthDataSubsystem, SubSystem } from "@cinefinn/types/socket";
+import type { AnythingToServerEvents, AuthHandshakeSubsystem, DiskStats, InterServerEvents, OfflineSubSystem, OnlineSubSystem, ServerToAnythingEvents, ServerToSubSystemEvents, SocketAuthDataSubsystem, SubSystem, SubSystemToServerEvents } from "@cinefinn/types/socket";
 import type { SocketConsumerMeta } from "./index.js";
 import { getConfig } from "../config.js";
 import { calculateMD5, getIO, queryDatabase, watchableUUIDToWatchable } from "../utils.js";
@@ -6,13 +6,14 @@ import { seriesTable, watchableEntitysTable } from "../database.js";
 import type { definedSocket } from "../index.js";
 import { sendSeriesReloadToAll } from "./client.socket.js";
 import { rebroadcastMovingItems, rebroadcastSubsystems } from '../routes/admin.js';
-import type { Episode, Movie, MovingItem, timestamped } from "@cinefinn/types/database";
+import type { Account, Episode, Movie, MovingItem, timestamped } from "@cinefinn/types/database";
 import fs from 'fs';
 import path from 'path';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 import { Transform } from 'stream';
 import { tryCatch } from "../tryCatch.js";
+import type { Socket } from "socket.io";
 
 async function authFunction(authHandshake: AuthHandshakeSubsystem): Promise<SocketAuthDataSubsystem> {
     const { authToken: token } = authHandshake;
@@ -118,12 +119,14 @@ export async function toggleSeriesesForSubSystem(subID: string, disabled: boolea
     console.log(`Toggling Serieses(${seriesIDs.length}) for SubSystem: ${subID} to Disabled: ${disabled}`);
 }
 
+export type definedSubSystemSocket = Socket<SubSystemToServerEvents, ServerToSubSystemEvents, InterServerEvents, { auth: SocketAuthDataSubsystem<Account | (Account & timestamped)> }>;
+
 export async function getSubSocketByID(subID: string) {
     const subSystemSocket = (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'subsystem' && s.data.auth.id === subID)[0];
     if (subSystemSocket == undefined) {
         throw new Error('SubSystem not found');
     }
-    return subSystemSocket as any as definedSocket;
+    return subSystemSocket as any as definedSubSystemSocket;
 }
 
 export default {

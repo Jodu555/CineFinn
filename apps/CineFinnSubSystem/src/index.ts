@@ -228,11 +228,11 @@ socket.on('file_chunk', (chunk: Buffer) => {
     currentDownload.bytesReceived += chunk.length;
 
     // Log progress
-    const progress = (
-        (currentDownload.bytesReceived / currentDownload.totalSize) *
-        100
-    ).toFixed(2);
-    console.log(`Download progress: ${progress}%`);
+    // const progress = (
+    //     (currentDownload.bytesReceived / currentDownload.totalSize) *
+    //     100
+    // ).toFixed(2);
+    // console.log(`Download progress: ${progress}%`);
 
     if (canWrite) {
         socket.emit('ack');
