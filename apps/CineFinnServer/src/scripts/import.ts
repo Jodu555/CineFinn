@@ -41,7 +41,7 @@ async function importSerieses() {
         // console.log(`=> Adding ${serie.title}`);
         await seriesTable.create({
             UUID: serie.ID,
-            tags: JSON.stringify([serie.categorie,]),
+            tags: [serie.categorie],
             title: serie.title,
             infos: serie.infos,
             refs: serie.references,
