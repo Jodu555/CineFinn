@@ -89,6 +89,12 @@ const httpServer = serve({
     // await wait(1000 * 10)
     // const output = await compareForNewReleases(mockIndex, [], { aniworld: true, sto: false, zoro: false });
 
+    const test = new Aniworld('http://186.2.175.5/serie/white-collar/')
+    // const test = new Aniworld('http://186.2.175.5/serie/star-wars-the-clone-wars')
+
+    console.log(await test.parseInformations());
+
+
 });
 
 let socket: Socket<ServerToScraperEvents, ScraperToServerEvents> | null = null;
@@ -195,3 +201,18 @@ async function checkForUpdates(index: DetailedSeries[]) {
 }
 
 socket.connect();
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    // process.exit(1);
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+    // process.exit(1);
+});
+
+process.on('SIGINT', () => {
+    console.log('Received SIGINT. Shutting down gracefully.');
+    process.exit(0);
+});
