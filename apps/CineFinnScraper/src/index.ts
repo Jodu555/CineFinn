@@ -89,11 +89,6 @@ const httpServer = serve({
     // await wait(1000 * 10)
     // const output = await compareForNewReleases(mockIndex, [], { aniworld: true, sto: false, zoro: false });
 
-    const test = new Aniworld('http://186.2.175.5/serie/white-collar/')
-    // const test = new Aniworld('http://186.2.175.5/serie/star-wars-the-clone-wars')
-
-    console.log(await test.parseInformations());
-
 
 });
 

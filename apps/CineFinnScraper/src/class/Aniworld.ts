@@ -4,7 +4,7 @@ import type { AniWorldAdditionalSeriesInformations, AniWorldEntity, AniWorldSeri
 import axios from 'axios';
 import jsdom from 'jsdom';
 
-const timing = true;
+const timing = false;
 class Aniworld {
     url: string;
     imageSRCPrefix: string;
