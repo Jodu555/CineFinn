@@ -4,7 +4,7 @@ import type { MovingItem, Episode, timestamped, Movie } from "@cinefinn/types/da
 import { Transform } from "stream";
 import { watchableEntitysTable, seriesTable } from "../database.js";
 import { getSubSocketByID } from "../sockets/subsystem.socket.js";
-import { watchableUUIDToWatchable, calculateMD5 } from "../utils.js";
+import { watchableUUIDToWatchable, calculateMD5, wait } from "../utils.js";
 import { tryCatch } from "../tryCatch.js";
 import { rebroadcastMovingItems, rebroadcastOverview } from "../routes/admin.js";
 
@@ -266,7 +266,6 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
         if (finalPath) {
             watchableEntitysTable.update({ UUID: watchableEntity.UUID }, { filePath: resultPath, subID: movingItem.toSubID });
             fs.rmSync(filePath, { recursive: true });
-            const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
             // Wait a bit so the user can see the result of the transfer
             await wait(1000 * 5);
             const index = getMovingItems().findIndex(m => m.ID === movingItem.ID);

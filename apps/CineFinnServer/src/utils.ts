@@ -125,3 +125,5 @@ export function calculateMD5(filePath: string): Promise<string> {
         stream.on('error', reject);
     });
 }
+
+export const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

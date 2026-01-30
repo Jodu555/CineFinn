@@ -1,5 +1,13 @@
-<template>
+span<template>
 	<div>
+		<div v-if="loading" class="d-flex justify-content-center">
+			<div class="spinner-border" role="status">
+				<span class="visually-hidden">Loading...</span>
+			</div>
+		</div>
+		<div v-if="error" class="alert alert-danger" role="alert">
+			<strong>Error:</strong> {{ error }}
+		</div>
 		<div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 row-cols-xxl-6 gap-3">
 			<div class="col-auto text-center">
 				<h2 class="text-center">Accounts</h2>
@@ -9,13 +17,11 @@
 				<h2 class="text-center">Series</h2>
 				<!-- <h4 class="text-center">{{ overview.series }}</h4> -->
 				<h4 class="text-center">{{ indexStore.series.length }}</h4>
-				<span
-					v-if="indexStore.series.filter((x) => x.infos.disabled).length !== 0"
+				<span v-if="indexStore.series.filter((x) => x.infos.disabled).length !== 0"
 					@click="toggleDisabledSeriesModal = true"
 					style="left: 70% !important; top: -2% !important; cursor: pointer"
-					class="position-absolute translate-middle badge rounded-pill bg-danger-subtle text-danger-emphasis"
-					>{{ indexStore.series.filter((x) => x.infos.disabled).length }}</span
-				>
+					class="position-absolute translate-middle badge rounded-pill bg-danger-subtle text-danger-emphasis">{{
+						indexStore.series.filter((x) => x.infos.disabled).length}}</span>
 			</div>
 			<div class="col-auto text-center">
 				<h2 class="text-center">Movies</h2>

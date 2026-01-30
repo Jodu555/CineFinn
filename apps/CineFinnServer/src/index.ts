@@ -184,49 +184,50 @@ const httpServer = serve({
 
     await handleSubSystemProminence(Job.fromDummy('crawl'));
 
-    const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-    // console.log('Waiting for 1 minute');
-    // await wait(1000 * 60 * 1);
-    // console.log('Waited for 1 minute');
-
-    // const testMovingItem = getMovingItems().find(m => m.ID === 'WE-56644ca7');
-    // if (testMovingItem != undefined) {
-    //     processMovingItem(testMovingItem);
-    // }
-
-    // console.log('Fixing Seasons');
-    // const seasons = await seasonsTable.get();
-    // for await (const season of seasons) {
-    //     const episodes = await episodesTable.get({ season_UUID: season.UUID });
-    //     if (episodes.length !== season.episodes) {
-    //         console.log(`Season ${season.UUID} has ${season.episodes} episodes, but should have ${episodes.length}. Updating...`);
-    //         await seasonsTable.update({ UUID: season.UUID }, { episodes: episodes.length });
-    //     }
-    // }
-    // console.log('Seasons Fixed');
+    // await fixSeasons();
+    // await insertMissingWatchableEntityRuntimes();
 
 
-    // console.log('Inserting Missing WatchableEntity runtimes');
-    // const entitys = await watchableEntitysTable.get({ runtime: -1 });
-    // let i = 0;
-    // for await (const entity of entitys) {
-    //     console.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`);
-    //     const runtime = await geFileRuntime(entity.UUID);
-    //     await watchableEntitysTable.update({ UUID: entity.UUID }, { runtime });
-    // }
-    // console.log('Missing WatchableEntity runtimes inserted');
 
 });
 
+async function fixSeasons() {
+    console.log('Fixing Seasons');
+    const seasons = await seasonsTable.get();
+    for await (const season of seasons) {
+        const episodes = await episodesTable.get({ season_UUID: season.UUID });
+        if (episodes.length !== season.episodes) {
+            console.log(`Season ${season.UUID} has ${season.episodes} episodes, but should have ${episodes.length}. Updating...`);
+            await seasonsTable.update({ UUID: season.UUID }, { episodes: episodes.length });
+        }
+    }
+    console.log('Seasons Fixed');
+}
+
+async function insertMissingWatchableEntityRuntimes() {
+    console.log('Inserting Missing WatchableEntity runtimes');
+    const entitys = await watchableEntitysTable.get({ runtime: -1, subID: 'main', unique: true });
+    let i = 0;
+    for await (const entity of entitys) {
+        console.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`)
+        const { data: runtime, error } = await tryCatch(() => geFileRuntime(entity.UUID));
+        if (error) {
+            console.error('Error getting runtime for entity', entity.UUID, error);
+            continue;
+        }
+        await watchableEntitysTable.update({ UUID: entity.UUID }, { runtime });
+    }
+    console.log('Missing WatchableEntity runtimes inserted');
+}
+
 function geFileRuntime(watchableUUID: string) {
     return new Promise<number>((resolve, reject) => {
-        const videoURL = `http://localhost:3000/video/${watchableUUID}?auth-token=SECR-DEV`;
+        const videoURL = `${getConfig().system.PUBLIC_API_ENDPOINT}/video/${watchableUUID}?auth-token=${getConfig().system.PUBLIC_API_AUTH_TOKEN}`;
         childProcess.exec(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${videoURL}"`, (error, stdout, stderr) => {
             if (error) {
-                console.log(error);
-                console.log(stderr);
-                reject(error);
+                // console.log(error);
+                // console.log(stderr);
+                reject({ error, stderr });
                 return;
             }
             const runtime = parseFloat(stdout);

@@ -243,37 +243,35 @@ const createDialogOpen = ref(false);
 const newPlaylistName = ref('');
 const newPlaylistDescription = ref('');
 
-const handleCreatePlaylist = () => {
+const handleCreatePlaylist = async () => {
     if (!newPlaylistName.value.trim()) return;
-    playlistStore.createPlaylist(newPlaylistName.value, newPlaylistDescription.value);
+    await playlistStore.createPlaylist(newPlaylistName.value, newPlaylistDescription.value);
     newPlaylistName.value = '';
     newPlaylistDescription.value = '';
     createDialogOpen.value = false;
 };
 
-const handleUpdatePlaylist = () => {
+const handleUpdatePlaylist = async () => {
     if (!editingPlaylist.value || !editingPlaylist.value.name.trim()) return;
-    playlistStore.updatePlaylist(editingPlaylist.value.UUID, {
+    await playlistStore.updatePlaylist(editingPlaylist.value.UUID, {
         name: editingPlaylist.value.name,
         description: editingPlaylist.value.description,
     });
     editingPlaylist.value = null;
 };
 
-const handleDeletePlaylist = () => {
+const handleDeletePlaylist = async () => {
     if (!deletePlaylistId.value) return;
 
-    // deletePlaylist(deletePlaylistId.value);
     if (selectedPlaylist.value?.UUID === deletePlaylistId.value) {
         selectedPlaylistUUID.value = '';
     }
+    await playlistStore.deletePlaylist(deletePlaylistId.value);
     deletePlaylistId.value = null;
-    // loadPlaylists();
 };
 
-const handleRemoveFromPlaylist = (playlistId: string, itemUUID: string) => {
-    // removeFromPlaylist(playlistId, itemId);
-    // loadPlaylists();
+const handleRemoveFromPlaylist = async (playlistId: string, itemUUID: string) => {
+    await playlistStore.removeFromPlaylist(playlistId, itemUUID);
     if (selectedPlaylist.value?.UUID === playlistId) {
         // const updated = getPlaylists().find((p) => p.id === playlistId);
         // selectedPlaylist.value = updated || null;

@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { wait } from './utils.js';
 
 
 type ExtractMethodNames<T> = { [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never }[keyof T];
@@ -88,8 +89,6 @@ class LRUCache<T> {
         return this.cache.has(key);
     }
 }
-
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Cache Context class
 export class CacheContext {
