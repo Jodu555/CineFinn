@@ -4,7 +4,7 @@
         <div>
             <slot name="trigger">
                 <button class="btn bg-transparent" title="Add To Playlist" :class="['btn-' + openButtonColor]"
-                    @click="open = true">
+                    @click="openModal">
                     <font-awesome-icon :icon="['fas', 'plus']" :size="iconSize"
                         :class="{ 'me-2': openButtonText.length > 0 }" />
                     {{ openButtonText }}
@@ -129,7 +129,7 @@ const props = withDefaults(
     }
 );
 
-await callOnce('loadPlaylists', () => playlistStore.loadPlaylists());
+await callOnce('loadPlaylists', () => playlistStore.loadPlaylists(true));
 
 
 const playlists = computed(() => playlistStore.playlists);
@@ -138,6 +138,8 @@ const open = ref(false);
 const showCreateForm = ref(false);
 const newPlaylistName = ref('');
 const newPlaylistDescription = ref('');
+
+
 
 const handleCreatePlaylist = async () => {
     if (!newPlaylistName.value.trim()) return;
@@ -172,6 +174,10 @@ const closeModal = () => {
     open.value = false;
 };
 
+const openModal = () => {
+    open.value = true;
+};
+
 // Watch for modal open/close
 watch(open, (isOpen) => {
     if (isOpen) {
@@ -179,6 +185,8 @@ watch(open, (isOpen) => {
         showCreateForm.value = false;
     }
 });
+
+defineExpose({ openModal, closeModal });
 </script>
 
 <style scoped>

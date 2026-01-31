@@ -60,7 +60,7 @@
 									<div class="d-flex gap-3">
 										<!-- Existing Button -->
 										<AddToPlaylistDialog :item-u-u-i-d="series.UUID" :content-title="series.title"
-											open-button-text="Add to Watchlist" open-button-color="outline-primary" />
+											open-button-text="Add to Playlist" open-button-color="outline-primary" />
 
 										<!-- New Edit Button -->
 										<button @click="enterEditMode" v-if="authStore.user.role >= Role.Mod"

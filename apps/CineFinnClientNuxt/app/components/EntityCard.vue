@@ -41,8 +41,14 @@
 					<nuxt-link class="btn btn-outline-primary btn-sm mt-1 mb-2" :prefetch-on="{ interaction: true }"
 						:to="`/watch/${entity.UUID}`">Go & Watch</nuxt-link>
 
-					<AddToPlaylistDialog :item-u-u-i-d="entity.UUID" :content-title="entity.title" open-button-text=""
-						open-button-color="outline-primary" icon-size="sm" />
+					<!-- <AddToPlaylistDialog :item-u-u-i-d="entity.UUID" :content-title="entity.title" open-button-text=""
+						open-button-color="outline-primary" icon-size="sm" /> -->
+					<div>
+						<button class="btn bg-transparent btn-outline-primary" @click="addToPlaylist()"
+							title="Add To Playlist">
+							<font-awesome-icon :icon="['fas', 'plus']" size="sm" />
+						</button>
+					</div>
 
 				</div>
 
@@ -143,6 +149,13 @@ const props = withDefaults(defineProps<{
 	beClickable: false,
 	serverRendered: false,
 });
+
+const emit = defineEmits(['addToPlaylist']);
+
+const addToPlaylist = () => {
+	emit('addToPlaylist', props.seriesID);
+};
+
 
 const entity = computed(() => {
 	return indexStore.series.find((i) => i.UUID == props.seriesID)!;

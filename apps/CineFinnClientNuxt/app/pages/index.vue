@@ -18,16 +18,25 @@
 			</div>
 		</div>
 		<div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 row-cols-xxl-5 g-4">
-			<EntityCard v-for="(entity, idx) in selectedSeries" :series-i-d="entity.UUID" :key="entity.UUID" />
+			<EntityCard v-for="(entity, idx) in selectedSeries" :series-i-d="entity.UUID" :key="entity.UUID"
+				@add-to-playlist="onAddToPlaylist" />
 			<!-- <EntityCard v-for="entity in selectedSeries"
                 :highlighted="scrolledToLastSeries && entity.ID == showScrollToLastSeries" class="border-success"
                 :entity="entity" :key="entity.ID" /> -->
 		</div>
+		<AddToPlaylistDialog ref="addToPlaylistDialog" :item-u-u-i-d="selectedSeriesToAddToPlaylist || ''"
+			:content-title="selectedSeries.find(x => x.UUID === selectedSeriesToAddToPlaylist)?.title || ''">
+			<template #trigger>
+				<div></div>
+			</template>
+		</AddToPlaylistDialog>
+
 	</div>
 </template>
 
 <script lang="ts" setup>
 import type { FrontendSeries } from '@cinefinn/types/database';
+import AddToPlaylistDialog from '~/components/AddToPlaylistDialog.vue';
 import EntityCard from '~/components/EntityCard.vue';
 
 definePageMeta({
@@ -35,6 +44,19 @@ definePageMeta({
 });
 
 const indexStore = useIndexStore();
+
+const addToPlaylistDialog = useTemplateRef('addToPlaylistDialog');
+
+const selectedSeriesToAddToPlaylist = ref<string | null>(null);
+
+const onAddToPlaylist = (seriesUUID: string) => {
+	selectedSeriesToAddToPlaylist.value = seriesUUID;
+	nextTick(() => {
+		if (!addToPlaylistDialog.value) return
+		addToPlaylistDialog.value.openModal();
+	})
+};
+
 
 const selectedCategory = ref('Alle');
 

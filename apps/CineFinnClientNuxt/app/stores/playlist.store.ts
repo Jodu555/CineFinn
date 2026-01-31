@@ -8,17 +8,15 @@ export const usePlaylistStore = defineStore('playlist', {
         playlists: [] as FrontendPlaylist[],
     }),
     actions: {
-        async loadPlaylists() {
-            this.loading = true;
-
+        async loadPlaylists(noloading = false) {
+            noloading && (this.loading = true);
             const response = await $fetch<FrontendPlaylist[]>(useAPIURL() + '/playlists', {
                 headers: {
                     'auth-token': useAuthStore().authToken || '',
                 },
             });
             this.playlists = response;
-
-            this.loading = false;
+            noloading && (this.loading = false);
         },
         async createPlaylist(name: string, description: string) {
             this.loading = true;
