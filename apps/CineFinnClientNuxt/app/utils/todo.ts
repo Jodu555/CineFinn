@@ -25,7 +25,11 @@ export const scrapers = [
     {
         categorie: 'Serien',
         inputValidationRules: [
-            (v: string) => (/^https?:\/\/sto\.to\/anime\/stream\/[a-zA-Z0-9\-]+\/?$/.test(v) || /^http?:\/\/186\.2\.175\.5\/serie\/stream\/[a-zA-Z0-9\-]+\/?$/.test(v)) || 'URL must be a valid STO URL',
+            (v: string) => (/^https?:\/\/sto\.to\/anime\/stream\/[a-zA-Z0-9\-]+\/?$/.test(v)
+                || /^http?:\/\/186\.2\.175\.5\/serie\/stream\/[a-zA-Z0-9\-]+\/?$/.test(v)
+                || /^http?:\/\/186\.2\.175\.5\/serie\/[a-zA-Z0-9\-]+\/?$/.test(v)
+            )
+                || 'URL must be a valid STO URL',
             (v: string) => !v.includes('/filme') || 'URL must be a valid STO URL and cannot be a movie page',
             (v: string) => !v.includes('/staffel') || 'URL must be a valid STO URL and cannot be an episode page',
         ],

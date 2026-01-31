@@ -162,8 +162,6 @@ const router = new Hono()
                         todo.scrapingInfo = {} as TodoItem['scrapingInfo'];
                     }
 
-                    console.log(todo);
-
                     todo.scrapingInfo![scraper.scrapeKey] = scraperInfo as any;
                 }
             }

@@ -7,11 +7,6 @@ import type { definedSocket } from "../index.js";
 import { sendSeriesReloadToAll } from "./client.socket.js";
 import { rebroadcastMovingItems, rebroadcastSubsystems } from '../routes/admin.js';
 import type { Account, Episode, Movie, MovingItem, timestamped } from "@cinefinn/types/database";
-import fs from 'fs';
-import path from 'path';
-import { pipeline } from 'stream';
-import { promisify } from 'util';
-import { Transform } from 'stream';
 import { tryCatch } from "../tryCatch.js";
 import type { Socket } from "socket.io";
 

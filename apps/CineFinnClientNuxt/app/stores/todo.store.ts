@@ -116,7 +116,6 @@ export const useTodoStore = defineStore('todo', {
             this.list.push(item);
             await this.change();
         },
-        //TODO: Implement this
         async useTodo(ID: string) {
             const { $swal } = useNuxtApp();
             const { isConfirmed: confirmed } = await $swal.fire({
