@@ -198,7 +198,7 @@ class Aniworld {
         const { document } = new jsdom.JSDOM(data).window;
 
         const episodeTable = document.querySelector('section.episode-section table.episode-table tbody');
-        const episodes = [...episodeTable!.querySelectorAll('tr.episode-row')];
+        const episodes = [...episodeTable!.querySelectorAll('tr.episode-row')].filter(x => !x.classList.contains('upcoming'));
 
         const out: AniWorldEntity[] = [];
         episodes.forEach((ep) => {
