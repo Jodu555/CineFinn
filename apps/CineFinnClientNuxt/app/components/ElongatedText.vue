@@ -1,6 +1,7 @@
 <template>
 	<p :class="props.class">
-		{{ show ? props.text : props.text.slice(0, props.maxLength) + (props.text.length >= props.maxLength ? '...' : '') }}
+		{{ show ? props.text : props.text.slice(0, props.maxLength) + (props.text.length >= props.maxLength ? '...'
+			: '') }}
 		<small v-if="!show && props.text.length >= props.maxLength" class="read-more" @click="show = true">More</small>
 		<small v-else-if="props.text.length >= props.maxLength" class="read-more" @click="show = false">Less</small>
 		<br />
@@ -21,5 +22,6 @@ const show = ref(false);
 .read-more {
 	color: var(--bs-primary);
 	cursor: pointer;
+	user-select: none;
 }
 </style>

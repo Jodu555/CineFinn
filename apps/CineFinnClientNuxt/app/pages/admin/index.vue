@@ -1,4 +1,4 @@
-span<template>
+<template>
 	<div>
 		<div v-if="loading" class="d-flex justify-content-center">
 			<div class="spinner-border" role="status">
@@ -13,6 +13,30 @@ span<template>
 				<h2 class="text-center">Accounts</h2>
 				<h4 class="text-center">{{ overview.accounts }}</h4>
 			</div>
+			<Modal v-model="toggleDisabledSeriesModal" title="Detailed Disabled Series Overview" size="xl">
+				<h3 class="text-center">List of disabled Series</h3>
+				<div class="table-responsive-md">
+					<table class="table">
+						<thead>
+							<tr>
+								<th scope="col">ID</th>
+								<th scope="col">Title</th>
+								<th scope="col">Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="serie in indexStore.series.filter((x) => x.infos.disabled)" class="">
+								<td scope="row">{{ serie.UUID }}</td>
+								<td>{{ serie.title }}</td>
+								<td>
+									<button type="button" disabled class="btn btn-outline-primary me-3">Enable</button>
+									<button type="button" disabled class="btn btn-outline-danger me-3">Delete</button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</Modal>
 			<div class="col-auto text-center" style="position: relative">
 				<h2 class="text-center">Series</h2>
 				<!-- <h4 class="text-center">{{ overview.series }}</h4> -->

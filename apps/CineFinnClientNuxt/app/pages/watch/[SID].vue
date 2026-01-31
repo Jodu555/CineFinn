@@ -47,7 +47,7 @@
 
 										<div v-if="series.tags && series.tags.length > 0">
 											<span class="badge bg-primary me-2"
-												v-for="(tag, idx) in series.tags.slice(0, 1)" :key="idx">
+												v-for="(tag, idx) in series.tags.slice(0, 5)" :key="idx">
 												{{ idx == 0 ? tag.toUpperCase() : tag }}
 											</span>
 										</div>
