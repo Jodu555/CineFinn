@@ -497,6 +497,7 @@ const coverURL = computed(() => {
 const displayTitle = computed(() => series.value?.infos.title || series.value?.title);
 
 const sendVideoTimeUpdate = async (time: number) => {
+	if (time == undefined) return;
 	console.log('Sending time update to server', time);
 	// useAxios().post(`/watch/updateTime/${currentEpisodeUUID.value}/${time}`, {});
 

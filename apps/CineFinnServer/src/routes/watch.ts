@@ -56,7 +56,7 @@ const router = new Hono()
         await Promise.all(promises);
 
         (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'client' && s.data.auth.user.UUID === user.UUID).forEach(async s => {
-            const watchList = await watchHistoryTable.get({ series_UUID: episodes[0].serie_UUID, account_UUID: user.UUID });
+            const watchList = await watchHistoryTable.get({ series_UUID: episodes[0].serie_UUID, account_UUID: user.UUID, unique: true });
             s.emit('watchListUpdate', watchList)
         });
 
@@ -75,7 +75,7 @@ const router = new Hono()
 
         const updated = async (seriesUUID: string) => {
             (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'client' && s.data.auth.user.UUID === user.UUID).forEach(async s => {
-                const watchList = await watchHistoryTable.get({ series_UUID: seriesUUID, account_UUID: user.UUID });
+                const watchList = await watchHistoryTable.get({ series_UUID: seriesUUID, account_UUID: user.UUID, unique: true });
                 s.emit('watchListUpdate', watchList)
             });
         }
