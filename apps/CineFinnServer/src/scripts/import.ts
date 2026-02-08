@@ -1,3 +1,4 @@
+import fs from 'fs';
 import crypto, { randomUUID } from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();;
@@ -20,14 +21,23 @@ async function run() {
     await connectDatabase(true);
 
 
-
-
     // console.log(await seriesTable.get({}));
 
 
-    await importSerieses();
     await importAccounts();
+    await importSerieses();
     await importWatchHistory();
+}
+
+async function importAccountsCreationMap() {
+    interface AccountCreation {
+        uuid: string;
+        name: string;
+        date: string;
+    }
+    const accountsCreationMapPath = path.join(process.cwd(), 'accounts-creation-map.json');
+    const accountsCreationMap = JSON.parse(fs.readFileSync(accountsCreationMapPath, 'utf8')) as AccountCreation[];
+    return accountsCreationMap;
 }
 
 async function importSerieses() {
@@ -143,9 +153,18 @@ async function importSerieses() {
 async function importAccounts() {
     const oldDB = Database.createDatabase(process.env.OLD_DB_HOST!, process.env.OLD_DB_USERNAME!, process.env.OLD_DB_PASSWORD!, process.env.OLD_DB_DATABASE!);
     await oldDB.connect();
-    const accounts = await oldDB.get('accounts').get({}) as { UUID: string; username: string; password: string; email: string; role: number; settings: string; activityDetails: string; }[];
-    console.log(accounts);
-    for (const account of accounts) {
+    const oldAccounts = await oldDB.get('accounts').get({}) as { UUID: string; username: string; password: string; email: string; role: number; settings: string; activityDetails: string; }[];
+    console.log(oldAccounts);
+
+
+    const accountsCreationMap = await importAccountsCreationMap();
+
+    if (oldAccounts.length !== accountsCreationMap.length) {
+        console.log('Accounts count mismatch', oldAccounts.length, accountsCreationMap.length, 'Please rerun the account creation map script');
+        process.exit(1);
+    }
+
+    for (const account of oldAccounts) {
         await accountsTable.create({
             UUID: account.UUID,
             username: account.username,
@@ -158,6 +177,15 @@ async function importAccounts() {
             status: 'active',
         });
         console.log(`=> Added account ${account.username}`);
+
+        const accountCreation = accountsCreationMap.find((a) => a.uuid === account.UUID);
+        if (accountCreation == undefined) {
+            console.log('Account not found in creation map', account.UUID);
+            process.exit(1);
+        }
+        //@ts-expect-error
+        await accountsTable.update({ UUID: account.UUID }, { 'created_at': new Date(accountCreation.date).getTime() });
+        console.log(`Patching Account ${account.UUID} with actual creation: ${accountCreation.date}`);
     }
 }
 
