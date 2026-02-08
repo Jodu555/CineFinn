@@ -106,7 +106,20 @@ async function compareForNewReleasesAniWorldOrSTO(
 
     const debug = false;
     const limit = promiseLimit<AniWorldSerieCompare>(10);
-    const data = series.filter((x) => x.refs?.aniworld && !ignoranceList.find((v) => v.serie_UUID == x.UUID && !v.lang));
+    const data = series.filter((x) => {
+
+        //Has to be either Aniworld or STO
+        if (x.refs.aniworld == undefined && x.refs.sto == undefined) {
+            return false;
+        }
+
+        const ignoranceItem = ignoranceList.find((v) => v.serie_UUID == x.UUID);
+        //The IgnoranceItem Has to exist
+        if (ignoranceItem == undefined) return true;
+        //If the Lang does not exist kill the complete Series
+        if (ignoranceItem.lang == undefined) return false;
+        return true;
+    });
 
     const sockets = await io.fetchSockets();
 
@@ -299,6 +312,11 @@ async function compareForNewReleasesAniWorldOrSTO(
 
 
         if (language == undefined) {
+            return;
+        }
+
+        if (ignoranceItem.lang == language) {
+            console.trace(entity, ignoranceItem.lang, language, ignoranceItem.lang == language, 'IGNORED');
             return;
         }
 

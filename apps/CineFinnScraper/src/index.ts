@@ -1,7 +1,7 @@
 import { io as Client, Socket } from 'socket.io-client';
 import { getConfig } from './config.js';
 import type { AuthHandshake, ScraperToServerEvents, ServerToScraperEvents, } from '@cinefinn/types/socket';
-import type { DetailedSeries, IgnoranceItem } from '@cinefinn/types/database';
+import type { DetailedSeries, IgnoranceItem, timestamped } from '@cinefinn/types/database';
 import { compareForNewReleases } from './utils/compare.js';
 import axios from 'axios';
 import Aniworld from './class/Aniworld.js';
@@ -134,8 +134,12 @@ socket.on('scrape:sto', async (url, cb) => {
 });
 
 async function checkForUpdates(index: DetailedSeries[]) {
+    // const response = await axios.get<DetailedSeries[]>('http://localhost:3000/index/all?auth-token=SECR-DEV', {
 
-    const response = await axios.get<DetailedSeries[]>('http://localhost:3000/index/all?auth-token=SECR-DEV', {
+    const response = await axios.get<DetailedSeries[]>(`${config.CORE.URL}/index/all`, {
+        headers: {
+            'auth-token': config.CORE.AUTH_TOKEN,
+        },
         timeout: 1000 * 60,
     });
 
@@ -150,16 +154,15 @@ async function checkForUpdates(index: DetailedSeries[]) {
     //This list should say, that these animes should the new episodes no be included unless they are german dubbed
     const ignoranceList: IgnoranceItem[] = [];
 
-    // if (process.env.IGNORE_API_HOST) {
-    //     const ignoreResponse = await axios.get<{ ID: string; title: string; }[]>(`${process.env.ACTION_API_HOST}/ignoreList/?auth-token=${process.env.AUTH_TOKEN_REST}`);
-    //     // const ignoreResponse = await axios.get<{ ID: string, title: string; }[]>(`http://cinema-api.jodu555.de/ignoreList/?auth-token=${process.env.AUTH_TOKEN_REST}`);
-    //     console.log('Loaded', ignoreResponse.data.length, 'Animes/Series to Ignore for now!');
-    //     for (const item of ignoreResponse.data) {
-    //         ignoranceList.push({
-    //             ID: item.ID,
-    //         });
-    //     }
-    // }
+    const USE_IGNORANCE_LIST = true;
+    if (USE_IGNORANCE_LIST === true) {
+        const ignoreResponse = await axios.get<IgnoranceItem[]>(`${config.CORE.URL}/admin/ignoranceItems`, {
+            headers: {
+                'auth-token': config.CORE.AUTH_TOKEN,
+            }
+        });
+        ignoranceList.push(...ignoreResponse.data);
+    }
 
 
     // if (smart) {
@@ -174,7 +177,7 @@ async function checkForUpdates(index: DetailedSeries[]) {
     console.time('Compare');
 
     // const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: true, zoro: false });
-    const output = await compareForNewReleases(index, [], { aniworld: true, sto: true, zoro: false });
+    const output = await compareForNewReleases(index, ignoranceList, { aniworld: true, sto: true, zoro: false });
     console.timeEnd('Compare');
 
 
