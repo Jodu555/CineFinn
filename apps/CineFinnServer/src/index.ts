@@ -133,7 +133,7 @@ const httpServer = serve({
     } else {
         console.log('Admin User not found');
     }
-    console.log(`Server is running on http://localhost:${info.port}`);
+
     // await crawl();
 
     const io = new Server<
@@ -158,8 +158,7 @@ const httpServer = serve({
     );
     setupSocketIO();
 
-    // console.log(seasonsTable.database.tables.get('seasons'))
-    // console.log(seasonsTable);
+    console.log(`Server is running on http://localhost:${info.port}`);
 
     setInterval(() => {
         database.pool.query('SELECT 1', (error, rows, fields) => {

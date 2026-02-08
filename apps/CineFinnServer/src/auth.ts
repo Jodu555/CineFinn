@@ -116,7 +116,11 @@ export const authMiddleware = authFullMiddleware((user) => true);
 
 
 export const authRouter = new Hono()
-    .post('/login', async (c) => {
+    .get('/registerEnabled', async (c) => {
+        return c.json({
+            enabled: getConfig().registration.enabled,
+        });
+    }).post('/login', async (c) => {
         const jsonBody = await c.req.json();
         const registerData = loginSchema.parse(jsonBody);
         const user = registerData;
@@ -145,6 +149,12 @@ export const authRouter = new Hono()
         });
 
     }).post('/register', async (c) => {
+        if (getConfig().registration.enabled == false) {
+            throw new HTTPException(401, {
+                message: 'Registration is currently disabled, please contact the administrator to get access.',
+            });
+        }
+
         const jsonBody = await c.req.json();
         const registerData = registerLoginSchema.parse(jsonBody);
 

@@ -12,20 +12,18 @@ export const useAuthStore = defineStore('auth', {
     }),
     actions: {
         async login(credentials: { username: string; password: string; }) {
-            const response = await $fetch<{ token: string; error?: { message: string; }; }>(useAPIURL() + '/auth/login', {
+            const { data, error } = await tryCatch<Promise<{ token: string; error?: { message: string; }; }>, FetchError>(() => $fetch<{ token: string; error?: { message: string; }; }>(useAPIURL() + '/auth/login', {
                 method: 'POST',
                 body: JSON.stringify(credentials),
-            });
-
-
-            if (response.error) {
-                console.log(response);
-                this.error = response.error.message;
+            }));
+            if (error) {
+                console.log(error);
+                this.error = error.data || 'An unknown error occurred.';
                 return;
             }
 
             this.loggedIn = true;
-            this.authToken = response.token;
+            this.authToken = data.token;
             useCookie('auth-token').value = this.authToken;
             await this.authenticate(true);
         },

@@ -10,16 +10,18 @@
 			<div class="col-1"></div>
 			<div class="col-5">
 				<div class="d-flex justify-content-evenly">
-					<button type="button" :disabled="loggingin" class="btn btn-lg"
-						:class="{ 'btn-secondary': loggingin, 'btn-primary': !loggingin }" @click="loggingin = true">
+					<button type="button" class="btn btn-lg"
+						:class="{ 'btn-secondary': state === 'register', 'btn-primary': state === 'login' }"
+						@click="state = 'login'">
 						Login
 					</button>
-					<button type="button" :disabled="!loggingin" class="btn btn-lg"
-						:class="{ 'btn-secondary': !loggingin, 'btn-primary': loggingin }" @click="loggingin = false">
+					<button type="button" class="btn btn-lg"
+						:class="{ 'btn-secondary': state === 'login', 'btn-primary': state === 'register' }"
+						@click="state = 'register'">
 						Register
 					</button>
 				</div>
-				<div v-if="loggingin" class="card mt-2">
+				<div v-if="state === 'login'" class="card mt-2">
 					<div class="card-header">Login - CineFinn</div>
 					<div class="card-body">
 						<h4 class="card-title">Login to the Cinema</h4>
@@ -53,9 +55,9 @@
 						</form>
 					</div>
 				</div>
-				<div v-if="!loggingin" class="card mt-2">
+				<div v-if="state === 'register'" class="card mt-2">
 					<div class="card-header">Register - CineFinn</div>
-					<div class="card-body">
+					<div v-if="registerEnabled?.enabled" class="card-body">
 						<h4 class="card-title">Register to the Cinema</h4>
 						<hr />
 						<div v-if="loading" class="d-flex justify-content-center">
@@ -88,6 +90,18 @@
 							</fieldset>
 						</form>
 					</div>
+					<div v-else class="card-body">
+						<h4 class="card-title">Registration Disabled</h4>
+						<hr />
+						<div v-if="loading" class="d-flex justify-content-center">
+							<div class="spinner-border" role="status">
+								<span class="visually-hidden">Loading...</span>
+							</div>
+						</div>
+						<p class="text-danger h5">
+							Registration is currently disabled, please contact the administrator to get access.
+						</p>
+					</div>
 				</div>
 			</div>
 			<div class="col-1"></div>
@@ -103,7 +117,16 @@
 	</div>
 </template>
 <script setup lang="ts">
+import useAPIURL from '~/hooks/useAPIURL';
+
 const authStore = useAuthStore();
+
+const state = ref<'login' | 'register'>('login');
+const loading = ref(false);
+
+const { data: registerEnabled, refresh } = await useFetch<{
+	enabled: boolean;
+}>(`${useAPIURL()}/auth/registerEnabled`);
 
 const rules = {
 	tokenRules: [
@@ -113,13 +136,36 @@ const rules = {
 	],
 	usernameRules: [
 		(value: string) => !!value || 'Cannot be empty.',
-		(value: string) => value.length >= 3 || 'Must be at least 3 Characters and can only be 20',
+		(value: string) => !!value.match(/^[a-zA-Z0-9]+$/) || 'Must be alphanumeric',
+		(value: string) => value.length >= 4 || 'Must be at least 4 Characters and can only be 20',
+		(value: string) => value.length <= 20 || 'Must be below 15 Characters',
 	],
 	passwordRules: [
 		(value: string) => !!value || 'Cannot be empty.',
-		(value: string) => value.length >= 3 || 'Must be at least 3 Characters and can only be 100',
+		(value: string) => value.length >= 4 || 'Must be at least 4 Characters and can only be 100',
+		(value: string) => value.length <= 100 || 'Must be below 100 Characters',
 	],
 };
+
+let timer: NodeJS.Timeout;
+
+watch(state, (newValue) => {
+	if (newValue === 'register') {
+		refresh();
+	}
+});
+
+onMounted(async () => {
+	timer = setInterval(async () => {
+		if (state.value === 'register') {
+			refresh();
+		}
+	}, 30 * 1000);
+});
+
+onUnmounted(() => {
+	clearInterval(timer);
+});
 
 const form = ref({
 	username: '',
@@ -130,14 +176,19 @@ const form = ref({
 	tokenValid: false,
 });
 
-const loggingin = ref(true);
 
-const loading = ref(false);
 
 async function onLogin() {
 	if (form.value.usernameValid && form.value.passwordValid) {
 		loading.value = true;
-		await authStore.login({ username: form.value.username, password: form.value.password });
+		// await authStore.login({ username: form.value.username, password: form.value.password });
+		const { error } = await tryCatch(() => authStore.login({ username: form.value.username, password: form.value.password }))
+
+		if (error) {
+			loading.value = false;
+			return;
+		}
+
 		form.value = {
 			username: '',
 			usernameValid: false,

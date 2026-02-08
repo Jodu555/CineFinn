@@ -61,7 +61,6 @@ export async function getKnownSubSystems() {
 
 export async function getSubSystems(): Promise<SubSystem[]> {
     const knownSubSystems = await getKnownSubSystems();
-    const allSockets = await getIO().fetchSockets();
     const subsystems = knownSubSystems.map(async subID => {
         const { data: subSystemSocket, error } = await tryCatch(() => getSubSocketByID(subID));
         const subData = (subSystemSocket?.data.auth as SocketAuthDataSubsystem);
