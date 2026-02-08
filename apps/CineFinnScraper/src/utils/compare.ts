@@ -106,7 +106,7 @@ async function compareForNewReleasesAniWorldOrSTO(
 
     const debug = false;
     const limit = promiseLimit<AniWorldSerieCompare>(10);
-    const data = series.filter((x) => x.refs?.aniworld && !ignoranceList.find((v) => v.UUID == x.UUID && !v.lang));
+    const data = series.filter((x) => x.refs?.aniworld && !ignoranceList.find((v) => v.serie_UUID == x.UUID && !v.lang));
 
     const sockets = await io.fetchSockets();
 
@@ -319,7 +319,7 @@ async function compareForNewReleasesAniWorldOrSTO(
             console.log('Serie not found. WTF????', aniworldSerie.UUID);
             continue;
         }
-        const ignoranceItem = ignoranceList.find((x) => x.UUID == aniworldSerie.UUID) || ({} as IgnoranceItem);
+        const ignoranceItem = ignoranceList.find((x) => x.serie_UUID == aniworldSerie.UUID) || ({} as IgnoranceItem);
 
         for (const _aniworldSeasonIDX in aniworldSerie.seasons) {
             const aniworldSeasonIDX = Number(_aniworldSeasonIDX);

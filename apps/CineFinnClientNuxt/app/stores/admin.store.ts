@@ -1,4 +1,4 @@
-import type { Account, Email, MovingItem, timestamped } from '@cinefinn/types/database';
+import type { Account, Email, IgnoranceItem, MovingItem, timestamped } from '@cinefinn/types/database';
 import type { Overview, SubSystem } from '@cinefinn/types/socket';
 import type { FetchError } from 'ofetch';
 import { defineStore } from 'pinia';
@@ -14,6 +14,7 @@ export const useAdminStore = defineStore('admin', {
         movingItems: [] as MovingItem[],
         emails: [] as (Email & timestamped)[],
         config: {} as any,
+        ignoranceItems: [] as (IgnoranceItem & timestamped)[],
     }),
     actions: {
         async loadOverview() {
@@ -155,6 +156,51 @@ export const useAdminStore = defineStore('admin', {
                 return;
             } else {
                 this.config = data;
+            }
+        },
+        async loadIgnoranceItems() {
+            this.loading = true;
+            const { data, error } = await tryCatch<Promise<(IgnoranceItem & timestamped)[]>, FetchError>(() => $fetch<(IgnoranceItem & timestamped)[]>(`${useAPIURL()}/admin/ignoranceItems`, {
+                method: 'GET',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+            }));
+            this.loading = false;
+            if (error) {
+                this.error = error.data || 'An unknown error occurred.';
+                return;
+            } else {
+                this.ignoranceItems = data;
+            }
+        },
+        async createIgnoranceItem(data: IgnoranceItem) {
+            const { data: ignoranceItem, error } = await tryCatch<Promise<IgnoranceItem>, FetchError>(() => $fetch<IgnoranceItem>(`${useAPIURL()}/admin/ignoranceItems`, {
+                method: 'POST',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+                body: data,
+            }));
+            if (error) {
+                this.error = error.data || 'An unknown error occurred.';
+                return;
+            } else {
+                await this.loadIgnoranceItems();
+            }
+        },
+        async deleteIgnoranceItem(serieUUID: string) {
+            const { data, error } = await tryCatch<Promise<IgnoranceItem>, FetchError>(() => $fetch<IgnoranceItem>(`${useAPIURL()}/admin/ignoranceItems/${serieUUID}`, {
+                method: 'DELETE',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+            }));
+            if (error) {
+                this.error = error.data || 'An unknown error occurred.';
+                return;
+            } else {
+                await this.loadIgnoranceItems();
             }
         },
         async updateOverview(overview: Partial<Overview>) {

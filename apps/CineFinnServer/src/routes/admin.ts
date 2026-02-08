@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { authFullMiddleware } from "../auth.js";
-import { accountsTable, emailsTable, episodesTable, moviesTable, playlistsTable, seasonsTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../database.js";
+import { accountsTable, emailsTable, episodesTable, ignoranceTable, moviesTable, playlistsTable, seasonsTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../database.js";
 import { getKnownSubSystems, getSeriesRelatedToSubSystem, getSubSystems } from "../sockets/subsystem.socket.js";
 import { getIO } from "../utils.js";
 import type { Overview, SocketAuthDataSubsystem } from "@cinefinn/types/socket";
@@ -10,6 +10,7 @@ import { getConfig, updateConfig } from "../config.js";
 import z from "zod";
 import { HTTPException } from "hono/http-exception";
 import { getMovingItems, prepareProcessMovingItem } from "../utils/movingItems.js";
+import type { Langs } from "../parser.js";
 
 
 export async function generateOverview() {
@@ -23,6 +24,7 @@ export async function generateOverview() {
         watchableEntitys,
         watchHistoryEntrys,
         playlists,
+        ignoreItems,
         sockets,
     ] = await Promise.allSettled([
         accountsTable.count(),
@@ -34,6 +36,7 @@ export async function generateOverview() {
         watchableEntitysTable.count(),
         watchHistoryTable.count(),
         playlistsTable.count(),
+        ignoranceTable.count(),
         getIO().fetchSockets(),
     ]);
     const overview = {
@@ -50,6 +53,7 @@ export async function generateOverview() {
         watchableEntitys: watchableEntitys.status === 'fulfilled' ? watchableEntitys.value : 0,
         watchHistoryEntrys: watchHistoryEntrys.status === 'fulfilled' ? watchHistoryEntrys.value : 0,
         playlists: playlists.status === 'fulfilled' ? playlists.value : 0,
+        ignoranceItems: ignoreItems.status === 'fulfilled' ? ignoreItems.value : 0,
         sockets: sockets.status === 'fulfilled' ? sockets.value.length : 0,
         scraper: sockets.status === 'fulfilled' ? sockets.value.find(s => s.data.auth.type === 'scraper') !== undefined : false,
     } satisfies Overview;
@@ -113,6 +117,11 @@ function redactConfig(config: ReturnType<typeof getConfig>): ReturnType<typeof g
 
 const processMovingItemsSchema = z.object({
     IDs: z.array(z.string()),
+});
+
+const createIgnoranceItemSchema = z.object({
+    serie_UUID: z.string(),
+    lang: z.enum(['GerDub', 'GerSub', 'EngDub', 'EngSub', 'JapDub', 'EngSubK', 'GerSubK', 'GerSubC', 'EngSubC']).optional(),
 });
 
 const router = new Hono()
@@ -191,6 +200,50 @@ const router = new Hono()
         }
         updateConfig(config);
         return c.json(redactConfig(config));
+    })
+    .get('/ignoranceItems', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+        const ignoranceItems = await ignoranceTable.get();
+        return c.json(ignoranceItems);
+    })
+    .post('/ignoranceItems', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+        const body = await c.req.json();
+        const data = createIgnoranceItemSchema.parse(body);
+
+        const series = await seriesTable.getOne({
+            UUID: data.serie_UUID,
+            unique: true,
+        });
+        if (series == undefined) {
+            return c.json({
+                status: 'error',
+                message: 'Serie not found',
+            });
+        }
+
+        const ignoranceItem = ignoranceTable.create({
+            serie_UUID: data.serie_UUID,
+            lang: data.lang,
+        });
+        return c.json(ignoranceItem);
+    })
+    .delete('/ignoranceItems/:SerieUUID', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+        const serie_UUID = c.req.param('SerieUUID');
+        const ignoranceItem = await ignoranceTable.getOne({
+            serie_UUID,
+            unique: true,
+        });
+        if (ignoranceItem == undefined) {
+            return c.json({
+                status: 'error',
+                message: 'IgnoranceItem not found',
+            });
+        }
+        await ignoranceTable.delete({
+            serie_UUID,
+        });
+        return c.json({
+            status: 'success',
+        });
     });
 
 export { router as adminRouter };

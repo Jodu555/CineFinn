@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();;
 import { Database, type thingDatabase } from '@jodu555/mysqlapi';
-import type { Account, timestamped, AuthToken, Series, Season, Episode, Movie, WatchableEntity, WatchHistory, SyncRoom, Job, Email, Playlist, TodoItem } from '@cinefinn/types/database';
+import type { Account, timestamped, AuthToken, Series, Season, Episode, Movie, WatchableEntity, WatchHistory, SyncRoom, Job, Email, Playlist, TodoItem, IgnoranceItem } from '@cinefinn/types/database';
 import { getConfig } from './config.js';
 import { debounce } from './utils.js';
 
@@ -27,6 +27,8 @@ export let jobsTable: thingDatabase<Job, Job & timestamped>;
 export let playlistsTable: thingDatabase<Playlist, Playlist & timestamped>;
 
 export let todosTable: thingDatabase<TodoItem, TodoItem & timestamped>;
+
+export let ignoranceTable: thingDatabase<IgnoranceItem, IgnoranceItem & timestamped>;
 
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -434,6 +436,18 @@ async function createTables() {
         },
     });
 
+    await database.createTable('ignorance_items', {
+        options: {
+            timestamps: true,
+            PK: 'serie_UUID',
+        },
+        serie_UUID: UUID_FIELD,
+        lang: {
+            type: 'varchar(10)',
+            null: true,
+        },
+    });
+
     accountsTable = database.get<Account, Account & timestamped>('accounts');
     authTokensTable = database.get<AuthToken>('authtokens');
     emailsTable = database.get<Email, Email & timestamped>('emails');
@@ -453,6 +467,8 @@ async function createTables() {
     playlistsTable = database.get<Playlist, Playlist & timestamped>('playlists');
 
     todosTable = database.get<TodoItem, TodoItem & timestamped>('todos');
+
+    ignoranceTable = database.get<IgnoranceItem, IgnoranceItem & timestamped>('ignorance_items');
 
 }
 

@@ -199,6 +199,7 @@ export interface Overview {
     watchableEntitys: number,
     watchHistoryEntrys: number,
     playlists: number,
+    ignoranceItems: number,
     sockets: number,
     scraper: boolean,
 }

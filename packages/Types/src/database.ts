@@ -234,7 +234,7 @@ export interface Job {
 
 
 export interface IgnoranceItem {
-    UUID?: string;
+    serie_UUID: string;
     lang?: Langs;
 }
 

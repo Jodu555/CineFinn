@@ -33,6 +33,12 @@
                                 <span class="ms-1 d-none d-sm-inline">Config</span>
                             </NuxtLink>
                         </li>
+                        <li>
+                            <NuxtLink class="nav-link px-0 align-middle" exact-active-class="active"
+                                to="/admin/ignore-list">
+                                <span class="ms-1 d-none d-sm-inline">Ignore List</span>
+                            </NuxtLink>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -60,6 +66,7 @@ await Promise.all([
     callOnce('loadMovingItems', () => adminStore.loadMovingItems(), { mode: 'navigation' }),
     callOnce('loadEmails', () => adminStore.loadEmails(), { mode: 'navigation' }),
     callOnce('loadConfig', () => adminStore.loadConfig(), { mode: 'navigation' }),
+    callOnce('loadIgnoranceItems', () => adminStore.loadIgnoranceItems(), { mode: 'navigation' }),
 ]);
 
 // await callOnce('loadOverview', () => adminStore.loadOverview(), { mode: 'navigation' });

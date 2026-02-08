@@ -80,6 +80,10 @@
 				<h4 class="text-center">{{ overview.playlists }}</h4>
 			</div>
 			<div class="col-auto text-center">
+				<h2 class="text-center">Ignorance Items</h2>
+				<h4 class="text-center">{{ overview.ignoranceItems }}</h4>
+			</div>
+			<div class="col-auto text-center">
 				<h2 class="text-center">Scraper</h2>
 				<h4 class="text-center">{{ overview.scraper ? 'Ja' : 'Nein' }}</h4>
 			</div>

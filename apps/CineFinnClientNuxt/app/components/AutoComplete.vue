@@ -7,7 +7,7 @@
 			type="text"
 			class="form-control me-3 dropdown-toggle"
 			:placeholder="options.placeholder || ''"
-			style="width: 18rem"
+			:style="{ width: options.inputWidth || '18rem' }"
 			autocomplete="off"
 			data-bs-toggle="dropdown"
 		/>
@@ -39,6 +39,7 @@ const props = defineProps<{
 		maximumItems?: number;
 		placeholder?: string;
 		prefetchAfterMinItems?: number;
+		inputWidth?: string;
 	};
 	selectFn: (ID: string, value: any) => void;
 	prefetchFn: (ID: string, value: any) => void;
