@@ -101,7 +101,7 @@ socket = Client(config.CORE.URL, {
     autoConnect: false,
     auth: {
         type: 'scraper',
-        authToken: config.CORE.AUTH_TOKEN,
+        authToken: config.CORE.SCRAPER_SOCKET_TOKEN,
     } satisfies AuthHandshake,
 });
 
@@ -138,7 +138,7 @@ async function checkForUpdates(index: DetailedSeries[]) {
 
     const response = await axios.get<DetailedSeries[]>(`${config.CORE.URL}/index/all`, {
         headers: {
-            'auth-token': config.CORE.AUTH_TOKEN,
+            'auth-token': config.CORE.REST_AUTH_TOKEN,
         },
         timeout: 1000 * 60,
     });
@@ -158,7 +158,7 @@ async function checkForUpdates(index: DetailedSeries[]) {
     if (USE_IGNORANCE_LIST === true) {
         const ignoreResponse = await axios.get<IgnoranceItem[]>(`${config.CORE.URL}/admin/ignoranceItems`, {
             headers: {
-                'auth-token': config.CORE.AUTH_TOKEN,
+                'auth-token': config.CORE.REST_AUTH_TOKEN,
             }
         });
         ignoranceList.push(...ignoreResponse.data);

@@ -7,9 +7,9 @@ interface Config {
     PORT: number;
     CORE: {
         URL: string;
-        AUTH_TOKEN: string;
+        REST_AUTH_TOKEN: string;
+        SCRAPER_SOCKET_TOKEN: string;
     };
-    SCRAPER_TOKEN: string;
     SCRAPER_CLIENT_TOKEN: string;
 }
 
@@ -18,9 +18,9 @@ const defaultConfig: Config = {
     PORT: 4000,
     CORE: {
         URL: 'http://localhost:3000',
-        AUTH_TOKEN: 'SUPER-SECURE-CORE-TOKEN',
+        REST_AUTH_TOKEN: 'SECR-DEV',
+        SCRAPER_SOCKET_TOKEN: 'SUPER-SECURE-CORE-TOKEN',
     },
-    SCRAPER_TOKEN: 'SUPER-SECURE-SCRAPER-TOKEN',
     SCRAPER_CLIENT_TOKEN: 'SUPER_SECURE-SCRAPER_CLIENT_TOKEN',
 };
 
