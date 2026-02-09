@@ -8,11 +8,22 @@
 				<!-- <a href="https://www.youtube.com/c/TRyFlow" target="_blank">TRyFlow</a> / -->
 				<a href="https://jodu555.de/imprint">Impressum</a> /
 				<a href="https://jodu555.de/privacy">Privacy Policy</a>
+				<small>&nbsp;&nbsp;&nbsp;@c{{ useClientVersion() }} - {{ status === 'success' && `@s${data!.version}` }} </small>
 			</p>
 		</footer>
 	</div>
 </template>
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import useAPIURL from '~/hooks/useAPIURL';
+import useClientVersion from '~/hooks/useClientVersion';
+
+const { data, status } = useFetch<{
+	status: 'ok' | 'error';
+	version: string;
+}>(`${useAPIURL()}/health`, {
+	lazy: true,
+});
+</script>
 <style lang="scss" scoped>
 .footer {
 	position: absolute;

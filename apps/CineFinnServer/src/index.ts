@@ -37,6 +37,8 @@ import { proxyRouter } from './routes/proxys.js';
 import { handleSubSystemProminence } from './job/crawler.js';
 import { Job } from './job/Job.js';
 
+import packageJSON from '../package.json' with { type: "json" };
+
 const { printMetrics, registerMetrics } = prometheus();
 const app = new Hono({
     strict: false,
@@ -56,16 +58,16 @@ const app = new Hono({
     }))
     .get('/metrics', printMetrics)
     .get('/health', (c) => {
-        c.status(200);
-        const cpus = os.cpus();
+        // const cpus = os.cpus();
         return c.json({
             status: 'ok',
-            memory: {
-                usage: process.memoryUsage(),
-                total: os.totalmem(),
-                free: os.freemem(),
-            },
-        });
+            version: packageJSON.version,
+            // memory: {
+            //     usage: process.memoryUsage(),
+            //     total: os.totalmem(),
+            //     free: os.freemem(),
+            // },
+        }, 200);
     })
     .route('/auth', authRouter)
     .route('/index', indexRouter)
