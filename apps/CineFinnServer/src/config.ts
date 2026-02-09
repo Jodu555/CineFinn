@@ -1,57 +1,9 @@
 import { setupConfigurationManagment, updateConfigurationManagment } from "@cinefinn/configuration-manager";
+import type { ServerConfig } from "@cinefinn/types";
 
 const cliOptions = [['identifier', 'I'], ['entrypoint', 'E'], ['port', 'P'], ['endpoint'], ['core-url'], ['core-token']];
 
-interface Config {
-    version: string;
-    system: {
-        PORT: number;
-        PUBLIC_API_ENDPOINT: string;
-        PUBLIC_API_AUTH_TOKEN: string;
-    };
-    videoPath: string;
-    imagePath: string;
-    database: {
-        host: string;
-        username: string;
-        password: string;
-        database: string;
-    };
-    redis: {
-        host: string;
-        port: number;
-        password: string;
-    };
-    smtp: {
-        host: string;
-        port: number;
-        secure: boolean;
-        auth: {
-            user: string;
-            pass: string;
-        };
-    };
-    scraper: {
-        authToken: string;
-    };
-    subsystem: {
-        authToken: string;
-    };
-    registration: {
-        enabled: boolean;
-        token: string;
-    };
-    proxyAPIs: {
-        segmentapi: {
-            url: string;
-        };
-        anidbapi: {
-            url: string;
-        };
-    };
-}
-
-const defaultConfig: Config = {
+const defaultConfig: ServerConfig = {
     version: '1.0.0',
     system: {
         PORT: 3000,
@@ -96,19 +48,23 @@ const defaultConfig: Config = {
         },
         anidbapi: {
             url: 'https://api.anidb.net/api',
+        },
+        bullboardapi: {
+            url: 'http://localhost:3001',
+            apiToken: 'BULLBOARD-API-TOKEN',
         }
     }
 };
 
-let config: Config;
+let config: ServerConfig;
 
 export function getConfig() {
     if (config == undefined) {
-        config = setupConfigurationManagment<Config>(defaultConfig, cliOptions);
+        config = setupConfigurationManagment<ServerConfig>(defaultConfig, cliOptions);
     }
     return config;
 }
 
-export function updateConfig(updated: Partial<Config>) {
-    return updateConfigurationManagment<Config>(updated);
+export function updateConfig(updated: Partial<ServerConfig>) {
+    return updateConfigurationManagment<ServerConfig>(updated);
 }

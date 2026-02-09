@@ -1,3 +1,4 @@
+import type { ServerConfig } from '@cinefinn/types';
 import type { Account, Email, IgnoranceItem, MovingItem, timestamped } from '@cinefinn/types/database';
 import type { Overview, SubSystem } from '@cinefinn/types/socket';
 import type { FetchError } from 'ofetch';
@@ -13,7 +14,7 @@ export const useAdminStore = defineStore('admin', {
         subsystems: [] as SubSystem[],
         movingItems: [] as MovingItem[],
         emails: [] as (Email & timestamped)[],
-        config: {} as any,
+        config: {} as ServerConfig,
         ignoranceItems: [] as (IgnoranceItem & timestamped)[],
     }),
     actions: {
