@@ -74,7 +74,7 @@ const router = new Hono()
             proxyURL,
             {
                 headers: {
-                    ...c.req.header(), // optional, specify only when forwarding all the request data (including credentials) is necessary.
+                    ...c.req.header(),
                     'X-Forwarded-Host': c.req.header('host'),
                     Authorization: undefined,
                     'auth-token': '',
@@ -82,6 +82,23 @@ const router = new Hono()
             }
         )
         res.headers.delete('Set-Cookie')
+        return res
+    })
+    .get('/bullboard/*', async (c) => {
+        const proxyURL = `${getConfig().proxyAPIs.bullboardapi.url}/admin/queues/api${c.req.path.replace('bullboard/', '') || ''}`
+        console.log('Proxying to:', proxyURL);
+        const res = await proxy(
+            proxyURL,
+            {
+                headers: {
+                    ...c.req.header(),
+                    'X-Forwarded-Host': c.req.header('host'),
+                    'token': getConfig().proxyAPIs.bullboardapi.apiToken,
+                },
+            }
+        )
+        res.headers.delete('Set-Cookie')
+        res.headers.delete('x-powered-by')
         return res
     })
 
