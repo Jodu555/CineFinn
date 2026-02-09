@@ -85,7 +85,7 @@ const router = new Hono()
         return res
     })
     .get('/bullboard/*', async (c) => {
-        const proxyURL = `${getConfig().proxyAPIs.bullboardapi.url}/admin/queues/api${c.req.path.replace('bullboard/', '') || ''}`
+        const proxyURL = `${getConfig().proxyAPIs.bullboardapi.url}/admin/queues/api${c.req.path.replace('bullboard/', '') || ''}?${c.req.url.split('?')[1]}`
         console.log('Proxying to:', proxyURL);
         const res = await proxy(
             proxyURL,
