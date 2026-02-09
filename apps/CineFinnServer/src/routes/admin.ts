@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { authFullMiddleware } from "../auth.js";
 import { accountsTable, emailsTable, episodesTable, ignoranceTable, moviesTable, playlistsTable, seasonsTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../database.js";
 import { getKnownSubSystems, getSeriesRelatedToSubSystem, getSubSystems } from "../sockets/subsystem.socket.js";
-import { getIO } from "../utils.js";
+import { getIO, queryDatabase } from "../utils.js";
 import type { Overview, SocketAuthDataSubsystem } from "@cinefinn/types/socket";
 import { Role } from "@cinefinn/types/database";
 import { generateEmailID } from "../utils/IdGenerators.js";
@@ -12,6 +12,15 @@ import { HTTPException } from "hono/http-exception";
 import { getMovingItems, prepareProcessMovingItem } from "../utils/movingItems.js";
 import type { Langs } from "../parser.js";
 
+async function getTotalRuntime(): Promise<number> {
+    const result = await queryDatabase(`
+            SELECT COALESCE(SUM(runtime), 0) AS total_runtime
+            FROM watchableEntitys;
+        `)
+
+    const finalResult = result[0].total_runtime > 0 ? parseInt(result[0].total_runtime) : 0;
+    return finalResult;
+}
 
 export async function generateOverview() {
     const [
@@ -22,6 +31,7 @@ export async function generateOverview() {
         episodes,
         movies,
         watchableEntitys,
+        totalRuntime,
         watchHistoryEntrys,
         playlists,
         ignoreItems,
@@ -34,6 +44,7 @@ export async function generateOverview() {
         episodesTable.count(),
         moviesTable.count(),
         watchableEntitysTable.count(),
+        getTotalRuntime(),
         watchHistoryTable.count(),
         playlistsTable.count(),
         ignoranceTable.count(),
@@ -51,6 +62,7 @@ export async function generateOverview() {
         episodes: episodes.status === 'fulfilled' ? episodes.value : 0,
         movies: movies.status === 'fulfilled' ? movies.value : 0,
         watchableEntitys: watchableEntitys.status === 'fulfilled' ? watchableEntitys.value : 0,
+        totalRuntime: totalRuntime.status === 'fulfilled' ? totalRuntime.value : 0,
         watchHistoryEntrys: watchHistoryEntrys.status === 'fulfilled' ? watchHistoryEntrys.value : 0,
         playlists: playlists.status === 'fulfilled' ? playlists.value : 0,
         ignoranceItems: ignoreItems.status === 'fulfilled' ? ignoreItems.value : 0,

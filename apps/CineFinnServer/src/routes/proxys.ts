@@ -1,7 +1,9 @@
 import axios from "axios";
 import { Hono } from "hono";
+import { proxy } from 'hono/proxy'
 import { createStorage } from "unstorage";
 import fsDriver from 'unstorage/drivers/fs';
+import { getConfig } from "../config.js";
 
 interface ImageRewriteData {
     url: string;
@@ -64,6 +66,23 @@ const router = new Hono()
         c.header('Cache-Control', `public, immutable, max-age=${CACHE_TIME}`);
 
         return c.body(response.data);
+    })
+    .get('/anidb/*', async (c) => {
+        const proxyURL = `${getConfig().proxyAPIs.anidbapi.url}${c.req.path || ''}`
+        console.log('Proxying to:', proxyURL);
+        const res = await proxy(
+            proxyURL,
+            {
+                headers: {
+                    ...c.req.header(), // optional, specify only when forwarding all the request data (including credentials) is necessary.
+                    'X-Forwarded-Host': c.req.header('host'),
+                    Authorization: undefined,
+                    'auth-token': '',
+                },
+            }
+        )
+        res.headers.delete('Set-Cookie')
+        return res
     })
 
 export { router as proxyRouter };

@@ -1,10 +1,19 @@
 <template>
-	<nav class="navbar sticky-top navbar-expand-lg"
-		style="backdrop-filter: blur(12px); background-color: color-mix(in oklab, var(--bs-body-bg) 77%, transparent)">
+	<nav
+		class="navbar sticky-top navbar-expand-lg"
+		style="backdrop-filter: blur(12px); background-color: color-mix(in oklab, var(--bs-body-bg) 77%, transparent)"
+	>
 		<div class="container-fluid">
 			<router-link class="navbar-brand text-primary fw-bold" to="/">CineFinn</router-link>
-			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-				aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+			<button
+				class="navbar-toggler"
+				type="button"
+				data-bs-toggle="collapse"
+				data-bs-target="#navbarNav"
+				aria-controls="navbarNav"
+				aria-expanded="false"
+				aria-label="Toggle navigation"
+			>
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarNav">
@@ -34,23 +43,33 @@
 					<li class="nav-item">
 						<NuxtLink class="nav-link" active-class="active" to="/todo">Todo</NuxtLink>
 					</li>
+					<li class="nav-item" v-if="authStore.user?.role >= Role.Mod">
+						<NuxtLink class="nav-link" active-class="active" to="/todo/anidb">AniDB</NuxtLink>
+					</li>
 					<!-- <li class="nav-item">
 						<router-link class="nav-link" active-class="active" to="/rmvc">RMVC</router-link>
 					</li> -->
-					<template v-if="authStore.loggedIn">
+					<div v-if="authStore.loggedIn">
 						<li v-if="authStore.user?.role >= Role.Mod" class="nav-item">
 							<NuxtLink class="nav-link" active-class="active" to="/admin">Admin</NuxtLink>
 						</li>
-
-					</template>
+					</div>
 				</ul>
 				<div v-if="authStore.loggedIn" class="d-flex">
-					<AutoComplete :options="{ placeholder: 'Search for a series...', clearAfterSelect: true }"
-						:data="autoCompleteSeries" :select-fn="autocompleteSearch"
-						:prefetch-fn="autocompletePrefetch" />
+					<AutoComplete
+						:options="{ placeholder: 'Search for a series...', clearAfterSelect: true }"
+						:data="autoCompleteSeries"
+						:select-fn="autocompleteSearch"
+						:prefetch-fn="autocompletePrefetch"
+					/>
 					<div class="btn-group" style="margin-left: 2rem" role="group" aria-label="Basic outlined example">
-						<button title="Settings" class="btn btn-outline-primary" data-bs-toggle="offcanvas"
-							data-bs-target="#offcanvasSettings" aria-controls="offcanvasSettings">
+						<button
+							title="Settings"
+							class="btn btn-outline-primary"
+							data-bs-toggle="offcanvas"
+							data-bs-target="#offcanvasSettings"
+							aria-controls="offcanvasSettings"
+						>
 							<font-awesome-icon icon="fa-solid fa-gears" />
 						</button>
 						<button class="btn btn-outline-danger" title="Logout" @click="authStore.logout()">

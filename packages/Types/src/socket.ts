@@ -198,6 +198,7 @@ export interface Overview {
     movies: number,
     watchableEntitys: number,
     watchHistoryEntrys: number,
+    totalRuntime: number,
     playlists: number,
     ignoranceItems: number,
     sockets: number,
