@@ -1,8 +1,5 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-const devBootstrapCss = process.env.NODE_ENV === 'development'
-    ? readFileSync(resolve(process.cwd(), 'node_modules/bootstrap/dist/css/bootstrap.min.css'), 'utf8')
-    : null;
 
 import packageJSON from './package.json';
 
@@ -13,7 +10,7 @@ export default defineNuxtConfig({
     css: [
         'bootstrap/dist/css/bootstrap.min.css',
         '@fortawesome/fontawesome-svg-core/styles.css',
-        '~/assets/main.scss'
+        '~/assets/main.scss',
     ],
     runtimeConfig: {
         public: {
@@ -29,10 +26,6 @@ export default defineNuxtConfig({
                 }
             }
         },
-        // ... your existing scss config ...
-
-        // 1. Force Vite to pre-bundle these dependencies.
-        // This helps ensure the imports are not treated as external and are preserved.
         optimizeDeps: {
             include: [
                 '@fortawesome/vue-fontawesome',
@@ -42,17 +35,10 @@ export default defineNuxtConfig({
             ]
         },
 
-        // 2. Specifically for SSR: Ensure the FontAwesome component 
-        // is not treated as an external module on the server.
-        // This forces the component code into the server bundle, 
-        // ensuring it can access the library correctly.
         ssr: {
             noExternal: ['@fortawesome/vue-fontawesome']
         }
     },
-
-    // Optional: You can also use the legacy 'transpile' which helps 
-    // ensure everything is compiled for the Node.js server environment.
     build: {
         transpile: [
             '@fortawesome/vue-fontawesome',
@@ -62,16 +48,9 @@ export default defineNuxtConfig({
     },
     app: {
         head: {
-            // style: devBootstrapCss ? [{ children: devBootstrapCss } as any] : [],
             bodyAttrs: {
                 'data-bs-theme': 'dark'
             },
-            // script: [
-            //   {
-            //     src: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js',
-            //     tagPosition: 'bodyClose'
-            //   }
-            // ]
         }
     },
     prometheus: {
