@@ -237,9 +237,7 @@ function geFileRuntime(watchableUUID: string) {
     });
 }
 
-export {
-    app,
-};
+export type ServerAppType = typeof app;
 
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
