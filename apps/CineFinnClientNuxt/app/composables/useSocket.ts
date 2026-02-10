@@ -4,7 +4,7 @@ import { io, Socket } from "socket.io-client";
 import useAPIURL from "~/hooks/useAPIURL";
 
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
-export default function useSocket() {
+export default function useSocket(type: 'client' | 'rmvcEmitter' = 'client') {
     if (socket !== null) {
         return socket;
     }
@@ -22,7 +22,8 @@ export default function useSocket() {
         reconnection: true,
         autoConnect: false,
         auth: {
-            type: 'client',
+            //@ts-expect-error
+            type,
             authToken: authStore.authToken,
         } satisfies AuthHandshake,
     });

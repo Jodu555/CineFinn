@@ -60,6 +60,7 @@ export interface ServerToClientEvents {
 
     'rmvc-recieve-action': (action: rmvcActions) => void;
     'rmvc-get-videoState': () => void;
+    'rmvc-recieve-videoStateChange': (arg0: { isPlaying: boolean; }) => void;
 
 }
 
@@ -75,11 +76,7 @@ export interface ClientToServerEvents {
     'rmvc-destroySession': () => void;
     'rmvc-send-videoStateChange': (arg0: videoStateChangeArg) => void;
     'rmvc-send-action': (arg0: rmvcSendActionArg) => void;
-
-    // 'rmvc-send-sessionInfo': () => void;
-    // 'rmvc-send-sessionStart': () => void;
-    // 'rmvc-send-sessionStop': () => void;
-    // 'rmvc-connect': (arg0: rmvcConnectArg) => void;
+    'rmvc-connect': (arg0: { rmvcID: string; }, cb: (arg0: { status: boolean; }) => void) => void;
 }
 
 export interface ServerToScraperEvents {

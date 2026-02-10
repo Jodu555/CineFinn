@@ -1,0 +1,41 @@
+export default defineNuxtRouteMiddleware(async (to, from) => {
+    const authStore = useAuthStore();
+
+    const authCookie = useCookie('auth-token');
+
+    const checkOnboarding = () => {
+        console.log('Checking Onboarding');
+        if (to.path === '/onboarding') {
+            console.log('Already on onboarding');
+            return false;
+        }
+        if (authStore.user && authStore.user.email && authStore.user.email.includes('@nil.com')) {
+            console.log('User is onboarded');
+            return true;
+        }
+    }
+
+    if (authStore.authToken == '' && (typeof authCookie.value == 'string' && authCookie.value !== '')) {
+        authStore.authToken = authCookie.value.toString();
+    }
+
+    if (authStore.loggedIn == false) {
+        console.log('User is not defined, trying to authenticate');
+        try {
+            await authStore.authenticate();
+            if (authStore.loggedIn == false) {
+                console.log('User is still not defined, redirecting to login');
+                // return navigateTo('/login');
+            } else {
+                if (checkOnboarding()) return navigateTo('/onboarding');
+                await useIndexStore().loadSeries();
+            }
+        } catch (error) {
+            // return navigateTo('/login');
+        }
+    }
+
+
+    if (checkOnboarding()) return navigateTo('/onboarding');
+
+});
