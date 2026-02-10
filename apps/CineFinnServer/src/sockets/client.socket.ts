@@ -8,6 +8,7 @@ import { accountsTable } from "../database.js";
 import { debounce, getIO } from "../utils.js";
 import { compareSettings } from "../utils/settings.js";
 import { getFrontEndSeries } from "../routes/index.js";
+import { randomUUID } from "crypto";
 
 type LocalAuthData = SocketAuthDataClient<Account | Account & timestamped>;
 
@@ -35,6 +36,8 @@ async function authFunction(authHandshake: AuthHandshakeClient): Promise<LocalAu
     }
 }
 
+
+
 async function connectionFunction(socket: definedSocket) {
     const socketAuth = socket.data.auth as LocalAuthData;
     console.log(socket.id, socketAuth.user.username, 'connected');
@@ -60,6 +63,37 @@ async function connectionFunction(socket: definedSocket) {
             s.emit('settingsUpdate', data);
         });
     });
+
+    socket.on('rmvc-createSession', async (cb) => {
+        const sessionID = Math.floor(Math.random() * 10 ** 5).toString();
+        socketAuth.rmvcSessionID = sessionID;
+        console.log('rmvc-createSession', socketAuth.user.username, socketAuth.rmvcSessionID);
+        cb(sessionID);
+    });
+
+    socket.on('rmvc-destroySession', async () => {
+        console.log('rmvc-destroySession', socketAuth.user.username, socketAuth.rmvcSessionID);
+        socketAuth.rmvcSessionID = undefined;
+    });
+
+    socket.on('rmvc-send-videoStateChange', async (data) => {
+        console.log('rmvc-send-videoStateChange', socketAuth.user.username, socketAuth.rmvcSessionID, data);
+        if (socketAuth.rmvcSessionID == undefined) return;
+        const sockets = await getIO().fetchSockets();
+        sockets.filter(s => s.data.auth.type === 'client' && s.data.auth.user.UUID === socketAuth.user.UUID && s.id !== socket.id).forEach(async s => {
+            s.emit('rmvc-get-videoState');
+        });
+    });
+
+    socket.on('rmvc-send-action', async (data) => {
+        console.log('rmvc-send-action', socketAuth.user.username, socketAuth.rmvcSessionID, data);
+        if (socketAuth.rmvcSessionID == undefined) return;
+        const sockets = await getIO().fetchSockets();
+        sockets.filter(s => s.data.auth.type === 'client' && s.data.auth.user.UUID === socketAuth.user.UUID && s.id !== socket.id).forEach(async s => {
+            s.emit('rmvc-recieve-action', data.action);
+        });
+    });
+
 
     socket.on('disconnect', () => {
         console.log(socket.id, 'user disconnected');

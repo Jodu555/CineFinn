@@ -36,6 +36,14 @@ export type ServerToAnythingEvents = ServerToClientEvents & ServerToScraperEvent
 
 export type AnythingToServerEvents = ClientToServerEvents & ScraperToServerEvents & SubSystemToServerEvents;
 
+interface videoStateChangeArg {
+    isPlaying: boolean;
+}
+interface rmvcSendActionArg {
+    rmvcID: string;
+    action: rmvcActions;
+}
+
 export interface ServerToClientEvents {
     // noArg: () => void;
     // basicEmit: (a: number, b: string, c: Buffer) => void;
@@ -49,19 +57,35 @@ export interface ServerToClientEvents {
     adminSubsystems: (obj: SubSystem[]) => void;
     adminMovingItems: (obj: database.MovingItem[]) => void;
     todoListUpdate: (obj: database.TodoItem[]) => void;
+
+    'rmvc-recieve-action': (action: rmvcActions) => void;
+    'rmvc-get-videoState': () => void;
+
 }
 
-export interface ServerToScraperEvents {
-    'job:checkForUpdates': (index: [database.DetailedSeries], callback: (chanedSeries: database.DetailedSeries[]) => void) => void;
-    'scrape:aniworld': (url: string, callback: (informations: scrapers.AniWorldSeriesInformations | void) => void) => void;
-    'scrape:sto': (url: string, callback: (informations: scrapers.AniWorldSeriesInformations | void) => void) => void;
-}
+type rmvcActions = 'play' | 'pause' | 'forward' | 'backward' | 'nextEp' | 'prevEp' | 'volHigh' | 'volDown';
 
 export interface ClientToServerEvents {
     state: (obj: { url: string; }) => void;
     updateTime: (obj: { watchableUUID: string; time: number; }) => void;
     updateSettings: (obj: database.SettingsObject) => void;
     resetSettings: () => void;
+
+    'rmvc-createSession': (cb: (sessionID: string) => void) => void;
+    'rmvc-destroySession': () => void;
+    'rmvc-send-videoStateChange': (arg0: videoStateChangeArg) => void;
+    'rmvc-send-action': (arg0: rmvcSendActionArg) => void;
+
+    // 'rmvc-send-sessionInfo': () => void;
+    // 'rmvc-send-sessionStart': () => void;
+    // 'rmvc-send-sessionStop': () => void;
+    // 'rmvc-connect': (arg0: rmvcConnectArg) => void;
+}
+
+export interface ServerToScraperEvents {
+    'job:checkForUpdates': (index: [database.DetailedSeries], callback: (chanedSeries: database.DetailedSeries[]) => void) => void;
+    'scrape:aniworld': (url: string, callback: (informations: scrapers.AniWorldSeriesInformations | void) => void) => void;
+    'scrape:sto': (url: string, callback: (informations: scrapers.AniWorldSeriesInformations | void) => void) => void;
 }
 
 export interface ScraperToServerEvents {
@@ -144,6 +168,7 @@ export interface SocketAuthDataClient<U = any> {
     type: 'client';
     token: string;
     user: U;
+    rmvcSessionID?: string;
 }
 
 export interface SocketAuthDataScraper<U = any> {

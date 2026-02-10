@@ -65,7 +65,7 @@
 			</div>
 			<div class="col-auto text-center">
 				<h2 class="text-center">Total Runtime</h2>
-				<h4 class="text-center">{{ overview.totalRuntime }}</h4>
+				<h4 class="text-center">{{ formatDuration(overview.totalRuntime) }}</h4>
 			</div>
 			<div class="col-auto text-center">
 				<h2 class="text-center">SubSystems</h2>
@@ -104,6 +104,22 @@ const toggleDisabledSeriesModal = ref(false);
 
 const adminStore = useAdminStore();
 const indexStore = useIndexStore();
+
+const formatDuration = (time: number): string => {
+	const seconds = Math.floor(time % 60);
+	const minutes = Math.floor(time / 60) % 60;
+	const hours = Math.floor(time / 3600) % 24;
+	const days = Math.floor(time / 86400);
+	const formatter = new Intl.NumberFormat(undefined, { minimumIntegerDigits: 2 });
+
+	if (days > 0) {
+		return `${days}d ${hours}:${formatter.format(minutes)}:${formatter.format(seconds)}`;
+	}
+	if (hours === 0) {
+		return `${minutes}:${formatter.format(seconds)}`;
+	}
+	return `${hours}:${formatter.format(minutes)}:${formatter.format(seconds)}`;
+};
 
 const loading = computed(() => adminStore.loading);
 const error = computed(() => adminStore.error);
