@@ -40,7 +40,7 @@ import { Job } from './job/Job.js';
 import packageJSON from '../package.json' with { type: "json" };
 
 const { printMetrics, registerMetrics } = prometheus();
-const app = new Hono({
+export const app = new Hono({
     strict: false,
 })
     .use(cors())
