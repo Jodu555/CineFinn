@@ -168,7 +168,7 @@ async function compareForNewReleasesAniWorldOrSTO(
                 return new Promise<AniWorldSerieCompare>(async (resolve, reject) => {
                     try {
                         const ref = serie.refs[refKey];
-                        if (typeof ref !== 'string') {
+                        if (typeof ref !== 'string' || ref == '') {
                             return resolve(null as any);
                         }
 
@@ -351,7 +351,7 @@ async function compareForNewReleasesAniWorldOrSTO(
                         serieTitle: localSerie.title,
                         serieReferenceAniworld: localSerie.refs.aniworld as string,
                         seasonIDX: aniworldSeasonIDX + 1,
-                        episodeIDX: aniworldSeason.indexOf(episode) + 1,
+                        episodeIDX: Number(aniworldSeason.indexOf(episode)) + 1,
                     });
                 }
                 continue;
@@ -365,7 +365,7 @@ async function compareForNewReleasesAniWorldOrSTO(
                     serieTitle: localSerie.title,
                     serieReferenceAniworld: localSerie.refs.aniworld as string,
                     seasonIDX: aniworldSeasonIDX + 1,
-                    episodeIDX: Number(_aniworldEpisodeIDX + 1),
+                    episodeIDX: Number(_aniworldEpisodeIDX) + 1,
                 }, localEpisode);
             }
         }

@@ -87,6 +87,13 @@ export interface ServerToScraperEvents {
     'job:checkForUpdates': (index: [database.DetailedSeries], callback: (chanedSeries: database.DetailedSeries[]) => void) => void;
     'scrape:aniworld': (url: string, callback: (informations: scrapers.AniWorldSeriesInformations | void) => void) => void;
     'scrape:sto': (url: string, callback: (informations: scrapers.AniWorldSeriesInformations | void) => void) => void;
+    'checkSerieForUpdates': (uuid: string, callback: (output: CheckForUpdatesOutput) => void) => void;
+}
+
+export interface CheckForUpdatesOutput {
+    aniworld: database.ExtendedEpisodeDownload[];
+    sto: database.ExtendedEpisodeDownload[];
+    zoro: database.ExtendedEpisodeDownload[];
 }
 
 export interface ScraperToServerEvents {

@@ -16,7 +16,7 @@ import { logger } from 'hono/logger';
 import { ownLogger } from './ownLogger.js';
 import { managmentRouter } from './routes/managment.js';
 import { CacheContext } from './LRUCache.js';
-import type { AnythingToServerEvents, AuthHandshake, ClientToServerEvents, InterServerEvents, ServerToAnythingEvents, ServerToClientEvents, SocketAuthDataClient, SocketAuthDataSubsystem, SocketData } from '@cinefinn/types/socket';
+import type { AnythingToServerEvents, AuthHandshake, CheckForUpdatesOutput, ClientToServerEvents, InterServerEvents, ServerToAnythingEvents, ServerToClientEvents, SocketAuthDataClient, SocketAuthDataSubsystem, SocketData } from '@cinefinn/types/socket';
 import { tryCatch } from './tryCatch.js';
 import { type Series, type Season, type Movie, type Account, type timestamped, type DetailedSeries, type DetailedMovie, type DetailedEpisode, type DetailedSeason, type FrontendSeries, Role } from '@cinefinn/types/database';
 import { getIO, queryDatabase, setIO, setIORedis, getEmailManager } from './utils.js';
@@ -38,6 +38,9 @@ import { handleSubSystemProminence } from './job/crawler.js';
 import { Job } from './job/Job.js';
 
 import packageJSON from '../package.json' with { type: "json" };
+import { getScraperSocket } from './sockets/scraper.socket.js';
+import { filenameParser } from './parser.js';
+import path from 'node:path';
 
 const { printMetrics, registerMetrics } = prometheus();
 export const app = new Hono({
@@ -77,7 +80,45 @@ export const app = new Hono({
     .route('/admin', adminRouter)
     .route('/todo', todoRouter)
     .route('', proxyRouter)
-    .route('/video', videoRouter);
+    .route('/video', videoRouter)
+    .get('/test/checkSerieForUpdates/:S-UUID', async (c) => {
+        const serieUUID = c.req.param('S-UUID');
+        if (serieUUID == undefined) {
+            return c.json({ error: 'No UUID provided' }, 400);
+        }
+        const scraperSocket = await getScraperSocket();
+
+        const { data: output, error } = await tryCatch(() => {
+            return new Promise<CheckForUpdatesOutput>((resolve, reject) => {
+                scraperSocket.timeout(1000 * 60 * 10).emit('checkSerieForUpdates', serieUUID, (err, output) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    resolve(output)
+                });
+            });
+        });
+
+        if (error) {
+            console.log('Error checking for updates', error);
+            return c.json({ error: error.message }, 500);
+        }
+
+        return c.json(output.aniworld.map(x => {
+            x.file = x.file.replaceAll('.', '#');
+            x.file += '.mp4';
+            const outPath = path.join(getConfig().videoPath, x._animeFolder, x.folder, x.file);
+            const parsed = filenameParser(outPath, x.file);
+
+            if (parsed.movie) return null;
+            return {
+                outPath,
+                file: x.file,
+                parsed
+            };
+        }).filter(x => x != null));
+    });
 
 // app.get('*', async (c, next) => {
 

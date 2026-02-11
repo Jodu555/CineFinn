@@ -119,6 +119,26 @@ socket.on('job:checkForUpdates', (cb) => {
     // cb(0);
 });
 
+socket.on('checkSerieForUpdates', async (uuid, cb) => {
+    console.log('checkSerieForUpdates', uuid);
+    const response = await axios.get<DetailedSeries>(`${config.CORE.URL}/index/${uuid}`, {
+        headers: {
+            'auth-token': config.CORE.REST_AUTH_TOKEN,
+        },
+        timeout: 1000 * 60,
+    });
+
+    if (response.status != 200) {
+        console.log('Error fetching index');
+        return;
+    }
+    const serie = response.data;
+    console.log(serie);
+
+    const output = await compareForNewReleases([serie], [], { aniworld: true, sto: true, zoro: false });
+    cb(output);
+});
+
 socket.on('scrape:aniworld', async (url, cb) => {
     console.log('scrape:aniworld', url);
     const aniworld = new Aniworld(url);

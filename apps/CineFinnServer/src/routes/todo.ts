@@ -3,7 +3,7 @@ import { authFullMiddleware } from "../auth.js";
 import { Role, type RefRef, type ScrapeInfo, type TodoItem, type TodoReferences, type ValueOf } from "@cinefinn/types/database";
 import type { AniWorldSeriesInformations } from "@cinefinn/types/scrapers";
 import { tryCatch } from "../tryCatch.js";
-import { isScraperSocketConnected } from "../sockets/scraper.socket.js";
+import { getScraperSocket, isScraperSocketConnected } from "../sockets/scraper.socket.js";
 import { createStorage } from "unstorage";
 import fsDriver from "unstorage/drivers/fs";
 import { unescape } from "querystring";
@@ -23,11 +23,7 @@ const scrapers = [
         referenceKey: 'aniworld',
         scrapeKey: 'aniworld',
         scrapeFunction: async (url: string) => {
-            const sockets = await getIO().fetchSockets();
-            const scraperSocket = sockets.find(s => s.data.auth.type === 'scraper');
-            if (scraperSocket == undefined) {
-                throw new Error('Scraper Socket not found');
-            }
+            const scraperSocket = await getScraperSocket();
             const data = await new Promise<AniWorldSeriesInformations | void>((resolve, reject) => {
                 scraperSocket.emit('scrape:aniworld', url, (data) => resolve(data));
             })
@@ -43,11 +39,7 @@ const scrapers = [
         referenceKey: 'sto',
         scrapeKey: 'sto',
         scrapeFunction: async (url: string) => {
-            const sockets = await getIO().fetchSockets();
-            const scraperSocket = sockets.find(s => s.data.auth.type === 'scraper');
-            if (scraperSocket == undefined) {
-                throw new Error('Scraper Socket not found');
-            }
+            const scraperSocket = await getScraperSocket();
             const data = await new Promise<AniWorldSeriesInformations | void>((resolve, reject) => {
                 scraperSocket.emit('scrape:aniworld', url, (data) => resolve(data));
             })

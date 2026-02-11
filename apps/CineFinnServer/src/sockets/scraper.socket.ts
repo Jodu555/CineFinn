@@ -1,10 +1,26 @@
 
-import type { AuthHandshakeScraper, SocketAuthDataScraper } from "@cinefinn/types/socket";
+import type { AuthHandshakeScraper, InterServerEvents, ScraperToServerEvents, ServerToScraperEvents, SocketAuthDataScraper } from "@cinefinn/types/socket";
 import type { SocketConsumerMeta } from "./index.js";
 import { getConfig } from "../config.js";
 import type { definedSocket } from "../index.js";
+import { getIO } from "../utils.js";
+import type { Socket } from "socket.io";
+import type { Account, timestamped } from "@cinefinn/types/database";
 
 export let isScraperSocketConnected = false;
+
+export type definedScraperSocket = Socket<ScraperToServerEvents, ServerToScraperEvents, InterServerEvents, { auth: SocketAuthDataScraper<Account | (Account & timestamped)> }>;
+export async function getScraperSocket() {
+    if (!isScraperSocketConnected) {
+        throw new Error('Scraper Socket not connected');
+    }
+    const sockets = await getIO().fetchSockets();
+    const scraperSocket = sockets.find(s => s.data.auth.type === 'scraper');
+    if (scraperSocket == undefined) {
+        throw new Error('Scraper Socket not found');
+    }
+    return scraperSocket as any as definedScraperSocket;
+}
 
 async function authFunction(authHandshake: AuthHandshakeScraper): Promise<SocketAuthDataScraper> {
     const { authToken } = authHandshake;
