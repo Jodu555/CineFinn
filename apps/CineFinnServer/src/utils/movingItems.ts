@@ -131,7 +131,7 @@ class ThrottleStream extends Transform {
 
 export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
     const { data: subSystemSocket, error } = await tryCatch(() => getSubSocketByID(movingItem.toSubID));
-    if (error) {
+    if (error || subSystemSocket == null) {
         console.log(`SubSystem ${movingItem.toSubID} not found`);
         return;
     }

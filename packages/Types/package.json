@@ -25,7 +25,8 @@
 	},
 	"scripts": {
 		"dev": "tsc --watch",
-		"build": "tsc"
+		"build": "tsc",
+		"typecheck": "tsc --noEmit"
 	},
 	"keywords": [],
 	"author": "",

@@ -6,7 +6,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "tsx watch src/index.ts",
-		"build": "tsc"
+		"build": "tsc",
+		"typecheck": "tsc --noEmit"
 	},
 	"keywords": [],
 	"author": "",

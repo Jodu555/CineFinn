@@ -24,6 +24,9 @@ const scrapers = [
         scrapeKey: 'aniworld',
         scrapeFunction: async (url: string) => {
             const scraperSocket = await getScraperSocket();
+            if (scraperSocket == null) {
+                throw new Error('Scraper Socket not found');
+            }
             const data = await new Promise<AniWorldSeriesInformations | void>((resolve, reject) => {
                 scraperSocket.emit('scrape:aniworld', url, (data) => resolve(data));
             })
@@ -40,6 +43,9 @@ const scrapers = [
         scrapeKey: 'sto',
         scrapeFunction: async (url: string) => {
             const scraperSocket = await getScraperSocket();
+            if (scraperSocket == null) {
+                throw new Error('Scraper Socket not found');
+            }
             const data = await new Promise<AniWorldSeriesInformations | void>((resolve, reject) => {
                 scraperSocket.emit('scrape:aniworld', url, (data) => resolve(data));
             })

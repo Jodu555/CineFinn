@@ -151,7 +151,7 @@ async function createVideoStreamOverSocket(
 
     const { data: subSocket, error } = await tryCatch(() => getSubSocketByID(subID));
 
-    if (error != null) {
+    if (error != null || subSocket == null) {
         return c.json(error, 500);
     }
 
