@@ -2,7 +2,7 @@ import { Hono, type Context } from 'hono';
 import { authFullMiddleware, type AuthedVars } from '../auth.js';
 import { jobsTable } from '../database.js';
 import { crawl } from '../job/crawler.js';
-import type { JobType } from '@cinefinn/types/database';
+import type { Job as IJob, JobType, timestamped } from '@cinefinn/types/database';
 import { generatePreviewImages } from '../job/images.js';
 import { tryCatch } from '../tryCatch.js';
 import { Job } from '../job/Job.js';

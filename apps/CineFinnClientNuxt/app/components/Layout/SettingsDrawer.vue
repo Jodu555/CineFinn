@@ -96,7 +96,9 @@ import JobCard from './JobCard.vue';
 const authStore = useAuthStore();
 const managmentStore = useManagmentStore();
 
-await callOnce(managmentStore.loadJobs, { mode: 'navigation' });
+if (authStore.loggedIn && authStore.user?.role >= Role.Mod) {
+	await callOnce(managmentStore.loadJobs, { mode: 'navigation' });
+}
 
 function updateSettings() {
 	useSocket().emit('updateSettings', authStore.user.settings);

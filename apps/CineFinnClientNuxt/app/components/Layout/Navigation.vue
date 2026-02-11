@@ -37,23 +37,21 @@
 							<li><router-link class="dropdown-item" active-class="active" to="/anidb">AniDB</router-link></li>
 						</ul>
 					</li> -->
-					<li class="nav-item">
+					<li v-if="authStore.loggedIn" class="nav-item">
 						<NuxtLink class="nav-link" active-class="active" to="/playlists">Playlists</NuxtLink>
 					</li>
-					<li class="nav-item">
+					<li v-if="authStore.loggedIn" class="nav-item">
 						<NuxtLink class="nav-link" active-class="active" to="/todo">Todo</NuxtLink>
 					</li>
 					<li class="nav-item" v-if="authStore.user?.role >= Role.Mod">
 						<NuxtLink class="nav-link" active-class="active" to="/todo/anidb">AniDB</NuxtLink>
 					</li>
-					<!-- <li class="nav-item">
-						<router-link class="nav-link" active-class="active" to="/rmvc">RMVC</router-link>
-					</li> -->
-					<div v-if="authStore.loggedIn">
-						<li v-if="authStore.user?.role >= Role.Mod" class="nav-item">
-							<NuxtLink class="nav-link" active-class="active" to="/admin">Admin</NuxtLink>
-						</li>
-					</div>
+					<li class="nav-item">
+						<NuxtLink class="nav-link" active-class="active" to="/rmvc">RMVC</NuxtLink>
+					</li>
+					<li v-if="authStore.loggedIn && authStore.user?.role >= Role.Mod" class="nav-item">
+						<NuxtLink class="nav-link" active-class="active" to="/admin">Admin</NuxtLink>
+					</li>
 				</ul>
 				<div v-if="authStore.loggedIn" class="d-flex">
 					<AutoComplete
