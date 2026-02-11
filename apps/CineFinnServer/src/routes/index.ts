@@ -12,7 +12,7 @@ import { sendSeriesReloadToAll } from "../sockets/client.socket.js";
 import { generateSeriesID } from "../utils/IdGenerators.js";
 import { getConfig } from "../config.js";
 import type { CheckForUpdatesOutput } from "@cinefinn/types/socket";
-import { filenameParser } from "../parser.js";
+import { filenameParser, type ParsedInformation } from "../parser.js";
 import { getScraperSocket } from "../sockets/scraper.socket.js";
 import { tryCatch } from "../tryCatch.js";
 
@@ -459,19 +459,23 @@ const router = new Hono()
             return c.json({ error: error.message }, 500);
         }
 
-        return c.json(output.aniworld.map(x => {
-            x.file = x.file.replaceAll('.', '#');
-            x.file += '.mp4';
-            const outPath = path.join(getConfig().videoPath, x._animeFolder, x.folder, x.file);
-            const parsed = filenameParser(outPath, x.file);
+        const finalOutput = Object.keys(output).reduce((prev: { outPath: string; file: string; parsed: ParsedInformation }[], curr) => {
+            const newArr = output[curr as keyof typeof output].map(x => {
+                x.file = x.file.replaceAll('.', '#');
+                x.file += '.mp4';
+                const outPath = path.join(getConfig().videoPath, x._animeFolder, x.folder, x.file);
+                const parsed = filenameParser(outPath, x.file);
 
-            if (parsed.movie) return null;
-            return {
-                outPath,
-                file: x.file,
-                parsed
-            };
-        }).filter(x => x != null));
+                if (parsed.movie) return null;
+                return {
+                    outPath,
+                    file: x.file,
+                    parsed
+                };
+            });
+            return prev.concat(newArr.filter(x => x != null));
+        }, []);
+        return c.json(finalOutput)
     })
     .patch('/:S-UUID', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const user = c.get('credentials').user;

@@ -174,7 +174,10 @@
 												</div>
 											</div>
 										</div>
-										<div v-for="additionals in additionalList" class="card cursor-disabled border-danger-subtle">
+										<div
+											v-for="additionals in additionalList?.filter((x) => x.parsed.season === currentDetailedSeasonData?.season_IDX)"
+											class="card cursor-disabled border-danger-subtle"
+										>
 											<!-- <pre>{{ additionals }}</pre> -->
 											<div class="card-body p-3">
 												<div class="d-flex">
