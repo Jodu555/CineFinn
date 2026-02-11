@@ -69,7 +69,7 @@ const gotoUrl = computed(() => {
 	return location.origin + '/rmvc';
 });
 
-const loading = ref(false);
+const loading = ref(true);
 const sessionStarted = ref(false);
 const sessionID = ref('');
 const actionRecord = ref([] as Action[]);
@@ -91,11 +91,20 @@ function stopSession() {
 	loading.value = false;
 }
 
-const videoRef = useTemplateRef<HTMLVideoElement>('video');
+let boundToVideo = false;
 
 onMounted(() => {
-	const video = videoRef.value;
-	if (video == undefined) return;
+	handleMounting();
+});
+
+function handleMounting() {
+	const video = document.querySelector('video');
+	if (video == undefined) {
+		console.log('Video Null');
+		setTimeout(handleMounting, 100);
+		return;
+	}
+	boundToVideo = true;
 	video.addEventListener('play', () => {
 		useSocket().emit('rmvc-send-videoStateChange', { isPlaying: true });
 	});
@@ -140,10 +149,11 @@ onMounted(() => {
 			} catch (_) {}
 		}
 	});
-	loading.value = true;
-});
+	loading.value = false;
+}
 
 onUnmounted(() => {
+	useSocket().off('rmvc-get-videoState');
 	useSocket().off('rmvc-recieve-action');
 });
 </script>

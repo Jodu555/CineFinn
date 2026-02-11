@@ -6,6 +6,7 @@ import { getIO } from "../utils.js";
 import clientSocket from "./client.socket.js";
 import scraperSocket from "./scraper.socket.js";
 import subsystemSocket from "./subsystem.socket.js";
+import rmvcEmitterSocket from "./rmvcEmitter.socket.js";
 import { rebroadcastOverview } from '../routes/admin.js';
 
 export async function setupSocketIO() {
@@ -13,6 +14,7 @@ export async function setupSocketIO() {
     socketRegistry.set('client', clientSocket.meta);
     socketRegistry.set('scraper', scraperSocket.meta);
     socketRegistry.set('subsystem', subsystemSocket.meta);
+    socketRegistry.set('rmvcEmitter', rmvcEmitterSocket.meta);
 
     setupSocketAuthMiddleware();
     setupSocketConnection();

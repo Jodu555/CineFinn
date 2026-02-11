@@ -3,18 +3,22 @@ import fs = require('fs');
 import type database = require("./database");
 import type scrapers = require("./scrapers");
 
-export type SocketAuthType = 'client' | 'scraper' | 'subsystem';
+export type SocketAuthType = 'client' | 'scraper' | 'subsystem' | 'rmvcEmitter';
 
 // export interface AuthHandshake {
 //     type: SocketAuthType;
 //     authToken: string;
 // }
 
-export type AuthHandshake = AuthHandshakeClient | AuthHandshakeScraper | AuthHandshakeSubsystem;
+export type AuthHandshake = AuthHandshakeClient | AuthHandshakeScraper | AuthHandshakeSubsystem | AuthHandshakeRmvcEmitter;
 
 export interface AuthHandshakeClient {
     type: 'client';
     authToken: string;
+}
+
+export interface AuthHandshakeRmvcEmitter {
+    type: 'rmvcEmitter';
 }
 
 export interface AuthHandshakeScraper {
@@ -159,13 +163,19 @@ export interface SocketData<U = any> {
     auth: SocketAuthData<U>;
 }
 
-export type SocketAuthData<U = any> = SocketAuthDataClient<U> | SocketAuthDataScraper<U> | SocketAuthDataSubsystem<U>;
+export type SocketAuthData<U = any> = SocketAuthDataClient<U> | SocketAuthDataScraper<U> | SocketAuthDataSubsystem<U> | SocketAuthDataRmvcEmitter<U>;
+
+export interface SocketAuthDataRmvcEmitter<U = any> {
+    type: 'rmvcEmitter';
+    rmvcEmitterSessionID?: string;
+}
 
 export interface SocketAuthDataClient<U = any> {
     type: 'client';
     token: string;
     user: U;
     rmvcSessionID?: string;
+    rmvcEmitterSessionID?: string;
 }
 
 export interface SocketAuthDataScraper<U = any> {

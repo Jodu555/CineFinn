@@ -9,6 +9,7 @@ import { debounce, getIO } from "../utils.js";
 import { compareSettings } from "../utils/settings.js";
 import { getFrontEndSeries } from "../routes/index.js";
 import { randomUUID } from "crypto";
+import rmvcEmitterSocket from "./rmvcEmitter.socket.js";
 
 type LocalAuthData = SocketAuthDataClient<Account | Account & timestamped>;
 
@@ -29,10 +30,18 @@ async function authFunction(authHandshake: AuthHandshakeClient): Promise<LocalAu
         throw new Error('Unauthorized');
     }
 
+    const result = await tryCatch(() => rmvcEmitterSocket.meta.authFunction(authHandshake));
+
+    if (result.error != null) {
+        console.log(result.error);
+        throw new Error('Unauthorized Error in RMVC Emitter Auth');
+    }
+
     return {
         type: 'client',
         token,
         user,
+        rmvcEmitterSessionID: result.data.rmvcEmitterSessionID,
     }
 }
 
@@ -80,8 +89,15 @@ async function connectionFunction(socket: definedSocket) {
         console.log('rmvc-send-videoStateChange', socketAuth.user.username, socketAuth.rmvcSessionID, data);
         if (socketAuth.rmvcSessionID == undefined) return;
         const sockets = await getIO().fetchSockets();
-        sockets.filter(s => s.data.auth.type === 'client' && s.data.auth.user.UUID === socketAuth.user.UUID && s.id !== socket.id).forEach(async s => {
-            s.emit('rmvc-get-videoState');
+        sockets.filter(s => {
+            if (s.data.auth.type === 'client') {
+                return s.data.auth.user.UUID === socketAuth.user.UUID && s.id !== socket.id;
+            }
+            if (s.data.auth.type === 'rmvcEmitter') {
+                return s.data.auth.rmvcEmitterSessionID === socketAuth.rmvcSessionID;
+            }
+        }).forEach(async s => {
+            s.emit('rmvc-recieve-videoStateChange', data);
         });
     });
 
@@ -98,6 +114,7 @@ async function connectionFunction(socket: definedSocket) {
     socket.on('disconnect', () => {
         console.log(socket.id, 'user disconnected');
     });
+    rmvcEmitterSocket.meta.connectionFunction(socket);;
 }
 
 export async function sendSeriesReloadToAll() {
