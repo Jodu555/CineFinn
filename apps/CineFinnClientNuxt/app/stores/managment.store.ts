@@ -41,12 +41,15 @@ export const useManagmentStore = defineStore('managment', {
             }
         },
         async deleteJob(jobUUID: string) {
+            this.error = '';
+            this.loading = true;
             const { data, error } = await tryCatch<Promise<void>, FetchError>(() => $fetch<void>(useAPIURL() + '/managment/jobs/delete/' + jobUUID, {
                 method: 'DELETE',
                 headers: {
                     'auth-token': useAuthStore().authToken,
                 }
             }));
+            this.loading = false;
             if (error) {
                 this.error = error.data || 'An unknown error occurred.';
                 return;

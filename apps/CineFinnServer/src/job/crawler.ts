@@ -595,7 +595,6 @@ export async function crawl(job: Job) {
     });
 
     job.timeEnd('Handling Files');
-    job.log('Done Handling Files');
 
     // ---- Update seasons episode counts in DB
     job.log(`Updating ${touchedSeasonsSet.size} Seasons`);
@@ -638,8 +637,8 @@ export async function crawl(job: Job) {
 
     job.timeEnd('Updating Seasons');
 
-    const probablyMissingSeries = allSeries.difference(touchedSeries);
-    if (probablyMissingSeries.size > 0) {
+    const probablyMissingSeries = Array.from(allSeries.difference(touchedSeries));
+    if (probablyMissingSeries.length > 0) {
         job.log('Probably missing series:', probablyMissingSeries);
         for (const UUID of probablyMissingSeries) {
             const serie = await seriesTable.getOne({ UUID });
@@ -647,12 +646,12 @@ export async function crawl(job: Job) {
                 job.log('Serie not found', UUID);
                 continue;
             }
-            await seriesTable.update({ UUID }, { infos: { disabled: true } });
+            await seriesTable.update({ UUID }, { infos: { ...serie.infos, disabled: true } });
         }
     }
 
     job.setResult({
-        probablyMissingSeries: Array.from(probablyMissingSeries),
+        probablyMissingSeries: probablyMissingSeries,
         touchedSeasons: Array.from(touchedSeasonsSet)
     });
 
