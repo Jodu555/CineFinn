@@ -651,9 +651,10 @@ export async function crawl(job: Job) {
         }
     }
 
-    // job.setResult({
-    //     info: Array.from(touchedSeasonsSet)
-    // });
+    job.setResult({
+        probablyMissingSeries: Array.from(probablyMissingSeries),
+        touchedSeasons: Array.from(touchedSeasonsSet)
+    });
 
     await handleSubSystemProminence(job);
 
