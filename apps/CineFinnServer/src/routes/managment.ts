@@ -2,7 +2,7 @@ import { Hono, type Context } from 'hono';
 import { authFullMiddleware, type AuthedVars } from '../auth.js';
 import { jobsTable } from '../database.js';
 import { crawl } from '../job/crawler.js';
-import type { Job as IJob, JobType, timestamped } from '@cinefinn/types/database';
+import { Role, type Job as IJob, type JobType, type timestamped } from '@cinefinn/types/database';
 import { generatePreviewImages } from '../job/images.js';
 import { tryCatch } from '../tryCatch.js';
 import { Job } from '../job/Job.js';
@@ -77,9 +77,22 @@ async function handleJob(type: JobType, c: Context<AuthedVars>, callFunction: (j
 }
 
 const router = new Hono()
-    .get('/jobs/info', authFullMiddleware((user) => user.role >= 1), async (c) => {
+    .get('/jobs/info', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const jobs = await jobsTable.get();
         return c.json(jobs);
+    })
+    .delete('/jobs/delete/:UUID', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+        const jobUUID = c.req.param('UUID');
+        const job = await jobsTable.getOne({ UUID: jobUUID });
+        if (job == undefined) {
+            return c.json({
+                message: 'Job not found',
+            });
+        }
+        await jobsTable.delete({ UUID: jobUUID });
+        return c.json({
+            message: 'Job deleted',
+        });
     })
     .get('/job/crawl', authFullMiddleware((user) => user.role >= jobRegistry.crawl.minimumRole), async (c) => {
         return await handleJob('crawl', c, crawl);

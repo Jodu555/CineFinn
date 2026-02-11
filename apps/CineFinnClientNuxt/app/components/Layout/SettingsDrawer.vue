@@ -29,9 +29,10 @@
 				<div v-if="authStore.user.role >= Role.Mod">
 					<h2>Jobs</h2>
 					<hr />
-					<ul class="list-group list-group-flush mb-3">
+					<ul v-if="managmentStore.error === ''" class="list-group list-group-flush mb-3">
 						<JobCard v-for="(jobName, jobType) in managmentStore.jobRegistry" :job-type="jobType" :key="jobType" />
 					</ul>
+					<div v-else class="alert alert-danger" role="alert"><strong>Error:</strong> {{ managmentStore.error }}</div>
 					<!-- <pre
 						>{{ data }}
 					</pre

@@ -1,10 +1,12 @@
 import type { Job, JobType, timestamped } from '@cinefinn/types/database'
 import { defineStore } from 'pinia'
 import useAPIURL from '~/hooks/useAPIURL';
+import type { FetchError } from 'ofetch';
 
 export const useManagmentStore = defineStore('managment', {
     state: () => ({
         loading: false,
+        error: '',
         jobRegistry: {
             crawl: 'Crawl the Archive',
             generatePreviewImages: 'Generate Preview Images',
@@ -16,13 +18,18 @@ export const useManagmentStore = defineStore('managment', {
     actions: {
         async loadJobs() {
             this.loading = true;
-            const response = await $fetch<(Job & timestamped)[]>(useAPIURL() + '/managment/jobs/info', {
+            this.error = '';
+            const { data: response, error } = await tryCatch<Promise<(Job & timestamped)[]>, FetchError>(() => $fetch<(Job & timestamped)[]>(useAPIURL() + '/managment/jobs/info', {
                 headers: {
                     'auth-token': useAuthStore().authToken || '',
-                },
-            });
-            this.jobs = response;
+                }
+            }));
             this.loading = false;
+            if (error) {
+                this.error = error.message || 'An unknown error occurred.';
+                return;
+            }
+            this.jobs = response;
         },
         updateJob(job: (Job & timestamped)) {
             // console.log('Updating Job', job);
@@ -32,6 +39,20 @@ export const useManagmentStore = defineStore('managment', {
             } else {
                 this.jobs.push({ ...job })
             }
-        }
+        },
+        async deleteJob(jobUUID: string) {
+            const { data, error } = await tryCatch<Promise<void>, FetchError>(() => $fetch<void>(useAPIURL() + '/managment/jobs/delete/' + jobUUID, {
+                method: 'DELETE',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                }
+            }));
+            if (error) {
+                this.error = error.data || 'An unknown error occurred.';
+                return;
+            } else {
+                this.jobs = this.jobs.filter((job) => job.UUID !== jobUUID);
+            }
+        },
     }
 })
