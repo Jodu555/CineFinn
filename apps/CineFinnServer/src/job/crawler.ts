@@ -480,9 +480,14 @@ export async function crawl(job: Job) {
             let existing = await watchableEntitysTable.getOne({ watchable_UUID: watchableUUID, lang: lang as Langs, unique: true });
             if (existing) {
                 if (existing.subID !== file.subID) {
-                    console.log('SubID mismatch', existing.subID, file.subID, file);
+                    job.log('SubID mismatch', existing.subID, file.subID, file);
                     await watchableEntitysTable.update({ UUID: existing.UUID }, { subID: file.subID, filePath: file.path });
                     existing.subID = file.subID;
+                    existing.filePath = file.path;
+                }
+                if (existing.filePath !== file.path) {
+                    job.log('FilePath mismatch', existing.filePath, file.path, file);
+                    await watchableEntitysTable.update({ UUID: existing.UUID }, { filePath: file.path });
                     existing.filePath = file.path;
                 }
                 watchableByKey.set(key, existing);

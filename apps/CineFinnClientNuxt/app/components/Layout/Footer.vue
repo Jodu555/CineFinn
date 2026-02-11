@@ -22,6 +22,7 @@ const { data, status } = useFetch<{
 	version: string;
 }>(`${useAPIURL()}/health`, {
 	lazy: true,
+	key: 'server-health',
 });
 </script>
 <style lang="scss" scoped>

@@ -50,7 +50,7 @@ const router = new Hono()
     .get('/:watchableEntityUUID', authMiddleware, async (c) => {
         const user = c.get('credentials').user;
         const watchableEntityUUID = c.req.param('watchableEntityUUID');
-        const debug = false;
+        const debug = true;
 
         try {
             // Find the watchable entity
@@ -69,16 +69,19 @@ const router = new Hono()
                 }
                 stat = fs.statSync(filePath);
             } else {
-                const subSystemSocket = (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'subsystem' && s.data.auth.id === watchableEntity.subID)[0];
+                const subSystemSocket = await getSubSocketByID(watchableEntity.subID);
                 if (subSystemSocket == undefined) {
                     return c.json({ message: 'SubSystem not found' }, 404);
                 }
                 stat = await new Promise<fs.Stats>((resolve, reject) => {
                     subSystemSocket.emit('videoStats', { filePath }, (stats) => {
+                        debug && console.log('Recieved Socket Stats', stats);
                         resolve(stats);
                     });
                 })
+
             }
+            debug && console.log('Got fileSize', stat.size, watchableEntity.subID);
             const fileSize = stat.size;
             const range = c.req.header('Range');
 

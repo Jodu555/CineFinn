@@ -174,35 +174,39 @@
 												</div>
 											</div>
 										</div>
-									</div>
-
-									<!-- Compact View -->
-									<!-- <div v-else class="row row-cols-4 row-cols-sm-6 row-cols-md-8 row-cols-lg-10 row-cols-xl-12 g-1">
-										<div v-for="episode in currentDetailedSeasonData?.episodes" :key="episode.UUID" class="col">
-											<div
-												:class="[
-													'card h-100 cursor-pointer',
-													isEpisodeWatched(episode.UUID) ? 'border-success bg-success bg-opacity-10' : '',
-													isCurrentEpisode(episode.UUID) ? 'border-primary border-2' : '',
-												]"
-												@click="handleEpisodeClick(episode.UUID)"
-												style="cursor: pointer; aspect-ratio: 1"
-											>
-												<div class="card-body p-1 d-flex flex-column align-items-center justify-content-center">
-													<span :class="['small fw-medium', isEpisodeWatched(episode.UUID) ? 'text-success' : '']">
-														{{ episode.episode_IDX }}
-													</span>
-													<font-awesome-icon v-if="isEpisodeWatched(episode.UUID)" :icon="['fas', 'check']" class="text-success mt-1" size="xs" />
-													<div class="progress w-100 mt-2" style="height: 2px">
-														<div
-															:class="['progress-bar', isEpisodeWatched(episode.UUID) ? 'bg-success' : 'bg-danger']"
-															:style="{ width: getEpisodeProgress(episode.UUID) + '%' }"
-														></div>
+										<div v-for="additionals in additionalList" class="card cursor-disabled border-danger-subtle">
+											<!-- <pre>{{ additionals }}</pre> -->
+											<div class="card-body p-3">
+												<div class="d-flex">
+													<div class="flex-grow-1">
+														<div class="d-flex align-items-center gap-3">
+															<div
+																:class="['rounded d-flex align-items-center justify-content-center', 'bg-secondary']"
+																style="width: 64px; height: 40px"
+															>
+																<font-awesome-icon :icon="['fas', 'xmark']" class="text-danger-emphasis" />
+															</div>
+															<div class="flex-grow-1">
+																<h3 :class="['h6 mb-1', 'text-danger']">Episode {{ additionals.parsed.episode }}</h3>
+																<div class="d-flex gap-4">
+																	<p class="small mb-0 text-danger-emphasis">Episode Missing</p>
+																</div>
+																<p class="text-muted small mb-0">
+																	<font-awesome-icon :icon="['fa', 'language']" class="me-1" />
+																	{{ additionals.parsed.language }}
+																</p>
+															</div>
+														</div>
+														<div class="progress mt-3" style="width: 100%; height: 4px">
+															<div :class="['progress-bar', 'bg-danger']" :style="{ width: '0%' }"></div>
+														</div>
 													</div>
 												</div>
 											</div>
 										</div>
-									</div> -->
+									</div>
+
+									<!-- Compact View -->
 									<div v-else class="row row-cols-4 row-cols-sm-6 row-cols-md-8 row-cols-lg-10 row-cols-xl-12 g-2">
 										<div v-for="episode in currentDetailedSeasonData?.episodes" :key="episode.UUID" class="col">
 											<div
@@ -373,7 +377,7 @@
 </template>
 
 <script setup lang="ts">
-import { Role, type DetailedEpisode, type DetailedSeason } from '@cinefinn/types/database';
+import { Role, type DetailedEpisode, type DetailedSeason, type Langs } from '@cinefinn/types/database';
 import { ref, computed, watch } from 'vue';
 import AddToPlaylistDialog from '~/components/AddToPlaylistDialog.vue';
 import ExtendedVideo from '~/components/ExtendedVideo.vue';
@@ -744,6 +748,25 @@ onMounted(() => {
 
 	console.log(detailedSerie.UUID, detailedSerie.title, detailedSerie.refs);
 });
+
+const { data: additionalList, status } = await useFetch<
+	{
+		outPath: string;
+		file: string;
+		parsed: {
+			movie: false;
+			title: string;
+			language: Langs;
+			season: number;
+			episode: number;
+		};
+	}[]
+>(useAPIURL() + '/test/checkSerieForUpdates/' + route.params.SID, {
+	headers: {
+		'auth-token': authStore.authToken,
+	},
+	key: 'checkSerieForUpdates-' + route.params.SID,
+});
 </script>
 
 <style scoped>
@@ -772,6 +795,10 @@ onMounted(() => {
 .cursor-pointer {
 	cursor: pointer;
 	transition: all 0.2s ease;
+}
+
+.cursor-disabled {
+	cursor: not-allowed;
 }
 
 .cursor-pointer:hover {

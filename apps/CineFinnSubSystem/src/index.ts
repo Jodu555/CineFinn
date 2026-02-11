@@ -121,8 +121,9 @@ const map = new Map<
 >();
 
 socket.on('videoStats', ({ filePath }, callback) => {
+    // filePath = path.join(getConfig().entrypoint, filePath);
     const stats = fs.statSync(filePath);
-    console.log('Got Stats for:', filePath, stats);
+    console.log('Got Stats for:', filePath, stats.ino);
     callback(stats);
 });
 
@@ -134,7 +135,8 @@ interface VideoRangeRequest {
 }
 
 socket.on('video-range', ({ filePath, start, end, requestId }: VideoRangeRequest) => {
-    console.log(filePath);
+    // filePath = path.join(getConfig().entrypoint, filePath);
+    console.log(filePath, start, end, requestId);
 
     if (!fs.existsSync(filePath)) {
         socket.emit('video-chunk-error', { error: 'File not found', requestId });
