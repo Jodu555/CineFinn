@@ -1,46 +1,40 @@
 import { Redis } from 'ioredis';
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
-import { serveStatic } from '@hono/node-server/serve-static'
+import { serveStatic } from '@hono/node-server/serve-static';
 
 // import dotenv from 'dotenv';
 // dotenv.config();
 import { Server, Socket } from 'socket.io';
-import { accountsTable, authTokensTable, connectDatabase, database, episodesTable, moviesTable, seasonsTable, seriesTable, todosTable, watchableEntitysTable } from './database.js';
+import { accountsTable, authTokensTable, connectDatabase, database, episodesTable, seasonsTable, watchableEntitysTable } from './database.js';
 
 import { trimTrailingSlash } from 'hono/trailing-slash';
-import { authFullMiddleware, authMiddleware, authRouter, getUser } from './auth.js';
+import { authMiddleware, authRouter } from './auth.js';
 import { prometheus } from '@hono/prometheus';
 import { cors } from 'hono/cors';
-import { logger } from 'hono/logger';
 import { ownLogger } from './ownLogger.js';
 import { managmentRouter } from './routes/managment.js';
-import { CacheContext } from './LRUCache.js';
-import type { AnythingToServerEvents, AuthHandshake, CheckForUpdatesOutput, ClientToServerEvents, InterServerEvents, ServerToAnythingEvents, ServerToClientEvents, SocketAuthDataClient, SocketAuthDataSubsystem, SocketData } from '@cinefinn/types/socket';
+import type { AnythingToServerEvents, InterServerEvents, ServerToAnythingEvents, SocketData } from '@cinefinn/types/socket';
 import { tryCatch } from './tryCatch.js';
-import { type Series, type Season, type Movie, type Account, type timestamped, type DetailedSeries, type DetailedMovie, type DetailedEpisode, type DetailedSeason, type FrontendSeries, Role } from '@cinefinn/types/database';
-import { getIO, queryDatabase, setIO, setIORedis, getEmailManager } from './utils.js';
+import { type Account, type timestamped } from '@cinefinn/types/database';
+import { getIO, setIO, setIORedis, getEmailManager } from './utils.js';
 import { watchRouter } from './routes/watch.js';
 import { videoRouter } from './routes/video.js';
 import { indexRouter } from './routes/index.js';
 import * as childProcess from 'node:child_process';
 import { getConfig } from './config.js';
-import { compareSettings } from './utils/settings.js';
-import os from "os";
 import { setupSocketIO } from './sockets/index.js';
-import { getKnownSubSystems, getSeriesRelatedToSubSystem, toggleSeriesesForSubSystem } from './sockets/subsystem.socket.js';
+import { getKnownSubSystems, toggleSeriesesForSubSystem } from './sockets/subsystem.socket.js';
 import { playlistRouter } from './routes/playlist.js';
 import { adminRouter } from './routes/admin.js';
 import { todoRouter } from './routes/todo.js';
-import axios from 'axios';
 import { proxyRouter } from './routes/proxys.js';
 import { handleSubSystemProminence } from './job/crawler.js';
 import { Job } from './job/Job.js';
 
 import packageJSON from '../package.json' with { type: "json" };
-import { getScraperSocket } from './sockets/scraper.socket.js';
-import { filenameParser } from './parser.js';
-import path from 'node:path';
+
+
 
 const { printMetrics, registerMetrics } = prometheus();
 export const app = new Hono({
@@ -81,44 +75,6 @@ export const app = new Hono({
     .route('/todo', todoRouter)
     .route('', proxyRouter)
     .route('/video', videoRouter)
-    .get('/test/checkSerieForUpdates/:S-UUID', async (c) => {
-        const serieUUID = c.req.param('S-UUID');
-        if (serieUUID == undefined) {
-            return c.json({ error: 'No UUID provided' }, 400);
-        }
-        const scraperSocket = await getScraperSocket();
-
-        const { data: output, error } = await tryCatch(() => {
-            return new Promise<CheckForUpdatesOutput>((resolve, reject) => {
-                scraperSocket.timeout(1000 * 60 * 10).emit('checkSerieForUpdates', serieUUID, (err, output) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    resolve(output)
-                });
-            });
-        });
-
-        if (error) {
-            console.log('Error checking for updates', error);
-            return c.json({ error: error.message }, 500);
-        }
-
-        return c.json(output.aniworld.map(x => {
-            x.file = x.file.replaceAll('.', '#');
-            x.file += '.mp4';
-            const outPath = path.join(getConfig().videoPath, x._animeFolder, x.folder, x.file);
-            const parsed = filenameParser(outPath, x.file);
-
-            if (parsed.movie) return null;
-            return {
-                outPath,
-                file: x.file,
-                parsed
-            };
-        }).filter(x => x != null));
-    });
 
 // app.get('*', async (c, next) => {
 

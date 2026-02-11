@@ -761,7 +761,7 @@ const { data: additionalList, status } = await useFetch<
 			episode: number;
 		};
 	}[]
->(useAPIURL() + '/test/checkSerieForUpdates/' + route.params.SID, {
+>(`${useAPIURL()}/index/${route.params.SID}/checkForUpdates`, {
 	headers: {
 		'auth-token': authStore.authToken,
 	},

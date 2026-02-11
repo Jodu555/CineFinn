@@ -9,19 +9,6 @@ import type { Account, timestamped } from "@cinefinn/types/database";
 
 export let isScraperSocketConnected = false;
 
-export type definedScraperSocket = Socket<ScraperToServerEvents, ServerToScraperEvents, InterServerEvents, { auth: SocketAuthDataScraper<Account | (Account & timestamped)> }>;
-export async function getScraperSocket() {
-    if (!isScraperSocketConnected) {
-        throw new Error('Scraper Socket not connected');
-    }
-    const sockets = await getIO().fetchSockets();
-    const scraperSocket = sockets.find(s => s.data.auth.type === 'scraper');
-    if (scraperSocket == undefined) {
-        throw new Error('Scraper Socket not found');
-    }
-    return scraperSocket as any as definedScraperSocket;
-}
-
 async function authFunction(authHandshake: AuthHandshakeScraper): Promise<SocketAuthDataScraper> {
     const { authToken } = authHandshake;
 
@@ -45,6 +32,19 @@ async function connectionFunction(socket: definedSocket) {
         console.log('scraper disconnected');
         isScraperSocketConnected = false;
     });
+}
+
+export type definedScraperSocket = Socket<ScraperToServerEvents, ServerToScraperEvents, InterServerEvents, { auth: SocketAuthDataScraper<Account | (Account & timestamped)> }>;
+export async function getScraperSocket() {
+    if (!isScraperSocketConnected) {
+        return null;
+    }
+    const sockets = await getIO().fetchSockets();
+    const scraperSocket = sockets.find(s => s.data.auth.type === 'scraper');
+    if (scraperSocket == undefined) {
+        return null;
+    }
+    return scraperSocket as any as definedScraperSocket;
 }
 
 export default {

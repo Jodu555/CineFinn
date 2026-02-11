@@ -118,7 +118,7 @@ export type definedSubSystemSocket = Socket<SubSystemToServerEvents, ServerToSub
 export async function getSubSocketByID(subID: string) {
     const subSystemSocket = (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'subsystem' && s.data.auth.id === subID)[0];
     if (subSystemSocket == undefined) {
-        throw new Error('SubSystem not found');
+        return null;
     }
     return subSystemSocket as any as definedSubSystemSocket;
 }

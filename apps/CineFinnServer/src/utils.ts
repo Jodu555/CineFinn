@@ -7,6 +7,9 @@ import { Redis } from 'ioredis';
 import EmailManager from './utils/EmailManager.js';
 import crypto from 'crypto';
 import fs from 'fs';
+import type { Storage, StorageValue } from 'unstorage';
+import type { Context } from 'hono';
+import { createMiddleware } from 'hono/factory';
 
 let io: Server<AnythingToServerEvents,
     ServerToAnythingEvents,
@@ -125,5 +128,19 @@ export function calculateMD5(filePath: string): Promise<string> {
         stream.on('error', reject);
     });
 }
+
+export const cachingMiddleware = <T extends StorageValue>(storage: Storage<T>, keyFunction = (c: Context<any>) => c.req.path) => {
+    return createMiddleware(async (c, next) => {
+        const key = keyFunction(c);
+        if (await storage.hasItem(key)) {
+            c.header('X-Cache-Hit', 'true');
+            return c.json(await storage.getItem(key));
+        } else {
+            await next();
+            const response = (await c.res.clone().json()) as T;
+            await storage.setItem(key, response);
+        }
+    })
+};
 
 export const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

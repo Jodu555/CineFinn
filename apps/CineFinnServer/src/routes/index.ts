@@ -1,18 +1,20 @@
 import fs from "fs";
 import path from "path";
 import { type FrontendSeries, type Season, type Movie, type DetailedEpisode, type DetailedSeason, type DetailedMovie, type DetailedSeries, type Episode, Role, type Series } from "@cinefinn/types/database";
-import { Hono, type Context } from "hono";
-import { database, seriesTable, seasonsTable, episodesTable, watchableEntitysTable, moviesTable, sleep } from "../database.js";
+import { Hono } from "hono";
+import { seriesTable, watchableEntitysTable } from "../database.js";
 import { authFullMiddleware, authMiddleware } from "../auth.js";
-import { forEachNonBlocking, forEachNonBlockingAsync, queryDatabase } from "../utils.js";
+import { cachingMiddleware, forEachNonBlockingAsync, queryDatabase } from "../utils.js";
 import { createStorage, prefixStorage } from "unstorage";
 import pLimit from 'p-limit';
-import { createMiddleware } from "hono/factory";
-import type { Storage, StorageValue } from "unstorage";
 import z from "zod";
 import { sendSeriesReloadToAll } from "../sockets/client.socket.js";
 import { generateSeriesID } from "../utils/IdGenerators.js";
 import { getConfig } from "../config.js";
+import type { CheckForUpdatesOutput } from "@cinefinn/types/socket";
+import { filenameParser } from "../parser.js";
+import { getScraperSocket } from "../sockets/scraper.socket.js";
+import { tryCatch } from "../tryCatch.js";
 
 
 
@@ -20,19 +22,7 @@ const indexStorage = createStorage();
 const fullIndexStorage = prefixStorage<DetailedSeries>(indexStorage, 'fullIndex');
 const undetailedIndexStorage = prefixStorage<FrontendSeries[]>(indexStorage, 'undetailedIndex');
 
-export const cachingMiddleware = <T extends StorageValue>(storage: Storage<T>, keyFunction = (c: Context<any>) => c.req.path) => {
-    return createMiddleware(async (c, next) => {
-        const key = keyFunction(c);
-        if (await storage.hasItem(key)) {
-            c.header('X-Cache-Hit', 'true');
-            return c.json(await storage.getItem(key));
-        } else {
-            await next();
-            const response = (await c.res.clone().json()) as T;
-            await storage.setItem(key, response);
-        }
-    })
-};
+const seriesUpdateStorage = prefixStorage<any>(indexStorage, 'seriesUpdate');
 
 export async function getFrontEndSeries() {
     const result = (await queryDatabase(`
@@ -441,6 +431,47 @@ const router = new Hono()
         // };
 
         // return c.json(finalOutput as DetailedSeries);
+    })
+    .get('/:S-UUID/checkForUpdates', cachingMiddleware(seriesUpdateStorage, (c) => `checkForUpdates-${c.req.param('S-UUID')}`), async (c) => {
+        const serieUUID = c.req.param('S-UUID');
+        if (serieUUID == undefined) {
+            return c.json({ error: 'No UUID provided' }, 400);
+        }
+        const scraperSocket = await getScraperSocket();
+        if (scraperSocket == null) {
+            return c.json({ error: 'Scraper Socket not found' }, 500);
+        }
+
+        const { data: output, error } = await tryCatch(() => {
+            return new Promise<CheckForUpdatesOutput>((resolve, reject) => {
+                scraperSocket.timeout(1000 * 60 * 10).emit('checkSerieForUpdates', serieUUID, (err, output) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    resolve(output)
+                });
+            });
+        });
+
+        if (error) {
+            console.log('Error checking for updates', error);
+            return c.json({ error: error.message }, 500);
+        }
+
+        return c.json(output.aniworld.map(x => {
+            x.file = x.file.replaceAll('.', '#');
+            x.file += '.mp4';
+            const outPath = path.join(getConfig().videoPath, x._animeFolder, x.folder, x.file);
+            const parsed = filenameParser(outPath, x.file);
+
+            if (parsed.movie) return null;
+            return {
+                outPath,
+                file: x.file,
+                parsed
+            };
+        }).filter(x => x != null));
     })
     .patch('/:S-UUID', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const user = c.get('credentials').user;
