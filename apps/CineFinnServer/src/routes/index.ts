@@ -284,6 +284,9 @@ const router = new Hono()
         })
         await Promise.all(promises);
 
+        //@ts-expect-error
+        await fullIndexStorage.setItem('fullIndex', output);
+
         return c.json(output);
 
     })
@@ -432,7 +435,7 @@ const router = new Hono()
 
         // return c.json(finalOutput as DetailedSeries);
     })
-    .get('/:S-UUID/checkForUpdates', cachingMiddleware(seriesUpdateStorage, (c) => `checkForUpdates-${c.req.param('S-UUID')}`), async (c) => {
+    .get('/:S-UUID/checkForUpdates', authMiddleware, cachingMiddleware(seriesUpdateStorage, (c) => `checkForUpdates-${c.req.param('S-UUID')}`), async (c) => {
         const serieUUID = c.req.param('S-UUID');
         if (serieUUID == undefined) {
             return c.json({ error: 'No UUID provided' }, 400);
@@ -602,6 +605,10 @@ const router = new Hono()
         return c.json({
             message: 'Successfully updated series cover',
         });
+    })
+    .get('/view/cache', async (c) => {
+
+        return c.json(await indexStorage.keys());
     });
 
 async function downloadImage(url: string) {
