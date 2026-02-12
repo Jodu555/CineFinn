@@ -182,22 +182,21 @@ const httpServer = serve({
 
     await handleSubSystemProminence(Job.fromDummy('crawl'));
 
-    await wait(1000)
+    // await wait(1000)
+    // const msArr = [] as number[];
+    // for (let i = 0; i < 10; i++) {
+    //     const pre = performance.now();
+    //     await app.request('/index/00ba2a50', {
+    //         headers: {
+    //             'auth-token': 'SECR-DEV',
+    //         }
+    //     })
+    //     const ms = performance.now() - pre;
+    //     msArr.push(ms);
+    //     console.log('Request took', ms, 'ms');
+    // }
+    // console.log('Average', msArr.reduce((prev, curr) => prev + curr, 0) / msArr.length);
 
-    const msArr = [] as number[];
-    for (let i = 0; i < 10; i++) {
-        const pre = performance.now();
-        await app.request('/index/00ba2a50', {
-            headers: {
-                'auth-token': 'SECR-DEV',
-            }
-        })
-        const ms = performance.now() - pre;
-        msArr.push(ms);
-        console.log('Request took', ms, 'ms');
-    }
-
-    console.log('Average', msArr.reduce((prev, curr) => prev + curr, 0) / msArr.length);
 
     // await fixSeasons();
     // await insertMissingWatchableEntityRuntimes();
