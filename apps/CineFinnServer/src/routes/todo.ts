@@ -4,12 +4,8 @@ import { Role, type RefRef, type ScrapeInfo, type TodoItem, type TodoReferences,
 import type { AniWorldSeriesInformations } from "@cinefinn/types/scrapers";
 import { tryCatch } from "../tryCatch.js";
 import { getScraperSocket, isScraperSocketConnected } from "../sockets/scraper.socket.js";
-import { createStorage } from "unstorage";
-import fsDriver from "unstorage/drivers/fs";
-import { unescape } from "querystring";
 import { getIO } from "../utils.js";
 import { accountsTable, todosTable } from "../database.js";
-import { all } from "axios";
 
 interface ScraperDefinition {
     referenceKey: keyof TodoReferences;
@@ -59,14 +55,6 @@ const scrapers = [
     }
 
 ] satisfies ScraperDefinition[];
-
-// const todoStorage = createStorage<TodoItem[]>({
-//     driver: fsDriver({
-//         base: './temp/todoStorage',
-//     })
-// })
-
-// const mainTestKey = 'test';
 
 
 const todoScrapeJobs = [] as {
@@ -197,7 +185,9 @@ const router = new Hono()
         sockets.filter(s => s.data.auth.type === 'client').forEach(async s => {
             s.emit('todoListUpdate', todos.sort((a, b) => a.sortOrder - b.sortOrder));
         });
-        setTimeout(handleBackgroundScrapeTodos, 1);
+        if (todoScrapeJobs.length > 0) {
+            handleBackgroundScrapeTodos().catch(console.error);
+        }
         return c.json(todos);
     });
 
