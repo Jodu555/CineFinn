@@ -17,7 +17,7 @@ import { managmentRouter } from './routes/managment.js';
 import type { AnythingToServerEvents, InterServerEvents, ServerToAnythingEvents, SocketData } from '@cinefinn/types/socket';
 import { tryCatch } from './tryCatch.js';
 import { type Account, type timestamped } from '@cinefinn/types/database';
-import { getIO, setIO, setIORedis, getEmailManager } from './utils.js';
+import { getIO, setIO, setIORedis, getEmailManager, wait } from './utils.js';
 import { watchRouter } from './routes/watch.js';
 import { videoRouter } from './routes/video.js';
 import { indexRouter } from './routes/index.js';
@@ -181,6 +181,23 @@ const httpServer = serve({
     }
 
     await handleSubSystemProminence(Job.fromDummy('crawl'));
+
+    await wait(1000)
+
+    const msArr = [] as number[];
+    for (let i = 0; i < 10; i++) {
+        const pre = performance.now();
+        await app.request('/index/00ba2a50', {
+            headers: {
+                'auth-token': 'SECR-DEV',
+            }
+        })
+        const ms = performance.now() - pre;
+        msArr.push(ms);
+        console.log('Request took', ms, 'ms');
+    }
+
+    console.log('Average', msArr.reduce((prev, curr) => prev + curr, 0) / msArr.length);
 
     // await fixSeasons();
     // await insertMissingWatchableEntityRuntimes();
