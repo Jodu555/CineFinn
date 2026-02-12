@@ -85,6 +85,8 @@ const router = new Hono()
 
         const touchedIDs = new Set<string>();
 
+        const dbTodos = await todosTable.get();
+
         for (const todo of todos) {
             touchedIDs.add(todo.ID);
 
@@ -92,12 +94,20 @@ const router = new Hono()
                 todo.creator = c.var.credentials.user.UUID
             }
 
-            let dbTodo = await todosTable.getOne({ ID: todo.ID });
-            if (dbTodo == undefined) {
+            console.time('Cheking todo')
+            let dbTodo = dbTodos.find(t => t.ID === todo.ID);
+            if (dbTodo == undefined || dbTodo == null) {
                 await todosTable.create(todo);
-                dbTodo = await todosTable.getOne({ ID: todo.ID });
+                const intermediate = await todosTable.getOne({ ID: todo.ID });
+                if (intermediate == undefined || intermediate == null) {
+                    throw new Error('Could not create todo'); //This should never happen
+                }
+                dbTodo = intermediate;
             }
+            console.timeEnd('Cheking todo')
 
+
+            console.time('Checking scraping info')
 
             for (const [_reference, url] of Object.entries(todo.refs)) {
                 const reference = _reference as keyof TodoReferences;
@@ -151,8 +161,19 @@ const router = new Hono()
                     todo.scrapingInfo![scraper.scrapeKey] = scraperInfo as any;
                 }
             }
+            console.timeEnd('Checking scraping info')
 
-            if (JSON.stringify(todo) !== JSON.stringify(dbTodo)) {
+            console.time('Checking if todo needs to be updated')
+            const needsUpdate =
+                todo.sortOrder !== dbTodo.sortOrder ||
+                todo.name !== dbTodo.name ||
+                todo.creator !== dbTodo.creator ||
+                todo.categorie !== dbTodo.categorie ||
+                JSON.stringify(todo.refs) !== JSON.stringify(dbTodo.refs) ||
+                JSON.stringify(todo.scrapingInfo) !== JSON.stringify(dbTodo.scrapingInfo);
+            // if (JSON.stringify(todo) !== JSON.stringify(dbTodo)) {
+            if (needsUpdate) {
+                console.time('Updating todo')
                 await todosTable.update({ ID: todo.ID }, {
                     sortOrder: todo.sortOrder,
                     name: todo.name,
@@ -161,15 +182,20 @@ const router = new Hono()
                     refs: todo.refs,
                     scrapingInfo: todo.scrapingInfo,
                 });
+                console.timeEnd('Updating todo')
             }
+            console.timeEnd('Checking if todo needs to be updated')
         }
 
-        const allTodos = await todosTable.get();
-        const allTodoIDs = new Set(allTodos.map(t => t.ID));
+        console.time('Checking for deleted todos')
+        // const allTodos = await todosTable.get();
+        const allTodoIDs = new Set(dbTodos.map(t => t.ID));
         const possibleDeletedIDs = allTodoIDs.difference(touchedIDs);
+        console.timeEnd('Checking for deleted todos')
 
+        console.time('Deleting todos')
         for (const possibleDeletedID of possibleDeletedIDs) {
-            const deletedTodo = allTodos.find(t => t.ID === possibleDeletedID);
+            const deletedTodo = dbTodos.find(t => t.ID === possibleDeletedID);
             if (deletedTodo == undefined) {
                 console.log('Could not find todo to delete', possibleDeletedID);
                 continue;
@@ -180,11 +206,14 @@ const router = new Hono()
                 await todosTable.delete({ ID: deletedTodo.ID });
             }
         }
+        console.timeEnd('Deleting todos')
 
+        console.time('Emitting todoListUpdate')
         const sockets = await getIO().fetchSockets();
         sockets.filter(s => s.data.auth.type === 'client').forEach(async s => {
             s.emit('todoListUpdate', todos.sort((a, b) => a.sortOrder - b.sortOrder));
         });
+        console.timeEnd('Emitting todoListUpdate')
         if (todoScrapeJobs.length > 0) {
             handleBackgroundScrapeTodos().catch(console.error);
         }

@@ -151,7 +151,7 @@ class Aniworld {
             console.log('Not Found!!!!!!', this.url, this.imageSRCPrefix);
         }
 
-        return { infos, startDate, endDate, description, image: imageSRC };
+        return { infos, startDate, endDate, description, image: `${this.imageSRCPrefix}${imageSRC}` };
     }
 
     private getListInformations(data: string): AniWorldEntity[] {
