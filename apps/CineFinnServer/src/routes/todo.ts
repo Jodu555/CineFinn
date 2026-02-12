@@ -80,6 +80,7 @@ const router = new Hono()
         return c.json(permittedAccounts);
     })
     .post('/', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+        const TIMING = false;
 
         const todos = await c.req.json() as TodoItem[];
 
@@ -94,7 +95,7 @@ const router = new Hono()
                 todo.creator = c.var.credentials.user.UUID
             }
 
-            console.time('Cheking todo')
+            TIMING && console.time('Cheking todo')
             let dbTodo = dbTodos.find(t => t.ID === todo.ID);
             if (dbTodo == undefined || dbTodo == null) {
                 await todosTable.create(todo);
@@ -104,10 +105,10 @@ const router = new Hono()
                 }
                 dbTodo = intermediate;
             }
-            console.timeEnd('Cheking todo')
+            TIMING && console.timeEnd('Cheking todo')
 
 
-            console.time('Checking scraping info')
+            TIMING && console.time('Checking scraping info')
 
             for (const [_reference, url] of Object.entries(todo.refs)) {
                 const reference = _reference as keyof TodoReferences;
@@ -161,9 +162,9 @@ const router = new Hono()
                     todo.scrapingInfo![scraper.scrapeKey] = scraperInfo as any;
                 }
             }
-            console.timeEnd('Checking scraping info')
+            TIMING && console.timeEnd('Checking scraping info')
 
-            console.time('Checking if todo needs to be updated')
+            TIMING && console.time('Checking if todo needs to be updated')
             const needsUpdate =
                 todo.sortOrder !== dbTodo.sortOrder ||
                 todo.name !== dbTodo.name ||
@@ -173,7 +174,7 @@ const router = new Hono()
                 JSON.stringify(todo.scrapingInfo) !== JSON.stringify(dbTodo.scrapingInfo);
             // if (JSON.stringify(todo) !== JSON.stringify(dbTodo)) {
             if (needsUpdate) {
-                console.time('Updating todo')
+                TIMING && console.time('Updating todo')
                 await todosTable.update({ ID: todo.ID }, {
                     sortOrder: todo.sortOrder,
                     name: todo.name,
@@ -182,18 +183,18 @@ const router = new Hono()
                     refs: todo.refs,
                     scrapingInfo: todo.scrapingInfo,
                 });
-                console.timeEnd('Updating todo')
+                TIMING && console.timeEnd('Updating todo')
             }
-            console.timeEnd('Checking if todo needs to be updated')
+            TIMING && console.timeEnd('Checking if todo needs to be updated')
         }
 
-        console.time('Checking for deleted todos')
+        TIMING && console.time('Checking for deleted todos')
         // const allTodos = await todosTable.get();
         const allTodoIDs = new Set(dbTodos.map(t => t.ID));
         const possibleDeletedIDs = allTodoIDs.difference(touchedIDs);
-        console.timeEnd('Checking for deleted todos')
+        TIMING && console.timeEnd('Checking for deleted todos')
 
-        console.time('Deleting todos')
+        TIMING && console.time('Deleting todos')
         for (const possibleDeletedID of possibleDeletedIDs) {
             const deletedTodo = dbTodos.find(t => t.ID === possibleDeletedID);
             if (deletedTodo == undefined) {
@@ -206,14 +207,14 @@ const router = new Hono()
                 await todosTable.delete({ ID: deletedTodo.ID });
             }
         }
-        console.timeEnd('Deleting todos')
+        TIMING && console.timeEnd('Deleting todos')
 
-        console.time('Emitting todoListUpdate')
+        TIMING && console.time('Emitting todoListUpdate')
         const sockets = await getIO().fetchSockets();
         sockets.filter(s => s.data.auth.type === 'client').forEach(async s => {
             s.emit('todoListUpdate', todos.sort((a, b) => a.sortOrder - b.sortOrder));
         });
-        console.timeEnd('Emitting todoListUpdate')
+        TIMING && console.timeEnd('Emitting todoListUpdate')
         if (todoScrapeJobs.length > 0) {
             handleBackgroundScrapeTodos().catch(console.error);
         }

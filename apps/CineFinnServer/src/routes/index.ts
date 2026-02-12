@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { type FrontendSeries, type Season, type Movie, type DetailedEpisode, type DetailedSeason, type DetailedMovie, type DetailedSeries, type Episode, Role, type Series } from "@cinefinn/types/database";
+import { type FrontendSeries, type Season, type Movie, type DetailedEpisode, type DetailedSeason, type DetailedMovie, type DetailedSeries, type Episode, Role, type Series, type timestamped, type WatchableEntity } from "@cinefinn/types/database";
 import { Hono } from "hono";
 import { seriesTable, watchableEntitysTable } from "../database.js";
 import { authFullMiddleware, authMiddleware } from "../auth.js";
@@ -119,6 +119,7 @@ const router = new Hono()
         return c.json(result);
     })
     .get('/all', authMiddleware, async (c) => {
+        const TIMING = false;
 
         if (await fullIndexStorage.hasItem('fullIndex')) {
             const fullIndex = await fullIndexStorage.getItem('fullIndex');
@@ -126,68 +127,7 @@ const router = new Hono()
         }
 
         const output = [] as DetailedSeries[];
-        // console.time('Load All db')
-        // const [
-        //     allSeries,
-        //     allSeasons,
-        //     allEpisodes,
-        //     allMovies,
-        //     allWatchableEntitys
-        // ] = await Promise.all([
-        //     seriesTable.get({}),
-        //     seasonsTable.get({}),
-        //     episodesTable.get({}),
-        //     moviesTable.get({}),
-        //     watchableEntitysTable.get({})
-        // ]);
-        // console.timeEnd('Load All db')
-
-        // await forEachNonBlockingAsync(allSeries, 10, async (serie, index) => {
-        //     index % 50 == 0 && console.log(`=> Working.... ${index}/${allSeries.length} series`);
-
-        //     // const seasons = await seasonsTable.get({ serie_UUID: serie.UUID });
-        //     const seasons = allSeasons.filter(s => s.serie_UUID == serie.UUID);
-        //     const newSeasons = seasons.map((season) => {
-        //         // const episodes = await episodesTable.get({ season_UUID: season.UUID });
-        //         const episodes = allEpisodes.filter(e => e.season_UUID == season.UUID);
-
-        //         const filledEpisodesWithWatchables = episodes.map((episode) => {
-        //             // const watchableEntitys = await watchableEntitysTable.get({ watchable_UUID: episode.UUID });
-        //             const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == episode.UUID);
-        //             watchableEntitys.map(we => { delete (we as any).filePath; return we });
-        //             return {
-        //                 ...episode,
-        //                 watchableEntitys,
-        //             } as DetailedEpisode;
-        //         });
-        //         const obj = {
-        //             ...season,
-        //             episodes: filledEpisodesWithWatchables.sort((a, b) => a.episode_IDX - b.episode_IDX),
-        //         } as DetailedSeason;
-        //         return obj;
-        //     });
-
-        //     // const movies = await moviesTable.get({ serie_UUID: serie.UUID });
-        //     const movies = allMovies.filter(m => m.serie_UUID == serie.UUID);
-
-        //     const newMovies = movies.map((movie) => {
-        //         // const watchableEntitys = await watchableEntitysTable.get({ watchable_UUID: movie.UUID });
-        //         const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == movie.UUID);
-        //         watchableEntitys.map(we => { delete (we as any).filePath; return we });
-        //         return {
-        //             ...movie,
-        //             watchableEntitys,
-        //         } as DetailedMovie;
-        //     });
-
-        //     const finalOutput = {
-        //         ...serie,
-        //         seasons: newSeasons.sort((a, b) => a.season_IDX - b.season_IDX),
-        //         movies: newMovies,
-        //     };
-        //     output.push(finalOutput);
-        // });
-
+        TIMING && console.time('queryDatabase');
         const rows = await queryDatabase(`
           SELECT 
             series.*,
@@ -224,22 +164,42 @@ const router = new Hono()
             ), ']'), '[]') FROM episodes e WHERE e.serie_UUID = series.UUID) AS episodes_array
         FROM series
             `) as any;
+        TIMING && console.timeEnd('queryDatabase');
 
+        TIMING && console.time('getAllWatchableEntitys');
         const allWatchableEntitys = await watchableEntitysTable.get({});
+        TIMING && console.timeEnd('getAllWatchableEntitys');
 
+        const watchableEntitysByWatchableUUID = new Map<string, (WatchableEntity & timestamped)[]>();
 
+        for (const watchableEntity of allWatchableEntitys) {
+            if (watchableEntitysByWatchableUUID.has(watchableEntity.watchable_UUID)) {
+                watchableEntitysByWatchableUUID.get(watchableEntity.watchable_UUID)!.push(watchableEntity);
+            } else {
+                watchableEntitysByWatchableUUID.set(watchableEntity.watchable_UUID, [watchableEntity]);
+            }
+        }
 
+        TIMING && console.time('forEachNonBlockingAsync');
         await forEachNonBlockingAsync(rows, 10, async (row: any, index) => {
             index % 50 == 0 && console.log(`=> Working.... ${index}/${rows.length} series`);
             const seasons = JSON.parse(row.seasons_array) as Season[];
             const movies = row.movies_array != undefined ? JSON.parse(row.movies_array) as Movie[] : [] as Movie[];
             const episodes = row.episodes_array != undefined ? JSON.parse(row.episodes_array) as Episode[] : [] as Episode[];
 
-            const newSeasons = seasons.map((season) => {
-                const episode = episodes.filter(e => e.season_UUID == season.UUID);
+            const episodeBySeasonUUID = new Map<string, Episode[]>();
+            for (const episode of episodes) {
+                if (episodeBySeasonUUID.has(episode.season_UUID)) {
+                    episodeBySeasonUUID.get(episode.season_UUID)!.push(episode);
+                } else {
+                    episodeBySeasonUUID.set(episode.season_UUID, [episode]);
+                }
+            }
 
+            const newSeasons = seasons.map((season) => {
+                const episode = episodeBySeasonUUID.get(season.UUID)!;
                 const newEpisodes = episode.map((episode) => {
-                    const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == episode.UUID);
+                    const watchableEntitys = watchableEntitysByWatchableUUID.get(episode.UUID)!;
                     watchableEntitys.map(we => { delete (we as any).filePath; return we });
                     return {
                         ...episode,
@@ -254,7 +214,7 @@ const router = new Hono()
             });
 
             const newMovies = movies.map((movie) => {
-                const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == movie.UUID);
+                const watchableEntitys = watchableEntitysByWatchableUUID.get(movie.UUID)!;
                 watchableEntitys.map(we => { delete (we as any).filePath; return we });
                 return {
                     ...movie,
@@ -276,16 +236,26 @@ const router = new Hono()
 
             output.push(obj);
         });
+        TIMING && console.timeEnd('forEachNonBlockingAsync');
 
+        //Putting this here allows the caching to be done after the request has been returned
+        new Promise<void>((res) => {
+            setImmediate(async () => {
+                TIMING && console.time('caching');
+                const limit = pLimit(5);
+                const promises = output.map(s => {
+                    limit(() => fullIndexStorage.setItem(`fullIndex-${s.UUID}`, s));
+                })
+                await Promise.all(promises);
+                TIMING && console.timeEnd('caching');
 
-        const limit = pLimit(5);
-        const promises = output.map(s => {
-            limit(() => fullIndexStorage.setItem(`fullIndex-${s.UUID}`, s));
+                TIMING && console.time('fullIndexStorage.setItem');
+                //@ts-expect-error
+                await fullIndexStorage.setItem('fullIndex', output);
+                TIMING && console.timeEnd('fullIndexStorage.setItem');
+                res();
+            })
         })
-        await Promise.all(promises);
-
-        //@ts-expect-error
-        await fullIndexStorage.setItem('fullIndex', output);
 
         return c.json(output);
 
