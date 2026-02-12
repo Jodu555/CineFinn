@@ -477,6 +477,30 @@ const router = new Hono()
         }, []);
         return c.json(finalOutput)
     })
+    .get('/:S-UUID/related', authMiddleware, async (c) => {
+        const user = c.get('credentials').user;
+        const seriesUUID = c.req.param('S-UUID');
+        let count = c.req.query('count') ?? 2;
+        if (typeof count !== 'number') {
+            count = Number(count);
+            if (isNaN(count)) {
+                count = 2;
+            }
+        }
+
+        const series = await seriesTable.getOne({ UUID: seriesUUID });
+        if (series == undefined) {
+            return c.json({
+                message: 'Series not found',
+            });
+        }
+        const seriesList = await seriesTable.get();
+        const relatedCategorieSeries = seriesList.filter(s => s.UUID !== seriesUUID && s.tags.includes(series.tags[0])).map(x => x.UUID);
+
+        const randomShuffled = relatedCategorieSeries.sort(() => Math.random() - 0.5);
+
+        return c.json(randomShuffled.slice(0, count));
+    })
     .patch('/:S-UUID', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const user = c.get('credentials').user;
         const seriesUUID = c.req.param('S-UUID');

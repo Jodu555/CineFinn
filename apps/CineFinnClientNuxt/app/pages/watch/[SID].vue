@@ -322,19 +322,13 @@
 					</div>
 
 					<!-- Related Content Sidebar -->
-					<div v-if="true" class="col-xl-3">
+					<div v-if="false" class="col-xl-3">
 						<h2 class="h5 mb-3">
 							<font-awesome-icon :icon="['fas', 'heart']" class="me-2 text-danger" />
 							More Like This
 						</h2>
 						<div class="d-flex flex-column gap-3">
-							<div
-								v-for="item in relatedContent"
-								:key="item.id"
-								class="card cursor-pointer"
-								@click="navigateToContent(item.id)"
-								style="cursor: pointer"
-							>
+							<div v-for="item in relatedContent" :key="item.id" class="card cursor-pointer" style="cursor: pointer">
 								<div class="card-body p-3">
 									<div class="d-flex gap-3">
 										<img :src="item.cover" :alt="item.title" class="rounded flex-shrink-0" style="width: 48px; height: 72px; object-fit: cover" />
@@ -355,6 +349,47 @@
 									</div>
 								</div>
 							</div>
+						</div>
+					</div>
+					<div v-if="true" class="col-xl-3">
+						<h2 class="h5 mb-3">
+							<font-awesome-icon :icon="['fas', 'heart']" class="me-2 text-danger" />
+							More Like This
+						</h2>
+						<div class="d-flex flex-column gap-3">
+							<NuxtLink
+								v-for="(item, idx) in dynamicPopulatedContent"
+								:key="item.UUID"
+								class="card cursor-pointer"
+								:to="`/watch/${item.UUID}`"
+								style="cursor: pointer; text-decoration: none"
+								prefetch-on="interaction"
+							>
+								<div class="card-body p-3">
+									<div class="d-flex gap-3">
+										<img
+											:src="decideSeriesImage(item, randomNumbersSeriesCover.at(idx + 1))"
+											:alt="item.title"
+											class="rounded flex-shrink-0"
+											style="width: 48px; height: 72px; object-fit: cover"
+										/>
+										<div class="flex-grow-1 overflow-hidden">
+											<h3 class="h6 mb-1 text-truncate">{{ item.title }}</h3>
+											<p class="text-muted small mb-1">
+												<font-awesome-icon :icon="['far', 'calendar']" class="me-1" />
+												{{ item.infos.startDate }} • {{ item.tags[0] }}
+											</p>
+											<div class="d-flex align-items-center small">
+												<font-awesome-icon :icon="['fas', 'star']" class="text-warning me-1" />
+												<span>{{ 5 }}</span>
+											</div>
+										</div>
+										<div class="d-flex align-items-center">
+											<font-awesome-icon :icon="['fas', 'chevron-right']" class="text-muted" />
+										</div>
+									</div>
+								</div>
+							</NuxtLink>
 						</div>
 					</div>
 				</div>
@@ -651,10 +686,6 @@ const getMovieProgress = (movieUUID: string) => {
 	return percent;
 };
 
-const navigateToContent = (id: number) => {
-	// contentId.value = id;
-};
-
 const switchTo = (vel: number) => {
 	console.log('switchTo', vel);
 
@@ -743,15 +774,15 @@ function singleDimSwitcher<T>(arr: T[], curr: number, velocity: number) {
 	return { value: arr[curr], idxptr: curr };
 }
 
-onMounted(() => {
-	const detailedSerie = indexStore.detailedSerie;
+// onMounted(() => {
+// 	const detailedSerie = indexStore.detailedSerie;
 
-	if (detailedSerie == null) {
-		return;
-	}
+// 	if (detailedSerie == null) {
+// 		return;
+// 	}
 
-	console.log(detailedSerie.UUID, detailedSerie.title, detailedSerie.refs);
-});
+// 	console.log(detailedSerie.UUID, detailedSerie.title, detailedSerie.refs);
+// });
 
 const { data: additionalList, status } = await useFetch<
 	{
@@ -770,9 +801,38 @@ const { data: additionalList, status } = await useFetch<
 		'auth-token': authStore.authToken,
 	},
 	key: 'checkSerieForUpdates-' + route.params.SID,
+	lazy: true,
 	onResponseError: (error) => {
 		return [];
 	},
+});
+
+const { data: dynamicRelatedContent } = await useFetch<string[]>(`${useAPIURL()}/index/${route.params.SID}/related`, {
+	headers: {
+		'auth-token': authStore.authToken,
+	},
+	key: 'relatedContent-' + route.params.SID,
+	onResponseError: (error) => {
+		return [];
+	},
+	lazy: true,
+	query: {
+		count: 5,
+	},
+});
+
+const randomNumbersSeriesCover = computed(() => {
+	const arr = Array.from({ length: dynamicPopulatedContent.value.length }, () => Math.floor(Math.random() * 1000));
+	return arr;
+});
+
+const dynamicPopulatedContent = computed(() => {
+	if (dynamicRelatedContent.value == undefined) return [];
+	return dynamicRelatedContent.value
+		.map((id) => {
+			return indexStore.series.find((s) => s.UUID === id);
+		})
+		.filter((x) => x != null);
 });
 </script>
 
