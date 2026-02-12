@@ -3,11 +3,11 @@ import crypto, { randomUUID } from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();;
 import axios from 'axios';
-import { accountsTable, connectDatabase, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, watchHistoryTable } from '../database.js';
+import { accountsTable, connectDatabase, episodesTable, ignoranceTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, watchHistoryTable } from '../database.js';
 import { Database } from '@jodu555/mysqlapi';
 import path from 'path';
 import type { Series, Episode, WatchableEntity, Movie } from '@cinefinn/types/database';
-import { generateEntityID, generateEpisodeID, generateMovieID, generateSeasonID } from '../utils/IdGenerators.js';
+import { generateEntityID, generateEpisodeID, generateMovieID, generateSeasonID, generateWatchHistoryID } from '../utils/IdGenerators.js';
 
 interface Segment {
     ID: string;
@@ -17,16 +17,37 @@ interface Segment {
     time: string;
 }
 
+const IMPORT_API_ENDPOINT = 'https://cinema-api.jodu555.de'
+const IMPORT_API_AUTH_TOKEN = 'SECR-DEV';
+
 async function run() {
     await connectDatabase(true);
 
 
     // console.log(await seriesTable.get({}));
 
-
+    await importIgnoreList();
     await importAccounts();
     await importSerieses();
     await importWatchHistory();
+}
+
+async function importIgnoreList() {
+    interface IgnoreItem {
+        ID: string;
+        title: string;
+    }
+    const response = await axios.get<IgnoreItem[]>(`${IMPORT_API_ENDPOINT}/ignorelist?auth-token=${IMPORT_API_AUTH_TOKEN}`);
+    const data = response.data;
+    console.log('Importing Ignore List', data.length, 'Items');
+
+    console.time('Importing Ignore List');
+    for (const item of data) {
+        await ignoranceTable.create({
+            serie_UUID: item.ID,
+        });
+    }
+    console.timeEnd('Importing Ignore List');
 }
 
 async function importAccountsCreationMap() {
@@ -36,12 +57,16 @@ async function importAccountsCreationMap() {
         date: string;
     }
     const accountsCreationMapPath = path.join(process.cwd(), 'accounts-creation-map.json');
+    if (!fs.existsSync(accountsCreationMapPath)) {
+        console.log('Accounts Creation Map not found, exiting');
+        process.exit(1);
+    }
     const accountsCreationMap = JSON.parse(fs.readFileSync(accountsCreationMapPath, 'utf8')) as AccountCreation[];
     return accountsCreationMap;
 }
 
 async function importSerieses() {
-    const response = await axios.get('https://cinema-api.jodu555.de/index/all?auth-token=SECR-DEV');
+    const response = await axios.get(`${IMPORT_API_ENDPOINT}index/all?auth-token=${IMPORT_API_AUTH_TOKEN}`);
     const data = response.data;
 
     let k = 0;
@@ -236,7 +261,7 @@ async function importWatchHistory() {
             }
 
             await watchHistoryTable.create({
-                UUID: crypto.randomUUID(),
+                UUID: generateWatchHistoryID(),
                 account_UUID: watchString.account_UUID,
                 series_UUID: watchable.ID,
                 watchable_UUID: watchableEM.UUID,
