@@ -36,17 +36,17 @@ export async function generatePreviewImages(job: Job) {
     for await (const watchableEntity of watchableEntities) {
         i++;
         i % 100 == 0 && job.log(`Handling File ${i}/${watchableEntities.length + 1}`);
-        const watchable = await watchableUUIDToWatchable(watchableEntity.watchable_UUID, generatorEpisodesCache);
-        if (watchable == undefined) {
-            job.log('Watchable not found', watchableEntity.watchable_UUID, 'for', watchableEntity.UUID);
-            continue;
-        }
+        // const watchable = await watchableUUIDToWatchable(watchableEntity.watchable_UUID, generatorEpisodesCache);
+        // if (watchable == undefined) {
+        //     job.log('Watchable not found', watchableEntity.watchable_UUID, 'for', watchableEntity.UUID);
+        //     continue;
+        // }
         const { data: series, cacheInfo: existingSeriesCacheInfo } = await generatorSeriesCache.execute(seriesTable, 'getOne', [{
-            UUID: watchable.serie_UUID,
+            UUID: watchableEntity.serie_UUID,
             unique: true,
         }]);
         if (series == undefined) {
-            job.log('Series not found', watchableEntity.watchable_UUID, 'for', watchableEntity.UUID, 'seriesuuid', watchable.serie_UUID);
+            job.log('Series not found', watchableEntity.watchable_UUID, 'for', watchableEntity.UUID, 'seriesuuid', watchableEntity.serie_UUID);
             continue;
         }
 
