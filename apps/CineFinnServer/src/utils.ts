@@ -137,6 +137,7 @@ export const cachingMiddleware = <T extends StorageValue>(storage: Storage<T>, k
             return c.json(await storage.getItem(key));
         } else {
             await next();
+            if (c.res.status !== 200) return;
             const response = (await c.res.clone().json()) as T;
             await storage.setItem(key, response);
         }
