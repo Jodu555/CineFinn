@@ -175,7 +175,8 @@
 											</div>
 										</div>
 										<div
-											v-for="additionals in additionalList?.filter((x) => x.parsed.season === currentDetailedSeasonData?.season_IDX)"
+											v-if="Array.isArray(additionalList) && additionalList.length > 0"
+											v-for="additionals in additionalList.filter((x) => x.parsed.season === currentDetailedSeasonData?.season_IDX)"
 											class="card cursor-disabled border-danger-subtle"
 										>
 											<!-- <pre>{{ additionals }}</pre> -->
@@ -769,6 +770,9 @@ const { data: additionalList, status } = await useFetch<
 		'auth-token': authStore.authToken,
 	},
 	key: 'checkSerieForUpdates-' + route.params.SID,
+	onResponseError: (error) => {
+		return [];
+	},
 });
 </script>
 
