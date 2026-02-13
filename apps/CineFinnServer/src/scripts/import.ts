@@ -70,7 +70,7 @@ async function importAccountsCreationMap() {
 }
 
 async function importSerieses() {
-    const response = await axios.get(`${IMPORT_API_ENDPOINT}index/all?auth-token=${IMPORT_API_AUTH_TOKEN}`);
+    const response = await axios.get(`${IMPORT_API_ENDPOINT}/index/all?auth-token=${IMPORT_API_AUTH_TOKEN}`);
     const data = response.data;
 
     let k = 0;
