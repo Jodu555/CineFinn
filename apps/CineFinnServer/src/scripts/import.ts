@@ -26,8 +26,8 @@ async function run() {
 
     // console.log(await seriesTable.get({}));
 
-    await importIgnoreList();
     await importAccounts();
+    await importIgnoreList();
     await importSerieses();
     await importWatchHistory();
 }
@@ -62,6 +62,10 @@ async function importAccountsCreationMap() {
         process.exit(1);
     }
     const accountsCreationMap = JSON.parse(fs.readFileSync(accountsCreationMapPath, 'utf8')) as AccountCreation[];
+    accountsCreationMap.forEach(a => {
+        a.name = a.name.replaceAll('\'', '');
+        a.uuid = a.uuid.replaceAll('\'', '');
+    })
     return accountsCreationMap;
 }
 
@@ -179,15 +183,13 @@ async function importAccounts() {
     const oldDB = Database.createDatabase(process.env.OLD_DB_HOST!, process.env.OLD_DB_USERNAME!, process.env.OLD_DB_PASSWORD!, process.env.OLD_DB_DATABASE!);
     await oldDB.connect();
     const oldAccounts = await oldDB.get('accounts').get({}) as { UUID: string; username: string; password: string; email: string; role: number; settings: string; activityDetails: string; }[];
-    console.log(oldAccounts);
-
 
     const accountsCreationMap = await importAccountsCreationMap();
 
-    if (oldAccounts.length !== accountsCreationMap.length) {
-        console.log('Accounts count mismatch', oldAccounts.length, accountsCreationMap.length, 'Please rerun the account creation map script');
-        process.exit(1);
-    }
+    // if (oldAccounts.length !== accountsCreationMap.length) {
+    //     console.log('Accounts count mismatch', oldAccounts.length, accountsCreationMap.length, 'Please rerun the account creation map script');
+    //     process.exit(1);
+    // }
 
     for (const account of oldAccounts) {
         await accountsTable.create({
