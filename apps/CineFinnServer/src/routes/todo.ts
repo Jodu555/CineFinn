@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { authFullMiddleware } from "../auth.js";
+import { authFullMiddleware } from "../middleware/auth.js";
 import { Role, type RefRef, type ScrapeInfo, type TodoItem, type TodoReferences, type ValueOf } from "@cinefinn/types/database";
 import type { AniWorldSeriesInformations } from "@cinefinn/types/scrapers";
 import { tryCatch } from "../tryCatch.js";

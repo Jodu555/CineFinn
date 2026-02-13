@@ -5,6 +5,14 @@ export interface ServerConfig {
         PUBLIC_API_ENDPOINT: string;
         PUBLIC_API_AUTH_TOKEN: string;
     };
+    prometheus: {
+        ENABLED: boolean;
+        METRICS_PREFIX: string;
+        basicAuth: {
+            username: string;
+            password: string;
+        };
+    };
     videoPath: string;
     imagePath: string;
     database: {

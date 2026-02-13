@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { Hono, type Context } from "hono";
-import { authMiddleware } from "../auth.js";
+import { authMiddleware } from "../middleware/auth.js";
 import { watchableEntitysTable } from "../database.js";
 import { stream, streamSSE } from 'hono/streaming';
 import { getIO } from '../utils.js';

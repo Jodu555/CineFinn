@@ -1,15 +1,15 @@
 import { Hono } from 'hono';
 import { createMiddleware } from 'hono/factory';
-import { accountsTable, authTokensTable, database, emailsTable, } from './database.js';
+import { accountsTable, authTokensTable, database, emailsTable, } from '../database.js';
 import bcrypt from 'bcryptjs';
 import { randomUUID } from 'node:crypto';
 import { HTTPException } from 'hono/http-exception';
 import z from 'zod';
 import type { Account } from '@cinefinn/types/database';
-import { getConfig } from './config.js';
-import { compareSettings, defaultSettings } from './utils/settings.js';
-import { getEmailManager } from './utils.js';
-import type { DataType } from './utils/EmailManager.js';
+import { getConfig } from '../config.js';
+import { compareSettings, defaultSettings } from '../utils/settings.js';
+import { getEmailManager } from '../utils.js';
+import type { DataType } from '../utils/EmailManager.js';
 
 const registerLoginSchema = z.object({
     username: z.string().min(3).max(15).trim().regex(/^[a-zA-Z0-9]+$/, {

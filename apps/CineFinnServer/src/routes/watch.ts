@@ -1,5 +1,5 @@
 import { Hono, type Context } from 'hono';
-import { authFullMiddleware, authMiddleware, type AuthedVars } from '../auth.js';
+import { authFullMiddleware, authMiddleware, type AuthedVars } from '../middleware/auth.js';
 import { episodesTable, moviesTable, seasonsTable, watchableEntitysTable, watchHistoryTable } from '../database.js';
 import { getIO, watchableUUIDToWatchable } from '../utils.js';
 import type { Episode, Movie } from '@cinefinn/types/database';

@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { authFullMiddleware } from "../../auth.js";
+import { authFullMiddleware } from "../../middleware/auth.js";
 import { accountsTable, emailsTable, episodesTable, ignoranceTable, moviesTable, playlistsTable, seasonsTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../../database.js";
 import { getKnownSubSystems, getSeriesRelatedToSubSystem, getSubSystems } from "../../sockets/subsystem.socket.js";
 import { getIO, queryDatabase } from "../../utils.js";

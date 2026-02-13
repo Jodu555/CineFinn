@@ -10,6 +10,14 @@ const defaultConfig: ServerConfig = {
         PUBLIC_API_ENDPOINT: 'http://localhost:3000',
         PUBLIC_API_AUTH_TOKEN: 'SECR-DEV',
     },
+    prometheus: {
+        ENABLED: true,
+        METRICS_PREFIX: 'cinefinn_',
+        basicAuth: {
+            username: 'admin',
+            password: 'admin',
+        }
+    },
     videoPath: '/tmp/videos',
     imagePath: '/tmp/images',
     database: {

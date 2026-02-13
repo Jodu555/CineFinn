@@ -9,10 +9,10 @@ import { Server, Socket } from 'socket.io';
 import { accountsTable, authTokensTable, connectDatabase, database, episodesTable, seasonsTable, watchableEntitysTable } from './database.js';
 
 import { trimTrailingSlash } from 'hono/trailing-slash';
-import { authMiddleware, authRouter } from './auth.js';
+import { authMiddleware, authRouter } from './middleware/auth.js';
 import { prometheus } from '@hono/prometheus';
 import { cors } from 'hono/cors';
-import { ownLogger } from './ownLogger.js';
+import { ownLogger } from './middleware/ownLogger.js';
 import { managmentRouter } from './routes/managment.js';
 import type { AnythingToServerEvents, InterServerEvents, ServerToAnythingEvents, SocketData } from '@cinefinn/types/socket';
 import { tryCatch } from './tryCatch.js';
@@ -34,9 +34,10 @@ import { Job } from './job/Job.js';
 
 import packageJSON from '../package.json' with { type: "json" };
 
+import { metricsRouter, registerMetrics } from './middleware/ownPrometheus.js';
 
 
-const { printMetrics, registerMetrics } = prometheus();
+
 export const app = new Hono({
     strict: false,
 })
@@ -44,6 +45,7 @@ export const app = new Hono({
     .use(trimTrailingSlash())
     .use(ownLogger(console.log, ['/socket.io', '/video']))
     .use('*', registerMetrics)
+    .route('', metricsRouter)
     .use('/images/*', authMiddleware, serveStatic({
         root: getConfig().imagePath,
         rewriteRequestPath: (path, c) => {
@@ -53,7 +55,6 @@ export const app = new Hono({
             c.header('Cache-Control', `public, immutable, max-age=31536000`)
         },
     }))
-    .get('/metrics', printMetrics)
     .get('/health', (c) => {
         // const cpus = os.cpus();
         return c.json({

@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { authMiddleware } from "../auth.js";
+import { authMiddleware } from "../middleware/auth.js";
 import { playlistsTable, seriesTable } from "../database.js";
 import z from "zod";
 

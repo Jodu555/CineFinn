@@ -1,5 +1,5 @@
 import { Hono, type Context } from 'hono';
-import { authFullMiddleware, type AuthedVars } from '../auth.js';
+import { authFullMiddleware, type AuthedVars } from '../middleware/auth.js';
 import { jobsTable } from '../database.js';
 import { crawl } from '../job/crawler.js';
 import { Role, type Job as IJob, type JobType, type timestamped } from '@cinefinn/types/database';
