@@ -294,18 +294,18 @@ async function createTables() {
             type: 'text',
             null: false,
         },
-        IV: {
-            type: 'BLOB',
-            null: true,
-        },
         runtime: {
             type: 'int',
             null: false,
         },
-        hash: {
-            type: 'varchar(128)',
-            null: false,
-        }
+        // IV: {
+        //     type: 'BLOB',
+        //     null: true,
+        // },
+        // hash: {
+        //     type: 'varchar(128)',
+        //     null: false,
+        // }
     });
 
     await database.createTable('watchHistory', {
