@@ -44,6 +44,11 @@
 								<span class="ms-1 d-none d-sm-inline">Ignore List</span>
 							</NuxtLink>
 						</li>
+						<li>
+							<NuxtLink class="nav-link px-0 align-middle" exact-active-class="active" to="/admin/cache">
+								<span class="ms-1 d-none d-sm-inline">Cache</span>
+							</NuxtLink>
+						</li>
 					</ul>
 				</div>
 			</div>
