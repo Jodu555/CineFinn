@@ -48,7 +48,7 @@ export async function connectDatabase(clean: boolean = false) {
 
     // import { rebroadcastAccounts, rebroadcastOverview } from './routes/admin.js';
     // const { rebroadcastAccounts, rebroadcastOverview } = await import('./routes/admin.js')
-    const adminRouter = await import('./routes/admin.js');
+    const adminRouter = await import('./routes/admin/admin.js');
 
     const rebAccounts = async () => {
         await sleep(200);

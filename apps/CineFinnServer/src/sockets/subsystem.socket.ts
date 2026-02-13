@@ -5,7 +5,7 @@ import { calculateMD5, getIO, queryDatabase, watchableUUIDToWatchable } from "..
 import { seriesTable, watchableEntitysTable } from "../database.js";
 import type { definedSocket } from "../index.js";
 import { sendSeriesReloadToAll } from "./client.socket.js";
-import { rebroadcastMovingItems, rebroadcastSubsystems } from '../routes/admin.js';
+import { rebroadcastMovingItems, rebroadcastSubsystems } from '../routes/admin/admin.js';
 import type { Account, Episode, Movie, MovingItem, timestamped } from "@cinefinn/types/database";
 import { tryCatch } from "../tryCatch.js";
 import type { Socket } from "socket.io";

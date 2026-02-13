@@ -26,7 +26,7 @@ import { getConfig } from './config.js';
 import { setupSocketIO } from './sockets/index.js';
 import { getKnownSubSystems, toggleSeriesesForSubSystem } from './sockets/subsystem.socket.js';
 import { playlistRouter } from './routes/playlist.js';
-import { adminRouter } from './routes/admin.js';
+import { adminRouter } from './routes/admin/admin.js';
 import { todoRouter } from './routes/todo.js';
 import { proxyRouter } from './routes/proxys.js';
 import { handleSubSystemProminence } from './job/crawler.js';

@@ -5,7 +5,7 @@ import { Hono } from "hono";
 import { seriesTable, watchableEntitysTable } from "../database.js";
 import { authFullMiddleware, authMiddleware } from "../auth.js";
 import { cachingMiddleware, forEachNonBlockingAsync, queryDatabase } from "../utils.js";
-import { createStorage, prefixStorage } from "unstorage";
+import { createStorage, prefixStorage, type Storage } from "unstorage";
 import pLimit from 'p-limit';
 import z from "zod";
 import { sendSeriesReloadToAll } from "../sockets/client.socket.js";
@@ -15,6 +15,7 @@ import type { CheckForUpdatesOutput } from "@cinefinn/types/socket";
 import { filenameParser, type ParsedInformation } from "../parser.js";
 import { getScraperSocket } from "../sockets/scraper.socket.js";
 import { tryCatch } from "../tryCatch.js";
+import { cacheRegistry } from "./admin/cache.js";
 
 
 
@@ -23,6 +24,11 @@ const fullIndexStorage = prefixStorage<DetailedSeries>(indexStorage, 'fullIndex'
 const undetailedIndexStorage = prefixStorage<FrontendSeries[]>(indexStorage, 'undetailedIndex');
 
 const seriesUpdateStorage = prefixStorage<any>(indexStorage, 'seriesUpdate');
+
+cacheRegistry.set('index', indexStorage);
+cacheRegistry.set('fullIndex', fullIndexStorage);
+cacheRegistry.set('undetailedIndex', undetailedIndexStorage);
+cacheRegistry.set('seriesUpdate', seriesUpdateStorage);
 
 export async function getFrontEndSeries() {
     const result = (await queryDatabase(`

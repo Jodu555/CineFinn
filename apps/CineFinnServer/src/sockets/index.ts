@@ -7,7 +7,7 @@ import clientSocket from "./client.socket.js";
 import scraperSocket from "./scraper.socket.js";
 import subsystemSocket from "./subsystem.socket.js";
 import rmvcEmitterSocket from "./rmvcEmitter.socket.js";
-import { rebroadcastOverview } from '../routes/admin.js';
+import { rebroadcastOverview } from '../routes/admin/admin.js';
 
 export async function setupSocketIO() {
 

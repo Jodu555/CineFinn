@@ -6,7 +6,7 @@ import { watchableEntitysTable, seriesTable } from "../database.js";
 import { getSubSocketByID } from "../sockets/subsystem.socket.js";
 import { watchableUUIDToWatchable, calculateMD5, wait } from "../utils.js";
 import { tryCatch } from "../tryCatch.js";
-import { rebroadcastMovingItems, rebroadcastOverview } from "../routes/admin.js";
+import { rebroadcastMovingItems, rebroadcastOverview } from "../routes/admin/admin.js";
 
 import { pipeline } from 'stream';
 import { promisify } from 'util';

@@ -1,16 +1,18 @@
 import { Hono } from "hono";
-import { authFullMiddleware } from "../auth.js";
-import { accountsTable, emailsTable, episodesTable, ignoranceTable, moviesTable, playlistsTable, seasonsTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../database.js";
-import { getKnownSubSystems, getSeriesRelatedToSubSystem, getSubSystems } from "../sockets/subsystem.socket.js";
-import { getIO, queryDatabase } from "../utils.js";
+import { authFullMiddleware } from "../../auth.js";
+import { accountsTable, emailsTable, episodesTable, ignoranceTable, moviesTable, playlistsTable, seasonsTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../../database.js";
+import { getKnownSubSystems, getSeriesRelatedToSubSystem, getSubSystems } from "../../sockets/subsystem.socket.js";
+import { getIO, queryDatabase } from "../../utils.js";
 import type { Overview, SocketAuthDataSubsystem } from "@cinefinn/types/socket";
 import { Role } from "@cinefinn/types/database";
-import { generateEmailID } from "../utils/IdGenerators.js";
-import { getConfig, updateConfig } from "../config.js";
+import { generateEmailID } from "../../utils/IdGenerators.js";
+import { getConfig, updateConfig } from "../../config.js";
 import z from "zod";
 import { HTTPException } from "hono/http-exception";
-import { getMovingItems, prepareProcessMovingItem } from "../utils/movingItems.js";
-import type { Langs } from "../parser.js";
+import { getMovingItems, prepareProcessMovingItem } from "../../utils/movingItems.js";
+import type { Langs } from "../../parser.js";
+import type { Storage } from "unstorage";
+import { cacheRoutes } from "./cache.js";
 
 async function getTotalRuntime(): Promise<number> {
     const result = await queryDatabase(`
@@ -256,6 +258,9 @@ const router = new Hono()
         return c.json({
             status: 'success',
         });
-    });
+    })
+    .route('/cache', cacheRoutes)
+
+
 
 export { router as adminRouter };

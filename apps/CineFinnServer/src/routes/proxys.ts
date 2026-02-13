@@ -4,6 +4,7 @@ import { proxy } from 'hono/proxy'
 import { createStorage } from "unstorage";
 import fsDriver from 'unstorage/drivers/fs';
 import { getConfig } from "../config.js";
+import { cacheRegistry } from "./admin/cache.js";
 
 interface ImageRewriteData {
     url: string;
@@ -17,6 +18,8 @@ const imageStorage = createStorage<ImageRewriteData>({
         base: './temp/imageStorage',
     })
 })
+
+cacheRegistry.set('imageRewrite', imageStorage);
 
 const CACHE_TIME = 1000 * 60 * 60 * 24 * 7;
 
