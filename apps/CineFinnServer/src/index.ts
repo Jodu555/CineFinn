@@ -2,7 +2,7 @@ import { Redis } from 'ioredis';
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
-
+import crypto from 'crypto';
 // import dotenv from 'dotenv';
 // dotenv.config();
 import { Server, Socket } from 'socket.io';
@@ -35,6 +35,7 @@ import { Job } from './job/Job.js';
 import packageJSON from '../package.json' with { type: "json" };
 
 import { metricsRouter, registerMetrics } from './middleware/ownPrometheus.js';
+import { generateEntityID } from './utils/IdGenerators.js';
 
 
 

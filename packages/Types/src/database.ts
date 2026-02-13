@@ -193,9 +193,9 @@ export interface WatchableEntity {
     lang: Langs;
     subID: string;
     filePath: string;
-    IV: Buffer;
     runtime: number;
-    hash: string;
+    // IV: string;
+    // hash: string;
 }
 
 export interface WatchHistory {

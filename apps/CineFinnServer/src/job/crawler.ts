@@ -500,9 +500,9 @@ export async function crawl(job: Job) {
                 lang: lang as Langs,
                 subID: file.subID,
                 filePath: file.path,
-                IV: EMPTY_IV,
                 runtime: -1,
-                hash: '',
+                // IV: EMPTY_IV.toString('base64'),
+                // hash: '',
             });
             watchableByKey.set(key, created);
             return created;

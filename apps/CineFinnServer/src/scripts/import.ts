@@ -125,9 +125,9 @@ async function importSerieses() {
                         lang: lang,
                         subID: episode.subID || 'main',
                         filePath: filePath,
-                        IV: iv,
                         runtime: -1,
-                        hash: '',
+                        // IV: iv.toString('base64'),
+                        // hash: '',
                     } satisfies WatchableEntity);
                     // console.log(`=> Added watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang})`);
                 }
@@ -165,9 +165,9 @@ async function importSerieses() {
                     lang: lang,
                     subID: movie.subID || 'main',
                     filePath,
-                    IV: iv,
                     runtime: -1,
-                    hash: '',
+                    // IV: iv.toString('base64'),
+                    // hash: '',
                 } satisfies WatchableEntity);
                 // console.log(`=> Added watchable entity ${serie.title} #${i} (${lang})`);
             }
