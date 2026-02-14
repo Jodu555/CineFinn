@@ -57,7 +57,7 @@ export default defineNuxtConfig({
         }
     },
     prometheus: {
-        verbose: true,
+        verbose: false,
         prefix: 'cinefinn_client_',
     },
     umami: {
