@@ -97,7 +97,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								<template v-for="job in finishedJobs" :key="job.UUID">
+								<template v-for="job in finishedJobs.sort((a, b) => b.finished_at - a.finished_at)" :key="job.UUID">
 									<tr>
 										<td>
 											<font-awesome-icon

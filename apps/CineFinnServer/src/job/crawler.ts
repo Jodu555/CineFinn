@@ -9,7 +9,7 @@ import { CacheContext } from '../LRUCache.js';
 import { Job } from './Job.js';
 import { getConfig } from '../config.js';
 import { generateSeriesID, generateMovieID, generateSeasonID, generateEpisodeID, generateEntityID } from '../utils/IdGenerators.js';
-import type { Langs, MovingItem } from '@cinefinn/types/database';
+import type { Episode, Langs, Movie, MovingItem, Season, Series, timestamped, WatchableEntity } from '@cinefinn/types/database';
 import { indexStorage } from '../routes/index.js';
 import { app } from '../index.js';
 import { getIO } from '../utils.js';
@@ -201,12 +201,6 @@ import { getMovingItems } from '../utils/movingItems.js';
 // With Cache:
 // Handling Files: 37.089s (ss.mmm)
 
-type SeriesRow = any;
-type SeasonRow = any;
-type EpisodeRow = any;
-type MovieRow = any;
-type WatchableRow = any;
-
 /**
  * Crawl optimized:
  * - Prefetch DB tables into Maps
@@ -263,7 +257,7 @@ export async function crawl(job: Job) {
 
     job.time('Handling Files');
 
-    const touchedSeasonsSet = new Set<string>();
+    const touchedSeasonsSet = new Set<string>(); // season_UUID
     const seasonEpisodeCounts = new Map<string, number>(); // season_UUID -> count
 
     // Pre-allocated empty IV buffer reused for creations
@@ -285,22 +279,26 @@ export async function crawl(job: Job) {
         watchableEntitysTable.get({})
     ]);
 
-    const seriesByTitle = new Map<string, SeriesRow>(prefetchedSeries.map((s: any) => [s.title, s]));
-    const seasonsByKey = new Map<string, SeasonRow>(prefetchedSeasons.map((s: any) => [`${s.serie_UUID}::${s.season_IDX}`, s]));
-    const episodesByKey = new Map<string, EpisodeRow>(prefetchedEpisodes.map((e: any) => [`${e.season_UUID}::${e.episode_IDX}`, e]));
-    const moviesByKey = new Map<string, MovieRow>(prefetchedMovies.map((m: any) => [`${m.serie_UUID}::${m.primaryName}`, m]));
-    const watchableByKey = new Map<string, WatchableRow>(prefetchedWatchables.map((w: any) => [`${w.watchable_UUID}::${w.lang}`, w]));
+    const seriesByTitle = new Map<string, Series & timestamped>(prefetchedSeries.map((s: any) => [s.title, s]));
+    const seasonsByKey = new Map<string, Season & timestamped>(prefetchedSeasons.map((s: any) => [`${s.serie_UUID}::${s.season_IDX}`, s]));
+    const episodesByKey = new Map<string, Episode & timestamped>(prefetchedEpisodes.map((e: any) => [`${e.season_UUID}::${e.episode_IDX}`, e]));
+    const moviesByKey = new Map<string, Movie & timestamped>(prefetchedMovies.map((m: any) => [`${m.serie_UUID}::${m.primaryName}`, m]));
+    const watchableByKey = new Map<string, WatchableEntity & timestamped>(prefetchedWatchables.map((w: any) => [`${w.watchable_UUID}::${w.lang}`, w]));
 
     // Guards to prevent duplicate creation in concurrent environment:
     // store promise for ongoing creation so other tasks can await
-    const creatingSeries = new Map<string, Promise<SeriesRow>>();
-    const creatingSeasons = new Map<string, Promise<SeasonRow>>();
-    const creatingEpisodes = new Map<string, Promise<EpisodeRow>>();
-    const creatingMovies = new Map<string, Promise<MovieRow>>();
-    const creatingWatchables = new Map<string, Promise<WatchableRow>>();
+    const creatingSeries = new Map<string, Promise<Series & timestamped>>();
+    const creatingSeasons = new Map<string, Promise<Season & timestamped>>();
+    const creatingEpisodes = new Map<string, Promise<Episode & timestamped>>();
+    const creatingMovies = new Map<string, Promise<Movie & timestamped>>();
+    const creatingWatchables = new Map<string, Promise<WatchableEntity & timestamped>>();
 
     const allSeries = new Set<string>(prefetchedSeries.map(s => s.UUID));
     const touchedSeries = new Set<string>();
+    const touchedWatchableEntitys = new Set<string>();
+    const touchedEpisodes = new Set<string>();
+    const touchedMovies = new Set<string>();
+    const touchedSeasons = new Set<string>();
 
     // Utility: increment local season counter
     function incSeasonCount(seasonUUID: string) {
@@ -308,7 +306,7 @@ export async function crawl(job: Job) {
     }
 
     // ---- Helper: get-or-create series
-    async function ensureSeries(title: string, file: string): Promise<SeriesRow> {
+    async function ensureSeries(title: string, file: string): Promise<Series & timestamped> {
         const cached = seriesByTitle.get(title);
         if (cached) return cached;
 
@@ -356,7 +354,7 @@ export async function crawl(job: Job) {
     }
 
     // ---- Helper: get-or-create movie
-    async function ensureMovie(serieUUID: string, movieTitle: string): Promise<MovieRow> {
+    async function ensureMovie(serieUUID: string, movieTitle: string): Promise<Movie & timestamped> {
         const key = `${serieUUID}::${movieTitle}`;
         const cached = moviesByKey.get(key);
         if (cached) return cached;
@@ -389,7 +387,7 @@ export async function crawl(job: Job) {
     }
 
     // ---- Helper: get-or-create season
-    async function ensureSeason(serieUUID: string, seasonIdx: number): Promise<SeasonRow> {
+    async function ensureSeason(serieUUID: string, seasonIdx: number): Promise<Season & timestamped> {
         const key = `${serieUUID}::${seasonIdx}`;
         const cached = seasonsByKey.get(key);
         if (cached) return cached;
@@ -423,7 +421,7 @@ export async function crawl(job: Job) {
     }
 
     // ---- Helper: get-or-create episode
-    async function ensureEpisode(seasonUUID: string, seasonIdx: number, episodeIdx: number, serieUUID: string): Promise<EpisodeRow> {
+    async function ensureEpisode(seasonUUID: string, seasonIdx: number, episodeIdx: number, serieUUID: string): Promise<Episode & timestamped> {
         const key = `${seasonUUID}::${episodeIdx}`;
         const cached = episodesByKey.get(key);
         if (cached) return cached;
@@ -469,7 +467,7 @@ export async function crawl(job: Job) {
     }
 
     // ---- Helper: get-or-create watchable entity
-    async function ensureWatchable(watchableUUID: string, serieUUID: string, lang: string, file: SubFile): Promise<WatchableRow> {
+    async function ensureWatchable(watchableUUID: string, serieUUID: string, lang: string, file: SubFile): Promise<WatchableEntity & timestamped> {
         const key = `${watchableUUID}::${lang}::${file.subID}`;
         const cached = watchableByKey.get(key);
         if (cached) return cached;
@@ -574,16 +572,21 @@ export async function crawl(job: Job) {
         if (parsedData.movie === true) {
             // movie branch
             const existingMovie = await ensureMovie(serie.UUID, parsedData.movieTitle!);
+            touchedMovies.add(existingMovie.UUID);
             watchableUUID = existingMovie.UUID;
         } else {
             // episodic branch
             const season = await ensureSeason(serie.UUID, parsedData.season);
             const episode = await ensureEpisode(season.UUID, parsedData.season, parsedData.episode, serie.UUID);
+            touchedEpisodes.add(episode.UUID);
+            touchedSeasons.add(season.UUID);
+            touchedSeasonsSet.add(season.UUID);
             watchableUUID = episode.UUID;
         }
 
         // create / ensure watchable entity (file lang)
-        await ensureWatchable(watchableUUID, serie.UUID, parsedData.language, subFile);
+        const watchableEntity = await ensureWatchable(watchableUUID, serie.UUID, parsedData.language, subFile);
+        touchedWatchableEntitys.add(watchableEntity.UUID);
     }
 
     // Choose concurrency based on environment; default to 20 concurrent workers
@@ -642,6 +645,88 @@ export async function crawl(job: Job) {
 
     job.timeEnd('Updating Seasons');
 
+    job.time('Loading all DB rows for stale check');
+    const allWatchableEntitys = new Set<string>((await watchableEntitysTable.get()).map(w => w.UUID));
+    const allEpisodes = new Set<string>((await episodesTable.get({})).map(e => e.UUID));
+    const allMovies = new Set<string>((await moviesTable.get({})).map(m => m.UUID));
+    const allSeasons = new Set<string>((await seasonsTable.get({})).map(s => s.UUID));
+    job.timeEnd('Loading all DB rows for stale check');
+
+
+    job.time('Checking for stale DB rows');
+    const staleWatchableEntitys = Array.from(allWatchableEntitys.difference(touchedWatchableEntitys));
+    const staleEpisodes = Array.from(allEpisodes.difference(touchedEpisodes));
+    const staleMovies = Array.from(allMovies.difference(touchedMovies));
+    const staleSeasons = Array.from(allSeasons.difference(touchedSeasons));
+    job.timeEnd('Checking for stale DB rows');
+
+    // console.log({
+    //     stale: {
+    //         staleWatchableEntitys: staleWatchableEntitys.length,
+    //         staleSeasons: staleSeasons.length,
+    //         staleEpisodes: staleEpisodes.length,
+    //         staleMovies: staleMovies.length
+    //     },
+    //     touched: {
+    //         touchedWatchableEntitys: touchedWatchableEntitys.size,
+    //         touchedSeasons: touchedSeasons.size,
+    //         touchedEpisodes: touchedEpisodes.size,
+    //         touchedMovies: touchedMovies.size
+    //     }
+    // });
+
+
+    job.time('Deleting stale DB rows');
+    if (staleWatchableEntitys.length > 0) {
+        job.log('Stale WatchableEntitys:', staleWatchableEntitys);
+        for (const UUID of staleWatchableEntitys) {
+            const watchableEntity = await watchableEntitysTable.getOne({ UUID });
+            if (watchableEntity == undefined) {
+                job.log('WatchableEntity not found', UUID);
+                continue;
+            }
+            await watchableEntitysTable.delete({ UUID });
+        }
+    }
+
+    if (staleEpisodes.length > 0) {
+        job.log('Stale Episodes:', staleEpisodes);
+        for (const UUID of staleEpisodes) {
+            const episode = await episodesTable.getOne({ UUID });
+            if (episode == undefined) {
+                job.log('Episode not found', UUID);
+                continue;
+            }
+            await episodesTable.delete({ UUID });
+        }
+    }
+
+    if (staleMovies.length > 0) {
+        job.log('Stale Movies:', staleMovies);
+        for (const UUID of staleMovies) {
+            const movie = await moviesTable.getOne({ UUID });
+            if (movie == undefined) {
+                job.log('Movie not found', UUID);
+                continue;
+            }
+            await moviesTable.delete({ UUID });
+        }
+    }
+
+    if (staleSeasons.length > 0) {
+        job.log('Stale Seasons:', staleSeasons);
+        for (const UUID of staleSeasons) {
+            const season = await seasonsTable.getOne({ UUID });
+            if (season == undefined) {
+                job.log('Season not found', UUID);
+                continue;
+            }
+            await seasonsTable.delete({ UUID });
+        }
+    }
+    job.timeEnd('Deleting stale DB rows');
+
+
     const probablyMissingSeries = Array.from(allSeries.difference(touchedSeries));
     if (probablyMissingSeries.length > 0) {
         job.log('Probably missing series:', probablyMissingSeries);
@@ -657,7 +742,11 @@ export async function crawl(job: Job) {
 
     job.setResult({
         probablyMissingSeries: probablyMissingSeries,
-        touchedSeasons: Array.from(touchedSeasonsSet)
+        touchedSeasons: Array.from(touchedSeasonsSet),
+        staleWatchableEntitys: Array.from(staleWatchableEntitys),
+        staleEpisodes: Array.from(staleEpisodes),
+        staleMovies: Array.from(staleMovies),
+        staleSeasons: Array.from(staleSeasons),
     });
 
     await handleSubSystemProminence(job);
