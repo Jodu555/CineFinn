@@ -22,7 +22,6 @@ export const useAuthStore = defineStore('auth', {
                 return;
             }
 
-            this.loggedIn = true;
             this.authToken = data.token;
             useCookie('auth-token').value = this.authToken;
             await this.authenticate(true);
@@ -40,7 +39,6 @@ export const useAuthStore = defineStore('auth', {
             console.log(data);
 
 
-            this.loggedIn = true;
             this.authToken = data.token;
             useCookie('auth-token').value = this.authToken;
             await this.authenticate(true);
