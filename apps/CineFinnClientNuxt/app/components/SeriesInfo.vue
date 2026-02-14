@@ -35,11 +35,12 @@
 
 				<div class="d-flex gap-3">
 					<!-- Existing Button -->
-					<AddToPlaylistDialog
+					<LazyAddToPlaylistDialog
 						:item-u-u-i-d="series.UUID"
 						:content-title="series.title"
 						open-button-text="Add to Playlist"
 						open-button-color="outline-primary"
+						hydrate-on-idle
 					/>
 
 					<!-- New Edit Button -->

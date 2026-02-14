@@ -53,15 +53,17 @@
 								<!-- Seasons Tab -->
 								<div v-if="activeTab === 'seasons' && hasSeasons" class="tab-pane fade show active">
 									<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+										<!-- Change Season -->
 										<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3">
 											<h2 class="h5 mb-0">Episodes</h2>
-											<select v-model="selectedSeason" class="form-select" style="width: auto">
+											<select v-model="selectedSeason" class="form-select" style="width: auto" aria-label="Change Seasons">
 												<option v-for="season in series.seasons" :key="season.UUID" :value="season.UUID">
 													Season {{ season.season_IDX }} ({{ Array.isArray(season.episodes) ? season.episodes.length : season.episodes }}
 													episodes)
 												</option>
 											</select>
 										</div>
+										<!-- Change View Mode -->
 										<div class="d-flex align-items-center gap-2 w-100 justify-content-center justify-content-sm-end">
 											<!-- Dropdown Menu -->
 											<div class="dropdown flex-shrink-0 me-2">
@@ -96,6 +98,7 @@
 													type="button"
 													:class="['btn', viewMode === 'list' ? 'btn-primary' : 'btn-outline-secondary']"
 													@click="viewMode = 'list'"
+													title="List View"
 												>
 													<font-awesome-icon :icon="['fas', 'list']" />
 												</button>
@@ -103,6 +106,7 @@
 													type="button"
 													:class="['btn', viewMode === 'compact' ? 'btn-primary' : 'btn-outline-secondary']"
 													@click="viewMode = 'compact'"
+													title="Compact View"
 												>
 													<font-awesome-icon :icon="['fas', 'grip']" />
 												</button>
@@ -322,35 +326,6 @@
 					</div>
 
 					<!-- Related Content Sidebar -->
-					<div v-if="false" class="col-xl-3">
-						<h2 class="h5 mb-3">
-							<font-awesome-icon :icon="['fas', 'heart']" class="me-2 text-danger" />
-							More Like This
-						</h2>
-						<div class="d-flex flex-column gap-3">
-							<div v-for="item in relatedContent" :key="item.id" class="card cursor-pointer" style="cursor: pointer">
-								<div class="card-body p-3">
-									<div class="d-flex gap-3">
-										<img :src="item.cover" :alt="item.title" class="rounded flex-shrink-0" style="width: 48px; height: 72px; object-fit: cover" />
-										<div class="flex-grow-1 overflow-hidden">
-											<h3 class="h6 mb-1 text-truncate">{{ item.title }}</h3>
-											<p class="text-muted small mb-1">
-												<font-awesome-icon :icon="['far', 'calendar']" class="me-1" />
-												{{ item.year }} • {{ item.type }}
-											</p>
-											<!-- <div class="d-flex align-items-center small" v-if="SHOW_RATING">
-											<font-awesome-icon :icon="['fas', 'star']" class="text-warning me-1" />
-											<span>{{ item.rating }}</span>
-										</div> -->
-										</div>
-										<div class="d-flex align-items-center">
-											<font-awesome-icon :icon="['fas', 'chevron-right']" class="text-muted" />
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
 					<div v-if="true" class="col-xl-3">
 						<h2 class="h5 mb-3">
 							<font-awesome-icon :icon="['fas', 'heart']" class="me-2 text-danger" />
@@ -498,12 +473,16 @@ const selectedSeason = ref((indexStore.selectedEntity as DetailedEpisode)?.seaso
 
 useSeoMeta({
 	title: computed(() => series.value?.title || ''),
+	ogTitle: computed(() => series.value?.title || ''),
 	description: computed(() => series.value?.infos.description || ''),
+	ogDescription: computed(() => series.value?.infos.description || ''),
 	ogImage: computed(() => coverURL.value),
 	ogType: 'video.tv_show',
+	ogUrl: computed(() => window.location.href),
 	twitterCard: 'player',
 	twitterTitle: computed(() => series.value?.title || ''),
 	twitterDescription: computed(() => series.value?.infos.description || ''),
+	twitterImage: computed(() => coverURL.value),
 });
 
 let initialViewMode = route.query.viewMode;

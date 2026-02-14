@@ -48,6 +48,9 @@ export default defineNuxtConfig({
     },
     app: {
         head: {
+            htmlAttrs: {
+                lang: 'en'
+            },
             bodyAttrs: {
                 'data-bs-theme': 'dark'
             },
