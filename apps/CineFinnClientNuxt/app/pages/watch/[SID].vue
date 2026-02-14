@@ -346,6 +346,7 @@
 								:to="`/watch/${item.UUID}`"
 								style="cursor: pointer; text-decoration: none"
 								prefetch-on="interaction"
+								@mouseover="indexStore.prefetchSeries(item.UUID)"
 							>
 								<div class="card-body p-3">
 									<div class="d-flex gap-3">
@@ -423,7 +424,6 @@ if (authStore.loggedIn) {
 	]);
 } else {
 	await Promise.all([
-		// callOnce('loadSeriesIndex', async () => await indexStore.loadSeries(), { mode: 'navigation' }),
 		callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string), { mode: 'navigation' }),
 	]);
 }
@@ -461,25 +461,6 @@ const isDisabled = computed(() => series.value?.infos.disabled);
 const currentDetailedSeasonData = computed(() => {
 	return indexStore.detailedSeasons.find((s) => s.UUID === selectedSeason.value);
 });
-
-const relatedContent = [
-	{
-		id: 5,
-		title: 'The Witcher',
-		year: 2019,
-		type: 'tv',
-		cover: 'https://placehold.co/48x72/1a1a1a/666?text=TW',
-		rating: 8.2,
-	},
-	{
-		id: 6,
-		title: 'Spirited Away',
-		year: 2001,
-		type: 'movie',
-		cover: 'https://placehold.co/48x72/1a1a1a/666?text=SA',
-		rating: 9.3,
-	},
-];
 
 const currentMovieUUID = ref<string | null>((route.query.movie as string) || null);
 const currentEpisodeUUID = ref<string | null>((route.query.episode as string) || null);

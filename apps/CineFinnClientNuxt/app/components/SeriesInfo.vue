@@ -88,6 +88,11 @@
 					<input type="text" class="form-control" :placeholder="ref" v-model="editForm.refs[ref as 'aniworld' | 'zoro' | 'sto']" />
 				</div>
 
+				<div v-if="editForm.image != null" class="form-check mb-3">
+					<input class="form-check-input" type="checkbox" v-model="editForm.image" />
+					<label class="form-check-label" for=""> Has Image </label>
+				</div>
+
 				<!-- Action Buttons -->
 				<div class="d-flex gap-3">
 					<!-- Save Button -->
@@ -129,6 +134,7 @@ const editForm = ref({
 	endDate: '',
 	tags: '',
 	description: '',
+	image: false,
 	refs: {
 		aniworld: '',
 		zoro: '',
@@ -147,6 +153,7 @@ const enterEditMode = () => {
 		// Convert tags array to comma-separated string for editing
 		tags: props.series.tags ? props.series.tags.join(', ') : '',
 		description: props.series.infos.description || '',
+		image: props.series.infos.image || false,
 		refs: {
 			aniworld: props.series.refs.aniworld || '',
 			zoro: props.series.refs.zoro || '',
@@ -171,6 +178,7 @@ const saveChanges = async () => {
 			startDate: editForm.value.startDate,
 			endDate: editForm.value.endDate,
 			description: editForm.value.description,
+			image: editForm.value.image,
 		},
 		refs: { ...props.series.refs, ...editForm.value.refs },
 	});

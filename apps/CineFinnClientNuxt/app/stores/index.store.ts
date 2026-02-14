@@ -10,7 +10,7 @@ export const useIndexStore = defineStore('index', {
         detailedMovies: [] as DetailedMovie[],
         selectedEntity: null as DetailedEpisode | DetailedMovie | null,
         selectedWatchableEntity: null as WatchableEntity | null,
-        detailedPrefetchedSeriesObj: {} as { [key: string]: DetailedSeries },
+        detailedPrefetchedSeriesObj: {} as { [key: string]: DetailedSeries | true },
         watchHistory: [] as WatchHistory[],
     }),
     actions: {
@@ -46,7 +46,7 @@ export const useIndexStore = defineStore('index', {
         async loadDetailedSeasonInfo(seriesID: string) {
             this.loading = true;
             // console.log(`loadDetailedSeasonInfo for seriesID: ${seriesID}`);
-            if (this.detailedPrefetchedSeriesObj[seriesID]) {
+            if (this.detailedPrefetchedSeriesObj[seriesID] && this.detailedPrefetchedSeriesObj[seriesID] !== true) {
                 const prefetched = this.detailedPrefetchedSeriesObj[seriesID];
                 this.detailedSeasons = prefetched.seasons;
                 this.detailedMovies = prefetched.movies;
@@ -85,14 +85,15 @@ export const useIndexStore = defineStore('index', {
             if (this.detailedPrefetchedSeriesObj[seriesID]) {
                 return;
             }
+            this.detailedPrefetchedSeriesObj[seriesID] = true;
             const response = await $fetch<DetailedSeries>(useAPIURL() + '/index/' + seriesID, {
                 headers: {
                     'auth-token': useAuthStore().authToken,
                 },
             });
             const img = new Image();
-            const url = new URL('https://cinema-api.jodu555.de' + `/images/${seriesID}/cover.jpg`);
-            url.searchParams.append('auth-token', 'SECR-DEV');
+            const url = new URL(useAPIURL() + `/images/${seriesID}/cover.jpg`);
+            url.searchParams.append('auth-token', useAuthStore().authToken);
             img.src = url.href;
             this.detailedPrefetchedSeriesObj[seriesID] = response;
         },

@@ -26,7 +26,7 @@ export const decideSeriesImage = (series: FrontendSeries, randomNumber?: string 
     if (series.infos.image) {
         // return `https://cinema-api.jodu555.de/images/${series.UUID}/cover.jpg`;
         const url = new URL(useAPIURL() + `/images/${series.UUID}/cover.jpg`);
-        url.searchParams.append('auth-token', 'SECR-DEV');
+        url.searchParams.append('auth-token', useAuthStore().authToken);
         return url.href;
     } else if (series.infos.imageURL) {
         return series.infos.imageURL;
