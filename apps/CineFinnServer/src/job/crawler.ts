@@ -228,11 +228,13 @@ export async function crawl(job: Job) {
 
     const subSystemSockets = (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'subsystem')
 
+    const loadedSubsystems = new Set<string>();
 
     const subSystemFilesPromise = subSystemSockets.map(s => {
         return new Promise<SubFile[]>((resolve, reject) => {
             s.emit('listFiles', (files) => {
-                job.log(`Found ${files.length} subsystem files`);
+                job.log(`Found ${files.length} subsystem files for ${s.data.auth.type === 'subsystem' ? s.data.auth.id : 'main'}`);
+                loadedSubsystems.add(s.data.auth.type === 'subsystem' ? s.data.auth.id : 'main');
                 resolve(files.map(f => ({ subID: s.data.auth.type === 'subsystem' ? s.data.auth.id : 'main', path: f })));
             });
             setTimeout(() => {
@@ -652,12 +654,10 @@ export async function crawl(job: Job) {
     job.timeEnd('Loading all DB rows for stale check');
 
 
-    job.time('Checking for stale DB rows');
+
     const staleWatchableEntitys = Array.from(allWatchableEntitys.difference(touchedWatchableEntitys));
-    const staleEpisodes = Array.from(allEpisodes.difference(touchedEpisodes));
-    const staleMovies = Array.from(allMovies.difference(touchedMovies));
-    const staleSeasons = Array.from(allSeasons.difference(touchedSeasons));
-    job.timeEnd('Checking for stale DB rows');
+
+
 
     // console.log({
     //     stale: {
@@ -673,20 +673,49 @@ export async function crawl(job: Job) {
     //         touchedMovies: touchedMovies.size
     //     }
     // });
-
-
-    job.time('Deleting stale DB rows');
+    const actualStaleWatchableEntitys = []
     if (staleWatchableEntitys.length > 0) {
-        job.log('Stale WatchableEntitys:', staleWatchableEntitys);
         for (const UUID of staleWatchableEntitys) {
             const watchableEntity = await watchableEntitysTable.getOne({ UUID });
             if (watchableEntity == undefined) {
                 job.log('WatchableEntity not found', UUID);
                 continue;
             }
-            await watchableEntitysTable.delete({ UUID });
+            if (loadedSubsystems.has(watchableEntity.subID)) {
+                actualStaleWatchableEntitys.push(watchableEntity.UUID);
+            } else {
+                if (watchableEntity.watchable_UUID.startsWith('MO-')) {
+                    touchedMovies.add(watchableEntity.watchable_UUID);
+                } else if (watchableEntity.watchable_UUID.startsWith('EP-')) {
+                    const episode = await episodesTable.getOne({ UUID: watchableEntity.watchable_UUID });
+                    if (episode == undefined) {
+                        actualStaleWatchableEntitys.push(watchableEntity.UUID);
+                        job.log('Episode not found for watchableentity', watchableEntity.watchable_UUID);
+                        continue;
+                    }
+                    touchedEpisodes.add(watchableEntity.watchable_UUID);
+                    touchedSeasons.add(episode.season_UUID);
+                }
+            }
         }
     }
+    console.log('Actual stale watchable entitys', actualStaleWatchableEntitys.length, 'of', staleWatchableEntitys.length);
+
+
+    job.time('Deleting stale DB rows');
+
+    for (const UUID of actualStaleWatchableEntitys) {
+        const watchableEntity = await watchableEntitysTable.getOne({ UUID });
+        if (watchableEntity == undefined) {
+            job.log('WatchableEntity not found', UUID);
+            continue;
+        }
+        await watchableEntitysTable.delete({ UUID });
+    }
+
+    const staleEpisodes = Array.from(allEpisodes.difference(touchedEpisodes));
+    const staleMovies = Array.from(allMovies.difference(touchedMovies));
+    const staleSeasons = Array.from(allSeasons.difference(touchedSeasons));
 
     if (staleEpisodes.length > 0) {
         job.log('Stale Episodes:', staleEpisodes);
