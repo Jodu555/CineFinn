@@ -150,7 +150,7 @@ async function importSerieses() {
                 movie_IDX: i,
                 primaryName: movie.primaryName || `${serie.title} #${i}`,
             } satisfies Movie);
-            console.log(`=> Added movie ${serie.title} #${i} (${movie.primaryName})`);
+            // console.log(`=> Added movie ${serie.title} #${i} (${movie.primaryName})`);
             for (const lang of movie.langs) {
                 // const iv = crypto.randomBytes(16);
                 const watchableEntityUUID = generateEntityID();
