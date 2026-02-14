@@ -11,16 +11,14 @@
 					</div>
 				</div>
 				<div class="text-muted" style="overflow: scroll; overflow-x: scroll; max-height: 200px">
-					<p v-for="line in reversedLogs" :key="line" class="mb-0">{{ line.slice(0,
-						100) }}</p>
+					<p v-for="line in reversedLogs" :key="line" class="mb-0">{{ line.slice(0, 100) }}</p>
 				</div>
 			</div>
 			<div class="row" v-else>
-				<p class="mb-0">Latest Run: {{ new Date(jobPosNegCompletedAt).toLocaleString() }}
+				<p class="mb-0">Latest Run: {{ new Date(jobPosNegCompletedAt).toLocaleString() }}</p>
+				<p :class="{ 'mb-0': currentJob!.failed_at != 0 }">
+					Latest Duration: {{ msToReadable(jobPosNegCompletedAt - +currentJob!.created_at || 0) }}
 				</p>
-				<p :class="{ 'mb-0': currentJob!.failed_at != 0 }">Latest Duration: {{ msToReadable(jobPosNegCompletedAt
-					-
-					+currentJob!.created_at || 0) }}</p>
 				<p v-if="currentJob!.failed_at != 0" class="text-danger">Latest Run Failed!</p>
 				<button @click="run(jobType)" class="btn btn-outline-info">Start</button>
 			</div>
@@ -47,7 +45,7 @@ const props = withDefaults(
 	}>(),
 	{
 		jobType: 'crawl',
-	}
+	},
 );
 
 const jobName = computed(() => managmentStore.jobRegistry[props.jobType]);
@@ -68,15 +66,15 @@ const isRunning = computed(() => currentJob.value?.finished_at == 0 && currentJo
 
 const reversedLogs = computed(() => {
 	// 1. Get the current logs array
-	const logs = currentJob.value?.logs || []
+	const logs = currentJob.value?.logs || [];
 
 	// 2. Use a spread operator to create a copy before reversing
 	// This prevents mutating the reactive store state directly (which is good practice)
-	const reversed = [...logs].reverse()
+	const reversed = [...logs].reverse();
 
 	// 3. Return the sliced array. This calculation only runs when logs changes.
-	return reversed.slice(0, 3)
-})
+	return reversed.slice(0, 50);
+});
 
 const jobPosNegCompletedAt = computed(() => {
 	if (currentJob.value == undefined) {
@@ -84,8 +82,6 @@ const jobPosNegCompletedAt = computed(() => {
 	}
 	return +currentJob.value.finished_at || +currentJob.value.failed_at;
 });
-
-
 </script>
 
 <style></style>

@@ -31,3 +31,7 @@ export const generateEmailID = () => {
 export const generateWatchHistoryID = () => {
     return `WH-${generateID()}`;
 };
+
+export const generateJobID = () => {
+    return `JOB-${generateID()}`;
+};

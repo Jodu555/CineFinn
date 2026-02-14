@@ -6,6 +6,7 @@ import { Role, type Job as IJob, type JobType, type timestamped } from '@cinefin
 import { generatePreviewImages } from '../job/images.js';
 import { tryCatch } from '../tryCatch.js';
 import { Job } from '../job/Job.js';
+import { generateJobID } from '../utils/IdGenerators.js';
 
 
 
@@ -46,7 +47,7 @@ async function handleJob(type: JobType, c: Context<AuthedVars>, callFunction: (j
             message: 'Job is already running!',
         });
     }
-    const jobUUID = crypto.randomUUID();
+    const jobUUID = generateJobID();
     await jobsTable.create({
         UUID: jobUUID,
         type,

@@ -58,8 +58,8 @@ export class Job {
 
     async sendSocketUpdate(immediate = false) {
         const socketJob = JSON.parse(JSON.stringify(this.toDB()));
-        socketJob.data = {};
-        socketJob.logs = socketJob.logs.slice(-10);
+        // socketJob.data = {};
+        // socketJob.logs = socketJob.logs.slice(-10);
         (await getIO().fetchSockets()).forEach(socket => {
             if (socket.data.auth.type === 'client') {
                 if (immediate) {
