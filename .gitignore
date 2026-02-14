@@ -6,6 +6,7 @@ new-time.json
 remote.json
 out-remote.json
 dlList.json
+dlListAniworld.json
 dlListOther.json
 zorolist.json
 Scraper/*.json

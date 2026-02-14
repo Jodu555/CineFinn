@@ -1,22 +1,30 @@
 <template>
 	<div>
-		<pre v-if="authStore.user.settings.developerMode.value">
+		<pre v-if="authStore.loggedIn && authStore.user.settings.developerMode.value">
 		{{ indexStore.selectedWatchableEntity }}
 		</pre
 		>
-		<EntityActionsInformation v-if="showVideo" class="container" :switch-to="switchTo" :change-language="changeLanguage" />
-		<div v-auto-animate v-if="showLatestWatchButton" class="text-center mb-2">
-			<button @click="skipToLatestTime" class="btn btn-outline-info">Jump to Latest watch position!</button>
+		<div v-if="authStore.loggedIn">
+			<EntityActionsInformation v-if="showVideo" class="container" :switch-to="switchTo" :change-language="changeLanguage" />
+			<div v-auto-animate v-if="showLatestWatchButton" class="text-center mb-2">
+				<button @click="skipToLatestTime" class="btn btn-outline-info">Jump to Latest watch position!</button>
+			</div>
 		</div>
 		<ClientOnly>
-			<ExtendedVideo
-				v-if="showVideo"
-				:videoSrc="videoSrc"
-				:switch-to="switchTo"
-				:can-play="true"
-				:events="{}"
-				:send-video-time-update="sendVideoTimeUpdate"
-			/>
+			<div v-if="showVideo">
+				<ExtendedVideo
+					v-if="authStore.loggedIn"
+					:videoSrc="videoSrc"
+					:switch-to="switchTo"
+					:can-play="true"
+					:events="{}"
+					:send-video-time-update="sendVideoTimeUpdate"
+				/>
+				<div v-else class="text-center">
+					<h2 class="text-danger">You need to be logged in to watch this video</h2>
+					<NuxtLink type="button" to="/login" class="mt-3 mb-4 btn btn-outline-primary btn-lg">Login</NuxtLink>
+				</div>
+			</div>
 		</ClientOnly>
 		<div v-if="series" class="container-fluid text-white min-vh-100 py-4">
 			<!-- Content Information -->
@@ -28,7 +36,7 @@
 						<SeriesInfo :series="series" :coverURL="coverURL" />
 						<!-- Episodes/Movies Section -->
 						<div v-if="(hasSeasons || hasMovies) && !isDisabled" class="mb-4">
-							<pre v-if="authStore.user.settings.developerMode.value">
+							<pre v-if="authStore.user?.settings?.developerMode?.value">
 								{{ { activeTab, hasSeasons, hasMovies } }}
 							</pre
 							>
@@ -65,9 +73,8 @@
 										</div>
 										<!-- Change View Mode -->
 										<div class="d-flex align-items-center gap-2 w-100 justify-content-center justify-content-sm-end">
-											<!-- Dropdown Menu -->
-											<div class="dropdown flex-shrink-0 me-2">
-												<!-- Removed 'btn-sm' here to match the size of the view mode buttons -->
+											<!-- Mark Season Dropdown -->
+											<div class="dropdown flex-shrink-0 me-2" v-if="authStore.loggedIn">
 												<button
 													class="btn btn-outline-secondary dropdown-toggle bg-transparent"
 													type="button"
@@ -326,7 +333,7 @@
 					</div>
 
 					<!-- Related Content Sidebar -->
-					<div v-if="true" class="col-xl-3">
+					<div v-if="authStore.loggedIn" class="col-xl-3">
 						<h2 class="h5 mb-3">
 							<font-awesome-icon :icon="['fas', 'heart']" class="me-2 text-danger" />
 							More Like This
@@ -369,23 +376,26 @@
 					</div>
 				</div>
 			</div>
-			<pre v-if="authStore.user.settings.developerMode.value">
-			selectedWatchableEntity: {{ indexStore.selectedWatchableEntity }}
-			selectedEntity: {{ indexStore.selectedEntity }}
+			<!-- Developer Debug Infos -->
+			<div v-if="authStore.loggedIn">
+				<pre v-if="authStore.user.settings.developerMode.value">
+				selectedWatchableEntity: {{ indexStore.selectedWatchableEntity }}
+				selectedEntity: {{ indexStore.selectedEntity }}
+				</pre
+				>
+				<pre v-if="authStore.user.settings.developerMode.value">
+				activeTab: {{ activeTab }}
+				viewMode: {{ viewMode }}
+				showVideo: {{ showVideo }}
+				videoSrc: {{ videoSrc }}
+				selectedSeason: {{ selectedSeason }}
+				hasSeasons: {{ hasSeasons }}
+				hasMovies: {{ hasMovies }}
+				currentDetailedSeasonData: {{ currentDetailedSeasonData }}
+				series: {{ series }}
 			</pre
-			>
-			<pre v-if="authStore.user.settings.developerMode.value">
-            activeTab: {{ activeTab }}
-            viewMode: {{ viewMode }}
-			showVideo: {{ showVideo }}
-			videoSrc: {{ videoSrc }}
-            selectedSeason: {{ selectedSeason }}
-            hasSeasons: {{ hasSeasons }}
-            hasMovies: {{ hasMovies }}
-            currentDetailedSeasonData: {{ currentDetailedSeasonData }}
-            series: {{ series }}
-        </pre
-			>
+				>
+			</div>
 		</div>
 	</div>
 </template>
@@ -398,7 +408,7 @@ import ExtendedVideo from '~/components/ExtendedVideo.vue';
 import useAPIURL from '~/hooks/useAPIURL';
 
 definePageMeta({
-	middleware: 'auth',
+	middleware: 'may-auth',
 	scrollToTop: true,
 });
 
@@ -406,12 +416,19 @@ const route = useRoute();
 const authStore = useAuthStore();
 const indexStore = useIndexStore();
 
-const series = computed(() => indexStore.series.find((s) => s.UUID === route.params.SID));
+if (authStore.loggedIn) {
+	await Promise.all([
+		callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string), { mode: 'navigation' }),
+		callOnce('loadWatchHistory', async () => await indexStore.loadWatchHistory(route.params.SID as string), { mode: 'navigation' }),
+	]);
+} else {
+	await Promise.all([
+		// callOnce('loadSeriesIndex', async () => await indexStore.loadSeries(), { mode: 'navigation' }),
+		callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string), { mode: 'navigation' }),
+	]);
+}
 
-await Promise.all([
-	callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string), { mode: 'navigation' }),
-	callOnce('loadWatchHistory', async () => await indexStore.loadWatchHistory(route.params.SID as string), { mode: 'navigation' }),
-]);
+const series = computed(() => indexStore.series.find((s) => s.UUID === route.params.SID));
 
 // await callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string), { mode: 'navigation' });
 // callOnce('loadWatchHistory', async () => await indexStore.loadWatchHistory(route.params.SID as string), { mode: 'navigation' });
@@ -548,6 +565,7 @@ const videoSrc = computed(() => {
 const forceHideLatestWatchButton = ref(false);
 
 const showLatestWatchButton = computed(() => {
+	if (authStore.loggedIn == false) return false;
 	if (authStore.user.settings.showLatestWatchButton.value == false) return false;
 	if (forceHideLatestWatchButton.value) return false;
 
@@ -762,7 +780,7 @@ function singleDimSwitcher<T>(arr: T[], curr: number, velocity: number) {
 // 	console.log(detailedSerie.UUID, detailedSerie.title, detailedSerie.refs);
 // });
 
-const { data: additionalList, status } = await useFetch<
+const { data: additionalList, execute: loadCheckForUpdates } = await useFetch<
 	{
 		outPath: string;
 		file: string;
@@ -780,24 +798,34 @@ const { data: additionalList, status } = await useFetch<
 	},
 	key: 'checkSerieForUpdates-' + route.params.SID,
 	lazy: true,
+	immediate: false,
 	onResponseError: (error) => {
 		return [];
 	},
 });
 
-const { data: dynamicRelatedContent } = await useFetch<string[]>(`${useAPIURL()}/index/${route.params.SID}/related`, {
-	headers: {
-		'auth-token': authStore.authToken,
+const { data: dynamicRelatedContent, execute: loadDynamicRelatedContent } = await useFetch<string[]>(
+	`${useAPIURL()}/index/${route.params.SID}/related`,
+	{
+		headers: {
+			'auth-token': authStore.authToken,
+		},
+		key: 'relatedContent-' + route.params.SID,
+		onResponseError: (error) => {
+			return [];
+		},
+		lazy: true,
+		immediate: false,
+		query: {
+			count: 5,
+		},
 	},
-	key: 'relatedContent-' + route.params.SID,
-	onResponseError: (error) => {
-		return [];
-	},
-	lazy: true,
-	query: {
-		count: 5,
-	},
-});
+);
+
+if (authStore.loggedIn) {
+	loadDynamicRelatedContent();
+	loadCheckForUpdates();
+}
 
 const randomNumbersSeriesCover = computed(() => {
 	const arr = Array.from({ length: dynamicPopulatedContent.value.length }, () => Math.floor(Math.random() * 1000));

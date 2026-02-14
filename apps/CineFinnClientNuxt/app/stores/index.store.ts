@@ -1,4 +1,4 @@
-import type { DetailedSeason, DetailedEpisode, WatchableEntity, DetailedSeries, DetailedMovie, FrontendSeries, WatchHistory } from '@cinefinn/types/database';
+import type { DetailedSeason, DetailedEpisode, WatchableEntity, DetailedSeries, DetailedMovie, FrontendSeries, WatchHistory, Season } from '@cinefinn/types/database';
 import useAPIURL from '~/hooks/useAPIURL';
 
 export const useIndexStore = defineStore('index', {
@@ -73,6 +73,10 @@ export const useIndexStore = defineStore('index', {
             } else {
                 // alert('Error loading Detailed Series ' + status.value);
                 this.loading = false;
+            }
+            if (this.series.length == 0) {
+                const undetailedSeries = await this.detailedSeriesToFrontendSeries(data.value!);
+                this.series.push(undetailedSeries);
             }
             // console.log(`loadDetailedSeasonInfo for seriesID: ${seriesID} from network`);
 
@@ -207,6 +211,29 @@ export const useIndexStore = defineStore('index', {
                 timerProgressBar: true,
                 showConfirmButton: false,
             });
+        },
+        async detailedSeriesToFrontendSeries(detailedSeries: DetailedSeries) {
+            const detailedSeriesClone = JSON.parse(JSON.stringify(detailedSeries)) as DetailedSeries;
+            const undetailedSeries = {
+                UUID: detailedSeriesClone?.UUID || '',
+                tags: detailedSeriesClone?.tags || [],
+                title: detailedSeriesClone?.title || '',
+                infos: detailedSeriesClone?.infos || {},
+                refs: detailedSeriesClone?.refs || {},
+                seasons: detailedSeriesClone?.seasons.map((s) => {
+                    const newSeason = {
+                        UUID: s.UUID,
+                        serie_UUID: s.serie_UUID,
+                        season_IDX: s.season_IDX,
+                        episodes: s.episodes.length,
+                    } satisfies Season;
+                    return newSeason;
+                }) || [],
+                // movies: detailedSeriesClone?.movies.map((s: any) => s.episodes = s.episodes.length) || [],
+                // seasons: detailedSeriesClone?.seasons || [],
+                movies: detailedSeriesClone?.movies || [],
+            } satisfies FrontendSeries;
+            return undetailedSeries;
         },
     }
 });

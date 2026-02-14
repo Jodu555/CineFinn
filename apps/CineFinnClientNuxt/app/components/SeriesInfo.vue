@@ -33,7 +33,7 @@
 					:max-length="200"
 				></ElongatedText>
 
-				<div class="d-flex gap-3">
+				<div class="d-flex gap-3" v-if="authStore.loggedIn">
 					<!-- Existing Button -->
 					<LazyAddToPlaylistDialog
 						:item-u-u-i-d="series.UUID"

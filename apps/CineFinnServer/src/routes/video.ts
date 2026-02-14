@@ -50,7 +50,7 @@ const router = new Hono()
     .get('/:watchableEntityUUID', authMiddleware, async (c) => {
         const user = c.get('credentials').user;
         const watchableEntityUUID = c.req.param('watchableEntityUUID');
-        const debug = true;
+        const debug = false;
 
         try {
             // Find the watchable entity

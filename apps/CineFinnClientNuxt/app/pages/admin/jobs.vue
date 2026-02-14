@@ -236,6 +236,8 @@ async function deleteJob(jobUUID: string) {
 	padding: 0.75rem;
 	max-height: 200px;
 	overflow-y: auto;
+	overflow-x: auto;
+	max-width: 79rem;
 }
 
 .code-block pre {

@@ -266,8 +266,7 @@ const router = new Hono()
         return c.json(output);
 
     })
-    .get('/:S-UUID', authMiddleware, cachingMiddleware(fullIndexStorage, (c) => `fullIndex-${c.req.param('S-UUID')}`), async (c) => {
-        // .get('/:S-UUID', authMiddleware, async (c) => {
+    .get('/:S-UUID', cachingMiddleware(fullIndexStorage, (c) => `fullIndex-${c.req.param('S-UUID')}`), async (c) => {
 
         const rows = (await queryDatabase(`
         SELECT 
