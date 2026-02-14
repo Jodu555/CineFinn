@@ -63,7 +63,7 @@ export class Job {
         (await getIO().fetchSockets()).forEach(socket => {
             if (socket.data.auth.type === 'client') {
                 if (immediate) {
-                    console.log('Sending Socket Update ', socket.data.auth.user.username)
+                    // console.log('Sending Socket Update ', socket.data.auth.user.username)
                     socket.emit('jobUpdate', socketJob);
                     // getIO().emit('jobUpdate', socketJob);
                 } else {

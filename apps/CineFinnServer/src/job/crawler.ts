@@ -580,7 +580,6 @@ export async function crawl(job: Job) {
             const episode = await ensureEpisode(season.UUID, parsedData.season, parsedData.episode, serie.UUID);
             touchedEpisodes.add(episode.UUID);
             touchedSeasons.add(season.UUID);
-            touchedSeasonsSet.add(season.UUID);
             watchableUUID = episode.UUID;
         }
 
