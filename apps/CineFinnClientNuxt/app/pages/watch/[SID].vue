@@ -478,7 +478,6 @@ useSeoMeta({
 	ogDescription: computed(() => series.value?.infos.description || ''),
 	ogImage: computed(() => coverURL.value),
 	ogType: 'video.tv_show',
-	ogUrl: computed(() => window.location.href),
 	twitterCard: 'player',
 	twitterTitle: computed(() => series.value?.title || ''),
 	twitterDescription: computed(() => series.value?.infos.description || ''),
