@@ -172,6 +172,14 @@
 																<p class="text-muted small mb-0">
 																	<font-awesome-icon :icon="['fa', 'language']" class="me-1" />
 																	{{ episode.watchableEntitys.map((e) => e.lang).join(', ') }}
+																	<small class="text-danger-emphasis" v-if="Array.isArray(additionalList) && additionalList.length > 0">
+																		{{
+																			additionalList
+																				?.filter((x) => x.parsed.season === episode.season_IDX && x.parsed.episode === episode.episode_IDX)
+																				.map((x) => x.parsed.language)
+																				.join(', ')
+																		}}
+																	</small>
 																</p>
 															</div>
 														</div>
@@ -187,7 +195,11 @@
 										</div>
 										<div
 											v-if="Array.isArray(additionalList) && additionalList.length > 0"
-											v-for="additionals in additionalList.filter((x) => x.parsed.season === currentDetailedSeasonData?.season_IDX)"
+											v-for="additionals in additionalList.filter(
+												(x) =>
+													x.parsed.season === currentDetailedSeasonData?.season_IDX &&
+													!currentDetailedSeasonData?.episodes.some((e) => e.episode_IDX == x.parsed.episode),
+											)"
 											class="card cursor-disabled border-danger-subtle"
 										>
 											<!-- <pre>{{ additionals }}</pre> -->
