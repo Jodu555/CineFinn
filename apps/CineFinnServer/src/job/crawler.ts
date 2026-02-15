@@ -546,7 +546,7 @@ export async function crawl(job: Job) {
     async function processFile(subFile: SubFile, idx: number) {
         const file = subFile.path;
         // Light logging
-        if (idx % 500 === 0) job.log(`Handling File ${idx}/${files.length}`);
+        if (idx % 1000 === 0) job.log(`Handling File ${idx}/${files.length}`);
 
         const base = path.parse(file).base;
         const { error, data: parsedData } = tryCatch(() => filenameParser(file, base));
@@ -555,40 +555,44 @@ export async function crawl(job: Job) {
             return;
         }
 
-        // ensure series exists
-        const serie = await ensureSeries(parsedData.title, file);
-        touchedSeries.add(serie.UUID);
+        try {
+            // ensure series exists
+            const serie = await ensureSeries(parsedData.title, file);
+            touchedSeries.add(serie.UUID);
 
-        let watchableUUID: string;
+            let watchableUUID: string;
 
-        if (parsedData.movie === true) {
-            // movie branch
-            const existingMovie = await ensureMovie(serie.UUID, parsedData.movieTitle!);
-            touchedMovies.add(existingMovie.UUID);
-            watchableUUID = existingMovie.UUID;
-        } else {
-            // episodic branch
-            const season = await ensureSeason(serie.UUID, parsedData.season);
-            const episode = await ensureEpisode(season.UUID, parsedData.season, parsedData.episode, serie.UUID);
-            touchedEpisodes.add(episode.UUID);
-            touchedSeasons.add(season.UUID);
-            watchableUUID = episode.UUID;
-        }
+            if (parsedData.movie === true) {
+                // movie branch
+                const existingMovie = await ensureMovie(serie.UUID, parsedData.movieTitle!);
+                touchedMovies.add(existingMovie.UUID);
+                watchableUUID = existingMovie.UUID;
+            } else {
+                // episodic branch
+                const season = await ensureSeason(serie.UUID, parsedData.season);
+                const episode = await ensureEpisode(season.UUID, parsedData.season, parsedData.episode, serie.UUID);
+                touchedEpisodes.add(episode.UUID);
+                touchedSeasons.add(season.UUID);
+                watchableUUID = episode.UUID;
+            }
 
-        // create / ensure watchable entity (file lang)
-        const watchableEntity = await ensureWatchable(watchableUUID, serie.UUID, parsedData.language, subFile);
-        if (watchableEntity.subID !== subFile.subID) {
-            job.log('SubID mismatch', watchableEntity.subID, subFile.subID, file, { file, lang: parsedData.language, serieUUID: serie.UUID, watchableUUID });
-            await watchableEntitysTable.update({ UUID: watchableEntity.UUID }, { subID: subFile.subID, filePath: subFile.path });
-            watchableEntity.subID = subFile.subID;
-            watchableEntity.filePath = subFile.path;
+            // create / ensure watchable entity (file lang)
+            const watchableEntity = await ensureWatchable(watchableUUID, serie.UUID, parsedData.language, subFile);
+            if (watchableEntity.subID !== subFile.subID) {
+                job.log('SubID mismatch', watchableEntity.subID, subFile.subID, file, { file, lang: parsedData.language, serieUUID: serie.UUID, watchableUUID });
+                await watchableEntitysTable.update({ UUID: watchableEntity.UUID }, { subID: subFile.subID, filePath: subFile.path });
+                watchableEntity.subID = subFile.subID;
+                watchableEntity.filePath = subFile.path;
+            }
+            if (watchableEntity.filePath !== subFile.path) {
+                job.log('FilePath mismatch', watchableEntity.filePath, subFile.path, { file, lang: parsedData.language, serieUUID: serie.UUID, watchableUUID });
+                await watchableEntitysTable.update({ UUID: watchableEntity.UUID }, { filePath: subFile.path });
+                watchableEntity.filePath = subFile.path;
+            }
+            touchedWatchableEntitys.add(watchableEntity.UUID);
+        } catch (error) {
+            await job.log(`Error processing file ${file}`, error);
         }
-        if (watchableEntity.filePath !== subFile.path) {
-            job.log('FilePath mismatch', watchableEntity.filePath, subFile.path, { file, lang: parsedData.language, serieUUID: serie.UUID, watchableUUID });
-            await watchableEntitysTable.update({ UUID: watchableEntity.UUID }, { filePath: subFile.path });
-            watchableEntity.filePath = subFile.path;
-        }
-        touchedWatchableEntitys.add(watchableEntity.UUID);
     }
 
     // Choose concurrency based on environment; default to 20 concurrent workers
@@ -750,6 +754,7 @@ export async function crawl(job: Job) {
                 job.log('Season not found', UUID);
                 continue;
             }
+            await job.log(`Deleting stale season ${UUID} from Series ${season.serie_UUID}`);
             await seasonsTable.delete({ UUID });
         }
     }
