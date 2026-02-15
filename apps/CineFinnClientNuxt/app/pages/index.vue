@@ -8,8 +8,12 @@
 		</div>
 		<div class="mb-4 d-flex justify-content-between">
 			<div class="d-flex gap-4">
-				<span v-for="cat in categories" @click="selectedCategory = cat" :key="cat"
-					:class="selectedCategory == cat ? 'btn btn-outline-primary' : 'btn btn-outline-secondary'">
+				<span
+					v-for="cat in categories"
+					@click="selectedCategory = cat"
+					:key="cat"
+					:class="selectedCategory == cat ? 'btn btn-outline-primary' : 'btn btn-outline-secondary'"
+				>
 					{{ cat }}
 				</span>
 			</div>
@@ -18,19 +22,20 @@
 			</div>
 		</div>
 		<div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 row-cols-xxl-5 g-4">
-			<EntityCard v-for="(entity, idx) in selectedSeries" :series-i-d="entity.UUID" :key="entity.UUID"
-				@add-to-playlist="onAddToPlaylist" />
+			<EntityCard v-for="(entity, idx) in selectedSeries" :series-i-d="entity.UUID" :key="entity.UUID" @add-to-playlist="onAddToPlaylist" />
 			<!-- <EntityCard v-for="entity in selectedSeries"
                 :highlighted="scrolledToLastSeries && entity.ID == showScrollToLastSeries" class="border-success"
                 :entity="entity" :key="entity.ID" /> -->
 		</div>
-		<AddToPlaylistDialog ref="addToPlaylistDialog" :item-u-u-i-d="selectedSeriesToAddToPlaylist || ''"
-			:content-title="selectedSeries.find(x => x.UUID === selectedSeriesToAddToPlaylist)?.title || ''">
+		<AddToPlaylistDialog
+			ref="addToPlaylistDialog"
+			:item-u-u-i-d="selectedSeriesToAddToPlaylist || ''"
+			:content-title="selectedSeries.find((x) => x.UUID === selectedSeriesToAddToPlaylist)?.title || ''"
+		>
 			<template #trigger>
 				<div></div>
 			</template>
 		</AddToPlaylistDialog>
-
 	</div>
 </template>
 
@@ -52,11 +57,10 @@ const selectedSeriesToAddToPlaylist = ref<string | null>(null);
 const onAddToPlaylist = (seriesUUID: string) => {
 	selectedSeriesToAddToPlaylist.value = seriesUUID;
 	nextTick(() => {
-		if (!addToPlaylistDialog.value) return
+		if (!addToPlaylistDialog.value) return;
 		addToPlaylistDialog.value.openModal();
-	})
+	});
 };
-
 
 const selectedCategory = ref('Alle');
 
