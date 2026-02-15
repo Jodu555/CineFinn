@@ -135,6 +135,14 @@
 									<tr v-if="openedJobs.includes(job.UUID)" class="table-active">
 										<td colspan="6" class="p-3">
 											<div class="row">
+												<div class="col-md-6 mb-3">
+													<h6 class="text-muted mb-2"><font-awesome-icon :icon="['far', 'clock']" class="me-1" />Started At</h6>
+													<pre class="mb-0">{{ new Date(+job.created_at).toLocaleString() }}</pre>
+												</div>
+												<div class="col-md-6 mb-3">
+													<h6 class="text-muted mb-2"><font-awesome-icon :icon="['far', 'clock']" class="me-1" />Running Time</h6>
+													<pre class="mb-0">{{ formatDuration(job.finished_at - job.created_at) }}</pre>
+												</div>
 												<!-- Data Input -->
 												<div class="col-md-6 mb-3">
 													<h6 class="text-muted mb-2"><font-awesome-icon :icon="['fas', 'database']" class="me-1" /> Data Input</h6>
