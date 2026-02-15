@@ -13,6 +13,10 @@
 		"./bytes": {
 			"types": "./dist/bytes.d.ts",
 			"import": "./dist/bytes.js"
+		},
+		"./tryCatch": {
+			"types": "./dist/tryCatch.d.ts",
+			"import": "./dist/tryCatch.js"
 		}
 	},
 	"scripts": {

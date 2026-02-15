@@ -10,7 +10,7 @@ import { Job } from './Job.js';
 import { getConfig } from '../config.js';
 import { generateSeriesID, generateMovieID, generateSeasonID, generateEpisodeID, generateEntityID } from '../utils/IdGenerators.js';
 import type { Episode, Langs, Movie, MovingItem, Season, Series, timestamped, WatchableEntity } from '@cinefinn/types/database';
-import { indexStorage } from '../routes/index.js';
+import { fullIndexStorage, indexStorage } from '../routes/index.js';
 import { app } from '../index.js';
 import { getIO } from '../utils.js';
 import { sendSeriesReloadToAll } from '../sockets/client.socket.js';
@@ -229,6 +229,7 @@ export async function crawl(job: Job) {
     const subSystemSockets = (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'subsystem')
 
     const loadedSubsystems = new Set<string>();
+    loadedSubsystems.add('main');
 
     const subSystemFilesPromise = subSystemSockets.map(s => {
         return new Promise<SubFile[]>((resolve, reject) => {
