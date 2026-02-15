@@ -715,6 +715,7 @@ export async function crawl(job: Job) {
             job.log('WatchableEntity not found', UUID);
             continue;
         }
+        await job.log(`Deleting stale watchable entity ${UUID} from file ${watchableEntity.filePath} with subID ${watchableEntity.subID} and series ${watchableEntity.serie_UUID}`);
         await watchableEntitysTable.delete({ UUID });
     }
 
@@ -730,6 +731,7 @@ export async function crawl(job: Job) {
                 job.log('Episode not found', UUID);
                 continue;
             }
+            await job.log(`Deleting stale episode ${UUID} from Season ${episode.season_UUID}`);
             await episodesTable.delete({ UUID });
         }
     }
@@ -742,6 +744,7 @@ export async function crawl(job: Job) {
                 job.log('Movie not found', UUID);
                 continue;
             }
+            await job.log(`Deleting stale movie ${UUID} from Serie ${movie.serie_UUID}`);
             await moviesTable.delete({ UUID });
         }
     }
