@@ -1,6 +1,6 @@
 import type { JobType, Job as IJob, timestamped } from "@cinefinn/types/database";
 import { jobsTable } from "../database.js";
-import { getIO } from "../utils.js";
+import { getIO, msToReadable } from "../utils.js";
 
 export class Job {
     UUID: string;
@@ -155,7 +155,7 @@ export class Job {
         }
         const end = Date.now();
         this.timers.delete(label);
-        await this.log(`[${label}] Took ${end - start}ms`);
+        await this.log(`[${label}] Took ${msToReadable(end - start)}`);
     }
 
     async setData(data: any) {

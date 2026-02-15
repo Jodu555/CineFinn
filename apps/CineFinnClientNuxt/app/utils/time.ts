@@ -16,7 +16,7 @@ export function msToReadable(ms: number) {
   if (hours > 0) result += `${hours}h `;
   if (minutes > 0) result += `${minutes}m `;
   if (seconds > 0) result += `${seconds}s`;
-  if (milliseconds > 0) result += `.${milliseconds}ms`;
+  if (milliseconds > 0) result += `${result.length > 0 ? '.' : ''}${milliseconds}ms`;
   return result.trim();
 }
 

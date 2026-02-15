@@ -145,3 +145,24 @@ export const cachingMiddleware = <T extends StorageValue>(storage: Storage<T>, k
 };
 
 export const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+export function msToReadable(ms: number) {
+
+    if (ms == 0) {
+        return '0ms'
+    }
+
+    const milliseconds = Math.floor((ms % 1000) / 100);
+    const seconds = Math.floor((ms / 1000) % 60);
+    const minutes = Math.floor((ms / (1000 * 60)) % 60);
+    const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
+    const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+
+    let result = '';
+    if (days > 0) result += `${days}d `;
+    if (hours > 0) result += `${hours}h `;
+    if (minutes > 0) result += `${minutes}m `;
+    if (seconds > 0) result += `${seconds}s`;
+    if (milliseconds > 0) result += `${result.length > 0 ? '.' : ''}${milliseconds}ms`;
+    return result.trim();
+}
