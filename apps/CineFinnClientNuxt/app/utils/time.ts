@@ -1,5 +1,10 @@
 
 export function msToReadable(ms: number) {
+
+  if (ms == 0) {
+    return '0ms'
+  }
+
   const milliseconds = Math.floor((ms % 1000) / 100);
   const seconds = Math.floor((ms / 1000) % 60);
   const minutes = Math.floor((ms / (1000 * 60)) % 60);
@@ -40,3 +45,19 @@ export function timeAgo(timestamp: Date, locale = 'en') {
   }
   return value;
 }
+
+// export const formatDuration = (time: number): string => {
+//   const seconds = Math.floor(time % 60);
+//   const minutes = Math.floor(time / 60) % 60;
+//   const hours = Math.floor(time / 3600) % 24;
+//   const days = Math.floor(time / 86400);
+//   const formatter = new Intl.NumberFormat(undefined, { minimumIntegerDigits: 2 });
+
+//   if (days > 0) {
+//     return `${days}d ${hours}:${formatter.format(minutes)}:${formatter.format(seconds)}`;
+//   }
+//   if (hours === 0) {
+//     return `${minutes}:${formatter.format(seconds)}`;
+//   }
+//   return `${hours}:${formatter.format(minutes)}:${formatter.format(seconds)}`;
+// };

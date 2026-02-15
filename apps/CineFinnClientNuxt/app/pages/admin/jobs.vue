@@ -137,11 +137,11 @@
 											<div class="row">
 												<div class="col-md-6 mb-3">
 													<h6 class="text-muted mb-2"><font-awesome-icon :icon="['far', 'clock']" class="me-1" />Started At</h6>
-													<pre class="mb-0">{{ new Date(+job.created_at).toLocaleString() }}</pre>
+													<pre class="mb-0">{{ formatDate(job.created_at) }}</pre>
 												</div>
 												<div class="col-md-6 mb-3">
 													<h6 class="text-muted mb-2"><font-awesome-icon :icon="['far', 'clock']" class="me-1" />Running Time</h6>
-													<pre class="mb-0">{{ formatDuration(job.finished_at - job.created_at) }}</pre>
+													<pre class="mb-0">{{ msToReadable(job.finished_at - job.created_at) }}</pre>
 												</div>
 												<!-- Data Input -->
 												<div class="col-md-6 mb-3">
@@ -216,7 +216,7 @@ function toggleDetails(uuid: string) {
 
 function formatDate(timestamp: number) {
 	if (!timestamp) return 'N/A';
-	return new Date(timestamp).toLocaleString();
+	return new Date(+timestamp).toLocaleString();
 }
 
 const { $swal } = useNuxtApp();

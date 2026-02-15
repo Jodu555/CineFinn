@@ -65,7 +65,7 @@
 			</div>
 			<div class="col-auto text-center">
 				<h2 class="text-center">Total Runtime</h2>
-				<h4 class="text-center">{{ formatDuration(overview.totalRuntime) }}</h4>
+				<h4 class="text-center">{{ msToReadable(overview.totalRuntime * 1000) }}</h4>
 			</div>
 			<div class="col-auto text-center">
 				<h2 class="text-center">SubSystems</h2>
