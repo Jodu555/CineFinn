@@ -14,8 +14,8 @@ import { getConfig } from "../config.js";
 import type { CheckForUpdatesOutput } from "@cinefinn/types/socket";
 import { filenameParser, type ParsedInformation } from "../parser.js";
 import { getScraperSocket } from "../sockets/scraper.socket.js";
-import { tryCatch } from "../tryCatch.js";
 import { cacheRegistry } from "./admin/cache.js";
+import { tryCatch } from "@cinefinn/utilities/tryCatch";
 
 
 

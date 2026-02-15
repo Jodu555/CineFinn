@@ -4,7 +4,6 @@ import { listFiles } from '../fileutils.js';
 import { createHash, randomUUID } from 'node:crypto';
 import { filenameParser } from '../parser.js';
 import { database, episodesTable, jobsTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable } from '../database.js';
-import { tryCatch } from '../tryCatch.js';
 import { CacheContext } from '../LRUCache.js';
 import { Job } from './Job.js';
 import { getConfig } from '../config.js';
@@ -15,6 +14,7 @@ import { app } from '../index.js';
 import { getIO } from '../utils.js';
 import { sendSeriesReloadToAll } from '../sockets/client.socket.js';
 import { getMovingItems } from '../utils/movingItems.js';
+import { tryCatch } from '@cinefinn/utilities/tryCatch';
 
 
 // export async function crawl(job: Job) {

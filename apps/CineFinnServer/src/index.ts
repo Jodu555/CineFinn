@@ -15,7 +15,6 @@ import { cors } from 'hono/cors';
 import { ownLogger } from './middleware/ownLogger.js';
 import { managmentRouter } from './routes/managment.js';
 import type { AnythingToServerEvents, InterServerEvents, ServerToAnythingEvents, SocketData } from '@cinefinn/types/socket';
-import { tryCatch } from './tryCatch.js';
 import { type Account, type timestamped } from '@cinefinn/types/database';
 import { getIO, setIO, setIORedis, getEmailManager, wait } from './utils.js';
 import { watchRouter } from './routes/watch.js';
@@ -36,6 +35,7 @@ import packageJSON from '../package.json' with { type: "json" };
 
 import { metricsRouter, registerMetrics } from './middleware/ownPrometheus.js';
 import { generateEntityID } from './utils/IdGenerators.js';
+import { tryCatch } from '@cinefinn/utilities/tryCatch';
 
 
 

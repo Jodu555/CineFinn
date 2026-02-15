@@ -1,13 +1,13 @@
 import type { Account, timestamped } from "@cinefinn/types/database";
 import type { AuthHandshake, SocketAuthData, SocketAuthType } from "@cinefinn/types/socket";
 import { type definedSocket } from "../index.js";
-import { tryCatch } from "../tryCatch.js";
 import { getIO } from "../utils.js";
 import clientSocket from "./client.socket.js";
 import scraperSocket from "./scraper.socket.js";
 import subsystemSocket from "./subsystem.socket.js";
 import rmvcEmitterSocket from "./rmvcEmitter.socket.js";
 import { rebroadcastOverview } from '../routes/admin/admin.js';
+import { tryCatch } from "@cinefinn/utilities/tryCatch";
 
 export async function setupSocketIO() {
 

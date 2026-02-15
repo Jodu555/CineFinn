@@ -1,5 +1,4 @@
 import type { AuthHandshake, AuthHandshakeClient, SocketAuthDataClient, SocketAuthDataRmvcEmitter } from "@cinefinn/types/socket";
-import { tryCatch } from "../tryCatch.js";
 import { getUser } from "../middleware/auth.js";
 import type { Account, timestamped } from "@cinefinn/types/database";
 import type { SocketConsumerMeta } from "./index.js";

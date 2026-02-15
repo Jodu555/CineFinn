@@ -5,9 +5,9 @@ import { watchableEntitysTable } from "../database.js";
 import { stream, streamSSE } from 'hono/streaming';
 import { getIO } from '../utils.js';
 import type { WatchableEntity } from '@cinefinn/types/database';
-import { tryCatch } from '../tryCatch.js';
 import type { definedSocket } from '../index.js';
 import { getSubSocketByID } from '../sockets/subsystem.socket.js';
+import { tryCatch } from '@cinefinn/utilities/tryCatch';
 
 
 

@@ -1,5 +1,4 @@
 import type { AuthHandshake, AuthHandshakeClient, SocketAuthDataClient } from "@cinefinn/types/socket";
-import { tryCatch } from "../tryCatch.js";
 import { getUser } from "../middleware/auth.js";
 import type { Account, timestamped } from "@cinefinn/types/database";
 import type { SocketConsumerMeta } from "./index.js";
@@ -10,6 +9,7 @@ import { compareSettings } from "../utils/settings.js";
 import { getFrontEndSeries } from "../routes/index.js";
 import { randomUUID } from "crypto";
 import rmvcEmitterSocket from "./rmvcEmitter.socket.js";
+import { tryCatch } from "@cinefinn/utilities/tryCatch";
 
 type LocalAuthData = SocketAuthDataClient<Account | Account & timestamped>;
 

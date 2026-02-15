@@ -4,7 +4,6 @@ import { jobsTable } from '../database.js';
 import { crawl } from '../job/crawler.js';
 import { Role, type Job as IJob, type JobType, type timestamped } from '@cinefinn/types/database';
 import { generatePreviewImages } from '../job/images.js';
-import { tryCatch } from '../tryCatch.js';
 import { Job } from '../job/Job.js';
 import { generateJobID } from '../utils/IdGenerators.js';
 
