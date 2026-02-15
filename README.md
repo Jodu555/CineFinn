@@ -40,13 +40,29 @@ When all the boxes are checked, I will deploy the MVP to a testing environment a
 > Immediately after the MVP I want to implement the following features:
 
 - [ ] Preview Image Generation
-- [ ] Scraper
+- [x] Scraper
 - [x] SubSystem
 - [x] Admin System
   - [x] Make Most of the Config Values like register and register token configurable
   - [x] Have a way to view emails and the status of them
 - [x] Playlist System
 - [ ] Sync System
+
+### Possible Duplicate Code to move to a new package
+
+- [ ] The Hono Mp4 file streaming used in the Server and should be in the SubSystem
+- [ ] The File Crawler used in the Server and SubSystem
+- [ ] tryCatch should be in Server, Client, SubSystem, Scraper and PreviewImageGenerator
+- [ ] Time stuff (msToReadable, timeAgo) should be in Server, Client
+- [ ] Bytes stuff (formatBytes, bytesToUnit) should be in Server, Client and SubSystem
+
+This would suggest a seperate new package for the hono mp4 file streaming and the file crawler.
+And a more general package for the tryCatch, time stuff.
+
+> But Naming things is hard. What are good names for both new packages?
+> It could be something like:
+
+- FileU
 
 ## Word Explanation:
 

@@ -182,6 +182,7 @@
 
 <script lang="ts" setup>
 import type { Job } from '@cinefinn/types/database';
+import { msToReadable } from '@cinefinn/utilities/time';
 import { computed, ref } from 'vue';
 
 definePageMeta({

@@ -1,0 +1,30 @@
+{
+	"name": "@cinefinn/utilities",
+	"version": "1.0.0",
+	"description": "",
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"exports": {
+		"./time": {
+			"types": "./dist/time.d.ts",
+			"import": "./dist/time.js"
+		},
+		"./bytes": {
+			"types": "./dist/bytes.d.ts",
+			"import": "./dist/bytes.js"
+		}
+	},
+	"scripts": {
+		"dev": "tsc --watch",
+		"build": "tsc",
+		"typecheck": "tsc --noEmit"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"packageManager": "pnpm@10.18.1",
+	"devDependencies": {
+		"@types/node": "^24.10.1"
+	}
+}

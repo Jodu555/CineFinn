@@ -34,6 +34,7 @@
 
 <script lang="ts" setup>
 import type { JobType } from '@cinefinn/types/database';
+import { msToReadable } from '@cinefinn/utilities/time';
 import useAPIURL from '~/hooks/useAPIURL';
 
 const managmentStore = useManagmentStore();

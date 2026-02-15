@@ -14,6 +14,7 @@
 	"dependencies": {
 		"@artmizu/nuxt-prometheus": "^2.7.0",
 		"@cinefinn/types": "workspace:*",
+		"@cinefinn/utilities": "workspace:*",
 		"@formkit/auto-animate": "^0.9.0",
 		"@fortawesome/fontawesome-svg-core": "^7.1.0",
 		"@fortawesome/free-regular-svg-icons": "^7.1.0",

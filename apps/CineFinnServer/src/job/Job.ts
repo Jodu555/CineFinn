@@ -1,6 +1,7 @@
 import type { JobType, Job as IJob, timestamped } from "@cinefinn/types/database";
+import { msToReadable } from "@cinefinn/utilities/time";
 import { jobsTable } from "../database.js";
-import { getIO, msToReadable } from "../utils.js";
+import { getIO } from "../utils.js";
 
 export class Job {
     UUID: string;

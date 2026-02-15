@@ -403,6 +403,7 @@
 
 <script setup lang="ts">
 import { Role, type DetailedEpisode, type DetailedSeason, type Langs } from '@cinefinn/types/database';
+import { msToReadable } from '@cinefinn/utilities/time';
 import { ref, computed, watch } from 'vue';
 import AddToPlaylistDialog from '~/components/AddToPlaylistDialog.vue';
 import ExtendedVideo from '~/components/ExtendedVideo.vue';

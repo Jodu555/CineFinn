@@ -16,6 +16,9 @@ importers:
       '@cinefinn/types':
         specifier: workspace:*
         version: link:../../packages/Types
+      '@cinefinn/utilities':
+        specifier: workspace:*
+        version: link:../../packages/Utilities
       '@formkit/auto-animate':
         specifier: ^0.9.0
         version: 0.9.0
@@ -129,6 +132,9 @@ importers:
       '@cinefinn/types':
         specifier: workspace:*
         version: link:../../packages/Types
+      '@cinefinn/utilities':
+        specifier: workspace:*
+        version: link:../../packages/Utilities
       '@hono/node-server':
         specifier: ^1.19.5
         version: 1.19.5(hono@4.10.3)
@@ -205,6 +211,9 @@ importers:
       '@cinefinn/types':
         specifier: workspace:*
         version: link:../../packages/Types
+      '@cinefinn/utilities':
+        specifier: workspace:*
+        version: link:../../packages/Utilities
       socket.io-client:
         specifier: ^4.8.1
         version: 4.8.1
@@ -231,6 +240,12 @@ importers:
       '@types/node':
         specifier: ^20.19.22
         version: 20.19.24
+
+  packages/Utilities:
+    devDependencies:
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.10.1
 
 packages:
 
