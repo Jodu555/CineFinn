@@ -47,7 +47,7 @@ export const app = new Hono({
     .use(ownLogger(console.log, ['/socket.io', '/video']))
     .use('*', registerMetrics)
     .route('', metricsRouter)
-    .use('/images/*', authMiddleware, serveStatic({
+    .use('/images/*', serveStatic({
         root: getConfig().imagePath,
         rewriteRequestPath: (path, c) => {
             return path.replace(/^\/images/, '');
