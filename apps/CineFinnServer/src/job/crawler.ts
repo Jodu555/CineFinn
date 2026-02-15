@@ -479,17 +479,6 @@ export async function crawl(job: Job) {
             // try DB getOne
             let existing = await watchableEntitysTable.getOne({ watchable_UUID: watchableUUID, lang: lang as Langs, unique: true });
             if (existing) {
-                if (existing.subID !== file.subID) {
-                    job.log('SubID mismatch', existing.subID, file.subID, file, { file, lang, serieUUID, watchableUUID });
-                    await watchableEntitysTable.update({ UUID: existing.UUID }, { subID: file.subID, filePath: file.path });
-                    existing.subID = file.subID;
-                    existing.filePath = file.path;
-                }
-                if (existing.filePath !== file.path) {
-                    job.log('FilePath mismatch', existing.filePath, file.path, { file, lang, serieUUID, watchableUUID });
-                    await watchableEntitysTable.update({ UUID: existing.UUID }, { filePath: file.path });
-                    existing.filePath = file.path;
-                }
                 watchableByKey.set(key, existing);
                 return existing;
             }
@@ -587,6 +576,17 @@ export async function crawl(job: Job) {
 
         // create / ensure watchable entity (file lang)
         const watchableEntity = await ensureWatchable(watchableUUID, serie.UUID, parsedData.language, subFile);
+        if (watchableEntity.subID !== subFile.subID) {
+            job.log('SubID mismatch', watchableEntity.subID, subFile.subID, file, { file, lang: parsedData.language, serieUUID: serie.UUID, watchableUUID });
+            await watchableEntitysTable.update({ UUID: watchableEntity.UUID }, { subID: subFile.subID, filePath: subFile.path });
+            watchableEntity.subID = subFile.subID;
+            watchableEntity.filePath = subFile.path;
+        }
+        if (watchableEntity.filePath !== subFile.path) {
+            job.log('FilePath mismatch', watchableEntity.filePath, subFile.path, { file, lang: parsedData.language, serieUUID: serie.UUID, watchableUUID });
+            await watchableEntitysTable.update({ UUID: watchableEntity.UUID }, { filePath: subFile.path });
+            watchableEntity.filePath = subFile.path;
+        }
         touchedWatchableEntitys.add(watchableEntity.UUID);
     }
 
@@ -771,7 +771,7 @@ export async function crawl(job: Job) {
     job.setResult({
         probablyMissingSeries: probablyMissingSeries,
         touchedSeasons: Array.from(touchedSeasonsSet),
-        staleWatchableEntitys: Array.from(staleWatchableEntitys),
+        actualStaleWatchableEntitys: Array.from(actualStaleWatchableEntitys),
         staleEpisodes: Array.from(staleEpisodes),
         staleMovies: Array.from(staleMovies),
         staleSeasons: Array.from(staleSeasons),

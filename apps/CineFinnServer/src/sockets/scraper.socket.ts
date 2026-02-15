@@ -36,7 +36,7 @@ async function connectionFunction(socket: definedSocket) {
 
 export type definedScraperSocket = Socket<ScraperToServerEvents, ServerToScraperEvents, InterServerEvents, { auth: SocketAuthDataScraper<Account | (Account & timestamped)> }>;
 export async function getScraperSocket() {
-    if (!isScraperSocketConnected) {
+    if (isScraperSocketConnected == false) {
         return null;
     }
     const sockets = await getIO().fetchSockets();
