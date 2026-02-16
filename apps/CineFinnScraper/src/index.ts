@@ -289,6 +289,7 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
         ...output.aniworld.map(x => ({ _categorie: 'Aniworld', ...x })),
         ...output.sto.map(x => ({ _categorie: 'STO', ...x }))
     ];
+    socket!.emit('job:setResult', jobUUID, condensedArray);
     if (condensedArray.length == 0) return;
 
     log(condensedArray);

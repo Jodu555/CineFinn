@@ -103,6 +103,7 @@ export interface ScraperToServerEvents {
     'job:recrawlArchive': () => void;
     'job:generatePreviewImages': () => void;
     'job:log': (jobUUID: string, ...logArgs: any[]) => void;
+    'job:setResult': (jobUUID: string, result: any) => void;
 }
 
 export interface SubSystemToServerEvents {

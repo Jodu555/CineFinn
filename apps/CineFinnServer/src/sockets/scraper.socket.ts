@@ -38,6 +38,15 @@ async function connectionFunction(socket: definedSocket) {
         job.log(...logArgs);
     });
 
+    socket.on('job:setResult', async (jobUUID, result) => {
+        let job = jobStore.get(jobUUID);
+        if (job == undefined) {
+            job = await Job.fromDBUUID(jobUUID);
+            return;
+        }
+        job.setResult(result);
+    });
+
     socket.on('disconnect', () => {
         console.log('scraper disconnected');
         isScraperSocketConnected = false;
