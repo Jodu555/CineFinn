@@ -84,7 +84,7 @@ export interface ClientToServerEvents {
 }
 
 export interface ServerToScraperEvents {
-    'job:checkForUpdates': (index: [database.DetailedSeries], callback: (chanedSeries: database.DetailedSeries[]) => void) => void;
+    'job:checkForUpdates': (arg0: { jobUUID: string, smart: boolean, index: database.DetailedSeries[] }, callback: (arg0: { result: boolean, changedSeries: database.DetailedSeries[] }) => void) => void;
     'scrape:aniworld': (url: string, callback: (informations: scrapers.AniWorldSeriesInformations | void) => void) => void;
     'scrape:sto': (url: string, callback: (informations: scrapers.AniWorldSeriesInformations | void) => void) => void;
     'checkSerieForUpdates': (uuid: string, callback: (output: CheckForUpdatesOutput) => void) => void;
@@ -102,6 +102,7 @@ export interface ScraperToServerEvents {
     // withAck: (d: string, callback: (e: number) => void) => void;
     'job:recrawlArchive': () => void;
     'job:generatePreviewImages': () => void;
+    'job:log': (jobUUID: string, ...logArgs: any[]) => void;
 }
 
 export interface SubSystemToServerEvents {

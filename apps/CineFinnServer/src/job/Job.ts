@@ -2,8 +2,13 @@ import type { JobType, Job as IJob, timestamped } from "@cinefinn/types/database
 import { msToReadable } from "@cinefinn/utilities/time";
 import { jobsTable } from "../database.js";
 import { getIO } from "../utils.js";
+import { EventEmitter } from "events";
 
-export class Job {
+type EventMap = {
+    finished: [];
+    failed: [];
+}
+export class Job extends EventEmitter<EventMap> {
     UUID: string;
     type: JobType;
     data: any;
@@ -19,6 +24,7 @@ export class Job {
     lastLogLineLength = 0;
     lastSave = 0;
     constructor(UUID: string, type: JobType, data: any, logs: string[], result: any, failed_at: number, finished_at: number, created_at: number) {
+        super();
         this.UUID = UUID;
         this.type = type;
         this.data = data;
@@ -170,13 +176,24 @@ export class Job {
     }
 
     async success() {
-        this.failed_at = 0;
-        this.finished_at = Date.now();
-        await this.save(true);
+        try {
+            this.failed_at = 0;
+            this.finished_at = Date.now();
+            await this.save(true);
+        } catch (error) {
+
+        } finally {
+            this.emit('finished')
+        }
     }
 
     async fail() {
-        this.failed_at = Date.now();
-        await this.save(true);
+        try {
+            this.failed_at = Date.now();
+            await this.save(true);
+        } catch (error) {
+        } finally {
+            this.emit('failed')
+        }
     }
 }

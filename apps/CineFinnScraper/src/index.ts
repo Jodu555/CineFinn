@@ -10,6 +10,9 @@ import { cors } from 'hono/cors';
 import { serve } from '@hono/node-server';
 import { trimTrailingSlash } from 'hono/trailing-slash';
 import { Server } from 'socket.io';
+import { getAniworldCalendarFromFile, storeAniworldCalendar } from './calendars/aniworldCalendar.js';
+import { getStoCalendarFromFile, storeStoCalendar } from './calendars/stoCalendar.js';
+import { msToReadable } from '@cinefinn/utilities/time';
 
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -19,7 +22,15 @@ const app = new Hono({
     strict: false,
 })
     .use(cors())
-    .use(trimTrailingSlash());
+    .use(trimTrailingSlash())
+    .get('/calendars/store/sto', async (c) => {
+        const calendar = await storeStoCalendar();
+        return c.json(calendar);
+    })
+    .get('/calendars/store/aniworld', async (c) => {
+        const calendar = await storeAniworldCalendar();
+        return c.json(calendar);
+    })
 
 export let io: Server;
 
@@ -114,9 +125,20 @@ socket.on('disconnect', () => {
     console.log('Disconnected from Core');
 });
 
-socket.on('job:checkForUpdates', (cb) => {
+socket.on('job:checkForUpdates', async ({ jobUUID, smart, index }, cb) => {
     console.log('job:checkForUpdates');
-    // cb(0);
+    try {
+        await checkForUpdates(jobUUID, index, smart);
+        cb({
+            result: true,
+            changedSeries: [],
+        });
+    } catch (error) {
+        cb({
+            result: false,
+            changedSeries: [],
+        });
+    }
 });
 
 socket.on('checkSerieForUpdates', async (uuid, cb) => {
@@ -153,15 +175,31 @@ socket.on('scrape:sto', async (url, cb) => {
     cb(informations);
 });
 
-async function checkForUpdates(index: DetailedSeries[]) {
-    // const response = await axios.get<DetailedSeries[]>('http://localhost:3000/index/all?auth-token=SECR-DEV', {
+async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart = false) {
+    const timingMap = new Map<string, number>();
+    const log = (...args: any[]) => {
+        socket!.emit('job:log', jobUUID, ...args);
+        console.log(`[${jobUUID}]`, ...args);
+    };
+    const time = (label: string) => {
+        timingMap.set(label, Date.now());
+    };
+    const timeEnd = (label: string) => {
+        const time = timingMap.get(label);
+        if (time == undefined) return;
+        timingMap.delete(label);
+        log(`[${label}] Took ${msToReadable(Date.now() - time)}`);
+    };
+    log('Scraper Socket recieved Call')
 
+    time('Fetching Index');
     const response = await axios.get<DetailedSeries[]>(`${config.CORE.URL}/index/all`, {
         headers: {
             'auth-token': config.CORE.REST_AUTH_TOKEN,
         },
         timeout: 1000 * 60,
     });
+    timeEnd('Fetching Index');
 
     if (response.status != 200) {
         console.log('Error fetching index');
@@ -169,36 +207,80 @@ async function checkForUpdates(index: DetailedSeries[]) {
     }
     index = response.data;
 
-    index.splice(10, index.length);
-
     //This list should say, that these animes should the new episodes no be included unless they are german dubbed
     const ignoranceList: IgnoranceItem[] = [];
 
     const USE_IGNORANCE_LIST = true;
+    log('Using Ignorance List', USE_IGNORANCE_LIST);
     if (USE_IGNORANCE_LIST === true) {
+        time('Fetching Ignorance List');
         const ignoreResponse = await axios.get<IgnoranceItem[]>(`${config.CORE.URL}/admin/ignoranceItems`, {
             headers: {
                 'auth-token': config.CORE.REST_AUTH_TOKEN,
             }
         });
+        timeEnd('Fetching Ignorance List');
         ignoranceList.push(...ignoreResponse.data);
     }
 
+    log('Using Smart Mode', smart);
+    if (smart) {
+        //Get calendar API data and ignore rest
+        // const allIDS = res.data.map(x => x.ID);
+        // const calendarIDResponse = await getRelevantReleasesUsingCalendar();
+        // const useLessIds = allIDS.filter(x => !calendarIDResponse.includes(x));
+        // console.log(useLessIds.length, 'animes/series to ignore because they are not in the relevant calendar');
+        // ignoranceList.push(...useLessIds.map(x => ({ ID: x })));
+        const thirtyDaysAgo = Date.now() - 1000 * 60 * 60 * 24 * 30;
+        time('Getting Calendars')
+        const aniworldCalendar = await getAniworldCalendarFromFile();
+        const stoCalendar = await getStoCalendarFromFile();
+        timeEnd('Getting Calendars')
 
-    // if (smart) {
-    // 	//Get calendar API data and ignore rest
-    // 	const allIDS = res.data.map(x => x.ID);
-    // 	const calendarIDResponse = await getRelevantReleasesUsingCalendar();
-    // 	const useLessIds = allIDS.filter(x => !calendarIDResponse.includes(x));
-    // 	console.log(useLessIds.length, 'animes/series to ignore because they are not in the relevant calendar');
-    // 	ignoranceList.push(...useLessIds.map(x => ({ ID: x })));
-    // }
+        const relevantSeriesUUIDs = new Set<string>();
 
-    console.time('Compare');
+        time('Filtering Relevant Series')
+        Object.entries(aniworldCalendar).forEach(([crawlTimestamp, calendarEntry]) => {
+            if (+crawlTimestamp < thirtyDaysAgo) {
+                return;
+            }
+            const entryRelevantSeriesUUIDs = calendarEntry
+                .map(x => index.find(y => y.refs.aniworld.includes(x.parsed.serieSlug))?.UUID)
+                .filter(x => x != null);
+
+            entryRelevantSeriesUUIDs.forEach(x => {
+                relevantSeriesUUIDs.add(x);
+            });
+        });
+        Object.entries(stoCalendar).forEach(([crawlTimestamp, calendarEntry]) => {
+            if (+crawlTimestamp < thirtyDaysAgo) {
+                return;
+            }
+            const entryRelevantSeriesUUIDs = calendarEntry
+                .map(x => index.find(y => y.refs.sto.includes(x.parsed.serieSlug))?.UUID)
+                .filter(x => x != null);
+
+            entryRelevantSeriesUUIDs.forEach(x => {
+                relevantSeriesUUIDs.add(x);
+            });
+        });
+        timeEnd('Filtering Relevant Series')
+        log('Relevant Series', relevantSeriesUUIDs.size);
+
+        index.forEach(x => {
+            if (!relevantSeriesUUIDs.has(x.UUID)) {
+                ignoranceList.push({
+                    serie_UUID: x.UUID,
+                });
+            }
+        });
+    }
+
+    time('Compare');
 
     // const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: true, zoro: false });
     const output = await compareForNewReleases(index, ignoranceList, { aniworld: true, sto: true, zoro: false });
-    console.timeEnd('Compare');
+    timeEnd('Compare');
 
 
     const condensedArray = [
@@ -207,8 +289,8 @@ async function checkForUpdates(index: DetailedSeries[]) {
     ];
     if (condensedArray.length == 0) return;
 
-    console.log(condensedArray);
-    console.log(condensedArray.length);
+    log(condensedArray);
+    log(condensedArray.length);
     // return;
 
     // await kickOffAniDl(condensedArray);

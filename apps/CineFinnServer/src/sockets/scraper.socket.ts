@@ -6,6 +6,7 @@ import type { definedSocket } from "../index.js";
 import { getIO } from "../utils.js";
 import type { Socket } from "socket.io";
 import type { Account, timestamped } from "@cinefinn/types/database";
+import { Job } from "../job/Job.js";
 
 export let isScraperSocketConnected = false;
 
@@ -28,6 +29,15 @@ async function connectionFunction(socket: definedSocket) {
     console.log('scraper connected');
     isScraperSocketConnected = true;
 
+    socket.on('job:log', async (jobUUID, ...logArgs) => {
+        let job = jobStore.get(jobUUID);
+        if (job == undefined) {
+            job = await Job.fromDBUUID(jobUUID);
+            return;
+        }
+        job.log(...logArgs);
+    });
+
     socket.on('disconnect', () => {
         console.log('scraper disconnected');
         isScraperSocketConnected = false;
@@ -45,6 +55,34 @@ export async function getScraperSocket() {
         return null;
     }
     return scraperSocket as any as definedScraperSocket;
+}
+
+const jobStore = new Map<string, Job>();
+
+export async function checkForUpdates(job: Job, smart: boolean) {
+    jobStore.set(job.UUID, job);
+    job.on('failed', () => {
+        jobStore.delete(job.UUID);
+    });
+    job.on('finished', () => {
+        jobStore.delete(job.UUID);
+    });
+    const scraperSocket = await getScraperSocket();
+    if (scraperSocket == null) {
+        await job.log('Scraper Socket not found');
+        await job.fail();
+        return;
+    }
+    await job.log('Handing over to Scraper Socket');
+    await new Promise<void>((resolve) => {
+        scraperSocket.emit('job:checkForUpdates', {
+            jobUUID: job.UUID,
+            smart,
+            index: job.data.index,
+        }, (e) => {
+            resolve();
+        });
+    });
 }
 
 export default {

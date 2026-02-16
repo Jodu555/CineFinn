@@ -16,6 +16,7 @@
 	"dependencies": {
 		"@cinefinn/configuration-manager": "workspace:*",
 		"@cinefinn/types": "workspace:*",
+		"@cinefinn/utilities": "workspace:*",
 		"@hono/node-server": "^1.19.5",
 		"axios": "^1.13.1",
 		"cheerio": "^1.1.2",

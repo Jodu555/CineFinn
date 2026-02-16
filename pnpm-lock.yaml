@@ -86,6 +86,9 @@ importers:
       '@cinefinn/types':
         specifier: workspace:*
         version: link:../../packages/Types
+      '@cinefinn/utilities':
+        specifier: workspace:*
+        version: link:../../packages/Utilities
       '@hono/node-server':
         specifier: ^1.19.5
         version: 1.19.5(hono@4.10.3)

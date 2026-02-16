@@ -9,7 +9,7 @@ dlList.json
 dlListAniworld.json
 dlListOther.json
 zorolist.json
-Scraper/*.json
+apps/CineFinnScraper/*.json
 config.json
 *.mp4
 __nogit.ts

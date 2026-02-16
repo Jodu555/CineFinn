@@ -6,6 +6,7 @@ import { Role, type Job as IJob, type JobType, type timestamped } from '@cinefin
 import { generatePreviewImages } from '../job/images.js';
 import { Job } from '../job/Job.js';
 import { generateJobID } from '../utils/IdGenerators.js';
+import { checkForUpdates } from '../sockets/scraper.socket.js';
 
 
 
@@ -101,11 +102,13 @@ const router = new Hono()
         return await handleJob('generatePreviewImages', c, generatePreviewImages);
     })
     .get('/job/checkForUpdates-smart', authFullMiddleware((user) => user.role >= jobRegistry['checkForUpdates-smart'].minimumRole), async (c) => {
+        return await handleJob('checkForUpdates-old', c, (job) => checkForUpdates(job, true));
         return c.json({
             message: 'Not implemented yet',
         });
     })
     .get('/job/checkForUpdates-old', authFullMiddleware((user) => user.role >= jobRegistry['checkForUpdates-old'].minimumRole), async (c) => {
+        return await handleJob('checkForUpdates-old', c, (job) => checkForUpdates(job, false));
         return c.json({
             message: 'Not implemented yet',
         });

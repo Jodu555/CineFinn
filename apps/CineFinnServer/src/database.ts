@@ -347,7 +347,7 @@ async function createTables() {
         },
         UUID: UUID_FIELD,
         type: {
-            type: 'varchar(16)',
+            type: 'varchar(22)',
             null: false,
         },
         failed_at: {
