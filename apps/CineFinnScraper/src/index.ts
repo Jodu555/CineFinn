@@ -134,6 +134,7 @@ socket.on('job:checkForUpdates', async ({ jobUUID, smart, index }, cb) => {
             changedSeries: [],
         });
     } catch (error) {
+        console.log('Error in job:checkForUpdates', error);
         cb({
             result: false,
             changedSeries: [],
@@ -236,6 +237,7 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
         const aniworldCalendar = await getAniworldCalendarFromFile();
         const stoCalendar = await getStoCalendarFromFile();
         timeEnd('Getting Calendars')
+        log('Calendars Loaded:', Object.keys(aniworldCalendar).length, 'Aniworld', Object.keys(stoCalendar).length, 'STO');
 
         const relevantSeriesUUIDs = new Set<string>();
 
@@ -245,7 +247,7 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
                 return;
             }
             const entryRelevantSeriesUUIDs = calendarEntry
-                .map(x => index.find(y => y.refs.aniworld.includes(x.parsed.serieSlug))?.UUID)
+                .map(x => index.find(y => (y.refs.aniworld || '').includes(x.parsed.serieSlug))?.UUID)
                 .filter(x => x != null);
 
             entryRelevantSeriesUUIDs.forEach(x => {
@@ -257,7 +259,7 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
                 return;
             }
             const entryRelevantSeriesUUIDs = calendarEntry
-                .map(x => index.find(y => y.refs.sto.includes(x.parsed.serieSlug))?.UUID)
+                .map(x => index.find(y => (y.refs.sto || '').includes(x.parsed.serieSlug))?.UUID)
                 .filter(x => x != null);
 
             entryRelevantSeriesUUIDs.forEach(x => {

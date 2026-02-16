@@ -83,6 +83,7 @@ export async function checkForUpdates(job: Job, smart: boolean) {
             resolve();
         });
     });
+    await job.success()
 }
 
 export default {

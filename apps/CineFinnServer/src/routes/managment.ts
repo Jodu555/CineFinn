@@ -102,7 +102,7 @@ const router = new Hono()
         return await handleJob('generatePreviewImages', c, generatePreviewImages);
     })
     .get('/job/checkForUpdates-smart', authFullMiddleware((user) => user.role >= jobRegistry['checkForUpdates-smart'].minimumRole), async (c) => {
-        return await handleJob('checkForUpdates-old', c, (job) => checkForUpdates(job, true));
+        return await handleJob('checkForUpdates-smart', c, (job) => checkForUpdates(job, true));
         return c.json({
             message: 'Not implemented yet',
         });
