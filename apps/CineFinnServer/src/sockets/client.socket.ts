@@ -66,7 +66,7 @@ async function connectionFunction(socket: definedSocket) {
     });
 
     socket.on('updateSettings', async (data) => {
-        console.log('updateSettings', data);
+        // console.log('updateSettings', data);
         await accountsTable.update({ UUID: socketAuth.user.UUID }, { settings: compareSettings(data) });
         (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'client' && s.data.auth.user.UUID === socketAuth.user.UUID && s.id !== socket.id).forEach(async s => {
             s.emit('settingsUpdate', data);
