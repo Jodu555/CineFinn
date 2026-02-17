@@ -35,8 +35,13 @@
 							</NuxtLink>
 						</li>
 						<li>
-							<NuxtLink class="nav-link px-0 align-middle" exact-active-class="active" to="/admin/jobs">
+							<NuxtLink class="nav-link px-0 align-middle" exact-active-class="active" to="/admin/jobs/system">
 								<span class="ms-1 d-none d-sm-inline">System Jobs</span>
+							</NuxtLink>
+						</li>
+						<li>
+							<NuxtLink class="nav-link px-0 align-middle" exact-active-class="active" to="/admin/jobs/redis">
+								<span class="ms-1 d-none d-sm-inline">Redis Jobs</span>
 							</NuxtLink>
 						</li>
 						<li>
