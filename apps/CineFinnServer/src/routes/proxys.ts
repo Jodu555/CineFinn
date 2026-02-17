@@ -5,6 +5,7 @@ import { createStorage } from "unstorage";
 import fsDriver from 'unstorage/drivers/fs';
 import { getConfig } from "../config.js";
 import { cacheRegistry } from "./admin/cache.js";
+import { tryCatch } from "@cinefinn/utilities/tryCatch";
 
 interface ImageRewriteData {
     url: string;
@@ -72,7 +73,7 @@ const router = new Hono()
     })
     .get('/anidb/*', async (c) => {
         const proxyURL = `${getConfig().proxyAPIs.anidbapi.url}${c.req.path || ''}`
-        console.log('Proxying to:', proxyURL);
+        // console.log('Proxying to:', proxyURL);
         const res = await proxy(
             proxyURL,
             {
@@ -89,8 +90,8 @@ const router = new Hono()
     })
     .get('/bullboard/*', async (c) => {
         const proxyURL = `${getConfig().proxyAPIs.bullboardapi.url}/admin/queues/api${c.req.path.replace('bullboard/', '') || ''}?${c.req.url.split('?')[1]}`
-        console.log('Proxying to:', proxyURL);
-        const res = await proxy(
+        // console.log('Proxying to:', proxyURL);
+        const { data: res, error } = await tryCatch<Promise<Response>, Error>(() => proxy(
             proxyURL,
             {
                 headers: {
@@ -99,7 +100,14 @@ const router = new Hono()
                     'token': getConfig().proxyAPIs.bullboardapi.apiToken,
                 },
             }
-        )
+        ));
+        if (error) {
+            console.log(error);
+            return c.json({
+                status: false,
+                message: 'Error proxying request',
+            });
+        }
         res.headers.delete('Set-Cookie')
         res.headers.delete('x-powered-by')
         return res

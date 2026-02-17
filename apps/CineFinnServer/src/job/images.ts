@@ -15,9 +15,12 @@ export async function generatePreviewImages(job: Job) {
     const generatorEpisodesCache = new CacheContext('crawler-generator-episodes', 250);
     const generatorSeriesCache = new CacheContext('crawler-generator-series', 500);
 
+    await job.time('Loading Watchable Entities from DB');
     const watchableEntities = await watchableEntitysTable.get();
+    await job.timeEnd('Loading Watchable Entities from DB');
 
 
+    await job.time('Handling Watchable Entities');
     const queuedJobs: QueuedPreviewImageGenerationJob[] = [];
     let i = 0;
     for await (const watchableEntity of watchableEntities) {
@@ -64,6 +67,7 @@ export async function generatePreviewImages(job: Job) {
         queuedJobs.push(generatedQueueJob);
         //job.log(`Queued ${generatedQueueJob.type} series: ${series.UUID} watchableEntity: ${watchableEntity.UUID}`);
     }
+    await job.timeEnd('Handling Watchable Entities');
     await job.setData(queuedJobs);
     job.log(`Finished Image Crawling (${queuedJobs.length})`);
     job.time('Added to Queue');
