@@ -1,0 +1,29 @@
+{
+	"name": "@cinefinn/cinefinn-previewimage-generator",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"dev": "tsx watch src/index.ts",
+		"build": "tsc",
+		"typecheck": "tsc --noEmit"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"packageManager": "pnpm@10.18.1",
+	"dependencies": {
+		"@cinefinn/configuration-manager": "workspace:*",
+		"@cinefinn/types": "workspace:*",
+		"@cinefinn/utilities": "workspace:*",
+		"@jodu555/commandmanager": "^1.5.4",
+		"axios": "^1.13.5",
+		"bullmq": "^5.66.0",
+		"ioredis": "^5.8.2"
+	},
+	"devDependencies": {
+		"@types/node": "^25.0.1",
+		"tsx": "^4.20.6"
+	}
+}

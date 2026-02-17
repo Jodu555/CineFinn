@@ -4,12 +4,13 @@ import type { MovingItem, Episode, timestamped, Movie } from "@cinefinn/types/da
 import { Transform } from "stream";
 import { watchableEntitysTable, seriesTable } from "../database.js";
 import { getSubSocketByID } from "../sockets/subsystem.socket.js";
-import { watchableUUIDToWatchable, calculateMD5, wait } from "../utils.js";
+import { watchableUUIDToWatchable, calculateMD5 } from "../utils.js";
 import { rebroadcastMovingItems, rebroadcastOverview } from "../routes/admin/admin.js";
 
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 import { tryCatch } from "@cinefinn/utilities/tryCatch";
+import { wait } from "@cinefinn/utilities/time";
 
 const pipelineAsync = promisify(pipeline);
 

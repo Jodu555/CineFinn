@@ -7,20 +7,7 @@ import { episodesTable, moviesTable, seriesTable, watchableEntitysTable } from "
 import { getConfig } from "../config.js";
 import { forEachNonBlockingAsync, getIORedis, watchableUUIDToWatchable } from '../utils.js';
 import { Queue, QueueEvents } from 'bullmq';
-
-interface QueuedPreviewImageGenerationJob {
-    type: 'generatePreviewImages';
-    UUID: string;
-    data: QueuedPreviewImageGenerationJobData;
-}
-
-interface QueuedPreviewImageGenerationJobData {
-    publicStreamURL: string;
-    seriesUUID: string;
-    watchableEntityUUID: string;
-    resultPath: string;
-    readrate: number;
-}
+import type { QueuedPreviewImageGenerationJob, QueuedPreviewImageGenerationJobData } from '@cinefinn/types';
 
 export async function generatePreviewImages(job: Job) {
     const config = getConfig();
@@ -69,7 +56,7 @@ export async function generatePreviewImages(job: Job) {
             data: {
                 publicStreamURL: videoURL.toString(),
                 seriesUUID: series.UUID,
-                watchableEntityUUID: watchableEntity.UUID,
+                entity: watchableEntity,
                 resultPath,
                 readrate: 0 //TODO: implement this via SubSystem
             }

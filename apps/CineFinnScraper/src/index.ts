@@ -14,8 +14,6 @@ import { getAniworldCalendarFromFile, storeAniworldCalendar } from './calendars/
 import { getStoCalendarFromFile, storeStoCalendar } from './calendars/stoCalendar.js';
 import { msToReadable } from '@cinefinn/utilities/time';
 
-const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 const config = getConfig();
 
 const app = new Hono({

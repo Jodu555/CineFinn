@@ -1,5 +1,5 @@
+import { wait } from '@cinefinn/utilities/time';
 import { createHash } from 'node:crypto';
-import { wait } from './utils.js';
 
 
 type ExtractMethodNames<T> = { [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never }[keyof T];

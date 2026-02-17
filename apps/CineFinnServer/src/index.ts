@@ -16,7 +16,7 @@ import { ownLogger } from './middleware/ownLogger.js';
 import { managmentRouter } from './routes/managment.js';
 import type { AnythingToServerEvents, InterServerEvents, ServerToAnythingEvents, SocketData } from '@cinefinn/types/socket';
 import { type Account, type timestamped } from '@cinefinn/types/database';
-import { getIO, setIO, setIORedis, getEmailManager, wait } from './utils.js';
+import { getIO, setIO, setIORedis, getEmailManager } from './utils.js';
 import { watchRouter } from './routes/watch.js';
 import { videoRouter } from './routes/video.js';
 import { indexRouter } from './routes/index.js';

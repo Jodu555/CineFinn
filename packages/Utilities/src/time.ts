@@ -44,3 +44,5 @@ export function timeAgo(timestamp: Date, locale = 'en') {
     }
     return value;
 }
+
+export const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

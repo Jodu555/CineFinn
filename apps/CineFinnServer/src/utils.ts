@@ -143,5 +143,3 @@ export const cachingMiddleware = <T extends StorageValue>(storage: Storage<T>, k
         }
     })
 };
-
-export const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

@@ -1,3 +1,5 @@
+import type { timestamped, WatchableEntity } from "./database.js";
+
 export interface ServerConfig {
     version: string;
     system: {
@@ -57,4 +59,19 @@ export interface ServerConfig {
             apiToken: string;
         }
     };
+}
+
+export interface QueuedPreviewImageGenerationJob {
+    type: 'generatePreviewImages';
+    UUID: string;
+    data: QueuedPreviewImageGenerationJobData;
+}
+
+export interface QueuedPreviewImageGenerationJobData {
+    publicStreamURL: string;
+    seriesUUID: string;
+    entity: WatchableEntity & timestamped;
+    resultPath: string;
+    readrate: number;
+    generatorName?: string;
 }
