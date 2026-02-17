@@ -76,12 +76,12 @@ const error = computed(() => adminStore.error);
 
 await Promise.all([
 	callOnce('loadOverview', () => adminStore.loadOverview(), { mode: 'navigation' }),
-	callOnce('loadAccounts', () => adminStore.loadAccounts(), { mode: 'navigation' }),
-	callOnce('loadSubsystems', () => adminStore.loadSubsystems(), { mode: 'navigation' }),
-	callOnce('loadMovingItems', () => adminStore.loadMovingItems(), { mode: 'navigation' }),
-	callOnce('loadEmails', () => adminStore.loadEmails(), { mode: 'navigation' }),
-	callOnce('loadConfig', () => adminStore.loadConfig(), { mode: 'navigation' }),
-	callOnce('loadIgnoranceItems', () => adminStore.loadIgnoranceItems(), { mode: 'navigation' }),
+	// callOnce('loadAccounts', () => adminStore.loadAccounts(), { mode: 'navigation' }),
+	// callOnce('loadSubsystems', () => adminStore.loadSubsystems(), { mode: 'navigation' }),
+	// callOnce('loadMovingItems', () => adminStore.loadMovingItems(), { mode: 'navigation' }),
+	// callOnce('loadEmails', () => adminStore.loadEmails(), { mode: 'navigation' }),
+	// callOnce('loadConfig', () => adminStore.loadConfig(), { mode: 'navigation' }),
+	// callOnce('loadIgnoranceItems', () => adminStore.loadIgnoranceItems(), { mode: 'navigation' }),
 ]);
 
 // await callOnce('loadOverview', () => adminStore.loadOverview(), { mode: 'navigation' });

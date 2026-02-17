@@ -64,11 +64,11 @@ definePageMeta({
 const adminStore = useAdminStore();
 const indexStore = useIndexStore();
 
+await callOnce('loadIgnoranceItems', () => adminStore.loadIgnoranceItems(), { mode: 'navigation' });
+
 const loading = computed(() => adminStore.loading);
 const error = computed(() => adminStore.error);
 const ignoranceItems = computed(() => adminStore.ignoranceItems);
-
-await callOnce('loadIgnoranceItems', () => adminStore.loadIgnoranceItems(), { mode: 'navigation' });
 
 const autoCompleteSeries = computed(() => {
 	return indexStore.series.map((x) => ({ value: x.title, ID: x.UUID })).filter((x) => x.value);

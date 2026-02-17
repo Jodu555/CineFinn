@@ -312,19 +312,18 @@ definePageMeta({
 	middleware: 'auth',
 });
 
-// --- Mock Store Logic ---
 const adminStore = useAdminStore();
+
+await callOnce('loadConfig', () => adminStore.loadConfig(), { mode: 'navigation' });
 
 const loading = computed(() => adminStore.loading || false);
 const error = computed(() => adminStore.error || null);
 const config = computed(() => adminStore.config);
 
-// Dummy Update Handler
 const handleUpdate = async (key: string, value: any) => {
 	await adminStore.updateConfigValue(key, value);
 };
 
-// --- ConfigItem Component (Render Function) ---
 const ConfigItem = defineComponent({
 	props: {
 		label: String,

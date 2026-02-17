@@ -195,6 +195,8 @@ const loading = computed(() => managmentStore.loading);
 const error = computed(() => managmentStore.error);
 const jobs = computed(() => managmentStore.jobs);
 
+await callOnce('loadJobs', () => managmentStore.loadJobs(), { mode: 'navigation' });
+
 const runningJobs = computed(() => {
 	return jobs.value.filter((job: Job) => !job.finished_at && !job.failed_at);
 });
