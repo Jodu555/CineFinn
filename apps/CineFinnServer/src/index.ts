@@ -36,6 +36,7 @@ import packageJSON from '../package.json' with { type: "json" };
 import { metricsRouter, registerMetrics } from './middleware/ownPrometheus.js';
 import { generateEntityID } from './utils/IdGenerators.js';
 import { tryCatch } from '@cinefinn/utilities/tryCatch';
+import { previewImagesRouter } from './routes/previewImages.js';
 
 
 
@@ -76,6 +77,7 @@ export const app = new Hono({
     .route('/admin', adminRouter)
     .route('/todo', todoRouter)
     .route('', proxyRouter)
+    .route('/previewImages', previewImagesRouter)
     .route('/video', videoRouter)
 
 // app.get('*', async (c, next) => {

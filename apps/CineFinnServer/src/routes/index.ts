@@ -549,10 +549,6 @@ const router = new Hono()
             message: 'Successfully updated series cover',
         });
     })
-    .get('/view/cache', async (c) => {
-
-        return c.json(await indexStorage.keys());
-    });
 
 async function downloadImage(url: string) {
     const response = await fetch(url);
