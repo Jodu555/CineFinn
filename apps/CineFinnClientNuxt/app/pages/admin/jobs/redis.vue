@@ -159,17 +159,21 @@ onMounted(async () => {
 
 	interval = setInterval(async () => {
 		await loadAllJobs();
-	}, 1000 * 5);
+	}, 1000 * 2);
 });
 
 type QueueType = 'completed' | 'failed';
 
-const { $swal } = useNuxtApp();
+const { $swal, $toast } = useNuxtApp();
 
 async function retry(queueType: QueueType = 'failed') {
-	const { error, data } = await tryCatch<Promise<void>, Error>(() => $fetch(`${useAPIURL()}/bullboard/queues/previewImageQueue/retry/${queueType}`));
+	const { error, data } = await tryCatch<Promise<unknown>, Error>(() =>
+		$fetch(`${useAPIURL()}/bullboard/queues/previewImageQueue/retry/${queueType}`, {
+			method: 'PUT',
+		}),
+	);
 	if (error) {
-		$swal.fire({
+		$toast.fire({
 			toast: true,
 			title: 'Error',
 			text: 'An error occurred while retrying the jobs',
@@ -177,35 +181,60 @@ async function retry(queueType: QueueType = 'failed') {
 		});
 		return;
 	}
+	$toast.fire({
+		title: 'Success',
+		text: `${queueType} jobs retried`,
+		icon: 'success',
+	});
 }
 async function pause() {
-	const { error, data } = await tryCatch<Promise<void>, Error>(() => $fetch(`${useAPIURL()}/bullboard/queues/previewImageQueue/pause`));
+	const { error, data } = await tryCatch<Promise<unknown>, Error>(() =>
+		$fetch(`${useAPIURL()}/bullboard/queues/previewImageQueue/pause`, {
+			method: 'PUT',
+		}),
+	);
 	if (error) {
-		$swal.fire({
-			toast: true,
+		$toast.fire({
 			title: 'Error',
 			text: 'An error occurred while pausing the queue',
 			icon: 'error',
 		});
 		return;
 	}
+	$toast.fire({
+		title: 'Success',
+		text: 'Queue paused',
+		icon: 'success',
+	});
 }
 async function resume() {
-	const { error, data } = await tryCatch<Promise<void>, Error>(() => $fetch(`${useAPIURL()}/bullboard/queues/previewImageQueue/resume`));
+	const { error, data } = await tryCatch<Promise<unknown>, Error>(() =>
+		$fetch(`${useAPIURL()}/bullboard/queues/previewImageQueue/resume`, {
+			method: 'PUT',
+		}),
+	);
 	if (error) {
-		$swal.fire({
-			toast: true,
+		$toast.fire({
 			title: 'Error',
 			text: 'An error occurred while resuming the queue',
 			icon: 'error',
 		});
 		return;
 	}
+	$toast.fire({
+		title: 'Success',
+		text: 'Queue resumed',
+		icon: 'success',
+	});
 }
 async function clean(queueType: QueueType) {
-	const { error, data } = await tryCatch<Promise<void>, Error>(() => $fetch(`${useAPIURL()}/bullboard/queues/previewImageQueue/clean/${queueType}`));
+	const { error, data } = await tryCatch<Promise<unknown>, Error>(() =>
+		$fetch(`${useAPIURL()}/bullboard/queues/previewImageQueue/clean/${queueType}`, {
+			method: 'PUT',
+		}),
+	);
 	if (error) {
-		$swal.fire({
+		$toast.fire({
 			toast: true,
 			title: 'Error',
 			text: 'An error occurred while cleaning the queue',
@@ -213,6 +242,11 @@ async function clean(queueType: QueueType) {
 		});
 		return;
 	}
+	$toast.fire({
+		title: 'Success',
+		text: 'Queue cleaned',
+		icon: 'success',
+	});
 }
 
 async function toggleQueueStatus() {

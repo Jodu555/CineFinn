@@ -11,6 +11,7 @@ import { HTTPException } from "hono/http-exception";
 const presignMeta = z.object({
     type: z.enum(['movie', 'episode']),
     seriesUUID: z.string(),
+    watchabelUUID: z.string(),
     watchableEntityUUID: z.string(),
 });
 
@@ -55,7 +56,7 @@ const router = new Hono()
             throw new HTTPException(400, { message: 'No files received' });
         }
 
-        const destDir = path.join(getConfig().imagePath, presignMetaData.seriesUUID, 'previewImages', presignMetaData.watchableEntityUUID);
+        const destDir = path.join(getConfig().imagePath, presignMetaData.seriesUUID, 'previewImages', presignMetaData.watchabelUUID, presignMetaData.watchableEntityUUID);
         await fs.promises.mkdir(destDir, { recursive: true });
 
         const saved: string[] = [];
@@ -71,7 +72,7 @@ const router = new Hono()
 
         return c.json({ ok: true, saved });
     })
-    .get('/deletePresignedURL', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+    .post('/deletePresignedURL', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const key = c.req.query('key') as string;
         if (key == undefined) {
             throw new HTTPException(400, { message: 'No key provided' });

@@ -71,12 +71,13 @@ const router = new Hono()
 
         return c.body(response.data);
     })
-    .get('/anidb/*', async (c) => {
+    .all('/anidb/*', async (c) => {
         const proxyURL = `${getConfig().proxyAPIs.anidbapi.url}${c.req.path || ''}`
         // console.log('Proxying to:', proxyURL);
         const res = await proxy(
             proxyURL,
             {
+                method: c.req.method,
                 headers: {
                     ...c.req.header(),
                     'X-Forwarded-Host': c.req.header('host'),
@@ -88,12 +89,14 @@ const router = new Hono()
         res.headers.delete('Set-Cookie')
         return res
     })
-    .get('/bullboard/*', async (c) => {
-        const proxyURL = `${getConfig().proxyAPIs.bullboardapi.url}/admin/queues/api${c.req.path.replace('bullboard/', '') || ''}?${c.req.url.split('?')[1]}`
+    .all('/bullboard/*', async (c) => {
+        const param = c.req.url.split('?')[1];
+        const proxyURL = `${getConfig().proxyAPIs.bullboardapi.url}/admin/queues/api${c.req.path.replace('bullboard/', '') || ''}?${param || ''}`
         // console.log('Proxying to:', proxyURL);
         const { data: res, error } = await tryCatch<Promise<Response>, Error>(() => proxy(
             proxyURL,
             {
+                method: c.req.method,
                 headers: {
                     ...c.req.header(),
                     'X-Forwarded-Host': c.req.header('host'),

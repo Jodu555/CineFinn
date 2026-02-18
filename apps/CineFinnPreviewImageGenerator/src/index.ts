@@ -211,6 +211,7 @@ async function uploadPreviewImages(job: Job<QueuedPreviewImageGenerationJobData>
         type: 'movie' | 'episode';
         seriesUUID: string;
         watchableEntityUUID: string;
+        watchableUUID: string;
     };
 
     const entity = job.data.entity as any;
@@ -219,11 +220,13 @@ async function uploadPreviewImages(job: Job<QueuedPreviewImageGenerationJobData>
             type: 'episode',
             seriesUUID: job.data.seriesUUID,
             watchableEntityUUID: job.data.entity.UUID,
+            watchableUUID: job.data.entity.watchable_UUID,
         }
         : {
             type: 'movie',
             seriesUUID: job.data.seriesUUID,
             watchableEntityUUID: job.data.entity.UUID,
+            watchableUUID: job.data.entity.watchable_UUID,
         };
 
     const presignRes = await axios.post(
