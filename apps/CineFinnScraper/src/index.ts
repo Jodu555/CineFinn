@@ -61,42 +61,20 @@ const httpServer = serve({
 
     const mockIndex: DetailedSeries[] = [
         {
-            UUID: 'S-IRREG',
-            title: 'Irregular',
+            UUID: 'S-House',
+            title: 'Dr House',
             seasons: [],
             movies: [],
             infos: {},
             refs: {
-                aniworld: 'https://aniworld.to/anime/stream/the-irregular-at-magic-high-school',
+                sto: 'http://186.2.175.5/serie/dr-house/',
             },
             tags: [],
         },
-        {
-            UUID: 'S-DALV',
-            title: 'Date a Live',
-            seasons: [],
-            movies: [],
-            infos: {},
-            refs: {
-                aniworld: 'https://aniworld.to/anime/stream/date-a-live',
-            },
-            tags: [],
-        },
-        {
-            UUID: 'S-ASTERISK',
-            title: 'Asterisk War',
-            seasons: [],
-            movies: [],
-            infos: {},
-            refs: {
-                aniworld: 'https://aniworld.to/anime/stream/the-asterisk-war',
-            },
-            tags: [],
-        }
     ];
 
     // await wait(1000 * 10)
-    // const output = await compareForNewReleases(mockIndex, [], { aniworld: true, sto: false, zoro: false });
+    // const output = await compareForNewReleases(mockIndex, [], { aniworld: true, sto: true, zoro: false });
 
 });
 

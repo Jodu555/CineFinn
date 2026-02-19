@@ -107,9 +107,8 @@ async function compareForNewReleasesAniWorldOrSTO(
     const debug = false;
     const limit = promiseLimit<AniWorldSerieCompare>(10);
     const data = series.filter((x) => {
-
         //Has to be either Aniworld or STO
-        if (x.refs.aniworld == undefined && x.refs.sto == undefined) {
+        if (x.refs[refKey] == undefined || x.refs[refKey] == '') {
             return false;
         }
 
