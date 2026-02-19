@@ -26,6 +26,7 @@ async function authFunction(authHandshake: AuthHandshakeSubsystem): Promise<Sock
         id: authHandshake.id,
         ptoken: authHandshake.ptoken,
         readrate: authHandshake.readrate,
+        endpoint: authHandshake.endpoint,
     };
 }
 
@@ -72,6 +73,7 @@ export async function getSubSystems(): Promise<SubSystem[]> {
                 status: 'offline',
                 name: subID,
                 series,
+                endpoint: false,
             } as SubSystem;
         } else {
 

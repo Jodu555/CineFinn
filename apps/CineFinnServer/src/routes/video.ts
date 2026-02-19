@@ -8,6 +8,7 @@ import type { WatchableEntity } from '@cinefinn/types/database';
 import type { definedSocket } from '../index.js';
 import { getSubSocketByID } from '../sockets/subsystem.socket.js';
 import { tryCatch } from '@cinefinn/utilities/tryCatch';
+import { proxy } from 'hono/proxy';
 
 
 
@@ -69,17 +70,27 @@ const router = new Hono()
                 }
                 stat = fs.statSync(filePath);
             } else {
-                const subSystemSocket = await getSubSocketByID(watchableEntity.subID);
-                if (subSystemSocket == undefined) {
+                const { data: subSocket, error } = await tryCatch(() => getSubSocketByID(watchableEntity.subID));
+                if (error != null || subSocket == null) {
                     return c.json({ message: 'SubSystem not found' }, 404);
                 }
+
+                if (subSocket.data.auth.endpoint !== false) {
+                    return proxy(`${subSocket.data.auth.endpoint}video?ptoken=${subSocket.data.auth.ptoken}&videoPath=${encodeURIComponent(filePath)}`, {
+                        headers: {
+                            'ptoken': subSocket.data.auth.ptoken,
+                            'Range': c.req.header('Range') || '',
+                            'Connection': 'keep-alive',
+                        }
+                    });
+                }
+
                 stat = await new Promise<fs.Stats>((resolve, reject) => {
-                    subSystemSocket.emit('videoStats', { filePath }, (stats) => {
+                    subSocket.emit('videoStats', { filePath }, (stats) => {
                         debug && console.log('Recieved Socket Stats', stats);
                         resolve(stats);
                     });
                 })
-
             }
             debug && console.log('Got fileSize', stat.size, watchableEntity.subID);
             const fileSize = stat.size;

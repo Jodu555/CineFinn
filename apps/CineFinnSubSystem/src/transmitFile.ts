@@ -5,7 +5,7 @@ import { getConfig } from './config.js';
 import { getSocket } from './utils/utils.js';
 import type { ErrorData } from '@cinefinn/types/socket';
 
-const socket = getSocket();
+
 
 
 interface DownloadSession {
@@ -17,9 +17,10 @@ interface DownloadSession {
     expectedPath: string;
 }
 
-let currentDownload: DownloadSession | null = null;
 
 export function setupTransmitFile() {
+    const socket = getSocket();
+    let currentDownload: DownloadSession | null = null;
 
     socket.on('file_start', (data) => {
         console.log(`Receiving file: ${data.filename} (${data.size} bytes)`);

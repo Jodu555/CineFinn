@@ -33,6 +33,7 @@ export interface AuthHandshakeSubsystem {
     token: string;
     ptoken: string;
     readrate: number;
+    endpoint: string | false;
 }
 
 
@@ -198,6 +199,7 @@ export interface SocketAuthDataSubsystem<U = any> {
     id: string;
     ptoken: string;
     readrate: number;
+    endpoint: string | false;
 }
 
 export type SubSystem = OfflineSubSystem | OnlineSubSystem;
@@ -221,7 +223,7 @@ export interface OnlineSubSystem {
     token: string;
     ptoken: string;
     readrate: number;
-    endpoint?: string;
+    endpoint: string | false;
     series: string[];
     diskStats: DiskStats | null;
 }

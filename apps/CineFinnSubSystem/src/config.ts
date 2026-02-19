@@ -5,7 +5,7 @@ interface Config {
     identifier: string;
     entrypoint: string;
     port: number;
-    endpoint: string | boolean;
+    endpoint: string | false;
     experimental: {
         readrate: number;
     };
@@ -20,7 +20,7 @@ const defaultConfig: Config = {
     identifier: 'local-kdrama',
     entrypoint: '/home/Media/K-Drama',
     port: 9999,
-    endpoint: false, //Means enable Socket Transmission
+    endpoint: false, //If false the subsystem assumes socket streaming! If set to a string, this will be the endpoint to proxy the video too
     experimental: {
         readrate: 0,
     },

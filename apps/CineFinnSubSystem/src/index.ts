@@ -10,12 +10,13 @@ import { cors } from 'hono/cors';
 import { trimTrailingSlash } from 'hono/trailing-slash';
 import { ownLogger } from './utils/ownLogger.js';
 import { serve } from '@hono/node-server';
-import { setSocket } from './utils/utils.js';
+import { getPtoken, setPtoken, setSocket } from './utils/utils.js';
 import { setupTransmitFile } from './transmitFile.js';
+import { videoRouter } from './routes/video.js';
 
 const config = getConfig();
 
-const ptoken = crypto.randomUUID().replaceAll('-', '');
+setPtoken(crypto.randomUUID().replaceAll('-', ''))
 
 export const app = new Hono({
     strict: false,
@@ -23,6 +24,7 @@ export const app = new Hono({
     .use(cors())
     .use(trimTrailingSlash())
     .use(ownLogger(console.log, ['/socket.io', '/video', '/bullboard']))
+    .route('/video', videoRouter);
 
 
 const httpServer = serve({
@@ -32,16 +34,20 @@ const httpServer = serve({
     console.log(info);
 });
 
+const socketAuth = {
+    type: 'subsystem',
+    authToken: config.core.token,
+    id: config.identifier,
+    token: config.core.token,
+    ptoken: getPtoken(),
+    readrate: config.experimental.readrate || 0,
+    endpoint: config.endpoint,
+} satisfies AuthHandshakeSubsystem;
+
+console.log(socketAuth);
 
 const socket = io(config.core.url, {
-    auth: {
-        type: 'subsystem',
-        authToken: config.core.token,
-        id: config.identifier,
-        token: config.core.token,
-        ptoken,
-        readrate: config.experimental.readrate || 0,
-    } satisfies AuthHandshakeSubsystem,
+    auth: socketAuth,
 }) as Socket<ServerToSubSystemEvents, SubSystemToServerEvents>;
 
 setSocket(socket);
@@ -62,7 +68,7 @@ socket.on('connect', async () => {
     const { files, dirs } = await listFilesAsync(config.entrypoint);
     console.log('Loaded', files.length, 'files from:', config.entrypoint);
 
-    console.log('Current pToken:', ptoken);
+    console.log('Current pToken:', getPtoken());
     sendDiskStats();
 });
 
