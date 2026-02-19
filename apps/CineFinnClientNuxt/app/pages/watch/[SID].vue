@@ -522,7 +522,7 @@ if (currentEpisodeUUID.value) initialTab = 'seasons';
 const activeTab = ref<Tab>(initialTab);
 
 const showVideo = computed(() => {
-	return indexStore.selectedWatchableEntity !== null;
+	return indexStore.selectedWatchableEntity !== null && !isDisabled.value;
 	// return currentMovieUUID.value !== null || currentEpisodeUUID.value !== null;
 });
 
