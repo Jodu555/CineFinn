@@ -17,6 +17,8 @@
 		"@cinefinn/configuration-manager": "workspace:*",
 		"@cinefinn/types": "workspace:*",
 		"@cinefinn/utilities": "workspace:*",
+		"@hono/node-server": "^1.19.5",
+		"hono": "^4.12.0",
 		"socket.io-client": "^4.8.1"
 	},
 	"devDependencies": {
