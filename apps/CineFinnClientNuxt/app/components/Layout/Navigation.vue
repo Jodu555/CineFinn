@@ -54,11 +54,17 @@
 					</li>
 				</ul>
 				<div v-if="authStore.loggedIn" class="d-flex">
-					<AutoComplete
+					<!-- <AutoComplete
 						:options="{ placeholder: 'Search for a series...', clearAfterSelect: true }"
 						:data="autoCompleteSeries"
 						:select-fn="autocompleteSearch"
 						:prefetch-fn="autocompletePrefetch"
+					/> -->
+					<AutoComplete
+						:options="{ placeholder: 'Search for a series...', clearAfterSelect: true, asLink: true }"
+						:data="autoCompleteSeries"
+						:prefetch-fn="autocompletePrefetch"
+						:link-builder-fn="autocompleteLinkBuilder"
 					/>
 					<div class="btn-group" style="margin-left: 2rem" role="group" aria-label="Basic outlined example">
 						<button
@@ -103,6 +109,11 @@ async function autocompleteSearch(ID: string, value: string) {
 	console.log('Autocomplete Search', ID, value);
 	const router = useRouter();
 	await router.push(`/watch/${ID}`);
+}
+
+function autocompleteLinkBuilder(ID: string, value: string) {
+	console.log('Autocomplete Link Builder', ID, value);
+	return `/watch/${ID}`;
 }
 
 async function autocompletePrefetch(ID: string, value: string) {

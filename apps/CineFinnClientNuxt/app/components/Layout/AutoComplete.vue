@@ -13,6 +13,7 @@
 		/>
 		<ul ref="dropdownMenuRef" v-show="recommendations.length >= 1" class="dropdown-menu">
 			<button
+				v-if="!options.asLink"
 				v-for="(recommendation, index) in recommendations"
 				:key="index"
 				@click="select(recommendation)"
@@ -25,6 +26,19 @@
 					{{ value.value }}
 				</span>
 			</button>
+			<NuxtLink
+				v-if="options.asLink"
+				v-for="(recommendation, index) in recommendations"
+				:key="index"
+				@mouseenter="prefetch(recommendation)"
+				@focus="prefetch(recommendation)"
+				class="dropdown-item"
+				:href="linkBuilderFn!(recommendation.properties?.ID || '', recommendation.properties?.value || '')"
+			>
+				<span v-for="(value, vIndex) in recommendation.values" :key="vIndex" :class="{ 'text-primary': value.h }">
+					{{ value.value }}
+				</span>
+			</NuxtLink>
 		</ul>
 	</div>
 </template>
@@ -40,9 +54,11 @@ const props = defineProps<{
 		placeholder?: string;
 		prefetchAfterMinItems?: number;
 		inputWidth?: string;
+		asLink?: boolean;
 	};
-	selectFn: (ID: string, value: any) => void;
+	selectFn?: (ID: string, value: any) => void;
 	prefetchFn: (ID: string, value: any) => void;
+	linkBuilderFn?: (ID: string, value: string) => string;
 }>();
 
 interface InputItem {
@@ -85,7 +101,7 @@ function select(item: RecommendationItem) {
 	if (item.properties.ID == undefined) return;
 	if (item.properties.value == undefined) return;
 
-	props.selectFn(item.properties.ID, item.properties.value);
+	props.selectFn!(item.properties.ID, item.properties.value);
 	if (props.options.clearAfterSelect || false) {
 		if (inputRef.value) inputRef.value.value = '';
 	}
