@@ -176,7 +176,7 @@ function showSeriesModal(subSystem: string) {
 }
 
 function getSeriesList(seriesIDs: string[]) {
-	return seriesIDs.map((id) => indexStore.series.find((s) => s.UUID === id));
+	return seriesIDs.map((id) => indexStore.seriesById.get(id));
 }
 
 function isSubSystemOnline(subID: string) {

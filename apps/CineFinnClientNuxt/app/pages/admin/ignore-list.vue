@@ -34,7 +34,7 @@
 							<tr v-for="item in ignoranceItems">
 								<template v-if="item != undefined">
 									<td scope="row">{{ item.serie_UUID }}</td>
-									<td>{{ indexStore.series.find((s) => s.UUID == item.serie_UUID)?.title }}</td>
+									<td>{{ indexStore.seriesById.get(item.serie_UUID)?.title }}</td>
 									<td>
 										{{ item.lang || 'All' }}
 									</td>
@@ -75,7 +75,7 @@ const autoCompleteSeries = computed(() => {
 });
 
 async function addIgnoranceItem(ID: string) {
-	const serie = indexStore.series.find((x) => x.UUID == ID);
+	const serie = indexStore.seriesById.get(ID);
 	if (serie) {
 		const obj = {
 			serie_UUID: serie.UUID,

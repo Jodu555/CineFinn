@@ -22,7 +22,13 @@
 			</div>
 		</div>
 		<div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 row-cols-xxl-5 g-4">
-			<EntityCard v-for="(entity, idx) in selectedSeries" :series-i-d="entity.UUID" :key="entity.UUID" @add-to-playlist="onAddToPlaylist" />
+			<EntityCard
+				v-for="(entity, idx) in selectedSeries"
+				:series-i-d="entity.UUID"
+				:key="entity.UUID"
+				:index="idx"
+				@add-to-playlist="onAddToPlaylist"
+			/>
 			<!-- <EntityCard v-for="entity in selectedSeries"
                 :highlighted="scrolledToLastSeries && entity.ID == showScrollToLastSeries" class="border-success"
                 :entity="entity" :key="entity.ID" /> -->
@@ -116,7 +122,7 @@ function preloadImagesForNotSelectedCategories() {
 	// }
 }
 
-preloadRouteComponents('/watch/:SID');
+// preloadRouteComponents('/watch/:SID');
 </script>
 
 <style scoped></style>

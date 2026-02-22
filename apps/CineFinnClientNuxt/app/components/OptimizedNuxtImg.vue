@@ -14,8 +14,11 @@
 			:loading="loadingAttr as any"
 			v-bind="nuxtImgAttrs"
 			:style="{ width, height }"
+			decoding="async"
 		/>
-		<div v-if="!visible" class="lazy-placeholder" :style="placeholderStyle">Loading....</div>
+		<div v-if="!visible" class="lazy-placeholder" :style="placeholderStyle">
+			<div class="skeleton-shimmer"></div>
+		</div>
 		<!-- Render NuxtImg only when visible -->
 		<!-- <NuxtImg v-if="visible" :src="(src as string)" :alt="alt" :width="width" :height="height" :sizes="sizes"
                 :format="format" :provider="provider" :loading="(loadingAttr as any)" v-bind="nuxtImgAttrs" :style="{
@@ -53,7 +56,7 @@ const props = defineProps({
 	provider: { type: String, default: undefined },
 	format: { type: String, default: undefined },
 	// IntersectionObserver options
-	rootMargin: { type: String, default: '200px' }, // pre-load slightly before visible
+	rootMargin: { type: String, default: '100px' }, // pre-load slightly before visible
 	threshold: { type: [Number, Array], default: 0 },
 	// Visual placeholder options
 	placeholderHeight: { type: String, default: '200px' },
@@ -64,11 +67,13 @@ const props = defineProps({
 	loadingAttr: { type: String, default: undefined },
 	containerClass: { type: [String, Array, Object], default: '' },
 	containerStyle: { type: [String, Object], default: '' },
+	// Eager load - bypasses lazy loading for above-fold images
+	eager: { type: Boolean, default: false },
 });
 
 // const root = ref<HTMLElement | null>(null)
 const root = useTemplateRef('root');
-const visible = ref(false);
+const visible = ref(props.eager);
 let observer: IntersectionObserver | null = null;
 
 const placeholderStyle = computed(() => ({
@@ -99,6 +104,12 @@ function trySetup() {
 	// Only run on client
 	if (!root.value) return;
 	LOGGING && console.log('Came 2');
+
+	// If eager, skip observer and show immediately
+	if (props.eager) {
+		visible.value = true;
+		return;
+	}
 
 	// If IntersectionObserver unsupported, fallback to immediate show
 	if (!('IntersectionObserver' in window)) {
@@ -144,6 +155,26 @@ onBeforeUnmount(() => {
 .lazy-placeholder {
 	width: 100%;
 	object-fit: cover;
-	background: gray;
+	background: #1f1f1f;
+	position: relative;
+	overflow: hidden;
+}
+.skeleton-shimmer {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg, #1f1f1f 25%, #2a2a2a 50%, #1f1f1f 75%);
+	background-size: 200% 100%;
+	animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+	0% {
+		background-position: 200% 0;
+	}
+	100% {
+		background-position: -200% 0;
+	}
 }
 </style>

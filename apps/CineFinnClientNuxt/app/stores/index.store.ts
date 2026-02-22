@@ -4,7 +4,7 @@ import useAPIURL from '~/hooks/useAPIURL';
 export const useIndexStore = defineStore('index', {
     state: () => ({
         loading: false,
-        series: [] as FrontendSeries[],
+        series: shallowRef<FrontendSeries[]>([]),
         detailedSerie: null as DetailedSeries | null,
         detailedSeasons: [] as DetailedSeason[],
         detailedMovies: [] as DetailedMovie[],
@@ -13,6 +13,11 @@ export const useIndexStore = defineStore('index', {
         detailedPrefetchedSeriesObj: {} as { [key: string]: DetailedSeries | true },
         watchHistory: [] as WatchHistory[],
     }),
+    getters: {
+        seriesById: (state) => {
+            return new Map(state.series.map((s) => [s.UUID, s]));
+        },
+    },
     actions: {
         async loadSeries() {
             this.loading = true;

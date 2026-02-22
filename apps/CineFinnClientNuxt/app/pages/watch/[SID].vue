@@ -441,7 +441,7 @@ if (authStore.loggedIn) {
 	]);
 }
 
-const series = computed(() => indexStore.series.find((s) => s.UUID === route.params.SID));
+const series = computed(() => indexStore.seriesById.get(route.params.SID as string));
 
 // await callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string), { mode: 'navigation' });
 // callOnce('loadWatchHistory', async () => await indexStore.loadWatchHistory(route.params.SID as string), { mode: 'navigation' });
@@ -767,7 +767,7 @@ const dynamicPopulatedContent = computed(() => {
 	if (dynamicRelatedContent.value == undefined) return [];
 	return dynamicRelatedContent.value
 		.map((id) => {
-			return indexStore.series.find((s) => s.UUID === id);
+			return indexStore.seriesById.get(id);
 		})
 		.filter((x) => x != null);
 });

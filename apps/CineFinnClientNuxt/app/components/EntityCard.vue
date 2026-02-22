@@ -1,16 +1,16 @@
 <template>
-	<div class="col" style="content-visibility: auto" :id="entity.UUID" @click="clicked">
+	<div class="col" style="content-visibility: auto; contain: content; will-change: transform;" :id="entity.UUID" @click="clicked">
 		<div class="card" :class="{ 'border-success': highlighted }">
 
 			<!-- <pre>{{ decideSeriesImage(entity, randomNumber) }}</pre> -->
 			<div v-if="!props.serverRendered">
 				<OptimizedNuxtImg style="width: 100%; height: 100%" :width="'100%'" :height="'100%'"
 					:src="decideSeriesImage(entity, randomNumber)" root-margin="500px" placeholder-height="400px"
-					class="entitycard-img" />
+					class="entitycard-img" :eager="isAboveFold" />
 			</div>
 			<div v-else>
 				<LazyOptimizedNuxtImg :src="decideSeriesImage(entity, randomNumber)" loading="lazy" root-margin="100px"
-					style="width: 100%; height: 100%" :width="'100%'" :height="'100%'" />
+					style="width: 100%; height: 100%" :width="'100%'" :height="'100%'" :eager="isAboveFold" />
 			</div>
 
 			<!-- <LazyOptimizedNuxtImg v-if="entity?.infos?.image" :src="buildCoverURL" loading="lazy" root-margin="100px"
@@ -142,13 +142,17 @@ const props = withDefaults(defineProps<{
 	showFooter?: boolean;
 	beClickable?: boolean;
 	serverRendered?: boolean;
+	index?: number;
 }>(), {
 	highlighted: false,
 	showBody: true,
 	showFooter: true,
 	beClickable: false,
 	serverRendered: false,
+	index: 0,
 });
+
+const isAboveFold = computed(() => props.index < 10);
 
 const emit = defineEmits(['addToPlaylist']);
 
@@ -158,7 +162,7 @@ const addToPlaylist = () => {
 
 
 const entity = computed(() => {
-	return indexStore.series.find((i) => i.UUID == props.seriesID)!;
+    return indexStore.seriesById.get(props.seriesID)!;
 });
 
 const editing = ref(false);
