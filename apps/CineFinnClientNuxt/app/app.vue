@@ -16,6 +16,12 @@ const authToken = useCookie('auth-token', { watch: true });
 
 const authStore = useAuthStore();
 
+useHead({
+	bodyAttrs: {
+		'data-bs-theme': 'dark',
+	},
+});
+
 onMounted(() => {
 	if (authStore.loggedIn) {
 		umIdentify({
@@ -34,7 +40,7 @@ watch(
 				username: newValue.username,
 			});
 		}
-	}
+	},
 );
 
 watch(
@@ -48,7 +54,7 @@ watch(
 		// }
 		// await useIndexStore().loadSeries();
 	},
-	{ immediate: true }
+	{ immediate: true },
 );
 </script>
 
