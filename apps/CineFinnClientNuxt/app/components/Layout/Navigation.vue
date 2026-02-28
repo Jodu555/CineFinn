@@ -53,20 +53,14 @@
 						<NuxtLink class="nav-link" active-class="active" to="/admin">Admin</NuxtLink>
 					</li>
 				</ul>
-				<div v-if="authStore.loggedIn" class="d-flex">
-					<!-- <AutoComplete
-						:options="{ placeholder: 'Search for a series...', clearAfterSelect: true }"
-						:data="autoCompleteSeries"
-						:select-fn="autocompleteSearch"
-						:prefetch-fn="autocompletePrefetch"
-					/> -->
+				<div v-if="authStore.loggedIn" class="d-flex flex-wrap align-items-center gap-2 justify-content-end">
 					<AutoComplete
 						:options="{ placeholder: 'Search for a series...', clearAfterSelect: true, asLink: true }"
 						:data="autoCompleteSeries"
 						:prefetch-fn="autocompletePrefetch"
 						:link-builder-fn="autocompleteLinkBuilder"
 					/>
-					<div class="btn-group" style="margin-left: 2rem" role="group" aria-label="Basic outlined example">
+					<div class="btn-group" role="group" aria-label="Basic outlined example">
 						<button
 							title="Settings"
 							class="btn btn-outline-primary"
