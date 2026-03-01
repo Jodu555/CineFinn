@@ -2,7 +2,7 @@
 	<div data-bs-theme="dark" class="landing-m-page">
 		<!-- ── FRANCHISE CAROUSEL ───────────────────────────────────────────────────── -->
 		<div v-if="showFranchises" class="container mt-3 shadow-lg p-2 mb-3 mt-1 rounded franchise-container">
-			<Carousel v-bind="franchiseCarouselConfig">
+			<Carousel v-bind="franchiseCarouselConfig" pre>
 				<Slide v-for="franchise in franchises" :key="franchise.id">
 					<div class="carousel-item-wrapper" style="height: 100%; width: 100%">
 						<div class="franchise-slide">
@@ -44,11 +44,16 @@
 						<font-awesome-icon :icon="['fas', 'fire']" class="row-icon text-danger" />
 						<span class="row-title">Beliebt bei dir</span>
 					</div>
-					<a href="#" class="see-all" @click.prevent="seeAllCategory('popular')"
-						>Alle ansehen <font-awesome-icon :icon="['fas', 'chevron-right']"
-					/></a>
+					<div class="carousel-nav-btns">
+						<button class="nav-arrow-btn" @click="slidePrev(carouselPopular)">
+							<font-awesome-icon icon="fa-solid fa-chevron-left" size="lg" />
+						</button>
+						<button class="nav-arrow-btn" @click="slideNext(carouselPopular)">
+							<font-awesome-icon icon="fa-solid fa-chevron-right" size="lg" />
+						</button>
+					</div>
 				</div>
-				<Carousel v-bind="carouselConfig">
+				<Carousel ref="carouselPopular" v-bind="carouselConfig">
 					<Slide v-for="item in popularForYou" :key="item.id">
 						<div class="carousel-slide-wrapper">
 							<div class="series-card" @mouseenter="item._hovered = true" @mouseleave="item._hovered = false">
@@ -83,16 +88,6 @@
 							</div>
 						</div>
 					</Slide>
-					<template #addons>
-						<Navigation>
-							<template #prev>
-								<font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-left" size="2xl" class="carousel-nav-icon" />
-							</template>
-							<template #next>
-								<font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-right" size="2xl" class="carousel-nav-icon" />
-							</template>
-						</Navigation>
-					</template>
 				</Carousel>
 			</div>
 
@@ -104,9 +99,16 @@
 						<span class="row-title">Neu & Beliebt</span>
 						<span class="badge bg-danger ms-2" style="font-size: 0.65rem">NEU</span>
 					</div>
-					<a href="#" class="see-all" @click.prevent="seeAllCategory('new')">Alle ansehen <font-awesome-icon :icon="['fas', 'chevron-right']" /></a>
+					<div class="carousel-nav-btns">
+						<button class="nav-arrow-btn" @click="slidePrev(carouselNew)">
+							<font-awesome-icon icon="fa-solid fa-chevron-left" size="lg" />
+						</button>
+						<button class="nav-arrow-btn" @click="slideNext(carouselNew)">
+							<font-awesome-icon icon="fa-solid fa-chevron-right" size="lg" />
+						</button>
+					</div>
 				</div>
-				<Carousel v-bind="carouselConfig">
+				<Carousel ref="carouselNew" v-bind="carouselConfig">
 					<Slide v-for="item in newAndPopular" :key="item.id">
 						<div class="carousel-slide-wrapper">
 							<div class="series-card" @mouseenter="item._hovered = true" @mouseleave="item._hovered = false">
@@ -142,16 +144,6 @@
 							</div>
 						</div>
 					</Slide>
-					<template #addons>
-						<Navigation>
-							<template #prev>
-								<font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-left" size="2xl" class="carousel-nav-icon" />
-							</template>
-							<template #next>
-								<font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-right" size="2xl" class="carousel-nav-icon" />
-							</template>
-						</Navigation>
-					</template>
 				</Carousel>
 			</div>
 
@@ -162,11 +154,16 @@
 						<font-awesome-icon :icon="['fas', 'film']" class="row-icon text-danger" />
 						<span class="row-title">Filme</span>
 					</div>
-					<a href="#" class="see-all" @click.prevent="seeAllCategory('movies')"
-						>Alle ansehen <font-awesome-icon :icon="['fas', 'chevron-right']"
-					/></a>
+					<div class="carousel-nav-btns">
+						<button class="nav-arrow-btn" @click="slidePrev(carouselMovies)">
+							<font-awesome-icon icon="fa-solid fa-chevron-left" size="lg" />
+						</button>
+						<button class="nav-arrow-btn" @click="slideNext(carouselMovies)">
+							<font-awesome-icon icon="fa-solid fa-chevron-right" size="lg" />
+						</button>
+					</div>
 				</div>
-				<Carousel v-bind="carouselConfig">
+				<Carousel ref="carouselMovies" v-bind="carouselConfig">
 					<Slide v-for="item in movies" :key="item.id">
 						<div class="carousel-slide-wrapper">
 							<div class="series-card" @mouseenter="item._hovered = true" @mouseleave="item._hovered = false">
@@ -201,16 +198,6 @@
 							</div>
 						</div>
 					</Slide>
-					<template #addons>
-						<Navigation>
-							<template #prev>
-								<font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-left" size="2xl" class="carousel-nav-icon" />
-							</template>
-							<template #next>
-								<font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-right" size="2xl" class="carousel-nav-icon" />
-							</template>
-						</Navigation>
-					</template>
 				</Carousel>
 			</div>
 
@@ -221,11 +208,16 @@
 						<font-awesome-icon :icon="['fas', 'tv']" class="row-icon text-danger" />
 						<span class="row-title">Serien</span>
 					</div>
-					<a href="#" class="see-all" @click.prevent="seeAllCategory('series')"
-						>Alle ansehen <font-awesome-icon :icon="['fas', 'chevron-right']"
-					/></a>
+					<div class="carousel-nav-btns">
+						<button class="nav-arrow-btn" @click="slidePrev(carouselSeries)">
+							<font-awesome-icon icon="fa-solid fa-chevron-left" size="lg" />
+						</button>
+						<button class="nav-arrow-btn" @click="slideNext(carouselSeries)">
+							<font-awesome-icon icon="fa-solid fa-chevron-right" size="lg" />
+						</button>
+					</div>
 				</div>
-				<Carousel v-bind="carouselConfig">
+				<Carousel ref="carouselSeries" v-bind="carouselConfig">
 					<Slide v-for="item in series" :key="item.id">
 						<div class="carousel-slide-wrapper">
 							<div class="series-card" @mouseenter="item._hovered = true" @mouseleave="item._hovered = false">
@@ -264,16 +256,6 @@
 							</div>
 						</div>
 					</Slide>
-					<template #addons>
-						<Navigation>
-							<template #prev>
-								<font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-left" size="2xl" class="carousel-nav-icon" />
-							</template>
-							<template #next>
-								<font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-right" size="2xl" class="carousel-nav-icon" />
-							</template>
-						</Navigation>
-					</template>
 				</Carousel>
 			</div>
 
@@ -284,9 +266,16 @@
 						<font-awesome-icon :icon="['fas', 'bookmark']" class="row-icon text-danger" />
 						<span class="row-title">Meine Liste</span>
 					</div>
-					<a href="#" class="see-all" @click.prevent="seeAllCategory('mylist')">Bearbeiten <font-awesome-icon :icon="['fas', 'pen']" /></a>
+					<div class="carousel-nav-btns">
+						<button class="nav-arrow-btn" @click="slidePrev(carouselMyList)">
+							<font-awesome-icon icon="fa-solid fa-chevron-left" size="lg" />
+						</button>
+						<button class="nav-arrow-btn" @click="slideNext(carouselMyList)">
+							<font-awesome-icon icon="fa-solid fa-chevron-right" size="lg" />
+						</button>
+					</div>
 				</div>
-				<Carousel v-bind="carouselConfig">
+				<Carousel ref="carouselMyList" v-bind="carouselConfig">
 					<Slide v-for="item in myList" :key="item.id">
 						<div class="carousel-slide-wrapper">
 							<div class="series-card" @mouseenter="item._hovered = true" @mouseleave="item._hovered = false">
@@ -321,16 +310,6 @@
 							</div>
 						</div>
 					</Slide>
-					<template #addons>
-						<Navigation>
-							<template #prev>
-								<font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-left" size="2xl" class="carousel-nav-icon" />
-							</template>
-							<template #next>
-								<font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-right" size="2xl" class="carousel-nav-icon" />
-							</template>
-						</Navigation>
-					</template>
 				</Carousel>
 			</div>
 
@@ -341,11 +320,16 @@
 						<font-awesome-icon :icon="['fas', 'clock-rotate-left']" class="row-icon text-danger" />
 						<span class="row-title">Weiterschauen</span>
 					</div>
-					<a href="#" class="see-all" @click.prevent="seeAllCategory('continue')"
-						>Alle ansehen <font-awesome-icon :icon="['fas', 'chevron-right']"
-					/></a>
+					<div class="carousel-nav-btns">
+						<button class="nav-arrow-btn" @click="slidePrev(carouselContinue)">
+							<font-awesome-icon icon="fa-solid fa-chevron-left" size="lg" />
+						</button>
+						<button class="nav-arrow-btn" @click="slideNext(carouselContinue)">
+							<font-awesome-icon icon="fa-solid fa-chevron-right" size="lg" />
+						</button>
+					</div>
 				</div>
-				<Carousel v-bind="episodeCarouselConfig">
+				<Carousel ref="carouselContinue" v-bind="episodeCarouselConfig">
 					<Slide v-for="item in continueWatching" :key="item.id">
 						<div class="carousel-slide-wrapper episode-wrapper">
 							<div class="ep-card" @mouseenter="item._hovered = true" @mouseleave="item._hovered = false" @click.stop="playEpisode(item)">
@@ -370,16 +354,6 @@
 							</div>
 						</div>
 					</Slide>
-					<template #addons>
-						<Navigation>
-							<template #prev>
-								<font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-left" size="2xl" class="carousel-nav-icon" />
-							</template>
-							<template #next>
-								<font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-right" size="2xl" class="carousel-nav-icon" />
-							</template>
-						</Navigation>
-					</template>
 				</Carousel>
 			</div>
 		</div>
@@ -392,9 +366,25 @@ definePageMeta({
 });
 
 import 'vue3-carousel/carousel.css';
-import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel';
+// import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel-nuxt';
+// import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel-nuxt';
+import Carousel from 'vue3-carousel-nuxt';
+import Slide from 'vue3-carousel-nuxt';
+// import Pagination from 'vue3-carousel-nuxt';
+// import Navigation from 'vue3-carousel-nuxt';
+import { useTemplateRef } from 'vue';
 
 const ready = ref(false);
+
+const carouselPopular = useTemplateRef<any>('carousel-popular');
+const carouselNew = useTemplateRef<any>('carousel-new');
+const carouselMovies = useTemplateRef<any>('carousel-movies');
+const carouselSeries = useTemplateRef<any>('carousel-series');
+const carouselMyList = useTemplateRef<any>('carousel-mylist');
+const carouselContinue = useTemplateRef<any>('carousel-continue');
+
+const slidePrev = (carousel: any) => carousel?.slidePrev();
+const slideNext = (carousel: any) => carousel?.slideNext();
 
 onMounted(() => {
 	ready.value = true;
@@ -1112,6 +1102,32 @@ const continueWatching = reactive<EpisodeItem[]>([
 
 .see-all:hover {
 	color: var(--cs-text);
+}
+
+.carousel-nav-btns {
+	display: flex;
+	gap: 0.5rem;
+}
+
+.nav-arrow-btn {
+	background: rgba(255, 255, 255, 0.1);
+	border: none;
+	border-radius: 50%;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--cs-text);
+	cursor: pointer;
+	transition:
+		background var(--t),
+		transform 0.15s;
+}
+
+.nav-arrow-btn:hover {
+	background: rgba(255, 255, 255, 0.25);
+	transform: scale(1.1);
 }
 
 /* ── Series Card ─────────────────────────────────────────────────────────────── */
