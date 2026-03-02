@@ -678,6 +678,7 @@ export async function crawl(job: Job) {
     //         touchedMovies: touchedMovies.size
     //     }
     // });
+    job.time('Computing StaleWatchableEntitys');
     const actualStaleWatchableEntitys = []
     if (staleWatchableEntitys.length > 0) {
         for (const UUID of staleWatchableEntitys) {
@@ -704,7 +705,8 @@ export async function crawl(job: Job) {
             }
         }
     }
-    console.log('Actual stale watchable entitys', actualStaleWatchableEntitys.length, 'of', staleWatchableEntitys.length);
+    job.timeEnd('Computing StaleWatchableEntitys');
+    job.log('Actual stale watchable entitys', actualStaleWatchableEntitys.length, 'of', staleWatchableEntitys.length);
 
 
     job.time('Deleting stale DB rows');
@@ -840,7 +842,7 @@ export async function handleSubSystemProminence(job: Job) {
             }
             job.log(`Prominent sub: ${prominentSub}`);
             watchableEntitys.filter(x => x.serie_UUID === serieUUID && x.subID !== prominentSub).forEach(watchableEntity => {
-                job.log(`Moving ${watchableEntity.UUID} from ${watchableEntity.subID} to ${prominentSub}`);
+                job.log(`Adding moving item for ${watchableEntity.UUID} from ${watchableEntity.subID} to ${prominentSub}`);
                 getMovingItems().push({
                     ID: watchableEntity.UUID,
                     serie_UUID: serieUUID,

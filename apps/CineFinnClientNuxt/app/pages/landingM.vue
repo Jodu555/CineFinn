@@ -366,12 +366,11 @@ definePageMeta({
 });
 
 import 'vue3-carousel/carousel.css';
-// import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel-nuxt';
+// TODO: IDK why this doesn't work. I have to use the non typesafe version for now
+// import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel';
 // import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel-nuxt';
 import Carousel from 'vue3-carousel-nuxt';
 import Slide from 'vue3-carousel-nuxt';
-// import Pagination from 'vue3-carousel-nuxt';
-// import Navigation from 'vue3-carousel-nuxt';
 import { useTemplateRef } from 'vue';
 
 const ready = ref(false);
