@@ -1,7 +1,9 @@
+import { useAuthCookie } from "~/composables/useAuthCookie";
+
 export default defineNuxtRouteMiddleware(async (to, from) => {
     const authStore = useAuthStore();
 
-    const authCookie = useCookie('auth-token');
+    const authCookie = useAuthCookie();
 
     const checkOnboarding = () => {
         console.log('Checking Onboarding');

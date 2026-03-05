@@ -2,6 +2,7 @@ import type { Account, SettingsObject } from '@cinefinn/types/database';
 import { defineStore } from 'pinia';
 import type { FetchError } from 'ofetch';
 import useAPIURL from '~/hooks/useAPIURL';
+import { useAuthCookie } from '~/composables/useAuthCookie';
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
@@ -23,7 +24,7 @@ export const useAuthStore = defineStore('auth', {
             }
 
             this.authToken = data.token;
-            useCookie('auth-token').value = this.authToken;
+            useAuthCookie().value = this.authToken;
             await this.authenticate(true);
         },
         async register(credentials: { username: string; password: string; token: string; }) {
@@ -40,19 +41,19 @@ export const useAuthStore = defineStore('auth', {
 
 
             this.authToken = data.token;
-            useCookie('auth-token').value = this.authToken;
+            useAuthCookie().value = this.authToken;
             await this.authenticate(true);
         },
         async authenticate(redirectToSlash = false) {
             try {
                 console.log('Authenticating user TRYING');
                 if (this.authToken == '') {
-                    this.authToken = useCookie('auth-token').value as string;
+                    this.authToken = useAuthCookie().value as string;
                 }
                 if (!this.authToken)
                     return;
                 const token = this.authToken;
-                useCookie('auth-token').value = token;
+                useAuthCookie().value = token;
 
                 const response = await $fetch<Account>(`${useAPIURL()}/auth/info`, {
                     headers: {
@@ -61,7 +62,7 @@ export const useAuthStore = defineStore('auth', {
                 });
 
                 console.log('Authenticating user', response.UUID, response.username, response.role, response.status);
-                // useCookie('auth-token').value = this.authToken;
+                // useAuthCookie().value = this.authToken;
                 this.user = response;
                 this.loggedIn = true;
 
@@ -74,7 +75,7 @@ export const useAuthStore = defineStore('auth', {
                 return response;
             } catch (error) {
                 console.log('Authenticating user FAILED', error);
-                // const authCookie = useCookie('auth-token');
+                // const authCookie = useAuthCookie();
                 // authCookie.value = '';
                 this.authToken = '';
                 this.loggedIn = false;
@@ -87,7 +88,7 @@ export const useAuthStore = defineStore('auth', {
                     'auth-token': this.authToken as string,
                 },
             });
-            const authCookie = useCookie('auth-token');
+            const authCookie = useAuthCookie();
             authCookie.value = '';
             this.authToken = '';
             this.user = null as any as Account;
