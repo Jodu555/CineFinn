@@ -1,121 +1,199 @@
 <template>
-	<div class="container">
-		<h1 class="text-center mb-3">Login - CineFinn</h1>
-		<div v-if="authStore.error != '' && !(form.usernameValid && form.passwordValid)"
-			class="alert alert-danger alert-dismissible">
-			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-			<strong>Error: <span>{{ authStore.error }}</span></strong>
-		</div>
-		<div class="row">
-			<div class="col-1"></div>
-			<div class="col-5">
-				<div class="d-flex justify-content-evenly">
-					<button type="button" class="btn btn-lg"
-						:class="{ 'btn-secondary': state === 'register', 'btn-primary': state === 'login' }"
-						@click="state = 'login'">
-						Login
-					</button>
-					<button type="button" class="btn btn-lg"
-						:class="{ 'btn-secondary': state === 'login', 'btn-primary': state === 'register' }"
-						@click="state = 'register'">
-						Register
-					</button>
-				</div>
-				<div v-if="state === 'login'" class="card mt-2">
-					<div class="card-header">Login - CineFinn</div>
-					<div class="card-body">
-						<h4 class="card-title">Login to the Cinema</h4>
-						<hr />
-						<div v-if="loading" class="d-flex justify-content-center">
-							<div class="spinner-border" role="status">
-								<span class="visually-hidden">Loading...</span>
+	<div class="login-page min-vh-100 d-flex align-items-center justify-content-center py-4">
+		<div class="container">
+			<div class="row justify-content-center">
+				<div class="col-md-8 col-lg-6">
+					<div class="card shadow-lg border-0 rounded-4">
+						<div class="card-header bg-transparent border-0 pt-4 pb-0">
+							<div class="text-center">
+								<font-awesome-icon icon="fa-solid fa-film" class="fa-3x text-primary mb-3" />
+								<h1 class="fw-bold">CineFinn</h1>
+								<p class="text-muted">Your personal streaming companion</p>
 							</div>
 						</div>
-						<form @submit.prevent="onLogin()" class="card-text" id="loginForm">
-							<fieldset>
-								<div class="form-group">
-									<InputValidator v-model="form.username" v-model:valid="form.usernameValid"
-										type="text" id="username" name="Username" autocomplete="username"
-										placeholder="Enter Username" :rules="rules.usernameRules" />
-								</div>
-								<div class="form-group">
-									<InputValidator v-model="form.password" v-model:valid="form.passwordValid"
-										type="password" id="password" name="Password" autocomplete="current-password"
-										placeholder="Enter Password" :rules="rules.passwordRules" />
-								</div>
-								<div class="d-flex justify-content-between">
-									<button type="submit" :disabled="!(form.usernameValid && form.passwordValid)"
-										class="mt-4 btn btn-primary">
-										Login
-									</button>
-									<nuxt-link to="/forgotPassword" class="mt-4">Fogot
-										Password?</nuxt-link>
-								</div>
-							</fieldset>
-						</form>
-					</div>
-				</div>
-				<div v-if="state === 'register'" class="card mt-2">
-					<div class="card-header">Register - CineFinn</div>
-					<div v-if="registerEnabled?.enabled" class="card-body">
-						<h4 class="card-title">Register to the Cinema</h4>
-						<hr />
-						<div v-if="loading" class="d-flex justify-content-center">
-							<div class="spinner-border" role="status">
-								<span class="visually-hidden">Loading...</span>
+						<div class="card-body px-4 pb-4">
+							<div v-if="authStore.error != '' && !(form.usernameValid && form.passwordValid)"
+								class="alert alert-danger alert-dismissible fade show" role="alert">
+								<font-awesome-icon icon="fa-solid fa-circle-exclamation" class="me-2" />
+								<strong>Error:</strong> {{ authStore.error }}
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 							</div>
-						</div>
-						<form @submit.prevent="onRegister()" class="card-text" id="loginForm">
-							<fieldset>
-								<div class="form-group">
-									<InputValidator v-model="form.token" v-model:valid="form.tokenValid" type="text"
-										id="token" name="Token" autocomplete="registertoken"
-										placeholder="Enter your Registration Token" :rules="rules.tokenRules" />
-								</div>
-								<div class="form-group">
-									<InputValidator v-model="form.username" v-model:valid="form.usernameValid"
-										type="text" id="username" name="Username" autocomplete="username"
-										placeholder="Enter Username" :rules="rules.usernameRules" />
-								</div>
-								<div class="form-group">
-									<InputValidator v-model="form.password" v-model:valid="form.passwordValid"
-										type="password" id="password" name="Password" autocomplete="current-password"
-										placeholder="Enter Password" :rules="rules.passwordRules" />
-								</div>
-								<button type="submit"
-									:disabled="!(form.usernameValid && form.passwordValid && form.tokenValid)"
-									class="mt-4 btn btn-primary">
+
+							<div class="d-flex justify-content-center gap-2 mb-4">
+								<button
+									type="button"
+									class="btn"
+									:class="state === 'login' ? 'btn-primary' : 'btn-outline-primary'"
+									@click="state = 'login'"
+								>
+									<font-awesome-icon icon="fa-solid fa-right-to-bracket" class="me-2" />
+									Login
+								</button>
+								<button
+									type="button"
+									class="btn"
+									:class="state === 'register' ? 'btn-primary' : 'btn-outline-primary'"
+									@click="state = 'register'"
+								>
+									<font-awesome-icon icon="fa-solid fa-user-plus" class="me-2" />
 									Register
 								</button>
-							</fieldset>
-						</form>
-					</div>
-					<div v-else class="card-body">
-						<h4 class="card-title">Registration Disabled</h4>
-						<hr />
-						<div v-if="loading" class="d-flex justify-content-center">
-							<div class="spinner-border" role="status">
-								<span class="visually-hidden">Loading...</span>
+							</div>
+
+							<div v-if="loading" class="d-flex justify-content-center my-4">
+								<div class="spinner-border text-primary" role="status">
+									<span class="visually-hidden">Loading...</span>
+								</div>
+							</div>
+
+							<div v-if="state === 'login'">
+								<form @submit.prevent="onLogin()" id="loginForm">
+									<fieldset :disabled="loading">
+										<div class="mb-3">
+											<label for="username" class="form-label">
+												<font-awesome-icon icon="fa-solid fa-user" class="me-2" />
+												Username
+											</label>
+											<InputValidator 
+												v-model="form.username" 
+												v-model:valid="form.usernameValid"
+												type="text" 
+												id="username" 
+												name="Username" 
+												autocomplete="username"
+												placeholder="Enter your username" 
+												:rules="rules.usernameRules"
+												:show-label="false"
+											/>
+										</div>
+										<div class="mb-3">
+											<label for="password" class="form-label">
+												<font-awesome-icon icon="fa-solid fa-lock" class="me-2" />
+												Password
+											</label>
+											<InputValidator 
+												v-model="form.password" 
+												v-model:valid="form.passwordValid"
+												type="password" 
+												id="password" 
+												name="Password" 
+												autocomplete="current-password"
+												placeholder="Enter your password" 
+												:rules="rules.passwordRules"
+												:show-label="false"
+											/>
+										</div>
+										<div class="d-flex justify-content-between align-items-center">
+											<button 
+												type="submit" 
+												:disabled="!(form.usernameValid && form.passwordValid)"
+												class="btn btn-primary px-4"
+											>
+												<font-awesome-icon icon="fa-solid fa-right-to-bracket" class="me-2" />
+												Login
+											</button>
+											<nuxtLink to="/forgotPassword" class="text-muted text-decoration-none small">
+												<font-awesome-icon icon="fa-solid fa-key" class="me-1" />
+												Forgot Password?
+											</nuxtLink>
+										</div>
+									</fieldset>
+								</form>
+							</div>
+
+							<div v-if="state === 'register'">
+								<div v-if="registerEnabled?.enabled">
+									<form @submit.prevent="onRegister()" id="registerForm">
+										<fieldset :disabled="loading">
+											<div class="mb-3">
+												<label for="token" class="form-label">
+													<font-awesome-icon icon="fa-solid fa-key" class="me-2" />
+													Registration Token
+												</label>
+												<InputValidator 
+													v-model="form.token" 
+													v-model:valid="form.tokenValid"
+													type="text" 
+													id="token" 
+													name="Token" 
+													autocomplete="registertoken"
+													placeholder="Enter your registration token" 
+													:rules="rules.tokenRules"
+													:show-label="false"
+												/>
+											</div>
+											<div class="mb-3">
+												<label for="regUsername" class="form-label">
+													<font-awesome-icon icon="fa-solid fa-user" class="me-2" />
+													Username
+												</label>
+												<InputValidator 
+													v-model="form.username" 
+													v-model:valid="form.usernameValid"
+													type="text" 
+													id="regUsername" 
+													name="Username" 
+													autocomplete="username"
+													placeholder="Choose a username" 
+													:rules="rules.usernameRules"
+													:show-label="false"
+												/>
+											</div>
+											<div class="mb-3">
+												<label for="regPassword" class="form-label">
+													<font-awesome-icon icon="fa-solid fa-lock" class="me-2" />
+													Password
+												</label>
+												<InputValidator 
+													v-model="form.password" 
+													v-model:valid="form.passwordValid"
+													type="password" 
+													id="regPassword" 
+													name="Password" 
+													autocomplete="new-password"
+													placeholder="Choose a password" 
+													:rules="rules.passwordRules"
+													:show-label="false"
+												/>
+											</div>
+											<button 
+												type="submit"
+												:disabled="!(form.usernameValid && form.passwordValid && form.tokenValid)"
+												class="btn btn-primary w-100"
+											>
+												<font-awesome-icon icon="fa-solid fa-user-plus" class="me-2" />
+												Create Account
+											</button>
+										</fieldset>
+									</form>
+								</div>
+								<div v-else class="text-center py-4">
+									<font-awesome-icon icon="fa-solid fa-user-slash" class="fa-3x text-danger mb-3" />
+									<h4 class="text-danger">Registration Closed</h4>
+									<p class="text-muted">
+										Registration is currently disabled. Please contact an administrator to request access.
+									</p>
+								</div>
 							</div>
 						</div>
-						<p class="text-danger h5">
-							Registration is currently disabled, please contact the administrator to get access.
+					</div>
+
+					<div class="text-center mt-4">
+						<p class="text-muted small mb-2">
+							<font-awesome-icon icon="fa-solid fa-lock" class="me-1" />
+							This area is restricted to authorized users only
+						</p>
+						<p class="text-warning small">
+							<font-awesome-icon icon="fa-solid fa-triangle-exclamation" class="me-1" />
+							New users require a valid registration token
 						</p>
 					</div>
 				</div>
 			</div>
-			<div class="col-1"></div>
-			<div class="col-4">
-				<h2 class="text-secondary text-center">
-					If you got here by accident I would recommend you to go home! <br />
-					This page is for known users only!
-					<br />
-					Which is why there is only a registration with a proprietary token!
-				</h2>
-			</div>
 		</div>
 	</div>
 </template>
+
 <script setup lang="ts">
 import useAPIURL from '~/hooks/useAPIURL';
 
@@ -181,7 +259,6 @@ const form = ref({
 async function onLogin() {
 	if (form.value.usernameValid && form.value.passwordValid) {
 		loading.value = true;
-		// await authStore.login({ username: form.value.username, password: form.value.password });
 		const { error } = await tryCatch(() => authStore.login({ username: form.value.username, password: form.value.password }))
 
 		if (error) {
@@ -223,4 +300,26 @@ async function onRegister() {
 	}
 }
 </script>
-<style></style>
+
+<style lang="scss" scoped>
+.login-page {
+	background-color: var(--bs-body-bg);
+}
+
+.card {
+	background-color: var(--bs-body-bg);
+}
+
+.btn-primary {
+	&:hover, &:focus {
+		background-color: color-mix(in oklab, var(--bs-primary) 85%, black);
+		border-color: color-mix(in oklab, var(--bs-primary) 85%, black);
+	}
+}
+
+[data-bs-theme='experimental'] {
+	.login-page {
+		background-color: oklch(0.15 0 0);
+	}
+}
+</style>
