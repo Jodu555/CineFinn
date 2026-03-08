@@ -12,29 +12,22 @@
 							</div>
 						</div>
 						<div class="card-body px-4 pb-4">
-							<div v-if="authStore.error != '' && !(form.usernameValid && form.passwordValid)"
-								class="alert alert-danger alert-dismissible fade show" role="alert">
+							<div
+								v-if="authStore.error != '' && !(form.usernameValid && form.passwordValid)"
+								class="alert alert-danger alert-dismissible fade show"
+								role="alert"
+							>
 								<font-awesome-icon icon="fa-solid fa-circle-exclamation" class="me-2" />
 								<strong>Error:</strong> {{ authStore.error }}
 								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 							</div>
 
 							<div class="d-flex justify-content-center gap-2 mb-4">
-								<button
-									type="button"
-									class="btn"
-									:class="state === 'login' ? 'btn-primary' : 'btn-outline-primary'"
-									@click="state = 'login'"
-								>
+								<button type="button" class="btn" :class="state === 'login' ? 'btn-primary' : 'btn-outline-primary'" @click="state = 'login'">
 									<font-awesome-icon icon="fa-solid fa-right-to-bracket" class="me-2" />
 									Login
 								</button>
-								<button
-									type="button"
-									class="btn"
-									:class="state === 'register' ? 'btn-primary' : 'btn-outline-primary'"
-									@click="state = 'register'"
-								>
+								<button type="button" class="btn" :class="state === 'register' ? 'btn-primary' : 'btn-outline-primary'" @click="state = 'register'">
 									<font-awesome-icon icon="fa-solid fa-user-plus" class="me-2" />
 									Register
 								</button>
@@ -54,14 +47,14 @@
 												<font-awesome-icon icon="fa-solid fa-user" class="me-2" />
 												Username
 											</label>
-											<InputValidator 
-												v-model="form.username" 
+											<InputValidator
+												v-model="form.username"
 												v-model:valid="form.usernameValid"
-												type="text" 
-												id="username" 
-												name="Username" 
+												type="text"
+												id="username"
+												name="Username"
 												autocomplete="username"
-												placeholder="Enter your username" 
+												placeholder="Enter your username"
 												:rules="rules.usernameRules"
 												:show-label="false"
 											/>
@@ -71,24 +64,20 @@
 												<font-awesome-icon icon="fa-solid fa-lock" class="me-2" />
 												Password
 											</label>
-											<InputValidator 
-												v-model="form.password" 
+											<InputValidator
+												v-model="form.password"
 												v-model:valid="form.passwordValid"
-												type="password" 
-												id="password" 
-												name="Password" 
+												type="password"
+												id="password"
+												name="Password"
 												autocomplete="current-password"
-												placeholder="Enter your password" 
+												placeholder="Enter your password"
 												:rules="rules.passwordRules"
 												:show-label="false"
 											/>
 										</div>
 										<div class="d-flex justify-content-between align-items-center">
-											<button 
-												type="submit" 
-												:disabled="!(form.usernameValid && form.passwordValid)"
-												class="btn btn-primary px-4"
-											>
+											<button type="submit" :disabled="!(form.usernameValid && form.passwordValid)" class="btn btn-primary px-4">
 												<font-awesome-icon icon="fa-solid fa-right-to-bracket" class="me-2" />
 												Login
 											</button>
@@ -110,15 +99,15 @@
 													<font-awesome-icon icon="fa-solid fa-key" class="me-2" />
 													Registration Token
 												</label>
-												<InputValidator 
-													v-model="form.token" 
+												<InputValidator
+													v-model="form.token"
 													v-model:valid="form.tokenValid"
-													type="text" 
-													id="token" 
-													name="Token" 
+													type="text"
+													id="token"
+													name="Token"
 													autocomplete="registertoken"
-													placeholder="Enter your registration token" 
-													:rules="rules.tokenRules"
+													placeholder="Enter your registration token"
+													:rules="rules.registerTokenRules"
 													:show-label="false"
 												/>
 											</div>
@@ -127,14 +116,14 @@
 													<font-awesome-icon icon="fa-solid fa-user" class="me-2" />
 													Username
 												</label>
-												<InputValidator 
-													v-model="form.username" 
+												<InputValidator
+													v-model="form.username"
 													v-model:valid="form.usernameValid"
-													type="text" 
-													id="regUsername" 
-													name="Username" 
+													type="text"
+													id="regUsername"
+													name="Username"
 													autocomplete="username"
-													placeholder="Choose a username" 
+													placeholder="Choose a username"
 													:rules="rules.usernameRules"
 													:show-label="false"
 												/>
@@ -144,23 +133,19 @@
 													<font-awesome-icon icon="fa-solid fa-lock" class="me-2" />
 													Password
 												</label>
-												<InputValidator 
-													v-model="form.password" 
+												<InputValidator
+													v-model="form.password"
 													v-model:valid="form.passwordValid"
-													type="password" 
-													id="regPassword" 
-													name="Password" 
+													type="password"
+													id="regPassword"
+													name="Password"
 													autocomplete="new-password"
-													placeholder="Choose a password" 
+													placeholder="Choose a password"
 													:rules="rules.passwordRules"
 													:show-label="false"
 												/>
 											</div>
-											<button 
-												type="submit"
-												:disabled="!(form.usernameValid && form.passwordValid && form.tokenValid)"
-												class="btn btn-primary w-100"
-											>
+											<button type="submit" :disabled="!(form.usernameValid && form.passwordValid && form.tokenValid)" class="btn btn-primary w-100">
 												<font-awesome-icon icon="fa-solid fa-user-plus" class="me-2" />
 												Create Account
 											</button>
@@ -170,9 +155,7 @@
 								<div v-else class="text-center py-4">
 									<font-awesome-icon icon="fa-solid fa-user-slash" class="fa-3x text-danger mb-3" />
 									<h4 class="text-danger">Registration Closed</h4>
-									<p class="text-muted">
-										Registration is currently disabled. Please contact an administrator to request access.
-									</p>
+									<p class="text-muted">Registration is currently disabled. Please contact an administrator to request access.</p>
 								</div>
 							</div>
 						</div>
@@ -207,7 +190,7 @@ const { data: registerEnabled, refresh } = await useFetch<{
 }>(`${useAPIURL()}/auth/registerEnabled`);
 
 const rules = {
-	tokenRules: [
+	registerTokenRules: [
 		(value: string) => !!value || 'Cannot be empty.',
 		(value: string) => value.length >= 10 || 'Must be at least 10 Characters',
 		(value: string) => value.length <= 15 || 'Must be below 15 Characters',
@@ -254,12 +237,10 @@ const form = ref({
 	tokenValid: false,
 });
 
-
-
 async function onLogin() {
 	if (form.value.usernameValid && form.value.passwordValid) {
 		loading.value = true;
-		const { error } = await tryCatch(() => authStore.login({ username: form.value.username, password: form.value.password }))
+		const { error } = await tryCatch(() => authStore.login({ username: form.value.username, password: form.value.password }));
 
 		if (error) {
 			loading.value = false;
@@ -311,7 +292,8 @@ async function onRegister() {
 }
 
 .btn-primary {
-	&:hover, &:focus {
+	&:hover,
+	&:focus {
 		background-color: color-mix(in oklab, var(--bs-primary) 85%, black);
 		border-color: color-mix(in oklab, var(--bs-primary) 85%, black);
 	}
