@@ -2,37 +2,34 @@
 	<div data-bs-theme="dark" class="landing-m-page">
 		<!-- ── FRANCHISE CAROUSEL ───────────────────────────────────────────────────── -->
 		<div v-if="showFranchises" class="container mt-3 shadow-lg p-2 mb-3 mt-1 rounded franchise-container">
-			<Carousel v-bind="franchiseCarouselConfig" pre>
-				<Slide v-for="franchise in franchises" :key="franchise.id">
-					<div class="carousel-item-wrapper" style="height: 100%; width: 100%">
-						<div class="franchise-slide">
-							<img :src="franchise.backgroundImage" class="d-block w-100 franchise-backdrop" :alt="franchise.slug" />
-							<div class="franchise-gradient-start"></div>
-							<div class="franchise-gradient-end"></div>
-							<div class="franchise-content">
-								<img :src="franchise.logo" :alt="franchise.slug" class="franchise-logo" />
-								<p class="text-secondary mt-2 mb-1">{{ franchise.description }}</p>
-								<p class="text-info mb-2">{{ franchise.contentCount }}</p>
-								<button class="btn btn-outline-info">
-									<font-awesome-icon :icon="['fas', 'circle-info']" class="me-2" />
-									Mehr Infos
-								</button>
+			<div class="franchise-carousel-wrapper">
+				<button class="franchise-nav-btn franchise-nav-prev" @click="slidePrev(franchiseCarousel)" aria-label="Previous">
+					<font-awesome-icon icon="fa-solid fa-chevron-left" size="lg" />
+				</button>
+				<Carousel ref="franchiseCarousel" v-bind="franchiseCarouselConfig">
+					<Slide v-for="franchise in franchises" :key="franchise.id">
+						<div class="carousel-item-wrapper" style="height: 100%; width: 100%">
+							<div class="franchise-slide">
+								<img :src="franchise.backgroundImage" class="d-block w-100 franchise-backdrop" :alt="franchise.slug" />
+								<div class="franchise-gradient-start"></div>
+								<div class="franchise-gradient-end"></div>
+								<div class="franchise-content">
+									<img :src="franchise.logo" :alt="franchise.slug" class="franchise-logo" />
+									<p class="text-secondary mt-2 mb-1">{{ franchise.description }}</p>
+									<p class="text-info mb-2">{{ franchise.contentCount }}</p>
+									<button class="btn btn-outline-info">
+										<font-awesome-icon :icon="['fas', 'circle-info']" class="me-2" />
+										Mehr Infos
+									</button>
+								</div>
 							</div>
 						</div>
-					</div>
-				</Slide>
-
-				<template #addons>
-					<Navigation>
-						<template #prev>
-							<font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-left" size="xl" class="carousel-nav-icon" />
-						</template>
-						<template #next>
-							<font-awesome-icon v-show="ready" icon="fa-solid fa-chevron-right" size="xl" class="carousel-nav-icon" />
-						</template>
-					</Navigation>
-				</template>
-			</Carousel>
+					</Slide>
+				</Carousel>
+				<button class="franchise-nav-btn franchise-nav-next" @click="slideNext(franchiseCarousel)" aria-label="Next">
+					<font-awesome-icon icon="fa-solid fa-chevron-right" size="lg" />
+				</button>
+			</div>
 		</div>
 
 		<!-- ── CONTENT ROWS ─────────────────────────────────────────────────────────── -->
@@ -238,6 +235,7 @@ import { useTemplateRef } from 'vue';
 
 const ready = ref(false);
 
+const franchiseCarousel = useTemplateRef<any>('franchiseCarousel');
 const carouselPopular = useTemplateRef<any>('carouselPopular');
 const carouselNew = useTemplateRef<any>('carouselNew');
 const carouselMovies = useTemplateRef<any>('carouselMovies');
@@ -317,8 +315,8 @@ const franchiseCarouselConfig = {
 	itemsToShow: 1,
 	snapAlign: 'center',
 	pauseAutoplayOnHover: true,
-	autoplay: 1000 * 2,
-	transition: 600,
+	autoplay: 1000 * 7,
+	transition: 800,
 	wrapAround: true,
 	gap: 15,
 };
@@ -354,15 +352,18 @@ const episodeCarouselConfig = {
 	gap: 24,
 	breakpoints: {
 		450: { itemsToShow: 1, snapAlign: 'center' },
-		600: { itemsToShow: 1.2, snapAlign: 'center' },
-		900: { itemsToShow: 1.8, snapAlign: 'center' },
-		1224: { itemsToShow: 2.2, snapAlign: 'start' },
-		1600: { itemsToShow: 2.8, snapAlign: 'start' },
-		1800: { itemsToShow: 3.2, snapAlign: 'start' },
-		2000: { itemsToShow: 3.5, snapAlign: 'start' },
-		2500: { itemsToShow: 4.2, snapAlign: 'start' },
-		3150: { itemsToShow: 4.8, snapAlign: 'start' },
-		3550: { itemsToShow: 5.2, snapAlign: 'start' },
+		520: { itemsToShow: 1.8, snapAlign: 'center' },
+		680: { itemsToShow: 2.0, snapAlign: 'center' },
+		780: { itemsToShow: 2.4, snapAlign: 'center' },
+		990: { itemsToShow: 3.0, snapAlign: 'center' },
+		1200: { itemsToShow: 3.6, snapAlign: 'center' },
+		1440: { itemsToShow: 4.5, snapAlign: 'start' },
+		1600: { itemsToShow: 4.8, snapAlign: 'start' },
+		1800: { itemsToShow: 5.2, snapAlign: 'start' },
+		2080: { itemsToShow: 6.5, snapAlign: 'start' },
+		2500: { itemsToShow: 7.5, snapAlign: 'start' },
+		3150: { itemsToShow: 8.5, snapAlign: 'start' },
+		3550: { itemsToShow: 9.5, snapAlign: 'start' },
 	},
 };
 
@@ -852,6 +853,60 @@ const continueWatching = reactive<EpisodeItem[]>([
 	overflow: hidden;
 }
 
+.franchise-carousel-wrapper {
+	position: relative;
+	display: flex;
+	align-items: center;
+}
+
+.franchise-carousel-wrapper .carousel {
+	flex: 1;
+}
+
+.franchise-nav-btn {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 10;
+	background: rgba(0, 0, 0, 0.65);
+	backdrop-filter: blur(8px);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	border-radius: 50%;
+	width: 44px;
+	height: 44px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--cs-text);
+	cursor: pointer;
+	transition: all var(--t);
+	opacity: 0;
+}
+
+.franchise-carousel-wrapper:hover .franchise-nav-btn {
+	opacity: 1;
+}
+
+.franchise-nav-btn:hover {
+	background: rgba(0, 0, 0, 0.85);
+	border-color: rgba(255, 255, 255, 0.35);
+	transform: translateY(-50%) scale(1.1);
+}
+
+.franchise-nav-prev {
+	left: 10px;
+}
+
+.franchise-nav-next {
+	right: 10px;
+}
+
+@media (hover: none) and (pointer: coarse) {
+	.franchise-nav-btn {
+		opacity: 1;
+	}
+}
+
 .franchise-slide {
 	position: relative;
 	height: 45vh;
@@ -888,10 +943,6 @@ const continueWatching = reactive<EpisodeItem[]>([
 	height: 5rem;
 	width: 5rem;
 	object-fit: contain;
-}
-
-.carousel-nav-icon {
-	color: white;
 }
 
 .carousel-slide-wrapper {
