@@ -80,36 +80,6 @@ export const app = new Hono({
     .route('/previewImages', previewImagesRouter)
     .route('/video', videoRouter)
 
-// app.get('*', async (c, next) => {
-
-//     const proxyables = [
-//         '/index/all',
-//         '/managment/jobs/info',
-//         '/socket.io'
-//     ];
-
-
-//     let isProxyable = false;
-//     for (const proxyable of proxyables) {
-//         if (c.req.path.startsWith(proxyable)) {
-//             isProxyable = true;
-//             break;
-//         }
-//     }
-
-//     // console.log('Came, isProxyable', c.req.path, isProxyable);
-//     if (!isProxyable) {
-//         return next();
-//     }
-
-//     const queryString = c.req.url.split('?')[1];
-
-//     const newUrl = `http://localhost:3100${c.req.path}?${queryString}&auth-token=SECR-DEV`;
-//     // const newUrl = `http://localhost:3100${c.req.path}?auth-token=SECR-DEV`;
-
-//     return proxy(newUrl);
-// });
-
 export type definedSocket = Socket<AnythingToServerEvents, ServerToAnythingEvents, InterServerEvents, SocketData<Account | (Account & timestamped)>>;
 
 const httpServer = serve({
@@ -131,7 +101,7 @@ const httpServer = serve({
                 TOKEN: 'SECR-DEV',
                 account_UUID: adminUser.UUID,
             });
-            return;
+            console.log('Creating Token for admin user', adminUser.username);
         }
     } else {
         console.log('Admin User not found');

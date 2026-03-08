@@ -38,7 +38,7 @@
 					</div>
 					<div class="card-body">
 						<ul class="list-group list-group-flush bg-transparent">
-							<ConfigItem label="Version" :value="config.version" icon="code-branch" />
+							<ConfigItem label="Config Version" :value="config.version" icon="code-branch" />
 							<ConfigItem label="API Endpoint" :value="config.system.PUBLIC_API_ENDPOINT" icon="globe" />
 							<ConfigItem label="Port" :value="config.system.PORT" icon="network-wired" />
 							<!-- Paths can be long, fixed wrapping here -->
