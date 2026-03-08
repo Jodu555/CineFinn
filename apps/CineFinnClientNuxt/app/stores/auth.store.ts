@@ -4,6 +4,8 @@ import type { FetchError } from 'ofetch';
 import useAPIURL from '~/hooks/useAPIURL';
 import { useAuthCookie } from '~/composables/useAuthCookie';
 
+const DEBUG = false;
+
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         loggedIn: false,
@@ -18,7 +20,7 @@ export const useAuthStore = defineStore('auth', {
                 body: JSON.stringify(credentials),
             }));
             if (error) {
-                console.log(error);
+                DEBUG && console.log(error);
                 this.error = error.data || 'An unknown error occurred.';
                 return;
             }
@@ -37,7 +39,7 @@ export const useAuthStore = defineStore('auth', {
                 return;
             }
 
-            console.log(data);
+            DEBUG && console.log(data);
 
 
             this.authToken = data.token;
@@ -46,7 +48,7 @@ export const useAuthStore = defineStore('auth', {
         },
         async authenticate(redirectToSlash = false) {
             try {
-                console.log('Authenticating user TRYING');
+                DEBUG && console.log('Authenticating user TRYING');
                 if (this.authToken == '') {
                     this.authToken = useAuthCookie().value as string;
                 }
@@ -61,7 +63,7 @@ export const useAuthStore = defineStore('auth', {
                     },
                 });
 
-                console.log('Authenticating user', response.UUID, response.username, response.role, response.status);
+                DEBUG && console.log('Authenticating user', response.UUID, response.username, response.role, response.status);
                 // useAuthCookie().value = this.authToken;
                 this.user = response;
                 this.loggedIn = true;
@@ -74,7 +76,7 @@ export const useAuthStore = defineStore('auth', {
 
                 return response;
             } catch (error) {
-                console.log('Authenticating user FAILED', error);
+                DEBUG && console.log('Authenticating user FAILED', error);
                 // const authCookie = useAuthCookie();
                 // authCookie.value = '';
                 this.authToken = '';

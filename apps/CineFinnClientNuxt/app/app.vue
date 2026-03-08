@@ -16,6 +16,8 @@ const authToken = useCookie('auth-token', { watch: true });
 
 const authStore = useAuthStore();
 
+await authStore.authenticate();
+
 useHead({
 	bodyAttrs: {
 		'data-bs-theme': 'dark',
