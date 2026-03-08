@@ -56,36 +56,7 @@
 				<Carousel ref="carouselPopular" v-bind="carouselConfig">
 					<Slide v-for="item in popularForYou" :key="item.id">
 						<div class="carousel-slide-wrapper">
-							<div class="series-card" @mouseenter="item._hovered = true" @mouseleave="item._hovered = false">
-								<div class="series-thumb-wrap position-relative overflow-hidden rounded-3">
-									<img :src="item.cover" class="series-thumb" :alt="item.title" loading="lazy" />
-									<div class="series-overlay" :class="{ visible: item._hovered }">
-										<div class="series-overlay-actions">
-											<button class="sov-btn sov-btn-light" @click.stop="navigateToSeries(item.id)">
-												<font-awesome-icon :icon="['fas', 'play']" />
-											</button>
-											<button class="sov-btn" @click.stop="addToList(item.id)">
-												<font-awesome-icon :icon="['fas', 'plus']" />
-											</button>
-											<button class="sov-btn ms-auto" @click.stop="showInfo(item.id)">
-												<font-awesome-icon :icon="['fas', 'chevron-down']" />
-											</button>
-										</div>
-										<p class="sov-title">{{ item.title }}</p>
-										<div class="sov-meta">
-											<span class="badge bg-secondary" style="font-size: 0.62rem">{{ item.rating }}</span>
-											<span class="sov-year">{{ yearLabel(item) }}</span>
-										</div>
-										<div class="sov-genres">
-											<span v-for="g in item.genres.slice(0, 2)" :key="g" class="genre-chip">{{ g }}</span>
-										</div>
-									</div>
-								</div>
-								<div class="series-info">
-									<p class="series-label-title">{{ item.title }}</p>
-									<p class="series-label-year">{{ yearLabel(item) }}</p>
-								</div>
-							</div>
+							<LandingSeriesCard :item="item" @navigate="navigateToSeries" @add-to-list="addToList" @show-info="showInfo" />
 						</div>
 					</Slide>
 				</Carousel>
@@ -111,37 +82,7 @@
 				<Carousel ref="carouselNew" v-bind="carouselConfig">
 					<Slide v-for="item in newAndPopular" :key="item.id">
 						<div class="carousel-slide-wrapper">
-							<div class="series-card" @mouseenter="item._hovered = true" @mouseleave="item._hovered = false">
-								<div class="series-thumb-wrap position-relative overflow-hidden rounded-3">
-									<img :src="item.cover" class="series-thumb" :alt="item.title" loading="lazy" />
-									<div class="series-overlay" :class="{ visible: item._hovered }">
-										<div class="series-overlay-actions">
-											<button class="sov-btn sov-btn-light" @click.stop="navigateToSeries(item.id)">
-												<font-awesome-icon :icon="['fas', 'play']" />
-											</button>
-											<button class="sov-btn" @click.stop="addToList(item.id)">
-												<font-awesome-icon :icon="['fas', 'plus']" />
-											</button>
-											<button class="sov-btn ms-auto" @click.stop="showInfo(item.id)">
-												<font-awesome-icon :icon="['fas', 'chevron-down']" />
-											</button>
-										</div>
-										<p class="sov-title">{{ item.title }}</p>
-										<div class="sov-meta">
-											<span class="badge bg-secondary" style="font-size: 0.62rem">{{ item.rating }}</span>
-											<span class="sov-year">{{ yearLabel(item) }}</span>
-										</div>
-										<div class="sov-genres">
-											<span v-for="g in item.genres.slice(0, 2)" :key="g" class="genre-chip">{{ g }}</span>
-										</div>
-									</div>
-									<span class="new-ribbon">NEU</span>
-								</div>
-								<div class="series-info">
-									<p class="series-label-title">{{ item.title }}</p>
-									<p class="series-label-year">{{ yearLabel(item) }}</p>
-								</div>
-							</div>
+							<LandingSeriesCard :item="item" :show-new-ribbon="true" @navigate="navigateToSeries" @add-to-list="addToList" @show-info="showInfo" />
 						</div>
 					</Slide>
 				</Carousel>
@@ -166,36 +107,7 @@
 				<Carousel ref="carouselMovies" v-bind="carouselConfig">
 					<Slide v-for="item in movies" :key="item.id">
 						<div class="carousel-slide-wrapper">
-							<div class="series-card" @mouseenter="item._hovered = true" @mouseleave="item._hovered = false">
-								<div class="series-thumb-wrap position-relative overflow-hidden rounded-3">
-									<img :src="item.cover" class="series-thumb" :alt="item.title" loading="lazy" />
-									<div class="series-overlay" :class="{ visible: item._hovered }">
-										<div class="series-overlay-actions">
-											<button class="sov-btn sov-btn-light" @click.stop="navigateToSeries(item.id)">
-												<font-awesome-icon :icon="['fas', 'play']" />
-											</button>
-											<button class="sov-btn" @click.stop="addToList(item.id)">
-												<font-awesome-icon :icon="['fas', 'plus']" />
-											</button>
-											<button class="sov-btn ms-auto" @click.stop="showInfo(item.id)">
-												<font-awesome-icon :icon="['fas', 'chevron-down']" />
-											</button>
-										</div>
-										<p class="sov-title">{{ item.title }}</p>
-										<div class="sov-meta">
-											<span class="badge bg-secondary" style="font-size: 0.62rem">{{ item.rating }}</span>
-											<span class="sov-year">{{ yearLabel(item) }}</span>
-										</div>
-										<div class="sov-genres">
-											<span v-for="g in item.genres.slice(0, 2)" :key="g" class="genre-chip">{{ g }}</span>
-										</div>
-									</div>
-								</div>
-								<div class="series-info">
-									<p class="series-label-title">{{ item.title }}</p>
-									<p class="series-label-year">{{ yearLabel(item) }}</p>
-								</div>
-							</div>
+							<LandingSeriesCard :item="item" @navigate="navigateToSeries" @add-to-list="addToList" @show-info="showInfo" />
 						</div>
 					</Slide>
 				</Carousel>
@@ -220,40 +132,13 @@
 				<Carousel ref="carouselSeries" v-bind="carouselConfig">
 					<Slide v-for="item in series" :key="item.id">
 						<div class="carousel-slide-wrapper">
-							<div class="series-card" @mouseenter="item._hovered = true" @mouseleave="item._hovered = false">
-								<div class="series-thumb-wrap position-relative overflow-hidden rounded-3">
-									<img :src="item.cover" class="series-thumb" :alt="item.title" loading="lazy" />
-									<div class="series-overlay" :class="{ visible: item._hovered }">
-										<div class="series-overlay-actions">
-											<button class="sov-btn sov-btn-light" @click.stop="navigateToSeries(item.id)">
-												<font-awesome-icon :icon="['fas', 'play']" />
-											</button>
-											<button class="sov-btn" @click.stop="addToList(item.id)">
-												<font-awesome-icon :icon="['fas', 'plus']" />
-											</button>
-											<button class="sov-btn ms-auto" @click.stop="showInfo(item.id)">
-												<font-awesome-icon :icon="['fas', 'chevron-down']" />
-											</button>
-										</div>
-										<p class="sov-title">{{ item.title }}</p>
-										<div class="sov-meta">
-											<span class="badge bg-secondary" style="font-size: 0.62rem">{{ item.rating }}</span>
-											<span class="sov-year">{{ yearLabel(item) }}</span>
-										</div>
-										<div class="sov-genres">
-											<span v-for="g in item.genres.slice(0, 2)" :key="g" class="genre-chip">{{ g }}</span>
-										</div>
-									</div>
-									<div v-if="item.episodeCount" class="episode-count-badge">
-										<font-awesome-icon :icon="['fas', 'film']" class="me-1" />
-										{{ item.episodeCount }} Folgen
-									</div>
-								</div>
-								<div class="series-info">
-									<p class="series-label-title">{{ item.title }}</p>
-									<p class="series-label-year">{{ yearLabel(item) }}</p>
-								</div>
-							</div>
+							<LandingSeriesCard
+								:item="item"
+								:show-episode-count="true"
+								@navigate="navigateToSeries"
+								@add-to-list="addToList"
+								@show-info="showInfo"
+							/>
 						</div>
 					</Slide>
 				</Carousel>
@@ -278,36 +163,13 @@
 				<Carousel ref="carouselMyList" v-bind="carouselConfig">
 					<Slide v-for="item in myList" :key="item.id">
 						<div class="carousel-slide-wrapper">
-							<div class="series-card" @mouseenter="item._hovered = true" @mouseleave="item._hovered = false">
-								<div class="series-thumb-wrap position-relative overflow-hidden rounded-3">
-									<img :src="item.cover" class="series-thumb" :alt="item.title" loading="lazy" />
-									<div class="series-overlay" :class="{ visible: item._hovered }">
-										<div class="series-overlay-actions">
-											<button class="sov-btn sov-btn-light" @click.stop="navigateToSeries(item.id)">
-												<font-awesome-icon :icon="['fas', 'play']" />
-											</button>
-											<button class="sov-btn sov-btn-danger" @click.stop="addToList(item.id)">
-												<font-awesome-icon :icon="['fas', 'minus']" />
-											</button>
-											<button class="sov-btn ms-auto" @click.stop="showInfo(item.id)">
-												<font-awesome-icon :icon="['fas', 'chevron-down']" />
-											</button>
-										</div>
-										<p class="sov-title">{{ item.title }}</p>
-										<div class="sov-meta">
-											<span class="badge bg-secondary" style="font-size: 0.62rem">{{ item.rating }}</span>
-											<span class="sov-year">{{ yearLabel(item) }}</span>
-										</div>
-										<div class="sov-genres">
-											<span v-for="g in item.genres.slice(0, 2)" :key="g" class="genre-chip">{{ g }}</span>
-										</div>
-									</div>
-								</div>
-								<div class="series-info">
-									<p class="series-label-title">{{ item.title }}</p>
-									<p class="series-label-year">{{ yearLabel(item) }}</p>
-								</div>
-							</div>
+							<LandingSeriesCard
+								:item="item"
+								:show-remove-button="true"
+								@navigate="navigateToSeries"
+								@add-to-list="addToList"
+								@show-info="showInfo"
+							/>
 						</div>
 					</Slide>
 				</Carousel>
@@ -366,6 +228,7 @@ definePageMeta({
 });
 
 import 'vue3-carousel/carousel.css';
+import LandingSeriesCard from '~/components/LandingSeriesCard.vue';
 // TODO: IDK why this doesn't work. I have to use the non typesafe version for now
 // import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel';
 // import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel-nuxt';
@@ -375,15 +238,21 @@ import { useTemplateRef } from 'vue';
 
 const ready = ref(false);
 
-const carouselPopular = useTemplateRef<any>('carousel-popular');
-const carouselNew = useTemplateRef<any>('carousel-new');
-const carouselMovies = useTemplateRef<any>('carousel-movies');
-const carouselSeries = useTemplateRef<any>('carousel-series');
-const carouselMyList = useTemplateRef<any>('carousel-mylist');
-const carouselContinue = useTemplateRef<any>('carousel-continue');
+const carouselPopular = useTemplateRef<any>('carouselPopular');
+const carouselNew = useTemplateRef<any>('carouselNew');
+const carouselMovies = useTemplateRef<any>('carouselMovies');
+const carouselSeries = useTemplateRef<any>('carouselSeries');
+const carouselMyList = useTemplateRef<any>('carouselMylist');
+const carouselContinue = useTemplateRef<any>('carouselContinue');
 
-const slidePrev = (carousel: any) => carousel?.slidePrev();
-const slideNext = (carousel: any) => carousel?.slideNext();
+const slidePrev = (carousel: any) => {
+	console.log(carousel);
+	carousel?.prev();
+};
+const slideNext = (carousel: any) => {
+	console.log(carousel);
+	carousel?.next();
+};
 
 onMounted(() => {
 	ready.value = true;
@@ -442,13 +311,6 @@ interface EpisodeItem {
 	duration: string;
 	_hovered?: boolean;
 }
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
-const yearLabel = (item: Series): string => {
-	if (!item.yearEnd) return `${item.yearStart}–`;
-	if (item.yearStart === item.yearEnd) return `${item.yearStart}`;
-	return `${item.yearStart}–${item.yearEnd}`;
-};
 
 // ── Carousel Configs ─────────────────────────────────────────────────────────
 const franchiseCarouselConfig = {
