@@ -1,12 +1,17 @@
-import type { Account, timestamped, WatchableEntity } from "@cinefinn/types/database";
+import type { Account, DetailedSeries, timestamped, WatchableEntity } from "@cinefinn/types/database";
 import { Hono } from "hono";
 import { createStorage, prefixStorage } from "unstorage";
 import { cacheRegistry } from "./admin/cache.js";
 import { authMiddleware } from "../middleware/auth.js";
+import { fullIndexStorage, indexStorage } from "./index.js";
+import { seriesTable, watchableEntitysTable } from "../database.js";
+import { app } from "../index.js";
+import { getConfig } from "../config.js";
 
 type CarouselMeta = {
-    icon: string;
+    id: string;
     title: string;
+    icon: string[];
     description: string;
     // type: 'series' | 'entity'; // horizontal or vertical
     userspecific: boolean;
@@ -18,41 +23,115 @@ type CarouselDetails = {} & CarouselMeta & (CarouselDetailsSeries | CarouselDeta
 
 interface CarouselDetailsEntity {
     type: 'entity';
-    computeFn: (user: Account) => Promise<{
-        watchTime: number;
-        entity: (WatchableEntity & timestamped);
-    }[]>;
+    computeFn: (user: Account, ctx: CarouselResponseItem[]) => CarouselEntityDetailsResult;
 }
 
 interface CarouselDetailsSeries {
     type: 'series';
-    computeFn: (user: Account) => Promise<{
-        UUID: string;
-        episodeCount: number;
-    }[]>;
+    computeFn: (user: Account, ctx: CarouselResponseItem[]) => CarouselSeriesDetailsResult;
 }
+
+type CarouselSeriesDetailsResult = Promise<{
+    UUID: string;
+    episodeCount: number;
+}[]>;
+
+type CarouselEntityDetailsResult = Promise<{
+    watchTime: number;
+    entity: (WatchableEntity & timestamped);
+}[]>;
 
 const carouselRegistry = new Map<string, CarouselDetails>();
 
+async function getNewlyAddedSeries(user: Account, ctx: CarouselResponseItem[]): CarouselSeriesDetailsResult {
+    const series = await seriesTable.get({});
+    const fullSeriesIndex = await fullIndexStorage.get('fullIndex') as any as DetailedSeries[] || [];
+    series.sort((a, b) => a.created_at - b.created_at)
+        .slice(0, 40)
+        .sort((a, b) => a.updated_at - b.updated_at)
+        .slice(0, 20);
+    return series.map(s => {
+        const fullIndexSeries = fullSeriesIndex.find(x => x.UUID == s.UUID)
+        let episodeCount = -1;
+        if (fullIndexSeries) {
+            episodeCount = fullIndexSeries.seasons.flat().length + fullIndexSeries.movies.length;
+        }
+        return {
+            UUID: s.UUID,
+            episodeCount,
+        }
+    });
+}
+
+async function getNewlyReleasedEpisodes(user: Account, ctx: CarouselResponseItem[]): CarouselEntityDetailsResult {
+    const watchableEntitys = await watchableEntitysTable.get({});
+    return watchableEntitys.sort((a, b) => a.created_at - b.created_at)
+        .slice(0, 40)
+        .sort((a, b) => a.updated_at - b.updated_at)
+        .slice(0, 25).map(w => {
+            delete (w as any).filePath;
+            return {
+                watchTime: 0,
+                entity: w,
+            }
+        });
+}
+
+async function getStillRunningSeries(user: Account, ctx: CarouselResponseItem[]): CarouselSeriesDetailsResult {
+    const newlyAddedSeriesCarousel = ctx.find(x => x.id === 'newly-added-series');
+    if (!newlyAddedSeriesCarousel) return [];
+    const ignoreSeriesList = newlyAddedSeriesCarousel.items.map(x => x.UUID);
+
+    const allSeries = await seriesTable.get();
+    const possibleSeries = allSeries.filter(s => !ignoreSeriesList.includes(s.UUID));
+
+    const seriesUpdateMap = new Map<string, number>();
+
+    const allWatchableEntitys = await watchableEntitysTable.get();
+    allWatchableEntitys
+        .filter(w => possibleSeries.find(s => s.UUID == w.serie_UUID))
+        .sort((a, b) => a.created_at - b.created_at)
+        .slice(0, 100)
+        .forEach(wacthableEntity => {
+            if (seriesUpdateMap.has(wacthableEntity.serie_UUID)) {
+                const latestTime = seriesUpdateMap.get(wacthableEntity.serie_UUID)!;
+                if (wacthableEntity.created_at > latestTime) {
+                    seriesUpdateMap.set(wacthableEntity.serie_UUID, wacthableEntity.created_at);
+                }
+            } else {
+                seriesUpdateMap.set(wacthableEntity.serie_UUID, wacthableEntity.created_at);
+            }
+        });
+
+    const fullSeriesIndex = await fullIndexStorage.get('fullIndex') as any as DetailedSeries[] || [];
+    return [...seriesUpdateMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 15).map(([UUID, time]) => {
+        const fullIndexSeries = fullSeriesIndex.find(x => x.UUID == UUID)
+        let episodeCount = -1;
+        if (fullIndexSeries) {
+            episodeCount = fullIndexSeries.seasons.flat().length + fullIndexSeries.movies.length;
+        }
+        return {
+            UUID,
+            episodeCount,
+        }
+    })
+}
+
 carouselRegistry.set('newly-added-series', {
-    icon: 'fas-fire',
+    id: 'newly-added-series',
     title: 'Neu hinzugefügt',
+    icon: ['fas', 'fire'],
     description: 'Die Top 20 neu hinzugefügten Serien',
     type: 'series',
     userspecific: false,
-    computeFn: async (user) => {
-        return [
-            {
-                UUID: 'test',
-                episodeCount: 10
-            }
-        ];
-    }
+    computeFn: getNewlyAddedSeries
 });
 
 carouselRegistry.set('watch-again', {
-    icon: 'fas-eye',
+    id: 'watch-again',
     title: 'Nochmal ansehen',
+    // icon: ['fas', 'eye'],
+    icon: ['fas', 'arrow-rotate-left'],
     description: 'Die Top 25 Serien, die du schon einmal gesehen hast',
     type: 'series',
     userspecific: true,
@@ -67,24 +146,19 @@ carouselRegistry.set('watch-again', {
 });
 
 carouselRegistry.set('still-running-series', {
-    icon: '',
+    id: 'still-running-series',
     title: 'Brand aktuell',
-    description: 'Serien, die in den letzten 4 Wochen eine neue Folge veröffentlicht haben und nicht in Neu hinzugefügten Serien enthalten sind',
+    icon: ['fas', 'tower-broadcast'],
+    description: 'Top 15 Serien, die eine neue Folge erhalten haben und nicht in Neu hinzugefügten Serien enthalten sind',
     type: 'series',
     userspecific: false,
-    computeFn: async (user) => {
-        return [
-            {
-                UUID: 'test',
-                episodeCount: 10
-            }
-        ];
-    }
+    computeFn: getStillRunningSeries
 })
 
 carouselRegistry.set('continue-watching', {
-    icon: 'fas-clock-rotate-left',
+    id: 'continue-watching',
     title: 'Weiterschauen',
+    icon: ['fas', 'clock-rotate-left'],
     description: 'Folgen bei denen du vor 90% Wiedergabe beendet hast',
     type: 'entity',
     userspecific: true,
@@ -106,29 +180,14 @@ carouselRegistry.set('continue-watching', {
     }
 })
 
-
 carouselRegistry.set('new-released-episodes', {
-    icon: 'fas-clock-rotate-left',
+    id: 'new-released-episodes',
     title: 'Neue Folgen',
+    icon: ['fas', 'bell'],
     description: 'Top 25 neu hinzugefügte Episoden',
     type: 'entity',
-    userspecific: true,
-    computeFn: async (user) => {
-        return [{
-            watchTime: 0,
-            entity: {
-                UUID: 'test',
-                serie_UUID: 'test',
-                watchable_UUID: 'test',
-                lang: 'GerDub',
-                subID: 'main',
-                filePath: 'test',
-                runtime: 150,
-                created_at: 0,
-                updated_at: 0,
-            }
-        }]
-    }
+    userspecific: false,
+    computeFn: getNewlyReleasedEpisodes
 })
 
 const recommendationStorage = createStorage<CarouselResponseItem>();
@@ -143,17 +202,16 @@ const router = new Hono()
         const output = [] as CarouselResponseItem[];
 
         for (const [carouselKey, carousel] of carouselRegistry) {
-            console.log(carouselKey, carousel);
-
-
             if (!carousel.userspecific) {
                 const cacheKey = `${carouselKey}`;
                 if (await recommendationStorage.has(cacheKey)) {
+                    console.log('Cache hit', carouselKey);
                     const cache = await recommendationStorage.get(cacheKey) as CarouselResponseItem;
                     output.push(cache);
                     continue;
                 }
-                const result = await carousel.computeFn(user);
+                console.log('Cache miss', carouselKey);
+                const result = await carousel.computeFn(user, output);
                 const responseCarousel = {
                     ...JSON.parse(JSON.stringify(carousel)),
                     items: result,
@@ -163,7 +221,7 @@ const router = new Hono()
                 await recommendationStorage.setItem(cacheKey, responseCarousel);
             } else {
 
-                const result = await carousel.computeFn(user);
+                const result = await carousel.computeFn(user, output);
 
                 const responseCarousel = {
                     ...JSON.parse(JSON.stringify(carousel)),
