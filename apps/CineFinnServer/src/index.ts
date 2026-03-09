@@ -37,6 +37,7 @@ import { metricsRouter, registerMetrics } from './middleware/ownPrometheus.js';
 import { generateEntityID } from './utils/IdGenerators.js';
 import { tryCatch } from '@cinefinn/utilities/tryCatch';
 import { previewImagesRouter } from './routes/previewImages.js';
+import { recommendationRouter } from './routes/recommendations.js';
 
 
 
@@ -78,6 +79,7 @@ export const app = new Hono({
     .route('/todo', todoRouter)
     .route('', proxyRouter)
     .route('/previewImages', previewImagesRouter)
+    .route('/recommendations', recommendationRouter)
     .route('/video', videoRouter)
 
 export type definedSocket = Socket<AnythingToServerEvents, ServerToAnythingEvents, InterServerEvents, SocketData<Account | (Account & timestamped)>>;
