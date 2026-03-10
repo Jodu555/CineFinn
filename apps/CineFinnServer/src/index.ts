@@ -23,7 +23,7 @@ import { indexRouter } from './routes/index.js';
 import * as childProcess from 'node:child_process';
 import { getConfig } from './config.js';
 import { setupSocketIO } from './sockets/index.js';
-import { getKnownSubSystems, toggleSeriesesForSubSystem } from './sockets/subsystem.socket.js';
+import { getKnownSubSystems, getSubSocketByID, toggleSeriesesForSubSystem } from './sockets/subsystem.socket.js';
 import { playlistRouter } from './routes/playlist.js';
 import { adminRouter } from './routes/admin/admin.js';
 import { todoRouter } from './routes/todo.js';
@@ -38,6 +38,7 @@ import { generateEntityID } from './utils/IdGenerators.js';
 import { tryCatch } from '@cinefinn/utilities/tryCatch';
 import { previewImagesRouter } from './routes/previewImages.js';
 import { recommendationRouter } from './routes/recommendations.js';
+import { wait } from '@cinefinn/utilities/time';
 
 
 
@@ -178,9 +179,10 @@ const httpServer = serve({
     // }
     // console.log('Average', msArr.reduce((prev, curr) => prev + curr, 0) / msArr.length);
 
-
     await fixSeasons();
-    // await insertMissingWatchableEntityRuntimes();
+
+    await wait(1000 * 15);
+    await insertMissingWatchableEntityRuntimes();
 
 
 
@@ -201,11 +203,19 @@ async function fixSeasons() {
 
 async function insertMissingWatchableEntityRuntimes() {
     console.log('Inserting Missing WatchableEntity runtimes');
-    const entitys = await watchableEntitysTable.get({ runtime: -1, subID: 'main', unique: true });
+    const entitys = await watchableEntitysTable.get({ runtime: -1, unique: true });
     let i = 0;
     for await (const entity of entitys) {
         console.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`)
-        const { data: runtime, error } = await tryCatch(() => geFileRuntime(entity.UUID));
+        if (getSubSocketByID(entity.subID) == null) continue;
+        const { data: runtime, error } = await tryCatch(() => Promise.race([
+            geFileRuntime(entity.UUID),
+            new Promise<number>((resolve, reject) => {
+                setTimeout(() => {
+                    reject('Timeout');
+                }, 1000 * 60 * 2);
+            })
+        ]));
         if (error) {
             console.error('Error getting runtime for entity', entity.UUID, error);
             continue;
