@@ -5,6 +5,7 @@ import { cacheRegistry } from "./admin/cache.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { fullIndexStorage, indexStorage } from "./index.js";
 import { seriesTable, watchableEntitysTable, watchHistoryTable } from "../database.js";
+import { queryDatabase } from "../utils.js";
 
 async function getCachedSeriesWatchableNumber(seriesUUID: string) {
     const fullSeriesIndex = await fullIndexStorage.get('fullIndex') as any as DetailedSeries[] || [];
@@ -153,6 +154,96 @@ async function getWatchAgainSeries(user: Account, ctx: CarouselResponseItem[]): 
         });
 }
 
+async function getContinueWatchingEpisodes(user: Account, ctx: CarouselResponseItem[]): CarouselEntityDetailsResult {
+    interface dbResponseRow {
+        UUID: string;
+        account_UUID: string;
+        watchable_UUID: string;
+        watchTime: number;
+        series_UUID: string;
+        watchableEntity_UUID: string;
+        episode_Idx: number;
+        season_Idx: number;
+        movie_Idx: number;
+        avg_runtime: number;
+        watched_percent: number;
+        watchableEntity: (WatchableEntity & timestamped);
+    }
+
+    const sql = `
+            SELECT
+            wh.UUID,
+            wh.account_UUID,
+            wh.watchable_UUID,
+            wh.watchTime,
+            wh.series_UUID,
+            we.\`UUID\` AS watchableEntity_UUID,
+            ep.season_IDX AS season_Idx,
+            ep.episode_IDX AS episode_Idx,
+            mo.movie_IDX AS movie_Idx,
+            AVG(we.runtime)                                    AS avg_runtime,
+            ROUND((wh.watchTime / AVG(we.runtime)) * 100, 2)  AS watched_percent,
+            JSON_OBJECT(
+                'UUID',         we.UUID,
+                'watchable_UUID', we.watchable_UUID,
+                'serie_UUID',   we.serie_UUID,
+                'lang',         we.lang,
+                'subID',        we.subID,
+                'filePath',     we.filePath,
+                'runtime',      we.runtime,
+                'created_at',   we.created_at,
+                'updated_at',   we.updated_at
+            )                                                  AS watchableEntity
+        FROM watchHistory wh
+        JOIN watchableEntitys we ON we.watchable_UUID = wh.watchable_UUID
+        LEFT JOIN episodes ep ON wh.watchable_UUID = ep.\`UUID\`
+        LEFT JOIN movies mo ON wh.watchable_UUID = mo.\`UUID\`
+        WHERE wh.account_UUID = ?
+        GROUP BY
+            wh.UUID,
+            wh.account_UUID,
+            wh.watchable_UUID,
+            wh.watchTime
+        HAVING watched_percent > ? AND watched_percent < ?
+        `
+    const betweenPercentage = [20, 80];
+    const dbResponse = await queryDatabase<dbResponseRow>(sql, [user.UUID, betweenPercentage[0], betweenPercentage[1]], ['watchableEntity']);
+
+    const seriesMap = new Map<string, dbResponseRow[]>();
+
+    dbResponse.forEach(row => {
+        if (seriesMap.has(row.series_UUID)) {
+            seriesMap.get(row.series_UUID)!.push(row);
+        } else {
+            seriesMap.set(row.series_UUID, [row]);
+        }
+    });
+
+    const output: Awaited<CarouselEntityDetailsResult> = [];
+
+    for (const [seriesUUID, rows] of seriesMap) {
+        if (rows.length === 1) {
+            output.push({
+                watchTime: rows[0]!.watchTime,
+                entity: rows[0]!.watchableEntity,
+            })
+        } else {
+            const latestRow = rows.reduce((best, current) => {
+                if (current.season_Idx > best.season_Idx) return current;
+                if (current.season_Idx === best.season_Idx && current.episode_Idx > best.episode_Idx) return current;
+                return best;
+            });
+
+            output.push({
+                watchTime: latestRow.watchTime,
+                entity: latestRow.watchableEntity,
+            });
+        }
+    }
+
+    return output;
+}
+
 carouselRegistry.set('newly-added-series', {
     order: 0,
     id: 'newly-added-series',
@@ -196,22 +287,7 @@ carouselRegistry.set('continue-watching', {
     description: 'Folgen bei denen du vor 90% Wiedergabe beendet hast',
     type: 'entity',
     userspecific: true,
-    computeFn: async (user) => {
-        return [{
-            watchTime: 10,
-            entity: {
-                UUID: 'test',
-                serie_UUID: 'test',
-                watchable_UUID: 'test',
-                lang: 'GerDub',
-                subID: 'main',
-                filePath: 'test',
-                runtime: 150,
-                created_at: 0,
-                updated_at: 0,
-            }
-        }]
-    }
+    computeFn: getContinueWatchingEpisodes
 })
 
 carouselRegistry.set('new-released-episodes', {
@@ -238,16 +314,18 @@ const router = new Hono()
 
         await Promise.all(
             carouselRegistry.entries().map(async ([carouselKey, carousel]) => {
+                console.time(carouselKey)
                 if (!carousel.userspecific) {
                     const cacheKey = `${carouselKey}`;
                     if (await recommendationStorage.has(cacheKey)) {
                         console.log('Cache hit', carouselKey);
                         const cache = await recommendationStorage.get(cacheKey) as CarouselResponseItem;
                         output.push(cache);
+                        console.timeEnd(carouselKey)
                         return;
                     }
                     console.log('Cache miss', carouselKey);
-                    console.time(carouselKey)
+
                     const result = await carousel.computeFn(user, output);
                     const responseCarousel = {
                         ...JSON.parse(JSON.stringify(carousel)),
@@ -255,11 +333,10 @@ const router = new Hono()
                     };
                     delete responseCarousel.computeFn;
                     output.push(responseCarousel)
-                    console.timeEnd(carouselKey)
                     await recommendationStorage.setItem(cacheKey, responseCarousel);
+                    console.timeEnd(carouselKey)
                     return;
                 } else {
-
                     const result = await carousel.computeFn(user, output);
 
                     const responseCarousel = {
@@ -269,6 +346,7 @@ const router = new Hono()
                     delete responseCarousel.computeFn;
 
                     output.push(responseCarousel);
+                    console.timeEnd(carouselKey)
                     return;
                 }
             })

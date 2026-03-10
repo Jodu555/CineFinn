@@ -180,7 +180,7 @@ const httpServer = serve({
 
 
     // await fixSeasons();
-    // await insertMissingWatchableEntityRuntimes();
+    await insertMissingWatchableEntityRuntimes();
 
 
 

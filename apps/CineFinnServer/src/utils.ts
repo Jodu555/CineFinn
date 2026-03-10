@@ -92,14 +92,23 @@ export async function forEachNonBlockingAsync<T>(array: T[], chunkSize: number, 
     });
 }
 
-export async function queryDatabase(query: string, values = [] as any[]) {
+export async function queryDatabase<R = any>(query: string, values = [] as any[], jsonFields = [] as string[]): Promise<R[]> {
     return new Promise<any[]>((resolve, reject) => {
         database.pool.query(query, values, (error, rows, fields) => {
             if (error) {
                 reject(error);
                 return;
             }
-            resolve(rows);
+            resolve(rows.map((e: any) => {
+                if (jsonFields.length === 0) {
+                    return e;
+                } else {
+                    jsonFields.forEach(field => {
+                        e[field] = JSON.parse(e[field]);
+                    });
+                    return e;
+                }
+            }));
         });
     })
 
