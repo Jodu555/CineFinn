@@ -15,6 +15,7 @@ import { getIO } from '../utils.js';
 import { sendSeriesReloadToAll } from '../sockets/client.socket.js';
 import { getMovingItems } from '../utils/movingItems.js';
 import { tryCatch } from '@cinefinn/utilities/tryCatch';
+import { recommendationStorage } from '../routes/recommendations.js';
 
 
 // export async function crawl(job: Job) {
@@ -790,14 +791,13 @@ export async function crawl(job: Job) {
 
     await handleSubSystemProminence(job);
 
-    job.time('Clearing Cache');
-    try { crawlerEpisodesCache.clear(); } catch (e) { }
-    try { crawlerSeriesSeasonsCache.clear(); } catch (e) { }
-    job.timeEnd('Clearing Cache');
-
 
     job.time('Invlaidating Cache');
-    await indexStorage.clear();
+    try { await crawlerEpisodesCache.clear(); } catch (e) { }
+    try { await crawlerSeriesSeasonsCache.clear(); } catch (e) { }
+
+    try { await indexStorage.clear(); } catch (e) { }
+    try { await recommendationStorage.clear(); } catch (e) { }
     job.timeEnd('Invlaidating Cache');
 
     await app.request('/index/all', {

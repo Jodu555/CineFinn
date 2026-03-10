@@ -355,4 +355,4 @@ const router = new Hono()
         return c.json(output.sort((a, b) => a.order - b.order));
     });
 
-export { router as recommendationRouter };
+export { router as recommendationRouter, recommendationStorage };
