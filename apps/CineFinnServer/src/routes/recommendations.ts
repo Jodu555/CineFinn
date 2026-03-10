@@ -255,7 +255,6 @@ carouselRegistry.set('newly-added-series', {
     computeFn: getNewlyAddedSeries
 });
 
-
 carouselRegistry.set('watch-again', {
     order: 1,
     id: 'watch-again',
@@ -305,6 +304,11 @@ const recommendationStorage = createStorage<CarouselResponseItem>();
 
 
 cacheRegistry.set('recommendations', recommendationStorage);
+
+//TODO: the ctx aware does not work cause the promise does all at the same time.
+//Solution Idea: Have the function just call the other function internally with a maybe dependence on the cache.
+
+//Confusion: continue-watching & still-running-series Are Empty and watch-again only has one.... this cant be right on the staging server
 
 const router = new Hono()
     .get("/", authMiddleware, async (c) => {
