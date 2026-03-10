@@ -44,10 +44,9 @@ type CarouselEntityDetailsResult = Promise<{
 const carouselRegistry = new Map<string, CarouselDetails>();
 
 async function getNewlyAddedSeries(user: Account, ctx: CarouselResponseItem[]): CarouselSeriesDetailsResult {
-    const series = await seriesTable.get({});
+    const series = await seriesTable.getLatest('created', {}, 40)
     const fullSeriesIndex = await fullIndexStorage.get('fullIndex') as any as DetailedSeries[] || [];
-    series.sort((a, b) => a.created_at - b.created_at)
-        .slice(0, 40)
+    series
         .sort((a, b) => a.updated_at - b.updated_at)
         .slice(0, 20);
     return series.map(s => {
@@ -64,9 +63,8 @@ async function getNewlyAddedSeries(user: Account, ctx: CarouselResponseItem[]): 
 }
 
 async function getNewlyReleasedEpisodes(user: Account, ctx: CarouselResponseItem[]): CarouselEntityDetailsResult {
-    const watchableEntitys = await watchableEntitysTable.get({});
-    return watchableEntitys.sort((a, b) => a.created_at - b.created_at)
-        .slice(0, 40)
+    const watchableEntitys = await watchableEntitysTable.getLatest('created', {}, 40);
+    return watchableEntitys
         .sort((a, b) => a.updated_at - b.updated_at)
         .slice(0, 25).map(w => {
             delete (w as any).filePath;

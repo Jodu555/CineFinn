@@ -176,11 +176,11 @@ importers:
         specifier: ^1.0.2
         version: 1.0.2(hono@4.10.3)(prom-client@15.1.3)
       '@jodu555/commandmanager':
-        specifier: ^1.5.3
-        version: 1.5.3
+        specifier: ^1.5.4
+        version: 1.5.4
       '@jodu555/mysqlapi':
-        specifier: ^4.2.1
-        version: 4.2.1
+        specifier: ^4.3.1
+        version: 4.3.1
       axios:
         specifier: ^1.12.2
         version: 1.13.1
@@ -986,14 +986,11 @@ packages:
     resolution: {integrity: sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w==}
     engines: {node: '>=18.0.0'}
 
-  '@jodu555/commandmanager@1.5.3':
-    resolution: {integrity: sha512-8Xcge6om5JzR5kpvXNWk1+mgOroO3NoxCDDUxE8TlNHyyqk0UCBbU0HhEYAucWbMf90qwrOgjDHe6Mi9Aalvpw==}
-
   '@jodu555/commandmanager@1.5.4':
     resolution: {integrity: sha512-80McTGwPnYwIWXtAg+0+wv4txy2saSJmc8hdYyd9Lzxyk0iDjB9U6Q51fXCCa2xRtFqfV+cOjVbMJuW4FCyxpA==}
 
-  '@jodu555/mysqlapi@4.2.1':
-    resolution: {integrity: sha512-56ynqdSkdKLSxeWItpd3Z03uY5cXcTZfCRb36TsLtp7YVIrbaClQ21fzvFyhf3vsO1bBTDf8OS+xEwkjCXx4sw==}
+  '@jodu555/mysqlapi@4.3.1':
+    resolution: {integrity: sha512-TBDztRffdM510EF846jrOSjoqFaLYqJC3cAMlVHdXVBh1uFPm9tMWOS16BhE492481FMCxddRhgxD0hmDSLOkw==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -5575,11 +5572,9 @@ snapshots:
     dependencies:
       minipass: 7.1.2
 
-  '@jodu555/commandmanager@1.5.3': {}
-
   '@jodu555/commandmanager@1.5.4': {}
 
-  '@jodu555/mysqlapi@4.2.1':
+  '@jodu555/mysqlapi@4.3.1':
     dependencies:
       '@types/mysql': 2.15.27
       mysql: 2.18.1
