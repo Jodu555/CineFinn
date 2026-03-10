@@ -158,6 +158,11 @@ const httpServer = serve({
 
     await handleSubSystemProminence(Job.fromDummy('crawl'));
 
+    // Warming up the cache
+    await app.request('/index/all', {
+        headers: { 'auth-token': getConfig().system.PUBLIC_API_AUTH_TOKEN },
+    });
+
     // await wait(1000)
     // const msArr = [] as number[];
     // for (let i = 0; i < 10; i++) {

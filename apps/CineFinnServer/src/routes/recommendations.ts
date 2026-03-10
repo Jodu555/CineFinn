@@ -4,11 +4,24 @@ import { createStorage, prefixStorage } from "unstorage";
 import { cacheRegistry } from "./admin/cache.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { fullIndexStorage, indexStorage } from "./index.js";
-import { seriesTable, watchableEntitysTable } from "../database.js";
-import { app } from "../index.js";
-import { getConfig } from "../config.js";
+import { seriesTable, watchableEntitysTable, watchHistoryTable } from "../database.js";
+
+async function getCachedSeriesWatchableNumber(seriesUUID: string) {
+    const fullSeriesIndex = await fullIndexStorage.get('fullIndex') as any as DetailedSeries[] || [];
+    const fullIndexSeries = fullSeriesIndex.find(x => x.UUID == seriesUUID)
+    let episodeCount = -1;
+    if (fullIndexSeries) {
+        episodeCount += fullIndexSeries.movies.length;
+        fullIndexSeries.seasons.flat().forEach(s => {
+            episodeCount += s.episodes.length;
+        })
+    }
+    return episodeCount;
+}
+
 
 type CarouselMeta = {
+    order: number;
     id: string;
     title: string;
     icon: string[];
@@ -45,21 +58,16 @@ const carouselRegistry = new Map<string, CarouselDetails>();
 
 async function getNewlyAddedSeries(user: Account, ctx: CarouselResponseItem[]): CarouselSeriesDetailsResult {
     const series = await seriesTable.getLatest('created', {}, 40)
-    const fullSeriesIndex = await fullIndexStorage.get('fullIndex') as any as DetailedSeries[] || [];
     series
         .sort((a, b) => a.updated_at - b.updated_at)
         .slice(0, 20);
-    return series.map(s => {
-        const fullIndexSeries = fullSeriesIndex.find(x => x.UUID == s.UUID)
-        let episodeCount = -1;
-        if (fullIndexSeries) {
-            episodeCount = fullIndexSeries.seasons.flat().length + fullIndexSeries.movies.length;
-        }
+
+    return await Promise.all(series.map(async s => {
         return {
             UUID: s.UUID,
-            episodeCount,
+            episodeCount: await getCachedSeriesWatchableNumber(s.UUID),
         }
-    });
+    }));
 }
 
 async function getNewlyReleasedEpisodes(user: Account, ctx: CarouselResponseItem[]): CarouselEntityDetailsResult {
@@ -85,7 +93,7 @@ async function getStillRunningSeries(user: Account, ctx: CarouselResponseItem[])
 
     const seriesUpdateMap = new Map<string, number>();
 
-    const allWatchableEntitys = await watchableEntitysTable.get();
+    const allWatchableEntitys = await watchableEntitysTable.getLatest('created', {}, 500);
     allWatchableEntitys
         .filter(w => possibleSeries.find(s => s.UUID == w.serie_UUID))
         .sort((a, b) => a.created_at - b.created_at)
@@ -102,20 +110,51 @@ async function getStillRunningSeries(user: Account, ctx: CarouselResponseItem[])
         });
 
     const fullSeriesIndex = await fullIndexStorage.get('fullIndex') as any as DetailedSeries[] || [];
-    return [...seriesUpdateMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 15).map(([UUID, time]) => {
-        const fullIndexSeries = fullSeriesIndex.find(x => x.UUID == UUID)
-        let episodeCount = -1;
-        if (fullIndexSeries) {
-            episodeCount = fullIndexSeries.seasons.flat().length + fullIndexSeries.movies.length;
-        }
+    return await Promise.all([...seriesUpdateMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 15).map(async ([UUID, time]) => {
         return {
             UUID,
-            episodeCount,
+            episodeCount: await getCachedSeriesWatchableNumber(UUID),
         }
-    })
+    }))
+}
+
+async function getWatchAgainSeries(user: Account, ctx: CarouselResponseItem[]): CarouselSeriesDetailsResult {
+    const watchHistory = await watchHistoryTable.get({ account_UUID: user.UUID });
+    // Key: Serie UUID, Value: Anzahl der Watchables gesehen.
+    const watchHistoryMap = new Map<string, number>();
+
+    watchHistory.forEach(wh => {
+        if (watchHistoryMap.has(wh.series_UUID)) {
+            watchHistoryMap.set(wh.series_UUID, watchHistoryMap.get(wh.series_UUID)! + 1);
+        } else {
+            watchHistoryMap.set(wh.series_UUID, 1);
+        }
+    });
+    const possibleSeries = await Promise.all(watchHistoryMap.keys().map(async UUID => {
+        const watchedWatchables = watchHistoryMap.get(UUID)!;
+        const watchableCount = await getCachedSeriesWatchableNumber(UUID);
+        return {
+            UUID,
+            watchedWatchables,
+            watchableCount,
+            percentage: Math.round((watchedWatchables / watchableCount) * 100),
+        }
+    }));
+
+    return possibleSeries
+        .sort((a, b) => b.percentage - a.percentage)
+        .filter(x => x.percentage > 80)
+        .slice(0, 25)
+        .map(x => {
+            return {
+                UUID: x.UUID,
+                episodeCount: x.watchableCount,
+            }
+        });
 }
 
 carouselRegistry.set('newly-added-series', {
+    order: 0,
     id: 'newly-added-series',
     title: 'Neu hinzugefügt',
     icon: ['fas', 'fire'],
@@ -125,25 +164,21 @@ carouselRegistry.set('newly-added-series', {
     computeFn: getNewlyAddedSeries
 });
 
+
 carouselRegistry.set('watch-again', {
+    order: 1,
     id: 'watch-again',
     title: 'Nochmal ansehen',
     // icon: ['fas', 'eye'],
     icon: ['fas', 'arrow-rotate-left'],
-    description: 'Die Top 25 Serien, die du schon einmal gesehen hast',
+    description: 'Die Top 25 Serien, die du schon einmal gesehen hast (80% WatchCompletion)',
     type: 'series',
     userspecific: true,
-    computeFn: async (user) => {
-        return [
-            {
-                UUID: 'test',
-                episodeCount: 10
-            }
-        ];
-    }
+    computeFn: getWatchAgainSeries
 });
 
 carouselRegistry.set('still-running-series', {
+    order: 2,
     id: 'still-running-series',
     title: 'Brand aktuell',
     icon: ['fas', 'tower-broadcast'],
@@ -154,6 +189,7 @@ carouselRegistry.set('still-running-series', {
 })
 
 carouselRegistry.set('continue-watching', {
+    order: 3,
     id: 'continue-watching',
     title: 'Weiterschauen',
     icon: ['fas', 'clock-rotate-left'],
@@ -179,6 +215,7 @@ carouselRegistry.set('continue-watching', {
 })
 
 carouselRegistry.set('new-released-episodes', {
+    order: 4,
     id: 'new-released-episodes',
     title: 'Neue Folgen',
     icon: ['fas', 'bell'],
@@ -199,40 +236,45 @@ const router = new Hono()
         const user = c.get('credentials').user;
         const output = [] as CarouselResponseItem[];
 
-        for (const [carouselKey, carousel] of carouselRegistry) {
-            if (!carousel.userspecific) {
-                const cacheKey = `${carouselKey}`;
-                if (await recommendationStorage.has(cacheKey)) {
-                    console.log('Cache hit', carouselKey);
-                    const cache = await recommendationStorage.get(cacheKey) as CarouselResponseItem;
-                    output.push(cache);
-                    continue;
+        await Promise.all(
+            carouselRegistry.entries().map(async ([carouselKey, carousel]) => {
+                if (!carousel.userspecific) {
+                    const cacheKey = `${carouselKey}`;
+                    if (await recommendationStorage.has(cacheKey)) {
+                        console.log('Cache hit', carouselKey);
+                        const cache = await recommendationStorage.get(cacheKey) as CarouselResponseItem;
+                        output.push(cache);
+                        return;
+                    }
+                    console.log('Cache miss', carouselKey);
+                    console.time(carouselKey)
+                    const result = await carousel.computeFn(user, output);
+                    const responseCarousel = {
+                        ...JSON.parse(JSON.stringify(carousel)),
+                        items: result,
+                    };
+                    delete responseCarousel.computeFn;
+                    output.push(responseCarousel)
+                    console.timeEnd(carouselKey)
+                    await recommendationStorage.setItem(cacheKey, responseCarousel);
+                    return;
+                } else {
+
+                    const result = await carousel.computeFn(user, output);
+
+                    const responseCarousel = {
+                        ...JSON.parse(JSON.stringify(carousel)),
+                        items: result,
+                    };
+                    delete responseCarousel.computeFn;
+
+                    output.push(responseCarousel);
+                    return;
                 }
-                console.log('Cache miss', carouselKey);
-                const result = await carousel.computeFn(user, output);
-                const responseCarousel = {
-                    ...JSON.parse(JSON.stringify(carousel)),
-                    items: result,
-                };
-                delete responseCarousel.computeFn;
-                output.push(responseCarousel)
-                await recommendationStorage.setItem(cacheKey, responseCarousel);
-            } else {
+            })
+        )
 
-                const result = await carousel.computeFn(user, output);
-
-                const responseCarousel = {
-                    ...JSON.parse(JSON.stringify(carousel)),
-                    items: result,
-                };
-                delete responseCarousel.computeFn;
-
-                output.push(responseCarousel);
-            }
-
-        }
-
-        return c.json(output);
+        return c.json(output.sort((a, b) => a.order - b.order));
     });
 
 export { router as recommendationRouter };
