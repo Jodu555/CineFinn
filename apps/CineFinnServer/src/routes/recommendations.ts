@@ -4,18 +4,38 @@ import { createStorage, prefixStorage } from "unstorage";
 import { cacheRegistry } from "./admin/cache.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { fullIndexStorage, indexStorage } from "./index.js";
-import { seriesTable, watchableEntitysTable, watchHistoryTable } from "../database.js";
-import { queryDatabase } from "../utils.js";
+import { episodesTable, moviesTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../database.js";
+import { forEachNonBlockingAsync, queryDatabase } from "../utils.js";
 
-async function getCachedSeriesWatchableNumber(seriesUUID: string) {
+type CacheMap = Map<string, DetailedSeries>;
+
+async function prepareCachedSeriesMap(): Promise<CacheMap> {
+    const fullSeriesMap = new Map<string, DetailedSeries>();
     const fullSeriesIndex = await fullIndexStorage.get('fullIndex') as any as DetailedSeries[] || [];
-    const fullIndexSeries = fullSeriesIndex.find(x => x.UUID == seriesUUID)
+    fullSeriesIndex.forEach(s => {
+        fullSeriesMap.set(s.UUID, s);
+    });
+    return fullSeriesMap;
+}
+
+async function getCachedSeriesWatchableNumber(seriesUUID: string, cacheMap?: CacheMap) {
+    let fullIndexSeries: DetailedSeries | undefined;
+    if (cacheMap) {
+        fullIndexSeries = cacheMap.get(seriesUUID);
+    } else {
+        const fullSeriesIndex = await fullIndexStorage.get('fullIndex') as any as DetailedSeries[] || [];
+        fullIndexSeries = fullSeriesIndex.find(x => x.UUID == seriesUUID)
+    }
     let episodeCount = -1;
     if (fullIndexSeries) {
         episodeCount += fullIndexSeries.movies.length;
         fullIndexSeries.seasons.flat().forEach(s => {
             episodeCount += s.episodes.length;
         })
+    } else {
+        const movies = await moviesTable.count({ serie_UUID: seriesUUID });
+        const episodes = await episodesTable.count({ serie_UUID: seriesUUID });
+        episodeCount = movies + episodes;
     }
     return episodeCount;
 }
@@ -37,12 +57,12 @@ type CarouselDetails = {} & CarouselMeta & (CarouselDetailsSeries | CarouselDeta
 
 interface CarouselDetailsEntity {
     type: 'entity';
-    computeFn: (user: Account, ctx: CarouselResponseItem[]) => CarouselEntityDetailsResult;
+    computeFn: (user: Account, cacheMap?: CacheMap) => CarouselEntityDetailsResult;
 }
 
 interface CarouselDetailsSeries {
     type: 'series';
-    computeFn: (user: Account, ctx: CarouselResponseItem[]) => CarouselSeriesDetailsResult;
+    computeFn: (user: Account, cacheMap?: CacheMap) => CarouselSeriesDetailsResult;
 }
 
 type CarouselSeriesDetailsResult = Promise<{
@@ -57,21 +77,22 @@ type CarouselEntityDetailsResult = Promise<{
 
 const carouselRegistry = new Map<string, CarouselDetails>();
 
-async function getNewlyAddedSeries(user: Account, ctx: CarouselResponseItem[]): CarouselSeriesDetailsResult {
-    const series = await seriesTable.getLatest('created', {}, 40)
-    series
+async function getNewlyAddedSeries(user: Account, map?: CacheMap): CarouselSeriesDetailsResult {
+    const cacheMap = map || await prepareCachedSeriesMap();
+    const fetchedSeries = await seriesTable.getLatest('created', {}, 40)
+    const series = fetchedSeries
         .sort((a, b) => a.updated_at - b.updated_at)
         .slice(0, 20);
 
     return await Promise.all(series.map(async s => {
         return {
             UUID: s.UUID,
-            episodeCount: await getCachedSeriesWatchableNumber(s.UUID),
+            episodeCount: await getCachedSeriesWatchableNumber(s.UUID, cacheMap),
         }
     }));
 }
 
-async function getNewlyReleasedEpisodes(user: Account, ctx: CarouselResponseItem[]): CarouselEntityDetailsResult {
+async function getNewlyReleasedEpisodes(user: Account): CarouselEntityDetailsResult {
     const watchableEntitys = await watchableEntitysTable.getLatest('created', {}, 40);
     return watchableEntitys
         .sort((a, b) => a.updated_at - b.updated_at)
@@ -84,19 +105,21 @@ async function getNewlyReleasedEpisodes(user: Account, ctx: CarouselResponseItem
         });
 }
 
-async function getStillRunningSeries(user: Account, ctx: CarouselResponseItem[]): CarouselSeriesDetailsResult {
-    const newlyAddedSeriesCarousel = ctx.find(x => x.id === 'newly-added-series');
-    if (!newlyAddedSeriesCarousel) return [];
-    const ignoreSeriesList = newlyAddedSeriesCarousel.items.map(x => x.UUID);
+async function getStillRunningSeries(user: Account, map?: CacheMap): CarouselSeriesDetailsResult {
+    const cacheMap = map || await prepareCachedSeriesMap();
 
-    const allSeries = await seriesTable.get();
-    const possibleSeries = allSeries.filter(s => !ignoreSeriesList.includes(s.UUID));
+    const newlyAddedSeriesCarousel = await getNewlyAddedSeries(user, cacheMap);
+    const ignoreSeriesList = new Set(...newlyAddedSeriesCarousel.map(x => x.UUID));
+
+    const seriesUUIDs = await queryDatabase<{ UUID: string }>(`SELECT UUID FROM ${seriesTable.table_name}`);
+    const possibleSeries = new Set(seriesUUIDs.map(s => s.UUID).filter(s => !ignoreSeriesList.has(s)));
 
     const seriesUpdateMap = new Map<string, number>();
 
+    // const allWatchableEntitys = await watchableEntitysTable.get();
     const allWatchableEntitys = await watchableEntitysTable.getLatest('created', {}, 500);
     allWatchableEntitys
-        .filter(w => possibleSeries.find(s => s.UUID == w.serie_UUID))
+        .filter(w => possibleSeries.has(w.serie_UUID))
         .sort((a, b) => a.created_at - b.created_at)
         .slice(0, 100)
         .forEach(wacthableEntity => {
@@ -110,17 +133,23 @@ async function getStillRunningSeries(user: Account, ctx: CarouselResponseItem[])
             }
         });
 
-    const fullSeriesIndex = await fullIndexStorage.get('fullIndex') as any as DetailedSeries[] || [];
-    return await Promise.all([...seriesUpdateMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 15).map(async ([UUID, time]) => {
-        return {
-            UUID,
-            episodeCount: await getCachedSeriesWatchableNumber(UUID),
-        }
-    }))
+    return await Promise.all(
+        [...seriesUpdateMap.entries()]
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 15)
+            .map(async ([UUID, time]) => {
+                return {
+                    UUID,
+                    episodeCount: await getCachedSeriesWatchableNumber(UUID, cacheMap),
+                }
+            })
+    );
 }
 
-async function getWatchAgainSeries(user: Account, ctx: CarouselResponseItem[]): CarouselSeriesDetailsResult {
+async function getWatchAgainSeries(user: Account, map?: CacheMap): CarouselSeriesDetailsResult {
+    const cacheMap = map || await prepareCachedSeriesMap();
     const watchHistory = await watchHistoryTable.get({ account_UUID: user.UUID });
+
     // Key: Serie UUID, Value: Anzahl der Watchables gesehen.
     const watchHistoryMap = new Map<string, number>();
 
@@ -131,18 +160,27 @@ async function getWatchAgainSeries(user: Account, ctx: CarouselResponseItem[]): 
             watchHistoryMap.set(wh.series_UUID, 1);
         }
     });
-    const possibleSeries = await Promise.all(watchHistoryMap.keys().map(async UUID => {
+
+    let count = 0;
+    const output: {
+        UUID: string;
+        watchedWatchables: number;
+        watchableCount: number;
+        percentage: number;
+    }[] = [];
+
+    await forEachNonBlockingAsync(watchHistoryMap.keys().toArray(), 50, async UUID => {
         const watchedWatchables = watchHistoryMap.get(UUID)!;
-        const watchableCount = await getCachedSeriesWatchableNumber(UUID);
-        return {
+        const watchableCount = await getCachedSeriesWatchableNumber(UUID, cacheMap);
+        output.push({
             UUID,
             watchedWatchables,
             watchableCount,
             percentage: Math.round((watchedWatchables / watchableCount) * 100),
-        }
-    }));
+        })
+    });
 
-    return possibleSeries
+    return output
         .sort((a, b) => b.percentage - a.percentage)
         .filter(x => x.percentage > 80)
         .slice(0, 25)
@@ -154,7 +192,7 @@ async function getWatchAgainSeries(user: Account, ctx: CarouselResponseItem[]): 
         });
 }
 
-async function getContinueWatchingEpisodes(user: Account, ctx: CarouselResponseItem[]): CarouselEntityDetailsResult {
+async function getContinueWatchingEpisodes(user: Account): CarouselEntityDetailsResult {
     interface dbResponseRow {
         UUID: string;
         account_UUID: string;
@@ -194,10 +232,10 @@ async function getContinueWatchingEpisodes(user: Account, ctx: CarouselResponseI
                 'created_at',   we.created_at,
                 'updated_at',   we.updated_at
             )                                                  AS watchableEntity
-        FROM watchHistory wh
-        JOIN watchableEntitys we ON we.watchable_UUID = wh.watchable_UUID
-        LEFT JOIN episodes ep ON wh.watchable_UUID = ep.\`UUID\`
-        LEFT JOIN movies mo ON wh.watchable_UUID = mo.\`UUID\`
+        FROM ${watchHistoryTable.table_name} wh
+        JOIN ${watchableEntitysTable.table_name} we ON we.watchable_UUID = wh.watchable_UUID
+        LEFT JOIN ${episodesTable.table_name} ep ON wh.watchable_UUID = ep.\`UUID\`
+        LEFT JOIN ${moviesTable.table_name} mo ON wh.watchable_UUID = mo.\`UUID\`
         WHERE wh.account_UUID = ?
         GROUP BY
             wh.UUID,
@@ -312,12 +350,16 @@ cacheRegistry.set('recommendations', recommendationStorage);
 
 const router = new Hono()
     .get("/", authMiddleware, async (c) => {
+        const cacheMap = await prepareCachedSeriesMap();
 
         const user = c.get('credentials').user;
         const output = [] as CarouselResponseItem[];
 
+        // const onlyRun = ['still-running-series'];
+
         await Promise.all(
             carouselRegistry.entries().map(async ([carouselKey, carousel]) => {
+                // if (!onlyRun.includes(carouselKey)) return;
                 console.time(carouselKey)
                 if (!carousel.userspecific) {
                     const cacheKey = `${carouselKey}`;
@@ -330,7 +372,7 @@ const router = new Hono()
                     }
                     console.log('Cache miss', carouselKey);
 
-                    const result = await carousel.computeFn(user, output);
+                    const result = await carousel.computeFn(user, cacheMap);
                     const responseCarousel = {
                         ...JSON.parse(JSON.stringify(carousel)),
                         items: result,
@@ -341,7 +383,7 @@ const router = new Hono()
                     console.timeEnd(carouselKey)
                     return;
                 } else {
-                    const result = await carousel.computeFn(user, output);
+                    const result = await carousel.computeFn(user, cacheMap);
 
                     const responseCarousel = {
                         ...JSON.parse(JSON.stringify(carousel)),

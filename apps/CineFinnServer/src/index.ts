@@ -179,10 +179,10 @@ const httpServer = serve({
     // }
     // console.log('Average', msArr.reduce((prev, curr) => prev + curr, 0) / msArr.length);
 
-    await fixSeasons();
+    // await fixSeasons();
 
-    await wait(1000 * 15);
-    await insertMissingWatchableEntityRuntimes();
+    // await wait(1000 * 15);
+    // await insertMissingWatchableEntityRuntimes();
 
 
 
