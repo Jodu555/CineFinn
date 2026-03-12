@@ -88,10 +88,7 @@ const carouselRegistry = new Map<string, CarouselDetails>();
 
 async function getNewlyAddedSeries(user: Account, meta: CarouselMeta, map?: CacheMap): CarouselSeriesDetailsResult {
     const cacheMap = map || await prepareCachedSeriesMap();
-    const fetchedSeries = await seriesTable.getLatest('created', {}, meta.returnItemsCount * 2)
-    const series = fetchedSeries
-        .sort((a, b) => a.updated_at - b.updated_at)
-        .slice(0, meta.returnItemsCount);
+    const series = await seriesTable.getLatest('created', {}, meta.returnItemsCount)
 
     return await Promise.all(series.map(async s => {
         return {
@@ -102,10 +99,9 @@ async function getNewlyAddedSeries(user: Account, meta: CarouselMeta, map?: Cach
 }
 
 async function getNewlyReleasedEpisodes(user: Account, meta: CarouselMeta): CarouselEntityDetailsResult {
-    const watchableEntitys = await watchableEntitysTable.getLatest('created', {}, meta.returnItemsCount * 2);
+    const watchableEntitys = await watchableEntitysTable.getLatest('created', {}, meta.returnItemsCount);
     return watchableEntitys
-        .sort((a, b) => a.updated_at - b.updated_at)
-        .slice(0, meta.returnItemsCount).map(w => {
+        .map(w => {
             delete (w as any).filePath;
             return {
                 watchTime: 0,
