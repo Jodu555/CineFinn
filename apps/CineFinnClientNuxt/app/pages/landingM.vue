@@ -232,6 +232,52 @@ import LandingSeriesCard from '~/components/LandingSeriesCard.vue';
 // import Carousel from 'vue3-carousel-nuxt';
 // import Slide from 'vue3-carousel-nuxt';
 import { useTemplateRef } from 'vue';
+import useAPIURL from '~/hooks/useAPIURL';
+import type { timestamped, WatchableEntity } from '@cinefinn/types/database';
+
+const authStore = useAuthStore();
+
+type AdditionalCarouselMeta = {
+	showNewRibbon?: boolean;
+	showWatchableCount?: boolean;
+};
+
+type CarouselMeta = {
+	order: number;
+	id: string;
+	title: string;
+	icon: string[];
+	description: string;
+	userspecific: boolean;
+	returnItemsCount: number;
+	additionalMeta?: AdditionalCarouselMeta;
+};
+
+type CarouselAddEntity = {
+	type: 'entity';
+	items: {
+		watchTime: number;
+		entity: WatchableEntity & timestamped;
+	}[];
+};
+
+type CarouselAddSeries = {
+	type: 'series';
+	items: {
+		UUID: string;
+		episodeCount: number;
+	}[];
+};
+
+type CarouselResponseItem = CarouselMeta & (CarouselAddEntity | CarouselAddSeries);
+
+const { data, status } = useFetch<CarouselResponseItem[]>(`${useAPIURL()}/recommendations`, {
+	key: 'recommendations',
+	server: true,
+	headers: {
+		'auth-token': authStore.authToken,
+	},
+});
 
 const ready = ref(false);
 
