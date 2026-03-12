@@ -1,3 +1,12 @@
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/bootstrap';
 @import './themes/experimental.scss';
+
+* {
+	// #090910#020202
+	--bs-body-bg: oklch(0.1436 0.0152 284.32) !important;
+	/* Very dark background */
+	--bs-body-bg-rgb: 9, 9, 16 !important;
+	/* RGB equivalent */
+	// --bs-secondary-rgb: 9, 9, 16;
+}

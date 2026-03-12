@@ -3,10 +3,10 @@
 		<!-- ── FRANCHISE CAROUSEL ───────────────────────────────────────────────────── -->
 		<div v-if="showFranchises" class="container mt-3 shadow-lg p-2 mb-3 mt-1 rounded franchise-container">
 			<div class="franchise-carousel-wrapper">
-				<button class="franchise-nav-btn franchise-nav-prev" @click="slidePrev(franchiseCarousel)" aria-label="Previous">
+				<button class="franchise-nav-btn franchise-nav-prev" @click="slidePrev(franchiseCarouselRef)" aria-label="Previous">
 					<font-awesome-icon icon="fa-solid fa-chevron-left" size="lg" />
 				</button>
-				<Carousel ref="franchiseCarousel" v-bind="franchiseCarouselConfig">
+				<Carousel ref="franchiseCarouselRef" v-bind="franchiseCarouselConfig">
 					<Slide v-for="franchise in franchises" :key="franchise.id">
 						<div class="carousel-item-wrapper" style="height: 100%; width: 100%">
 							<div class="franchise-slide">
@@ -26,7 +26,7 @@
 						</div>
 					</Slide>
 				</Carousel>
-				<button class="franchise-nav-btn franchise-nav-next" @click="slideNext(franchiseCarousel)" aria-label="Next">
+				<button class="franchise-nav-btn franchise-nav-next" @click="slideNext(franchiseCarouselRef)" aria-label="Next">
 					<font-awesome-icon icon="fa-solid fa-chevron-right" size="lg" />
 				</button>
 			</div>
@@ -34,186 +34,83 @@
 
 		<!-- ── CONTENT ROWS ─────────────────────────────────────────────────────────── -->
 		<div class="content-zone px-2 px-lg-4">
-			<!-- 1. Beliebt bei dir -->
-			<div class="content-row">
-				<div class="row-header px-2">
-					<div class="row-title-group">
-						<font-awesome-icon :icon="['fas', 'fire']" class="row-icon text-danger" />
-						<span class="row-title">Beliebt bei dir</span>
-					</div>
-					<div class="carousel-nav-btns">
-						<button class="nav-arrow-btn" @click="slidePrev(carouselPopular)">
-							<font-awesome-icon icon="fa-solid fa-chevron-left" size="lg" />
-						</button>
-						<button class="nav-arrow-btn" @click="slideNext(carouselPopular)">
-							<font-awesome-icon icon="fa-solid fa-chevron-right" size="lg" />
-						</button>
-					</div>
-				</div>
-				<Carousel ref="carouselPopular" v-bind="carouselConfig">
-					<Slide v-for="item in popularForYou" :key="item.id">
-						<div class="carousel-slide-wrapper">
-							<LandingSeriesCard :item="item" @navigate="navigateToSeries" @add-to-list="addToList" @show-info="showInfo" />
+			<!-- Dynamic carousels from API -->
+			<template v-if="carouselData!.length > 0">
+				<div v-for="carousel in carouselData" :key="carousel.id" class="content-row">
+					<div class="row-header px-2">
+						<div class="row-title-group">
+							<font-awesome-icon :icon="carousel.icon" class="row-icon text-danger" />
+							<span class="row-title">{{ carousel.title }}</span>
 						</div>
-					</Slide>
-				</Carousel>
-			</div>
-
-			<!-- 2. Neu & Beliebt -->
-			<div class="content-row">
-				<div class="row-header px-2">
-					<div class="row-title-group">
-						<font-awesome-icon :icon="['fas', 'sparkles']" class="row-icon text-danger" />
-						<span class="row-title">Neu & Beliebt</span>
-						<span class="badge bg-danger ms-2" style="font-size: 0.65rem">NEU</span>
-					</div>
-					<div class="carousel-nav-btns">
-						<button class="nav-arrow-btn" @click="slidePrev(carouselNew)">
-							<font-awesome-icon icon="fa-solid fa-chevron-left" size="lg" />
-						</button>
-						<button class="nav-arrow-btn" @click="slideNext(carouselNew)">
-							<font-awesome-icon icon="fa-solid fa-chevron-right" size="lg" />
-						</button>
-					</div>
-				</div>
-				<Carousel ref="carouselNew" v-bind="carouselConfig">
-					<Slide v-for="item in newAndPopular" :key="item.id">
-						<div class="carousel-slide-wrapper">
-							<LandingSeriesCard :item="item" :show-new-ribbon="true" @navigate="navigateToSeries" @add-to-list="addToList" @show-info="showInfo" />
+						<div class="carousel-nav-btns">
+							<button class="nav-arrow-btn" @click="slidePrev(carousel.id)">
+								<font-awesome-icon icon="fa-solid fa-chevron-left" size="lg" />
+							</button>
+							<button class="nav-arrow-btn" @click="slideNext(carousel.id)">
+								<font-awesome-icon icon="fa-solid fa-chevron-right" size="lg" />
+							</button>
 						</div>
-					</Slide>
-				</Carousel>
-			</div>
-
-			<!-- 3. Filme -->
-			<div class="content-row">
-				<div class="row-header px-2">
-					<div class="row-title-group">
-						<font-awesome-icon :icon="['fas', 'film']" class="row-icon text-danger" />
-						<span class="row-title">Filme</span>
 					</div>
-					<div class="carousel-nav-btns">
-						<button class="nav-arrow-btn" @click="slidePrev(carouselMovies)">
-							<font-awesome-icon icon="fa-solid fa-chevron-left" size="lg" />
-						</button>
-						<button class="nav-arrow-btn" @click="slideNext(carouselMovies)">
-							<font-awesome-icon icon="fa-solid fa-chevron-right" size="lg" />
-						</button>
-					</div>
-				</div>
-				<Carousel ref="carouselMovies" v-bind="carouselConfig">
-					<Slide v-for="item in movies" :key="item.id">
-						<div class="carousel-slide-wrapper">
-							<LandingSeriesCard :item="item" @navigate="navigateToSeries" @add-to-list="addToList" @show-info="showInfo" />
-						</div>
-					</Slide>
-				</Carousel>
-			</div>
-
-			<!-- 4. Serien -->
-			<div class="content-row">
-				<div class="row-header px-2">
-					<div class="row-title-group">
-						<font-awesome-icon :icon="['fas', 'tv']" class="row-icon text-danger" />
-						<span class="row-title">Serien</span>
-					</div>
-					<div class="carousel-nav-btns">
-						<button class="nav-arrow-btn" @click="slidePrev(carouselSeries)">
-							<font-awesome-icon icon="fa-solid fa-chevron-left" size="lg" />
-						</button>
-						<button class="nav-arrow-btn" @click="slideNext(carouselSeries)">
-							<font-awesome-icon icon="fa-solid fa-chevron-right" size="lg" />
-						</button>
-					</div>
-				</div>
-				<Carousel ref="carouselSeries" v-bind="carouselConfig">
-					<Slide v-for="item in series" :key="item.id">
-						<div class="carousel-slide-wrapper">
-							<LandingSeriesCard
-								:item="item"
-								:show-episode-count="true"
-								@navigate="navigateToSeries"
-								@add-to-list="addToList"
-								@show-info="showInfo"
-							/>
-						</div>
-					</Slide>
-				</Carousel>
-			</div>
-
-			<!-- 5. Meine Liste -->
-			<div class="content-row">
-				<div class="row-header px-2">
-					<div class="row-title-group">
-						<font-awesome-icon :icon="['fas', 'bookmark']" class="row-icon text-danger" />
-						<span class="row-title">Meine Liste</span>
-					</div>
-					<div class="carousel-nav-btns">
-						<button class="nav-arrow-btn" @click="slidePrev(carouselMyList)">
-							<font-awesome-icon icon="fa-solid fa-chevron-left" size="lg" />
-						</button>
-						<button class="nav-arrow-btn" @click="slideNext(carouselMyList)">
-							<font-awesome-icon icon="fa-solid fa-chevron-right" size="lg" />
-						</button>
-					</div>
-				</div>
-				<Carousel ref="carouselMyList" v-bind="carouselConfig">
-					<Slide v-for="item in myList" :key="item.id">
-						<div class="carousel-slide-wrapper">
-							<LandingSeriesCard
-								:item="item"
-								:show-remove-button="true"
-								@navigate="navigateToSeries"
-								@add-to-list="addToList"
-								@show-info="showInfo"
-							/>
-						</div>
-					</Slide>
-				</Carousel>
-			</div>
-
-			<!-- 6. Weiterschauen -->
-			<div class="content-row">
-				<div class="row-header px-2">
-					<div class="row-title-group">
-						<font-awesome-icon :icon="['fas', 'clock-rotate-left']" class="row-icon text-danger" />
-						<span class="row-title">Weiterschauen</span>
-					</div>
-					<div class="carousel-nav-btns">
-						<button class="nav-arrow-btn" @click="slidePrev(carouselContinue)">
-							<font-awesome-icon icon="fa-solid fa-chevron-left" size="lg" />
-						</button>
-						<button class="nav-arrow-btn" @click="slideNext(carouselContinue)">
-							<font-awesome-icon icon="fa-solid fa-chevron-right" size="lg" />
-						</button>
-					</div>
-				</div>
-				<Carousel ref="carouselContinue" v-bind="episodeCarouselConfig">
-					<Slide v-for="item in continueWatching" :key="item.id">
-						<div class="carousel-slide-wrapper episode-wrapper">
-							<div class="ep-card" @mouseenter="item._hovered = true" @mouseleave="item._hovered = false" @click.stop="playEpisode(item)">
-								<div class="ep-thumb-wrap position-relative overflow-hidden rounded-3">
-									<img :src="item.thumbnail" class="ep-thumb" :alt="item.episodeTitle" loading="lazy" />
-									<div class="ep-play-layer" :class="{ visible: item._hovered }">
-										<div class="ep-play-circle" @click.stop="playEpisode(item)">
-											<font-awesome-icon :icon="['fas', 'play']" />
+					<!-- Series carousel (type === 'series') -->
+					<Carousel v-if="carousel.type === 'series'" :ref="(el: any) => (carouselRefs[carousel.id] = el)" v-bind="carouselConfig">
+						<Slide v-for="item in carousel.mappedItems" :key="item.UUID">
+							<div class="carousel-slide-wrapper">
+								<LandingSeriesCard
+									:item="item"
+									:show-episode-count="carousel.additionalMeta?.showWatchableCount"
+									@navigate="navigateToSeries"
+									@add-to-list="addToList"
+									@show-info="showInfo"
+								/>
+							</div>
+						</Slide>
+					</Carousel>
+					<!-- Entity/Episode carousel (type === 'entity') -->
+					<Carousel v-else-if="carousel.type === 'entity'" :ref="(el: any) => (carouselRefs[carousel.id] = el)" v-bind="episodeCarouselConfig">
+						<Slide v-for="item in carousel.mappedItems" :key="item.id">
+							<div class="carousel-slide-wrapper episode-wrapper">
+								<div class="ep-card" @mouseenter="item._hovered = true" @mouseleave="item._hovered = false" @click.stop="playEpisode(item)">
+									<div class="ep-thumb-wrap position-relative overflow-hidden rounded-3">
+										<img :src="item.thumbnail" class="ep-thumb" :alt="item.episodeTitle" loading="lazy" />
+										<div class="ep-play-layer" :class="{ visible: item._hovered }">
+											<div class="ep-play-circle" @click.stop="playEpisode(item)">
+												<font-awesome-icon :icon="['fas', 'play']" />
+											</div>
+										</div>
+										<span class="ep-badge top-start">S{{ item.season }} E{{ item.episode }}</span>
+										<span class="ep-badge top-end">{{ item.duration }}</span>
+										<div class="ep-progress-track">
+											<div class="ep-progress-fill" :style="{ width: item.progress + '%' }"></div>
 										</div>
 									</div>
-									<span class="ep-badge top-start">S{{ item.season }} E{{ item.episode }}</span>
-									<span class="ep-badge top-end">{{ item.duration }}</span>
-									<div class="ep-progress-track">
-										<div class="ep-progress-fill" :style="{ width: item.progress + '%' }"></div>
+									<div class="ep-info">
+										<p class="ep-series">{{ item.seriesTitle }}</p>
+										<p class="ep-episode">{{ item.episodeTitle }}</p>
+										<p class="ep-pct"><font-awesome-icon :icon="['fas', 'clock']" class="me-1" />{{ item.progress }}% gesehen</p>
 									</div>
 								</div>
-								<div class="ep-info">
-									<p class="ep-series">{{ item.seriesTitle }}</p>
-									<p class="ep-episode">{{ item.episodeTitle }}</p>
-									<p class="ep-pct"><font-awesome-icon :icon="['fas', 'clock']" class="me-1" />{{ item.progress }}% gesehen</p>
-								</div>
 							</div>
-						</div>
-					</Slide>
-				</Carousel>
+						</Slide>
+					</Carousel>
+				</div>
+			</template>
+			<!-- Loading state -->
+			<div v-else-if="status === 'pending'" class="content-row">
+				<div class="row-header px-2">
+					<div class="row-title-group">
+						<font-awesome-icon :icon="['fas', 'spinner']" class="row-icon text-danger fa-spin" />
+						<span class="row-title">Laden...</span>
+					</div>
+				</div>
+			</div>
+			<!-- Error state -->
+			<div v-else-if="status === 'error'" class="content-row">
+				<div class="row-header px-2">
+					<div class="row-title-group">
+						<font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="row-icon text-danger" />
+						<span class="row-title">Fehler beim Laden der Empfehlungen</span>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -226,16 +123,12 @@ definePageMeta({
 
 import 'vue3-carousel/carousel.css';
 import LandingSeriesCard from '~/components/LandingSeriesCard.vue';
-// TODO: IDK why this doesn't work. I have to use the non typesafe version for now
-// import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel';
-// import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel-nuxt';
-// import Carousel from 'vue3-carousel-nuxt';
-// import Slide from 'vue3-carousel-nuxt';
-import { useTemplateRef } from 'vue';
 import useAPIURL from '~/hooks/useAPIURL';
-import type { timestamped, WatchableEntity } from '@cinefinn/types/database';
+import { useIndexStore } from '~/stores/index.store';
+import type { FrontendSeries, timestamped, WatchableEntity } from '@cinefinn/types/database';
 
 const authStore = useAuthStore();
+const indexStore = useIndexStore();
 
 type AdditionalCarouselMeta = {
 	showNewRibbon?: boolean;
@@ -279,42 +172,84 @@ const { data, status } = useFetch<CarouselResponseItem[]>(`${useAPIURL()}/recomm
 	},
 });
 
+const mapSeriesItem = (UUID: string): FrontendSeries | undefined => {
+	return indexStore.seriesById.get(UUID);
+};
+
+const mapEntityItem = (entity: WatchableEntity & timestamped, watchTime: number): EpisodeItem => {
+	const seriesData = indexStore.seriesById.get(entity.serie_UUID);
+	const url = new URL(useAPIURL() + `/images/${entity.serie_UUID}/previewImages/${entity.watchable_UUID}/${entity.UUID}/preview1.jpg`);
+	url.searchParams.append('auth-token', useAuthStore().authToken);
+	return {
+		id: entity.UUID,
+		seriesId: entity.serie_UUID,
+		seriesTitle: seriesData?.title || '',
+		episodeTitle: seriesData?.title || '',
+		season: 1,
+		episode: 1,
+		thumbnail: url.href,
+		progress: watchTime,
+		duration: `${Math.floor(entity.runtime / 60)} Min.`,
+	};
+};
+
+const carouselData = computed(() => {
+	if (!data.value) return [];
+	return data.value
+		.map((carousel) => {
+			if (carousel.type === 'series') {
+				return {
+					...carousel,
+					mappedItems: carousel.items.map((item) => mapSeriesItem(item.UUID)).filter(Boolean) as FrontendSeries[],
+				};
+			} else {
+				return {
+					...carousel,
+					mappedItems: carousel.items.map((item) => mapEntityItem(item.entity, item.watchTime)),
+				};
+			}
+		})
+		.sort((a, b) => a.order - b.order);
+});
+
 const ready = ref(false);
 
-const franchiseCarousel = useTemplateRef<any>('franchiseCarousel');
-const carouselPopular = useTemplateRef<any>('carouselPopular');
-const carouselNew = useTemplateRef<any>('carouselNew');
-const carouselMovies = useTemplateRef<any>('carouselMovies');
-const carouselSeries = useTemplateRef<any>('carouselSeries');
-const carouselMyList = useTemplateRef<any>('carouselMylist');
-const carouselContinue = useTemplateRef<any>('carouselContinue');
+const carouselRefs = ref<{ [key: string]: any }>({});
+const franchiseCarouselRef = ref<any>(null);
 
-const slidePrev = (carousel: any) => {
-	console.log(carousel);
-	carousel?.prev();
+const slidePrev = (carouselId?: any) => {
+	if (carouselId && typeof carouselId === 'string') {
+		carouselRefs.value[carouselId]?.prev();
+	} else {
+		carouselId?.prev();
+	}
 };
-const slideNext = (carousel: any) => {
-	console.log(carousel);
-	carousel?.next();
+const slideNext = (carouselId?: any) => {
+	if (carouselId && typeof carouselId === 'string') {
+		carouselRefs.value[carouselId]?.next();
+	} else {
+		carouselId?.next();
+	}
 };
 
-onMounted(() => {
+onMounted(async () => {
+	await indexStore.loadSeries();
 	ready.value = true;
 });
 
 const router = useRouter();
 
 // ── Navigation Helpers ──────────────────────────────────────────────────────
-const navigateToSeries = (id: number) => {
+const navigateToSeries = (id: string) => {
 	console.log('Navigate to series:', id);
 	router.push(`/watch/${id}`);
 };
 
-const addToList = (id: number) => {
+const addToList = (id: string) => {
 	console.log('Add to list:', id);
 };
 
-const showInfo = (id: number) => {
+const showInfo = (id: string) => {
 	console.log('Show info:', id);
 	router.push(`/watch/${id}`);
 };
@@ -329,23 +264,9 @@ const seeAllCategory = (category: string) => {
 	// Future: navigate to category page or open a modal
 };
 
-// ── Types ──────────────────────────────────────────────────────────────────────
-interface Series {
-	id: number;
-	title: string;
-	description: string;
-	cover: string;
-	yearStart: number;
-	yearEnd: number | null;
-	genres: string[];
-	rating: string;
-	episodeCount?: number;
-	_hovered?: boolean;
-}
-
 interface EpisodeItem {
-	id: number;
-	seriesId: number;
+	id: string;
+	seriesId: string;
 	seriesTitle: string;
 	episodeTitle: string;
 	season: number;
@@ -446,423 +367,7 @@ const franchises = ref([
 	},
 ]);
 
-// ── Beliebt bei dir ─────────────────────────────────────────────────────────
-const popularForYou = reactive<Series[]>([
-	{
-		id: 100,
-		title: 'Dark Horizons',
-		description: '',
-		cover: 'https://picsum.photos/seed/pf100/460/500',
-		yearStart: 2019,
-		yearEnd: 2024,
-		genres: ['Sci-Fi', 'Thriller'],
-		rating: '16+',
-	},
-	{
-		id: 101,
-		title: 'Waldgeister',
-		description: '',
-		cover: 'https://picsum.photos/seed/pf101/460/500',
-		yearStart: 2018,
-		yearEnd: 2023,
-		genres: ['Fantasy', 'Drama'],
-		rating: '12+',
-	},
-	{
-		id: 102,
-		title: 'Neon City',
-		description: '',
-		cover: 'https://picsum.photos/seed/pf102/460/500',
-		yearStart: 2020,
-		yearEnd: 2022,
-		genres: ['Sci-Fi', 'Krimi'],
-		rating: '16+',
-	},
-	{
-		id: 103,
-		title: 'Blutlinie',
-		description: '',
-		cover: 'https://picsum.photos/seed/pf103/460/500',
-		yearStart: 2021,
-		yearEnd: 2024,
-		genres: ['Drama', 'Thriller'],
-		rating: '18+',
-	},
-	{
-		id: 104,
-		title: 'Quantensprung',
-		description: '',
-		cover: 'https://picsum.photos/seed/pf104/460/500',
-		yearStart: 2022,
-		yearEnd: 2024,
-		genres: ['Sci-Fi'],
-		rating: '16+',
-	},
-	{
-		id: 105,
-		title: 'Stellar Abyss',
-		description: '',
-		cover: 'https://picsum.photos/seed/pf105/460/500',
-		yearStart: 2023,
-		yearEnd: null,
-		genres: ['Sci-Fi', 'Drama'],
-		rating: '12+',
-	},
-	{
-		id: 106,
-		title: 'Grenzland',
-		description: '',
-		cover: 'https://picsum.photos/seed/pf106/460/500',
-		yearStart: 2010,
-		yearEnd: 2023,
-		genres: ['Drama'],
-		rating: '16+',
-		episodeCount: 312,
-	},
-]);
-
-// ── Neu & Beliebt ─────────────────────────────────────────────────────────
-const newAndPopular = reactive<Series[]>([
-	{
-		id: 200,
-		title: 'Die Küstenräuber',
-		description: '',
-		cover: 'https://picsum.photos/seed/na10/460/500',
-		yearStart: 2025,
-		yearEnd: null,
-		genres: ['Abenteuer', 'Drama'],
-		rating: '16+',
-	},
-	{
-		id: 201,
-		title: 'Cybergeist',
-		description: '',
-		cover: 'https://picsum.photos/seed/na11/460/500',
-		yearStart: 2025,
-		yearEnd: null,
-		genres: ['Sci-Fi', 'Krimi'],
-		rating: '12+',
-	},
-	{
-		id: 202,
-		title: 'Feuertaufe',
-		description: '',
-		cover: 'https://picsum.photos/seed/na12/460/500',
-		yearStart: 2025,
-		yearEnd: null,
-		genres: ['Action', 'Drama'],
-		rating: '16+',
-	},
-	{
-		id: 203,
-		title: 'Mondschatten',
-		description: '',
-		cover: 'https://picsum.photos/seed/na13/460/500',
-		yearStart: 2025,
-		yearEnd: null,
-		genres: ['Sci-Fi', 'Mystery'],
-		rating: '12+',
-	},
-	{
-		id: 204,
-		title: 'Das Labyrinth',
-		description: '',
-		cover: 'https://picsum.photos/seed/na14/460/500',
-		yearStart: 2025,
-		yearEnd: null,
-		genres: ['Thriller', 'Mystery'],
-		rating: '18+',
-	},
-	{
-		id: 205,
-		title: 'Eiszeit',
-		description: '',
-		cover: 'https://picsum.photos/seed/na15/460/500',
-		yearStart: 2025,
-		yearEnd: null,
-		genres: ['Sci-Fi', 'Drama'],
-		rating: '16+',
-	},
-	{
-		id: 206,
-		title: 'Stadtgold',
-		description: '',
-		cover: 'https://picsum.photos/seed/na16/460/500',
-		yearStart: 2025,
-		yearEnd: null,
-		genres: ['Drama'],
-		rating: '12+',
-	},
-]);
-
-// ── Filme ───────────────────────────────────────────────────────────────────
-const movies = reactive<Series[]>([
-	{
-		id: 300,
-		title: 'Der Letzte Ritter',
-		description: '',
-		cover: 'https://picsum.photos/seed/mv300/460/500',
-		yearStart: 2024,
-		yearEnd: null,
-		genres: ['Action', 'Fantasy'],
-		rating: '12+',
-	},
-	{
-		id: 301,
-		title: 'Nachtschwärmer',
-		description: '',
-		cover: 'https://picsum.photos/seed/mv301/460/500',
-		yearStart: 2024,
-		yearEnd: null,
-		genres: ['Thriller', 'Krimi'],
-		rating: '16+',
-	},
-	{
-		id: 302,
-		title: 'Sonnenuntergang',
-		description: '',
-		cover: 'https://picsum.photos/seed/mv302/460/500',
-		yearStart: 2023,
-		yearEnd: null,
-		genres: ['Drama', 'Romantik'],
-		rating: '12+',
-	},
-	{
-		id: 303,
-		title: 'Metal Storm',
-		description: '',
-		cover: 'https://picsum.photos/seed/mv303/460/500',
-		yearStart: 2024,
-		yearEnd: null,
-		genres: ['Action', 'Sci-Fi'],
-		rating: '16+',
-	},
-	{
-		id: 304,
-		title: 'Das Geheimnis',
-		description: '',
-		cover: 'https://picsum.photos/seed/mv304/460/500',
-		yearStart: 2023,
-		yearEnd: null,
-		genres: ['Mystery', 'Thriller'],
-		rating: '14+',
-	},
-	{
-		id: 305,
-		title: 'Freaks',
-		description: '',
-		cover: 'https://picsum.photos/seed/mv305/460/500',
-		yearStart: 2024,
-		yearEnd: null,
-		genres: ['Horror', 'Thriller'],
-		rating: '18+',
-	},
-]);
-
-// ── Serien ───────────────────────────────────────────────────────────────────
-const series = reactive<Series[]>([
-	{
-		id: 400,
-		title: 'Grenzland',
-		description: '',
-		cover: 'https://picsum.photos/seed/se400/460/500',
-		yearStart: 2010,
-		yearEnd: 2023,
-		genres: ['Drama'],
-		rating: '16+',
-		episodeCount: 312,
-	},
-	{
-		id: 401,
-		title: 'Precinct 9',
-		description: '',
-		cover: 'https://picsum.photos/seed/se401/460/500',
-		yearStart: 2008,
-		yearEnd: 2021,
-		genres: ['Krimi', 'Drama'],
-		rating: '18+',
-		episodeCount: 284,
-	},
-	{
-		id: 402,
-		title: 'Himmel & Erde',
-		description: '',
-		cover: 'https://picsum.photos/seed/se402/460/500',
-		yearStart: 2015,
-		yearEnd: 2022,
-		genres: ['History', 'Drama'],
-		rating: '18+',
-		episodeCount: 156,
-	},
-	{
-		id: 403,
-		title: 'Klinikum 12',
-		description: '',
-		cover: 'https://picsum.photos/seed/se403/460/500',
-		yearStart: 2012,
-		yearEnd: 2025,
-		genres: ['Drama', 'Medical'],
-		rating: '16+',
-		episodeCount: 420,
-	},
-	{
-		id: 404,
-		title: 'Codebreaker',
-		description: '',
-		cover: 'https://picsum.photos/seed/se404/460/500',
-		yearStart: 2016,
-		yearEnd: 2024,
-		genres: ['Thriller', 'Sci-Fi'],
-		rating: '16+',
-		episodeCount: 198,
-	},
-	{
-		id: 405,
-		title: 'Dynastien',
-		description: '',
-		cover: 'https://picsum.photos/seed/se405/460/500',
-		yearStart: 2014,
-		yearEnd: 2023,
-		genres: ['History', 'Drama'],
-		rating: '16+',
-		episodeCount: 240,
-	},
-]);
-
-// ── Meine Liste ────────────────────────────────────────────────────────────
-const myList = reactive<Series[]>([
-	{
-		id: 500,
-		title: 'Schattenläufer',
-		description: '',
-		cover: 'https://picsum.photos/seed/ml60/460/500',
-		yearStart: 2023,
-		yearEnd: null,
-		genres: ['Thriller'],
-		rating: '16+',
-	},
-	{
-		id: 501,
-		title: 'Mondschatten',
-		description: '',
-		cover: 'https://picsum.photos/seed/ml61/460/500',
-		yearStart: 2025,
-		yearEnd: null,
-		genres: ['Sci-Fi', 'Mystery'],
-		rating: '12+',
-	},
-	{
-		id: 502,
-		title: 'Klinikum 12',
-		description: '',
-		cover: 'https://picsum.photos/seed/ml62/460/500',
-		yearStart: 2012,
-		yearEnd: 2025,
-		genres: ['Drama', 'Medical'],
-		rating: '16+',
-	},
-	{
-		id: 503,
-		title: 'Lichtjahre',
-		description: '',
-		cover: 'https://picsum.photos/seed/ml63/460/500',
-		yearStart: 2024,
-		yearEnd: null,
-		genres: ['Sci-Fi', 'Mystery'],
-		rating: '12+',
-	},
-	{
-		id: 504,
-		title: 'Eisenbahn der Seelen',
-		description: '',
-		cover: 'https://picsum.photos/seed/ml64/460/500',
-		yearStart: 2023,
-		yearEnd: null,
-		genres: ['Drama', 'Fantasy'],
-		rating: '12+',
-	},
-	{
-		id: 505,
-		title: 'Stahl und Seide',
-		description: '',
-		cover: 'https://picsum.photos/seed/ml65/460/500',
-		yearStart: 2024,
-		yearEnd: null,
-		genres: ['Drama'],
-		rating: '12+',
-	},
-]);
-
-// ── Weiterschauen ─────────────────────────────────────────────────────────
-const continueWatching = reactive<EpisodeItem[]>([
-	{
-		id: 600,
-		seriesId: 100,
-		seriesTitle: 'Dark Horizons',
-		episodeTitle: 'Die letzte Brücke',
-		season: 2,
-		episode: 7,
-		//thumbnail: 'https://picsum.photos/seed/cw1/640/360',
-		thumbnail: 'http://localhost:3000/images/S-c0afd997/previewImages/EP-8f5402c4/WE-228e13a0/preview3.jpg',
-		progress: 63,
-		duration: '48 Min.',
-	},
-	{
-		id: 601,
-		seriesId: 102,
-		seriesTitle: 'Neon City',
-		episodeTitle: 'Schwarzmarkt',
-		season: 1,
-		episode: 3,
-		thumbnail: 'https://picsum.photos/seed/cw2/640/360',
-		progress: 28,
-		duration: '42 Min.',
-	},
-	{
-		id: 602,
-		seriesId: 101,
-		seriesTitle: 'Waldgeister',
-		episodeTitle: 'Das Erwachen',
-		season: 3,
-		episode: 11,
-		thumbnail: 'https://picsum.photos/seed/cw3/640/360',
-		progress: 81,
-		duration: '55 Min.',
-	},
-	{
-		id: 603,
-		seriesId: 105,
-		seriesTitle: 'Stellar Abyss',
-		episodeTitle: 'Jenseits der Leere',
-		season: 3,
-		episode: 2,
-		thumbnail: 'https://picsum.photos/seed/cw4/640/360',
-		progress: 45,
-		duration: '51 Min.',
-	},
-	{
-		id: 604,
-		seriesId: 103,
-		seriesTitle: 'Blutlinie',
-		episodeTitle: 'Verrat',
-		season: 2,
-		episode: 5,
-		thumbnail: 'https://picsum.photos/seed/cw5/640/360',
-		progress: 10,
-		duration: '44 Min.',
-	},
-	{
-		id: 605,
-		seriesId: 104,
-		seriesTitle: 'Quantensprung',
-		episodeTitle: 'Parallelwelten',
-		season: 1,
-		episode: 8,
-		thumbnail: 'https://picsum.photos/seed/cw6/640/360',
-		progress: 72,
-		duration: '58 Min.',
-	},
-]);
+// ── Carousel Configs ─────────────────────────────────────────────────────────
 </script>
 
 <style>

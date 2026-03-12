@@ -1,41 +1,40 @@
 <template>
-	<div 
-		class="series-card" 
-		:class="{ 'is-active': isActive }" 
-		@click="handleCardClick" 
-		tabindex="0" 
-		@focus="handleFocus" 
+	<div
+		class="series-card"
+		:class="{ 'is-active': isActive }"
+		@click="handleCardClick"
+		tabindex="0"
+		@focus="handleFocus"
 		@blur="handleBlur"
 		@mouseenter="handleMouseEnter"
 		@mouseleave="handleMouseLeave"
 	>
 		<div class="series-thumb-wrap position-relative overflow-hidden rounded-3">
-			<img :src="item.cover" class="series-thumb" :alt="item.title" loading="lazy" />
+			<img :src="seriesImage" class="series-thumb" :alt="item.title" loading="lazy" />
 			<div class="series-overlay" :class="{ visible: isActive || isHovered }">
 				<div class="series-overlay-actions">
-					<button class="sov-btn sov-btn-light" @click.stop="$emit('navigate', item.id)">
+					<button class="sov-btn sov-btn-light" @click.stop="$emit('navigate', item.UUID)">
 						<font-awesome-icon :icon="['fas', 'play']" />
 					</button>
-					<button class="sov-btn" :class="{ 'sov-btn-danger': showRemoveButton }" @click.stop="$emit('addToList', item.id)">
+					<button class="sov-btn" :class="{ 'sov-btn-danger': showRemoveButton }" @click.stop="$emit('addToList', item.UUID)">
 						<font-awesome-icon :icon="['fas', showRemoveButton ? 'minus' : 'plus']" />
 					</button>
-					<button class="sov-btn ms-auto" @click.stop="$emit('showInfo', item.id)">
+					<button class="sov-btn ms-auto" @click.stop="$emit('showInfo', item.UUID)">
 						<font-awesome-icon :icon="['fas', 'chevron-down']" />
 					</button>
 				</div>
 				<p class="sov-title">{{ item.title }}</p>
 				<div class="sov-meta">
-					<span class="badge bg-secondary" style="font-size: 0.62rem">{{ item.rating }}</span>
 					<span class="sov-year">{{ yearLabel }}</span>
 				</div>
 				<div class="sov-genres">
-					<span v-for="g in item.genres.slice(0, 2)" :key="g" class="genre-chip">{{ g }}</span>
+					<span v-for="g in item.tags.slice(0, 2)" :key="g" class="genre-chip">{{ g }}</span>
 				</div>
 			</div>
 			<span v-if="showNewRibbon" class="new-ribbon">NEU</span>
-			<div v-if="showEpisodeCount && item.episodeCount" class="episode-count-badge">
+			<div v-if="showEpisodeCount && totalEpisodeCount > 0" class="episode-count-badge">
 				<font-awesome-icon :icon="['fas', 'film']" class="me-1" />
-				{{ item.episodeCount }} Folgen
+				{{ totalEpisodeCount }} Folgen
 			</div>
 		</div>
 		<div class="series-info">
@@ -46,39 +45,39 @@
 </template>
 
 <script lang="ts" setup>
-interface Series {
-	id: number;
-	title: string;
-	description: string;
-	cover: string;
-	yearStart: number;
-	yearEnd: number | null;
-	genres: string[];
-	rating: string;
-	episodeCount?: number;
-	_hovered?: boolean;
-}
+import type { FrontendSeries } from '@cinefinn/types/database';
+import { decideSeriesImage } from '~/utils/utils';
 
 const props = defineProps<{
-	item: Series;
+	item: FrontendSeries;
 	showNewRibbon?: boolean;
 	showEpisodeCount?: boolean;
 	showRemoveButton?: boolean;
 }>();
 
 defineEmits<{
-	(event: 'navigate', id: number): void;
-	(event: 'addToList', id: number): void;
-	(event: 'showInfo', id: number): void;
+	(event: 'navigate', id: string): void;
+	(event: 'addToList', id: string): void;
+	(event: 'showInfo', id: string): void;
 }>();
 
 const isActive = ref(false);
 const isHovered = ref(false);
 
+const randomNumber = Math.floor(Math.random() * 1000);
+const seriesImage = computed(() => decideSeriesImage(props.item, randomNumber));
+
+const totalEpisodeCount = computed(() => {
+	return props.item.seasons.reduce((sum, s) => sum + s.episodes, 0);
+});
+
 const yearLabel = computed(() => {
-	if (!props.item.yearEnd) return `${props.item.yearStart}–`;
-	if (props.item.yearStart === props.item.yearEnd) return `${props.item.yearStart}`;
-	return `${props.item.yearStart}–${props.item.yearEnd}`;
+	const start = props.item.infos.startDate?.split('-')[0] || '';
+	const end = props.item.infos.endDate?.split('-')[0] || '';
+	if (!start) return '';
+	if (!end) return `${start}–`;
+	if (start === end) return start;
+	return `${start}–${end}`;
 });
 
 const handleCardClick = () => {
@@ -188,7 +187,7 @@ onUnmounted(() => {
 	.series-card:hover .series-overlay {
 		opacity: 0;
 	}
-	
+
 	.series-card.is-active .series-overlay {
 		opacity: 1;
 	}
