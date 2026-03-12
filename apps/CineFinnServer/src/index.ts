@@ -37,7 +37,7 @@ import { metricsRouter, registerMetrics } from './middleware/ownPrometheus.js';
 import { generateEntityID } from './utils/IdGenerators.js';
 import { tryCatch } from '@cinefinn/utilities/tryCatch';
 import { previewImagesRouter } from './routes/previewImages.js';
-import { recommendationRouter } from './routes/recommendations.js';
+import { recommendationRouter } from './routes/recommendations/recommendations.js';
 import { wait } from '@cinefinn/utilities/time';
 
 

@@ -2,11 +2,14 @@ import fsDriver from 'unstorage/drivers/fs';
 import type { Account, DetailedSeries, timestamped, WatchableEntity } from "@cinefinn/types/database";
 import { Hono } from "hono";
 import { createStorage, prefixStorage } from "unstorage";
-import { cacheRegistry } from "./admin/cache.js";
-import { authMiddleware } from "../middleware/auth.js";
-import { fullIndexStorage, indexStorage } from "./index.js";
-import { episodesTable, moviesTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../database.js";
-import { cachingMiddleware, forEachNonBlockingAsync, queryDatabase } from "../utils.js";
+import { cacheRegistry } from "../admin/cache.js";
+import { authMiddleware } from "../../middleware/auth.js";
+import { fullIndexStorage, indexStorage } from "../index.js";
+import { episodesTable, moviesTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../../database.js";
+import { cachingMiddleware, forEachNonBlockingAsync, queryDatabase } from "../../utils.js";
+import { getConfig } from '../../config.js';
+import path from 'path';
+import { pickPreviewImage } from './imageHelper.js';
 
 type CacheMap = Map<string, DetailedSeries>;
 
@@ -296,6 +299,10 @@ carouselRegistry.set('newly-added-series', {
     type: 'series',
     userspecific: false,
     returnItemsCount: 20,
+    additionalMeta: {
+        showNewRibbon: true,
+        showWatchableCount: true,
+    },
     computeFn: getNewlyAddedSeries
 });
 
@@ -321,6 +328,9 @@ carouselRegistry.set('still-running-series', {
     type: 'series',
     userspecific: false,
     returnItemsCount: 15,
+    additionalMeta: {
+        showWatchableCount: true,
+    },
     computeFn: getStillRunningSeries
 })
 
@@ -345,10 +355,13 @@ carouselRegistry.set('new-released-episodes', {
     type: 'entity',
     userspecific: false,
     returnItemsCount: 25,
+    additionalMeta: {
+        showNewRibbon: true,
+    },
     computeFn: getNewlyReleasedEpisodes
 })
 
-//Missing: marathon-worthy, 
+//Missing: marathon-worthy, your-list, new-in-german, total-classic, category-specific like Drama or Isekai,
 
 const recommendationStorage = createStorage<CarouselResponseItem>();
 
@@ -362,8 +375,12 @@ const tempStorage = createStorage({
 });
 
 
+type ArrayElement<ArrayType extends readonly unknown[]> =
+    ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
+
 const router = new Hono()
-    .get("/", cachingMiddleware(tempStorage), authMiddleware, async (c) => {
+    // .get("/", cachingMiddleware(tempStorage), authMiddleware, async (c) => {
+    .get("/", authMiddleware, async (c) => {
         const cacheMap = await prepareCachedSeriesMap();
         const user = c.get('credentials').user;
         const output = [] as CarouselResponseItem[];
@@ -401,6 +418,21 @@ const router = new Hono()
             carouselRegistry.entries().map(async ([carouselKey, carousel]) => {
                 console.time(carouselKey);
                 const item = await buildCarouselResponse(carouselKey, carousel);
+                if (carousel.type === 'entity') {
+                    console.log(item?.items.forEach(async e => {
+                        const entity = e as ArrayElement<Awaited<CarouselEntityDetailsResult>>;
+                        const inputFolder = path.join(
+                            getConfig().imagePath,
+                            entity.entity.serie_UUID,
+                            'previewImages',
+                            entity.entity.watchable_UUID,
+                            entity.entity.UUID,
+                        );
+                        const files = await pickPreviewImage(inputFolder);
+                        console.log(files);
+
+                    }));
+                }
                 if (item) output.push(item);
                 console.timeEnd(carouselKey);
             })
@@ -408,5 +440,17 @@ const router = new Hono()
 
         return c.json(output.sort((a, b) => a.order - b.order));
     });
+
+
+// async function test() {
+//     const inputFolder = path.join(getConfig().imagePath, 'S-1de8d379', 'previewImages', 'EP-ecb7d610', 'WE-1c7fbed0');
+
+//     console.log(inputFolder);
+//     const files = await pickPreviewImage(inputFolder);
+//     console.log(files);
+
+// }
+
+// test().catch(console.error);
 
 export { router as recommendationRouter, recommendationStorage };

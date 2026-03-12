@@ -15,7 +15,7 @@ import { getIO } from '../utils.js';
 import { sendSeriesReloadToAll } from '../sockets/client.socket.js';
 import { getMovingItems } from '../utils/movingItems.js';
 import { tryCatch } from '@cinefinn/utilities/tryCatch';
-import { recommendationStorage } from '../routes/recommendations.js';
+import { recommendationStorage } from '../routes/recommendations/recommendations.js';
 
 
 // export async function crawl(job: Job) {
