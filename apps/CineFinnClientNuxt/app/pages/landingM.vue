@@ -382,6 +382,10 @@ const franchises = ref([
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,600;9..40,700;9..40,800&display=swap');
 
+.content-zone .carousel__slide {
+	width: auto !important;
+}
+
 :root {
 	--cs-bg: #090910;
 	--cs-surface: #11111a;
