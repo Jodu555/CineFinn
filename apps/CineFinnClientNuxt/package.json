@@ -2,7 +2,7 @@
 	"name": "@cinefinn/cinefinnclientnuxt",
 	"type": "module",
 	"private": true,
-	"version": "2.2.2",
+	"version": "2.2.3",
 	"scripts": {
 		"build": "nuxt build",
 		"dev": "nuxt dev",

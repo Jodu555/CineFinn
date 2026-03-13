@@ -33,7 +33,7 @@
 		</div>
 
 		<!-- ── CONTENT ROWS ─────────────────────────────────────────────────────────── -->
-		<div ref="ssrActive" class="content-zone ssr-active px-2 px-lg-4">
+		<div class="content-zone ssr-active px-2 px-lg-4">
 			<!-- Dynamic carousels from API -->
 			<template v-if="carouselData!.length > 0">
 				<div v-for="carousel in carouselData" :key="carousel.id" class="content-row">
@@ -376,11 +376,25 @@ const franchises = ref([
 	},
 ]);
 
-const ssrActive = useTemplateRef('ssrActive');
 if (import.meta.client) {
-	if (ssrActive.value) {
-		ssrActive.value.classList.remove('ssr-active');
-	}
+	const inter = setInterval(() => {
+		console.log('Checking');
+		const el = document.querySelector('.ssr-active');
+		if (el) {
+			el.classList.remove('ssr-active');
+			clearInterval(inter);
+		} else {
+			const otherEl = document.querySelector('.content-zone');
+			if (otherEl) {
+				if (otherEl.classList.contains('ssr-active')) {
+					otherEl.classList.remove('ssr-active');
+					clearInterval(inter);
+				} else {
+					clearInterval(inter);
+				}
+			}
+		}
+	}, 1000);
 }
 </script>
 

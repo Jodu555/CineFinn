@@ -1,7 +1,7 @@
 {
 	"name": "@cinefinn/cinefinnserver",
 	"type": "module",
-	"version": "2.2.1",
+	"version": "2.2.2",
 	"scripts": {
 		"dev": "tsx watch src/index.ts",
 		"build": "tsc",
