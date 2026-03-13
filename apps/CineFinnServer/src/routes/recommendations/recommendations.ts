@@ -1,5 +1,5 @@
 import fsDriver from 'unstorage/drivers/fs';
-import type { Account, DetailedSeries, timestamped, WatchableEntity } from "@cinefinn/types/database";
+import type { Account, DetailedSeries, Episode, Movie, timestamped, WatchableEntity } from "@cinefinn/types/database";
 import { Hono } from "hono";
 import { createStorage, prefixStorage } from "unstorage";
 import { cacheRegistry } from "../admin/cache.js";
@@ -44,6 +44,40 @@ async function getCachedSeriesWatchableNumber(seriesUUID: string, cacheMap?: Cac
     return episodeCount;
 }
 
+async function getCachedSeriesWatchableIndexes(seriesUUID: string, watchableUUID: string, cacheMap?: CacheMap): Promise<{ season: number, episode: number }> {
+    let fullIndexSeries: DetailedSeries | undefined;
+    if (cacheMap) {
+        fullIndexSeries = cacheMap.get(seriesUUID);
+    } else {
+        const fullSeriesIndex = await fullIndexStorage.get('fullIndex') as any as DetailedSeries[] || [];
+        fullIndexSeries = fullSeriesIndex.find(x => x.UUID == seriesUUID)
+    }
+
+    if (watchableUUID.startsWith('EP-')) {
+        let returnEpisode: Episode | undefined;
+        outer: for (const season of fullIndexSeries?.seasons || []) {
+            for (const episode of season.episodes) {
+                if (episode.UUID == watchableUUID) {
+                    returnEpisode = episode;
+                    break outer;
+                }
+            };
+        }
+        return { season: returnEpisode?.season_IDX || 0, episode: returnEpisode?.episode_IDX || 0 };
+
+    } else if (watchableUUID.startsWith('MO-')) {
+        let returnMovie: Movie | undefined;
+        for (const movie of fullIndexSeries?.movies || []) {
+            if (movie.UUID == watchableUUID) {
+                returnMovie = movie;
+                break;
+            }
+        }
+        return { season: 0, episode: returnMovie?.movie_IDX || 0 };
+    }
+    throw new Error('Unknown Watchable UUID ' + watchableUUID);
+}
+
 type AdditionalCarouselMeta = {
     showNewRibbon?: boolean;
     showWatchableCount?: boolean;
@@ -81,8 +115,14 @@ type CarouselSeriesDetailsResult = Promise<{
 
 type CarouselEntityDetailsResult = Promise<{
     watchTime: number;
-    entity: (WatchableEntity & timestamped);
+    entity: (WatchableEntity & timestamped & { additional: AdditionalEntityData });
 }[]>;
+
+type AdditionalEntityData = {
+    imageFile: string;
+    season: number;
+    episode: number;
+}
 
 const carouselRegistry = new Map<string, CarouselDetails>();
 
@@ -98,16 +138,24 @@ async function getNewlyAddedSeries(user: Account, meta: CarouselMeta, map?: Cach
     }));
 }
 
-async function getNewlyReleasedEpisodes(user: Account, meta: CarouselMeta): CarouselEntityDetailsResult {
+async function getNewlyReleasedEpisodes(user: Account, meta: CarouselMeta, map?: CacheMap): CarouselEntityDetailsResult {
     const watchableEntitys = await watchableEntitysTable.getLatest('created', {}, meta.returnItemsCount);
-    return watchableEntitys
-        .map(w => {
+    return await Promise.all(watchableEntitys
+        .map(async w => {
             delete (w as any).filePath;
+            const indezes = await getCachedSeriesWatchableIndexes(w.serie_UUID, w.watchable_UUID, map);
             return {
                 watchTime: 0,
-                entity: w,
+                entity: {
+                    ...w,
+                    additional: {
+                        imageFile: await decideEntityImage(w),
+                        season: indezes.season,
+                        episode: indezes.episode,
+                    }
+                },
             }
-        });
+        }));
 }
 
 async function getStillRunningSeries(user: Account, meta: CarouselMeta, map?: CacheMap): CarouselSeriesDetailsResult {
@@ -265,9 +313,17 @@ async function getContinueWatchingEpisodes(user: Account, meta: CarouselMeta): C
 
     for (const [seriesUUID, rows] of seriesMap) {
         if (rows.length === 1) {
+            const rowZero = rows[0]!;
             output.push({
-                watchTime: rows[0]!.watchTime,
-                entity: rows[0]!.watchableEntity,
+                watchTime: rowZero.watchTime,
+                entity: {
+                    ...rowZero.watchableEntity,
+                    additional: {
+                        imageFile: await decideEntityImage(rowZero.watchableEntity),
+                        season: rowZero.season_Idx,
+                        episode: rowZero.episode_Idx,
+                    }
+                },
             })
         } else {
             const latestRow = rows.reduce((best, current) => {
@@ -278,7 +334,14 @@ async function getContinueWatchingEpisodes(user: Account, meta: CarouselMeta): C
 
             output.push({
                 watchTime: latestRow.watchTime,
-                entity: latestRow.watchableEntity,
+                entity: {
+                    ...latestRow.watchableEntity,
+                    additional: {
+                        imageFile: await decideEntityImage(latestRow.watchableEntity),
+                        season: latestRow.season_Idx,
+                        episode: latestRow.episode_Idx || latestRow.movie_Idx,
+                    }
+                },
             });
         }
     }
@@ -302,21 +365,8 @@ carouselRegistry.set('newly-added-series', {
     computeFn: getNewlyAddedSeries
 });
 
-carouselRegistry.set('watch-again', {
-    order: 1,
-    id: 'watch-again',
-    title: 'Nochmal ansehen',
-    // icon: ['fas', 'eye'],
-    icon: ['fas', 'arrow-rotate-left'],
-    description: 'Die Top 25 Serien, die du schon einmal gesehen hast (80% WatchCompletion)',
-    type: 'series',
-    userspecific: true,
-    returnItemsCount: 25,
-    computeFn: getWatchAgainSeries
-});
-
 carouselRegistry.set('still-running-series', {
-    order: 2,
+    order: 1,
     id: 'still-running-series',
     title: 'Brand aktuell',
     icon: ['fas', 'tower-broadcast'],
@@ -330,20 +380,8 @@ carouselRegistry.set('still-running-series', {
     computeFn: getStillRunningSeries
 })
 
-carouselRegistry.set('continue-watching', {
-    order: 3,
-    id: 'continue-watching',
-    title: 'Weiterschauen',
-    icon: ['fas', 'clock-rotate-left'],
-    description: 'Top 25 Folgen bei denen du zwischen 20% & 80% Wiedergabe beendet hast',
-    type: 'entity',
-    userspecific: true,
-    returnItemsCount: 25,
-    computeFn: getContinueWatchingEpisodes
-})
-
 carouselRegistry.set('new-released-episodes', {
-    order: 4,
+    order: 2,
     id: 'new-released-episodes',
     title: 'Neue Folgen',
     icon: ['fas', 'bell'],
@@ -355,6 +393,31 @@ carouselRegistry.set('new-released-episodes', {
         showNewRibbon: true,
     },
     computeFn: getNewlyReleasedEpisodes
+})
+
+carouselRegistry.set('watch-again', {
+    order: 3,
+    id: 'watch-again',
+    title: 'Nochmal ansehen',
+    // icon: ['fas', 'eye'],
+    icon: ['fas', 'arrow-rotate-left'],
+    description: 'Die Top 25 Serien, die du schon einmal gesehen hast (80% WatchCompletion)',
+    type: 'series',
+    userspecific: true,
+    returnItemsCount: 25,
+    computeFn: getWatchAgainSeries
+});
+
+carouselRegistry.set('continue-watching', {
+    order: 4,
+    id: 'continue-watching',
+    title: 'Weiterschauen',
+    icon: ['fas', 'clock-rotate-left'],
+    description: 'Top 25 Folgen bei denen du zwischen 20% & 80% Wiedergabe beendet hast',
+    type: 'entity',
+    userspecific: true,
+    returnItemsCount: 25,
+    computeFn: getContinueWatchingEpisodes
 })
 
 //Missing: marathon-worthy, your-list, new-in-german, total-classic, category-specific like Drama or Isekai,
@@ -414,21 +477,12 @@ const router = new Hono()
             carouselRegistry.entries().map(async ([carouselKey, carousel]) => {
                 console.time(carouselKey);
                 const item = await buildCarouselResponse(carouselKey, carousel);
-                if (carousel.type === 'entity') {
-                    console.log(item?.items.forEach(async e => {
-                        const entity = e as ArrayElement<Awaited<CarouselEntityDetailsResult>>;
-                        const inputFolder = path.join(
-                            getConfig().imagePath,
-                            entity.entity.serie_UUID,
-                            'previewImages',
-                            entity.entity.watchable_UUID,
-                            entity.entity.UUID,
-                        );
-                        const files = await pickPreviewImage(inputFolder);
-                        console.log(files);
-
-                    }));
-                }
+                // if (carousel.type === 'entity') {
+                //     console.log(item?.items.forEach(async e => {
+                //         const entity = e as ArrayElement<Awaited<CarouselEntityDetailsResult>>;
+                //         const file = await decideEntityImage(entity.entity);
+                //     }));
+                // }
                 if (item) output.push(item);
                 console.timeEnd(carouselKey);
             })
@@ -436,6 +490,19 @@ const router = new Hono()
 
         return c.json(output.sort((a, b) => a.order - b.order));
     });
+
+async function decideEntityImage(entity: WatchableEntity) {
+    const inputFolder = path.join(
+        getConfig().imagePath,
+        entity.serie_UUID,
+        'previewImages',
+        entity.watchable_UUID,
+        entity.UUID,
+    );
+    const file = await pickPreviewImage(inputFolder);
+    if (file == undefined) return 'preview1.jpg';
+    return path.parse(file).base;
+}
 
 
 // async function test() {

@@ -40,7 +40,7 @@ function decodeRangeHeader(range: string, fileSize: number) {
 
 const router = new Hono()
     .all('/', (c) => {
-        const debug = true;
+        const debug = false;
 
         const ptoken = c.req.header('ptoken') || c.req.query('ptoken');
         debug && console.log('Got request with ptoken:', ptoken);

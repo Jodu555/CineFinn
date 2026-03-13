@@ -40,7 +40,7 @@
 					<div class="row-header px-2">
 						<div class="row-title-group">
 							<font-awesome-icon :icon="carousel.icon" class="row-icon text-danger" />
-							<span class="row-title">{{ carousel.title }}</span>
+							<span class="row-title" :title="carousel.description">{{ carousel.title }}</span>
 						</div>
 						<div class="carousel-nav-btns">
 							<button class="nav-arrow-btn" @click="slidePrev(carousel.id)">
@@ -58,6 +58,7 @@
 								<LandingSeriesCard
 									:item="item"
 									:show-episode-count="carousel.additionalMeta?.showWatchableCount"
+									:show-new-ribbon="carousel.additionalMeta?.showNewRibbon"
 									@navigate="navigateToSeries"
 									@add-to-list="addToList"
 									@show-info="showInfo"
@@ -86,7 +87,7 @@
 									<div class="ep-info">
 										<p class="ep-series">{{ item.seriesTitle }}</p>
 										<p class="ep-episode">{{ item.episodeTitle }}</p>
-										<p class="ep-pct"><font-awesome-icon :icon="['fas', 'clock']" class="me-1" />{{ item.progress }}% gesehen</p>
+										<p class="ep-pct"><font-awesome-icon :icon="['fas', 'clock']" class="me-1" />{{ Math.min(item.progress || 0, 100) }}% gesehen</p>
 									</div>
 								</div>
 							</div>
@@ -150,8 +151,14 @@ type CarouselAddEntity = {
 	type: 'entity';
 	items: {
 		watchTime: number;
-		entity: WatchableEntity & timestamped;
+		entity: WatchableEntity & timestamped & { additional: AdditionalEntityData };
 	}[];
+};
+
+type AdditionalEntityData = {
+	imageFile: string;
+	season: number;
+	episode: number;
 };
 
 type CarouselAddSeries = {
@@ -176,17 +183,19 @@ const mapSeriesItem = (UUID: string): FrontendSeries | undefined => {
 	return indexStore.seriesById.get(UUID);
 };
 
-const mapEntityItem = (entity: WatchableEntity & timestamped, watchTime: number): EpisodeItem => {
+const mapEntityItem = (entity: WatchableEntity & timestamped & { additional: AdditionalEntityData }, watchTime: number): EpisodeItem => {
 	const seriesData = indexStore.seriesById.get(entity.serie_UUID);
-	const url = new URL(useAPIURL() + `/images/${entity.serie_UUID}/previewImages/${entity.watchable_UUID}/${entity.UUID}/preview1.jpg`);
+	const url = new URL(
+		useAPIURL() + `/images/${entity.serie_UUID}/previewImages/${entity.watchable_UUID}/${entity.UUID}/${entity.additional.imageFile}`,
+	);
 	url.searchParams.append('auth-token', useAuthStore().authToken);
 	return {
 		id: entity.UUID,
 		seriesId: entity.serie_UUID,
 		seriesTitle: seriesData?.title || '',
 		episodeTitle: seriesData?.title || '',
-		season: 1,
-		episode: 1,
+		season: entity.additional.season,
+		episode: entity.additional.episode,
 		thumbnail: url.href,
 		progress: watchTime,
 		duration: `${Math.floor(entity.runtime / 60)} Min.`,

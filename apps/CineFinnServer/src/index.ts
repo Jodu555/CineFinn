@@ -181,8 +181,8 @@ const httpServer = serve({
 
     // await fixSeasons();
 
-    // await wait(1000 * 15);
-    // await insertMissingWatchableEntityRuntimes();
+    await wait(1000 * 15);
+    await insertMissingWatchableEntityRuntimes();
 
 
 

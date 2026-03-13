@@ -6,9 +6,10 @@ import {
     faEye, faUserPlus, faToggleOn, faShareNodes, faChartLine, faUserShield, faLock, faAt, faShieldHalved, faHashtag, faFileCode, faBomb,
     faBuilding, faEnvelope, faKey, faPlug, faServer, faBolt, faUser, faTable, faDatabase, faImage, faFilm, faGlobe, faCodeBranch, faSliders, faNetworkWired,
     faEyeSlash, faXmark, faExclamationTriangle, faChevronUp, faChevronDown, faCheckCircle, faTasks, faHistory, faSyncAlt, faHourglassHalf, faFileExport, faTerminal,
-    faRightToBracket, faPaperPlane, faClock, faCircleInfo, faChevronLeft, faFire, faBookmark, faMinus,
+    faRightToBracket, faPaperPlane, faCircleInfo, faChevronLeft, faFire, faBookmark, faMinus, faTowerBroadcast, faBell, faArrowRotateLeft,
+    faClock as fasClock,
 } from '@fortawesome/free-solid-svg-icons';
-import { faCalendar } from '@fortawesome/free-regular-svg-icons';
+import { faCalendar, faClock as farClock } from '@fortawesome/free-regular-svg-icons';
 
 config.autoAddCss = false;
 
@@ -17,10 +18,10 @@ library.add(
     faPlus, faArrowLeft, faTv, faList, faGrip, faPlay, faPause, faLanguage, faHeart, faChevronRight, faChevronUp, faChevronDown, faTasks, faHistory,
     faEye, faUserPlus, faToggleOn, faShareNodes, faChartLine, faUserShield, faLock, faAt, faShieldHalved, faHashtag, faCheckCircle, faSyncAlt, faHourglassHalf,
     faBuilding, faEnvelope, faKey, faPlug, faServer, faBolt, faUser, faTable, faDatabase, faImage, faFilm, faGlobe, faCodeBranch, faSliders, faNetworkWired,
-    faEyeSlash, faXmark, faExclamationTriangle, faStar, faFolder, faHandPointLeft, faFileCode, faBomb, faRightToBracket, faPaperPlane, faClock, faCircleInfo, faChevronLeft,
-    faFire, faBookmark, faMinus
+    faEyeSlash, faXmark, faExclamationTriangle, faStar, faFolder, faHandPointLeft, faFileCode, faBomb, faRightToBracket, faPaperPlane, faCircleInfo, faChevronLeft,
+    faFire, faBookmark, faMinus, faTowerBroadcast, faBell, faArrowRotateLeft, fasClock
 );
-library.add(faCalendar);
+library.add(faCalendar, farClock);
 
 export default defineNuxtPlugin((nuxtApp) => {
     nuxtApp.vueApp.component('font-awesome-icon', FontAwesomeIcon);

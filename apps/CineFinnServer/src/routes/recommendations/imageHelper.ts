@@ -63,11 +63,12 @@ async function rejectReason(filePath: string) {
     return null; // We like the frame
 }
 
+const DEBUG = false;
 export async function pickPreviewImage(folder: string) {
 
     const absFolder = path.resolve(folder);
     if (!fs.existsSync(absFolder)) {
-        console.error(`Folder not found: ${absFolder}`);
+        DEBUG && console.error(`Folder not found: ${absFolder}`);
         return null;
     }
 
@@ -76,7 +77,7 @@ export async function pickPreviewImage(folder: string) {
     );
 
     if (allFiles.length === 0) {
-        console.error('No image files found in folder.');
+        DEBUG && console.error('No image files found in folder.');
         return null;
     }
 
@@ -86,14 +87,14 @@ export async function pickPreviewImage(folder: string) {
     const total = sorted.length;
     const skipUntil = Math.max(CONFIG.skipFrames, Math.floor(total * CONFIG.minFractionIn));
 
-    console.error(`Found ${total} frames. Skipping first ${skipUntil}, then scanning…`);
+    DEBUG && console.error(`Found ${total} frames. Skipping first ${skipUntil}, then scanning…`);
 
     for (let i = 0; i < sorted.length; i++) {
         const filename = sorted[i];
         const filePath = path.join(absFolder, filename);
 
         if (i < skipUntil) {
-            console.error(`  [${i + 1}/${total}] ${filename} → skipped (too early)`);
+            DEBUG && console.error(`  [${i + 1}/${total}] ${filename} → skipped (too early)`);
             continue;
         }
 
@@ -101,24 +102,24 @@ export async function pickPreviewImage(folder: string) {
         try {
             reason = await rejectReason(filePath);
         } catch (err: any) {
-            console.error(`  [${i + 1}/${total}] ${filename} → error reading file: ${err.message}`);
+            DEBUG && console.error(`  [${i + 1}/${total}] ${filename} → error reading file: ${err.message}`);
             continue;
         }
 
         if (reason) {
-            console.error(`  [${i + 1}/${total}] ${filename} → rejected: ${reason}`);
+            DEBUG && console.error(`  [${i + 1}/${total}] ${filename} → rejected: ${reason}`);
         } else {
-            console.error(`  [${i + 1}/${total}] ${filename} → ✓ selected`);
+            DEBUG && console.error(`  [${i + 1}/${total}] ${filename} → ✓ selected`);
             // Print ONLY the path to stdout so callers can capture it cleanly
-            console.log(filePath);
+            DEBUG && console.log(filePath);
             return filePath;
         }
     }
 
     // Fallback: nothing passed – return the middle frame
     const fallback = path.join(absFolder, sorted[Math.floor(total / 2)]);
-    console.error(`No ideal frame found - falling back to middle frame.`);
-    console.log(fallback);
+    DEBUG && console.error(`No ideal frame found - falling back to middle frame.`);
+    DEBUG && console.log(fallback);
     return fallback;
 }
 

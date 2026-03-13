@@ -19,8 +19,8 @@
 				</div>
 			</div>
 			<div class="d-flex justify-content-center">
-				<div class="table-responsive">
-					<table class="table table-dark w-auto">
+				<div class="table-responsive" style="width: 100%">
+					<table class="table">
 						<thead>
 							<tr>
 								<th scope="col">UUID</th>
