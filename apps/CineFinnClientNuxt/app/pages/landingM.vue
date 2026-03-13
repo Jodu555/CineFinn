@@ -378,7 +378,6 @@ const franchises = ref([
 
 if (import.meta.client) {
 	const inter = setInterval(() => {
-		console.log('Checking');
 		const el = document.querySelector('.ssr-active');
 		if (el) {
 			el.classList.remove('ssr-active');
@@ -394,7 +393,7 @@ if (import.meta.client) {
 				}
 			}
 		}
-	}, 1000);
+	}, 10);
 }
 </script>
 
