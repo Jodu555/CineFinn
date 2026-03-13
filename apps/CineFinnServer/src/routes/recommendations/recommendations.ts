@@ -30,7 +30,7 @@ async function getCachedSeriesWatchableNumber(seriesUUID: string, cacheMap?: Cac
         const fullSeriesIndex = await fullIndexStorage.get('fullIndex') as any as DetailedSeries[] || [];
         fullIndexSeries = fullSeriesIndex.find(x => x.UUID == seriesUUID)
     }
-    let episodeCount = -1;
+    let episodeCount = 0;
     if (fullIndexSeries) {
         episodeCount += fullIndexSeries.movies.length;
         fullIndexSeries.seasons.flat().forEach(s => {
@@ -171,11 +171,11 @@ async function getStillRunningSeries(user: Account, meta: CarouselMeta, map?: Ca
     const seriesUpdateMap = new Map<string, number>();
 
     // const allWatchableEntitys = await watchableEntitysTable.get();
-    const allWatchableEntitys = await watchableEntitysTable.getLatest('created', {}, 500);
+    const allWatchableEntitys = await watchableEntitysTable.getLatest('created', {}, meta.returnItemsCount * 70);
     allWatchableEntitys
         .filter(w => possibleSeries.has(w.serie_UUID))
         .sort((a, b) => a.created_at - b.created_at)
-        .slice(0, 100)
+        .slice(0, meta.returnItemsCount * 40)
         .forEach(wacthableEntity => {
             if (seriesUpdateMap.has(wacthableEntity.serie_UUID)) {
                 const latestTime = seriesUpdateMap.get(wacthableEntity.serie_UUID)!;

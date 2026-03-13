@@ -17,10 +17,10 @@
 									<img :src="franchise.logo" :alt="franchise.slug" class="franchise-logo" />
 									<p class="text-secondary mt-2 mb-1">{{ franchise.description }}</p>
 									<p class="text-info mb-2">{{ franchise.contentCount }}</p>
-									<button class="btn btn-outline-info">
+									<NuxtLink class="btn btn-outline-info" :to="`/franchise/${franchise.slug}`">
 										<font-awesome-icon :icon="['fas', 'circle-info']" class="me-2" />
 										Mehr Infos
-									</button>
+									</NuxtLink>
 								</div>
 							</div>
 						</div>
@@ -253,7 +253,6 @@ onMounted(async () => {
 
 const router = useRouter();
 
-// ── Navigation Helpers ──────────────────────────────────────────────────────
 const navigateToSeries = (id: string) => {
 	console.log('Navigate to series:', id);
 	router.push(`/watch/${id}`);
@@ -273,11 +272,6 @@ const playEpisode = (item: EpisodeItem) => {
 	router.push(`/watch/${item.seriesId}`);
 };
 
-const seeAllCategory = (category: string) => {
-	console.log('See all:', category);
-	// Future: navigate to category page or open a modal
-};
-
 interface EpisodeItem {
 	id: string;
 	seriesId: string;
@@ -291,7 +285,6 @@ interface EpisodeItem {
 	_hovered?: boolean;
 }
 
-// ── Carousel Configs ─────────────────────────────────────────────────────────
 const franchiseCarouselConfig = {
 	itemsToShow: 1,
 	snapAlign: 'center',
@@ -348,7 +341,6 @@ const episodeCarouselConfig = {
 	},
 };
 
-// ── Franchise Data ───────────────────────────────────────────────────────────
 const showFranchises = ref(true);
 
 const franchises = ref([
