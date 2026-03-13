@@ -81,6 +81,7 @@ async function getCachedSeriesWatchableIndexes(seriesUUID: string, watchableUUID
 type AdditionalCarouselMeta = {
     showNewRibbon?: boolean;
     showWatchableCount?: boolean;
+    wrapAround?: boolean;
 }
 
 type CarouselMeta = {
@@ -361,6 +362,7 @@ carouselRegistry.set('newly-added-series', {
     additionalMeta: {
         showNewRibbon: true,
         showWatchableCount: true,
+        wrapAround: false,
     },
     computeFn: getNewlyAddedSeries
 });
@@ -391,6 +393,7 @@ carouselRegistry.set('new-released-episodes', {
     returnItemsCount: 25,
     additionalMeta: {
         showNewRibbon: true,
+        wrapAround: false,
     },
     computeFn: getNewlyReleasedEpisodes
 })

@@ -52,7 +52,11 @@
 						</div>
 					</div>
 					<!-- Series carousel (type === 'series') -->
-					<Carousel v-if="carousel.type === 'series'" :ref="(el: any) => (carouselRefs[carousel.id] = el)" v-bind="carouselConfig">
+					<Carousel
+						v-if="carousel.type === 'series'"
+						:ref="(el: any) => (carouselRefs[carousel.id] = el)"
+						v-bind="{ ...carouselConfig, wrapAround: carousel.additionalMeta?.wrapAround }"
+					>
 						<Slide v-for="item in carousel.mappedItems" :key="item.UUID">
 							<div class="carousel-slide-wrapper">
 								<LandingSeriesCard
@@ -134,6 +138,7 @@ const indexStore = useIndexStore();
 type AdditionalCarouselMeta = {
 	showNewRibbon?: boolean;
 	showWatchableCount?: boolean;
+	wrapAround?: boolean;
 };
 
 type CarouselMeta = {
