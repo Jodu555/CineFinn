@@ -33,7 +33,7 @@
 		</div>
 
 		<!-- ── CONTENT ROWS ─────────────────────────────────────────────────────────── -->
-		<div class="content-zone px-2 px-lg-4">
+		<div ref="ssrActive" class="content-zone ssr-active px-2 px-lg-4">
 			<!-- Dynamic carousels from API -->
 			<template v-if="carouselData!.length > 0">
 				<div v-for="carousel in carouselData" :key="carousel.id" class="content-row">
@@ -376,13 +376,18 @@ const franchises = ref([
 	},
 ]);
 
-// ── Carousel Configs ─────────────────────────────────────────────────────────
+const ssrActive = useTemplateRef('ssrActive');
+if (import.meta.client) {
+	if (ssrActive.value) {
+		ssrActive.value.classList.remove('ssr-active');
+	}
+}
 </script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,600;9..40,700;9..40,800&display=swap');
 
-.content-zone .carousel__slide {
+.ssr-active .carousel__slide {
 	width: auto !important;
 }
 
