@@ -25,35 +25,69 @@ import { promisify } from 'util';
 const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
 
-const listFiles = async (rootPath: string, concurrency: number = 20): Promise<{ files: string[], dirs: string[]; }> => {
+// const listFiles = async (rootPath: string, concurrency: number = 20): Promise<{ files: string[], dirs: string[]; }> => {
+//     const files: string[] = [];
+//     const dirs: string[] = [];
+//     const queue: string[] = [rootPath];
+
+//     while (queue.length > 0) {
+//         const currentDir = queue.shift()!;
+//         const entries = await readdir(currentDir);
+
+//         const batch = entries.map(entry => {
+//             const fullPath = path.join(currentDir, entry);
+//             return stat(fullPath).then(stats => ({ name: entry, path: fullPath, isDirectory: stats.isDirectory() }));
+//         });
+
+//         const results = await Promise.all(batch);
+
+//         for (const result of results) {
+//             if (result.isDirectory) {
+//                 dirs.push(result.name);
+//                 queue.push(result.path);
+//             } else {
+//                 files.push(result.path);
+//             }
+//         }
+
+//         // Control concurrency by processing directories in chunks
+//         if (queue.length > concurrency) {
+//             await new Promise(resolve => setImmediate(resolve));
+//         }
+//     }
+
+//     return { files, dirs };
+// };
+
+const listFiles = async (
+    rootPath: string,
+    concurrency: number = 20
+): Promise<{ files: string[]; dirs: string[] }> => {
     const files: string[] = [];
     const dirs: string[] = [];
     const queue: string[] = [rootPath];
 
-    while (queue.length > 0) {
-        const currentDir = queue.shift()!;
-        const entries = await readdir(currentDir);
+    const processDir = async (dirPath: string): Promise<void> => {
+        const entries = await readdir(dirPath, { withFileTypes: true });
 
-        const batch = entries.map(entry => {
-            const fullPath = path.join(currentDir, entry);
-            return stat(fullPath).then(stats => ({ name: entry, path: fullPath, isDirectory: stats.isDirectory() }));
-        });
-
-        const results = await Promise.all(batch);
-
-        for (const result of results) {
-            if (result.isDirectory) {
-                dirs.push(result.name);
-                queue.push(result.path);
+        for (const entry of entries) {
+            const fullPath = path.join(dirPath, entry.name);
+            if (entry.isDirectory()) {
+                dirs.push(entry.name);
+                queue.push(fullPath);
             } else {
-                files.push(result.path);
+                files.push(fullPath);
             }
         }
+    };
 
-        // Control concurrency by processing directories in chunks
-        if (queue.length > concurrency) {
-            await new Promise(resolve => setImmediate(resolve));
-        }
+    while (queue.length > 0) {
+        const batch = queue.splice(0, concurrency);
+
+        await Promise.all(batch.map(processDir));
+
+        // This is needed to prevent the event loop from blocking otherwise we lose the socket connections for example
+        await new Promise(resolve => setImmediate(resolve));
     }
 
     return { files, dirs };
