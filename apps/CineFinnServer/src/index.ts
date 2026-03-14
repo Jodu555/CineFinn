@@ -206,8 +206,11 @@ async function insertMissingWatchableEntityRuntimes() {
     const entitys = await watchableEntitysTable.get({ runtime: -1, unique: true });
     let i = 0;
     for await (const entity of entitys) {
-        if (await getSubSocketByID(entity.subID) == null) continue;
         console.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`)
+        if (await getSubSocketByID(entity.subID) == null) {
+            console.log(`Skipping entity ${i}/${entitys.length}: ${entity.UUID} because subID ${entity.subID} is not connected`);
+            continue;
+        }
         const { data: runtime, error } = await tryCatch(() => Promise.race([
             geFileRuntime(entity.UUID),
             new Promise<number>((resolve, reject) => {
