@@ -207,7 +207,7 @@ async function insertMissingWatchableEntityRuntimes() {
     let i = 0;
     for await (const entity of entitys) {
         console.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`)
-        if (await getSubSocketByID(entity.subID) == null) {
+        if (entity.subID !== 'main' && await getSubSocketByID(entity.subID) == null) {
             console.log(`Skipping entity ${i}/${entitys.length}: ${entity.UUID} because subID ${entity.subID} is not connected`);
             continue;
         }
