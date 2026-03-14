@@ -180,7 +180,7 @@ async function importSerieses() {
 }
 
 async function importAccounts() {
-    const oldDB = Database.createDatabase(process.env.OLD_DB_HOST!, process.env.OLD_DB_USERNAME!, process.env.OLD_DB_PASSWORD!, process.env.OLD_DB_DATABASE!);
+    const oldDB = Database.createDatabase(process.env.OLD_DB_HOST!, process.env.OLD_DB_USERNAME!, process.env.OLD_DB_PASSWORD!, process.env.OLD_DB_DATABASE!, false);
     await oldDB.connect();
     const oldAccounts = await oldDB.get('accounts').get({}) as { UUID: string; username: string; password: string; email: string; role: number; settings: string; activityDetails: string; }[];
 

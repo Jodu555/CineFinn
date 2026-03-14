@@ -1,9 +1,10 @@
 import { Hono, type Context } from 'hono';
 import { authFullMiddleware, authMiddleware, type AuthedVars } from '../middleware/auth.js';
 import { episodesTable, moviesTable, seasonsTable, watchableEntitysTable, watchHistoryTable } from '../database.js';
-import { getIO, watchableUUIDToWatchable } from '../utils.js';
+import { getIO, isMovie, watchableUUIDToWatchable } from '../utils.js';
 import type { Episode, Movie } from '@cinefinn/types/database';
 import { generateWatchHistoryID } from '../utils/IdGenerators.js';
+import translationV1WatchString from '../utils/translationV1WatchString.js';
 
 
 
@@ -29,6 +30,16 @@ const router = new Hono()
                 message: 'No episodes found',
             });
         }
+
+
+        //To force hono to complete the request before doing the translation stuff cause that's more a failsafe than anything else
+        setImmediate(() => {
+            setTimeout(async () => {
+                console.time('Translating');
+                await translationV1WatchString.markSeason(user.UUID, episodes[0].serie_UUID, episodes[0].season_IDX, bool ? 'true' : 'false');
+                console.timeEnd('Translating');
+            }, 1000);
+        });
 
         const promises = episodes.map(async (episode) => {
             const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, watchable_UUID: episode.UUID, unique: true });
@@ -99,6 +110,42 @@ const router = new Hono()
         }
 
         const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, watchable_UUID: watchable.UUID, unique: true });
+
+        //To force hono to complete the request before doing the translation stuff cause that's more a failsafe than anything else
+        setImmediate(() => {
+            setTimeout(async () => {
+                if (isMovie(watchable)) {
+                    console.time('Translating');
+                    await translationV1WatchString.updateSegment(user.UUID, {
+                        series: watchable.serie_UUID,
+                        season: -1,
+                        episode: -1,
+                        movie: watchable.movie_IDX,
+                    }, (seg) => {
+                        if (seg.time < time) {
+                            seg.time = time;
+                        }
+                    });
+                    console.timeEnd('Translating');
+                } else {
+                    console.time('Translating');
+                    await translationV1WatchString.updateSegment(user.UUID, {
+                        series: watchable.serie_UUID,
+                        season: watchable.season_IDX,
+                        episode: watchable.episode_IDX,
+                        movie: -1,
+                    }, (seg) => {
+                        if (seg.time < time) {
+                            seg.time = time;
+                        }
+                    });
+                    console.timeEnd('Translating');
+                }
+
+            }, 1000);
+        });
+
+
         if (watchHistory == undefined) {
             await watchHistoryTable.create({
                 UUID: generateWatchHistoryID(),

@@ -179,8 +179,8 @@ importers:
         specifier: ^1.5.4
         version: 1.5.4
       '@jodu555/mysqlapi':
-        specifier: ^4.3.2
-        version: 4.3.2
+        specifier: ^4.4.1
+        version: 4.4.1
       axios:
         specifier: ^1.12.2
         version: 1.13.1
@@ -1129,8 +1129,8 @@ packages:
   '@jodu555/commandmanager@1.5.4':
     resolution: {integrity: sha512-80McTGwPnYwIWXtAg+0+wv4txy2saSJmc8hdYyd9Lzxyk0iDjB9U6Q51fXCCa2xRtFqfV+cOjVbMJuW4FCyxpA==}
 
-  '@jodu555/mysqlapi@4.3.2':
-    resolution: {integrity: sha512-2T/KFuIOt41Me+ZsKA/1ceI6IqgOR5tvUriOKWghyPIkLQZGeZq2LCb4aQvcaLd2y8ZCanLYNi2Dfk2yIVnIpw==}
+  '@jodu555/mysqlapi@4.4.1':
+    resolution: {integrity: sha512-wZVJyz/KkERd+rg12FtNgN2ZKXIryua5hMbHPk31txQfjqyFQ8MJmELj0DuI/zKPQzvNzE0aJKXDj8IyQwSPZQ==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -5814,7 +5814,7 @@ snapshots:
 
   '@jodu555/commandmanager@1.5.4': {}
 
-  '@jodu555/mysqlapi@4.3.2':
+  '@jodu555/mysqlapi@4.4.1':
     dependencies:
       '@types/mysql': 2.15.27
       mysql: 2.18.1

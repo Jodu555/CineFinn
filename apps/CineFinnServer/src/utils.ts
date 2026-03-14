@@ -1,4 +1,4 @@
-import type { Account, timestamped } from '@cinefinn/types/database';
+import type { Account, Episode, Movie, timestamped } from '@cinefinn/types/database';
 import type { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData, AnythingToServerEvents, ServerToAnythingEvents } from '@cinefinn/types/socket';
 import type { Server } from 'socket.io';
 import { CacheContext } from './LRUCache.js';
@@ -62,6 +62,14 @@ export async function watchableUUIDToWatchable(watchableUUID: string, cache?: Ca
     } else {
         throw new Error('Unknown Watchable UUID ' + watchableUUID);
     }
+}
+
+export function isMovie(watchable: Movie | Episode): watchable is Movie {
+    return 'movie_IDX' in watchable;
+}
+
+export function isEpisode(watchable: Movie | Episode): watchable is Episode {
+    return 'episode_IDX' in watchable;
 }
 
 export function forEachNonBlocking<T>(array: T[], chunkSize: number, cb: (element: T, index: number) => void, finished?: () => void) {
