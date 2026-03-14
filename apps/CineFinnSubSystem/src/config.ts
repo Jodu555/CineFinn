@@ -6,9 +6,7 @@ interface Config {
     entrypoint: string;
     port: number;
     endpoint: string | false;
-    experimental: {
-        readrate: number;
-    };
+    bandwidth: number; // in MB/s
     core: {
         url: string;
         token: string;
@@ -16,14 +14,12 @@ interface Config {
 }
 
 const defaultConfig: Config = {
-    version: '1.0.1',
+    version: '1.0.2',
     identifier: 'local-kdrama',
     entrypoint: '/home/Media/K-Drama',
     port: 9999,
     endpoint: false, //If false the subsystem assumes socket streaming! If set to a string, this will be the endpoint to proxy the video too
-    experimental: {
-        readrate: 0,
-    },
+    bandwidth: 0, // in MB/s
     core: {
         url: 'http://localhost:3100',
         token: 'SUPER-SECURE-CORE-TOKEN',

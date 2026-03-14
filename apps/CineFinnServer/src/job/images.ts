@@ -8,6 +8,7 @@ import { getConfig } from "../config.js";
 import { forEachNonBlockingAsync, getIORedis, watchableUUIDToWatchable } from '../utils.js';
 import { Queue, QueueEvents } from 'bullmq';
 import type { QueuedPreviewImageGenerationJob, QueuedPreviewImageGenerationJobData } from '@cinefinn/types';
+import { getSubSocketByID } from '../sockets/subsystem.socket.js';
 
 export async function generatePreviewImages(job: Job) {
     const config = getConfig();
@@ -53,6 +54,10 @@ export async function generatePreviewImages(job: Job) {
         const videoURL = new URL(`${config.system.PUBLIC_API_ENDPOINT}/video/${watchableEntity.UUID}`);
         videoURL.searchParams.set('auth-token', config.system.PUBLIC_API_AUTH_TOKEN);
 
+        const subSystemSocket = await getSubSocketByID(watchableEntity.subID);
+
+        const bandwith = subSystemSocket ? subSystemSocket.data.auth.bandwith : 0;
+
         const generatedQueueJob = {
             UUID: crypto.randomUUID(),
             type: 'generatePreviewImages',
@@ -61,7 +66,7 @@ export async function generatePreviewImages(job: Job) {
                 seriesUUID: series.UUID,
                 entity: watchableEntity,
                 resultPath,
-                readrate: 0 //TODO: implement this via SubSystem
+                bandwith,
             }
         } satisfies QueuedPreviewImageGenerationJob;
         queuedJobs.push(generatedQueueJob);

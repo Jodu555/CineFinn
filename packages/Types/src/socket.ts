@@ -32,7 +32,7 @@ export interface AuthHandshakeSubsystem {
     id: string;
     token: string;
     ptoken: string;
-    readrate: number;
+    bandwith: number; // in MB/s
     endpoint: string | false;
 }
 
@@ -198,7 +198,7 @@ export interface SocketAuthDataSubsystem<U = any> {
     token: string;
     id: string;
     ptoken: string;
-    readrate: number;
+    bandwith: number; // in MB/s
     endpoint: string | false;
 }
 
@@ -222,7 +222,7 @@ export interface OnlineSubSystem {
     id: string;
     token: string;
     ptoken: string;
-    readrate: number;
+    bandwith: number; // in MB/s
     endpoint: string | false;
     series: string[];
     diskStats: DiskStats | null;

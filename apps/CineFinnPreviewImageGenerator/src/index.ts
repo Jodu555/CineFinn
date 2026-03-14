@@ -265,6 +265,24 @@ async function uploadPreviewImages(job: Job<QueuedPreviewImageGenerationJobData>
     fs.rmSync(outputDir, { recursive: true, force: true });
 }
 
+function calcReadrate(bandwidthMBs: number, inputFile: string): number {
+    const result = child_process.execSync(
+        `ffprobe -v error -show_entries format=bit_rate \
+     -of default=noprint_wrappers=1:nokey=1 "${inputFile}"`
+    ).toString().trim();
+
+    const streamBitrateBps = parseInt(result, 10);
+
+    if (!streamBitrateBps || streamBitrateBps <= 0) {
+        return -1;
+    }
+
+    const bandwidthBps = bandwidthMBs * 8_000_000;
+
+    const readrate = bandwidthBps / streamBitrateBps;
+
+    return Math.min(50, Math.max(0.5, readrate));
+}
 
 async function main() {
     const config = getConfig();
@@ -299,7 +317,11 @@ async function main() {
 
             let readRateArg = '';
             if (config.useReadRate) {
-                readRateArg = `-readrate ${job.data.readrate ?? 0}`;
+                const readRate = calcReadrate(job.data.bandwith, job.data.publicStreamURL);
+                await job.log(`Calculated readrate: ${readRate}`);
+                if (readRate > 0) {
+                    readRateArg = `-readrate ${readRate}`;
+                }
             }
 
             const workingOutputDir = path.join(config.tempImagePath, job.data.entity.UUID)

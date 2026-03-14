@@ -25,7 +25,7 @@ async function authFunction(authHandshake: AuthHandshakeSubsystem): Promise<Sock
         token,
         id: authHandshake.id,
         ptoken: authHandshake.ptoken,
-        readrate: authHandshake.readrate,
+        bandwith: authHandshake.bandwith,
         endpoint: authHandshake.endpoint,
     };
 }

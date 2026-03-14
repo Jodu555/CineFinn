@@ -201,10 +201,7 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
             highWaterMark: 64 * 1024,
         });
 
-        //TODO: Change this to the actual readrate or better change the name of it to have bandwith in MB/s and then guess the readrate from it.
-        // subSystemSocket.data.auth.readrate;
-        // 10 MB/s
-        const bandwidth = 5 * 1024 * 1024
+        const bandwidth = subSystemSocket.data.auth.bandwith * 1024 * 1024
         const throttle = new ThrottleStream(bandwidth);
 
         let bytesSent = 0;

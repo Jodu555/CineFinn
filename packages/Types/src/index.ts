@@ -72,6 +72,6 @@ export interface QueuedPreviewImageGenerationJobData {
     seriesUUID: string;
     entity: WatchableEntity & timestamped;
     resultPath: string;
-    readrate: number;
+    bandwith: number; // in MB/s
     generatorName?: string;
 }
