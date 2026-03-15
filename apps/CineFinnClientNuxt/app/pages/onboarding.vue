@@ -198,6 +198,8 @@ async function submitForm() {
 			verificationCodeValid.value = false;
 			return;
 		}
+		//Reload user info so the check actually passes in the onboarding middleware
+		await authStore.authenticate();
 		useRouter().push('/');
 	}
 }
