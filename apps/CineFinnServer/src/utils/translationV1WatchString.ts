@@ -59,9 +59,30 @@ class Segment {
     }
 }
 
-const load = async (UUID: string): Promise<string> => {
-    const oldDB = Database.createDatabase(process.env.OLD_DB_HOST!, process.env.OLD_DB_USERNAME!, process.env.OLD_DB_PASSWORD!, process.env.OLD_DB_DATABASE!, false);
+let oldDB: Database;
+async function getOldDB() {
+    if (oldDB != undefined) return oldDB;
+    oldDB = Database.createDatabase(process.env.OLD_DB_HOST!, process.env.OLD_DB_USERNAME!, process.env.OLD_DB_PASSWORD!, process.env.OLD_DB_DATABASE!, false);
     await oldDB.connect();
+
+    await oldDB.createTable('watch_strings', {
+        options: {
+            PK: 'account_UUID',
+        },
+        account_UUID: {
+            type: 'varchar(64)',
+            null: false,
+        },
+        watch_string: {
+            type: 'LONGTEXT',
+        },
+    });
+
+    return oldDB;
+}
+
+const load = async (UUID: string): Promise<string> => {
+    const oldDB = await getOldDB();
     let data = await oldDB.get<DatabaseWatchStringItem>('watch_strings').getOne({ account_UUID: UUID });
     if (data == null || data == undefined) {
         data = { account_UUID: UUID, watch_string: '' };
@@ -71,8 +92,7 @@ const load = async (UUID: string): Promise<string> => {
 };
 
 const save = async (UUID: string, watchString: string) => {
-    const oldDB = Database.createDatabase(process.env.OLD_DB_HOST!, process.env.OLD_DB_USERNAME!, process.env.OLD_DB_PASSWORD!, process.env.OLD_DB_DATABASE!, false);
-    await oldDB.connect();
+    const oldDB = await getOldDB();
     let data = await oldDB.get<DatabaseWatchStringItem>('watch_strings').update({ account_UUID: UUID }, { watch_string: watchString });
 };
 
