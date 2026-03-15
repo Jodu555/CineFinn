@@ -4,7 +4,7 @@ import type { MovingItem, Episode, timestamped, Movie } from "@cinefinn/types/da
 import { Transform } from "stream";
 import { watchableEntitysTable, seriesTable } from "../database.js";
 import { getSubSocketByID } from "../sockets/subsystem.socket.js";
-import { watchableUUIDToWatchable, calculateMD5 } from "../utils.js";
+import { watchableUUIDToWatchable, calculateMD5, isEpisode, isMovie } from "../utils.js";
 import { rebroadcastMovingItems, rebroadcastOverview } from "../routes/admin/admin.js";
 
 import { pipeline } from 'stream';
@@ -157,12 +157,10 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
 
     let resultPath = '';
 
-    if (watchable.UUID.startsWith('EP-')) {
-        const episode = watchable as Episode & timestamped;
-        resultPath = path.join(resultPath, series.tags[0], series.title, `Season-${episode.season_IDX}`,)
+    if (isEpisode(watchable)) {
+        resultPath = path.join(resultPath, series.tags[0], series.title, `Season-${watchable.season_IDX}`,)
     }
-    if (watchable.UUID.startsWith('MO-')) {
-        const movie = watchable as Movie & timestamped;
+    if (isMovie(watchable)) {
         resultPath = path.join(resultPath, series.tags[0], series.title, 'Movies')
     }
 
