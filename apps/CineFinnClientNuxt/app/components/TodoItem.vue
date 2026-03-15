@@ -296,13 +296,15 @@
 								</div>
 							</div>
 						</div>
-						{{
-							{
-								canSave,
-								todoNameValid,
-								valid,
-							}
-						}}
+						<div v-if="authStore.user.settings.developerMode.value">
+							{{
+								{
+									canSave,
+									todoNameValid,
+									valid,
+								}
+							}}
+						</div>
 
 						<div class="d-flex justify-content-end">
 							<button type="button" @click="element.edited = false" class="btn btn-outline-danger mx-2">Cancel</button>
