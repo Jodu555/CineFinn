@@ -2,7 +2,12 @@
 	<div>
 		<li class="list-group-item">
 			<div class="d-flex">
-				<img v-if="decideImageURL(element).length > 0" :src="decideImageURL(element)" class="img-fluid rounded-top me-4 dp-img" alt="" />
+				<img
+					v-if="decideImageURL(element).length > 0 && props.minimal == false"
+					:src="decideImageURL(element)"
+					class="img-fluid rounded-top me-4 dp-img"
+					alt=""
+				/>
 				<div style="width: 100%" ref="parent">
 					<div class="d-flex justify-content-between">
 						<div>
@@ -151,7 +156,7 @@
 					</ul>
 
 					<!-- Scrape Infos Per ScraperKey -->
-					<div v-for="[key, scrapeInfo] in Object.entries(element.scrapingInfo! || {})">
+					<div v-if="!props.minimal" v-for="[key, scrapeInfo] in Object.entries(element.scrapingInfo! || {})">
 						<div v-if="scrapeInfo != undefined">
 							<p class="mb-0" style="text-transform: capitalize">
 								{{ key }}: {{ new Date(scrapeInfo.scrapedAt).toLocaleString() }} ({{ scrapeInfo.message }})
