@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { authFullMiddleware } from "../middleware/auth.js";
+import { authFullMiddleware, authMiddleware } from "../middleware/auth.js";
 import { Role, type RefRef, type ScrapeInfo, type TodoItem, type TodoReferences, type ValueOf } from "@cinefinn/types/database";
 import type { AniWorldSeriesInformations } from "@cinefinn/types/scrapers";
 import { getScraperSocket, isScraperSocketConnected } from "../sockets/scraper.socket.js";
@@ -64,7 +64,7 @@ const todoScrapeJobs = [] as {
 }[];
 
 const router = new Hono()
-    .get('/', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
+    .get('/', authMiddleware, async (c) => {
         const todos = await todosTable.get();
         return c.json(todos.sort((a, b) => a.sortOrder - b.sortOrder));
     })

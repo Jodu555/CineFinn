@@ -104,22 +104,26 @@ const router = new Hono()
 
         const user = c.get('credentials').user;
 
-        const playlist = await playlistsTable.getOne({
-            UUID: playlistUUID,
-            account_UUID: user.UUID,
-            unique: true,
-        });
+        const [
+            playlist,
+            series,
+        ] = await Promise.all([
+            playlistsTable.getOne({
+                UUID: playlistUUID,
+                account_UUID: user.UUID,
+                unique: true,
+            }),
+            seriesTable.getOne({
+                UUID: itemUUID,
+                unique: true,
+            })
+        ]);
 
         if (playlist == undefined) {
             return c.json({
                 message: 'Playlist not found',
             });
         }
-
-        const series = await seriesTable.getOne({
-            UUID: itemUUID,
-            unique: true,
-        });
 
         if (series == undefined) {
             return c.json({
