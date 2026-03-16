@@ -78,6 +78,14 @@ async function getOldDB() {
         },
     });
 
+    setInterval(() => {
+        oldDB.pool.query('SELECT 1', (error, rows, fields) => {
+            if (error) {
+                console.log('Error keeping database connection alive:', error);
+            }
+        });
+    }, 10000 * 30);
+
     return oldDB;
 }
 
