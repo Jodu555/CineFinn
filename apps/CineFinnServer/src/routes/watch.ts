@@ -2,9 +2,16 @@ import { Hono, type Context } from 'hono';
 import { authFullMiddleware, authMiddleware, type AuthedVars } from '../middleware/auth.js';
 import { episodesTable, moviesTable, seasonsTable, watchableEntitysTable, watchHistoryTable } from '../database.js';
 import { getIO, isMovie, watchableUUIDToWatchable } from '../utils.js';
-import type { Episode, Movie } from '@cinefinn/types/database';
+import type { Episode, Movie, timestamped, WatchableEntity, WatchHistory } from '@cinefinn/types/database';
 import { generateWatchHistoryID } from '../utils/IdGenerators.js';
 import translationV1WatchString from '../utils/translationV1WatchString.js';
+
+type WatchHistoryWithDetails = WatchHistory & {
+    runtime: number;
+    season_IDX: number;
+    episode_IDX: number;
+    movie_IDX: number;
+};
 
 
 
@@ -68,7 +75,7 @@ const router = new Hono()
 
         (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'client' && s.data.auth.user.UUID === user.UUID).forEach(async s => {
             const watchList = await watchHistoryTable.get({ series_UUID: episodes[0].serie_UUID, account_UUID: user.UUID, unique: true });
-            s.emit('watchListUpdate', watchList)
+            s.emit('watchListUpdate', watchList);
         });
 
         return c.json(episodes);
@@ -87,9 +94,9 @@ const router = new Hono()
         const updated = async (seriesUUID: string) => {
             (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'client' && s.data.auth.user.UUID === user.UUID).forEach(async s => {
                 const watchList = await watchHistoryTable.get({ series_UUID: seriesUUID, account_UUID: user.UUID, unique: true });
-                s.emit('watchListUpdate', watchList)
+                s.emit('watchListUpdate', watchList);
             });
-        }
+        };
 
         let watchableUUID = c.req.param('watchableUUID');
         if (watchableUUID.startsWith('WE-')) {
@@ -173,6 +180,60 @@ const router = new Hono()
                 message: 'Watchable watchTime not updated because lower',
             });
         }
+    })
+    .get('/history', authMiddleware, async (c) => {
+        const user = c.get('credentials').user;
+        const watchHistory = await watchHistoryTable.get({ account_UUID: user.UUID });
+
+        // watchableUUID -> watchableEntity
+        const wacthableEntitysMap = new Map<string, WatchableEntity & timestamped>();
+
+        const watchableEntitys = await watchableEntitysTable.get();
+        watchableEntitys.forEach(we => {
+            wacthableEntitysMap.set(we.watchable_UUID, we);
+        });
+
+        const episodeMap = new Map<string, Episode & timestamped>();
+        const moviesMap = new Map<string, Movie & timestamped>();
+
+        const episodes = await episodesTable.get();
+        episodes.forEach(e => {
+            episodeMap.set(e.UUID, e);
+        });
+        const movies = await moviesTable.get();
+        movies.forEach(m => {
+            moviesMap.set(m.UUID, m);
+        });
+
+
+        const result: WatchHistoryWithDetails[] = await Promise.all(
+            watchHistory.map(async (wh): Promise<WatchHistoryWithDetails> => {
+                const watchableEntity = wacthableEntitysMap.get(wh.watchable_UUID)!;
+
+                let season_IDX = 0;
+                let episode_IDX = 0;
+                let movie_IDX = 0;
+
+                if (wh.watchable_UUID.startsWith('EP-')) {
+                    const episode = episodeMap.get(wh.watchable_UUID)!;
+                    season_IDX = episode?.season_IDX || 0;
+                    episode_IDX = episode?.episode_IDX || 0;
+                } else if (wh.watchable_UUID.startsWith('MO-')) {
+                    const movie = moviesMap.get(wh.watchable_UUID)!;
+                    movie_IDX = movie?.movie_IDX || 0;
+                }
+
+                return {
+                    ...wh,
+                    runtime: watchableEntity?.runtime || 0,
+                    season_IDX,
+                    episode_IDX,
+                    movie_IDX,
+                };
+            })
+        );
+
+        return c.json(result);
     });
 
 export { router as watchRouter };

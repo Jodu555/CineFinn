@@ -41,6 +41,9 @@
 						<NuxtLink class="nav-link" active-class="active" to="/playlists">Playlists</NuxtLink>
 					</li>
 					<li v-if="authStore.loggedIn" class="nav-item">
+						<NuxtLink class="nav-link" active-class="active" to="/watchhistory">History</NuxtLink>
+					</li>
+					<li v-if="authStore.loggedIn" class="nav-item">
 						<NuxtLink class="nav-link" active-class="active" to="/todo">Todo</NuxtLink>
 					</li>
 					<li class="nav-item" v-if="authStore.user?.role >= Role.Mod">
