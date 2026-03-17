@@ -7,8 +7,7 @@
 		@focus="handleFocus"
 		@blur="handleBlur"
 		@mouseenter="handleMouseEnter"
-		@mouseleave="handleMouseLeave"
-	>
+		@mouseleave="handleMouseLeave">
 		<div class="series-thumb-wrap position-relative overflow-hidden rounded-3">
 			<img :src="seriesImage" class="series-thumb" :alt="item.title" loading="lazy" />
 			<div class="series-overlay" :class="{ visible: isActive || isHovered }">
@@ -176,11 +175,11 @@ onUnmounted(() => {
 }
 
 .series-overlay.visible {
-	opacity: 1;
+	opacity: 1 !important;
 }
 
 .series-card:hover .series-overlay {
-	opacity: 1;
+	opacity: 1 !important;
 }
 
 @media (hover: none) and (pointer: coarse) {
