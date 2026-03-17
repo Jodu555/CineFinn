@@ -18,8 +18,7 @@
 					:switch-to="switchTo"
 					:can-play="true"
 					:events="{}"
-					:send-video-time-update="sendVideoTimeUpdate"
-				/>
+					:send-video-time-update="sendVideoTimeUpdate" />
 				<div v-else class="text-center">
 					<h2 class="text-danger">You need to be logged in to watch this video</h2>
 					<NuxtLink type="button" to="/login" class="mt-3 mb-4 btn btn-outline-primary btn-lg">Login</NuxtLink>
@@ -43,13 +42,21 @@
 							<div class="d-flex justify-content-center">
 								<ul class="nav nav-tabs mb-4" role="tablist">
 									<li v-if="hasSeasons" class="nav-item" role="presentation">
-										<button :class="['nav-link', { active: activeTab === 'seasons' }]" @click="activeTab = 'seasons'" type="button" role="tab">
+										<button
+											:class="['nav-link', { active: activeTab === 'seasons' }]"
+											@click="activeTab = 'seasons'"
+											type="button"
+											role="tab">
 											<font-awesome-icon :icon="['fas', 'tv']" class="me-2 px-1" />
 											Seasons ({{ series.seasons?.length }})
 										</button>
 									</li>
 									<li v-if="hasMovies" class="nav-item" role="presentation">
-										<button :class="['nav-link', { active: activeTab === 'movies' }]" @click="activeTab = 'movies'" type="button" role="tab">
+										<button
+											:class="['nav-link', { active: activeTab === 'movies' }]"
+											@click="activeTab = 'movies'"
+											type="button"
+											role="tab">
 											<font-awesome-icon :icon="['fas', 'film']" class="me-2 px-1" />
 											Movies ({{ series.movies?.length }})
 										</button>
@@ -60,13 +67,16 @@
 							<div class="tab-content">
 								<!-- Seasons Tab -->
 								<div v-if="activeTab === 'seasons' && hasSeasons" class="tab-pane fade show active">
-									<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+									<div
+										class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
 										<!-- Change Season -->
 										<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3">
 											<h2 class="h5 mb-0">Episodes</h2>
 											<select v-model="selectedSeason" class="form-select" style="width: auto" aria-label="Change Seasons">
 												<option v-for="season in series.seasons" :key="season.UUID" :value="season.UUID">
-													Season {{ season.season_IDX }} ({{ Array.isArray(season.episodes) ? season.episodes.length : season.episodes }}
+													Season {{ season.season_IDX }} ({{
+														Array.isArray(season.episodes) ? season.episodes.length : season.episodes
+													}}
 													episodes)
 												</option>
 											</select>
@@ -79,20 +89,25 @@
 													class="btn btn-outline-secondary dropdown-toggle bg-transparent"
 													type="button"
 													data-bs-toggle="dropdown"
-													aria-expanded="false"
-												>
+													aria-expanded="false">
 													<font-awesome-icon :icon="['fas', 'check']" class="me-2" />
 													Mark Season
 												</button>
 												<ul class="dropdown-menu dropdown-menu-end">
 													<li>
-														<button class="dropdown-item d-flex align-items-center" type="button" @click="handleMarkSeasonWatched(true)">
+														<button
+															class="dropdown-item d-flex align-items-center"
+															type="button"
+															@click="handleMarkSeasonWatched(true)">
 															<font-awesome-icon :icon="['fas', 'check']" class="me-2 text-success" />
 															Mark as Watched
 														</button>
 													</li>
 													<li>
-														<button class="dropdown-item d-flex align-items-center" type="button" @click="handleMarkSeasonWatched(false)">
+														<button
+															class="dropdown-item d-flex align-items-center"
+															type="button"
+															@click="handleMarkSeasonWatched(false)">
 															<font-awesome-icon :icon="['fas', 'xmark']" class="me-2 text-secondary" />
 															Mark as Unwatched
 														</button>
@@ -105,16 +120,14 @@
 													type="button"
 													:class="['btn', viewMode === 'list' ? 'btn-primary' : 'btn-outline-secondary']"
 													@click="viewMode = 'list'"
-													title="List View"
-												>
+													title="List View">
 													<font-awesome-icon :icon="['fas', 'list']" />
 												</button>
 												<button
 													type="button"
 													:class="['btn', viewMode === 'compact' ? 'btn-primary' : 'btn-outline-secondary']"
 													@click="viewMode = 'compact'"
-													title="Compact View"
-												>
+													title="Compact View">
 													<font-awesome-icon :icon="['fas', 'grip']" />
 												</button>
 											</div>
@@ -133,8 +146,7 @@
 												isCurrentEpisode(episode.UUID) ? 'border-primary border-2' : '',
 											]"
 											@click="handleEpisodeClick(episode.UUID)"
-											style="cursor: pointer"
-										>
+											style="cursor: pointer">
 											<div class="card-body p-3">
 												<div class="d-flex">
 													<div class="flex-grow-1">
@@ -144,9 +156,11 @@
 																	'rounded d-flex align-items-center justify-content-center',
 																	isEpisodeWatched(episode.UUID) ? 'bg-success bg-opacity-25' : 'bg-secondary',
 																]"
-																style="width: 64px; height: 40px"
-															>
-																<font-awesome-icon v-if="isEpisodeWatched(episode.UUID)" :icon="['fas', 'check']" class="text-success" />
+																style="width: 64px; height: 40px">
+																<font-awesome-icon
+																	v-if="isEpisodeWatched(episode.UUID)"
+																	:icon="['fas', 'check']"
+																	class="text-success" />
 																<font-awesome-icon v-else :icon="['fas', 'play']" />
 															</div>
 															<div class="flex-grow-1">
@@ -163,7 +177,11 @@
 																		<!-- 20min -->
 																		{{
 																			msToReadable(
-																				(episode.watchableEntitys.reduce((prev, curr) => prev + curr.runtime, 0) / episode.watchableEntitys.length) *
+																				(episode.watchableEntitys.reduce(
+																					(prev, curr) => prev + curr.runtime,
+																					0,
+																				) /
+																					episode.watchableEntitys.length) *
 																					1000,
 																			)
 																		}}
@@ -172,10 +190,16 @@
 																<p class="text-muted small mb-0">
 																	<font-awesome-icon :icon="['fa', 'language']" class="me-1" />
 																	{{ episode.watchableEntitys.map((e) => e.lang).join(', ') }}
-																	<small class="text-danger-emphasis" v-if="Array.isArray(additionalList) && additionalList.length > 0">
+																	<small
+																		class="text-danger-emphasis"
+																		v-if="Array.isArray(additionalList) && additionalList.length > 0">
 																		{{
 																			additionalList
-																				?.filter((x) => x.parsed.season === episode.season_IDX && x.parsed.episode === episode.episode_IDX)
+																				?.filter(
+																					(x) =>
+																						x.parsed.season === episode.season_IDX &&
+																						x.parsed.episode === episode.episode_IDX,
+																				)
 																				.map((x) => x.parsed.language)
 																				.join(', ')
 																		}}
@@ -185,9 +209,11 @@
 														</div>
 														<div class="progress mt-3" style="width: 100%; height: 4px">
 															<div
-																:class="['progress-bar', isEpisodeWatched(episode.UUID) ? 'bg-success' : 'bg-secondary']"
-																:style="{ width: getEpisodeProgress(episode.UUID) + '%' }"
-															></div>
+																:class="[
+																	'progress-bar',
+																	isEpisodeWatched(episode.UUID) ? 'bg-success' : 'bg-secondary',
+																]"
+																:style="{ width: getEpisodeProgress(episode.UUID) + '%' }"></div>
 														</div>
 													</div>
 												</div>
@@ -200,8 +226,7 @@
 													x.parsed.season === currentDetailedSeasonData?.season_IDX &&
 													!currentDetailedSeasonData?.episodes.some((e) => e.episode_IDX == x.parsed.episode),
 											)"
-											class="card cursor-disabled border-danger-subtle"
-										>
+											class="card cursor-disabled border-danger-subtle">
 											<!-- <pre>{{ additionals }}</pre> -->
 											<div class="card-body p-3">
 												<div class="d-flex">
@@ -209,8 +234,7 @@
 														<div class="d-flex align-items-center gap-3">
 															<div
 																:class="['rounded d-flex align-items-center justify-content-center', 'bg-secondary']"
-																style="width: 64px; height: 40px"
-															>
+																style="width: 64px; height: 40px">
 																<font-awesome-icon :icon="['fas', 'xmark']" class="text-danger-emphasis" />
 															</div>
 															<div class="flex-grow-1">
@@ -243,18 +267,21 @@
 													isCurrentEpisode(episode.UUID) ? 'border-primary border-2' : '',
 												]"
 												@click="handleEpisodeClick(episode.UUID)"
-												style="cursor: pointer; height: 100%; max-height: 100%"
-											>
-												<div class="card-body p-1 d-flex flex-column align-items-center justify-content-center h-100 mb-2 pb-2">
+												style="cursor: pointer; height: 100%; max-height: 100%">
+												<div
+													class="card-body p-1 d-flex flex-column align-items-center justify-content-center h-100 mb-2 pb-2">
 													<span :class="['h5', isEpisodeWatched(episode.UUID) ? 'text-success' : '']">
 														{{ episode.episode_IDX }}
 													</span>
-													<font-awesome-icon v-if="isEpisodeWatched(episode.UUID)" :icon="['fas', 'check']" class="text-success mt-1" size="xs" />
+													<font-awesome-icon
+														v-if="isEpisodeWatched(episode.UUID)"
+														:icon="['fas', 'check']"
+														class="text-success mt-1"
+														size="xs" />
 													<div class="progress w-100 mt-2" style="height: 2px">
 														<div
 															:class="['progress-bar', isEpisodeWatched(episode.UUID) ? 'bg-success' : 'bg-secondary']"
-															:style="{ width: getEpisodeProgress(episode.UUID) + '%' }"
-														></div>
+															:style="{ width: getEpisodeProgress(episode.UUID) + '%' }"></div>
 													</div>
 												</div>
 											</div>
@@ -274,8 +301,7 @@
 												isCurrentMovie(movie.UUID) ? 'border-primary border-2' : '',
 											]"
 											@click="handleMovieClick(movie.UUID)"
-											style="cursor: pointer"
-										>
+											style="cursor: pointer">
 											<div class="card-body p-4">
 												<div class="d-flex gap-3">
 													<div
@@ -283,9 +309,12 @@
 															'rounded d-flex align-items-center justify-content-center flex-shrink-0',
 															isMovieWatched(movie.UUID) ? 'bg-success bg-opacity-25' : 'bg-secondary',
 														]"
-														style="width: 80px; height: 80px"
-													>
-														<font-awesome-icon v-if="isMovieWatched(movie.UUID)" :icon="['fas', 'check']" class="text-success" size="2x" />
+														style="width: 80px; height: 80px">
+														<font-awesome-icon
+															v-if="isMovieWatched(movie.UUID)"
+															:icon="['fas', 'check']"
+															class="text-success"
+															size="2x" />
 														<font-awesome-icon v-else :icon="['fas', 'film']" size="2x" />
 													</div>
 													<div class="flex-grow-1">
@@ -325,8 +354,7 @@
 														<div class="progress mt-3" style="height: 4px">
 															<div
 																:class="['progress-bar', isMovieWatched(movie.UUID) ? 'bg-success' : 'bg-secondary']"
-																:style="{ width: getMovieProgress(movie.UUID) + '%' }"
-															></div>
+																:style="{ width: getMovieProgress(movie.UUID) + '%' }"></div>
 														</div>
 													</div>
 												</div>
@@ -338,7 +366,9 @@
 						</div>
 						<div class="text-center" v-if="isDisabled">
 							<h2 class="text-danger">It Seems there is currently no video data for this Series</h2>
-							<p class="text-danger mb-0">It either got removed, or is on a node which is currently un reachable, or is currently being transcoded</p>
+							<p class="text-danger mb-0">
+								It either got removed, or is on a node which is currently un reachable, or is currently being transcoded
+							</p>
 							<p class="text-danger">Please check back later and if this issue persists please contact the Administrator</p>
 							<NuxtLink type="button" to="/" class="mt-3 mb-4 btn btn-outline-primary btn-lg">Go Watch something else</NuxtLink>
 						</div>
@@ -358,16 +388,14 @@
 								:to="`/watch/${item.UUID}`"
 								style="cursor: pointer; text-decoration: none"
 								prefetch-on="interaction"
-								@mouseover="indexStore.prefetchSeries(item.UUID)"
-							>
+								@mouseover="indexStore.prefetchSeries(item.UUID)">
 								<div class="card-body p-3">
 									<div class="d-flex gap-3">
 										<img
 											:src="decideSeriesImage(item, randomNumbersSeriesCover.at(idx + 1))"
 											:alt="item.title"
 											class="rounded flex-shrink-0"
-											style="width: 48px; height: 72px; object-fit: cover"
-										/>
+											style="width: 48px; height: 72px; object-fit: cover" />
 										<div class="flex-grow-1 overflow-hidden">
 											<h3 class="h6 mb-1 text-truncate">{{ item.title }}</h3>
 											<p class="text-muted small mb-1">
@@ -556,12 +584,12 @@ const videoSrc = computed(() => {
 	return '';
 });
 
-const forceHideLatestWatchButton = ref(false);
+const forceHideLatestWatchButton = ref('');
 
 const showLatestWatchButton = computed(() => {
 	if (authStore.loggedIn == false) return false;
 	if (authStore.user.settings.showLatestWatchButton.value == false) return false;
-	if (forceHideLatestWatchButton.value) return false;
+	if (forceHideLatestWatchButton.value == indexStore.selectedWatchableEntity!.watchable_UUID) return false;
 
 	const watchHistorySegment = indexStore.watchHistory.find((w) => w.watchable_UUID === indexStore.selectedWatchableEntity?.watchable_UUID);
 	return watchHistorySegment !== undefined;
@@ -573,7 +601,7 @@ const skipToLatestTime = () => {
 	const video = document.querySelector('video');
 	if (video && watchHistorySegment) {
 		video.currentTime = watchHistorySegment.watchTime;
-		forceHideLatestWatchButton.value = true;
+		forceHideLatestWatchButton.value = indexStore.selectedWatchableEntity!.watchable_UUID;
 	}
 };
 
