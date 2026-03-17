@@ -20,7 +20,7 @@
 								Endpoint:
 								{{ subsystem.status == 'offline' ? 'Offline' : subsystem.endpoint ? subsystem.endpoint : '*Socket Transmit*' }}
 							</li>
-							<li v-if="subsystem.status == 'online'" class="list-group-item">Readrate: {{ subsystem.readrate }}</li>
+							<li v-if="subsystem.status == 'online'" class="list-group-item">Bandwith: {{ subsystem.bandwith }} MB/s</li>
 							<li class="list-group-item">Series: {{ subsystem.status == 'offline' ? 'Offline' : subsystem.series.length }}</li>
 							<li v-if="subsystem.status == 'online' && subsystem.diskStats" class="list-group-item">
 								Disk Usage:
@@ -32,8 +32,7 @@
 										:style="{ width: `${getUsagePercentage(subsystem.diskStats)}%` }"
 										aria-valuenow="25"
 										aria-valuemin="0"
-										aria-valuemax="100"
-									>
+										aria-valuemax="100">
 										{{ getUsagePercentage(subsystem.diskStats).toFixed(2) }}%
 									</div>
 								</div>
@@ -47,7 +46,13 @@
 							<Modal v-model="toggleShowSeriesModal" :title="`List Series ${selectedShowSeriesSubSystem}`" size="lg">
 								<div class="mb-3 ms-5 me-5">
 									<label for="searchTerm" class="form-label">Search</label>
-									<input v-model="searchTerm" type="text" class="form-control" id="searchTerm" aria-describedby="helpId" placeholder="Name or ID" />
+									<input
+										v-model="searchTerm"
+										type="text"
+										class="form-control"
+										id="searchTerm"
+										aria-describedby="helpId"
+										placeholder="Name or ID" />
 									<small id="helpId" class="form-text text-secondary">Name or ID of the Series</small>
 								</div>
 								<div class="d-flex justify-content-center">
@@ -63,9 +68,9 @@
 											<tr
 												v-for="serie in getSeriesList(subsystem.series).filter(
 													(x) =>
-														x?.title.toLowerCase().includes(searchTerm.toLowerCase()) || x?.UUID.toLowerCase().startsWith(searchTerm.toLowerCase()),
-												)"
-											>
+														x?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+														x?.UUID.toLowerCase().startsWith(searchTerm.toLowerCase()),
+												)">
 												<template v-if="serie !== undefined">
 													<td scope="row">{{ serie.UUID }}</td>
 													<td>{{ serie.title }}</td>
@@ -106,8 +111,7 @@
 						:class="{
 							'text-success': isSubSystemOnline(item.fromSubID),
 							'text-danger': !isSubSystemOnline(item.fromSubID),
-						}"
-					>
+						}">
 						{{ item.fromSubID }}
 					</h5>
 					<h5>=></h5>
@@ -115,8 +119,7 @@
 						:class="{
 							'text-success': isSubSystemOnline(item.toSubID),
 							'text-danger': !isSubSystemOnline(item.toSubID),
-						}"
-					>
+						}">
 						{{ item.toSubID }}
 					</h5>
 				</div>
@@ -135,8 +138,7 @@
 						:style="{ width: `${item.meta.progress}%` }"
 						:aria-valuenow="item.meta.progress"
 						aria-valuemin="0"
-						aria-valuemax="100"
-					>
+						aria-valuemax="100">
 						<span class="h5 mt-2">{{ item.meta.progress }}%</span>
 					</div>
 				</div>

@@ -3,7 +3,11 @@
 		<h2 class="text-center">Preview Image Generation</h2>
 
 		<div class="mt-3 mb-5 d-flex justify-content-evenly">
-			<button @click="toggleQueueStatus()" type="button" class="btn" :class="{ 'btn-outline-success': isPaused, 'btn-outline-danger': !isPaused }">
+			<button
+				@click="toggleQueueStatus()"
+				type="button"
+				class="btn"
+				:class="{ 'btn-outline-success': isPaused, 'btn-outline-danger': !isPaused }">
 				{{ isPaused ? 'Resume' : 'Pause' }}
 			</button>
 			<button type="button" @click="retry('failed')" class="btn btn-outline-warning">Retry Failed</button>
@@ -31,7 +35,9 @@
 					</h4>
 				</div>
 			</div>
-			<div class="col-auto" style="border-left: 3px solid rgb(222, 226, 230); opacity: 0.05; transform: translate(0px, 25px); height: 100px"></div>
+			<div
+				class="col-auto"
+				style="border-left: 3px solid rgb(222, 226, 230); opacity: 0.05; transform: translate(0px, 25px); height: 100px"></div>
 			<div class="col-auto">
 				<Progress :percentage="job.progress" />
 			</div>

@@ -22,7 +22,6 @@ export default function useSocket(type: 'client' | 'rmvcEmitter' = 'client') {
         reconnection: true,
         autoConnect: false,
         auth: {
-            //@ts-expect-error
             type,
             authToken: authStore.authToken,
         } satisfies AuthHandshake,
