@@ -3,11 +3,12 @@ import { msToReadable } from "@cinefinn/utilities/time";
 import { jobsTable } from "../database.js";
 import { getIO } from "../utils.js";
 import { EventEmitter } from "events";
+import { generateJobID } from '../utils/IdGenerators.js';
 
 type EventMap = {
     finished: [];
     failed: [];
-}
+};
 export class Job extends EventEmitter<EventMap> {
     UUID: string;
     type: JobType;
@@ -46,7 +47,7 @@ export class Job extends EventEmitter<EventMap> {
         return Job.fromDB(dbJob);
     }
     static fromDummy(type: JobType) {
-        return new Job(crypto.randomUUID(), type, {}, [], {}, 0, 0, -1);
+        return new Job(generateJobID(), type, {}, [], {}, 0, 0, -1);
     }
 
     toDB(): IJob & timestamped {
@@ -183,7 +184,7 @@ export class Job extends EventEmitter<EventMap> {
         } catch (error) {
 
         } finally {
-            this.emit('finished')
+            this.emit('finished');
         }
     }
 
@@ -193,7 +194,7 @@ export class Job extends EventEmitter<EventMap> {
             await this.save(true);
         } catch (error) {
         } finally {
-            this.emit('failed')
+            this.emit('failed');
         }
     }
 }

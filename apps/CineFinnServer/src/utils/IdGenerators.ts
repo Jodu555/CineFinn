@@ -35,3 +35,7 @@ export const generateWatchHistoryID = () => {
 export const generateJobID = () => {
     return `JOB-${generateID()}`;
 };
+
+export const generatePlaylistID = () => {
+    return `PL-${generateID()}`;
+};

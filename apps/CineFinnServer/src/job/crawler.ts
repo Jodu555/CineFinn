@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import { listFiles } from '../fileutils.js';
-import { createHash, randomUUID } from 'node:crypto';
 import { filenameParser } from '../parser.js';
 import { database, episodesTable, jobsTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable } from '../database.js';
 import { CacheContext } from '../LRUCache.js';
@@ -227,7 +226,7 @@ export async function crawl(job: Job) {
     job.log(`Found ${localFiles.length} local files`);
 
 
-    const subSystemSockets = (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'subsystem')
+    const subSystemSockets = (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'subsystem');
 
     const loadedSubsystems = new Set<string>();
     loadedSubsystems.add('main');
@@ -242,12 +241,12 @@ export async function crawl(job: Job) {
             setTimeout(() => {
                 reject('Timeout');
             }, 1000 * 60 * 5);
-        })
+        });
     });
 
     const subSystemFiles = await Promise.all(subSystemFilesPromise);
     for (const subSystemFile of subSystemFiles) {
-        files = files.concat(subSystemFile)
+        files = files.concat(subSystemFile);
     }
     job.log(`Found ${files.length} total files`);
 
@@ -680,7 +679,7 @@ export async function crawl(job: Job) {
     //     }
     // });
     job.time('Computing StaleWatchableEntitys');
-    const actualStaleWatchableEntitys = []
+    const actualStaleWatchableEntitys = [];
     if (staleWatchableEntitys.length > 0) {
         for (const UUID of staleWatchableEntitys) {
             const watchableEntity = await watchableEntitysTable.getOne({ UUID });
@@ -817,7 +816,7 @@ export async function handleSubSystemProminence(job: Job) {
         const obj = {
             ...map.get(watchableEntity.serie_UUID),
             [watchableEntity.subID]: (map.get(watchableEntity.serie_UUID)?.[watchableEntity.subID] ?? 0) + 1,
-        }
+        };
         map.set(watchableEntity.serie_UUID, obj);
     }
 
@@ -831,7 +830,7 @@ export async function handleSubSystemProminence(job: Job) {
             }
         }
         return prominentSub;
-    }
+    };
 
     for (const [serieUUID, subMap] of map) {
         if (Object.keys(subMap).length > 1) {

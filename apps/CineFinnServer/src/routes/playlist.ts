@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { authMiddleware } from "../middleware/auth.js";
 import { playlistsTable, seriesTable } from "../database.js";
 import z from "zod";
+import { generatePlaylistID } from '../utils/IdGenerators.js';
 
 const playlistCreateSchema = z.object({
     name: z.string().min(3).max(64).trim(),
@@ -26,7 +27,7 @@ const router = new Hono()
 
         const user = c.get('credentials').user;
 
-        const playlistUUID = crypto.randomUUID();
+        const playlistUUID = generatePlaylistID();
         await playlistsTable.create({
             UUID: playlistUUID,
             account_UUID: user.UUID,

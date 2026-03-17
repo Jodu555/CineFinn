@@ -281,7 +281,12 @@ const formatDate = (stamp: string | number): string => {
 };
 
 const watchItem = (itemUUID: string) => {
-	router.push(`/watch/${itemUUID}`);
+	router.push({
+		path: `/watch/${itemUUID}`,
+		query: {
+			playlist: selectedPlaylistUUID.value,
+		},
+	});
 };
 
 const closeAllModals = () => {

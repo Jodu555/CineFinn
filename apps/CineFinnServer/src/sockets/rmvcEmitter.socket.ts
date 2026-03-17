@@ -1,20 +1,15 @@
-import type { AuthHandshake, AuthHandshakeClient, SocketAuthDataClient, SocketAuthDataRmvcEmitter } from "@cinefinn/types/socket";
-import { getUser } from "../middleware/auth.js";
+import type { AuthHandshakeClient, SocketAuthDataClient, SocketAuthDataRmvcEmitter } from "@cinefinn/types/socket";
 import type { Account, timestamped } from "@cinefinn/types/database";
 import type { SocketConsumerMeta } from "./index.js";
-import { app, type definedSocket } from "../index.js";
-import { accountsTable } from "../database.js";
-import { debounce, getIO } from "../utils.js";
-import { compareSettings } from "../utils/settings.js";
-import { getFrontEndSeries } from "../routes/index.js";
-import { randomUUID } from "crypto";
+import { type definedSocket } from "../index.js";
+import { getIO } from "../utils.js";
 
 type LocalAuthData = SocketAuthDataRmvcEmitter<Account | Account & timestamped>;
 
 async function authFunction(authHandshake: AuthHandshakeClient): Promise<LocalAuthData> {
     return {
         type: 'rmvcEmitter',
-    } as LocalAuthData
+    } as LocalAuthData;
 }
 
 
@@ -73,4 +68,4 @@ export default {
         authFunction,
         connectionFunction,
     } satisfies SocketConsumerMeta,
-}
+};
