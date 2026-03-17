@@ -42,7 +42,7 @@ async function authFunction(authHandshake: AuthHandshakeClient): Promise<LocalAu
         token,
         user,
         rmvcEmitterSessionID: result.data.rmvcEmitterSessionID,
-    }
+    };
 }
 
 
@@ -50,15 +50,19 @@ async function authFunction(authHandshake: AuthHandshakeClient): Promise<LocalAu
 async function connectionFunction(socket: definedSocket) {
     const socketAuth = socket.data.auth as LocalAuthData;
     console.log(socket.id, socketAuth.user.username, 'connected');
-    const debouncedUpdateTime = debounce(async (data: { watchableUUID: string; time: number }) => {
-        console.log('debounced updateTime', data);
-        const response = await app.request(`/watch/updateTime/${data.watchableUUID}/${data.time}`, {
-            method: 'POST',
-            headers: {
-                'auth-token': socketAuth.token,
-            },
-        });
-    }, 4000);
+    const debouncedUpdateTime = debounce(
+        async (data: { watchableUUID: string; time: number; }) => {
+            console.log('debounced updateTime', data);
+            const response = await app.request(`/watch/updateTime/${data.watchableUUID}/${data.time}`, {
+                method: 'POST',
+                headers: {
+                    'auth-token': socketAuth.token,
+                },
+            });
+        },
+        2000,
+        (data) => data.watchableUUID // This is the key for debouncing, if this changes then the debounce will be flushed!
+    );
 
     socket.on('updateTime', async (data) => {
         console.log('updateTime', data);
@@ -131,4 +135,4 @@ export default {
         authFunction,
         connectionFunction,
     } satisfies SocketConsumerMeta,
-}
+};

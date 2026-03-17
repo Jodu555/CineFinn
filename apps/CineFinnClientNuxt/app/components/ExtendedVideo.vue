@@ -1,3 +1,4 @@
+template
 <template>
 	<div>
 		<div v-if="!inSyncRoom">
@@ -34,8 +35,7 @@
 							:style="{
 								'--intro-skip-start': segment.startms / videoData.duration,
 								'--intro-skip-end': segment.endms / videoData.duration,
-							}"
-						></div>
+							}"></div>
 
 						<template v-if="videoData.buffered">
 							<div
@@ -45,8 +45,7 @@
 								:style="{
 									'--buffer-start': videoData.buffered.start(i - 1) / videoData.duration,
 									'--buffer-end': videoData.buffered.end(i - 1) / videoData.duration,
-								}"
-							></div>
+								}"></div>
 						</template>
 
 						<img class="preview-img" />
@@ -69,17 +68,17 @@
 							<svg class="volume-high-icon" viewBox="0 0 24 24">
 								<path
 									fill="currentColor"
-									d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z"
-								/>
+									d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" />
 							</svg>
 							<svg class="volume-low-icon" viewBox="0 0 24 24">
-								<path fill="currentColor" d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
+								<path
+									fill="currentColor"
+									d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
 							</svg>
 							<svg class="volume-muted-icon" viewBox="0 0 24 24">
 								<path
 									fill="currentColor"
-									d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z"
-								/>
+									d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z" />
 							</svg>
 						</button>
 						<input class="volume-slider" type="range" min="0" max="1" step="any" value="1" />
@@ -101,8 +100,7 @@
 								fill-rule="evenodd"
 								clip-rule="evenodd"
 								d="M0 18H2L2 0H0L0 18ZM17.7139 17.3827C18.7133 17.9977 20 17.2787 20 16.1052L20 1.8948C20 0.7213 18.7133 0.00230002 17.7139 0.6173L6.1679 7.7225C5.2161 8.3082 5.2161 9.6918 6.1679 10.2775L17.7139 17.3827ZM18 2.7896V15.2104L7.908 9L18 2.7896Z"
-								fill="currentColor"
-							/>
+								fill="currentColor" />
 						</svg>
 					</button>
 					<button title="Next Episode" @click="switchTo(1)">
@@ -111,8 +109,7 @@
 								fill-rule="evenodd"
 								clip-rule="evenodd"
 								d="M22 3H20V21H22V3ZM4.28615 3.61729C3.28674 3.00228 2 3.7213 2 4.89478V19.1052C2 20.2787 3.28674 20.9977 4.28615 20.3827L15.8321 13.2775C16.7839 12.6918 16.7839 11.3082 15.8321 10.7225L4.28615 3.61729ZM4 18.2104V5.78956L14.092 12L4 18.2104Z"
-								fill="currentColor"
-							></path>
+								fill="currentColor"></path>
 						</svg>
 					</button>
 					<button v-if="screenWidth >= 380" title="Toggle Video Speed" class="speed-btn wide-btn">1x</button>
@@ -120,13 +117,14 @@
 						<svg viewBox="0 0 24 24">
 							<path
 								fill="currentColor"
-								d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-10-7h9v6h-9z"
-							/>
+								d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-10-7h9v6h-9z" />
 						</svg>
 					</button>
 					<button v-if="screenWidth >= 450" title="Toggle Theatre Player" class="theater-btn">
 						<svg class="tall" viewBox="0 0 24 24">
-							<path fill="currentColor" d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z" />
+							<path
+								fill="currentColor"
+								d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z" />
 						</svg>
 						<svg class="wide" viewBox="0 0 24 24">
 							<path fill="currentColor" d="M19 7H5c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 8H5V9h14v6z" />
@@ -762,6 +760,26 @@ const initializeVideoControls = () => {
 		let percent = video.currentTime / video.duration;
 		percent = isNaN(percent) ? 0 : percent;
 		timelineContainer.style.setProperty('--progress-position', String(percent));
+
+		if (settings.value.autoSkip.value == true && video.currentTime >= video.duration) {
+			props.switchTo(1);
+			setTimeout(() => {
+				video.play();
+			}, 400);
+		}
+		if (
+			(isInterceptingWithIntro && !alreadySkipped.value.find((x) => x == 'intro')) ||
+			(isInterceptingWithOutro && !alreadySkipped.value.find((x) => x == 'outro'))
+		) {
+			if (settings.value.skipSegments.value == true) {
+				const segment = segmentData.value.find((x) => x.type == (isInterceptingWithIntro ? 'intro' : 'outro'));
+				if (!segment) return;
+				console.log('Skipped ', segment.type.toUpperCase(), ': AutoSkip');
+				alreadySkipped.value.push(segment.type);
+				//Add 2 so the function does not loop itself
+				skip(segment.endms + 2, true);
+			}
+		}
 	};
 	video.volume = settings.value.volume.value;
 	const onVolumeChange = () => {
