@@ -27,7 +27,7 @@
 					<span class="sov-year">{{ yearLabel }}</span>
 				</div>
 				<div class="sov-genres">
-					<span v-for="g in item.tags.slice(0, 2)" :key="g" class="genre-chip">{{ g }}</span>
+					<span v-for="g in (item.tags || []).slice(0, 2)" :key="g" class="genre-chip">{{ g }}</span>
 				</div>
 			</div>
 			<span v-if="showNewRibbon" class="new-ribbon">NEU</span>
@@ -67,12 +67,12 @@ const randomNumber = Math.floor(Math.random() * 1000);
 const seriesImage = computed(() => decideSeriesImage(props.item, randomNumber));
 
 const totalEpisodeCount = computed(() => {
-	return props.item.seasons.reduce((sum, s) => sum + s.episodes, 0);
+	return (props.item.seasons || []).reduce((sum, s) => sum + (s?.episodes || 0), 0);
 });
 
 const yearLabel = computed(() => {
-	const start = props.item.infos.startDate?.split('-')[0] || '';
-	const end = props.item.infos.endDate?.split('-')[0] || '';
+	const start = props.item.infos?.startDate?.split('-')[0] || '';
+	const end = props.item.infos?.endDate?.split('-')[0] || '';
 	if (!start) return '';
 	if (!end) return `${start}–`;
 	if (start === end) return start;

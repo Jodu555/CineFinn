@@ -174,6 +174,7 @@ const { $swal, $toast } = useNuxtApp();
 
 async function retry(queueType: QueueType = 'failed') {
 	const { error, data } = await tryCatch<Promise<unknown>, Error>(() =>
+		//@ts-ignore - Excessive Call depth IDK
 		$fetch(`${useAPIURL()}/bullboard/queues/previewImageQueue/retry/${queueType}`, {
 			method: 'PUT',
 		}),
@@ -195,6 +196,7 @@ async function retry(queueType: QueueType = 'failed') {
 }
 async function pause() {
 	const { error, data } = await tryCatch<Promise<unknown>, Error>(() =>
+		//@ts-ignore - Excessive Call depth IDK
 		$fetch(`${useAPIURL()}/bullboard/queues/previewImageQueue/pause`, {
 			method: 'PUT',
 		}),
@@ -215,6 +217,7 @@ async function pause() {
 }
 async function resume() {
 	const { error, data } = await tryCatch<Promise<unknown>, Error>(() =>
+		//@ts-ignore - Excessive Call depth IDK
 		$fetch(`${useAPIURL()}/bullboard/queues/previewImageQueue/resume`, {
 			method: 'PUT',
 		}),
@@ -235,6 +238,7 @@ async function resume() {
 }
 async function clean(queueType: QueueType) {
 	const { error, data } = await tryCatch<Promise<unknown>, Error>(() =>
+		//@ts-ignore - Excessive Call depth IDK
 		$fetch(`${useAPIURL()}/bullboard/queues/previewImageQueue/clean/${queueType}`, {
 			method: 'PUT',
 		}),
