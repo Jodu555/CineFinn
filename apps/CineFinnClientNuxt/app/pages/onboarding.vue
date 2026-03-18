@@ -26,7 +26,9 @@
 
 							<div v-if="!stepTwo" class="text-center mb-4">
 								<font-awesome-icon icon="fa-solid fa-envelope" class="fa-2x text-muted mb-3" />
-								<p class="text-muted">Verify your email address to complete registration. You'll receive a verification code via email.</p>
+								<p class="text-muted">
+									Verify your email address to complete registration. You'll receive a verification code via email.
+								</p>
 								<p class="text-muted small">This helps secure your account and enables password recovery.</p>
 								<p class="text-muted small">
 									<font-awesome-icon icon="fa-solid fa-clock" class="me-1" />
@@ -58,8 +60,7 @@
 											autocomplete="email"
 											placeholder="Enter your email address"
 											:rules="emailRules"
-											:show-label="false"
-										/>
+											:show-label="false" />
 									</div>
 
 									<div class="mb-3" v-if="stepTwo">
@@ -77,8 +78,7 @@
 											autocomplete="one-time-code"
 											placeholder="Enter verification code"
 											:rules="verificationCodeRules"
-											:show-label="false"
-										/>
+											:show-label="false" />
 									</div>
 
 									<div class="d-flex justify-content-center mt-4 gap-3">
@@ -106,7 +106,6 @@
 </template>
 
 <script lang="ts" setup>
-import useAPIURL from '~/hooks/useAPIURL';
 import type { FetchError } from 'ofetch';
 
 definePageMeta({

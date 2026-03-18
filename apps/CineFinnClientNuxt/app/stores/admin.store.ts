@@ -3,7 +3,7 @@ import type { Account, Email, IgnoranceItem, MovingItem, timestamped } from '@ci
 import type { Overview, SubSystem } from '@cinefinn/types/socket';
 import type { FetchError } from 'ofetch';
 import { defineStore } from 'pinia';
-import useAPIURL from '~/hooks/useAPIURL';
+
 
 export const useAdminStore = defineStore('admin', {
     state: () => ({

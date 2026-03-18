@@ -2,7 +2,7 @@ import { validateEmail } from './utils';
 import type { RefRef, TodoItem, TodoReferences } from '@cinefinn/types/database';
 import type { AniWorldEntity, AniWorldSeriesInformations } from '@cinefinn/types/scrapers';
 import type { Ref } from 'vue';
-import useAPIURL from '~/hooks/useAPIURL';
+
 
 export const scrapers = [
     {
@@ -156,9 +156,9 @@ export function decideImageURL(element: TodoItem) {
 }
 
 type LanguageDevision = {
-    total: number
-    devision: Record<string, number>
-}
+    total: number;
+    devision: Record<string, number>;
+};
 
 const cache = new Map<string, LanguageDevision>();
 

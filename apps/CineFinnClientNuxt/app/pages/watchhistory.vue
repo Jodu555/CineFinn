@@ -39,7 +39,9 @@
 
 			<!-- Error State -->
 			<div v-else-if="status === 'error'" class="text-center py-5">
-				<div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 96px; height: 96px">
+				<div
+					class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-4"
+					style="width: 96px; height: 96px">
 					<font-awesome-icon :icon="['fas', 'exclamation-triangle']" size="3x" class="text-danger" />
 				</div>
 				<h2 class="h4 fw-bold mb-2">Error Loading History</h2>
@@ -128,7 +130,6 @@
 import type { FrontendSeries, WatchHistory } from '@cinefinn/types/database';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import useAPIURL from '~/hooks/useAPIURL';
 
 definePageMeta({
 	middleware: 'auth',

@@ -14,9 +14,6 @@
 	</div>
 </template>
 <script setup lang="ts">
-import useAPIURL from '~/hooks/useAPIURL';
-import useClientVersion from '~/hooks/useClientVersion';
-
 const { data, status } = useFetch<{
 	status: 'ok' | 'error';
 	version: string;

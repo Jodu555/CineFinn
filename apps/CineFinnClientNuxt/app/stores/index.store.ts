@@ -1,5 +1,5 @@
 import type { DetailedSeason, DetailedEpisode, WatchableEntity, DetailedSeries, DetailedMovie, FrontendSeries, WatchHistory, Season } from '@cinefinn/types/database';
-import useAPIURL from '~/hooks/useAPIURL';
+
 
 export const useIndexStore = defineStore('index', {
     state: () => ({
@@ -10,7 +10,7 @@ export const useIndexStore = defineStore('index', {
         detailedMovies: [] as DetailedMovie[],
         selectedEntity: null as DetailedEpisode | DetailedMovie | null,
         selectedWatchableEntity: null as WatchableEntity | null,
-        detailedPrefetchedSeriesObj: {} as { [key: string]: DetailedSeries | true },
+        detailedPrefetchedSeriesObj: {} as { [key: string]: DetailedSeries | true; },
         watchHistory: [] as WatchHistory[],
     }),
     getters: {

@@ -8,8 +8,6 @@
 </template>
 
 <script setup lang="ts">
-import useAPIURL from '~/hooks/useAPIURL';
-
 const isConnected = ref(false);
 const transport = ref('N/A');
 const socketID = ref('N/A');
@@ -67,7 +65,7 @@ watch(
 		} else {
 			socket.disconnect();
 		}
-	}
+	},
 );
 
 watch(
@@ -78,7 +76,7 @@ watch(
 				url: newURL,
 			});
 		}
-	}
+	},
 );
 
 function onDisconnect() {

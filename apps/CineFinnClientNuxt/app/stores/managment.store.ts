@@ -1,6 +1,6 @@
-import type { Job, JobType, timestamped } from '@cinefinn/types/database'
-import { defineStore } from 'pinia'
-import useAPIURL from '~/hooks/useAPIURL';
+import type { Job, JobType, timestamped } from '@cinefinn/types/database';
+import { defineStore } from 'pinia';
+
 import type { FetchError } from 'ofetch';
 
 export const useManagmentStore = defineStore('managment', {
@@ -33,11 +33,11 @@ export const useManagmentStore = defineStore('managment', {
         },
         updateJob(job: (Job & timestamped)) {
             // console.log('Updating Job', job);
-            const index = this.jobs.findIndex((j) => j.UUID === job.UUID)
+            const index = this.jobs.findIndex((j) => j.UUID === job.UUID);
             if (index !== -1) {
-                this.jobs[index] = { ...this.jobs[index], ...job }
+                this.jobs[index] = { ...this.jobs[index], ...job };
             } else {
-                this.jobs.push({ ...job })
+                this.jobs.push({ ...job });
             }
         },
         async deleteJob(jobUUID: string) {
@@ -58,4 +58,4 @@ export const useManagmentStore = defineStore('managment', {
             }
         },
     }
-})
+});

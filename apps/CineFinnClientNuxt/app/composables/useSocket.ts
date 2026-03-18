@@ -1,7 +1,7 @@
 
 import type { AuthHandshake, ClientToServerEvents, ServerToClientEvents } from "@cinefinn/types/socket";
 import { io, Socket } from "socket.io-client";
-import useAPIURL from "~/hooks/useAPIURL";
+
 
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
 export default function useSocket(type: 'client' | 'rmvcEmitter' = 'client') {

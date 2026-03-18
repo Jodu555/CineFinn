@@ -16,7 +16,6 @@
 import Footer from '~/components/Layout/Footer.vue';
 import Navigation from '~/components/Layout/Navigation.vue';
 import SettingsDrawer from '~/components/Layout/SettingsDrawer.vue';
-import { useVersionUpdater } from '~/hooks/useVersionUpdater';
 
 const { isNewVersionAvailable } = useVersionUpdater();
 

@@ -77,7 +77,6 @@
 
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
-import useAPIURL from '~/hooks/useAPIURL';
 
 const authStore = useAuthStore();
 const { $swal } = useNuxtApp();

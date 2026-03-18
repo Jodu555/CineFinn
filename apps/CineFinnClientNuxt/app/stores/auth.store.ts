@@ -1,7 +1,7 @@
 import type { Account, SettingsObject } from '@cinefinn/types/database';
 import { defineStore } from 'pinia';
 import type { FetchError } from 'ofetch';
-import useAPIURL from '~/hooks/useAPIURL';
+
 import { useAuthCookie } from '~/composables/useAuthCookie';
 
 const DEBUG = false;
@@ -30,7 +30,7 @@ export const useAuthStore = defineStore('auth', {
             await this.authenticate(true);
         },
         async register(credentials: { username: string; password: string; token: string; }) {
-            const { data, error } = await tryCatch<Promise<{ token: string, user: Account }>, FetchError>(() => $fetch<{ token: string, user: Account }>(useAPIURL() + '/auth/register', {
+            const { data, error } = await tryCatch<Promise<{ token: string, user: Account; }>, FetchError>(() => $fetch<{ token: string, user: Account; }>(useAPIURL() + '/auth/register', {
                 method: 'POST',
                 body: JSON.stringify(credentials),
             }));

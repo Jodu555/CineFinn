@@ -15,9 +15,12 @@
 						<button
 							v-for="name in cacheNames"
 							:key="name"
-							:class="['list-group-item', 'list-group-item-action', selectedCache === name ? 'active' : 'bg-dark text-light border-secondary']"
-							@click="selectCache(name)"
-						>
+							:class="[
+								'list-group-item',
+								'list-group-item-action',
+								selectedCache === name ? 'active' : 'bg-dark text-light border-secondary',
+							]"
+							@click="selectCache(name)">
 							<font-awesome-icon :icon="['fas', 'folder']" class="me-2" />
 							{{ name }}
 						</button>
@@ -40,7 +43,10 @@
 							<button class="btn btn-sm btn-outline-info me-2" @click="loadKeys" :disabled="pendingKeys">
 								<font-awesome-icon :icon="['fas', 'rotate']" />
 							</button>
-							<button class="btn btn-sm btn-outline-danger" @click="clearCurrentCache" :disabled="!authStore.user || authStore.user.role < 2">
+							<button
+								class="btn btn-sm btn-outline-danger"
+								@click="clearCurrentCache"
+								:disabled="!authStore.user || authStore.user.role < 2">
 								<font-awesome-icon :icon="['fas', 'bomb']" />
 							</button>
 						</div>
@@ -58,14 +64,12 @@
 									selectedKey === key ? 'active' : 'bg-dark text-light border-secondary',
 								]"
 								style="cursor: pointer"
-								@click="selectKey(key)"
-							>
+								@click="selectKey(key)">
 								<span class="text-truncate" style="max-width: 80%">{{ key }}</span>
 								<button
 									class="btn btn-sm btn-outline-danger border-0"
 									@click.stop="deleteKey(key)"
-									:disabled="!authStore.user || authStore.user.role < 2"
-								>
+									:disabled="!authStore.user || authStore.user.role < 2">
 									<font-awesome-icon :icon="['fas', 'trash']" />
 								</button>
 							</li>
@@ -81,9 +85,11 @@
 								type="text"
 								class="form-control form-control-sm bg-dark text-light border-secondary"
 								v-model="newKeyInput"
-								placeholder="New key name..."
-							/>
-							<button class="btn btn-sm btn-success" @click="createNewKey" :disabled="!newKeyInput || !authStore.user || authStore.user.role < 2">
+								placeholder="New key name..." />
+							<button
+								class="btn btn-sm btn-success"
+								@click="createNewKey"
+								:disabled="!newKeyInput || !authStore.user || authStore.user.role < 2">
 								<font-awesome-icon :icon="['fas', 'plus']" />
 							</button>
 						</div>
@@ -107,8 +113,7 @@
 							v-model="contentData"
 							class="form-control bg-dark text-light border-secondary font-monospace"
 							rows="15"
-							:disabled="pendingContent"
-						></textarea>
+							:disabled="pendingContent"></textarea>
 						<div v-if="parseError" class="alert alert-danger mt-2 py-1 px-2 small">
 							<font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="me-1" />
 							{{ parseError }}
@@ -122,8 +127,7 @@
 						<button
 							class="btn btn-primary"
 							@click="saveItem"
-							:disabled="!isJsonValid || pendingContent || !authStore.user || authStore.user.role < 2"
-						>
+							:disabled="!isJsonValid || pendingContent || !authStore.user || authStore.user.role < 2">
 							<font-awesome-icon :icon="['fas', 'save']" class="me-1" />
 							Save Changes
 						</button>
@@ -140,7 +144,6 @@
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
-import useAPIURL from '~/hooks/useAPIURL';
 
 definePageMeta({
 	middleware: 'auth',

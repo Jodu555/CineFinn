@@ -70,7 +70,6 @@
 import type { QueuedPreviewImageGenerationJobData } from '@cinefinn/types';
 import { onMounted, onUnmounted, ref } from 'vue';
 import Progress from '~/components/Progress.vue';
-import useAPIURL from '~/hooks/useAPIURL';
 
 function upperCaseFirstLetter(str: string) {
 	return str.at(0)?.toUpperCase() + str.split('').slice(1).join('');

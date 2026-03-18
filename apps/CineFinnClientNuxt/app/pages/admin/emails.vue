@@ -24,8 +24,7 @@
 						data-bs-toggle="collapse"
 						:data-bs-target="'#collapse-' + email.UUID"
 						aria-expanded="false"
-						:aria-controls="'collapse-' + email.UUID"
-					>
+						:aria-controls="'collapse-' + email.UUID">
 						<div class="d-flex w-100 justify-content-between align-items-center">
 							<!-- Left Side: Subject -->
 							<span class="text-truncate me-3" style="max-width: 60%"> {{ email.UUID }} - {{ email.subject }} </span>
@@ -88,8 +87,7 @@
 									data-bs-toggle="tab"
 									:data-bs-target="'#html-pane-' + email.UUID"
 									type="button"
-									role="tab"
-								>
+									role="tab">
 									HTML Preview
 								</button>
 							</li>
@@ -100,8 +98,7 @@
 									data-bs-toggle="tab"
 									:data-bs-target="'#text-pane-' + email.UUID"
 									type="button"
-									role="tab"
-								>
+									role="tab">
 									Raw Text
 								</button>
 							</li>
@@ -112,8 +109,7 @@
 									data-bs-toggle="tab"
 									:data-bs-target="'#data-pane-' + email.UUID"
 									type="button"
-									role="tab"
-								>
+									role="tab">
 									Data JSON
 								</button>
 							</li>
@@ -149,7 +145,6 @@
 
 <script lang="ts" setup>
 import type { Email, timestamped } from '@cinefinn/types/database';
-import useAPIURL from '~/hooks/useAPIURL';
 
 definePageMeta({
 	middleware: 'auth',

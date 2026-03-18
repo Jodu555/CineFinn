@@ -1,6 +1,6 @@
 import type { Series, SeriesInfos, TodoItem } from '@cinefinn/types/database';
-import { defineStore } from 'pinia'
-import useAPIURL from '~/hooks/useAPIURL';
+import { defineStore } from 'pinia';
+
 
 export interface permAcc {
     UUID: string;
@@ -91,7 +91,7 @@ export const useTodoStore = defineStore('todo', {
                 headers: {
                     'auth-token': useAuthStore().authToken,
                 },
-            }))
+            }));
             if (error) {
                 console.log(error);
                 return;
@@ -257,4 +257,4 @@ export const useTodoStore = defineStore('todo', {
             this.list = list;
         },
     }
-})
+});

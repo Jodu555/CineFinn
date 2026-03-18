@@ -15,19 +15,26 @@
 							<div
 								v-if="authStore.error != '' && !(form.usernameValid && form.passwordValid)"
 								class="alert alert-danger alert-dismissible fade show"
-								role="alert"
-							>
+								role="alert">
 								<font-awesome-icon icon="fa-solid fa-circle-exclamation" class="me-2" />
 								<strong>Error:</strong> {{ authStore.error }}
 								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 							</div>
 
 							<div class="d-flex justify-content-center gap-2 mb-4">
-								<button type="button" class="btn" :class="state === 'login' ? 'btn-primary' : 'btn-outline-primary'" @click="state = 'login'">
+								<button
+									type="button"
+									class="btn"
+									:class="state === 'login' ? 'btn-primary' : 'btn-outline-primary'"
+									@click="state = 'login'">
 									<font-awesome-icon icon="fa-solid fa-right-to-bracket" class="me-2" />
 									Login
 								</button>
-								<button type="button" class="btn" :class="state === 'register' ? 'btn-primary' : 'btn-outline-primary'" @click="state = 'register'">
+								<button
+									type="button"
+									class="btn"
+									:class="state === 'register' ? 'btn-primary' : 'btn-outline-primary'"
+									@click="state = 'register'">
 									<font-awesome-icon icon="fa-solid fa-user-plus" class="me-2" />
 									Register
 								</button>
@@ -56,8 +63,7 @@
 												autocomplete="username"
 												placeholder="Enter your username"
 												:rules="rules.usernameRules"
-												:show-label="false"
-											/>
+												:show-label="false" />
 										</div>
 										<div class="mb-3">
 											<label for="password" class="form-label">
@@ -73,11 +79,13 @@
 												autocomplete="current-password"
 												placeholder="Enter your password"
 												:rules="rules.passwordRules"
-												:show-label="false"
-											/>
+												:show-label="false" />
 										</div>
 										<div class="d-flex justify-content-between align-items-center">
-											<button type="submit" :disabled="!(form.usernameValid && form.passwordValid)" class="btn btn-primary px-4">
+											<button
+												type="submit"
+												:disabled="!(form.usernameValid && form.passwordValid)"
+												class="btn btn-primary px-4">
 												<font-awesome-icon icon="fa-solid fa-right-to-bracket" class="me-2" />
 												Login
 											</button>
@@ -108,8 +116,7 @@
 													autocomplete="registertoken"
 													placeholder="Enter your registration token"
 													:rules="rules.registerTokenRules"
-													:show-label="false"
-												/>
+													:show-label="false" />
 											</div>
 											<div class="mb-3">
 												<label for="regUsername" class="form-label">
@@ -125,8 +132,7 @@
 													autocomplete="username"
 													placeholder="Choose a username"
 													:rules="rules.usernameRules"
-													:show-label="false"
-												/>
+													:show-label="false" />
 											</div>
 											<div class="mb-3">
 												<label for="regPassword" class="form-label">
@@ -142,10 +148,12 @@
 													autocomplete="new-password"
 													placeholder="Choose a password"
 													:rules="rules.passwordRules"
-													:show-label="false"
-												/>
+													:show-label="false" />
 											</div>
-											<button type="submit" :disabled="!(form.usernameValid && form.passwordValid && form.tokenValid)" class="btn btn-primary w-100">
+											<button
+												type="submit"
+												:disabled="!(form.usernameValid && form.passwordValid && form.tokenValid)"
+												class="btn btn-primary w-100">
 												<font-awesome-icon icon="fa-solid fa-user-plus" class="me-2" />
 												Create Account
 											</button>
@@ -178,8 +186,6 @@
 </template>
 
 <script setup lang="ts">
-import useAPIURL from '~/hooks/useAPIURL';
-
 const authStore = useAuthStore();
 
 const state = ref<'login' | 'register'>('login');

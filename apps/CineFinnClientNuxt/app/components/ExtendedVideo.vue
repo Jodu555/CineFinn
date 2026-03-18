@@ -184,7 +184,6 @@ template
 import { ref, computed, watch, onMounted, onBeforeUnmount, reactive } from 'vue';
 import { throttle } from '@/utils/debounceAndThrottle';
 import type { DetailedEpisode, DetailedMovie } from '@cinefinn/types/database';
-import useAPIURL from '~/hooks/useAPIURL';
 import RmvcModal from './RmvcModal.vue';
 // import ShareModal from '@/components/Watch/ShareModal.vue';
 // import RmvcModal from '@/components/Watch/RmvcModal.vue';

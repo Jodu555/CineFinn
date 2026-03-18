@@ -55,8 +55,7 @@
 					<Carousel
 						v-if="carousel.type === 'series'"
 						:ref="(el: any) => (carouselRefs[carousel.id] = el)"
-						v-bind="{ ...carouselConfig, wrapAround: carousel.additionalMeta?.wrapAround }"
-					>
+						v-bind="{ ...carouselConfig, wrapAround: carousel.additionalMeta?.wrapAround }">
 						<Slide v-for="item in carousel.mappedItems" :key="item.UUID">
 							<div class="carousel-slide-wrapper">
 								<LandingSeriesCard
@@ -65,16 +64,22 @@
 									:show-new-ribbon="carousel.additionalMeta?.showNewRibbon"
 									@navigate="navigateToSeries"
 									@add-to-list="addToList"
-									@show-info="showInfo"
-								/>
+									@show-info="showInfo" />
 							</div>
 						</Slide>
 					</Carousel>
 					<!-- Entity/Episode carousel (type === 'entity') -->
-					<Carousel v-else-if="carousel.type === 'entity'" :ref="(el: any) => (carouselRefs[carousel.id] = el)" v-bind="episodeCarouselConfig">
+					<Carousel
+						v-else-if="carousel.type === 'entity'"
+						:ref="(el: any) => (carouselRefs[carousel.id] = el)"
+						v-bind="episodeCarouselConfig">
 						<Slide v-for="item in carousel.mappedItems" :key="item.id">
 							<div class="carousel-slide-wrapper episode-wrapper">
-								<div class="ep-card" @mouseenter="item._hovered = true" @mouseleave="item._hovered = false" @click.stop="playEpisode(item)">
+								<div
+									class="ep-card"
+									@mouseenter="item._hovered = true"
+									@mouseleave="item._hovered = false"
+									@click.stop="playEpisode(item)">
 									<div class="ep-thumb-wrap position-relative overflow-hidden rounded-3">
 										<img :src="item.thumbnail" class="ep-thumb" :alt="item.episodeTitle" loading="lazy" />
 										<div class="ep-play-layer" :class="{ visible: item._hovered }">
@@ -91,7 +96,10 @@
 									<div class="ep-info">
 										<p class="ep-series">{{ item.seriesTitle }}</p>
 										<p class="ep-episode">{{ item.episodeTitle }}</p>
-										<p class="ep-pct"><font-awesome-icon :icon="['fas', 'clock']" class="me-1" />{{ Math.min(item.progress || 0, 100) }}% gesehen</p>
+										<p class="ep-pct">
+											<font-awesome-icon :icon="['fas', 'clock']" class="me-1" />{{ Math.min(item.progress || 0, 100) }}%
+											gesehen
+										</p>
 									</div>
 								</div>
 							</div>
@@ -128,7 +136,7 @@ definePageMeta({
 
 import 'vue3-carousel/carousel.css';
 import LandingSeriesCard from '~/components/LandingSeriesCard.vue';
-import useAPIURL from '~/hooks/useAPIURL';
+
 import { useIndexStore } from '~/stores/index.store';
 import type { FrontendSeries, timestamped, WatchableEntity } from '@cinefinn/types/database';
 

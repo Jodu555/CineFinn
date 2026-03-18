@@ -1,6 +1,6 @@
-import type { FrontendPlaylist } from '@cinefinn/types/database'
-import { defineStore } from 'pinia'
-import useAPIURL from '~/hooks/useAPIURL';
+import type { FrontendPlaylist } from '@cinefinn/types/database';
+import { defineStore } from 'pinia';
+
 
 export const usePlaylistStore = defineStore('playlist', {
     state: () => ({
@@ -20,7 +20,7 @@ export const usePlaylistStore = defineStore('playlist', {
         },
         async createPlaylist(name: string, description: string) {
             this.loading = true;
-            const response = await $fetch<{ message: string, playlistUUID: string }>(useAPIURL() + '/playlists', {
+            const response = await $fetch<{ message: string, playlistUUID: string; }>(useAPIURL() + '/playlists', {
                 method: 'POST',
                 headers: {
                     'auth-token': useAuthStore().authToken,
@@ -34,7 +34,7 @@ export const usePlaylistStore = defineStore('playlist', {
             this.loading = false;
             return response;
         },
-        async updatePlaylist(id: string, body: { name: string, description: string }) {
+        async updatePlaylist(id: string, body: { name: string, description: string; }) {
             this.loading = true;
             const response = await $fetch<FrontendPlaylist>(useAPIURL() + '/playlists/' + id, {
                 method: 'PUT',
@@ -84,4 +84,4 @@ export const usePlaylistStore = defineStore('playlist', {
             this.loading = false;
         },
     }
-})
+});
