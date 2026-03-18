@@ -378,7 +378,7 @@
 					<div v-if="authStore.loggedIn" class="col-xl-3">
 						<h2 class="h5 mb-3">
 							<font-awesome-icon :icon="['fas', 'heart']" class="me-2 text-danger" />
-							More Like This
+							{{ dynamicRelatedContentPlaylist.length > 0 ? 'From the Playlist' : 'More Like This' }}
 						</h2>
 						<div class="d-flex flex-column gap-3">
 							<NuxtLink
@@ -402,9 +402,12 @@
 												<font-awesome-icon :icon="['far', 'calendar']" class="me-1" />
 												{{ item.infos.startDate }} • {{ item.tags[0] }}
 											</p>
-											<div class="d-flex align-items-center small">
-												<font-awesome-icon :icon="['fas', 'star']" class="text-warning me-1" />
-												<span>{{ 5 }}</span>
+											<div class="d-flex align-items-center small mt-2">
+												<!-- <font-awesome-icon :icon="['fas', 'star']" class="text-warning me-1" />
+												<span>{{ 5 }}</span> -->
+												<span class="badge bg-secondary me-2" v-for="(tag, idx) in series.tags.slice(1, 5)" :key="idx">
+													{{ idx == 0 ? tag.toLowerCase() : tag }}
+												</span>
 											</div>
 										</div>
 										<div class="d-flex align-items-center">
@@ -457,6 +460,7 @@ definePageMeta({
 const route = useRoute();
 const authStore = useAuthStore();
 const indexStore = useIndexStore();
+const playlistStore = usePlaylistStore();
 
 if (authStore.loggedIn) {
 	await Promise.all([
@@ -763,7 +767,16 @@ const { data: additionalList, execute: loadCheckForUpdates } = await useFetch<
 	},
 });
 
-const { data: dynamicRelatedContent, execute: loadDynamicRelatedContent } = await useFetch<string[]>(
+const dynamicRelatedContent = computed(() => {
+	if (dynamicRelatedContentPlaylist.value.length > 0) {
+		return dynamicRelatedContentPlaylist.value;
+	}
+	return dynamicRelatedContentAPI.value;
+});
+
+const dynamicRelatedContentPlaylist = ref<string[]>([]);
+
+const { data: dynamicRelatedContentAPI, execute: loadDynamicRelatedContent } = await useFetch<string[]>(
 	`${useAPIURL()}/index/${route.params.SID}/related`,
 	{
 		headers: {
@@ -782,6 +795,14 @@ const { data: dynamicRelatedContent, execute: loadDynamicRelatedContent } = awai
 );
 
 if (authStore.loggedIn) {
+	if ('playlist' in route.query) {
+		playlistStore.loadPlaylists();
+		const playlist = playlistStore.playlists.find((p) => p.UUID === route.query.playlist);
+		if (playlist) {
+			dynamicRelatedContentPlaylist.value = playlist.items;
+		}
+	}
+
 	loadDynamicRelatedContent();
 	loadCheckForUpdates();
 }
