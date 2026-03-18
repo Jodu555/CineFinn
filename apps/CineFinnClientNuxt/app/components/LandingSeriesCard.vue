@@ -116,6 +116,18 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+:root {
+	--cs-bg: #090910;
+	--cs-surface: #11111a;
+	--cs-accent: #e5091a;
+	--cs-accent-glow: rgba(229, 9, 26, 0.35);
+	--cs-text: #eeeef5;
+	--cs-muted: #7777a0;
+	--cs-overlay: linear-gradient(to top, rgba(5, 5, 15, 0.97) 0%, rgba(5, 5, 15, 0.7) 55%, transparent 100%);
+	--radius: 10px;
+	--t: 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .series-card {
 	flex-shrink: 0;
 	width: 230px;
