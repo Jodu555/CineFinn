@@ -116,7 +116,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-:root {
+* {
 	--cs-bg: #090910;
 	--cs-surface: #11111a;
 	--cs-accent: #e5091a;
