@@ -589,7 +589,7 @@ const forceHideLatestWatchButton = ref('');
 const showLatestWatchButton = computed(() => {
 	if (authStore.loggedIn == false) return false;
 	if (authStore.user.settings.showLatestWatchButton.value == false) return false;
-	if (forceHideLatestWatchButton.value == indexStore.selectedWatchableEntity!.watchable_UUID) return false;
+	if (forceHideLatestWatchButton.value == indexStore.selectedWatchableEntity?.watchable_UUID) return false;
 
 	const watchHistorySegment = indexStore.watchHistory.find((w) => w.watchable_UUID === indexStore.selectedWatchableEntity?.watchable_UUID);
 	return watchHistorySegment !== undefined;
