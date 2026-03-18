@@ -385,7 +385,10 @@
 								v-for="(item, idx) in dynamicPopulatedContent"
 								:key="item.UUID"
 								class="card cursor-pointer"
-								:to="`/watch/${item.UUID}`"
+								:class="{
+									'border-success': item.UUID === route.params.SID,
+								}"
+								:to="`/watch/${item.UUID}${route.query.playlist ? `?playlist=${route.query.playlist}` : ''}`"
 								style="cursor: pointer; text-decoration: none"
 								prefetch-on="interaction"
 								@mouseover="indexStore.prefetchSeries(item.UUID)">
