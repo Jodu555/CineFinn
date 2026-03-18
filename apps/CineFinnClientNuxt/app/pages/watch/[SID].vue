@@ -466,21 +466,26 @@ const authStore = useAuthStore();
 const indexStore = useIndexStore();
 const playlistStore = usePlaylistStore();
 
+//This reliably works evene when spaming the page transitions
 if (authStore.loggedIn) {
-	await Promise.all([
-		callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string), { mode: 'navigation' }),
-		callOnce('loadWatchHistory', async () => await indexStore.loadWatchHistory(route.params.SID as string), { mode: 'navigation' }),
-	]);
+	await Promise.all([indexStore.loadDetailedSeasonInfo(route.params.SID as string), indexStore.loadWatchHistory(route.params.SID as string)]);
 } else {
-	await Promise.all([
-		callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string), { mode: 'navigation' }),
-	]);
+	await indexStore.loadDetailedSeasonInfo(route.params.SID as string);
 }
 
-const series = computed(() => indexStore.seriesById.get(route.params.SID as string));
+//This has some race conditions i dont know how to fix
+// if (authStore.loggedIn) {
+// 	await Promise.all([
+// 		callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string), { mode: 'navigation' }),
+// 		callOnce('loadWatchHistory', async () => await indexStore.loadWatchHistory(route.params.SID as string), { mode: 'navigation' }),
+// 	]);
+// } else {
+// 	await Promise.all([
+// 		callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string), { mode: 'navigation' }),
+// 	]);
+// }
 
-// await callOnce('loadSeriesInfo', async () => await indexStore.loadDetailedSeasonInfo(route.params.SID as string), { mode: 'navigation' });
-// callOnce('loadWatchHistory', async () => await indexStore.loadWatchHistory(route.params.SID as string), { mode: 'navigation' });
+const series = computed(() => indexStore.seriesById.get(route.params.SID as string));
 
 const coverURL = computed(() => {
 	return decideSeriesImage(series.value!, randomNumber.value);
