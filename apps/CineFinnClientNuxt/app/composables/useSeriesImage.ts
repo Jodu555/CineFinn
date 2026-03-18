@@ -1,5 +1,4 @@
 import type { FrontendSeries } from '@cinefinn/types/database';
-import useAPIURL from '~/hooks/useAPIURL';
 
 export function useSeriesImage() {
   const apiURL = useAPIURL();
