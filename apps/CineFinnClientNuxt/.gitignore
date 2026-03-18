@@ -5,6 +5,7 @@
 .nitro
 .cache
 dist
+*.cpuprofile
 
 # Node dependencies
 node_modules
