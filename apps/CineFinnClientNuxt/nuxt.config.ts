@@ -31,7 +31,9 @@ export default defineNuxtConfig({
                 '@fortawesome/vue-fontawesome',
                 '@fortawesome/free-solid-svg-icons',
                 '@fortawesome/free-regular-svg-icons',
-                '@fortawesome/fontawesome-svg-core'
+                '@fortawesome/fontawesome-svg-core',
+                'sweetalert2',
+                'socket.io-client',
             ]
         },
 
