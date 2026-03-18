@@ -1,16 +1,27 @@
 <template>
-	<div class="col" style="content-visibility: auto; contain: content; will-change: transform;" :id="entity.UUID" @click="clicked">
+	<div class="col" style="content-visibility: auto; contain: content; will-change: transform" :id="entity.UUID" @click="clicked">
 		<div class="card" :class="{ 'border-success': highlighted }">
-
 			<!-- <pre>{{ decideSeriesImage(entity, randomNumber) }}</pre> -->
 			<div v-if="!props.serverRendered">
-				<OptimizedNuxtImg style="width: 100%; height: 100%" :width="'100%'" :height="'100%'"
-					:src="decideSeriesImage(entity, randomNumber)" root-margin="500px" placeholder-height="400px"
-					class="entitycard-img" :eager="isAboveFold" />
+				<OptimizedNuxtImg
+					style="width: 100%; height: 100%"
+					:width="'100%'"
+					:height="'100%'"
+					:src="decideSeriesImage(entity, randomNumber)"
+					root-margin="500px"
+					placeholder-height="400px"
+					class="entitycard-img"
+					:eager="isAboveFold" />
 			</div>
 			<div v-else>
-				<LazyOptimizedNuxtImg :src="decideSeriesImage(entity, randomNumber)" loading="lazy" root-margin="100px"
-					style="width: 100%; height: 100%" :width="'100%'" :height="'100%'" :eager="isAboveFold" />
+				<LazyOptimizedNuxtImg
+					:src="decideSeriesImage(entity, randomNumber)"
+					loading="lazy"
+					root-margin="100px"
+					style="width: 100%; height: 100%"
+					:width="'100%'"
+					:height="'100%'"
+					:eager="isAboveFold" />
 			</div>
 
 			<!-- <LazyOptimizedNuxtImg v-if="entity?.infos?.image" :src="buildCoverURL" loading="lazy" root-margin="100px"
@@ -29,35 +40,36 @@
 			<div class="card-body" v-if="props.showBody" v-auto-animate>
 				<h4 class="card-title">{{ entity.infos?.title || entity.infos?.infos || entity.title }}</h4>
 				<div class="card-text">
-					<ElongatedText v-if="entity.infos.description"
-						:text="entity.infos.description || 'No Description available yet...'" :max-length="125" />
+					<ElongatedText
+						v-if="entity.infos.description"
+						:text="entity.infos.description || 'No Description available yet...'"
+						:max-length="125" />
 
-					<small v-if="entity.infos.startDate || entity.infos.endDate" class="text-secondary">{{
-						entity.infos.startDate }} - {{ entity.infos.endDate }}</small>
+					<small v-if="entity.infos.startDate || entity.infos.endDate" class="text-secondary"
+						>{{ entity.infos.startDate }} - {{ entity.infos.endDate }}</small
+					>
 				</div>
 
 				<div class="d-flex justify-content-between">
 					<!-- <button @click="goAndWatch" class="btn btn-outline-primary btn-sm">Go & Watch</button> -->
-					<nuxt-link class="btn btn-outline-primary btn-sm mt-1 mb-2" :prefetch-on="{ interaction: true }"
-						:to="`/watch/${entity.UUID}`">Go & Watch</nuxt-link>
+					<nuxt-link class="btn btn-outline-primary btn-sm mt-1 mb-2" :prefetch-on="{ interaction: true }" :to="`/watch/${entity.UUID}`"
+						>Go & Watch</nuxt-link
+					>
 
 					<!-- <AddToPlaylistDialog :item-u-u-i-d="entity.UUID" :content-title="entity.title" open-button-text=""
 						open-button-color="outline-primary" icon-size="sm" /> -->
 					<div>
-						<button class="btn bg-transparent btn-outline-primary" @click="addToPlaylist()"
-							title="Add To Playlist">
+						<button class="btn bg-transparent btn-outline-primary" @click="addToPlaylist()" title="Add To Playlist">
 							<font-awesome-icon :icon="['fas', 'plus']" size="sm" />
 						</button>
 					</div>
-
 				</div>
 
 				<div v-if="authStore.user.role >= 2" class="d-flex">
 					<p class="ms-auto text-secondary" style="margin-bottom: 0.1rem">ID: {{ entity.UUID }}</p>
 				</div>
 
-				<button v-if="authStore.user.role >= 2" type="button" class="btn btn-outline-info btn-sm"
-					@click="toggleEdit()">
+				<button v-if="authStore.user.role >= 2" type="button" class="btn btn-outline-info btn-sm" @click="toggleEdit()">
 					<font-awesome-icon :icon="['fa-solid', 'fa-pen']" size="lg" />
 				</button>
 
@@ -66,8 +78,7 @@
 					<form @submit.prevent="saveEditObject">
 						<h5>References:</h5>
 						<div class="mb-3">
-							<input type="text" v-model="editObject.refs.aniworld" class="form-control"
-								placeholder="Aniworld" />
+							<input type="text" v-model="editObject.refs.aniworld" class="form-control" placeholder="Aniworld" />
 						</div>
 						<div class="mb-3">
 							<input type="text" v-model="editObject.refs.zoro" class="form-control" placeholder="Zoro" />
@@ -78,19 +89,16 @@
 						<h5>Infos:</h5>
 						<div class="mb-3">
 							<label for="title" class="form-label">Title</label>
-							<input type="text" v-model="editObject.infos.infos" class="form-control" id="title"
-								placeholder="Title" />
+							<input type="text" v-model="editObject.infos.infos" class="form-control" id="title" placeholder="Title" />
 						</div>
 
 						<label for="" class="form-label">Start / End - Date</label>
 						<div class="row mb-3">
 							<div class="col">
-								<input type="text" v-model="editObject.infos.startDate" class="form-control"
-									placeholder="Start" />
+								<input type="text" v-model="editObject.infos.startDate" class="form-control" placeholder="Start" />
 							</div>
 							<div class="col">
-								<input type="text" v-model="editObject.infos.endDate" class="form-control"
-									placeholder="End" />
+								<input type="text" v-model="editObject.infos.endDate" class="form-control" placeholder="End" />
 							</div>
 						</div>
 
@@ -100,20 +108,17 @@
 						</div>
 						<div v-if="editObject.infos.imageURL != null" class="mb-3">
 							<label for="imgurl" class="form-label">Image Url</label>
-							<input type="text" v-model="editObject.infos.imageURL" class="form-control" id="imgurl"
-								placeholder="ImageUrl" />
+							<input type="text" v-model="editObject.infos.imageURL" class="form-control" id="imgurl" placeholder="ImageUrl" />
 						</div>
 
 						<div class="mb-5">
 							<label for="" class="form-label">Description</label>
-							<textarea v-model="editObject.infos.description" class="form-control" id="description"
-								rows="3"></textarea>
+							<textarea v-model="editObject.infos.description" class="form-control" id="description" rows="3"></textarea>
 						</div>
 
 						<div class="mb-3 p-1 border border-warning-subtle rounded">
 							<label for="title" class="form-label text-danger">InnerTitle</label>
-							<input type="text" v-model="editObject.title" class="form-control" id="innerTitle"
-								placeholder="innerTitle" />
+							<input type="text" v-model="editObject.title" class="form-control" id="innerTitle" placeholder="innerTitle" />
 						</div>
 
 						<div class="d-flex">
@@ -123,7 +128,9 @@
 					</form>
 				</div>
 			</div>
-			<div v-if="props.showFooter" class="card-footer"
+			<div
+				v-if="props.showFooter"
+				class="card-footer"
 				:class="{ 'text-secondary': !entity.infos.disabled, 'text-danger': entity.infos.disabled }">
 				{{ entityInfoString }}
 			</div>
@@ -134,23 +141,27 @@
 <script lang="ts" setup>
 const authStore = useAuthStore();
 const indexStore = useIndexStore();
+const { decideSeriesImage } = useSeriesImage();
 
-const props = withDefaults(defineProps<{
-	seriesID: string;
-	highlighted?: boolean;
-	showBody?: boolean;
-	showFooter?: boolean;
-	beClickable?: boolean;
-	serverRendered?: boolean;
-	index?: number;
-}>(), {
-	highlighted: false,
-	showBody: true,
-	showFooter: true,
-	beClickable: false,
-	serverRendered: false,
-	index: 0,
-});
+const props = withDefaults(
+	defineProps<{
+		seriesID: string;
+		highlighted?: boolean;
+		showBody?: boolean;
+		showFooter?: boolean;
+		beClickable?: boolean;
+		serverRendered?: boolean;
+		index?: number;
+	}>(),
+	{
+		highlighted: false,
+		showBody: true,
+		showFooter: true,
+		beClickable: false,
+		serverRendered: false,
+		index: 0,
+	},
+);
 
 const isAboveFold = computed(() => props.index < 10);
 
@@ -160,9 +171,8 @@ const addToPlaylist = () => {
 	emit('addToPlaylist', props.seriesID);
 };
 
-
 const entity = computed(() => {
-    return indexStore.seriesById.get(props.seriesID)!;
+	return indexStore.seriesById.get(props.seriesID)!;
 });
 
 const editing = ref(false);
@@ -185,7 +195,6 @@ const editObject = ref({
 });
 
 const toggleEdit = () => {
-
 	if (editing.value === false) {
 		if (entity.value) {
 			editObject.value = {
@@ -216,17 +225,17 @@ const saveEditObject = async () => {
 	toggleEdit();
 };
 
+const imgStyle = computed(
+	() =>
+		isHydrated.value
+			? { width: '100%', height: '100%' } // client after hydration
+			: { width: '300px', height: '400px' }, // server / initial
+);
 
-const imgStyle = computed(() =>
-	isHydrated.value
-		? { width: '100%', height: '100%' }      // client after hydration
-		: { width: '300px', height: '400px' }   // server / initial
-)
-
-const isHydrated = ref(false)
+const isHydrated = ref(false);
 onMounted(() => {
 	isHydrated.value = true;
-})
+});
 
 const randomNumber = useState('randomNumber' + props.seriesID, () => Math.floor(Math.random() * 1000));
 

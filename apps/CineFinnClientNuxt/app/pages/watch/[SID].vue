@@ -455,6 +455,8 @@ import AddToPlaylistDialog from '~/components/AddToPlaylistDialog.vue';
 import ExtendedVideo from '~/components/ExtendedVideo.vue';
 import useAPIURL from '~/hooks/useAPIURL';
 
+const { decideSeriesImage } = useSeriesImage();
+
 definePageMeta({
 	middleware: 'may-auth',
 	scrollToTop: true,

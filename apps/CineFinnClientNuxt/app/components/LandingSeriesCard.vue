@@ -45,7 +45,8 @@
 
 <script lang="ts" setup>
 import type { FrontendSeries } from '@cinefinn/types/database';
-import { decideSeriesImage } from '~/utils/utils';
+
+const { decideSeriesImage } = useSeriesImage();
 
 const props = defineProps<{
 	item: FrontendSeries;

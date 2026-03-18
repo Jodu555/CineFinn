@@ -22,18 +22,18 @@ export const validateEmail = (email: string) => {
         );
 };
 
-export const decideSeriesImage = (series: FrontendSeries, randomNumber?: string | number) => {
-    if (series.infos.image) {
-        // return `https://cinema-api.jodu555.de/images/${series.UUID}/cover.jpg`;
-        const url = new URL(useAPIURL() + `/images/${series.UUID}/cover.jpg`);
-        url.searchParams.append('auth-token', useAuthStore().authToken);
-        return url.href;
-    } else if (series.infos.imageURL) {
-        return series.infos.imageURL;
-    } else {
-        return `https://picsum.photos/seed/movie${randomNumber}/300/400`;
-    }
-};
+// export const decideSeriesImage = (series: FrontendSeries, randomNumber?: string | number) => {
+//     if (series.infos.image) {
+//         // return `https://cinema-api.jodu555.de/images/${series.UUID}/cover.jpg`;
+//         const url = new URL(useAPIURL() + `/images/${series.UUID}/cover.jpg`);
+//         url.searchParams.append('auth-token', useAuthStore().authToken);
+//         return url.href;
+//     } else if (series.infos.imageURL) {
+//         return series.infos.imageURL;
+//     } else {
+//         return `https://picsum.photos/seed/movie${randomNumber}/300/400`;
+//     }
+// };
 
 export const langDetails = {
     gerdub: {
