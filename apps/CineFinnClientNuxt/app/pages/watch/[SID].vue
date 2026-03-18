@@ -798,15 +798,20 @@ const { data: dynamicRelatedContentAPI, execute: loadDynamicRelatedContent } = a
 );
 
 if (authStore.loggedIn) {
+	let loadAPIRecommendations = true;
 	if ('playlist' in route.query) {
-		playlistStore.loadPlaylists();
+		await playlistStore.loadPlaylists();
 		const playlist = playlistStore.playlists.find((p) => p.UUID === route.query.playlist);
 		if (playlist) {
 			dynamicRelatedContentPlaylist.value = playlist.items;
+			loadAPIRecommendations = false;
 		}
 	}
 
-	loadDynamicRelatedContent();
+	if (loadAPIRecommendations) {
+		loadDynamicRelatedContent();
+	}
+
 	loadCheckForUpdates();
 }
 
