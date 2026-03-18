@@ -741,7 +741,7 @@ const initializeVideoControls = () => {
 	};
 	const onError = () => {
 		videoLoading.value = true;
-		umTrackEvent('video_error', { error: video.error });
+		umTrackEvent('video_error', { url: useRoute().fullPath, error: video.error });
 	};
 	const onProgress = () => {
 		updateVueVideoData();
