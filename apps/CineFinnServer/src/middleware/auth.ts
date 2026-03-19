@@ -99,6 +99,13 @@ export const authFullMiddleware = (cb: (user: Account) => boolean) => createMidd
         });
     }
 
+    await accountsTable.update({ UUID: user.UUID }, {
+        activityDetails: {
+            lastHandshake: new Date().toLocaleString(),
+            lastLogin: user.activityDetails.lastLogin || new Date().toLocaleString(),
+        }
+    });
+
     if (!cb(user)) {
         throw new HTTPException(403, {
             message: 'Insufficent Permission'
@@ -142,6 +149,13 @@ export const authRouter = new Hono()
         await authTokensTable.create({
             TOKEN: authToken,
             account_UUID: result.UUID,
+        });
+
+        await accountsTable.update({ UUID: result.UUID }, {
+            activityDetails: {
+                lastHandshake: new Date().toLocaleString(),
+                lastLogin: new Date().toLocaleString(),
+            }
         });
 
         return c.json({

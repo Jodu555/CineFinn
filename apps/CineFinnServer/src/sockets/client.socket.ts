@@ -119,6 +119,14 @@ async function connectionFunction(socket: definedSocket) {
         console.log(socket.id, 'user disconnected');
     });
     rmvcEmitterSocket.meta.connectionFunction(socket);;
+
+    accountsTable.update({ UUID: socketAuth.user.UUID }, {
+        activityDetails: {
+            lastHandshake: new Date().toLocaleString(),
+            lastLogin: socketAuth.user.activityDetails.lastLogin || new Date().toLocaleString(),
+        }
+    });
+
 }
 
 export async function sendSeriesReloadToAll() {
