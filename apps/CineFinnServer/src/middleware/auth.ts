@@ -101,8 +101,8 @@ export const authFullMiddleware = (cb: (user: Account) => boolean) => createMidd
 
     await accountsTable.update({ UUID: user.UUID }, {
         activityDetails: {
-            lastHandshake: new Date().toLocaleString(),
-            lastLogin: user.activityDetails.lastLogin || new Date().toLocaleString(),
+            lastHandshake: new Date().toLocaleString('de'),
+            lastLogin: user.activityDetails.lastLogin || new Date().toLocaleString('de'),
         }
     });
 
@@ -153,8 +153,8 @@ export const authRouter = new Hono()
 
         await accountsTable.update({ UUID: result.UUID }, {
             activityDetails: {
-                lastHandshake: new Date().toLocaleString(),
-                lastLogin: new Date().toLocaleString(),
+                lastHandshake: new Date().toLocaleString('de'),
+                lastLogin: new Date().toLocaleString('de'),
             }
         });
 

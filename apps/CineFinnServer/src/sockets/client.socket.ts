@@ -122,8 +122,8 @@ async function connectionFunction(socket: definedSocket) {
 
     accountsTable.update({ UUID: socketAuth.user.UUID }, {
         activityDetails: {
-            lastHandshake: new Date().toLocaleString(),
-            lastLogin: socketAuth.user.activityDetails.lastLogin || new Date().toLocaleString(),
+            lastHandshake: new Date().toLocaleString('de'),
+            lastLogin: socketAuth.user.activityDetails.lastLogin || new Date().toLocaleString('de'),
         }
     });
 
