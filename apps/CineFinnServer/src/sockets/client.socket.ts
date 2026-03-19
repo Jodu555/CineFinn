@@ -116,7 +116,7 @@ async function connectionFunction(socket: definedSocket) {
 
 
     socket.on('disconnect', () => {
-        console.log(socket.id, 'user disconnected');
+        console.log(socket.id, socketAuth.user.username, 'user disconnected');
     });
     rmvcEmitterSocket.meta.connectionFunction(socket);;
 
