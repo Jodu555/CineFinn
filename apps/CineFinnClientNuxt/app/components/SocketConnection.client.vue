@@ -1,5 +1,5 @@
 <template>
-	<div v-if="authStore.user.settings.developerMode.value || authStore.user.username == 'Nariko' || authStore.user.username == 'Jodu'">
+	<div v-if="authStore.user.settings.developerMode.value">
 		<p class="mb-0">API: {{ useAPIURL() }}</p>
 		<p class="mb-0">Status: {{ isConnected ? 'connected' : 'disconnected' }}</p>
 		<p class="mb-0">Transport: {{ transport }}</p>
