@@ -618,7 +618,7 @@ const skipToLatestTime = () => {
 	}
 };
 
-const handleEpisodeClick = (episodeUUID: string) => {
+const handleEpisodeClick = async (episodeUUID: string) => {
 	const router = useRouter();
 	const prevQuery = JSON.parse(JSON.stringify(route.query));
 	delete prevQuery.movie;
@@ -627,20 +627,28 @@ const handleEpisodeClick = (episodeUUID: string) => {
 	if (currentEpisodeUUID.value === episodeUUID) {
 		currentEpisodeUUID.value = null;
 		indexStore.setSelectedWatchableEntityUUID(null);
-		router.push({ path: `/watch/${series.value!.UUID}`, query: { ...prevQuery } });
+		await router.push({ path: `/watch/${series.value!.UUID}`, query: { ...prevQuery } });
 		return;
 	}
+
+	const previouslyPaused = document.querySelector('video')?.paused || true;
+
 	currentEpisodeUUID.value = episodeUUID;
 	currentMovieUUID.value = null;
 	indexStore.setSelectedWatchableEntityUUID(episodeUUID);
 
-	router.push({ path: `/watch/${series.value!.UUID}`, query: { episode: episodeUUID, ...prevQuery } });
+	await router.push({ path: `/watch/${series.value!.UUID}`, query: { episode: episodeUUID, ...prevQuery } });
+	setTimeout(() => {
+		if (!previouslyPaused) {
+			document.querySelector('video')?.play();
+		}
+	}, 400);
 };
 const isCurrentEpisode = (episodeUUID: string) => {
 	return currentEpisodeUUID.value === episodeUUID;
 };
 
-const handleMovieClick = (movieUUID: string) => {
+const handleMovieClick = async (movieUUID: string) => {
 	const router = useRouter();
 	const prevQuery = JSON.parse(JSON.stringify(route.query));
 	delete prevQuery.movie;
@@ -648,15 +656,21 @@ const handleMovieClick = (movieUUID: string) => {
 	if (currentMovieUUID.value === movieUUID) {
 		currentMovieUUID.value = null;
 		indexStore.setSelectedWatchableEntityUUID(null);
-		router.push({ path: `/watch/${series.value!.UUID}`, query: { ...prevQuery } });
+		await router.push({ path: `/watch/${series.value!.UUID}`, query: { ...prevQuery } });
 		return;
 	}
+	const previouslyPaused = document.querySelector('video')?.paused || true;
 
 	currentMovieUUID.value = movieUUID;
 	currentEpisodeUUID.value = null;
 	indexStore.setSelectedWatchableEntityUUID(movieUUID);
 
-	router.push({ path: `/watch/${series.value!.UUID}`, query: { movie: movieUUID, ...prevQuery } });
+	await router.push({ path: `/watch/${series.value!.UUID}`, query: { movie: movieUUID, ...prevQuery } });
+	setTimeout(() => {
+		if (!previouslyPaused) {
+			document.querySelector('video')?.play();
+		}
+	}, 400);
 };
 const isCurrentMovie = (movieUUID: string) => {
 	return currentMovieUUID.value === movieUUID;
