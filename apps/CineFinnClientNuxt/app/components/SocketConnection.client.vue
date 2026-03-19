@@ -43,12 +43,13 @@ onMounted(() => {
 
 	socket.on('connect_error', (err) => {
 		console.log('connect_error', err);
-		connectError.value = err.message;
+		connectError.value = err.message + ' - ' + JSON.stringify(err);
 		umTrackEvent('socket_connect_error', { error: err.message });
 	});
 });
 const router = useRouter();
 function onConnect() {
+	connectError.value = '';
 	isConnected.value = true;
 	transport.value = socket.io.engine.transport.name;
 
