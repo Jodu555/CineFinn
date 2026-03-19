@@ -52,7 +52,7 @@ async function connectionFunction(socket: definedSocket) {
     console.log(socket.id, socketAuth.user.username, 'connected');
     const debouncedUpdateTime = debounce(
         async (data: { watchableUUID: string; time: number; }) => {
-            console.log('debounced updateTime', data);
+            console.log('debounced updateTime', data, socketAuth.user.username);
             const response = await app.request(`/watch/updateTime/${data.watchableUUID}/${data.time}`, {
                 method: 'POST',
                 headers: {
@@ -65,7 +65,7 @@ async function connectionFunction(socket: definedSocket) {
     );
 
     socket.on('updateTime', async (data) => {
-        console.log('updateTime', data);
+        console.log('updateTime', data, socketAuth.user.username);
         debouncedUpdateTime(data);
     });
 
