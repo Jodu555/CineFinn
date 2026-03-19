@@ -1,9 +1,10 @@
 <template>
-	<div v-if="false">
+	<div v-if="authStore.user.settings.developerMode.value || authStore.user.username == 'Nariko' || authStore.user.username == 'Jodu'">
 		<p class="mb-0">API: {{ useAPIURL() }}</p>
 		<p class="mb-0">Status: {{ isConnected ? 'connected' : 'disconnected' }}</p>
 		<p class="mb-0">Transport: {{ transport }}</p>
-		<p>Socket ID: {{ socketID }}</p>
+		<p class="mb-0">Socket ID: {{ socketID }}</p>
+		<p v-if="connectError.length > 0">Connect Error: {{ connectError }}</p>
 	</div>
 </template>
 
@@ -11,6 +12,7 @@
 const isConnected = ref(false);
 const transport = ref('N/A');
 const socketID = ref('N/A');
+const connectError = ref('');
 
 const socket = useSocket();
 const managmentStore = useManagmentStore();
@@ -38,6 +40,12 @@ onMounted(() => {
 		onConnect();
 	}
 	socket.on('connect', onConnect);
+
+	socket.on('connect_error', (err) => {
+		console.log('connect_error', err);
+		connectError.value = err.message;
+		umTrackEvent('socket_connect_error', { error: err.message });
+	});
 });
 const router = useRouter();
 function onConnect() {
