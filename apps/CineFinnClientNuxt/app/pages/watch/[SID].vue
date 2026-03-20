@@ -618,6 +618,42 @@ const skipToLatestTime = () => {
 	}
 };
 
+const videoKeepState = () => {
+	const videoElement = document.querySelector('video');
+	let previouslyPaused = false;
+	if (videoElement) {
+		previouslyPaused = videoElement.paused;
+	}
+	return {
+		apply: () => {
+			const inter = setInterval(() => {
+				const interVideoElement = document.querySelector('video');
+				if (interVideoElement) {
+					if (interVideoElement.readyState >= 3) {
+						if (!previouslyPaused) {
+							interVideoElement.play();
+							clearInterval(inter);
+						}
+					}
+				}
+			}, 100);
+			setTimeout(() => {
+				clearInterval(inter);
+				const interVideoElement = document.querySelector('video');
+				if (interVideoElement && !previouslyPaused) {
+					interVideoElement.play();
+				}
+				umTrackEvent('videoKeepState_timeout', {
+					previouslyPaused,
+					readyState: interVideoElement?.readyState,
+					paused: interVideoElement?.paused,
+					route: useRoute().fullPath,
+				});
+			}, 1000 * 10);
+		},
+	};
+};
+
 const handleEpisodeClick = async (episodeUUID: string) => {
 	const router = useRouter();
 	const prevQuery = JSON.parse(JSON.stringify(route.query));
@@ -631,24 +667,14 @@ const handleEpisodeClick = async (episodeUUID: string) => {
 		return;
 	}
 
-	const videoElement = document.querySelector('video');
-	let previouslyPaused = false;
-	if (videoElement) {
-		previouslyPaused = videoElement.paused;
-	}
+	const { apply } = videoKeepState();
 
 	currentEpisodeUUID.value = episodeUUID;
 	currentMovieUUID.value = null;
 	indexStore.setSelectedWatchableEntityUUID(episodeUUID);
 
 	await router.push({ path: `/watch/${series.value!.UUID}`, query: { episode: episodeUUID, ...prevQuery } });
-	setTimeout(() => {
-		console.log('AFTER', 'previouslyPaused', previouslyPaused);
-
-		if (!previouslyPaused) {
-			document.querySelector('video')?.play();
-		}
-	}, 400);
+	apply();
 };
 const isCurrentEpisode = (episodeUUID: string) => {
 	return currentEpisodeUUID.value === episodeUUID;
@@ -665,21 +691,14 @@ const handleMovieClick = async (movieUUID: string) => {
 		await router.push({ path: `/watch/${series.value!.UUID}`, query: { ...prevQuery } });
 		return;
 	}
-	const videoElement = document.querySelector('video');
-	let previouslyPaused = false;
-	if (videoElement) {
-		previouslyPaused = videoElement.paused;
-	}
+	const { apply } = videoKeepState();
+
 	currentMovieUUID.value = movieUUID;
 	currentEpisodeUUID.value = null;
 	indexStore.setSelectedWatchableEntityUUID(movieUUID);
 
 	await router.push({ path: `/watch/${series.value!.UUID}`, query: { movie: movieUUID, ...prevQuery } });
-	setTimeout(() => {
-		if (!previouslyPaused) {
-			document.querySelector('video')?.play();
-		}
-	}, 400);
+	apply();
 };
 const isCurrentMovie = (movieUUID: string) => {
 	return currentMovieUUID.value === movieUUID;
