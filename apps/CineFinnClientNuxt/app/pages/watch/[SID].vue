@@ -631,9 +631,11 @@ const handleEpisodeClick = async (episodeUUID: string) => {
 		return;
 	}
 
-	const previouslyPaused = document.querySelector('video')?.paused || true;
-
-	console.log('BEFORE', 'previouslyPaused', previouslyPaused);
+	const videoElement = document.querySelector('video');
+	let previouslyPaused = false;
+	if (videoElement) {
+		previouslyPaused = videoElement.paused;
+	}
 
 	currentEpisodeUUID.value = episodeUUID;
 	currentMovieUUID.value = null;
@@ -663,8 +665,11 @@ const handleMovieClick = async (movieUUID: string) => {
 		await router.push({ path: `/watch/${series.value!.UUID}`, query: { ...prevQuery } });
 		return;
 	}
-	const previouslyPaused = document.querySelector('video')?.paused || true;
-
+	const videoElement = document.querySelector('video');
+	let previouslyPaused = false;
+	if (videoElement) {
+		previouslyPaused = videoElement.paused;
+	}
 	currentMovieUUID.value = movieUUID;
 	currentEpisodeUUID.value = null;
 	indexStore.setSelectedWatchableEntityUUID(movieUUID);
