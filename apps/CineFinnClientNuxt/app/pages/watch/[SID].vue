@@ -633,12 +633,16 @@ const handleEpisodeClick = async (episodeUUID: string) => {
 
 	const previouslyPaused = document.querySelector('video')?.paused || true;
 
+	console.log('BEFORE', 'previouslyPaused', previouslyPaused);
+
 	currentEpisodeUUID.value = episodeUUID;
 	currentMovieUUID.value = null;
 	indexStore.setSelectedWatchableEntityUUID(episodeUUID);
 
 	await router.push({ path: `/watch/${series.value!.UUID}`, query: { episode: episodeUUID, ...prevQuery } });
 	setTimeout(() => {
+		console.log('AFTER', 'previouslyPaused', previouslyPaused);
+
 		if (!previouslyPaused) {
 			document.querySelector('video')?.play();
 		}
