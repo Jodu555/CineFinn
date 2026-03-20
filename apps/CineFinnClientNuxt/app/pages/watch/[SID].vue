@@ -735,7 +735,7 @@ const getMovieProgress = (movieUUID: string) => {
 	return percent;
 };
 
-const switchTo = (vel: number) => {
+const switchTo = async (vel: number) => {
 	console.log('switchTo', vel);
 
 	if (currentMovieUUID.value !== null) {
@@ -744,7 +744,7 @@ const switchTo = (vel: number) => {
 		const { idxptr, value } = singleDimSwitcher(arr, index, vel);
 		if (value == undefined) return;
 		// currentMovieUUID.value = value.UUID;
-		handleMovieClick(value.UUID);
+		await handleMovieClick(value.UUID);
 	} else {
 		const arr = indexStore.detailedSeasons.map((x) => x.episodes);
 		const seasonIndexPtr = arr.findIndex((x) => x.find((y) => y.UUID === currentEpisodeUUID.value));
@@ -752,7 +752,7 @@ const switchTo = (vel: number) => {
 		const { arrptr, idxptr, value } = multiDimSwitcher(arr, seasonIndexPtr, episodeIndexPtr, vel);
 		if (value == undefined) return;
 		selectedSeason.value = value.season_UUID;
-		handleEpisodeClick(value.UUID);
+		await handleEpisodeClick(value.UUID);
 		// currentEpisodeUUID.value = value.UUID;
 		// selectedSeason.value = arr[arrptr]![idxptr]!.season_UUID;
 	}
