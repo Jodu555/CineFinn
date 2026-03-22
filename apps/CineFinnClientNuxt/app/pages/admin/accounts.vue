@@ -24,7 +24,7 @@
 					<tr v-for="account in accounts" class="">
 						<td scope="row">{{ account.UUID.split('-')[0] }}</td>
 						<td>{{ account.username }}</td>
-						<td>{{ account.email }}</td>
+						<td>{{ account.email.includes('@nil.com') ? 'N/A' : account.email }}</td>
 						<td>{{ roleIDToName(account.role) }}</td>
 						<td>{{ capitalize(account.status) }}</td>
 						<td>{{ account.activityDetails?.lastHandshake }}</td>
