@@ -1,5 +1,42 @@
 <template>
 	<div>
+		<Modal v-model="toggleShowSeriesModal" :title="`List Series ${selectedShowSeriesSubSystem}`" size="lg">
+			<div class="mb-3 ms-5 me-5">
+				<label for="searchTerm" class="form-label">Search</label>
+				<input v-model="searchTerm" type="text" class="form-control" id="searchTerm" aria-describedby="helpId" placeholder="Name or ID" />
+				<small id="helpId" class="form-text text-secondary">Name or ID of the Series</small>
+			</div>
+			<div class="d-flex justify-content-center">
+				<table class="table" style="width: 75%; max-width: 85%">
+					<thead>
+						<tr>
+							<th scope="col">ID</th>
+							<th scope="col">Title</th>
+							<th scope="col">Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr
+							v-for="serie in getSeriesList(subsystems.find((x) => x.id == selectedShowSeriesSubSystem)!.series ?? []).filter(
+								(x) =>
+									x?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+									x?.UUID.toLowerCase().startsWith(searchTerm.toLowerCase()),
+							)">
+							<template v-if="serie !== undefined">
+								<td scope="row">{{ serie.UUID }}</td>
+								<td>{{ serie.title }}</td>
+								<td>-</td>
+							</template>
+							<template v-else>
+								<td scope="row">-</td>
+								<td>-</td>
+								<td>-</td>
+							</template>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</Modal>
 		<h2 class="text-center">SubSystems</h2>
 		<div v-if="loading" class="d-flex justify-content-center">
 			<div class="spinner-border" role="status">
@@ -43,49 +80,6 @@
 						</ul>
 						<div v-if="subsystem.status == 'online'" class="d-grid gap-2">
 							<button type="button" @click="showSeriesModal(subsystem.id)" class="btn btn-outline-primary mt-2">List</button>
-							<Modal v-model="toggleShowSeriesModal" :title="`List Series ${selectedShowSeriesSubSystem}`" size="lg">
-								<div class="mb-3 ms-5 me-5">
-									<label for="searchTerm" class="form-label">Search</label>
-									<input
-										v-model="searchTerm"
-										type="text"
-										class="form-control"
-										id="searchTerm"
-										aria-describedby="helpId"
-										placeholder="Name or ID" />
-									<small id="helpId" class="form-text text-secondary">Name or ID of the Series</small>
-								</div>
-								<div class="d-flex justify-content-center">
-									<table class="table" style="width: 75%; max-width: 85%">
-										<thead>
-											<tr>
-												<th scope="col">ID</th>
-												<th scope="col">Title</th>
-												<th scope="col">Actions</th>
-											</tr>
-										</thead>
-										<tbody>
-											<tr
-												v-for="serie in getSeriesList(subsystem.series).filter(
-													(x) =>
-														x?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-														x?.UUID.toLowerCase().startsWith(searchTerm.toLowerCase()),
-												)">
-												<template v-if="serie !== undefined">
-													<td scope="row">{{ serie.UUID }}</td>
-													<td>{{ serie.title }}</td>
-													<td>-</td>
-												</template>
-												<template v-else>
-													<td scope="row">-</td>
-													<td>-</td>
-													<td>-</td>
-												</template>
-											</tr>
-										</tbody>
-									</table>
-								</div>
-							</Modal>
 						</div>
 					</div>
 				</div>

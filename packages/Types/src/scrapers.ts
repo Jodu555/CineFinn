@@ -1,4 +1,5 @@
-import type database = require("./database");
+// import type database = require("./database");
+import type * as database from "./database.js";
 
 
 export interface AniWorldEntity {
