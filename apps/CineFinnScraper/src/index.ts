@@ -12,7 +12,7 @@ import { trimTrailingSlash } from 'hono/trailing-slash';
 import { Server } from 'socket.io';
 import { getAniworldCalendarFromFile, storeAniworldCalendar } from './calendars/aniworldCalendar.js';
 import { getStoCalendarFromFile, storeStoCalendar } from './calendars/stoCalendar.js';
-import { msToReadable } from '@cinefinn/utilities/time';
+import { msToReadable, wait } from '@cinefinn/utilities/time';
 
 const config = getConfig();
 
@@ -28,7 +28,7 @@ const app = new Hono({
     .get('/calendars/store/aniworld', async (c) => {
         const calendar = await storeAniworldCalendar();
         return c.json(calendar);
-    })
+    });
 
 export let io: Server;
 
@@ -62,19 +62,20 @@ const httpServer = serve({
     const mockIndex: DetailedSeries[] = [
         {
             UUID: 'S-House',
-            title: 'Dr House',
+            title: 'Hudson and Rex',
             seasons: [],
             movies: [],
             infos: {},
             refs: {
-                sto: 'http://186.2.175.5/serie/dr-house/',
+                // sto: 'http://186.2.175.5/serie/dr-house/',
+                sto: 'http://186.2.175.5/serie/hudson-and-rex/',
             },
             tags: [],
         },
     ];
 
-    // await wait(1000 * 10)
-    // const output = await compareForNewReleases(mockIndex, [], { aniworld: true, sto: true, zoro: false });
+    await wait(1000 * 10);
+    const output = await compareForNewReleases(mockIndex, [], { aniworld: true, sto: true, zoro: false });
 
 });
 
@@ -167,7 +168,7 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
         timingMap.delete(label);
         log(`[${label}] Took ${msToReadable(Date.now() - time)}`);
     };
-    log('Scraper Socket recieved Call')
+    log('Scraper Socket recieved Call');
 
     time('Fetching Index');
     const response = await axios.get<DetailedSeries[]>(`${config.CORE.URL}/index/all`, {
@@ -209,15 +210,15 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
         // console.log(useLessIds.length, 'animes/series to ignore because they are not in the relevant calendar');
         // ignoranceList.push(...useLessIds.map(x => ({ ID: x })));
         const thirtyDaysAgo = Date.now() - 1000 * 60 * 60 * 24 * 30;
-        time('Getting Calendars')
+        time('Getting Calendars');
         const aniworldCalendar = await getAniworldCalendarFromFile();
         const stoCalendar = await getStoCalendarFromFile();
-        timeEnd('Getting Calendars')
+        timeEnd('Getting Calendars');
         log('Calendars Loaded:', Object.keys(aniworldCalendar).length, 'Aniworld', Object.keys(stoCalendar).length, 'STO');
 
         const relevantSeriesUUIDs = new Set<string>();
 
-        time('Filtering Relevant Series')
+        time('Filtering Relevant Series');
         Object.entries(aniworldCalendar).forEach(([crawlTimestamp, calendarEntry]) => {
             if (+crawlTimestamp < thirtyDaysAgo) {
                 return;
@@ -242,7 +243,7 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
                 relevantSeriesUUIDs.add(x);
             });
         });
-        timeEnd('Filtering Relevant Series')
+        timeEnd('Filtering Relevant Series');
         log('Relevant Series', relevantSeriesUUIDs.size);
 
         index.forEach(x => {
