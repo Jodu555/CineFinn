@@ -1,6 +1,6 @@
 <template>
 	<div class="container">
-		<h1 class="text-center">Ignore List ({{ 0 }})</h1>
+		<h1 class="text-center">Ignore List ({{ ignoranceItems.length }})</h1>
 		<div v-if="loading" class="d-flex justify-content-center">
 			<div class="spinner-border" role="status">
 				<span class="visually-hidden">Loading...</span>
@@ -14,8 +14,7 @@
 						:options="{ placeholder: 'Add a Series', clearAfterSelect: true, maximumItems: 7, inputWidth: '25rem' }"
 						:data="autoCompleteSeries"
 						:select-fn="addIgnoranceItem"
-						:prefetch-fn="() => {}"
-					/>
+						:prefetch-fn="() => {}" />
 				</div>
 			</div>
 			<div class="d-flex justify-content-center">
@@ -39,7 +38,9 @@
 										{{ item.lang || 'All' }}
 									</td>
 									<td>
-										<button type="button" class="btn btn-outline-danger" @click="adminStore.deleteIgnoranceItem(item.serie_UUID)">Delete</button>
+										<button type="button" class="btn btn-outline-danger" @click="adminStore.deleteIgnoranceItem(item.serie_UUID)">
+											Delete
+										</button>
 									</td>
 									<td>
 										{{ new Date(+item.created_at).toLocaleString() }}

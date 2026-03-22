@@ -11,20 +11,24 @@
 			<table class="table">
 				<thead>
 					<tr>
-						<th scope="col">UUID</th>
+						<th scope="col">UUID (first -)</th>
 						<th scope="col">Username</th>
+						<th scope="col">E-Mail</th>
 						<th scope="col">Role</th>
+						<th scope="col">Status</th>
 						<th scope="col">Last Seen</th>
 						<th scope="col">Last Login</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr v-for="account in accounts" class="">
-						<td scope="row">{{ account.UUID }}</td>
-						<td>{{ account?.username }}</td>
-						<td>{{ roleIDToName(account?.role) }}</td>
-						<td>{{ account?.activityDetails?.lastHandshake }}</td>
-						<td>{{ account?.activityDetails?.lastLogin }}</td>
+						<td scope="row">{{ account.UUID.split('-')[0] }}</td>
+						<td>{{ account.username }}</td>
+						<td>{{ account.email }}</td>
+						<td>{{ roleIDToName(account.role) }}</td>
+						<td>{{ capitalize(account.status) }}</td>
+						<td>{{ account.activityDetails?.lastHandshake }}</td>
+						<td>{{ account.activityDetails?.lastLogin }}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -44,6 +48,10 @@ await callOnce('loadAccounts', () => adminStore.loadAccounts(), { mode: 'navigat
 const loading = computed(() => adminStore.loading);
 const error = computed(() => adminStore.error);
 const accounts = computed(() => adminStore.accounts);
+
+const capitalize = (str: string) => {
+	return str.charAt(0).toUpperCase() + str.slice(1);
+};
 
 // await callOnce('loadAccounts', () => adminStore.loadAccounts(), { mode: 'navigation' });
 </script>

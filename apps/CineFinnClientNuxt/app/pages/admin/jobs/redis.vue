@@ -118,7 +118,7 @@ async function loadJobsForQueue(queueType: string) {
 		return;
 	}
 
-	const previewImageQueue = data.queues.find((x) => (x.name = 'previewImageQueue'));
+	const previewImageQueue = data.queues?.find((x) => (x.name = 'previewImageQueue'));
 	if (!previewImageQueue) return;
 
 	const queue = queues.value.find((x) => x.name == queueType);
