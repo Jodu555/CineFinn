@@ -2,8 +2,6 @@ import { io as Client, Socket } from 'socket.io-client';
 import { getConfig } from './config.js';
 import type { AuthHandshake, ScraperToServerEvents, ServerToScraperEvents, } from '@cinefinn/types/socket';
 import type { DetailedSeries } from '@cinefinn/types/models/media';
-import type { IgnoranceItem } from '@cinefinn/types/shared/crawler';
-import type { timestamped } from '@cinefinn/types/shared/utilities';
 import { compareForNewReleases } from './utils/compare.js';
 import axios from 'axios';
 import Aniworld from './class/Aniworld.js';
@@ -15,6 +13,7 @@ import { Server } from 'socket.io';
 import { getAniworldCalendarFromFile, storeAniworldCalendar } from './calendars/aniworldCalendar.js';
 import { getStoCalendarFromFile, storeStoCalendar } from './calendars/stoCalendar.js';
 import { msToReadable, wait } from '@cinefinn/utilities/time';
+import type { IgnoranceItem } from '@cinefinn/types/shared';
 
 const config = getConfig();
 
@@ -227,7 +226,7 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
             }
             const entryRelevantSeriesUUIDs = calendarEntry
                 .map(x => index.find(y => (y.refs.aniworld || '').includes(x.parsed.serieSlug))?.UUID)
-                .filter(x => x != null);
+                .filter(x => x != null && x != undefined);
 
             entryRelevantSeriesUUIDs.forEach(x => {
                 relevantSeriesUUIDs.add(x);
@@ -239,7 +238,7 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
             }
             const entryRelevantSeriesUUIDs = calendarEntry
                 .map(x => index.find(y => (y.refs.sto || '').includes(x.parsed.serieSlug))?.UUID)
-                .filter(x => x != null);
+                .filter(x => x != null && x != undefined);
 
             entryRelevantSeriesUUIDs.forEach(x => {
                 relevantSeriesUUIDs.add(x);

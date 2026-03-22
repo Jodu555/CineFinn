@@ -43,7 +43,7 @@ class Aniworld {
             console.log(`   => Seasons: ${numberOfSeasons} - Movies: ${hasMovies}`);
 
             if (hasMovies) {
-                const url = this.isv2 ? `${this.url}/staffel-0` : `${this.url}/filme`
+                const url = this.isv2 ? `${this.url}/staffel-0` : `${this.url}/filme`;
                 const movResponse = await axios.get(url);
                 output.movies = this.isv2 ? this.getListInformationsV2(movResponse.data) : this.getListInformations(movResponse.data);
                 console.log(`    => Got ${output.movies.length} Movies`);
@@ -77,8 +77,8 @@ class Aniworld {
         const seasonsUl = [...document.querySelectorAll('span')].find((e) => e.textContent!.includes('Staffeln:'))!.parentElement!.parentElement;
         const seasonsTab = [...seasonsUl!.querySelectorAll('li')].map((e) => e.querySelector('a')?.title).filter((e) => e != undefined);
 
-        const numberOfSeasons = seasonsTab.filter((e) => e.includes('Staffel')).length;
-        const hasMovies = seasonsTab.find((e) => e.includes('Film')) != null;
+        const numberOfSeasons = seasonsTab.filter((e) => e!.includes('Staffel')).length;
+        const hasMovies = seasonsTab.find((e) => e!.includes('Film')) != null;
 
         return {
             numberOfSeasons,
@@ -136,7 +136,7 @@ class Aniworld {
     private parseAdditionalInformationsV2(data: string): AniWorldAdditionalSeriesInformations {
         const { document } = new jsdom.JSDOM(data).window;
 
-        const infos = document.querySelector(`div.container-fluid h1.h2`)?.textContent?.trim() || 'NOT FOUND'
+        const infos = document.querySelector(`div.container-fluid h1.h2`)?.textContent?.trim() || 'NOT FOUND';
 
         const description = document.querySelector('div.container-fluid div.series-description span.description-text')?.textContent || 'NOT FOUND';
 
@@ -209,10 +209,10 @@ class Aniworld {
             const secondName = rows[0]!.querySelector('span.episode-title-eng')?.getAttribute('title') || '';
             const langs: Langs[] = [];
 
-            const flags = rows[2]!.querySelectorAll('svg.watch-language')
+            const flags = rows[2]!.querySelectorAll('svg.watch-language');
 
             for (const flag of flags) {
-                const flagLangClass = [...flag.classList].find(x => x.includes('svg-flag-'))
+                const flagLangClass = [...flag.classList].find(x => x.includes('svg-flag-'));
                 if (flagLangClass == undefined) {
                     console.log('NOT FOUND!!! flagLangClass');
                     continue;
@@ -234,7 +234,7 @@ class Aniworld {
 
             }
 
-            out.push({ mainName, secondName, langs: langs as Langs[] })
+            out.push({ mainName, secondName, langs: langs as Langs[] });
         });
         return out;
     };

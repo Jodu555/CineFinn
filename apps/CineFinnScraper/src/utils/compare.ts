@@ -1,5 +1,5 @@
 import type { DetailedEpisode, DetailedMovie, DetailedSeries, Langs, SeriesRefs } from '@cinefinn/types/models/media';
-import type { ExtendedEpisodeDownload, IgnoranceItem } from '@cinefinn/types/shared/crawler';
+import type { ExtendedEpisodeDownload, IgnoranceItem } from '@cinefinn/types/shared';
 import type { AniWorldEntity, AniWorldSeriesInformations, ExtendedZoroEpisode } from '@cinefinn/types/scrapers';
 import * as fs from 'fs';
 import Aniworld from '../class/Aniworld.js';
@@ -328,7 +328,7 @@ async function compareForNewReleasesAniWorldOrSTO(
         }
 
 
-    }
+    };
 
 
     for (const aniworldSerie of compare) {
