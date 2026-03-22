@@ -6,7 +6,7 @@ import axios from 'axios';
 import { accountsTable, connectDatabase, episodesTable, ignoranceTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, watchHistoryTable } from '../database.js';
 import { Database } from '@jodu555/mysqlapi';
 import path from 'path';
-import type { Series, Episode, WatchableEntity, Movie } from '@cinefinn/types/database';
+import type { Series, Episode, WatchableEntity, Movie } from '@cinefinn/types/models/media';
 import { generateEntityID, generateEpisodeID, generateMovieID, generateSeasonID, generateWatchHistoryID } from '../utils/IdGenerators.js';
 
 interface Segment {

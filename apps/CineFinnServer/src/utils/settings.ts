@@ -1,4 +1,4 @@
-import type { SettingsObject } from "@cinefinn/types/database";
+import type { SettingsObject } from "@cinefinn/types/models/user";
 
 const langsOptions = ['GerDub', 'GerSub', 'EngDub', 'EngSub', 'JapDub', 'EngSubK', 'GerSubK', 'GerSubC', 'EngSubC'];
 

@@ -1,5 +1,5 @@
 import { validateEmail } from './utils';
-import type { RefRef, TodoItem, TodoReferences } from '@cinefinn/types/database';
+import type { RefRef, TodoItem, TodoReferences } from '@cinefinn/types/shared/crawler';
 import type { AniWorldEntity, AniWorldSeriesInformations } from '@cinefinn/types/scrapers';
 import type { Ref } from 'vue';
 

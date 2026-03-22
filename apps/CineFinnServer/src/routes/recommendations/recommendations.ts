@@ -1,5 +1,7 @@
 import fsDriver from 'unstorage/drivers/fs';
-import type { Account, DetailedSeries, Episode, Movie, timestamped, WatchableEntity } from "@cinefinn/types/database";
+import type { Account } from "@cinefinn/types/models/user";
+import type { DetailedSeries, Episode, Movie, WatchableEntity } from "@cinefinn/types/models/media";
+import type { timestamped } from "@cinefinn/types/shared/utilities";
 import { Hono } from "hono";
 import { createStorage, prefixStorage } from "unstorage";
 import { cacheRegistry } from "../admin/cache.js";

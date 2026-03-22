@@ -6,7 +6,8 @@ import { seriesTable, watchableEntitysTable } from "../database.js";
 import type { definedSocket } from "../index.js";
 import { sendSeriesReloadToAll } from "./client.socket.js";
 import { rebroadcastSubsystems } from '../routes/admin/admin.js';
-import type { Account, timestamped } from "@cinefinn/types/database";
+import type { Account } from "@cinefinn/types/models/user";
+import type { timestamped } from "@cinefinn/types/shared/utilities";
 import type { Socket } from "socket.io";
 import { tryCatch } from "@cinefinn/utilities/tryCatch";
 

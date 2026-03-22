@@ -1,7 +1,12 @@
 import dotenv from 'dotenv';
 dotenv.config();;
 import { Database, type thingDatabase } from '@jodu555/mysqlapi';
-import type { Account, timestamped, AuthToken, Series, Season, Episode, Movie, WatchableEntity, WatchHistory, SyncRoom, Job, Email, Playlist, TodoItem, IgnoranceItem } from '@cinefinn/types/database';
+import type { Account, AuthToken, Email } from '@cinefinn/types/models/user';
+import type { Series, Season, Episode, Movie, WatchableEntity } from '@cinefinn/types/models/media';
+import type { Playlist } from '@cinefinn/types/models/playlist';
+import type { WatchHistory, SyncRoom, Job } from '@cinefinn/types/models/system';
+import type { TodoItem, IgnoranceItem } from '@cinefinn/types/shared/crawler';
+import type { timestamped } from '@cinefinn/types/shared/utilities';
 import { getConfig } from './config.js';
 import { debounce } from './utils.js';
 

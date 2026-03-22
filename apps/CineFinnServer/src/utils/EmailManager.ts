@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import { getConfig } from '../config.js';
-import type { Email, EmailTypes } from '@cinefinn/types/database';
+import type { Email, EmailTypes } from '@cinefinn/types/models/user';
 import { accountsTable, emailsTable } from '../database.js';
 import { generateEmailID } from './IdGenerators.js';
 

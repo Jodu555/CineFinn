@@ -1,4 +1,6 @@
-import type { Account, Episode, Movie, timestamped } from '@cinefinn/types/database';
+import type { Account } from '@cinefinn/types/models/user';
+import type { Episode, Movie } from '@cinefinn/types/models/media';
+import type { timestamped } from '@cinefinn/types/shared/utilities';
 import type { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData, AnythingToServerEvents, ServerToAnythingEvents } from '@cinefinn/types/socket';
 import type { Server } from 'socket.io';
 import { CacheContext } from './LRUCache.js';

@@ -1,4 +1,4 @@
-import type { FrontendSeries } from '@cinefinn/types/database';
+import type { FrontendSeries } from '@cinefinn/types/models/media';
 
 export function useSeriesImage() {
   const apiURL = useAPIURL();

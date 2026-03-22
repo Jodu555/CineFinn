@@ -1,6 +1,8 @@
 import path from "path";
 import fs from "fs";
-import type { MovingItem, Episode, timestamped, Movie } from "@cinefinn/types/database";
+import type { MovingItem } from "@cinefinn/types/models/system";
+import type { Episode, Movie } from "@cinefinn/types/models/media";
+import type { timestamped } from "@cinefinn/types/shared/utilities";
 import { Transform } from "stream";
 import { watchableEntitysTable, seriesTable } from "../database.js";
 import { getSubSocketByID } from "../sockets/subsystem.socket.js";

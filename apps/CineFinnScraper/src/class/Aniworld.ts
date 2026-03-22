@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import type { Langs } from '@cinefinn/types/database';
+import type { Langs } from '@cinefinn/types/models/media';
 import type { AniWorldAdditionalSeriesInformations, AniWorldEntity, AniWorldSeriesInformations } from '@cinefinn/types/scrapers';
 import axios from 'axios';
 import jsdom from 'jsdom';

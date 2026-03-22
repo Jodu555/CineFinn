@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { authFullMiddleware } from "../middleware/auth.js";
-import { Role } from "@cinefinn/types/database";
+import { Role } from "@cinefinn/types/models/user";
 import z from "zod";
 import { getConfig } from "../config.js";
 import path from "path";

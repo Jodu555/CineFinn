@@ -1,6 +1,8 @@
 import { Hono } from "hono";
 import { authFullMiddleware, authMiddleware } from "../middleware/auth.js";
-import { Role, type RefRef, type ScrapeInfo, type TodoItem, type TodoReferences, type ValueOf } from "@cinefinn/types/database";
+import type { RefRef, ScrapeInfo, TodoItem, TodoReferences } from "@cinefinn/types/shared/crawler";
+import type { ValueOf } from "@cinefinn/types/shared/utilities";
+import { Role } from "@cinefinn/types/models/user";
 import type { AniWorldSeriesInformations } from "@cinefinn/types/scrapers";
 import { getScraperSocket, isScraperSocketConnected } from "../sockets/scraper.socket.js";
 import { getIO } from "../utils.js";

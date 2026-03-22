@@ -1,4 +1,5 @@
-import type { Job, JobType, timestamped } from '@cinefinn/types/database';
+import type { Job, JobType } from '@cinefinn/types/models/system';
+import type { timestamped } from '@cinefinn/types/shared/utilities';
 import { defineStore } from 'pinia';
 
 import type { FetchError } from 'ofetch';

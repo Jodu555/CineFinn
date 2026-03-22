@@ -10,17 +10,37 @@
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js"
 		},
-		"./socket": {
-			"types": "./dist/socket.d.ts",
-			"import": "./dist/socket.js"
+		"./models": {
+			"types": "./dist/models/index.d.ts",
+			"import": "./dist/models/index.js"
 		},
-		"./database": {
-			"types": "./dist/database.d.ts",
-			"import": "./dist/database.js"
+		"./models/user": {
+			"types": "./dist/models/user.d.ts",
+			"import": "./dist/models/user.js"
+		},
+		"./models/media": {
+			"types": "./dist/models/media.d.ts",
+			"import": "./dist/models/media.js"
+		},
+		"./models/playlist": {
+			"types": "./dist/models/playlist.d.ts",
+			"import": "./dist/models/playlist.js"
+		},
+		"./models/system": {
+			"types": "./dist/models/system.d.ts",
+			"import": "./dist/models/system.js"
+		},
+		"./socket": {
+			"types": "./dist/socket/index.d.ts",
+			"import": "./dist/socket/index.js"
 		},
 		"./scrapers": {
-			"types": "./dist/scrapers.d.ts",
-			"import": "./dist/scrapers.js"
+			"types": "./dist/scrapers/index.d.ts",
+			"import": "./dist/scrapers/index.js"
+		},
+		"./shared": {
+			"types": "./dist/shared/index.d.ts",
+			"import": "./dist/shared/index.js"
 		}
 	},
 	"scripts": {

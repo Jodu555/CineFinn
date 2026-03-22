@@ -5,7 +5,8 @@ import { getConfig } from "../config.js";
 import type { definedSocket } from "../index.js";
 import { getIO } from "../utils.js";
 import type { Socket } from "socket.io";
-import type { Account, timestamped } from "@cinefinn/types/database";
+import type { Account } from "@cinefinn/types/models/user";
+import type { timestamped } from "@cinefinn/types/shared/utilities";
 import { Job } from "../job/Job.js";
 
 export let isScraperSocketConnected = false;

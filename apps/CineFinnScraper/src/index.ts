@@ -1,7 +1,9 @@
 import { io as Client, Socket } from 'socket.io-client';
 import { getConfig } from './config.js';
 import type { AuthHandshake, ScraperToServerEvents, ServerToScraperEvents, } from '@cinefinn/types/socket';
-import type { DetailedSeries, IgnoranceItem, timestamped } from '@cinefinn/types/database';
+import type { DetailedSeries } from '@cinefinn/types/models/media';
+import type { IgnoranceItem } from '@cinefinn/types/shared/crawler';
+import type { timestamped } from '@cinefinn/types/shared/utilities';
 import { compareForNewReleases } from './utils/compare.js';
 import axios from 'axios';
 import Aniworld from './class/Aniworld.js';

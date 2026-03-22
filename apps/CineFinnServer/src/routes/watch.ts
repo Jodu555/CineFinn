@@ -2,7 +2,9 @@ import { Hono, type Context } from 'hono';
 import { authFullMiddleware, authMiddleware, type AuthedVars } from '../middleware/auth.js';
 import { episodesTable, moviesTable, seasonsTable, watchableEntitysTable, watchHistoryTable } from '../database.js';
 import { getIO, isMovie, watchableUUIDToWatchable } from '../utils.js';
-import type { Episode, Movie, timestamped, WatchableEntity, WatchHistory } from '@cinefinn/types/database';
+import type { Episode, Movie, WatchableEntity } from '@cinefinn/types/models/media';
+import type { WatchHistory } from '@cinefinn/types/models/system';
+import type { timestamped } from '@cinefinn/types/shared/utilities';
 import { generateWatchHistoryID } from '../utils/IdGenerators.js';
 import translationV1WatchString from '../utils/translationV1WatchString.js';
 

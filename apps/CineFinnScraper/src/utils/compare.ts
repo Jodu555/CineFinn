@@ -1,4 +1,5 @@
-import type { DetailedEpisode, DetailedMovie, DetailedSeries, ExtendedEpisodeDownload, IgnoranceItem, Langs, SeriesRefs } from '@cinefinn/types/database';
+import type { DetailedEpisode, DetailedMovie, DetailedSeries, Langs, SeriesRefs } from '@cinefinn/types/models/media';
+import type { ExtendedEpisodeDownload, IgnoranceItem } from '@cinefinn/types/shared/crawler';
 import type { AniWorldEntity, AniWorldSeriesInformations, ExtendedZoroEpisode } from '@cinefinn/types/scrapers';
 import * as fs from 'fs';
 import Aniworld from '../class/Aniworld.js';

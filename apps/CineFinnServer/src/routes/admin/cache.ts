@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type { Storage } from 'unstorage';
 import { authFullMiddleware } from '../../middleware/auth.js';
-import { Role } from '@cinefinn/types/database';
+import { Role } from '@cinefinn/types/models/user';
 
 export const cacheRegistry = new Map<string, Storage<any>>();
 

@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
-import { type FrontendSeries, type Season, type Movie, type DetailedEpisode, type DetailedSeason, type DetailedMovie, type DetailedSeries, type Episode, Role, type Series, type timestamped, type WatchableEntity } from "@cinefinn/types/database";
+import { type FrontendSeries, type Season, type Movie, type DetailedEpisode, type DetailedSeason, type DetailedMovie, type DetailedSeries, type Episode, type Series, type WatchableEntity } from "@cinefinn/types/models/media";
+import { Role } from "@cinefinn/types/models/user";
+import type { timestamped } from "@cinefinn/types/shared/utilities";
 import { Hono } from "hono";
 import { seriesTable, watchableEntitysTable } from "../database.js";
 import { authFullMiddleware, authMiddleware } from "../middleware/auth.js";

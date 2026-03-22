@@ -1,5 +1,7 @@
 import type { ServerConfig } from '@cinefinn/types';
-import type { Account, Email, IgnoranceItem, MovingItem, timestamped } from '@cinefinn/types/database';
+import type { Account, Email } from '@cinefinn/types/models/user';
+import type { IgnoranceItem, MovingItem } from '@cinefinn/types/models/system';
+import type { timestamped } from '@cinefinn/types/shared/utilities';
 import type { Overview, SubSystem } from '@cinefinn/types/socket';
 import type { FetchError } from 'ofetch';
 import { defineStore } from 'pinia';

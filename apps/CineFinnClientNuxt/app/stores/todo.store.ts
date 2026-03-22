@@ -1,4 +1,5 @@
-import type { Series, SeriesInfos, TodoItem } from '@cinefinn/types/database';
+import type { Series, SeriesInfos } from '@cinefinn/types/models/media';
+import type { TodoItem } from '@cinefinn/types/shared/crawler';
 import { defineStore } from 'pinia';
 
 

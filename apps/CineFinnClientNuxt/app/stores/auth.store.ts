@@ -1,4 +1,4 @@
-import type { Account, SettingsObject } from '@cinefinn/types/database';
+import type { Account, SettingsObject } from '@cinefinn/types/models/user';
 import { defineStore } from 'pinia';
 import type { FetchError } from 'ofetch';
 

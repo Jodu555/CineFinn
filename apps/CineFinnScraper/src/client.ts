@@ -1,7 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 import promiseLimit from 'promise-limit';
 import type { AniWorldSerieCompare } from './utils/compare.js';
-import type { DetailedSeries } from '@cinefinn/types/database';
+import type { DetailedSeries } from '@cinefinn/types/models/media';
 import Aniworld from './class/Aniworld.js';
 
 let socket: Socket;

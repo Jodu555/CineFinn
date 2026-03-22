@@ -1,4 +1,4 @@
-import type { FrontendPlaylist } from '@cinefinn/types/database';
+import type { FrontendPlaylist } from '@cinefinn/types/models/playlist';
 import { defineStore } from 'pinia';
 
 

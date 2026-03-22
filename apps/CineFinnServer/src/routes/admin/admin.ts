@@ -4,7 +4,7 @@ import { accountsTable, emailsTable, episodesTable, ignoranceTable, moviesTable,
 import { getKnownSubSystems, getSeriesRelatedToSubSystem, getSubSystems } from "../../sockets/subsystem.socket.js";
 import { getIO, queryDatabase } from "../../utils.js";
 import type { Overview, SocketAuthDataSubsystem } from "@cinefinn/types/socket";
-import { Role } from "@cinefinn/types/database";
+import { Role } from "@cinefinn/types/models/user";
 import { generateEmailID } from "../../utils/IdGenerators.js";
 import { getConfig, updateConfig } from "../../config.js";
 import z from "zod";

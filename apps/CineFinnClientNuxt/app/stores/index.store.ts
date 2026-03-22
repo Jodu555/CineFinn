@@ -1,4 +1,5 @@
-import type { DetailedSeason, DetailedEpisode, WatchableEntity, DetailedSeries, DetailedMovie, FrontendSeries, WatchHistory, Season } from '@cinefinn/types/database';
+import type { DetailedSeason, DetailedEpisode, WatchableEntity, DetailedSeries, DetailedMovie, FrontendSeries, Season } from '@cinefinn/types/models/media';
+import type { WatchHistory } from '@cinefinn/types/models/system';
 
 
 export const useIndexStore = defineStore('index', {
