@@ -1,5 +1,5 @@
 import type { JobType, Job as IJob } from "@cinefinn/types/models/system";
-import type { timestamped } from "@cinefinn/types/shared/utilities";
+import type { timestamped } from "@cinefinn/types/shared";
 import { msToReadable } from "@cinefinn/utilities/time";
 import { jobsTable } from "../database.js";
 import { getIO } from "../utils.js";

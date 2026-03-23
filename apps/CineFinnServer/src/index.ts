@@ -16,7 +16,7 @@ import { ownLogger } from './middleware/ownLogger.js';
 import { managmentRouter } from './routes/managment.js';
 import type { AnythingToServerEvents, InterServerEvents, ServerToAnythingEvents, SocketData } from '@cinefinn/types/socket';
 import type { Account } from '@cinefinn/types/models/user';
-import type { timestamped } from '@cinefinn/types/shared/utilities';
+import type { timestamped } from '@cinefinn/types/shared';
 import { getIO, setIO, setIORedis, getEmailManager } from './utils.js';
 import { watchRouter } from './routes/watch.js';
 import { videoRouter } from './routes/video.js';
@@ -57,7 +57,7 @@ export const app = new Hono({
             return path.replace(/^\/images/, '');
         },
         onFound: (_path, c) => {
-            c.header('Cache-Control', `public, immutable, max-age=31536000`)
+            c.header('Cache-Control', `public, immutable, max-age=31536000`);
         },
     }))
     .get('/health', (c) => {
@@ -82,7 +82,7 @@ export const app = new Hono({
     .route('', proxyRouter)
     .route('/previewImages', previewImagesRouter)
     .route('/recommendations', recommendationRouter)
-    .route('/video', videoRouter)
+    .route('/video', videoRouter);
 
 export type definedSocket = Socket<AnythingToServerEvents, ServerToAnythingEvents, InterServerEvents, SocketData<Account | (Account & timestamped)>>;
 
@@ -207,7 +207,7 @@ async function insertMissingWatchableEntityRuntimes() {
     const entitys = await watchableEntitysTable.get({ runtime: -1, unique: true });
     let i = 0;
     for await (const entity of entitys) {
-        console.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`)
+        console.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`);
         if (entity.subID !== 'main' && await getSubSocketByID(entity.subID) == null) {
             console.log(`Skipping entity ${i}/${entitys.length}: ${entity.UUID} because subID ${entity.subID} is not connected`);
             continue;

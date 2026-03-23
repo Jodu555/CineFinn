@@ -5,8 +5,8 @@ import type { Account, AuthToken, Email } from '@cinefinn/types/models/user';
 import type { Series, Season, Episode, Movie, WatchableEntity } from '@cinefinn/types/models/media';
 import type { Playlist } from '@cinefinn/types/models/playlist';
 import type { WatchHistory, SyncRoom, Job } from '@cinefinn/types/models/system';
-import type { TodoItem, IgnoranceItem } from '@cinefinn/types/shared/crawler';
-import type { timestamped } from '@cinefinn/types/shared/utilities';
+import type { TodoItem, IgnoranceItem } from '@cinefinn/types/shared';
+import type { timestamped } from '@cinefinn/types/shared';
 import { getConfig } from './config.js';
 import { debounce } from './utils.js';
 

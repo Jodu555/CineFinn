@@ -2,7 +2,6 @@ import path from "path";
 import fs from "fs";
 import type { MovingItem } from "@cinefinn/types/models/system";
 import type { Episode, Movie } from "@cinefinn/types/models/media";
-import type { timestamped } from "@cinefinn/types/shared/utilities";
 import { Transform } from "stream";
 import { watchableEntitysTable, seriesTable } from "../database.js";
 import { getSubSocketByID } from "../sockets/subsystem.socket.js";
@@ -160,10 +159,10 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
     let resultPath = '';
 
     if (isEpisode(watchable)) {
-        resultPath = path.join(resultPath, series.tags[0], series.title, `Season-${watchable.season_IDX}`,)
+        resultPath = path.join(resultPath, series.tags[0], series.title, `Season-${watchable.season_IDX}`,);
     }
     if (isMovie(watchable)) {
-        resultPath = path.join(resultPath, series.tags[0], series.title, 'Movies')
+        resultPath = path.join(resultPath, series.tags[0], series.title, 'Movies');
     }
 
 
@@ -201,7 +200,7 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
             highWaterMark: 64 * 1024,
         });
 
-        const bandwidth = subSystemSocket.data.auth.bandwith * 1024 * 1024
+        const bandwidth = subSystemSocket.data.auth.bandwith * 1024 * 1024;
         const throttle = new ThrottleStream(bandwidth);
 
         let bytesSent = 0;

@@ -1,7 +1,7 @@
 import fsDriver from 'unstorage/drivers/fs';
 import type { Account } from "@cinefinn/types/models/user";
 import type { DetailedSeries, Episode, Movie, WatchableEntity } from "@cinefinn/types/models/media";
-import type { timestamped } from "@cinefinn/types/shared/utilities";
+import type { timestamped } from "@cinefinn/types/shared";
 import { Hono } from "hono";
 import { createStorage, prefixStorage } from "unstorage";
 import { cacheRegistry } from "../admin/cache.js";
@@ -30,14 +30,14 @@ async function getCachedSeriesWatchableNumber(seriesUUID: string, cacheMap?: Cac
         fullIndexSeries = cacheMap.get(seriesUUID);
     } else {
         const fullSeriesIndex = await fullIndexStorage.get('fullIndex') as any as DetailedSeries[] || [];
-        fullIndexSeries = fullSeriesIndex.find(x => x.UUID == seriesUUID)
+        fullIndexSeries = fullSeriesIndex.find(x => x.UUID == seriesUUID);
     }
     let episodeCount = 0;
     if (fullIndexSeries) {
         episodeCount += fullIndexSeries.movies.length;
         fullIndexSeries.seasons.flat().forEach(s => {
             episodeCount += s.episodes.length;
-        })
+        });
     } else {
         const movies = await moviesTable.count({ serie_UUID: seriesUUID });
         const episodes = await episodesTable.count({ serie_UUID: seriesUUID });
@@ -46,13 +46,13 @@ async function getCachedSeriesWatchableNumber(seriesUUID: string, cacheMap?: Cac
     return episodeCount;
 }
 
-async function getCachedSeriesWatchableIndexes(seriesUUID: string, watchableUUID: string, cacheMap?: CacheMap): Promise<{ season: number, episode: number }> {
+async function getCachedSeriesWatchableIndexes(seriesUUID: string, watchableUUID: string, cacheMap?: CacheMap): Promise<{ season: number, episode: number; }> {
     let fullIndexSeries: DetailedSeries | undefined;
     if (cacheMap) {
         fullIndexSeries = cacheMap.get(seriesUUID);
     } else {
         const fullSeriesIndex = await fullIndexStorage.get('fullIndex') as any as DetailedSeries[] || [];
-        fullIndexSeries = fullSeriesIndex.find(x => x.UUID == seriesUUID)
+        fullIndexSeries = fullSeriesIndex.find(x => x.UUID == seriesUUID);
     }
 
     if (watchableUUID.startsWith('EP-')) {
@@ -84,7 +84,7 @@ type AdditionalCarouselMeta = {
     showNewRibbon?: boolean;
     showWatchableCount?: boolean;
     wrapAround?: boolean;
-}
+};
 
 type CarouselMeta = {
     order: number;
@@ -95,9 +95,9 @@ type CarouselMeta = {
     userspecific: boolean;
     returnItemsCount: number;
     additionalMeta?: AdditionalCarouselMeta;
-}
+};
 
-type CarouselResponseItem = { items: any[] } & CarouselMeta;
+type CarouselResponseItem = { items: any[]; } & CarouselMeta;
 
 type CarouselDetails = {} & CarouselMeta & (CarouselDetailsSeries | CarouselDetailsEntity);
 
@@ -118,26 +118,26 @@ type CarouselSeriesDetailsResult = Promise<{
 
 type CarouselEntityDetailsResult = Promise<{
     watchTime: number;
-    entity: (WatchableEntity & timestamped & { additional: AdditionalEntityData });
+    entity: (WatchableEntity & timestamped & { additional: AdditionalEntityData; });
 }[]>;
 
 type AdditionalEntityData = {
     imageFile: string;
     season: number;
     episode: number;
-}
+};
 
 const carouselRegistry = new Map<string, CarouselDetails>();
 
 async function getNewlyAddedSeries(user: Account, meta: CarouselMeta, map?: CacheMap): CarouselSeriesDetailsResult {
     const cacheMap = map || await prepareCachedSeriesMap();
-    const series = await seriesTable.getLatest('created', {}, meta.returnItemsCount)
+    const series = await seriesTable.getLatest('created', {}, meta.returnItemsCount);
 
     return await Promise.all(series.map(async s => {
         return {
             UUID: s.UUID,
             episodeCount: await getCachedSeriesWatchableNumber(s.UUID, cacheMap),
-        }
+        };
     }));
 }
 
@@ -157,7 +157,7 @@ async function getNewlyReleasedEpisodes(user: Account, meta: CarouselMeta, map?:
                         episode: indezes.episode,
                     }
                 },
-            }
+            };
         }));
 }
 
@@ -167,7 +167,7 @@ async function getStillRunningSeries(user: Account, meta: CarouselMeta, map?: Ca
     const newlyAddedSeriesCarousel = await getNewlyAddedSeries(user, meta, cacheMap);
     const ignoreSeriesList = new Set(...newlyAddedSeriesCarousel.map(x => x.UUID));
 
-    const seriesUUIDs = await queryDatabase<{ UUID: string }>(`SELECT UUID FROM ${seriesTable.table_name}`);
+    const seriesUUIDs = await queryDatabase<{ UUID: string; }>(`SELECT UUID FROM ${seriesTable.table_name}`);
     const possibleSeries = new Set(seriesUUIDs.map(s => s.UUID).filter(s => !ignoreSeriesList.has(s)));
 
     const seriesUpdateMap = new Map<string, number>();
@@ -197,7 +197,7 @@ async function getStillRunningSeries(user: Account, meta: CarouselMeta, map?: Ca
                 return {
                     UUID,
                     episodeCount: await getCachedSeriesWatchableNumber(UUID, cacheMap),
-                }
+                };
             })
     );
 }
@@ -233,7 +233,7 @@ async function getWatchAgainSeries(user: Account, meta: CarouselMeta, map?: Cach
             watchedWatchables,
             watchableCount,
             percentage: Math.round((watchedWatchables / watchableCount) * 100),
-        })
+        });
     });
 
     return output
@@ -244,7 +244,7 @@ async function getWatchAgainSeries(user: Account, meta: CarouselMeta, map?: Cach
             return {
                 UUID: x.UUID,
                 episodeCount: x.watchableCount,
-            }
+            };
         });
 }
 
@@ -298,7 +298,7 @@ async function getContinueWatchingEpisodes(user: Account, meta: CarouselMeta): C
             wh.watchable_UUID,
             wh.watchTime
         HAVING watched_percent > ? AND watched_percent < ?
-        `
+        `;
     const betweenPercentage = [20, 80];
     const dbResponse = await queryDatabase<dbResponseRow>(sql, [user.UUID, betweenPercentage[0], betweenPercentage[1]], ['watchableEntity']);
 
@@ -327,7 +327,7 @@ async function getContinueWatchingEpisodes(user: Account, meta: CarouselMeta): C
                         episode: rowZero.episode_Idx,
                     }
                 },
-            })
+            });
         } else {
             const latestRow = rows.reduce((best, current) => {
                 if (current.season_Idx > best.season_Idx) return current;
@@ -382,7 +382,7 @@ carouselRegistry.set('still-running-series', {
         showWatchableCount: true,
     },
     computeFn: getStillRunningSeries
-})
+});
 
 carouselRegistry.set('new-released-episodes', {
     order: 2,
@@ -398,7 +398,7 @@ carouselRegistry.set('new-released-episodes', {
         wrapAround: false,
     },
     computeFn: getNewlyReleasedEpisodes
-})
+});
 
 carouselRegistry.set('watch-again', {
     order: 3,
@@ -423,7 +423,7 @@ carouselRegistry.set('continue-watching', {
     userspecific: true,
     returnItemsCount: 25,
     computeFn: getContinueWatchingEpisodes
-})
+});
 
 //Missing: marathon-worthy, your-list, new-in-german, total-classic, category-specific like Drama or Isekai,
 

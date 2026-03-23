@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { authFullMiddleware, authMiddleware } from "../middleware/auth.js";
-import type { RefRef, ScrapeInfo, TodoItem, TodoReferences } from "@cinefinn/types/shared/crawler";
-import type { ValueOf } from "@cinefinn/types/shared/utilities";
+import type { RefRef, ScrapeInfo, TodoItem, TodoReferences } from "@cinefinn/types/shared";
+import type { ValueOf } from "@cinefinn/types/shared";
 import { Role } from "@cinefinn/types/models/user";
 import type { AniWorldSeriesInformations } from "@cinefinn/types/scrapers";
 import { getScraperSocket, isScraperSocketConnected } from "../sockets/scraper.socket.js";
@@ -27,7 +27,7 @@ const scrapers = [
             }
             const data = await new Promise<AniWorldSeriesInformations | void>((resolve, reject) => {
                 scraperSocket.emit('scrape:aniworld', url, (data) => resolve(data));
-            })
+            });
 
             if (data == undefined) {
                 throw new Error('Scraper Socket did not return data');
@@ -46,7 +46,7 @@ const scrapers = [
             }
             const data = await new Promise<AniWorldSeriesInformations | void>((resolve, reject) => {
                 scraperSocket.emit('scrape:aniworld', url, (data) => resolve(data));
-            })
+            });
 
             if (data == undefined) {
                 throw new Error('Scraper Socket did not return data');
@@ -62,7 +62,7 @@ const scrapers = [
 const todoScrapeJobs = [] as {
     todoID: string;
     scrapeKey: keyof RefRef;
-    func: (() => Promise<ScrapeInfo<keyof RefRef>>)
+    func: (() => Promise<ScrapeInfo<keyof RefRef>>);
 }[];
 
 const router = new Hono()
@@ -94,10 +94,10 @@ const router = new Hono()
             touchedIDs.add(todo.ID);
 
             if (todo.creator == undefined) {
-                todo.creator = c.var.credentials.user.UUID
+                todo.creator = c.var.credentials.user.UUID;
             }
 
-            TIMING && console.time('Cheking todo')
+            TIMING && console.time('Cheking todo');
             let dbTodo = dbTodos.find(t => t.ID === todo.ID);
             if (dbTodo == undefined || dbTodo == null) {
                 await todosTable.create(todo);
@@ -107,10 +107,10 @@ const router = new Hono()
                 }
                 dbTodo = intermediate;
             }
-            TIMING && console.timeEnd('Cheking todo')
+            TIMING && console.timeEnd('Cheking todo');
 
 
-            TIMING && console.time('Checking scraping info')
+            TIMING && console.time('Checking scraping info');
 
             for (const [_reference, url] of Object.entries(todo.refs)) {
                 const reference = _reference as keyof TodoReferences;
@@ -141,7 +141,7 @@ const router = new Hono()
                         state: 'loading',
                         scrapedAt: Date.now(),
                         data: undefined,
-                    }
+                    };
 
                     const promiseFn = async (): Promise<ScrapeInfo<keyof RefRef>> => {
                         const { data, error } = await tryCatch<Promise<AniWorldSeriesInformations>, Error>(() => scraper.scrapeFunction(url));
@@ -164,9 +164,9 @@ const router = new Hono()
                     todo.scrapingInfo![scraper.scrapeKey] = scraperInfo as any;
                 }
             }
-            TIMING && console.timeEnd('Checking scraping info')
+            TIMING && console.timeEnd('Checking scraping info');
 
-            TIMING && console.time('Checking if todo needs to be updated')
+            TIMING && console.time('Checking if todo needs to be updated');
             const needsUpdate =
                 todo.sortOrder !== dbTodo.sortOrder ||
                 todo.name !== dbTodo.name ||
@@ -176,7 +176,7 @@ const router = new Hono()
                 JSON.stringify(todo.scrapingInfo) !== JSON.stringify(dbTodo.scrapingInfo);
             // if (JSON.stringify(todo) !== JSON.stringify(dbTodo)) {
             if (needsUpdate) {
-                TIMING && console.time('Updating todo')
+                TIMING && console.time('Updating todo');
                 await todosTable.update({ ID: todo.ID }, {
                     sortOrder: todo.sortOrder,
                     name: todo.name,
@@ -185,18 +185,18 @@ const router = new Hono()
                     refs: todo.refs,
                     scrapingInfo: todo.scrapingInfo,
                 });
-                TIMING && console.timeEnd('Updating todo')
+                TIMING && console.timeEnd('Updating todo');
             }
-            TIMING && console.timeEnd('Checking if todo needs to be updated')
+            TIMING && console.timeEnd('Checking if todo needs to be updated');
         }
 
-        TIMING && console.time('Checking for deleted todos')
+        TIMING && console.time('Checking for deleted todos');
         // const allTodos = await todosTable.get();
         const allTodoIDs = new Set(dbTodos.map(t => t.ID));
         const possibleDeletedIDs = allTodoIDs.difference(touchedIDs);
-        TIMING && console.timeEnd('Checking for deleted todos')
+        TIMING && console.timeEnd('Checking for deleted todos');
 
-        TIMING && console.time('Deleting todos')
+        TIMING && console.time('Deleting todos');
         for (const possibleDeletedID of possibleDeletedIDs) {
             const deletedTodo = dbTodos.find(t => t.ID === possibleDeletedID);
             if (deletedTodo == undefined) {
@@ -209,14 +209,14 @@ const router = new Hono()
                 await todosTable.delete({ ID: deletedTodo.ID });
             }
         }
-        TIMING && console.timeEnd('Deleting todos')
+        TIMING && console.timeEnd('Deleting todos');
 
-        TIMING && console.time('Emitting todoListUpdate')
+        TIMING && console.time('Emitting todoListUpdate');
         const sockets = await getIO().fetchSockets();
         sockets.filter(s => s.data.auth.type === 'client').forEach(async s => {
             s.emit('todoListUpdate', todos.sort((a, b) => a.sortOrder - b.sortOrder));
         });
-        TIMING && console.timeEnd('Emitting todoListUpdate')
+        TIMING && console.timeEnd('Emitting todoListUpdate');
         if (todoScrapeJobs.length > 0) {
             handleBackgroundScrapeTodos().catch(console.error);
         }

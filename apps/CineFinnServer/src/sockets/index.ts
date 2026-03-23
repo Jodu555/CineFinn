@@ -1,5 +1,5 @@
 import type { Account } from "@cinefinn/types/models/user";
-import type { timestamped } from "@cinefinn/types/shared/utilities";
+import type { timestamped } from "@cinefinn/types/shared";
 import type { AuthHandshake, SocketAuthData, SocketAuthType } from "@cinefinn/types/socket";
 import { type definedSocket } from "../index.js";
 import { getIO } from "../utils.js";

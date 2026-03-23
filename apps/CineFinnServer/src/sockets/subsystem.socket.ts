@@ -7,7 +7,7 @@ import type { definedSocket } from "../index.js";
 import { sendSeriesReloadToAll } from "./client.socket.js";
 import { rebroadcastSubsystems } from '../routes/admin/admin.js';
 import type { Account } from "@cinefinn/types/models/user";
-import type { timestamped } from "@cinefinn/types/shared/utilities";
+import type { timestamped } from "@cinefinn/types/shared";
 import type { Socket } from "socket.io";
 import { tryCatch } from "@cinefinn/utilities/tryCatch";
 
@@ -31,7 +31,7 @@ async function authFunction(authHandshake: AuthHandshakeSubsystem): Promise<Sock
     };
 }
 
-export const subSocketDiskStatsMap = new Map<string, any>()
+export const subSocketDiskStatsMap = new Map<string, any>();
 
 async function connectionFunction(socket: definedSocket) {
     const socketAuthData = socket.data.auth as SocketAuthDataSubsystem;
@@ -116,7 +116,7 @@ export async function toggleSeriesesForSubSystem(subID: string, disabled: boolea
     console.log(`Toggling Serieses(${seriesIDs.length}) for SubSystem: ${subID} to Disabled: ${disabled}`);
 }
 
-export type definedSubSystemSocket = Socket<SubSystemToServerEvents, ServerToSubSystemEvents, InterServerEvents, { auth: SocketAuthDataSubsystem<Account | (Account & timestamped)> }>;
+export type definedSubSystemSocket = Socket<SubSystemToServerEvents, ServerToSubSystemEvents, InterServerEvents, { auth: SocketAuthDataSubsystem<Account | (Account & timestamped)>; }>;
 
 export async function getSubSocketByID(subID: string) {
     const subSystemSocket = (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'subsystem' && s.data.auth.id === subID)[0];

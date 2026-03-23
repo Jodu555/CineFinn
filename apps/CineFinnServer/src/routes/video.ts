@@ -3,9 +3,6 @@ import { Hono, type Context } from "hono";
 import { authMiddleware } from "../middleware/auth.js";
 import { watchableEntitysTable } from "../database.js";
 import { stream, streamSSE } from 'hono/streaming';
-import { getIO } from '../utils.js';
-import type { WatchableEntity } from '@cinefinn/types/models/media';
-import type { definedSocket } from '../index.js';
 import { getSubSocketByID } from '../sockets/subsystem.socket.js';
 import { tryCatch } from '@cinefinn/utilities/tryCatch';
 import { proxy } from 'hono/proxy';
@@ -90,7 +87,7 @@ const router = new Hono()
                         debug && console.log('Recieved Socket Stats', stats);
                         resolve(stats);
                     });
-                })
+                });
             }
             debug && console.log('Got fileSize', stat.size, watchableEntity.subID);
             const fileSize = stat.size;
@@ -190,7 +187,7 @@ async function createVideoStreamOverSocket(
             resolveStream();
         };
 
-        const handleData = ({ chunk, requestId: reqID }: { chunk: any; requestId: string }) => {
+        const handleData = ({ chunk, requestId: reqID }: { chunk: any; requestId: string; }) => {
             if (requestId === reqID) {
                 if (testMap.has(reqID)) {
                     testMap.delete(reqID);
@@ -200,13 +197,13 @@ async function createVideoStreamOverSocket(
             }
         };
 
-        const handleEnd = ({ requestId: reqID }: { requestId: string }) => {
+        const handleEnd = ({ requestId: reqID }: { requestId: string; }) => {
             if (requestId === reqID) {
                 cleanup();
             }
         };
 
-        const handleError = ({ error, requestId: reqID }: { error: any; requestId: string }) => {
+        const handleError = ({ error, requestId: reqID }: { error: any; requestId: string; }) => {
             if (requestId === reqID) {
                 cleanup();
             }

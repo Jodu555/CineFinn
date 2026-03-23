@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { type FrontendSeries, type Season, type Movie, type DetailedEpisode, type DetailedSeason, type DetailedMovie, type DetailedSeries, type Episode, type Series, type WatchableEntity } from "@cinefinn/types/models/media";
 import { Role } from "@cinefinn/types/models/user";
-import type { timestamped } from "@cinefinn/types/shared/utilities";
+import type { timestamped } from "@cinefinn/types/shared";
 import { Hono } from "hono";
 import { seriesTable, watchableEntitysTable } from "../database.js";
 import { authFullMiddleware, authMiddleware } from "../middleware/auth.js";
@@ -68,7 +68,7 @@ export async function getFrontEndSeries() {
                 refs: JSON.parse(row.refs),
                 seasons: seasons.sort((a, b) => a.season_IDX - b.season_IDX),
                 movies: movies.sort((a, b) => a.movie_IDX - b.movie_IDX),
-            } as FrontendSeries & { seasons_array?: string; movies_array?: string };
+            } as FrontendSeries & { seasons_array?: string; movies_array?: string; };
             delete obj.seasons_array;
             delete obj.movies_array;
             return obj as FrontendSeries;
@@ -208,7 +208,7 @@ const router = new Hono()
                 const episode = episodeBySeasonUUID.get(season.UUID)!;
                 const newEpisodes = episode.map((episode) => {
                     const watchableEntitys = watchableEntitysByWatchableUUID.get(episode.UUID)!;
-                    watchableEntitys.map(we => { delete (we as any).filePath; return we });
+                    watchableEntitys.map(we => { delete (we as any).filePath; return we; });
                     return {
                         ...episode,
                         watchableEntitys,
@@ -223,7 +223,7 @@ const router = new Hono()
 
             const newMovies = movies.map((movie) => {
                 const watchableEntitys = watchableEntitysByWatchableUUID.get(movie.UUID)!;
-                watchableEntitys.map(we => { delete (we as any).filePath; return we });
+                watchableEntitys.map(we => { delete (we as any).filePath; return we; });
                 return {
                     ...movie,
                     watchableEntitys,
@@ -237,7 +237,7 @@ const router = new Hono()
                 refs: JSON.parse(row.refs),
                 seasons: newSeasons.sort((a, b) => a.season_IDX - b.season_IDX),
                 movies: newMovies.sort((a, b) => a.movie_IDX - b.movie_IDX),
-            } as DetailedSeries & { seasons_array?: string; movies_array?: string; episodes_array?: string };
+            } as DetailedSeries & { seasons_array?: string; movies_array?: string; episodes_array?: string; };
             delete obj.seasons_array;
             delete obj.movies_array;
             delete obj.episodes_array;
@@ -253,7 +253,7 @@ const router = new Hono()
                 const limit = pLimit(5);
                 const promises = output.map(s => {
                     limit(() => fullIndexStorage.setItem(`fullIndex-${s.UUID}`, s));
-                })
+                });
                 await Promise.all(promises);
                 TIMING && console.timeEnd('caching');
 
@@ -262,8 +262,8 @@ const router = new Hono()
                 await fullIndexStorage.setItem('fullIndex', output);
                 TIMING && console.timeEnd('fullIndexStorage.setItem');
                 res();
-            })
-        })
+            });
+        });
 
         return c.json(output);
 
@@ -333,7 +333,7 @@ const router = new Hono()
                 const newEpisodes = episode.map((episode) => {
                     // const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == episode.UUID);
                     const watchableEntitys = watchableEntitysByWatchableUUID.get(episode.UUID)!;
-                    watchableEntitys.map(we => { delete (we as any).filePath; return we });
+                    watchableEntitys.map(we => { delete (we as any).filePath; return we; });
                     return {
                         ...episode,
                         watchableEntitys,
@@ -349,7 +349,7 @@ const router = new Hono()
             const newMovies = movies.map((movie) => {
                 // const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == movie.UUID);
                 const watchableEntitys = watchableEntitysByWatchableUUID.get(movie.UUID)!;
-                watchableEntitys.map(we => { delete (we as any).filePath; return we });
+                watchableEntitys.map(we => { delete (we as any).filePath; return we; });
                 return {
                     ...movie,
                     watchableEntitys,
@@ -363,7 +363,7 @@ const router = new Hono()
                 refs: JSON.parse(row.refs),
                 seasons: newSeasons.sort((a, b) => a.season_IDX - b.season_IDX),
                 movies: newMovies.sort((a, b) => a.movie_IDX - b.movie_IDX),
-            } as DetailedSeries & { seasons_array?: string; movies_array?: string; episodes_array?: string };
+            } as DetailedSeries & { seasons_array?: string; movies_array?: string; episodes_array?: string; };
             delete obj.seasons_array;
             delete obj.movies_array;
             delete obj.episodes_array;
@@ -397,7 +397,7 @@ const router = new Hono()
                         reject(err);
                         return;
                     }
-                    resolve(output)
+                    resolve(output);
                 });
             });
         });
@@ -407,7 +407,7 @@ const router = new Hono()
             return c.json({ error: error.message }, 500);
         }
 
-        const finalOutput = Object.keys(output).reduce((prev: { outPath: string; file: string; parsed: ParsedInformation }[], curr) => {
+        const finalOutput = Object.keys(output).reduce((prev: { outPath: string; file: string; parsed: ParsedInformation; }[], curr) => {
             const newArr = output[curr as keyof typeof output].map(x => {
                 x.file = x.file.replaceAll('.', '#');
                 x.file += '.mp4';
@@ -423,7 +423,7 @@ const router = new Hono()
             });
             return prev.concat(newArr.filter(x => x != null));
         }, []);
-        return c.json(finalOutput)
+        return c.json(finalOutput);
     })
     .get('/:S-UUID/related', authMiddleware, async (c) => {
         const user = c.get('credentials').user;
@@ -486,7 +486,7 @@ const router = new Hono()
         await undetailedIndexStorage.removeItem('undetailedIndex');
 
 
-        await sendSeriesReloadToAll()
+        await sendSeriesReloadToAll();
 
         return c.json({
             message: 'Successfully updated series',
@@ -550,7 +550,7 @@ const router = new Hono()
         return c.json({
             message: 'Successfully updated series cover',
         });
-    })
+    });
 
 async function downloadImage(url: string) {
     const response = await fetch(url);

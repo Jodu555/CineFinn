@@ -3,7 +3,7 @@ import { authFullMiddleware, type AuthedVars } from '../middleware/auth.js';
 import { jobsTable } from '../database.js';
 import { crawl } from '../job/crawler.js';
 import type { Job as IJob, JobType } from '@cinefinn/types/models/system';
-import type { timestamped } from '@cinefinn/types/shared/utilities';
+import type { timestamped } from '@cinefinn/types/shared';
 import { Role } from '@cinefinn/types/models/user';
 import { generatePreviewImages } from '../job/images.js';
 import { Job } from '../job/Job.js';

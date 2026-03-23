@@ -4,6 +4,7 @@ import type { TodoItem, ExtendedEpisodeDownload } from "../shared/crawler.js";
 import type { AniWorldSeriesInformations } from "../scrapers/aniworld.js";
 import type { SocketAuthData } from "./auth.js";
 import type { SubSystem, DiskStats, Overview, ClientInfo, RequestFileData, FileChunkData, FileStartData, ErrorData, UploadCompleteData } from "./subsystem.js";
+import type * as fs from "fs";
 
 type rmvcActions = 'play' | 'pause' | 'forward' | 'backward' | 'nextEp' | 'prevEp' | 'volHigh' | 'volDown';
 
@@ -78,7 +79,7 @@ export interface SubSystemToServerEvents {
 
 export interface ServerToSubSystemEvents {
     'listFiles': (callback: (files: string[]) => void) => void;
-    'videoStats': (obj: { filePath: string; }, callback: (stats: FsStats) => void) => void;
+    'videoStats': (obj: { filePath: string; }, callback: (stats: fs.Stats) => void) => void;
     'video-range': (obj: { start: number, end: number, filePath: string, requestId: string; }) => void;
     getDiskStats: () => void;
     file_start: (data: FileStartData) => void;
@@ -102,8 +103,3 @@ export interface SocketData<U = any> {
     auth: SocketAuthData<U>;
 }
 
-export interface FsStats {
-    size: number;
-    mtime: Date;
-    mtimeMs: number;
-}

@@ -9,7 +9,7 @@ import { getConfig } from '../config.js';
 import { generateSeriesID, generateMovieID, generateSeasonID, generateEpisodeID, generateEntityID } from '../utils/IdGenerators.js';
 import type { Episode, Langs, Movie, Season, Series, WatchableEntity } from '@cinefinn/types/models/media';
 import type { MovingItem } from '@cinefinn/types/models/system';
-import type { timestamped } from '@cinefinn/types/shared/utilities';
+import type { timestamped } from '@cinefinn/types/shared';
 import { fullIndexStorage, indexStorage } from '../routes/index.js';
 import { app } from '../index.js';
 import { getIO } from '../utils.js';

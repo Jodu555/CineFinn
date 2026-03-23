@@ -1,7 +1,7 @@
 import type { AuthHandshake, AuthHandshakeClient, SocketAuthDataClient } from "@cinefinn/types/socket";
 import { getUser } from "../middleware/auth.js";
 import type { Account } from "@cinefinn/types/models/user";
-import type { timestamped } from "@cinefinn/types/shared/utilities";
+import type { timestamped } from "@cinefinn/types/shared";
 import type { SocketConsumerMeta } from "./index.js";
 import { app, type definedSocket } from "../index.js";
 import { accountsTable } from "../database.js";

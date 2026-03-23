@@ -6,7 +6,7 @@ import type { definedSocket } from "../index.js";
 import { getIO } from "../utils.js";
 import type { Socket } from "socket.io";
 import type { Account } from "@cinefinn/types/models/user";
-import type { timestamped } from "@cinefinn/types/shared/utilities";
+import type { timestamped } from "@cinefinn/types/shared";
 import { Job } from "../job/Job.js";
 
 export let isScraperSocketConnected = false;
@@ -54,7 +54,7 @@ async function connectionFunction(socket: definedSocket) {
     });
 }
 
-export type definedScraperSocket = Socket<ScraperToServerEvents, ServerToScraperEvents, InterServerEvents, { auth: SocketAuthDataScraper<Account | (Account & timestamped)> }>;
+export type definedScraperSocket = Socket<ScraperToServerEvents, ServerToScraperEvents, InterServerEvents, { auth: SocketAuthDataScraper<Account | (Account & timestamped)>; }>;
 export async function getScraperSocket() {
     if (isScraperSocketConnected == false) {
         return null;
@@ -93,7 +93,7 @@ export async function checkForUpdates(job: Job, smart: boolean) {
             resolve();
         });
     });
-    await job.success()
+    await job.success();
 }
 
 export default {
@@ -102,4 +102,4 @@ export default {
         authFunction,
         connectionFunction,
     } satisfies SocketConsumerMeta,
-}
+};

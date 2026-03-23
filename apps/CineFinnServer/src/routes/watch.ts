@@ -4,7 +4,7 @@ import { episodesTable, moviesTable, seasonsTable, watchableEntitysTable, watchH
 import { getIO, isMovie, watchableUUIDToWatchable } from '../utils.js';
 import type { Episode, Movie, WatchableEntity } from '@cinefinn/types/models/media';
 import type { WatchHistory } from '@cinefinn/types/models/system';
-import type { timestamped } from '@cinefinn/types/shared/utilities';
+import type { timestamped } from '@cinefinn/types/shared';
 import { generateWatchHistoryID } from '../utils/IdGenerators.js';
 import translationV1WatchString from '../utils/translationV1WatchString.js';
 
