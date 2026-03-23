@@ -54,8 +54,7 @@
 									"
 									v-model="setting.value"
 									class="form-check-input"
-									:id="key"
-								/>
+									:id="key" />
 								<label class="form-check-label" :for="key">{{ setting.title }}</label>
 							</div>
 						</template>
@@ -72,8 +71,7 @@
 											setting.value = (event.target as any).checked;
 											updateSettings();
 										}
-									"
-								>
+									">
 									<option v-for="option in setting.options" :key="option" :value="option">
 										{{ option }}
 									</option>
@@ -91,7 +89,7 @@
 	</div>
 </template>
 <script setup lang="ts">
-import { Role } from '@cinefinn/types/database';
+import { Role } from '@cinefinn/types';
 import JobCard from './JobCard.vue';
 
 const authStore = useAuthStore();

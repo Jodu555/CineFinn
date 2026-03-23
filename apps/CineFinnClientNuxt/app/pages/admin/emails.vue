@@ -144,7 +144,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Email, timestamped } from '@cinefinn/types/database';
+import type { Email, timestamped } from '@cinefinn/types';
 
 definePageMeta({
 	middleware: 'auth',

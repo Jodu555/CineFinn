@@ -127,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import type { FrontendSeries, WatchHistory } from '@cinefinn/types/database';
+import type { FrontendSeries, WatchHistory } from '@cinefinn/types';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 

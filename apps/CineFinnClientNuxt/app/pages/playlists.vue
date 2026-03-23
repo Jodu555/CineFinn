@@ -203,7 +203,7 @@
 </template>
 
 <script setup lang="ts">
-import type { FrontendPlaylist, FrontendSeries } from '@cinefinn/types/database';
+import type { FrontendPlaylist, FrontendSeries } from '@cinefinn/types';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import LandingSeriesCard from '~/components/LandingSeriesCard.vue';

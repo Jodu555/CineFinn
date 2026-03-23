@@ -138,7 +138,7 @@ import 'vue3-carousel/carousel.css';
 import LandingSeriesCard from '~/components/LandingSeriesCard.vue';
 
 import { useIndexStore } from '~/stores/index.store';
-import type { FrontendSeries, timestamped, WatchableEntity } from '@cinefinn/types/database';
+import type { FrontendSeries, timestamped, WatchableEntity } from '@cinefinn/types';
 
 const authStore = useAuthStore();
 const indexStore = useIndexStore();

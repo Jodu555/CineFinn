@@ -12,8 +12,7 @@
 					v-for="cat in categories"
 					@click="selectedCategory = cat"
 					:key="cat"
-					:class="selectedCategory == cat ? 'btn btn-outline-primary' : 'btn btn-outline-secondary'"
-				>
+					:class="selectedCategory == cat ? 'btn btn-outline-primary' : 'btn btn-outline-secondary'">
 					{{ cat }}
 				</span>
 			</div>
@@ -27,8 +26,7 @@
 				:series-i-d="entity.UUID"
 				:key="entity.UUID"
 				:index="idx"
-				@add-to-playlist="onAddToPlaylist"
-			/>
+				@add-to-playlist="onAddToPlaylist" />
 			<!-- <EntityCard v-for="entity in selectedSeries"
                 :highlighted="scrolledToLastSeries && entity.ID == showScrollToLastSeries" class="border-success"
                 :entity="entity" :key="entity.ID" /> -->
@@ -36,8 +34,7 @@
 		<AddToPlaylistDialog
 			ref="addToPlaylistDialog"
 			:item-u-u-i-d="selectedSeriesToAddToPlaylist || ''"
-			:content-title="selectedSeries.find((x) => x.UUID === selectedSeriesToAddToPlaylist)?.title || ''"
-		>
+			:content-title="selectedSeries.find((x) => x.UUID === selectedSeriesToAddToPlaylist)?.title || ''">
 			<template #trigger>
 				<div></div>
 			</template>
@@ -46,7 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { FrontendSeries } from '@cinefinn/types/database';
+import type { FrontendSeries } from '@cinefinn/types';
 import AddToPlaylistDialog from '~/components/AddToPlaylistDialog.vue';
 import EntityCard from '~/components/EntityCard.vue';
 

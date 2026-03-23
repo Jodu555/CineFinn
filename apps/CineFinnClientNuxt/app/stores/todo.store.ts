@@ -1,5 +1,5 @@
 import type { Series, SeriesInfos } from '@cinefinn/types/models/media';
-import type { TodoItem } from '@cinefinn/types/shared/crawler';
+import type { TodoItem } from '@cinefinn/types/shared';
 import { defineStore } from 'pinia';
 
 

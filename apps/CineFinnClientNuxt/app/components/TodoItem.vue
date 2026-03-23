@@ -6,8 +6,7 @@
 					v-if="decideImageURL(element).length > 0 && props.minimal == false"
 					:src="decideImageURL(element)"
 					class="img-fluid rounded-top me-4 dp-img"
-					alt=""
-				/>
+					alt="" />
 				<div style="width: 100%" ref="parent">
 					<div class="d-flex justify-content-between">
 						<div>
@@ -19,8 +18,7 @@
 								title="Edit"
 								type="button"
 								@click="element.edited = true"
-								class="btn btn-outline-primary me-3"
-							>
+								class="btn btn-outline-primary me-3">
 								<font-awesome-icon :icon="['fa-solid', 'fa-pen']" size="lg" />
 							</button>
 							<button
@@ -28,8 +26,7 @@
 								title="Use"
 								type="button"
 								@click="todoStore.useTodo(element.ID)"
-								class="btn btn-outline-success me-3"
-							>
+								class="btn btn-outline-success me-3">
 								<font-awesome-icon :icon="['fa-solid', 'fa-check']" size="lg" />
 							</button>
 							<button
@@ -37,8 +34,7 @@
 								title="Delete"
 								type="button"
 								@click="todoStore.deleteTodo(element.ID)"
-								class="btn btn-outline-danger"
-							>
+								class="btn btn-outline-danger">
 								<font-awesome-icon :icon="['fa-solid', 'fa-trash']" size="lg" />
 							</button>
 						</div>
@@ -49,8 +45,7 @@
 								title="Bring to top"
 								@click="todoStore.moveToDoToTop(element.ID)"
 								type="button"
-								class="btn btn-outline-info me-2"
-							>
+								class="btn btn-outline-info me-2">
 								<font-awesome-icon icon="fa-solid fa-up-long" />
 							</button>
 							<!-- Bring to Bottom -->
@@ -59,8 +54,7 @@
 								title="Bring to Bottom"
 								@click="todoStore.moveToDoToBottom(element.ID)"
 								type="button"
-								class="btn btn-outline-warning"
-							>
+								class="btn btn-outline-warning">
 								<font-awesome-icon icon="fa-solid fa-down-long" />
 							</button>
 							<button v-if="element.edited" type="button" @click="element.edited = false" class="btn btn-close"></button>
@@ -94,13 +88,20 @@
 						<li v-for="[key, value] in Object.entries(languageDevisionC.devision)">&nbsp;&nbsp;&nbsp;&nbsp;{{ key }}: {{ value }}%</li>
 						<template v-if="hasMovies">
 							<li>
-								Movies: {{ element.scrapingInfo?.['aniworld']?.data?.movies?.length || element.scrapingInfo?.['sto']?.data?.movies?.length || 0 }}
+								Movies:
+								{{
+									element.scrapingInfo?.['aniworld']?.data?.movies?.length ||
+									element.scrapingInfo?.['sto']?.data?.movies?.length ||
+									0
+								}}
 							</li>
 							<li>
 								&nbsp;&nbsp;&nbsp;&nbsp;Apx Size on Disk:
 								{{
 									numWithFP(
-										((element.scrapingInfo?.['aniworld']?.data?.movies?.length || element.scrapingInfo?.['sto']?.data?.movies?.length || 0) *
+										((element.scrapingInfo?.['aniworld']?.data?.movies?.length ||
+											element.scrapingInfo?.['sto']?.data?.movies?.length ||
+											0) *
 											constants.mbperMovie) /
 											1024,
 										1,
@@ -148,7 +149,10 @@
                                             </template>
                                         </div> -->
 								<br />
-								<p v-if="authStore.user.role > 1" style="cursor: pointer" @click="todoStore.deleteOrRetryScrapeTodo(element.ID, 'all')">
+								<p
+									v-if="authStore.user.role > 1"
+									style="cursor: pointer"
+									@click="todoStore.deleteOrRetryScrapeTodo(element.ID, 'all')">
 									<u>Delete All Scraped infos</u>
 								</p>
 							</em>
@@ -165,7 +169,10 @@
 								<div class="spinner-border text-warning spinner-border-xs" role="status">
 									<span class="visually-hidden">Loading...</span>
 								</div>
-								<small class="text-danger" style="cursor: pointer" @click="todoStore.deleteOrRetryScrapeTodo(element.ID, scrapeInfo.key)"
+								<small
+									class="text-danger"
+									style="cursor: pointer"
+									@click="todoStore.deleteOrRetryScrapeTodo(element.ID, scrapeInfo.key)"
 									><u>Retry {{ scrapeInfo.key }}</u></small
 								>
 							</div>
@@ -182,7 +189,10 @@
 							<span v-if="scrapeInfo?.state === 'success'" class="h6 text-success mt-0">
 								<span
 									>Success: "{{ scrapeInfo.message }}" &nbsp;&nbsp;&nbsp;&nbsp;
-									<small class="text-secondary" style="cursor: pointer" @click="todoStore.deleteOrRetryScrapeTodo(element.ID, scrapeInfo.key)">
+									<small
+										class="text-secondary"
+										style="cursor: pointer"
+										@click="todoStore.deleteOrRetryScrapeTodo(element.ID, scrapeInfo.key)">
 										<u>Rescrape {{ scrapeInfo.key }}</u>
 									</small>
 								</span>
@@ -213,8 +223,7 @@
 										autocomplete="todo-name"
 										placeholder="Enter Name"
 										:rules="todoNameRules"
-										:show-label="false"
-									/>
+										:show-label="false" />
 									<!-- <input type="text"
                                         :disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
                                         class="form-control" id="name" v-model="element.name" /> -->
@@ -255,8 +264,7 @@
 										style="width: 100%"
 										:disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
 										class="form-select"
-										aria-label="Default select example"
-									>
+										aria-label="Default select example">
 										<option selected disabled>Kategorie</option>
 										<option>Aniworld</option>
 										<option>STO</option>
@@ -272,9 +280,10 @@
 								<h6>{{ refCategorie }}</h6>
 
 								<div
-									v-for="refkey in Object.keys(element.refs).filter((x) => scrapers.find((y) => y.referenceKey == x)?.categorie == refCategorie)"
-									class="row text-center align-items-center mb-4"
-								>
+									v-for="refkey in Object.keys(element.refs).filter(
+										(x) => scrapers.find((y) => y.referenceKey == x)?.categorie == refCategorie,
+									)"
+									class="row text-center align-items-center mb-4">
 									<div class="col-2">
 										<label for="url" class="form-label" style="text-transform: capitalize">{{ refkey }}:</label>
 									</div>
@@ -290,8 +299,7 @@
 											:disabled="authStore.user.UUID != element.creator && authStore.user.role == 2"
 											:show-label="false"
 											:rules="rules[refkey as keyof TodoReferences]"
-											:can-be-empty="true"
-										/>
+											:can-be-empty="true" />
 									</div>
 								</div>
 							</div>
@@ -315,8 +323,7 @@
 									todoStore.saveTodo();
 								"
 								class="btn btn-outline-success"
-								:disabled="!canSave"
-							>
+								:disabled="!canSave">
 								Save
 							</button>
 						</div>
@@ -331,7 +338,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { TodoItem, TodoReferences } from '@cinefinn/types/database';
+import type { TodoItem, TodoReferences } from '@cinefinn/types';
 import InputValidator from './InputValidator.vue';
 
 const props = withDefaults(

@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { FrontendSeries } from '@cinefinn/types/database';
+import type { FrontendSeries } from '@cinefinn/types';
 
 const { decideSeriesImage } = useSeriesImage();
 

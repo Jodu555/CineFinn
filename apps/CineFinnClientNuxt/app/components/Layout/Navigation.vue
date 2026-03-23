@@ -80,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { Role } from '@cinefinn/types/database';
+import { Role } from '@cinefinn/types';
 import AutoComplete from './AutoComplete.vue';
 
 const authStore = useAuthStore();

@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { JobType } from '@cinefinn/types/database';
+import type { JobType } from '@cinefinn/types';
 import { msToReadable } from '@cinefinn/utilities/time';
 
 const managmentStore = useManagmentStore();
