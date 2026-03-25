@@ -17,7 +17,7 @@
 					</thead>
 					<tbody>
 						<tr
-							v-for="serie in getSeriesList(subsystems.find((x) => x.id == selectedShowSeriesSubSystem)!.series ?? []).filter(
+							v-for="serie in getSeriesList(subsystems.find((x) => x.id == selectedShowSeriesSubSystem)?.series ?? []).filter(
 								(x) =>
 									x?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
 									x?.UUID.toLowerCase().startsWith(searchTerm.toLowerCase()),
