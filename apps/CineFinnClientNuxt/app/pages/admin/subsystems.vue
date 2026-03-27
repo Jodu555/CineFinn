@@ -156,7 +156,10 @@ definePageMeta({
 const indexStore = useIndexStore();
 const adminStore = useAdminStore();
 
-await callOnce('loadSubsystems', () => adminStore.loadSubsystems(), { mode: 'navigation' });
+await Promise.all([
+	await callOnce('loadSubsystems', () => adminStore.loadSubsystems(), { mode: 'navigation' }),
+	await callOnce('loadMovingItems', () => adminStore.loadMovingItems(), { mode: 'navigation' }),
+]);
 
 const loading = computed(() => adminStore.loading);
 const error = computed(() => adminStore.error);
