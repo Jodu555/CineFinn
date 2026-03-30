@@ -22,7 +22,7 @@ export interface AuthHandshakeSubsystem {
     id: string;
     token: string;
     ptoken: string;
-    bandwith: number;
+    bandwidth: number;
     endpoint: string | false;
 }
 
@@ -51,6 +51,6 @@ export interface SocketAuthDataSubsystem<U = any> {
     token: string;
     id: string;
     ptoken: string;
-    bandwith: number;
+    bandwidth: number;
     endpoint: string | false;
 }

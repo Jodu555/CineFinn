@@ -56,7 +56,7 @@
 								Endpoint:
 								{{ subsystem.status == 'offline' ? 'Offline' : subsystem.endpoint ? subsystem.endpoint : '*Socket Transmit*' }}
 							</li>
-							<li v-if="subsystem.status == 'online'" class="list-group-item">Bandwith: {{ subsystem.bandwith }} MB/s</li>
+							<li v-if="subsystem.status == 'online'" class="list-group-item">bandwidth: {{ subsystem.bandwidth }} MB/s</li>
 							<li class="list-group-item">Series: {{ subsystem.status == 'offline' ? 'Offline' : subsystem.series.length }}</li>
 							<li v-if="subsystem.status == 'online' && subsystem.diskStats" class="list-group-item">
 								Disk Usage:
@@ -100,7 +100,7 @@
 		<div v-auto-animate v-for="item in adminStore.movingItems" :key="item.ID" class="row">
 			<div class="col-auto ms-5 me-auto">
 				<h4 class="mb-1">
-					{{ indexStore.seriesById.get(item.serie_UUID)!.title.split('').splice(0, 50).join('') }}({{ item.serie_UUID }}) -- {{ item.ID }} -
+					{{ indexStore.seriesById.get(item.serie_UUID)?.title?.split('').splice(0, 50).join('') }}({{ item.serie_UUID }}) -- {{ item.ID }} -
 					{{ item.meta.isAdditional ? 'Additional' : 'System' }}
 				</h4>
 				<div class="d-flex gap-2">

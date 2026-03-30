@@ -20,7 +20,7 @@ export interface OnlineSubSystem {
     id: string;
     token: string;
     ptoken: string;
-    bandwith: number;
+    bandwidth: number;
     endpoint: string | false;
     series: string[];
     diskStats: DiskStats | null;

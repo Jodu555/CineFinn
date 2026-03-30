@@ -40,7 +40,7 @@ const socketAuth = {
     id: config.identifier,
     token: config.core.token,
     ptoken: getPtoken(),
-    bandwith: config.bandwidth || 0,
+    bandwidth: config.bandwidth || 0,
     endpoint: config.endpoint,
 } satisfies AuthHandshakeSubsystem;
 

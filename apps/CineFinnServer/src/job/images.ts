@@ -56,7 +56,7 @@ export async function generatePreviewImages(job: Job) {
 
         const subSystemSocket = await getSubSocketByID(watchableEntity.subID);
 
-        const bandwith = subSystemSocket ? subSystemSocket.data.auth.bandwith : 0;
+        const bandwidth = subSystemSocket ? subSystemSocket.data.auth.bandwidth : 0;
 
         const generatedQueueJob = {
             UUID: crypto.randomUUID(),
@@ -66,7 +66,7 @@ export async function generatePreviewImages(job: Job) {
                 seriesUUID: series.UUID,
                 entity: watchableEntity,
                 resultPath,
-                bandwith,
+                bandwidth,
             }
         } satisfies QueuedPreviewImageGenerationJob;
         queuedJobs.push(generatedQueueJob);

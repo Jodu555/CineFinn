@@ -1,73 +1,87 @@
 import path from "path";
 import fs from "fs";
 import type { MovingItem } from "@cinefinn/types/models/system";
-import type { Episode, Movie } from "@cinefinn/types/models/media";
 import { Transform } from "stream";
 import { watchableEntitysTable, seriesTable } from "../database.js";
-import { getSubSocketByID } from "../sockets/subsystem.socket.js";
+import subsystemSocket, { getSubSocketByID } from "../sockets/subsystem.socket.js";
 import { watchableUUIDToWatchable, calculateMD5, isEpisode, isMovie } from "../utils.js";
 import { rebroadcastMovingItems, rebroadcastOverview } from "../routes/admin/admin.js";
-
-import { pipeline } from 'stream';
-import { promisify } from 'util';
+import { pipeline } from "stream";
+import { promisify } from "util";
 import { tryCatch } from "@cinefinn/utilities/tryCatch";
 import { wait } from "@cinefinn/utilities/time";
 
 const pipelineAsync = promisify(pipeline);
 
-const movingItems = [] as MovingItem[];
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+const QUEUE_TICK_MS = parseInt(process.env.MOVING_ITEM_TICK ?? "5000");
+const PROGRESS_BROADCAST_THRESHOLD = 0.5; // percent
+const POST_TRANSFER_WAIT_MS = 5_000;
+const STREAM_HIGH_WATER_MARK = 64 * 1024;
+
+const MAX_RETRY_ATTEMPTS = 3;
+const RETRY_BASE_DELAY_MS = 2_000;
+
+// ─── State ───────────────────────────────────────────────────────────────────
+
+const movingItems: MovingItem[] = [];
 
 export const getMovingItems = () => movingItems;
+
+// ─── Queue ───────────────────────────────────────────────────────────────────
 
 class MovingItemQueue {
     private items: string[] = [];
     private timeout: NodeJS.Timeout | null = null;
-
     private onFinishedCallback: () => void = () => { };
 
-    public onFinished(callback: () => void) {
+    onFinished(callback: () => void) {
         this.onFinishedCallback = callback;
     }
 
-    public enqueue(item: string) {
-        console.log('MovingItemQueue: Enqueue', item);
-        this.items.push(item);
-        this.setupTimer();
+    enqueue(id: string) {
+        console.log("[Queue] Enqueue:", id);
+        this.items.push(id);
+        this.scheduleNext();
     }
 
-    private setupTimer() {
-        if (this.timeout != null) {
-            clearTimeout(this.timeout);
-        }
+    private scheduleNext() {
+        if (this.timeout) clearTimeout(this.timeout);
         this.timeout = setTimeout(() => {
             this.timeout = null;
             this.dequeue();
-        }, parseInt(process.env.MOVING_ITEM_TICK!) || 5000);
+        }, QUEUE_TICK_MS);
     }
 
-    public async dequeue() {
-        const item = this.items.shift();
-        if (item == undefined) {
-            if (this.onFinishedCallback != null) {
-                this.onFinishedCallback();
-                clearTimeout(this.timeout!);
-            }
+    async dequeue() {
+        const id = this.items.shift();
+
+        if (id == null) {
+            this.onFinishedCallback();
             return null;
         }
-        console.log('MovingItemQueue: Dequeue', item);
-        await processMovingItem(getMovingItems().find(m => m.ID === item)!);
-        if (this.items.length == 0) {
-            if (this.onFinishedCallback != null) {
-                this.onFinishedCallback();
-                clearTimeout(this.timeout!);
-            }
+
+        console.log("[Queue] Dequeue:", id);
+        const item = movingItems.find((m) => m.ID === id);
+
+        if (item) {
+            await processMovingItem(item);
         } else {
-            this.setupTimer();
+            console.warn(`[Queue] Moving item ${id} not found — skipping`);
         }
-        return item;
+
+        if (this.items.length === 0) {
+            this.onFinishedCallback();
+            if (this.timeout) clearTimeout(this.timeout);
+        } else {
+            this.scheduleNext();
+        }
+
+        return id;
     }
 
-    public get length() {
+    get length() {
         return this.items.length;
     }
 }
@@ -75,190 +89,233 @@ class MovingItemQueue {
 export const movingItemQueue = new MovingItemQueue();
 
 movingItemQueue.onFinished(async () => {
-    await rebroadcastOverview();
-    // setSeries(await crawlAndIndex());
-    // await sendSeriesReloadToAll();
     await rebroadcastMovingItems();
     await rebroadcastOverview();
 });
 
-export async function prepareProcessMovingItem(ID: string) {
-    movingItemQueue.enqueue(ID);
+// ─── Public API ──────────────────────────────────────────────────────────────
+
+export async function prepareProcessMovingItem(id: string) {
+    movingItemQueue.enqueue(id);
 }
 
 export async function processMovingItem(movingItem: MovingItem) {
-    if (movingItem.fromSubID === 'main' && movingItem.toSubID !== 'main') {
+    if (movingItem.fromSubID === "main" && movingItem.toSubID !== "main") {
         await sendMovingItemToSubSystem(movingItem);
-    } else if (movingItem.fromSubID !== 'main' && movingItem.toSubID === 'main') {
-        console.log('Not implemented!');
-        // recieveMovingItemFromSubSystem(movingItem);
+    } else if (movingItem.fromSubID !== "main" && movingItem.toSubID === "main") {
+        console.warn("[MovingItem] Receiving from sub-system is not yet implemented");
     }
 }
 
+// ─── Throttle Stream ─────────────────────────────────────────────────────────
+
 class ThrottleStream extends Transform {
     private bytesPerSecond: number;
-    private bytesSent: number = 0;
-    private startTime: number;
+    private startTime = Date.now();
+    private bytesWritten = 0;
 
     constructor(bytesPerSecond: number) {
         super();
         this.bytesPerSecond = bytesPerSecond;
-        this.startTime = Date.now();
     }
 
     _transform(
         chunk: Buffer,
-        encoding: BufferEncoding,
+        _encoding: BufferEncoding,
         callback: (error?: Error | null) => void
-    ): void {
-        this.bytesSent += chunk.length;
-        
-        const expectedTime = this.bytesSent / this.bytesPerSecond;
+    ) {
+        this.bytesWritten += chunk.length;
+
         const elapsed = (Date.now() - this.startTime) / 1000;
+        const expectedTime = this.bytesWritten / this.bytesPerSecond;
         const delay = Math.max(0, (expectedTime - elapsed) * 1000);
 
-        if (delay > 0) {
-            const waitUntil = Date.now() + delay;
-            while (Date.now() < waitUntil) {
-            }
+        if (delay > 10) {
+            setTimeout(() => {
+                this.push(chunk);
+                callback();
+            }, delay);
+        } else {
+            this.push(chunk);
+            callback();
         }
-
-        this.push(chunk);
-        callback();
     }
 }
 
-const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 2000;
+// ─── File Transfer ───────────────────────────────────────────────────────────
 
 export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
-    const { data: subSystemSocket, error } = await tryCatch(() => getSubSocketByID(movingItem.toSubID));
-    if (error || subSystemSocket == null) {
-        console.log(`SubSystem ${movingItem.toSubID} not found`);
+    const { data: subSystemSocket, error: socketError } = await tryCatch(() =>
+        getSubSocketByID(movingItem.toSubID)
+    );
+
+    if (socketError || subSystemSocket == null) {
+        console.error(`[Transfer] Sub-system socket not found: ${movingItem.toSubID}`);
         return;
     }
 
     const watchableEntity = await watchableEntitysTable.getOne({ UUID: movingItem.watchableEntityUUID });
-    if (watchableEntity == undefined) {
-        console.log(`WatchableEntity ${movingItem.watchableEntityUUID} not found`);
+    if (!watchableEntity) {
+        console.error(`[Transfer] WatchableEntity not found: ${movingItem.watchableEntityUUID}`);
         return;
     }
 
     const series = await seriesTable.getOne({ UUID: watchableEntity.serie_UUID });
-    if (series == undefined) {
-        console.log(`Serie ${watchableEntity.serie_UUID} not found`);
+    if (!series) {
+        console.error(`[Transfer] Series not found: ${watchableEntity.serie_UUID}`);
         return;
     }
 
     const watchable = await watchableUUIDToWatchable(watchableEntity.watchable_UUID);
-    if (watchable == undefined) {
-        console.log(`Watchable ${movingItem.watchableEntityUUID} not found`);
+    if (!watchable) {
+        console.error(`[Transfer] Watchable not found: ${watchableEntity.watchable_UUID}`);
         return;
     }
 
-    let resultPath = '';
+    const { filePath } = watchableEntity;
+    if (!filePath) {
+        console.error(`[Transfer] No filePath for WatchableEntity: ${movingItem.watchableEntityUUID}`);
+        return;
+    }
 
+    let resultDir = "";
     if (isEpisode(watchable)) {
-        resultPath = path.join(resultPath, series.tags[0], series.title, `Season-${watchable.season_IDX}`,);
+        resultDir = path.join(series.tags[0], series.title, `Season-${watchable.season_IDX}`);
+    } else if (isMovie(watchable)) {
+        resultDir = path.join(series.tags[0], series.title, "Movies");
     }
-    if (isMovie(watchable)) {
-        resultPath = path.join(resultPath, series.tags[0], series.title, 'Movies');
-    }
-
-
-    const filePath = watchableEntity.filePath;
-    if (filePath == undefined) {
-        console.log(`FilePath for WatchableEntity ${movingItem.watchableEntityUUID} not found`);
-        return;
-    }
-
-    console.log(`Starting file transfer to client: ${movingItem.toSubID} ${movingItem.watchableEntityUUID}`);
-    console.log(`Local Path: ${filePath}`);
 
     let lastError: Error | null = null;
 
-    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-        console.log(`File transfer attempt ${attempt} of ${MAX_RETRIES}`);
+    for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
+        if (attempt > 1) {
+            const delay = RETRY_BASE_DELAY_MS * 2 ** (attempt - 2);
+            console.log(`[Transfer] Retry attempt ${attempt}/${MAX_RETRY_ATTEMPTS} in ${delay}ms...`);
+            await wait(delay);
+        }
 
         try {
-            if (!fs.existsSync(filePath)) {
-                throw new Error(`File not found: ${filePath}`);
-            }
+            const finalPath = await attemptFileTransfer({
+                movingItem,
+                filePath,
+                resultDir,
+                subSystemSocket,
+            });
 
-            const stats = fs.statSync(filePath);
-            const fileSize = stats.size;
-            const md5 = await calculateMD5(filePath);
-            const filename = path.parse(filePath).base;
+            // Success — update DB and clean up
+            await watchableEntitysTable.update(
+                { UUID: watchableEntity.UUID },
+                { filePath: finalPath, subID: movingItem.toSubID }
+            );
 
-            movingItem.meta.movingStarted = Date.now();
+            fs.rmSync(filePath, { recursive: true });
+
+            await wait(POST_TRANSFER_WAIT_MS);
+
+            const index = movingItems.findIndex((m) => m.ID === movingItem.ID);
+            if (index !== -1) movingItems.splice(index, 1);
+
             await rebroadcastMovingItems();
-            subSystemSocket.emit('file_start', {
-                filename,
-                size: fileSize,
-                md5,
-                resultPath: path.join(resultPath, filename),
-            });
-
-            const readStream = fs.createReadStream(filePath, {
-                highWaterMark: 64 * 1024,
-            });
-
-            const bandwidth = subSystemSocket.data.auth.bandwith * 1024 * 1024;
-            const throttle = new ThrottleStream(bandwidth);
-
-            let bytesSent = 0;
-            let lastProgress = 0;
-
-            throttle.on('data', (chunk: Buffer) => {
-                subSystemSocket.emit('file_chunk', chunk);
-
-                bytesSent += chunk.length;
-                const progress = ((bytesSent / fileSize) * 100).toFixed(2);
-                if (+progress - lastProgress > 0.5 || +progress === 100) {
-                    lastProgress = +progress;
-                    movingItem.meta.progress = +progress;
-                    rebroadcastMovingItems();
-                }
-            });
-
-            await pipelineAsync(readStream, throttle);
-
-            const finalPath = await new Promise<string>((resolve, reject) => {
-                subSystemSocket.emit('file_end', (finalPath) => {
-                    if (finalPath === false) {
-                        reject(new Error('File transfer failed'));
-                    } else {
-                        resolve(finalPath);
-                    }
-                });
-            });
-            console.log('File transfer complete', finalPath);
-
-            movingItem.meta.result = finalPath;
-            await rebroadcastMovingItems();
-
-            if (finalPath) {
-                watchableEntitysTable.update({ UUID: watchableEntity.UUID }, { filePath: resultPath, subID: movingItem.toSubID });
-                fs.rmSync(filePath, { recursive: true });
-                await wait(1000 * 5);
-                const index = getMovingItems().findIndex(m => m.ID === movingItem.ID);
-                getMovingItems().splice(index, 1);
-                await rebroadcastMovingItems();
-            }
-
             return;
-
         } catch (err) {
             lastError = err as Error;
-            console.error(`File transfer attempt ${attempt} failed:`, lastError.message);
-
-            if (attempt < MAX_RETRIES) {
-                console.log(`Retrying in ${RETRY_DELAY_MS}ms...`);
-                await wait(RETRY_DELAY_MS);
-            }
+            console.error(`[Transfer] Attempt ${attempt} failed:`, lastError.message);
+            movingItem.meta.progress = 0;
+            await rebroadcastMovingItems();
         }
     }
 
-    console.error(`File transfer failed after ${MAX_RETRIES} attempts`);
-    subSystemSocket.emit('file_error', { message: lastError?.message || 'Unknown error' });
+    console.error(`[Transfer] All ${MAX_RETRY_ATTEMPTS} attempts failed for ${movingItem.ID}:`, lastError?.message);
+    subSystemSocket.emit("file_error", { message: lastError?.message ?? "Unknown error" });
+}
+
+// ─── Single Transfer Attempt ─────────────────────────────────────────────────
+
+interface AttemptParams {
+    movingItem: MovingItem;
+    filePath: string;
+    resultDir: string;
+    subSystemSocket: NonNullable<Awaited<ReturnType<typeof getSubSocketByID>>>;
+}
+
+async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemSocket }: AttemptParams): Promise<string> {
+    if (!fs.existsSync(filePath)) {
+        throw new Error(`File not found: ${filePath}`);
+    }
+
+    const stats = fs.statSync(filePath);
+    const fileSize = stats.size;
+    const md5 = await calculateMD5(filePath);
+    const filename = path.basename(filePath);
+    const resultPath = path.join(resultDir, filename);
+
+    movingItem.meta.movingStarted = Date.now();
+    movingItem.meta.progress = 0;
+    await rebroadcastMovingItems();
+
+    subSystemSocket.emit("file_start", { filename, size: fileSize, md5, resultPath });
+
+    const readStream = fs.createReadStream(filePath, { highWaterMark: STREAM_HIGH_WATER_MARK });
+    console.log(subSystemSocket.data);
+    process.exit(0);
+
+
+    const rawBandwidth = subSystemSocket.data.auth.bandwidth;
+    if (!rawBandwidth || rawBandwidth <= 0) {
+        throw new Error(`Invalid bandwidth value on sub-system socket: ${rawBandwidth}`);
+    }
+    const bandwidth = rawBandwidth * 1024 * 1024;
+    const throttle = new ThrottleStream(bandwidth);
+
+    let bytesSent = 0;
+    let lastProgress = 0;
+    let ackPending = false;
+
+    const waitForAck = (): Promise<void> =>
+        new Promise((resolve) => {
+            if (!ackPending) return resolve();
+            subSystemSocket.once("ack", () => {
+                ackPending = false;
+                resolve();
+            });
+        });
+
+    subSystemSocket.on("ack", () => { ackPending = false; });
+
+    throttle.on("data", async (chunk: Buffer) => {
+        readStream.pause();
+        await waitForAck();
+
+        ackPending = true;
+        subSystemSocket.emit("file_chunk", chunk);
+
+        bytesSent += chunk.length;
+        const progress = (bytesSent / fileSize) * 100;
+
+        if (progress - lastProgress >= PROGRESS_BROADCAST_THRESHOLD || progress >= 100) {
+            lastProgress = progress;
+            movingItem.meta.progress = parseFloat(progress.toFixed(2));
+            await rebroadcastMovingItems();
+        }
+
+        readStream.resume();
+    });
+
+    await pipelineAsync(readStream, throttle);
+
+    const finalPath = await new Promise<string>((resolve, reject) => {
+        subSystemSocket.emit("file_end", (result: string | false) => {
+            if (result === false) {
+                reject(new Error("Remote rejected the file transfer"));
+            } else {
+                resolve(result);
+            }
+        });
+    });
+
+    console.log(`[Transfer] Complete: ${finalPath}`);
+    movingItem.meta.result = finalPath;
+    await rebroadcastMovingItems();
+
+    return finalPath;
 }
