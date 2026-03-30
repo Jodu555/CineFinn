@@ -113,7 +113,15 @@ export const useIndexStore = defineStore('index', {
             this.watchHistory = response;
         },
         async updateWatchList(watchList: WatchHistory[]) {
-            this.watchHistory = watchList;
+            watchList.forEach(w => {
+                let index = this.watchHistory.findIndex(wh => w.UUID === wh.UUID);
+                if (index === -1) {
+                    this.watchHistory.push(w);
+                } else {
+                    this.watchHistory[index] = w;
+                }
+            });
+            // this.watchHistory.push(...deduplicated);
         },
         setSelectedWatchableEntityUUID(entityUUID: string | null, language?: string) {
             // console.log('setSelectedWatchableEntityUUID', entityUUID);

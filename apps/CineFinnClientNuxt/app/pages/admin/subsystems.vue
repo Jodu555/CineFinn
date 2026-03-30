@@ -18,10 +18,9 @@
 					<tbody>
 						<tr
 							v-for="serie in getSeriesList(subsystems.find((x) => x.id == selectedShowSeriesSubSystem)?.series ?? []).filter(
-								(x) =>
-									x?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-									x?.UUID.toLowerCase().startsWith(searchTerm.toLowerCase()),
-							)">
+								(x) => x?.title.toLowerCase().includes(searchTerm.toLowerCase()) || x?.UUID.toLowerCase().startsWith(searchTerm.toLowerCase()),
+							)"
+						>
 							<template v-if="serie !== undefined">
 								<td scope="row">{{ serie.UUID }}</td>
 								<td>{{ serie.title }}</td>
@@ -69,7 +68,8 @@
 										:style="{ width: `${getUsagePercentage(subsystem.diskStats)}%` }"
 										aria-valuenow="25"
 										aria-valuemin="0"
-										aria-valuemax="100">
+										aria-valuemax="100"
+									>
 										{{ getUsagePercentage(subsystem.diskStats).toFixed(2) }}%
 									</div>
 								</div>
@@ -99,13 +99,17 @@
 		<hr />
 		<div v-auto-animate v-for="item in adminStore.movingItems" :key="item.ID" class="row">
 			<div class="col-auto ms-5 me-auto">
-				<h4 class="mb-1">#{{ item.serie_UUID }} -- {{ item.ID }} - {{ item.meta.isAdditional ? 'Additional' : 'System' }}</h4>
+				<h4 class="mb-1">
+					{{ indexStore.seriesById.get(item.serie_UUID)!.title.split('').splice(0, 50).join('') }}({{ item.serie_UUID }}) -- {{ item.ID }} -
+					{{ item.meta.isAdditional ? 'Additional' : 'System' }}
+				</h4>
 				<div class="d-flex gap-2">
 					<h5
 						:class="{
 							'text-success': isSubSystemOnline(item.fromSubID),
 							'text-danger': !isSubSystemOnline(item.fromSubID),
-						}">
+						}"
+					>
 						{{ item.fromSubID }}
 					</h5>
 					<h5>=></h5>
@@ -113,7 +117,8 @@
 						:class="{
 							'text-success': isSubSystemOnline(item.toSubID),
 							'text-danger': !isSubSystemOnline(item.toSubID),
-						}">
+						}"
+					>
 						{{ item.toSubID }}
 					</h5>
 				</div>
@@ -132,7 +137,8 @@
 						:style="{ width: `${item.meta.progress}%` }"
 						:aria-valuenow="item.meta.progress"
 						aria-valuemin="0"
-						aria-valuemax="100">
+						aria-valuemax="100"
+					>
 						<span class="h5 mt-2">{{ item.meta.progress }}%</span>
 					</div>
 				</div>
