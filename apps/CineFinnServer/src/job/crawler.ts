@@ -17,6 +17,7 @@ import { sendSeriesReloadToAll } from '../sockets/client.socket.js';
 import { getMovingItems } from '../utils/movingItems.js';
 import { tryCatch } from '@cinefinn/utilities/tryCatch';
 import { recommendationStorage } from '../routes/recommendations/recommendations.js';
+import { rebroadcastMovingItems } from '../routes/admin/admin.js';
 
 
 // export async function crawl(job: Job) {
@@ -793,13 +794,13 @@ export async function crawl(job: Job) {
     await handleSubSystemProminence(job);
 
 
-    job.time('Invlaidating Cache');
+    job.time('Invalidating Cache');
     try { await crawlerEpisodesCache.clear(); } catch (e) { }
     try { await crawlerSeriesSeasonsCache.clear(); } catch (e) { }
 
     try { await indexStorage.clear(); } catch (e) { }
     try { await recommendationStorage.clear(); } catch (e) { }
-    job.timeEnd('Invlaidating Cache');
+    job.timeEnd('Invalidating Cache');
 
     await app.request('/index/all', {
         headers: { 'auth-token': getConfig().system.PUBLIC_API_AUTH_TOKEN },
@@ -811,6 +812,9 @@ export async function crawl(job: Job) {
 }
 
 export async function handleSubSystemProminence(job: Job) {
+    // Clear moving items
+    getMovingItems().length = 0;
+
     const watchableEntitys = await watchableEntitysTable.get();
 
     const map = new Map<string, Record<string, number>>();
@@ -860,4 +864,5 @@ export async function handleSubSystemProminence(job: Job) {
             });
         }
     }
+    await rebroadcastMovingItems();
 }
