@@ -12,7 +12,8 @@ import { HTTPException } from "hono/http-exception";
 import { getMovingItems, prepareProcessMovingItem } from "../../utils/movingItems.js";
 import type { Langs } from "../../parser.js";
 import type { Storage } from "unstorage";
-import { cacheRoutes } from "./cache.js";
+import { cacheRouter } from "./cache.js";
+import { subsystemRouter } from "./subsystems.js";
 
 async function getTotalRuntime(): Promise<number> {
     const result = await queryDatabase(`
@@ -129,10 +130,6 @@ function redactConfig(config: ReturnType<typeof getConfig>): ReturnType<typeof g
     return redactedConfig;
 }
 
-const processMovingItemsSchema = z.object({
-    IDs: z.array(z.string()),
-});
-
 const createIgnoranceItemSchema = z.object({
     serie_UUID: z.string(),
     lang: z.enum(['GerDub', 'GerSub', 'EngDub', 'EngSub', 'JapDub', 'EngSubK', 'GerSubK', 'GerSubC', 'EngSubC']).optional(),
@@ -145,22 +142,6 @@ const router = new Hono()
             delete a.password;
         });
         return c.json(accounts);
-    })
-    .get('/subsystems', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
-        const subsystems = await getSubSystems();
-        return c.json(await Promise.all(subsystems));
-    })
-    .get('/subsystems/movingItems', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
-        const movingItems = getMovingItems();
-        return c.json(movingItems);
-    })
-    .post('/subsystems/movingItems', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
-        const body = await c.req.json();
-        const processMovingItemsBody = processMovingItemsSchema.parse(body);
-        for (const toProcessID of processMovingItemsBody.IDs) {
-            prepareProcessMovingItem(toProcessID);
-        }
-        return c.json(getMovingItems());
     })
     .get('/overview', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const overview = await generateOverview();
@@ -259,7 +240,8 @@ const router = new Hono()
             status: 'success',
         });
     })
-    .route('/cache', cacheRoutes)
+    .route('/subsystems', subsystemRouter)
+    .route('/cache', cacheRouter)
 
 
 

@@ -5,7 +5,7 @@ import { Role } from '@cinefinn/types/models/user';
 
 export const cacheRegistry = new Map<string, Storage<any>>();
 
-export const cacheRoutes = new Hono()
+export const cacheRouter = new Hono()
     .get('/caches', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const names = Array.from(cacheRegistry.keys());
         return c.json(names);
