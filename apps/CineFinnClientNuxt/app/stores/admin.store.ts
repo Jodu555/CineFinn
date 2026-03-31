@@ -15,6 +15,7 @@ export const useAdminStore = defineStore('admin', {
         accounts: [] as (Account & timestamped)[],
         subsystems: [] as SubSystem[],
         movingItems: [] as MovingItem[],
+        enqueuedMovingItems: new Set<string>(),
         emails: [] as (Email & timestamped)[],
         config: {} as ServerConfig,
         ignoranceItems: [] as (IgnoranceItem & timestamped)[],
@@ -84,6 +85,7 @@ export const useAdminStore = defineStore('admin', {
             this.loading = false;
         },
         async deepAddMoveItems(itemIds: string[]) {
+            itemIds.forEach(id => this.enqueuedMovingItems.add(id));
             const { data, error } = await tryCatch<Promise<MovingItem[]>, FetchError>(() => $fetch<MovingItem[]>(useAPIURL() + '/admin/subsystems/movingItems', {
                 method: 'POST',
                 headers: {

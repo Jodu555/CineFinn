@@ -123,10 +123,16 @@
 					</h5>
 				</div>
 				<!-- <h5>{{ item.fromSubID }} => p{{ item.toSubID }}</h5> -->
-				<div class="d-flex gap-3 mb-2">
-					<button v-if="item.meta.movingStarted == 0" @click="adminStore.moveItem(item.ID)" type="button" class="btn btn-outline-warning">
-						Move
-					</button>
+				<div class="d-flex gap-3 mb-3">
+					<template v-if="item.meta.movingStarted == 0">
+						<button v-if="!enqueuedMovingItems.has(item.ID)" @click="adminStore.moveItem(item.ID)" type="button" class="btn btn-outline-warning">
+							Move
+						</button>
+						<button v-else class="btn btn-outline-warning" type="button" disabled>
+							<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+							<span role="status">Moving...</span>
+						</button>
+					</template>
 				</div>
 			</div>
 			<div class="ms-5 mb-3" style="width: 95%" v-if="item.meta.movingStarted !== 0">
@@ -170,6 +176,7 @@ await Promise.all([
 const loading = computed(() => adminStore.loading);
 const error = computed(() => adminStore.error);
 const subsystems = computed(() => adminStore.subsystems);
+const enqueuedMovingItems = computed(() => adminStore.enqueuedMovingItems);
 
 const toggleShowSeriesModal = ref(false);
 const selectedShowSeriesSubSystem = ref('');
