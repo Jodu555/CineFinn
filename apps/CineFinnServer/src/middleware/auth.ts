@@ -71,6 +71,7 @@ export async function getUser(token: string) {
     }
 
     user.settings = compareSettings(user.settings);
+    delete user.password;
     return user;
 }
 
