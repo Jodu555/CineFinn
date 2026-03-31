@@ -7,7 +7,7 @@
 			</div>
 			<div class="offcanvas-body">
 				<h2>User Infos:</h2>
-				<pre v-if="authStore.user.settings.developerMode.value">{{ authStore.user }}</pre>
+				<pre v-if="authStore.user.settings.developerMode.value">{{ { ...authStore.user, settings: null } }}</pre>
 				<hr />
 				<ul class="list-group list-group-flush mb-2" style="background: transparent">
 					<li class="list-group-item">
@@ -28,6 +28,7 @@
 				</ul>
 				<div v-if="authStore.user.role >= Role.Mod">
 					<h2>Jobs</h2>
+					<pre v-if="authStore.user.settings.developerMode.value">{{ { registry: managmentStore.jobRegistry } }}</pre>
 					<hr />
 					<ul v-if="managmentStore.error === ''" class="list-group list-group-flush mb-3">
 						<JobCard v-for="(jobName, jobType) in managmentStore.jobRegistry" :job-type="jobType" :key="jobType" />
@@ -40,6 +41,7 @@
 				</div>
 				<div>
 					<h2>Settings</h2>
+					<pre v-if="authStore.user.settings.developerMode.value">{{ authStore.user.settings }}</pre>
 					<hr />
 					<div v-for="(setting, key) of authStore.user.settings" :key="key">
 						<template v-if="setting.type === 'checkbox'">
@@ -54,7 +56,8 @@
 									"
 									v-model="setting.value"
 									class="form-check-input"
-									:id="key" />
+									:id="key"
+								/>
 								<label class="form-check-label" :for="key">{{ setting.title }}</label>
 							</div>
 						</template>
@@ -71,7 +74,8 @@
 											setting.value = (event.target as any).checked;
 											updateSettings();
 										}
-									">
+									"
+								>
 									<option v-for="option in setting.options" :key="option" :value="option">
 										{{ option }}
 									</option>
