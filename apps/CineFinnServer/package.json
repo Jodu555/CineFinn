@@ -3,7 +3,8 @@
 	"type": "module",
 	"version": "2.2.3",
 	"scripts": {
-		"dev": "tsx watch src/index.ts",
+		"dev": "nodemon --watch src --exec \"tsx src/index.ts\"",
+		"dev_old": "tsx watch src/index.ts",
 		"build": "tsc",
 		"start": "node dist/index.js",
 		"typecheck": "tsc --noEmit"
