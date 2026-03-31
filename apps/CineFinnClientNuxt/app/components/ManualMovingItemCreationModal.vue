@@ -199,6 +199,8 @@ function cancelMoving() {
 
 async function submitMoving() {
 	adminStore.createAdditionalMovingItems(selectedSubSystem.value, Array.from(movingSerieses.value));
+	cancelMoving();
+	proxyValue.value = false;
 }
 </script>
 

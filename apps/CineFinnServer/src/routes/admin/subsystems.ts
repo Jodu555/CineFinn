@@ -5,6 +5,7 @@ import { getMovingItems, prepareProcessMovingItem } from "../../utils/movingItem
 import { Role } from "@cinefinn/types";
 import z from "zod";
 import { watchableEntitysTable } from "../../database.js";
+import { rebroadcastMovingItems } from "./admin.js";
 
 const processMovingItemsSchema = z.object({
     IDs: z.array(z.string()),
@@ -32,19 +33,37 @@ export const subsystemRouter = new Hono()
         }
         return c.json(getMovingItems());
     })
+    .delete('/movingItems/additionals', authFullMiddleware((user) => user.role >= Role.Admin), async (c) => {
+        //Remove all additional items using SLICE
+        for (let i = getMovingItems().length - 1; i >= 0; i--) {
+            const item = getMovingItems()[i];
+            if (item.meta.isAdditional) {
+                getMovingItems().splice(i, 1);
+            }
+        }
+        await rebroadcastMovingItems();
+        return c.json(getMovingItems());
+    })
     .patch('/movingItems', authFullMiddleware((user) => user.role >= Role.Admin), async (c) => {
+        console.log('WE GOT HERE');
+
         const body = await c.req.json();
         const createMovingItemBody = createMovingItemSchema.parse(body);
 
-        const { to, seriesIDs: series } = createMovingItemBody;
+        const { to, seriesIDs } = createMovingItemBody;
 
-        for await (const serieUUID of series) {
+        for await (const serieUUID of seriesIDs) {
             const watchableEntitys = await watchableEntitysTable.get({ serie_UUID: serieUUID });
 
             for await (const watchableEntity of watchableEntitys) {
 
                 if (watchableEntity.subID === to) {
                     console.log(`Skipping watchable entity ${watchableEntity.UUID} because it is already on the target sub-system ${to}`);
+                    continue;
+                }
+
+                if (getMovingItems().some(x => x.ID === watchableEntity.UUID)) {
+                    console.log(`Skipping watchable entity ${watchableEntity.UUID} because it is already in the list`);
                     continue;
                 }
 
@@ -63,4 +82,6 @@ export const subsystemRouter = new Hono()
                 })
             }
         }
+        await rebroadcastMovingItems();
+        return c.json(getMovingItems());
     });

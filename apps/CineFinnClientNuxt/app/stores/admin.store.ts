@@ -110,17 +110,10 @@ export const useAdminStore = defineStore('admin', {
             await this.deepProcessMovingItems(this.movingItems.filter((x) => x.meta.isAdditional).map((x) => x.ID));
         },
         async removeAdditionalMovingItems() {
-
-        },
-        async createAdditionalMovingItems(toSubID: string, seriesIDs: string[]) {
-            const { data, error } = await tryCatch<Promise<MovingItem[]>, FetchError>(() => $fetch<MovingItem[]>(useAPIURL() + '/admin/subsystems/movingItems', {
-                method: 'POST',
+            const { data, error } = await tryCatch<Promise<MovingItem[]>, FetchError>(() => $fetch<MovingItem[]>(useAPIURL() + '/admin/subsystems/movingItems/additionals', {
+                method: 'DELETE',
                 headers: {
                     'auth-token': useAuthStore().authToken,
-                },
-                body: {
-                    seriesIDs: seriesIDs,
-                    toSubID,
                 },
             }));
             if (error) {
@@ -132,7 +125,32 @@ export const useAdminStore = defineStore('admin', {
                 });
                 return;
             } else {
-                await this.loadMovingItems();
+                // This is not needed because the server will send an update using sockets
+                // await this.loadMovingItems();
+            }
+        },
+        async createAdditionalMovingItems(toSubID: string, seriesIDs: string[]) {
+            const { data, error } = await tryCatch<Promise<MovingItem[]>, FetchError>(() => $fetch<MovingItem[]>(useAPIURL() + '/admin/subsystems/movingItems', {
+                method: 'PATCH',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+                body: {
+                    seriesIDs: seriesIDs,
+                    to: toSubID,
+                },
+            }));
+            if (error) {
+                useNuxtApp().$toast.fire({
+                    toast: true,
+                    title: 'Error',
+                    text: error.data || 'An unknown error occurred.',
+                    icon: 'error',
+                });
+                return;
+            } else {
+                // This is not needed because the server will send an update using sockets
+                // await this.loadMovingItems();
             }
         },
         async loadEmails() {
