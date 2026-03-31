@@ -187,6 +187,9 @@
 																			{{ episode.watchableEntitys.map((e) => e.subID).join(', ') }}
 																		</p>
 																		<p class="mb-0">
+																			{{ episode.watchableEntitys.map((e) => e.UUID).join(', ') }}
+																		</p>
+																		<p class="mb-0">
 																			{{ episode.UUID }}
 																		</p>
 																		<p class="mb-0">{{ episode.season_IDX }}x{{ episode.episode_IDX }}</p>

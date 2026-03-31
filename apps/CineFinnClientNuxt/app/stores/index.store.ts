@@ -63,25 +63,26 @@ export const useIndexStore = defineStore('index', {
                 // console.log(`loadDetailedSeasonInfo for seriesID: ${seriesID} from cache`);
                 return;
             }
-            const { data, status } = await useFetch<DetailedSeries>(`${useAPIURL()}/index/${seriesID}`, {
-                key: 'index/' + seriesID,
+            const { data, error } = await tryCatch<Promise<DetailedSeries>, Error>(() => $fetch<DetailedSeries>(`${useAPIURL()}/index/${seriesID}`, {
                 method: 'GET',
                 headers: {
                     'auth-token': useAuthStore().authToken,
                 },
-            });
+            }));
 
-            if (status.value == 'success') {
-                this.detailedSeasons = data.value!.seasons;
-                this.detailedMovies = data.value!.movies;
-                this.detailedSerie = data.value!;
+
+            if (error) {
                 this.loading = false;
-            } else {
-                // alert('Error loading Detailed Series ' + status.value);
-                this.loading = false;
+                return;
             }
+
+            this.detailedSeasons = data.seasons;
+            this.detailedMovies = data.movies;
+            this.detailedSerie = data;
+            this.loading = false;
+
             if (this.series.length == 0) {
-                const undetailedSeries = await this.detailedSeriesToFrontendSeries(data.value!);
+                const undetailedSeries = await this.detailedSeriesToFrontendSeries(data);
                 this.series.push(undetailedSeries);
             }
             // console.log(`loadDetailedSeasonInfo for seriesID: ${seriesID} from network`);

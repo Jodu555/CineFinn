@@ -10,10 +10,13 @@ import { pipeline } from "stream";
 import { promisify } from "util";
 import { tryCatch } from "@cinefinn/utilities/tryCatch";
 import { wait } from "@cinefinn/utilities/time";
+import { indexStorage } from "../routes/index.js";
+import { recommendationStorage } from "../routes/recommendations/recommendations.js";
+import { app } from "../index.js";
+import { getConfig } from "../config.js";
+import { sendSeriesReloadToAll } from "../sockets/client.socket.js";
 
 const pipelineAsync = promisify(pipeline);
-
-// ─── Constants ───────────────────────────────────────────────────────────────
 
 const QUEUE_TICK_MS = parseInt(process.env.MOVING_ITEM_TICK ?? "5000");
 const PROGRESS_BROADCAST_THRESHOLD = 0.5; // percent
@@ -23,13 +26,10 @@ const STREAM_HIGH_WATER_MARK = 64 * 1024;
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 2_000;
 
-// ─── State ───────────────────────────────────────────────────────────────────
-
 const movingItems: MovingItem[] = [];
 
 export const getMovingItems = () => movingItems;
 
-// ─── Queue ───────────────────────────────────────────────────────────────────
 
 class MovingItemQueue {
     private items: string[] = [];
@@ -89,11 +89,25 @@ class MovingItemQueue {
 export const movingItemQueue = new MovingItemQueue();
 
 movingItemQueue.onFinished(async () => {
+    console.log('MovingItemQueue Drained');
     await rebroadcastMovingItems();
     await rebroadcastOverview();
+
+    console.log('Clearing Cache');
+    try { await indexStorage.clear(); } catch (e) { }
+    try { await recommendationStorage.clear(); } catch (e) { }
+
+    console.log('Filling Cache');
+    await app.request('/index/all', {
+        headers: { 'auth-token': getConfig().system.PUBLIC_API_AUTH_TOKEN },
+    });
+
+    await wait(1000 * 1);
+
+    console.log('Reloading Series');
+    await sendSeriesReloadToAll();
 });
 
-// ─── Public API ──────────────────────────────────────────────────────────────
 
 export async function prepareProcessMovingItem(id: string) {
     movingItemQueue.enqueue(id);
@@ -107,7 +121,6 @@ export async function processMovingItem(movingItem: MovingItem) {
     }
 }
 
-// ─── Throttle Stream ─────────────────────────────────────────────────────────
 
 class ThrottleStream extends Transform {
     private bytesPerSecond: number;
@@ -142,7 +155,6 @@ class ThrottleStream extends Transform {
     }
 }
 
-// ─── File Transfer ───────────────────────────────────────────────────────────
 
 export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
     const { data: subSystemSocket, error: socketError } = await tryCatch(() =>
@@ -229,7 +241,6 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
     subSystemSocket.emit("file_error", { message: lastError?.message ?? "Unknown error" });
 }
 
-// ─── Single Transfer Attempt ─────────────────────────────────────────────────
 
 interface AttemptParams {
     movingItem: MovingItem;
@@ -245,6 +256,7 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
 
     const stats = fs.statSync(filePath);
     const fileSize = stats.size;
+    console.log(`[Transfer] Starting transfer of ${filePath} (${(fileSize / (1024 * 1024)).toFixed(2)} MB) to sub-system ${movingItem.toSubID}`);
     const md5 = await calculateMD5(filePath);
     const filename = path.basename(filePath);
     const resultPath = path.join(resultDir, filename);
@@ -256,8 +268,6 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
     subSystemSocket.emit("file_start", { filename, size: fileSize, md5, resultPath });
 
     const readStream = fs.createReadStream(filePath, { highWaterMark: STREAM_HIGH_WATER_MARK });
-    console.log(subSystemSocket.data);
-    process.exit(0);
 
 
     const rawBandwidth = subSystemSocket.data.auth.bandwidth;
