@@ -21,6 +21,21 @@ const authStore = useAuthStore();
 const adminStore = useAdminStore();
 const todoStore = useTodoStore();
 
+onBeforeUnmount(() => {
+	socket.off('connect', onConnect);
+	socket.off('disconnect', onDisconnect);
+	socket.off('connect_error');
+	socket.off('jobUpdate', managmentStore.updateJob);
+	socket.off('watchListUpdate', indexStore.updateWatchList);
+	socket.off('settingsUpdate', authStore.updateSettings);
+	socket.off('seriesReload', indexStore.reloadSeries);
+	socket.off('adminOverview', adminStore.updateOverview);
+	socket.off('adminAccounts', adminStore.updateAccounts);
+	socket.off('adminSubsystems', adminStore.updateSubsystems);
+	socket.off('adminMovingItems', adminStore.updateMovingItems);
+	socket.off('todoListUpdate', todoStore.updateTodoList);
+});
+
 onMounted(() => {
 	socket.on('disconnect', onDisconnect);
 	socket.on('jobUpdate', managmentStore.updateJob);
@@ -92,9 +107,4 @@ function onDisconnect() {
 	isConnected.value = false;
 	transport.value = 'N/A';
 }
-
-onBeforeUnmount(() => {
-	socket.off('connect', onConnect);
-	socket.off('disconnect', onDisconnect);
-});
 </script>
