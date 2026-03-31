@@ -36,6 +36,7 @@
 				</table>
 			</div>
 		</Modal>
+		<ManualMovingItemCreationModal v-model="toggleShowManualMovingItemCreationModal" />
 		<h2 class="text-center">SubSystems</h2>
 		<div v-if="loading" class="d-flex justify-content-center">
 			<div class="spinner-border" role="status">
@@ -87,7 +88,7 @@
 		</div>
 		<h2 class="text-center mt-3 mb-5">MovingList ({{ adminStore.movingItems.length }})</h2>
 		<div class="d-flex justify-content-center">
-			<button type="button" class="btn btn-outline-primary me-4">Add Item</button>
+			<button type="button" class="btn btn-outline-primary me-4" @click="toggleShowManualMovingItemCreationModal = true">Add Item</button>
 			<button type="button" class="btn btn-outline-warning me-4" @click="adminStore.moveAllItems()">
 				Move All ({{ adminStore.movingItems.length }})
 			</button>
@@ -159,6 +160,7 @@
 
 <script lang="ts" setup>
 import type { DiskStats } from '@cinefinn/types/socket';
+import ManualMovingItemCreationModal from '~/components/ManualMovingItemCreationModal.vue';
 import Modal from '~/components/Modal.vue';
 
 definePageMeta({
@@ -177,6 +179,8 @@ const loading = computed(() => adminStore.loading);
 const error = computed(() => adminStore.error);
 const subsystems = computed(() => adminStore.subsystems);
 const enqueuedMovingItems = computed(() => adminStore.enqueuedMovingItems);
+
+const toggleShowManualMovingItemCreationModal = ref(false);
 
 const toggleShowSeriesModal = ref(false);
 const selectedShowSeriesSubSystem = ref('');
