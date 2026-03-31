@@ -114,14 +114,20 @@ export const useIndexStore = defineStore('index', {
             this.watchHistory = response;
         },
         async updateWatchList(watchList: WatchHistory[]) {
-            watchList.forEach(w => {
-                let index = this.watchHistory.findIndex(wh => w.UUID === wh.UUID);
-                if (index === -1) {
-                    this.watchHistory.push(w);
-                } else {
-                    this.watchHistory[index] = w;
-                }
-            });
+            //Taking the old watchlist basically deduplcating it by the history uuid and splicing it with the new one.
+            // So we take the difference, this prevents overwriting when multiple tabs are open at different serieses
+            this.watchHistory = [
+                ...this.watchHistory.filter(wh => watchList.some(w => w.UUID === wh.UUID)),
+                ...watchList,
+            ]
+            // watchList.forEach(w => {
+            //     let index = this.watchHistory.findIndex(wh => w.UUID === wh.UUID);
+            //     if (index === -1) {
+            //         this.watchHistory.push(w);
+            //     } else {
+            //         this.watchHistory[index] = w;
+            //     }
+            // });
             // this.watchHistory.push(...deduplicated);
         },
         setSelectedWatchableEntityUUID(entityUUID: string | null, language?: string) {
