@@ -197,8 +197,8 @@ function cancelMoving() {
 	movingSerieses.value = new Set();
 }
 
-function submitMoving() {
-	// adminStore.moveAllItems();
+async function submitMoving() {
+	adminStore.createAdditionalMovingItems(selectedSubSystem.value, Array.from(movingSerieses.value));
 }
 </script>
 

@@ -15,7 +15,7 @@ export const useAdminStore = defineStore('admin', {
         accounts: [] as (Account & timestamped)[],
         subsystems: [] as SubSystem[],
         movingItems: [] as MovingItem[],
-        enqueuedMovingItems: new Set<string>(),
+        enqueuedMovingItems: new Set<string>() as Set<string>,
         emails: [] as (Email & timestamped)[],
         config: {} as ServerConfig,
         ignoranceItems: [] as (IgnoranceItem & timestamped)[],
@@ -84,7 +84,7 @@ export const useAdminStore = defineStore('admin', {
             }
             this.loading = false;
         },
-        async deepAddMoveItems(itemIds: string[]) {
+        async deepProcessMovingItems(itemIds: string[]) {
             itemIds.forEach(id => this.enqueuedMovingItems.add(id));
             const { data, error } = await tryCatch<Promise<MovingItem[]>, FetchError>(() => $fetch<MovingItem[]>(useAPIURL() + '/admin/subsystems/movingItems', {
                 method: 'POST',
@@ -100,17 +100,40 @@ export const useAdminStore = defineStore('admin', {
                 return;
             }
         },
-        async moveItem(itemID: string) {
-            await this.deepAddMoveItems([itemID]);
+        async moveMovingItem(itemID: string) {
+            await this.deepProcessMovingItems([itemID]);
         },
-        async moveAllItems() {
-            await this.deepAddMoveItems(this.movingItems.map((x) => x.ID));
+        async moveAllMovingItems() {
+            await this.deepProcessMovingItems(this.movingItems.map((x) => x.ID));
         },
-        async moveAllAdditionalItems() {
-            await this.deepAddMoveItems(this.movingItems.filter((x) => x.meta.isAdditional).map((x) => x.ID));
+        async moveAllAdditionalMovingItems() {
+            await this.deepProcessMovingItems(this.movingItems.filter((x) => x.meta.isAdditional).map((x) => x.ID));
         },
-        async removeAdditionalItems() {
+        async removeAdditionalMovingItems() {
 
+        },
+        async createAdditionalMovingItems(toSubID: string, seriesIDs: string[]) {
+            const { data, error } = await tryCatch<Promise<MovingItem[]>, FetchError>(() => $fetch<MovingItem[]>(useAPIURL() + '/admin/subsystems/movingItems', {
+                method: 'POST',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+                body: {
+                    seriesIDs: seriesIDs,
+                    toSubID,
+                },
+            }));
+            if (error) {
+                useNuxtApp().$toast.fire({
+                    toast: true,
+                    title: 'Error',
+                    text: error.data || 'An unknown error occurred.',
+                    icon: 'error',
+                });
+                return;
+            } else {
+                await this.loadMovingItems();
+            }
         },
         async loadEmails() {
             this.loading = true;

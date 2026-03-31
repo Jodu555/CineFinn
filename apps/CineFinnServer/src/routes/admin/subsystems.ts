@@ -12,7 +12,7 @@ const processMovingItemsSchema = z.object({
 
 const createMovingItemSchema = z.object({
     to: z.string(),
-    series: z.array(z.string()),
+    seriesIDs: z.array(z.string()),
 })
 
 export const subsystemRouter = new Hono()
@@ -36,7 +36,7 @@ export const subsystemRouter = new Hono()
         const body = await c.req.json();
         const createMovingItemBody = createMovingItemSchema.parse(body);
 
-        const { to, series } = createMovingItemBody;
+        const { to, seriesIDs: series } = createMovingItemBody;
 
         for await (const serieUUID of series) {
             const watchableEntitys = await watchableEntitysTable.get({ serie_UUID: serieUUID });
