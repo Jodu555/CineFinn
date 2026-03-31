@@ -92,6 +92,8 @@ export function setupTransmitFile() {
 
     socket.on('file_error', (data: ErrorData) => {
         console.error('File transfer error:', data.message);
+        currentDownload?.stream.destroy();
+        currentDownload?.hash.destroy();
         currentDownload = null;
     });
 }

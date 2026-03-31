@@ -579,7 +579,7 @@ const videoSrc = computed(() => {
 	if (!oldVideoAPI) {
 		let url = `${useAPIURL()}/video/`;
 		url += `${indexStore.selectedWatchableEntity?.UUID}`;
-		url += `?auth-token=${authStore.authToken}`;
+		url += `?auth-token=${authStore.authToken}&subsystem=${indexStore.selectedWatchableEntity?.subID}`;
 		return url;
 	}
 	return '';
