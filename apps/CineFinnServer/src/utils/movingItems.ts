@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs";
+import crypto from 'crypto';
 import type { MovingItem } from "@cinefinn/types/models/system";
 import { Transform } from "stream";
 import { watchableEntitysTable, seriesTable } from "../database.js";
@@ -256,8 +257,8 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
 
     const stats = fs.statSync(filePath);
     const fileSize = stats.size;
+    const md5Hash = crypto.createHash('md5');
     console.log(`[Transfer] Starting transfer of ${filePath} (${(fileSize / (1024 * 1024)).toFixed(2)} MB) to sub-system ${movingItem.toSubID}`);
-    const md5 = await calculateMD5(filePath);
     const filename = path.basename(filePath);
     const resultPath = path.join(resultDir, filename);
 
@@ -265,7 +266,7 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
     movingItem.meta.progress = 0;
     await rebroadcastMovingItems();
 
-    subSystemSocket.emit("file_start", { filename, size: fileSize, md5, resultPath });
+    subSystemSocket.emit("file_start", { filename, size: fileSize, resultPath });
 
     const readStream = fs.createReadStream(filePath, { highWaterMark: STREAM_HIGH_WATER_MARK });
 
@@ -297,6 +298,7 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
         await waitForAck();
 
         ackPending = true;
+        md5Hash.update(chunk);
         subSystemSocket.emit("file_chunk", chunk);
 
         bytesSent += chunk.length;
@@ -311,10 +313,27 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
         readStream.resume();
     });
 
+    readStream.on('error', (err) => {
+        console.error(`[Transfer] ReadStream error: ${err.message}`);
+        readStream.destroy();
+        throttle.destroy();
+        throw err;
+    });
+
+    throttle.on('error', (err) => {
+        console.error(`[Transfer] Throttle error: ${err.message}`);
+        readStream.destroy();
+        throttle.destroy();
+        throw err;
+    });
+
     await pipelineAsync(readStream, throttle);
 
+    const md5 = md5Hash.digest('hex');
+    console.log(`[Transfer] MD5: ${md5}`);
+
     const finalPath = await new Promise<string>((resolve, reject) => {
-        subSystemSocket.emit("file_end", (result: string | false) => {
+        subSystemSocket.emit("file_end", md5, (result: string | false) => {
             if (result === false) {
                 reject(new Error("Remote rejected the file transfer"));
             } else {

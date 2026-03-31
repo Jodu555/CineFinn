@@ -65,7 +65,6 @@ export interface FileChunkData {
 export interface FileStartData {
     filename: string;
     size: number;
-    md5: string;
     resultPath: string;
 }
 

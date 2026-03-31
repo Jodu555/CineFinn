@@ -11,7 +11,6 @@ import type { ErrorData } from '@cinefinn/types/socket';
 interface DownloadSession {
     stream: fs.WriteStream;
     hash: crypto.Hash;
-    expectedMD5: string;
     bytesReceived: number;
     totalSize: number;
     expectedPath: string;
@@ -32,7 +31,6 @@ export function setupTransmitFile() {
         currentDownload = {
             stream: downloadStream,
             hash: downloadHash,
-            expectedMD5: data.md5,
             bytesReceived: 0,
             totalSize: data.size,
             expectedPath: downloadPath,
@@ -66,7 +64,7 @@ export function setupTransmitFile() {
         // If canWrite is false, we'll emit ack on 'drain' event
     });
 
-    socket.on('file_end', async (callback) => {
+    socket.on('file_end', async (md5, callback) => {
         if (!currentDownload) {
             console.error('Received file_end but no active download session');
             return;
@@ -80,10 +78,10 @@ export function setupTransmitFile() {
         );
 
         const calculatedMD5 = session.hash.digest('hex');
-        const isValid = calculatedMD5 === session.expectedMD5;
+        const isValid = calculatedMD5 === md5;
 
         console.log(`Download complete!`);
-        console.log(`Expected MD5: ${session.expectedMD5}`);
+        console.log(`Expected MD5: ${md5}`);
         console.log(`Calculated MD5: ${calculatedMD5}`);
         console.log(`File integrity: ${isValid ? 'VALID' : 'CORRUPTED'}`);
         console.log(`Total bytes received: ${session.bytesReceived}`);
