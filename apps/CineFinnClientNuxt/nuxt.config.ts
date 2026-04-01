@@ -34,6 +34,7 @@ export default defineNuxtConfig({
                 '@fortawesome/fontawesome-svg-core',
                 'sweetalert2',
                 'socket.io-client',
+                'vue-draggable-next',
             ]
         },
 
