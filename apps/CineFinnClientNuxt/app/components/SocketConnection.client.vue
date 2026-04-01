@@ -48,6 +48,10 @@ onMounted(() => {
 	socket.on('adminMovingItems', adminStore.updateMovingItems);
 	socket.on('todoListUpdate', todoStore.updateTodoList);
 
+	socket.on('reload', () => {
+		window.location.reload();
+	});
+
 	if (authStore.loggedIn !== true) return;
 	socket.connect();
 

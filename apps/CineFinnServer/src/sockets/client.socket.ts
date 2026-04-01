@@ -143,6 +143,16 @@ export async function sendSeriesReloadToAll() {
     });
 }
 
+export async function sendSiteReload() {
+    let i = 0;
+    const sockets = await getIO().fetchSockets();
+    sockets.filter((s) => s.data.auth.type === 'client').forEach((s) => {
+        i++;
+        s.emit('reload');
+    });
+    return i;
+}
+
 export default {
     meta: {
         type: 'client',

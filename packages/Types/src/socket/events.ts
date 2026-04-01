@@ -31,6 +31,8 @@ export interface ServerToClientEvents {
     'rmvc-recieve-action': (action: rmvcActions) => void;
     'rmvc-get-videoState': () => void;
     'rmvc-recieve-videoStateChange': (arg0: { isPlaying: boolean; }) => void;
+
+    reload: () => void;
 }
 
 export interface ClientToServerEvents {

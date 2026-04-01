@@ -2,7 +2,7 @@ import { Command, CommandManager } from "@jodu555/commandmanager";
 import { accountsTable, authTokensTable } from "../database.js";
 import type { AuthToken } from "@cinefinn/types";
 import { getIO } from "../utils.js";
-import { socketStateMap } from "../sockets/client.socket.js";
+import { sendSiteReload, socketStateMap } from "../sockets/client.socket.js";
 
 
 export function setupCommandManager() {
@@ -73,5 +73,35 @@ function registerCommands() {
             output.push('', '------------------------------------');
             return output;
         })
+    );
+
+    commandManager.registerCommand(
+        new Command(
+            ['reloadClient', 'rlc'],
+            'reloadClient <all/Socket-ID/User-UUID>',
+            'Reloads the page for the specified connected sockets',
+            async (command, [...args], scope) => {
+                if (args[1] == 'all') {
+                    const num = await sendSiteReload();
+                    return 'Reloaded ' + num + ' socket(s)';
+                } else {
+                    const socketIDOrUserUUIDOrUserName = args[1];
+                    const sockets = await getIO().fetchSockets();
+                    let i = 0;
+                    sockets.forEach((x) => {
+                        if (x.data.auth.type !== 'client') return;
+                        if (x.id == socketIDOrUserUUIDOrUserName || x.data.auth.user?.UUID == socketIDOrUserUUIDOrUserName || x.data.auth.user?.username == socketIDOrUserUUIDOrUserName) {
+                            i++;
+                            x.emit('reload');
+                        }
+                    });
+                    if (i == 0) {
+                        return 'No socket found with Socket-ID or User-UUID:' + socketIDOrUserUUIDOrUserName;
+                    } else {
+                        return 'Reloaded' + i + 'socket(s)';
+                    }
+                }
+            }
+        )
     );
 }
