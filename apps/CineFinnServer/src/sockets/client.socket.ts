@@ -46,7 +46,7 @@ async function authFunction(authHandshake: AuthHandshakeClient): Promise<LocalAu
     };
 }
 
-
+export const socketStateMap = new Map<string, string>();
 
 async function connectionFunction(socket: definedSocket) {
     const socketAuth = socket.data.auth as LocalAuthData;
@@ -115,10 +115,15 @@ async function connectionFunction(socket: definedSocket) {
         });
     });
 
+    socket.on('state', ({ url }) => {
+        socketStateMap.set(socket.id, url);
+    });
 
     socket.on('disconnect', () => {
         console.log(socket.id, socketAuth.user.username, 'user disconnected');
+        socketStateMap.delete(socket.id);
     });
+
     rmvcEmitterSocket.meta.connectionFunction(socket);;
 
     accountsTable.update({ UUID: socketAuth.user.UUID }, {
