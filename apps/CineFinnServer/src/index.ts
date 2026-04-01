@@ -9,8 +9,7 @@ import { Server, Socket } from 'socket.io';
 import { accountsTable, authTokensTable, connectDatabase, database, episodesTable, seasonsTable, watchableEntitysTable } from './database.js';
 
 import { trimTrailingSlash } from 'hono/trailing-slash';
-import { authMiddleware, authRouter } from './middleware/auth.js';
-import { prometheus } from '@hono/prometheus';
+import { authRouter } from './middleware/auth.js';
 import { cors } from 'hono/cors';
 import { ownLogger } from './middleware/ownLogger.js';
 import { managmentRouter } from './routes/managment.js';
@@ -35,11 +34,11 @@ import { Job } from './job/Job.js';
 import packageJSON from '../package.json' with { type: "json" };
 
 import { metricsRouter, registerMetrics } from './middleware/ownPrometheus.js';
-import { generateEntityID } from './utils/IdGenerators.js';
 import { tryCatch } from '@cinefinn/utilities/tryCatch';
 import { previewImagesRouter } from './routes/previewImages.js';
 import { recommendationRouter } from './routes/recommendations/recommendations.js';
 import { wait } from '@cinefinn/utilities/time';
+import { setupCommandManager } from './utils/commands.js';
 
 
 
@@ -147,6 +146,8 @@ const httpServer = serve({
 
     getEmailManager();
 
+    setupCommandManager();
+
     const knownSubSystems = await getKnownSubSystems();
     const subSystemSockets = (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'subsystem');
     for (const subSystem of knownSubSystems) {
@@ -184,8 +185,6 @@ const httpServer = serve({
 
     await wait(1000 * 15);
     await insertMissingWatchableEntityRuntimes();
-
-
 
 });
 

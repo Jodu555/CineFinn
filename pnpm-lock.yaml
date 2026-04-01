@@ -176,8 +176,8 @@ importers:
         specifier: ^1.0.2
         version: 1.0.2(hono@4.12.0)(prom-client@15.1.3)
       '@jodu555/commandmanager':
-        specifier: ^1.5.4
-        version: 1.5.4
+        specifier: ^1.5.5
+        version: 1.5.5
       '@jodu555/mysqlapi':
         specifier: ^4.4.1
         version: 4.4.1
@@ -1130,6 +1130,9 @@ packages:
 
   '@jodu555/commandmanager@1.5.4':
     resolution: {integrity: sha512-80McTGwPnYwIWXtAg+0+wv4txy2saSJmc8hdYyd9Lzxyk0iDjB9U6Q51fXCCa2xRtFqfV+cOjVbMJuW4FCyxpA==}
+
+  '@jodu555/commandmanager@1.5.5':
+    resolution: {integrity: sha512-ogM93FFCK5IXBBM8bTBSxm2/QRlk6nqlLs4ObhjXiN7P+D90X4fAxx47rHADDWBirngjrTCaZixfiu9DE+sTIQ==}
 
   '@jodu555/mysqlapi@4.4.1':
     resolution: {integrity: sha512-wZVJyz/KkERd+rg12FtNgN2ZKXIryua5hMbHPk31txQfjqyFQ8MJmELj0DuI/zKPQzvNzE0aJKXDj8IyQwSPZQ==}
@@ -5925,6 +5928,8 @@ snapshots:
       minipass: 7.1.3
 
   '@jodu555/commandmanager@1.5.4': {}
+
+  '@jodu555/commandmanager@1.5.5': {}
 
   '@jodu555/mysqlapi@4.4.1':
     dependencies:
