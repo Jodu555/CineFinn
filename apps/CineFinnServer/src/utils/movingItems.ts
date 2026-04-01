@@ -16,6 +16,7 @@ import { recommendationStorage } from "../routes/recommendations/recommendations
 import { app } from "../index.js";
 import { getConfig } from "../config.js";
 import { sendSeriesReloadToAll } from "../sockets/client.socket.js";
+import { ThrottleStream } from "@cinefinn/utilities/stream";
 
 const pipelineAsync = promisify(pipeline);
 
@@ -26,6 +27,9 @@ const STREAM_HIGH_WATER_MARK = 64 * 1024;
 
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 2_000;
+
+//If the sub-system does not respond within this time, it will be retried
+const PULL_REQUEST_TIMEOUT_MS = 10_000;
 
 const movingItems: MovingItem[] = [];
 
@@ -118,41 +122,7 @@ export async function processMovingItem(movingItem: MovingItem) {
     if (movingItem.fromSubID === "main" && movingItem.toSubID !== "main") {
         await sendMovingItemToSubSystem(movingItem);
     } else if (movingItem.fromSubID !== "main" && movingItem.toSubID === "main") {
-        console.warn("[MovingItem] Receiving from sub-system is not yet implemented");
-    }
-}
-
-
-class ThrottleStream extends Transform {
-    private bytesPerSecond: number;
-    private startTime = Date.now();
-    private bytesWritten = 0;
-
-    constructor(bytesPerSecond: number) {
-        super();
-        this.bytesPerSecond = bytesPerSecond;
-    }
-
-    _transform(
-        chunk: Buffer,
-        _encoding: BufferEncoding,
-        callback: (error?: Error | null) => void
-    ) {
-        this.bytesWritten += chunk.length;
-
-        const elapsed = (Date.now() - this.startTime) / 1000;
-        const expectedTime = this.bytesWritten / this.bytesPerSecond;
-        const delay = Math.max(0, (expectedTime - elapsed) * 1000);
-
-        if (delay > 10) {
-            setTimeout(() => {
-                this.push(chunk);
-                callback();
-            }, delay);
-        } else {
-            this.push(chunk);
-            callback();
-        }
+        await receiveMovingItemFromSubSystem(movingItem);
     }
 }
 
@@ -242,15 +212,119 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
     subSystemSocket.emit("file_error", { message: lastError?.message ?? "Unknown error" });
 }
 
+export async function receiveMovingItemFromSubSystem(movingItem: MovingItem) {
+    const { data: subSystemSocket, error: socketError } = await tryCatch(() =>
+        getSubSocketByID(movingItem.fromSubID)
+    );
 
-interface AttemptParams {
+    if (socketError || subSystemSocket == null) {
+        console.error(`[Transfer] Sub-system socket not found: ${movingItem.fromSubID}`);
+        return;
+    }
+
+    const watchableEntity = await watchableEntitysTable.getOne({ UUID: movingItem.watchableEntityUUID });
+    if (!watchableEntity) {
+        console.error(`[Transfer] WatchableEntity not found: ${movingItem.watchableEntityUUID}`);
+        return;
+    }
+
+    const series = await seriesTable.getOne({ UUID: watchableEntity.serie_UUID });
+    if (!series) {
+        console.error(`[Transfer] Series not found: ${watchableEntity.serie_UUID}`);
+        return;
+    }
+
+    const watchable = await watchableUUIDToWatchable(watchableEntity.watchable_UUID);
+    if (!watchable) {
+        console.error(`[Transfer] Watchable not found: ${watchableEntity.watchable_UUID}`);
+        return;
+    }
+
+    const { filePath } = watchableEntity; // path on the sub system
+    if (!filePath) {
+        console.error(`[Transfer] No filePath for WatchableEntity: ${movingItem.watchableEntityUUID}`);
+        return;
+    }
+
+    const rawBandwidth = subSystemSocket.data.auth.bandwidth;
+    if (!rawBandwidth || rawBandwidth <= 0) {
+        console.error(`[Transfer] Invalid bandwidth on sub socket: ${rawBandwidth}`);
+        return;
+    }
+
+    // Build the local destination path (same logic as the push direction)
+    let resultDir = "";
+    if (isEpisode(watchable)) {
+        resultDir = path.join(series.tags[0], series.title, `Season-${watchable.season_IDX}`);
+    } else if (isMovie(watchable)) {
+        resultDir = path.join(series.tags[0], series.title, "Movies");
+    }
+
+    const filename = path.basename(filePath);
+    const localResultPath = path.join(getConfig().videoPath, resultDir, filename);
+    fs.mkdirSync(path.dirname(localResultPath), { recursive: true });
+
+    console.log(
+        `[Transfer] Requesting ${filePath} from sub-system ${movingItem.fromSubID} ` +
+        `(${rawBandwidth} MB/s) → ${localResultPath}`
+    );
+
+    let lastError: Error | null = null;
+
+    for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
+        if (attempt > 1) {
+            const delay = RETRY_BASE_DELAY_MS * 2 ** (attempt - 2);
+            console.log(`[Transfer] Retry attempt ${attempt}/${MAX_RETRY_ATTEMPTS} in ${delay}ms...`);
+            await wait(delay);
+        }
+
+        try {
+            const finalPath = await attemptFileReceive({
+                movingItem,
+                filePath,
+                localResultPath,
+                bandwidth: rawBandwidth,
+                subSystemSocket,
+            });
+
+            // Success — update DB, remove file on sub, clean up moving list
+            await watchableEntitysTable.update(
+                { UUID: watchableEntity.UUID },
+                { filePath: finalPath, subID: "main" }
+            );
+
+            await wait(POST_TRANSFER_WAIT_MS);
+
+            const index = movingItems.findIndex((m) => m.ID === movingItem.ID);
+            if (index !== -1) movingItems.splice(index, 1);
+
+            await rebroadcastMovingItems();
+            return;
+        } catch (err) {
+            lastError = err as Error;
+            console.error(`[Transfer] Attempt ${attempt} failed:`, lastError.message);
+            movingItem.meta.progress = 0;
+            await rebroadcastMovingItems();
+        }
+    }
+
+    console.error(
+        `[Transfer] All ${MAX_RETRY_ATTEMPTS} attempts failed for ${movingItem.ID}:`,
+        lastError?.message
+    );
+    subSystemSocket.emit("pull_file_error", { message: lastError?.message ?? "Unknown error" });
+}
+
+
+
+interface TransferAttemptParams {
     movingItem: MovingItem;
     filePath: string;
     resultDir: string;
     subSystemSocket: NonNullable<Awaited<ReturnType<typeof getSubSocketByID>>>;
 }
 
-async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemSocket }: AttemptParams): Promise<string> {
+async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemSocket }: TransferAttemptParams): Promise<string> {
     if (!fs.existsSync(filePath)) {
         throw new Error(`File not found: ${filePath}`);
     }
@@ -347,4 +421,134 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
     await rebroadcastMovingItems();
 
     return finalPath;
+}
+
+interface ReceiveAttemptParams {
+    movingItem: MovingItem;
+    filePath: string;         // path on the sub
+    localResultPath: string;  // where to write on main
+    bandwidth: number;        // MB/s
+    subSystemSocket: NonNullable<Awaited<ReturnType<typeof getSubSocketByID>>>;
+}
+
+async function attemptFileReceive({
+    movingItem,
+    filePath,
+    localResultPath,
+    bandwidth,
+    subSystemSocket,
+}: ReceiveAttemptParams): Promise<string> {
+    return new Promise((resolve, reject) => {
+        let writeStream: fs.WriteStream | null = null;
+        let md5Hash = crypto.createHash("md5");
+        let bytesReceived = 0;
+        let totalSize = 0;
+        let lastProgress = 0;
+        let startTimeout: ReturnType<typeof setTimeout> | null = null;
+
+        const cleanup = () => {
+            if (startTimeout) clearTimeout(startTimeout);
+            subSystemSocket.off("pull_file_start", onStart);
+            subSystemSocket.off("pull_file_chunk", onChunk);
+            subSystemSocket.off("pull_file_end", onEnd);
+            subSystemSocket.off("pull_file_error", onError);
+        };
+
+        const fail = (err: Error) => {
+            cleanup();
+            writeStream?.destroy();
+            // Try to remove a partial file so retries start clean
+            try { if (fs.existsSync(localResultPath)) fs.unlinkSync(localResultPath); } catch { }
+            reject(err);
+        };
+
+        const onStart = (data: { size: number }) => {
+            if (startTimeout) clearTimeout(startTimeout);
+            totalSize = data.size;
+            console.log(
+                `[Transfer] Receiving ${filePath} ` +
+                `(${(totalSize / (1024 * 1024)).toFixed(2)} MB) from sub-system`
+            );
+
+            movingItem.meta.movingStarted = Date.now();
+            movingItem.meta.progress = 0;
+            rebroadcastMovingItems();
+
+            writeStream = fs.createWriteStream(localResultPath);
+
+            writeStream.on("error", (err) => fail(err));
+
+            // Back-pressure: ack when the write buffer drains
+            writeStream.on("drain", () => {
+                subSystemSocket.emit("pull_ack");
+            });
+        };
+
+        const onChunk = (chunk: Buffer) => {
+            if (!writeStream) return fail(new Error("Received chunk before pull_file_start"));
+
+            md5Hash.update(chunk);
+            const canWrite = writeStream.write(chunk);
+            bytesReceived += chunk.length;
+
+            const progress = (bytesReceived / totalSize) * 100;
+            if (progress - lastProgress >= PROGRESS_BROADCAST_THRESHOLD || progress >= 100) {
+                lastProgress = progress;
+                movingItem.meta.progress = parseFloat(progress.toFixed(2));
+                rebroadcastMovingItems(); // fire-and-forget for chunk hot path
+            }
+
+            if (canWrite) {
+                subSystemSocket.emit("pull_ack");
+            }
+            // If canWrite is false, the 'drain' listener above will ack
+        };
+
+        const onEnd = (remoteMD5: string, callback: (result: string | false) => void) => {
+            if (!writeStream) return fail(new Error("Received pull_file_end before pull_file_start"));
+
+            writeStream.end();
+            writeStream.once("finish", () => {
+                const calculatedMD5 = md5Hash.digest("hex");
+                const isValid = calculatedMD5 === remoteMD5;
+
+                console.log(`[Transfer] Download complete: ${localResultPath}`);
+                console.log(`[Transfer] Expected MD5:   ${remoteMD5}`);
+                console.log(`[Transfer] Calculated MD5: ${calculatedMD5}`);
+                console.log(`[Transfer] File integrity: ${isValid ? "VALID" : "CORRUPTED"}`);
+                console.log(`[Transfer] Total bytes received: ${bytesReceived}`);
+
+                cleanup();
+
+                if (isValid) {
+                    callback(localResultPath);
+                    movingItem.meta.result = localResultPath;
+                    rebroadcastMovingItems();
+                    resolve(localResultPath);
+                } else {
+                    callback(false);
+                    fail(new Error(`MD5 mismatch — file corrupted (expected ${remoteMD5}, got ${calculatedMD5})`));
+                }
+            });
+        };
+
+        const onError = (data: { message: string }) => {
+            fail(new Error(`Sub-system reported error: ${data.message}`));
+        };
+
+        subSystemSocket.on("pull_file_start", onStart);
+        subSystemSocket.on("pull_file_chunk", onChunk);
+        subSystemSocket.on("pull_file_end", onEnd);
+        subSystemSocket.on("pull_file_error", onError);
+
+        // Guard against sub never responding
+        startTimeout = setTimeout(() => {
+            fail(new Error(`Sub-system did not start sending within ${PULL_REQUEST_TIMEOUT_MS}ms`));
+        }, PULL_REQUEST_TIMEOUT_MS);
+
+        subSystemSocket.emit("pull_request", {
+            filePath,      // sub's local path
+            bandwidth,     // MB/s — sub uses this for ThrottleStream
+        });
+    });
 }

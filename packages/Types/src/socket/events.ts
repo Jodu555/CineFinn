@@ -75,6 +75,10 @@ export interface SubSystemToServerEvents {
     request_file: (data: RequestFileData) => void;
     file_chunk: (data: FileChunkData) => void;
     ack: () => void;
+    pull_file_start: (data: { size: number }) => void;
+    pull_file_chunk: (chunk: Buffer) => void;
+    pull_file_end: (md5: string, callback: (result: string | false) => void) => void;
+    pull_file_error: (data: { message: string }) => void;
 }
 
 export interface ServerToSubSystemEvents {
@@ -89,6 +93,9 @@ export interface ServerToSubSystemEvents {
     upload_ack: () => void;
     upload_complete: (data: UploadCompleteData) => void;
     upload_error: (data: ErrorData) => void;
+    pull_request: (data: { filePath: string; bandwidth: number }) => void;
+    pull_ack: () => void;
+    pull_file_error: (data: { message: string }) => void;
 }
 
 export type ServerToAnythingEvents = ServerToClientEvents & ServerToScraperEvents & ServerToSubSystemEvents;

@@ -17,6 +17,10 @@
 		"./tryCatch": {
 			"types": "./dist/tryCatch.d.ts",
 			"import": "./dist/tryCatch.js"
+		},
+		"./stream": {
+			"types": "./dist/stream.d.ts",
+			"import": "./dist/stream.js"
 		}
 	},
 	"scripts": {
