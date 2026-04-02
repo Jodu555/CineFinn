@@ -10,6 +10,7 @@ import type { Account } from "@cinefinn/types/models/user";
 import type { timestamped } from "@cinefinn/types/shared";
 import type { Socket } from "socket.io";
 import { tryCatch } from "@cinefinn/utilities/tryCatch";
+import { undetailedIndexStorage } from "../routes/index.js";
 
 async function authFunction(authHandshake: AuthHandshakeSubsystem): Promise<SocketAuthDataSubsystem> {
     const { authToken: token } = authHandshake;
@@ -112,6 +113,7 @@ export async function toggleSeriesesForSubSystem(subID: string, disabled: boolea
         series.infos.disabled = disabled;
         await seriesTable.update({ UUID: seriesID }, { infos: series.infos });
     }
+    undetailedIndexStorage.clear();
     sendSeriesReloadToAll();
     console.log(`Toggling Serieses(${seriesIDs.length}) for SubSystem: ${subID} to Disabled: ${disabled}`);
 }
