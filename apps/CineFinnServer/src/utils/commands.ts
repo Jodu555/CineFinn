@@ -2,7 +2,8 @@ import { Command, CommandManager } from "@jodu555/commandmanager";
 import { accountsTable, authTokensTable } from "../database.js";
 import type { AuthToken } from "@cinefinn/types";
 import { getIO } from "../utils.js";
-import { sendSiteReload, socketStateMap } from "../sockets/client.socket.js";
+import { sendSeriesReloadToAll, sendSiteReload, socketStateMap } from "../sockets/client.socket.js";
+import { cacheRegistry } from "../routes/admin/cache.js";
 
 
 export function setupCommandManager() {
@@ -78,7 +79,7 @@ function registerCommands() {
     commandManager.registerCommand(
         new Command(
             ['reloadClient', 'rlc'],
-            'reloadClient <all/Socket-ID/User-UUID>',
+            'reloadClient <all/Socket-ID/User-UUID/UserName>',
             'Reloads the page for the specified connected sockets',
             async (command, [...args], scope) => {
                 if (args[1] == 'all') {
@@ -98,9 +99,36 @@ function registerCommands() {
                     if (i == 0) {
                         return 'No socket found with Socket-ID or User-UUID:' + socketIDOrUserUUIDOrUserName;
                     } else {
-                        return 'Reloaded' + i + 'socket(s)';
+                        return 'Reloaded ' + i + ' socket(s)';
                     }
                 }
+            }
+        )
+    );
+
+    commandManager.registerCommand(
+        new Command(
+            ['cacheclear', 'cac'],
+            'cacheclear',
+            'Clears All caches that exist',
+            async (command, [...args], scope) => {
+                for (const cacheKey in cacheRegistry) {
+                    const cache = cacheRegistry.get(cacheKey)!;
+                    await cache.clear();
+                }
+                return 'All caches cleared!';
+            }
+        )
+    );
+
+    commandManager.registerCommand(
+        new Command(
+            ['sendSeriesReload', 'ssr'],
+            'sendSeriesReload',
+            'Sends a site reload to all connected sockets',
+            async (command, [...args], scope) => {
+                await sendSeriesReloadToAll();
+                return 'Series reload sent to all connected sockets';
             }
         )
     );
