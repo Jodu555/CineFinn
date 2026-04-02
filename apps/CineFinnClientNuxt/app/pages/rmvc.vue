@@ -91,6 +91,14 @@
 import type { ClientToServerEvents, ServerToClientEvents } from '@cinefinn/types/socket';
 import type { Socket } from 'socket.io-client';
 
+definePageMeta({
+	middleware: 'may-auth',
+});
+
+useSeoMeta({
+	title: 'Cinema | RMVC',
+});
+
 const authStore = useAuthStore();
 
 const loading = ref(false);
@@ -115,10 +123,6 @@ function connect() {
 		}
 	});
 }
-
-definePageMeta({
-	middleware: 'may-auth',
-});
 
 onMounted(() => {
 	document.title = `Cinema | RMVC`;

@@ -69,6 +69,10 @@ definePageMeta({
 	middleware: 'auth',
 });
 
+useSeoMeta({
+	title: 'Cinema | Admin',
+});
+
 const adminStore = useAdminStore();
 
 const loading = computed(() => adminStore.loading);

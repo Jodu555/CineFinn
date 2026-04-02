@@ -110,6 +110,11 @@ definePageMeta({
     middleware: 'auth',
 });
 
+useSeoMeta({
+    title: 'Cinema | Browse',
+    description: 'Browse the latest movies and series',
+});
+
 const showFranchises = ref(true);
 
 const franchises = ref([

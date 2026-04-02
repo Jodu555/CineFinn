@@ -82,8 +82,11 @@ const authStore = useAuthStore();
 const { $swal } = useNuxtApp();
 
 definePageMeta({
-	title: 'Todo - AniDB',
 	middleware: 'auth',
+});
+
+useSeoMeta({
+	title: 'Cinema | Todo - AniDB',
 });
 
 const loading = ref(false);

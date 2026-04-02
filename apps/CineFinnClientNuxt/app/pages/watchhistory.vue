@@ -41,7 +41,8 @@
 			<div v-else-if="status === 'error'" class="text-center py-5">
 				<div
 					class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-4"
-					style="width: 96px; height: 96px">
+					style="width: 96px; height: 96px"
+				>
 					<font-awesome-icon :icon="['fas', 'exclamation-triangle']" size="3x" class="text-danger" />
 				</div>
 				<h2 class="h4 fw-bold mb-2">Error Loading History</h2>
@@ -52,7 +53,8 @@
 			<div v-else-if="displayItems.length === 0" class="text-center py-5">
 				<div
 					class="bg-secondary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-4"
-					style="width: 96px; height: 96px">
+					style="width: 96px; height: 96px"
+				>
 					<font-awesome-icon :icon="['fas', 'clock-rotate-left']" size="3x" class="text-secondary" />
 				</div>
 				<h2 class="h4 fw-bold mb-2">No Watch History</h2>
@@ -74,7 +76,8 @@
 									:src="getSeriesImage(item.series_UUID)"
 									class="card-img-top"
 									:alt="getSeriesTitle(item.series_UUID)"
-									style="height: 200px; object-fit: cover" />
+									style="height: 200px; object-fit: cover"
+								/>
 								<div class="card-img-overlay d-flex align-items-end p-0">
 									<div class="progress w-100" style="height: 4px; border-radius: 0">
 										<div class="progress-bar bg-primary" :style="{ width: item.percentage + '%' }"></div>
@@ -101,13 +104,10 @@
 									:src="getEntityThumbnail(item)"
 									class="card-img-top"
 									:alt="getSeriesTitle(item.series_UUID)"
-									style="height: 140px; object-fit: cover" />
-								<span v-if="item.watchable_UUID.startsWith('MO-')" class="badge bg-danger position-absolute top-0 start-0 m-2"
-									>Movie</span
-								>
-								<span v-else class="badge bg-primary position-absolute top-0 start-0 m-2"
-									>S{{ item.season_IDX }} E{{ item.episode_IDX }}</span
-								>
+									style="height: 140px; object-fit: cover"
+								/>
+								<span v-if="item.watchable_UUID.startsWith('MO-')" class="badge bg-danger position-absolute top-0 start-0 m-2">Movie</span>
+								<span v-else class="badge bg-primary position-absolute top-0 start-0 m-2">S{{ item.season_IDX }} E{{ item.episode_IDX }}</span>
 								<div class="card-img-overlay d-flex align-items-end p-0">
 									<div class="progress w-100" style="height: 4px; border-radius: 0">
 										<div class="progress-bar bg-primary" :style="{ width: item.progressPercentage + '%' }"></div>
@@ -133,6 +133,11 @@ import { useRouter } from 'vue-router';
 
 definePageMeta({
 	middleware: 'auth',
+});
+
+useSeoMeta({
+	title: 'Cinema | Watch History',
+	description: 'View your watch history and track your progress on movies and series',
 });
 
 type WatchHistoryWithDetails = WatchHistory & {

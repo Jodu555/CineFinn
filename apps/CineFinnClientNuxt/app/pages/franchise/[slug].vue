@@ -128,6 +128,10 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+definePageMeta({
+	middleware: 'auth',
+});
+
 interface Content {
 	id: string;
 	title: string;
@@ -377,6 +381,10 @@ const slug = route.params.slug as string;
 const isLoading = ref(true);
 const selectedSubFranchise = ref<string | null>(null);
 const franchise = ref<FranchiseData | null>(null);
+useSeoMeta({
+	title: computed(() => 'Cinema | Franchise - ' + franchise.value?.name),
+	description: computed(() => franchise.value?.description),
+});
 
 onMounted(() => {
 	franchise.value = franchiseData[slug] || null;

@@ -60,7 +60,7 @@ definePageMeta({
 });
 
 useSeoMeta({
-	title: 'CineFinn - List',
+	title: 'Cinema | List',
 });
 
 const indexStore = useIndexStore();

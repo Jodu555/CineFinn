@@ -36,12 +36,7 @@
 												<font-awesome-icon icon="fa-solid fa-envelope" class="me-2" />
 												Email Address
 											</label>
-											<input
-												type="email"
-												class="form-control"
-												id="email"
-												v-model="form.email"
-												placeholder="Enter your email address" />
+											<input type="email" class="form-control" id="email" v-model="form.email" placeholder="Enter your email address" />
 										</div>
 										<div class="d-flex justify-content-between align-items-center">
 											<nuxtLink to="/login" class="text-muted text-decoration-none small">
@@ -76,7 +71,8 @@
 												class="form-control"
 												id="resetToken"
 												v-model="form.resetToken"
-												placeholder="Enter the reset token from your email" />
+												placeholder="Enter the reset token from your email"
+											/>
 										</div>
 										<div class="d-flex justify-content-between align-items-center">
 											<button
@@ -85,7 +81,8 @@
 												@click="
 													stage = 1;
 													error = '';
-												">
+												"
+											>
 												<font-awesome-icon icon="fa-solid fa-arrow-left" class="me-2" />
 												Back
 											</button>
@@ -119,7 +116,8 @@
 												autocomplete="current-password"
 												placeholder="Enter your new password"
 												:rules="passwordRules"
-												:show-label="false" />
+												:show-label="false"
+											/>
 										</div>
 										<button type="submit" class="btn btn-primary w-100">
 											<font-awesome-icon icon="fa-solid fa-floppy-disk" class="me-2" />
@@ -147,6 +145,10 @@
 </template>
 
 <script lang="ts" setup>
+useSeoMeta({
+	title: 'Cinema | Forgot Password',
+});
+
 const stage = ref(1);
 const loading = ref(false);
 const error = ref('');

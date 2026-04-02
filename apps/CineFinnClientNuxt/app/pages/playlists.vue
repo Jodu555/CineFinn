@@ -26,7 +26,8 @@
 			<div v-if="playlists.length === 0" class="text-center py-5">
 				<div
 					class="bg-secondary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-4"
-					style="width: 96px; height: 96px">
+					style="width: 96px; height: 96px"
+				>
 					<font-awesome-icon :icon="['fas', 'plus']" size="3x" class="text-secondary" />
 				</div>
 				<h2 class="h4 fw-bold mb-2">No Playlists Yet</h2>
@@ -49,7 +50,8 @@
 							class="card cursor-pointer transition-all"
 							:class="selectedPlaylistUUID === playlist.UUID ? 'border-primary bg-primary bg-opacity-10' : ''"
 							@click="selectedPlaylistUUID = playlist.UUID"
-							style="cursor: pointer">
+							style="cursor: pointer"
+						>
 							<div class="card-body">
 								<div class="d-flex align-items-start justify-content-between">
 									<div class="flex-grow-1 overflow-hidden">
@@ -93,7 +95,8 @@
 									:show-remove-button="true"
 									@navigate="watchItem"
 									@add-to-list="handleRemoveFromPlaylist(selectedPlaylist.UUID, $event)"
-									@show-info="watchItem" />
+									@show-info="watchItem"
+								/>
 							</div>
 						</div>
 					</div>
@@ -120,12 +123,7 @@
 					<div class="modal-body">
 						<div class="mb-3">
 							<label for="new-playlist-name" class="form-label">Playlist Name</label>
-							<input
-								id="new-playlist-name"
-								v-model="newPlaylistName"
-								type="text"
-								class="form-control"
-								placeholder="My Awesome Playlist" />
+							<input id="new-playlist-name" v-model="newPlaylistName" type="text" class="form-control" placeholder="My Awesome Playlist" />
 						</div>
 						<div class="mb-3">
 							<label for="new-playlist-description" class="form-label">Description (Optional)</label>
@@ -134,11 +132,10 @@
 								v-model="newPlaylistDescription"
 								class="form-control"
 								rows="3"
-								placeholder="A collection of my favorite shows..."></textarea>
+								placeholder="A collection of my favorite shows..."
+							></textarea>
 						</div>
-						<button class="btn btn-primary w-100" :disabled="!newPlaylistName.trim()" @click="handleCreatePlaylist">
-							Create Playlist
-						</button>
+						<button class="btn btn-primary w-100" :disabled="!newPlaylistName.trim()" @click="handleCreatePlaylist">Create Playlist</button>
 					</div>
 				</div>
 			</div>
@@ -164,20 +161,14 @@
 							<label for="edit-playlist-description" class="form-label">Description</label>
 							<textarea id="edit-playlist-description" v-model="editingPlaylist.description" class="form-control" rows="3"></textarea>
 						</div>
-						<button class="btn btn-primary w-100" :disabled="!editingPlaylist.name.trim()" @click="handleUpdatePlaylist">
-							Save Changes
-						</button>
+						<button class="btn btn-primary w-100" :disabled="!editingPlaylist.name.trim()" @click="handleUpdatePlaylist">Save Changes</button>
 					</div>
 				</div>
 			</div>
 		</div>
 
 		<!-- Delete Confirmation Modal -->
-		<div
-			class="modal fade"
-			:class="{ show: !!deletePlaylistId, 'd-block': !!deletePlaylistId }"
-			tabindex="-1"
-			@click.self="deletePlaylistId = null">
+		<div class="modal fade" :class="{ show: !!deletePlaylistId, 'd-block': !!deletePlaylistId }" tabindex="-1" @click.self="deletePlaylistId = null">
 			<div class="modal-dialog modal-dialog-centered">
 				<div class="modal-content">
 					<div class="modal-header">
@@ -185,9 +176,7 @@
 						<button type="button" class="btn-close" @click="deletePlaylistId = null"></button>
 					</div>
 					<div class="modal-body">
-						<p class="text-muted">
-							This action cannot be undone. This will permanently delete your playlist and remove all items from it.
-						</p>
+						<p class="text-muted">This action cannot be undone. This will permanently delete your playlist and remove all items from it.</p>
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-secondary" @click="deletePlaylistId = null">Cancel</button>
@@ -210,6 +199,10 @@ import LandingSeriesCard from '~/components/LandingSeriesCard.vue';
 
 definePageMeta({
 	middleware: 'auth',
+});
+
+useSeoMeta({
+	title: 'Cinema | Playlists',
 });
 
 const playlistStore = usePlaylistStore();
