@@ -7,6 +7,7 @@
 		"dev": "pnpm run -r --parallel --aggregate-output dev",
 		"build": "pnpm run -r build",
 		"dev:packages": "pnpm run --filter \"./packages/*\" dev",
+		"build:packages": "pnpm run --filter \"./packages/*\" build",
 		"typecheck": "pnpm run -r typecheck"
 	},
 	"keywords": [],
