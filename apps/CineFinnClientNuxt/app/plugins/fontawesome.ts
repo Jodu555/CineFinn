@@ -7,7 +7,7 @@ import {
     faBuilding, faEnvelope, faKey, faPlug, faServer, faBolt, faUser, faTable, faDatabase, faImage, faFilm, faGlobe, faCodeBranch, faSliders, faNetworkWired,
     faEyeSlash, faXmark, faExclamationTriangle, faChevronUp, faChevronDown, faCheckCircle, faTasks, faHistory, faSyncAlt, faHourglassHalf, faFileExport, faTerminal,
     faRightToBracket, faPaperPlane, faCircleInfo, faChevronLeft, faFire, faBookmark, faMinus, faTowerBroadcast, faBell, faArrowRotateLeft,
-    faClock as fasClock,
+    faClock as fasClock, faUpLong,
 } from '@fortawesome/free-solid-svg-icons';
 import { faCalendar, faClock as farClock } from '@fortawesome/free-regular-svg-icons';
 
@@ -19,7 +19,7 @@ library.add(
     faEye, faUserPlus, faToggleOn, faShareNodes, faChartLine, faUserShield, faLock, faAt, faShieldHalved, faHashtag, faCheckCircle, faSyncAlt, faHourglassHalf,
     faBuilding, faEnvelope, faKey, faPlug, faServer, faBolt, faUser, faTable, faDatabase, faImage, faFilm, faGlobe, faCodeBranch, faSliders, faNetworkWired,
     faEyeSlash, faXmark, faExclamationTriangle, faStar, faFolder, faHandPointLeft, faFileCode, faBomb, faRightToBracket, faPaperPlane, faCircleInfo, faChevronLeft,
-    faFire, faBookmark, faMinus, faTowerBroadcast, faBell, faArrowRotateLeft, fasClock
+    faFire, faBookmark, faMinus, faTowerBroadcast, faBell, faArrowRotateLeft, fasClock, faUpLong
 );
 library.add(faCalendar, farClock);
 

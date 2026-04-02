@@ -1,6 +1,11 @@
 <template>
 	<div class="container">
 		<!-- <button @click="indexStore.loadSeries()">Load Series</button> -->
+		<div v-auto-animate style="z-index: 100">
+			<a v-auto-animate v-if="backToTop" @click="scrollToTop()" id="backToTop" class="btn btn-primary btn-lg back-to-top" role="button"
+				><font-awesome-icon icon="fa-solid fa-up-long" size="xl"
+			/></a>
+		</div>
 		<div class="d-none d-md-block">
 			<div class="mt-4 d-flex justify-content-center align-items-center">
 				<h3>Showing {{ selectedSeries.length }} / {{ indexStore.series.length }} Serie(s)</h3>
@@ -12,7 +17,8 @@
 					v-for="cat in categories"
 					@click="selectedCategory = cat"
 					:key="cat"
-					:class="selectedCategory == cat ? 'btn btn-outline-primary' : 'btn btn-outline-secondary'">
+					:class="selectedCategory == cat ? 'btn btn-outline-primary' : 'btn btn-outline-secondary'"
+				>
 					{{ cat }}
 				</span>
 			</div>
@@ -26,7 +32,8 @@
 				:series-i-d="entity.UUID"
 				:key="entity.UUID"
 				:index="idx"
-				@add-to-playlist="onAddToPlaylist" />
+				@add-to-playlist="onAddToPlaylist"
+			/>
 			<!-- <EntityCard v-for="entity in selectedSeries"
                 :highlighted="scrolledToLastSeries && entity.ID == showScrollToLastSeries" class="border-success"
                 :entity="entity" :key="entity.ID" /> -->
@@ -34,7 +41,8 @@
 		<AddToPlaylistDialog
 			ref="addToPlaylistDialog"
 			:item-u-u-i-d="selectedSeriesToAddToPlaylist || ''"
-			:content-title="selectedSeries.find((x) => x.UUID === selectedSeriesToAddToPlaylist)?.title || ''">
+			:content-title="selectedSeries.find((x) => x.UUID === selectedSeriesToAddToPlaylist)?.title || ''"
+		>
 			<template #trigger>
 				<div></div>
 			</template>
@@ -49,6 +57,10 @@ import EntityCard from '~/components/EntityCard.vue';
 
 definePageMeta({
 	middleware: 'auth',
+});
+
+useSeoMeta({
+	title: 'CineFinn - List',
 });
 
 const indexStore = useIndexStore();
@@ -92,34 +104,53 @@ const categories = computed(() => {
 	return cats;
 });
 
-// onMounted(async () => {
-// 	preloadImagesForNotSelectedCategories();
-// });
+onMounted(() => {
+	window.addEventListener('scroll', handleScroll, { passive: true });
+});
 
-// watch(selectedCategory, () => {
-// 	preloadImagesForNotSelectedCategories();
-// });
+onBeforeUnmount(() => {
+	window.removeEventListener('scroll', handleScroll);
+});
 
-function preloadImagesForNotSelectedCategories() {
-	// const prefetchedImages = new Set<HTMLImageElement>();
-	// for (const cat of categories.value) {
-	// 	// if (cat == 'Alle') continue;
-	// 	if (cat == selectedCategory.value) continue;
-	// 	// console.log('Preloading Category:', cat);
-	// 	const catSeries = indexStore.series.filter((i) => i.tags[0]! == cat).slice(0, 10);
-	// 	catSeries.forEach((s) => {
-	// 		// indexStore.prefetchSeries(s.UUID);
-	// 		const img = new Image();
-	// 		const url = new URL('https://cinema-api.jodu555.de' + `/images/${s.UUID}/cover.jpg`);
-	// 		url.searchParams.append('auth-token', 'SECR-DEV');
-	// 		img.src = url.href;
-	// 		prefetchedImages.add(img);
-	// 		// console.log('Preloading', url.href);
-	// 	});
-	// }
+function handleScroll(e: Event) {
+	const height = document.documentElement.offsetHeight;
+
+	const mapping = map(
+		document.documentElement.scrollTop,
+		[0, height],
+		[0, window.innerHeight - (document.querySelector('.footer')?.getBoundingClientRect().height || 0) - 25],
+	);
+
+	// console.log('SCROLL', height, document.documentElement.scrollTop);
+	// console.log('MAPPING', Math.ceil(mapping));
+
+	if (document.documentElement.scrollTop > 100) {
+		backToTop.value = true;
+		const backToTopElem = document.querySelector<HTMLDivElement>('#backToTop');
+		if (backToTopElem) backToTopElem.style.top = `${Math.ceil(mapping)}px`;
+	} else {
+		backToTop.value = false;
+	}
 }
 
-// preloadRouteComponents('/watch/:SID');
+const backToTop = ref(false);
+
+//This function maps a value from one range to another range and clamps it to the new range
+function map(value: number, oldRange: number[], newRange: number[]) {
+	const newValue = ((value - oldRange[0]!) * (newRange[1]! - newRange[0]!)) / (oldRange[1]! - oldRange[0]!) + newRange[0]!;
+	return Math.min(Math.max(newValue, newRange[0]!), newRange[1]!);
+}
+
+function scrollToTop() {
+	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 </script>
 
-<style scoped></style>
+<style scoped>
+.back-to-top {
+	position: fixed;
+	/* bottom: 64px; */
+	right: 25px;
+	/* display: none; */
+}
+</style>
