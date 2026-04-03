@@ -1,7 +1,7 @@
 import { Command, CommandManager } from "@jodu555/commandmanager";
 import { accountsTable, authTokensTable } from "../database.js";
 import type { AuthToken } from "@cinefinn/types";
-import { getIO } from "../utils.js";
+import { getIO, loggerInstances } from "../utils.js";
 import { sendSeriesReloadToAll, sendSiteReload, socketStateMap } from "../sockets/client.socket.js";
 import { cacheRegistry } from "../routes/admin/cache.js";
 
@@ -129,6 +129,32 @@ function registerCommands() {
             async (command, [...args], scope) => {
                 await sendSeriesReloadToAll();
                 return 'Series reload sent to all connected sockets';
+            }
+        )
+    );
+
+    commandManager.registerCommand(
+        new Command(
+            ['logger', 'l'],
+            'logger [instance/list]',
+            'Toggles a logger instance or lists all logger instances with their current state',
+            async (command, [...args], scope) => {
+                if (args[1] == 'list') {
+                    const output = ['Logger Instances:'];
+                    for (const instance in loggerInstances) {
+                        output.push(` - ${instance}: ${loggerInstances[instance] ? 'enabled' : 'disabled'}`);
+                    }
+                    output.push('');
+                    return output;
+                } else {
+                    const instance = args[1];
+                    if (instance in loggerInstances) {
+                        loggerInstances[instance] = !loggerInstances[instance];
+                        return `Logger instance ${instance} has been toggled to ${loggerInstances[instance] ? 'enabled' : 'disabled'}`;
+                    } else {
+                        return `Logger instance ${instance} not found`;
+                    }
+                }
             }
         )
     );

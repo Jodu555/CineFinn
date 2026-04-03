@@ -5,7 +5,7 @@ import type { timestamped } from "@cinefinn/types/shared";
 import type { SocketConsumerMeta } from "./index.js";
 import { app, type definedSocket } from "../index.js";
 import { accountsTable } from "../database.js";
-import { debounce, getIO } from "../utils.js";
+import { debounce, getIO, loggerInstances } from "../utils.js";
 import { compareSettings } from "../utils/settings.js";
 import { getFrontEndSeries } from "../routes/index.js";
 import { randomUUID } from "crypto";
@@ -53,7 +53,7 @@ async function connectionFunction(socket: definedSocket) {
     console.log(socket.id, socketAuth.user.username, 'connected');
     const debouncedUpdateTime = debounce(
         async (data: { watchableUUID: string; time: number; }) => {
-            console.log('debounced updateTime', data, socketAuth.user.username);
+            loggerInstances.updateTime && console.log('debounced updateTime', data, socketAuth.user.username);
             const response = await app.request(`/watch/updateTime/${data.watchableUUID}/${data.time}`, {
                 method: 'POST',
                 headers: {
@@ -66,7 +66,7 @@ async function connectionFunction(socket: definedSocket) {
     );
 
     socket.on('updateTime', async (data) => {
-        console.log('updateTime', data, socketAuth.user.username);
+        loggerInstances.updateTime && console.log('updateTime', data, socketAuth.user.username);
         debouncedUpdateTime(data);
     });
 

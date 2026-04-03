@@ -22,6 +22,10 @@ let io: Server<AnythingToServerEvents,
 //     InterServerEvents,
 //     SocketData<Account | Account & timestamped>>;
 
+export const loggerInstances = {
+    updateTime: false
+} as Record<string, boolean>;
+
 export function setIO(newIO: Server<ClientToServerEvents,
     ServerToClientEvents,
     InterServerEvents,
