@@ -148,6 +148,8 @@ const httpServer = serve({
 
     setupCommandManager();
 
+    await wait(1000 * 5);
+
     const knownSubSystems = await getKnownSubSystems();
     const subSystemSockets = (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'subsystem');
     for (const subSystem of knownSubSystems) {
