@@ -218,7 +218,6 @@
 											)"
 											class="card cursor-disabled border-danger-subtle"
 										>
-											<!-- <pre>{{ additionals }}</pre> -->
 											<div class="card-body p-3">
 												<div class="d-flex">
 													<div class="flex-grow-1">
@@ -255,7 +254,8 @@
 											<div
 												:class="[
 													'card cursor-pointer',
-													isEpisodeWatched(episode.UUID) ? 'border-success bg-success bg-opacity-10' : '',
+													isEpisodeWatched(episode.UUID) && !isCurrentEpisode(episode.UUID) ? 'border-success' : '',
+													isEpisodeWatched(episode.UUID) ? 'bg-success bg-opacity-10' : '',
 													isCurrentEpisode(episode.UUID) ? 'border-primary border-2' : '',
 												]"
 												@click="handleEpisodeClick(episode.UUID)"
@@ -614,33 +614,69 @@ const videoKeepState = () => {
 	}
 	return {
 		apply: () => {
-			const inter = setInterval(() => {
-				const interVideoElement = document.querySelector('video');
-				if (interVideoElement) {
-					if (interVideoElement.readyState >= 3) {
-						if (!previouslyPaused) {
-							interVideoElement.play();
-							clearInterval(inter);
+			return new Promise<HTMLVideoElement>((resolve, reject) => {
+				const inter = setInterval(() => {
+					const interVideoElement = document.querySelector('video');
+					if (interVideoElement) {
+						if (interVideoElement.readyState >= 3) {
+							if (!previouslyPaused) {
+								interVideoElement.play();
+								clearInterval(inter);
+								resolve(interVideoElement);
+							}
 						}
 					}
-				}
-			}, 100);
-			setTimeout(() => {
-				clearInterval(inter);
-				const interVideoElement = document.querySelector('video');
-				if (interVideoElement && !previouslyPaused) {
-					interVideoElement.play();
-				}
-				umTrackEvent('videoKeepState_timeout', {
-					previouslyPaused,
-					readyState: interVideoElement?.readyState,
-					paused: interVideoElement?.paused,
-					route: useRoute().fullPath,
-				});
-			}, 1000 * 10);
+				}, 100);
+				setTimeout(() => {
+					clearInterval(inter);
+					const interVideoElement = document.querySelector('video');
+					if (interVideoElement && !previouslyPaused) {
+						interVideoElement.play();
+					}
+					umTrackEvent('videoKeepState_timeout', {
+						previouslyPaused,
+						readyState: interVideoElement?.readyState,
+						paused: interVideoElement?.paused,
+						route: useRoute().fullPath,
+					});
+					reject(null);
+				}, 1000 * 10);
+			});
 		},
 	};
 };
+
+function isElementInViewport(element: HTMLElement) {
+	const rect = element.getBoundingClientRect();
+
+	return (
+		rect.top >= 0 &&
+		rect.left >= 0 &&
+		rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) /* or $(window).height() */ &&
+		rect.right <= (window.innerWidth || document.documentElement.clientWidth) /* or $(window).width() */
+	);
+}
+
+function actualScrollIntoView(element: HTMLElement) {
+	if (!element) return;
+
+	addEventListener(
+		'scrollend',
+		(evt) => {
+			if (isElementInViewport(element)) return;
+			element.scrollIntoView({
+				behavior: 'smooth',
+				block: 'center',
+			});
+			actualScrollIntoView(element);
+		},
+		{ once: true },
+	);
+	element.scrollIntoView({
+		behavior: 'smooth',
+		block: 'center',
+	});
+}
 
 const handleEpisodeClick = async (episodeUUID: string) => {
 	const router = useRouter();
@@ -662,7 +698,8 @@ const handleEpisodeClick = async (episodeUUID: string) => {
 	indexStore.setSelectedWatchableEntityUUID(episodeUUID);
 
 	await router.push({ path: `/watch/${series.value!.UUID}`, query: { episode: episodeUUID, ...prevQuery } });
-	apply();
+	const videoElem = await apply();
+	actualScrollIntoView(videoElem);
 };
 const isCurrentEpisode = (episodeUUID: string) => {
 	return currentEpisodeUUID.value === episodeUUID;
@@ -686,7 +723,8 @@ const handleMovieClick = async (movieUUID: string) => {
 	indexStore.setSelectedWatchableEntityUUID(movieUUID);
 
 	await router.push({ path: `/watch/${series.value!.UUID}`, query: { movie: movieUUID, ...prevQuery } });
-	apply();
+	const videoElem = await apply();
+	actualScrollIntoView(videoElem);
 };
 const isCurrentMovie = (movieUUID: string) => {
 	return currentMovieUUID.value === movieUUID;
