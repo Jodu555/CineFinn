@@ -708,8 +708,6 @@ const handleEpisodeClick = async (episodeUUID: string) => {
 		console.log(error);
 		return;
 	}
-	console.log('Applied', videoElem);
-
 	actualScrollIntoView(videoElem);
 };
 const isCurrentEpisode = (episodeUUID: string) => {
@@ -734,7 +732,11 @@ const handleMovieClick = async (movieUUID: string) => {
 	indexStore.setSelectedWatchableEntityUUID(movieUUID);
 
 	await router.push({ path: `/watch/${series.value!.UUID}`, query: { movie: movieUUID, ...prevQuery } });
-	const videoElem = await apply();
+	const { error, data: videoElem } = await tryCatch(() => apply());
+	if (error) {
+		console.log(error);
+		return;
+	}
 	actualScrollIntoView(videoElem);
 };
 const isCurrentMovie = (movieUUID: string) => {
