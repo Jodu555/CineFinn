@@ -615,19 +615,24 @@ const videoKeepState = () => {
 	return {
 		apply: () => {
 			return new Promise<HTMLVideoElement>((resolve, reject) => {
+				let timeout: NodeJS.Timeout | undefined;
 				const inter = setInterval(() => {
 					const interVideoElement = document.querySelector('video');
 					if (interVideoElement) {
+						console.log('interVideoElement', interVideoElement.readyState);
 						if (interVideoElement.readyState >= 3) {
 							if (!previouslyPaused) {
 								interVideoElement.play();
-								clearInterval(inter);
-								resolve(interVideoElement);
 							}
+							clearInterval(inter);
+							if (timeout) clearTimeout(timeout);
+							resolve(interVideoElement);
 						}
 					}
 				}, 100);
-				setTimeout(() => {
+				timeout = setTimeout(() => {
+					console.log('videoKeepState timeout reached');
+
 					clearInterval(inter);
 					const interVideoElement = document.querySelector('video');
 					if (interVideoElement && !previouslyPaused) {
@@ -698,7 +703,13 @@ const handleEpisodeClick = async (episodeUUID: string) => {
 	indexStore.setSelectedWatchableEntityUUID(episodeUUID);
 
 	await router.push({ path: `/watch/${series.value!.UUID}`, query: { episode: episodeUUID, ...prevQuery } });
-	const videoElem = await apply();
+	const { error, data: videoElem } = await tryCatch(() => apply());
+	if (error) {
+		console.log(error);
+		return;
+	}
+	console.log('Applied', videoElem);
+
 	actualScrollIntoView(videoElem);
 };
 const isCurrentEpisode = (episodeUUID: string) => {

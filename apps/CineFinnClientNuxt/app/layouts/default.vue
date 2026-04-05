@@ -27,7 +27,7 @@ const route = useRoute();
 const authStore = useAuthStore();
 
 onErrorCaptured((err) => {
-	showError({ statusCode: 500, statusMessage: err.message, fatal: true });
+	showError({ statusCode: 500, statusMessage: err?.message, fatal: true });
 	return false; // prevent further propagation
 });
 </script>
