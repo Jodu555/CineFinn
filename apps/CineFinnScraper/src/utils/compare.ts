@@ -10,8 +10,14 @@ import type { Socket } from 'socket.io-client';
 
 
 function sanitizeFileName(str: string): string {
+    str = sanitizeForWindows(str);
     return sanitizeFilename(str, { replacement: ' ' }).replace(/  +/g, ' ');
 }
+
+function sanitizeForWindows(str: string): string {
+    return str.replaceAll(/[:<>"/\\|?*]+/g, '');
+}
+
 export interface AniWorldSerieCompare extends AniWorldSeriesInformations {
     UUID: string;
     title: string;
@@ -380,7 +386,18 @@ async function compareForNewReleasesAniWorldOrSTO(
             // const localMovie = localSerie.movies.find((x) => x.movie_IDX == aniworldMovieIDX + 1);
             const localMovie = localSerie.movies.find((lm) => {
                 //Movie title has to be similar and the release date should be the same
-                return computeLevenshteinDistance(sanitizeFileName(lm.primaryName.toLowerCase()), sanitizeFileName(aniworldMovie.mainName.toLowerCase())) < 0.8;
+
+                const sanLocMainName = sanitizeFileName(lm.primaryName.toLowerCase());
+
+                const sanRemMainName = sanitizeFileName(aniworldMovie.mainName.toLowerCase());
+                const sanRemSecoName = sanitizeFileName(aniworldMovie.secondName.toLowerCase());
+
+                const lst = Math.min(
+                    computeLevenshteinDistance(sanLocMainName, sanRemMainName),
+                    computeLevenshteinDistance(sanLocMainName, sanRemSecoName)
+                )
+                // console.log({ local: sanLocMainName, remoteM: sanRemMainName, remoteS: sanRemSecoName }, lst)
+                return lst < 4;
             });
             // if (localMovie == undefined) {
             //     console.log('Missing Movie!');
@@ -397,7 +414,7 @@ async function compareForNewReleasesAniWorldOrSTO(
                 type: 'movie',
                 serieTitle: localSerie.title,
                 serieReferenceAniworld: localSerie.refs.aniworld as string,
-                movieTitle: aniworldMovie.mainName,
+                movieTitle: aniworldMovie.mainName || aniworldMovie.secondName,
                 movieIDX: aniworldMovieIDX + 1,
             }, localMovie);
         }
