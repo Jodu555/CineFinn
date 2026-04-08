@@ -258,8 +258,6 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
 
     time('Compare');
 
-    index = index.filter(x => x.UUID === '086e5d7e');
-
     // const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: true, zoro: false });
     const output = await compareForNewReleases(index, ignoranceList, { aniworld: true, sto: true, zoro: false });
     timeEnd('Compare');
