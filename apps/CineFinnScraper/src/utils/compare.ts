@@ -265,7 +265,7 @@ async function compareForNewReleasesAniWorldOrSTO(
 
     type OutputListMeta = {
         serieTitle: string;
-        serieReferenceAniworld: string;
+        serieReference: string;
     } & (OutputListMetaEpisode | OutputListMetaMovie);
 
     interface OutputListMetaEpisode {
@@ -327,10 +327,10 @@ async function compareForNewReleasesAniWorldOrSTO(
         }
 
         if (outputListMeta.type === 'episode') {
-            addtoOutputList(outputListMeta.serieTitle, outputListMeta.serieReferenceAniworld as string, outputListMeta.seasonIDX, outputListMeta.episodeIDX, language);
+            addtoOutputList(outputListMeta.serieTitle, outputListMeta.serieReference as string, outputListMeta.seasonIDX, outputListMeta.episodeIDX, language);
         }
         if (outputListMeta.type === 'movie') {
-            addtoOutputListMovie(outputListMeta.serieTitle, outputListMeta.serieReferenceAniworld as string, outputListMeta.movieTitle, outputListMeta.movieIDX, language);
+            addtoOutputListMovie(outputListMeta.serieTitle, outputListMeta.serieReference as string, outputListMeta.movieTitle, outputListMeta.movieIDX, language);
         }
 
 
@@ -355,7 +355,7 @@ async function compareForNewReleasesAniWorldOrSTO(
                     handle(episode, ignoranceItem, {
                         type: 'episode',
                         serieTitle: localSerie.title,
-                        serieReferenceAniworld: localSerie.refs.aniworld as string,
+                        serieReference: localSerie.refs.aniworld as string,
                         seasonIDX: aniworldSeasonIDX + 1,
                         episodeIDX: Number(aniworldSeason.indexOf(episode)) + 1,
                     });
@@ -369,7 +369,7 @@ async function compareForNewReleasesAniWorldOrSTO(
                 handle(aniworldEpisode, ignoranceItem, {
                     type: 'episode',
                     serieTitle: localSerie.title,
-                    serieReferenceAniworld: localSerie.refs.aniworld as string,
+                    serieReference: localSerie.refs['refKey'] as string,
                     seasonIDX: aniworldSeasonIDX + 1,
                     episodeIDX: Number(_aniworldEpisodeIDX) + 1,
                 }, localEpisode);
@@ -413,7 +413,7 @@ async function compareForNewReleasesAniWorldOrSTO(
             handle(aniworldMovie, ignoranceItem, {
                 type: 'movie',
                 serieTitle: localSerie.title,
-                serieReferenceAniworld: localSerie.refs.aniworld as string,
+                serieReference: localSerie.refs['refKey'] as string,
                 movieTitle: aniworldMovie.mainName || aniworldMovie.secondName,
                 movieIDX: aniworldMovieIDX + 1,
             }, localMovie);
