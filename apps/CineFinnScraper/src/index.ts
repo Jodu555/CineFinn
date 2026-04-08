@@ -75,8 +75,8 @@ const httpServer = serve({
         },
     ];
 
-    await wait(1000 * 10);
-    const output = await compareForNewReleases(mockIndex, [], { aniworld: true, sto: true, zoro: false });
+    // await wait(1000 * 10);
+    // const output = await compareForNewReleases(mockIndex, [], { aniworld: true, sto: true, zoro: false });
 
 });
 
@@ -258,6 +258,8 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
 
     time('Compare');
 
+    index = index.filter(x => x.UUID === '086e5d7e');
+
     // const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: true, zoro: false });
     const output = await compareForNewReleases(index, ignoranceList, { aniworld: true, sto: true, zoro: false });
     timeEnd('Compare');
@@ -268,10 +270,10 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
         ...output.sto.map(x => ({ _categorie: 'STO', ...x }))
     ];
     socket!.emit('job:setResult', jobUUID, condensedArray);
-    if (condensedArray.length == 0) return;
-
     log(condensedArray);
     log(condensedArray.length);
+    if (condensedArray.length == 0) return;
+
     // return;
 
     // await kickOffAniDl(condensedArray);

@@ -377,7 +377,11 @@ async function compareForNewReleasesAniWorldOrSTO(
         for (const _aniworldMovieIDX in aniworldSerie.movies) {
             const aniworldMovieIDX = Number(_aniworldMovieIDX);
             const aniworldMovie = aniworldSerie.movies[aniworldMovieIDX];
-            const localMovie = localSerie.movies.find((x) => x.movie_IDX == aniworldMovieIDX + 1);
+            // const localMovie = localSerie.movies.find((x) => x.movie_IDX == aniworldMovieIDX + 1);
+            const localMovie = localSerie.movies.find((lm) => {
+                //Movie title has to be similar and the release date should be the same
+                return computeLevenshteinDistance(sanitizeFileName(lm.primaryName.toLowerCase()), sanitizeFileName(aniworldMovie.mainName.toLowerCase())) < 0.8;
+            });
             // if (localMovie == undefined) {
             //     console.log('Missing Movie!');
             //     handle(aniworldMovie, ignoranceItem, {
@@ -406,6 +410,31 @@ async function compareForNewReleasesAniWorldOrSTO(
         fs.writeFileSync('dlList.json', JSON.stringify(outputDlList, null, 3));
         return [];
     }
+}
+
+// Computes the Levenshtein distance between two strings and returns a similarity score between 0 and 1
+function computeLevenshteinDistance(a: string, b: string): number {
+    const matrix: number[][] = [];
+    const m = a.length;
+    const n = b.length;
+    let i = 0;
+    let j = 0;
+    for (i = 0; i <= m; i++) {
+        matrix[i] = [i];
+    }
+    for (j = 0; j <= n; j++) {
+        matrix[0][j] = j;
+    }
+    for (i = 1; i <= m; i++) {
+        for (j = 1; j <= n; j++) {
+            if (b.charAt(j - 1) === a.charAt(i - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1));
+            }
+        }
+    }
+    return matrix[m][n];
 }
 
 export {
