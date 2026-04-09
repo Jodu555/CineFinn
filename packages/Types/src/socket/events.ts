@@ -49,10 +49,10 @@ export interface ClientToServerEvents {
 }
 
 export interface ServerToScraperEvents {
-    'job:checkForUpdates': (arg0: { jobUUID: string, smart: boolean, index: DetailedSeries[]; }, callback: (arg0: { result: boolean, changedSeries: DetailedSeries[]; }) => void) => void;
+    'job:checkForUpdates': (arg0: { jobUUID: string, smart: boolean, index: DetailedSeries[]; alreadyCheckedForUpdates: string[] }, callback: (arg0: { result: boolean, changedSeries: DetailedSeries[]; }) => void) => void;
     'scrape:aniworld': (url: string, callback: (informations: AniWorldSeriesInformations | void) => void) => void;
     'scrape:sto': (url: string, callback: (informations: AniWorldSeriesInformations | void) => void) => void;
-    'checkSerieForUpdates': (uuid: string, callback: (output: CheckForUpdatesOutput) => void) => void;
+    'checkSerieForUpdates': (serieUUID: string, callback: (output: CheckForUpdatesOutput) => void) => void;
 }
 
 export interface CheckForUpdatesOutput {

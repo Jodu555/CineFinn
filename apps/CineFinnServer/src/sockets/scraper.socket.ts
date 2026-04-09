@@ -8,6 +8,7 @@ import type { Socket } from "socket.io";
 import type { Account } from "@cinefinn/types/models/user";
 import type { timestamped } from "@cinefinn/types/shared";
 import { Job } from "../job/Job.js";
+import { cacheRegistry } from "../routes/admin/cache.js";
 
 export let isScraperSocketConnected = false;
 
@@ -83,12 +84,29 @@ export async function checkForUpdates(job: Job, smart: boolean) {
         await job.fail();
         return;
     }
+
+    const usableSeriesIds = new Set<string>();
+    const updateCache = cacheRegistry.get('seriesUpdate');
+    if (updateCache !== undefined) {
+        await job.log('Checking for Series Update Cache');
+        const keys = await updateCache.keys() || [];
+        for (const key of keys) {
+            const value = await updateCache.get(key) as [];
+            if (value.length > 0) {
+                const seriesID = key.replaceAll('checkForUpdates-', '');
+                await job.log(`Found Series ${seriesID} in Cache with ${value.length} items`);
+                usableSeriesIds.add(seriesID);
+            }
+        }
+    }
+
     await job.log('Handing over to Scraper Socket');
     await new Promise<void>((resolve) => {
         scraperSocket.emit('job:checkForUpdates', {
             jobUUID: job.UUID,
             smart,
             index: job.data.index,
+            alreadyCheckedForUpdates: [...usableSeriesIds],
         }, (e) => {
             resolve();
         });

@@ -67,14 +67,15 @@ export async function storeAniworldCalendar() {
     const newEpisodes = await getAniworldCalendar();
     const calendar = await getAniworldCalendarFromFile();
     calendar[new Date().getTime()] = newEpisodes;
-    fs.writeFileSync(filePath, JSON.stringify(calendar, null, 2));
+    await fs.promises.writeFile(filePath, JSON.stringify(calendar, null, 2));
     return calendar;
 }
 
 export async function getAniworldCalendarFromFile() {
     if (fs.existsSync(filePath) == false) {
-        fs.writeFileSync(filePath, JSON.stringify({}, null, 2));
+        await fs.promises.writeFile(filePath, JSON.stringify({}, null, 2));
     }
-    const calendar = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Calendar;
+    const fileData = await fs.promises.readFile(filePath, 'utf-8');
+    const calendar = JSON.parse(fileData) as Calendar;
     return calendar;
 }

@@ -103,10 +103,10 @@ socket.on('disconnect', () => {
     console.log('Disconnected from Core');
 });
 
-socket.on('job:checkForUpdates', async ({ jobUUID, smart, index }, cb) => {
+socket.on('job:checkForUpdates', async ({ jobUUID, smart, index, alreadyCheckedForUpdates }, cb) => {
     console.log('job:checkForUpdates');
     try {
-        await checkForUpdates(jobUUID, index, smart);
+        await checkForUpdates(jobUUID, index, smart, alreadyCheckedForUpdates);
         cb({
             result: true,
             changedSeries: [],
@@ -120,9 +120,9 @@ socket.on('job:checkForUpdates', async ({ jobUUID, smart, index }, cb) => {
     }
 });
 
-socket.on('checkSerieForUpdates', async (uuid, cb) => {
-    console.log('checkSerieForUpdates', uuid);
-    const response = await axios.get<DetailedSeries>(`${config.CORE.URL}/index/${uuid}`, {
+socket.on('checkSerieForUpdates', async (serieUUID, cb) => {
+    console.log('checkSerieForUpdates', serieUUID);
+    const response = await axios.get<DetailedSeries>(`${config.CORE.URL}/index/${serieUUID}`, {
         headers: {
             'auth-token': config.CORE.REST_AUTH_TOKEN,
         },
@@ -154,7 +154,7 @@ socket.on('scrape:sto', async (url, cb) => {
     cb(informations);
 });
 
-async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart = false) {
+async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart = false, alreadyCheckedForUpdates: string[] = []) {
     const timingMap = new Map<string, number>();
     const log = (...args: any[]) => {
         socket!.emit('job:log', jobUUID, ...args);
@@ -204,17 +204,13 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
 
     log('Using Smart Mode', smart);
     if (smart) {
-        //Get calendar API data and ignore rest
-        // const allIDS = res.data.map(x => x.ID);
-        // const calendarIDResponse = await getRelevantReleasesUsingCalendar();
-        // const useLessIds = allIDS.filter(x => !calendarIDResponse.includes(x));
-        // console.log(useLessIds.length, 'animes/series to ignore because they are not in the relevant calendar');
-        // ignoranceList.push(...useLessIds.map(x => ({ ID: x })));
         const thirtyDaysAgo = Date.now() - 1000 * 60 * 60 * 24 * 30;
+
         time('Getting Calendars');
         const aniworldCalendar = await getAniworldCalendarFromFile();
         const stoCalendar = await getStoCalendarFromFile();
         timeEnd('Getting Calendars');
+
         log('Calendars Loaded:', Object.keys(aniworldCalendar).length, 'Aniworld', Object.keys(stoCalendar).length, 'STO');
 
         const relevantSeriesUUIDs = new Set<string>();
@@ -248,7 +244,7 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
         log('Relevant Series', relevantSeriesUUIDs.size);
 
         index.forEach(x => {
-            if (!relevantSeriesUUIDs.has(x.UUID)) {
+            if (!relevantSeriesUUIDs.has(x.UUID) && !alreadyCheckedForUpdates.includes(x.UUID)) {
                 ignoranceList.push({
                     serie_UUID: x.UUID,
                 });
@@ -257,8 +253,6 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
     }
 
     time('Compare');
-
-    // const output = await compareForNewReleases(res.data, ignoranceList, { aniworld: true, sto: true, zoro: false });
     const output = await compareForNewReleases(index, ignoranceList, { aniworld: true, sto: true, zoro: false });
     timeEnd('Compare');
 
