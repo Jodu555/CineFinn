@@ -732,9 +732,20 @@ const initializeVideoControls = () => {
 			stallTimeout = undefined;
 		}
 	};
+	const onCanPlayThrough = () => {
+		videoLoading.value = false;
+		console.log('Video Can Play Through');
+		if (stallTimeout) {
+			clearTimeout(stallTimeout);
+			stallTimeout = undefined;
+		}
+	};
 	const onSeeking = () => {
 		videoLoading.value = true;
 		console.log('Video Seeking');
+	};
+	const onSeeked = () => {
+		console.log('Video Seeked');
 	};
 	const onStalled = async () => {
 		videoLoading.value = true;
@@ -772,6 +783,12 @@ const initializeVideoControls = () => {
 		videoLoading.value = true;
 		console.log('Video Error');
 		umTrackEvent('video_error', { url: useRoute().fullPath, error: video.error });
+	};
+	const onWaiting = () => {
+		console.log('Video Waiting');
+	};
+	const onSuspended = () => {
+		console.log('Video Suspended');
 	};
 	const onProgress = () => {
 		updateVueVideoData();
@@ -849,9 +866,13 @@ const initializeVideoControls = () => {
 	addListener(video, 'loadeddata', onLoadedData);
 	addListener(video, 'loadstart', onLoadStart);
 	addListener(video, 'canplay', onCanPlay);
+	addListener(video, 'canplaythrough', onCanPlayThrough);
 	addListener(video, 'seeking', onSeeking);
+	addListener(video, 'seeked', onSeeked);
 	addListener(video, 'stalled', onStalled);
 	addListener(video, 'error', onError);
+	addListener(video, 'waiting', onWaiting);
+	addListener(video, 'suspend', onSuspended);
 	addListener(video, 'progress', onProgress);
 	addListener(video, 'durationchange', onDurationChange);
 	addListener(video, 'timeupdate', onTimeUpdate);
