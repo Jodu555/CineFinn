@@ -712,27 +712,49 @@ const initializeVideoControls = () => {
 	});
 
 	// Video event listeners (named so we can remove them)
+	let stallTimeout = undefined as NodeJS.Timeout | undefined;
 	const onLoadedData = () => {
 		if (totalTimeElem) totalTimeElem.textContent = formatDuration(video.duration);
 		dataLoading.value = false;
+		console.log('Video Loaded Data');
 	};
 	const onLoadStart = () => {
 		videoLoading.value = true;
 		dataLoading.value = true;
+		console.log('Video Load Start');
 	};
 	const onCanPlay = () => {
 		updateVueVideoData();
 		videoLoading.value = false;
+		console.log('Video Can Play');
+		if (stallTimeout) {
+			clearTimeout(stallTimeout);
+			stallTimeout = undefined;
+		}
 	};
 	const onSeeking = () => {
 		videoLoading.value = true;
+		console.log('Video Seeking');
 	};
 	const onStalled = async () => {
 		videoLoading.value = true;
+		console.log('Video Stalled');
 		umTrackEvent('video_stalled');
+		if (stallTimeout) {
+			clearTimeout(stallTimeout);
+			stallTimeout = undefined;
+		}
 		let previouslyPaused = video.paused;
-		setTimeout(async () => {
+		let previousTime = video.currentTime;
+		stallTimeout = setTimeout(async () => {
 			if (video.readyState !== 4) {
+				console.log('Video Stalled: Reloading', {
+					readyState: video.readyState,
+					currentTime: video.currentTime,
+					duration: video.duration,
+					previouslyPaused,
+					previousTime,
+				});
 				const time = video.currentTime;
 				video.load();
 				try {
@@ -742,12 +764,13 @@ const initializeVideoControls = () => {
 					}
 				} catch {}
 				videoLoading.value = false;
-				video.currentTime = time;
+				video.currentTime = Math.max(time, previousTime, 0);
 			}
 		}, 10000);
 	};
 	const onError = () => {
 		videoLoading.value = true;
+		console.log('Video Error');
 		umTrackEvent('video_error', { url: useRoute().fullPath, error: video.error });
 	};
 	const onProgress = () => {

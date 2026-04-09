@@ -48,7 +48,8 @@ const router = new Hono()
     .get('/:watchableEntityUUID', authMiddleware, async (c) => {
         const user = c.get('credentials').user;
         const watchableEntityUUID = c.req.param('watchableEntityUUID');
-        const debug = false;
+        const debugParam = c.req.query('debug');
+        const debug = false || debugParam === 'true';
 
         try {
             // Find the watchable entity
@@ -98,6 +99,7 @@ const router = new Hono()
                 c.header('Accept-Ranges', 'bytes');
                 c.header('Content-Length', fileSize.toString());
                 c.header('Content-Type', 'video/mp4');
+                debug && console.log('HEAD request, sending headers only');
                 return c.body(null, 200);
             }
 
@@ -114,6 +116,7 @@ const router = new Hono()
                     end,
                     highWaterMark: 64 * 1024 // 64KB chunks
                 });
+                debug && console.log('Creating file stream');
 
                 // Set status code first
                 c.status(range ? 206 : 200);
@@ -130,7 +133,8 @@ const router = new Hono()
                 // Return the file stream as body
                 return c.body(fileStream as any);
             } else {
-                const requestId = crypto.randomUUID();
+                const requestId = crypto.randomUUID().split('-')[0]; // Shorten the UUID for easier logging
+                debug && console.log('Requesting video stream over socket', requestId);
                 return createVideoStreamOverSocket(watchableEntity.subID, requestId, filePath, { start, end }, c, fileSize);
             }
 

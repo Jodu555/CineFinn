@@ -12,6 +12,12 @@
 		</div>
 		<ClientOnly>
 			<div v-if="showVideo">
+				<div v-if="authStore.loggedIn && authStore.user.settings.developerMode.value" class="d-flex justify-content-center mt-2 mb-4">
+					<div class="form-check form-switch">
+						<input class="form-check-input" type="checkbox" role="switch" id="videoDebug" v-model="videoDebug" />
+						<label class="form-check-label" for="videoDebug">Video Debug</label>
+					</div>
+				</div>
 				<ExtendedVideo
 					v-if="authStore.loggedIn"
 					:videoSrc="videoSrc"
@@ -555,6 +561,8 @@ const showVideo = computed(() => {
 	// return currentMovieUUID.value !== null || currentEpisodeUUID.value !== null;
 });
 
+const videoDebug = ref(false);
+
 const videoSrc = computed(() => {
 	if (series.value === undefined) return '';
 
@@ -579,7 +587,7 @@ const videoSrc = computed(() => {
 	if (!oldVideoAPI) {
 		let url = `${useAPIURL()}/video/`;
 		url += `${indexStore.selectedWatchableEntity?.UUID}`;
-		url += `?auth-token=${authStore.authToken}&subsystem=${indexStore.selectedWatchableEntity?.subID}`;
+		url += `?auth-token=${authStore.authToken}&subsystem=${indexStore.selectedWatchableEntity?.subID}&debug=${videoDebug.value}`;
 		return url;
 	}
 	return '';
