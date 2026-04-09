@@ -23,11 +23,15 @@ const app = new Hono({
     .use(cors())
     .use(trimTrailingSlash())
     .get('/calendars/store/sto', async (c) => {
+        console.time('Store STO Calendar');
         const calendar = await storeStoCalendar();
+        console.timeEnd('Store STO Calendar');
         return c.json(calendar);
     })
     .get('/calendars/store/aniworld', async (c) => {
+        console.time('Store Aniworld Calendar');
         const calendar = await storeAniworldCalendar();
+        console.timeEnd('Store Aniworld Calendar');
         return c.json(calendar);
     });
 
