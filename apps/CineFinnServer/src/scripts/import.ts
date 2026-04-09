@@ -43,9 +43,15 @@ async function importIgnoreList() {
 
     console.time('Importing Ignore List');
     for (const item of data) {
+        const existingIgnoreItem = await ignoranceTable.getOne({ serie_UUID: item.ID, unique: true });
+        if (existingIgnoreItem != undefined) {
+            console.log(`=> Ignorance item ${item.title} already exists, skipping`);
+            continue;
+        }
         await ignoranceTable.create({
             serie_UUID: item.ID,
         });
+        console.log(`=> Added Ignorance Item ${item.title}`);
     }
     console.timeEnd('Importing Ignore List');
 }
@@ -78,38 +84,61 @@ async function importSerieses() {
         k++;
         k % 15 == 0 && console.log(`=> Working.... ${k}/${data.length} series`);
         // console.log(`=> Adding ${serie.title}`);
-        await seriesTable.create({
-            UUID: serie.ID,
-            tags: [serie.categorie],
-            title: serie.title,
-            infos: serie.infos,
-            refs: serie.references,
-        } satisfies Series);
-        console.log(`=> Added ${serie.title}`);
+
+        const existingSerie = await seriesTable.getOne({ UUID: serie.ID, unique: true });
+        if (existingSerie != undefined) {
+            console.log(`=> Series ${serie.title} already exists, skipping`);
+        } else {
+            await seriesTable.create({
+                UUID: serie.ID,
+                tags: [serie.categorie],
+                title: serie.title,
+                infos: serie.infos,
+                refs: serie.references,
+            } satisfies Series);
+            console.log(`=> Added ${serie.title}`);
+        }
+
 
         let s = 0;
         for (const season of serie.seasons) {
             s++;
-            const seasonUUID = generateSeasonID();
+            const existingSeason = await seasonsTable.getOne({ serie_UUID: serie.ID, season_IDX: s, episodes: season.length, unique: true });
+            const seasonUUID = existingSeason?.UUID || generateSeasonID();
             // console.log(`=> Adding season ${serie.title} S${season.season}`);
-            await seasonsTable.create({
-                UUID: seasonUUID,
-                serie_UUID: serie.ID,
-                season_IDX: s,
-                episodes: season.length,
-            });
+            if (existingSeason == undefined) {
+                await seasonsTable.create({
+                    UUID: seasonUUID,
+                    serie_UUID: serie.ID,
+                    season_IDX: s,
+                    episodes: season.length,
+                });
+            } else {
+                console.log(`=> Season ${serie.title} S${existingSeason.season_IDX} already exists, skipping`);
+            }
 
             for (const episode of season) {
-                const episodeUUID = generateEpisodeID();
                 // console.log(`=> Adding episode ${serie.title} S${episode.season}E${episode.episode}`);
-                await episodesTable.create({
-                    UUID: episodeUUID,
+                const existingEpisode = await episodesTable.getOne({
                     serie_UUID: serie.ID,
+                    season_UUID: seasonUUID,
                     season_IDX: episode.season,
                     episode_IDX: episode.episode,
-                    season_UUID: seasonUUID,
-                } satisfies Episode);
-                // console.log(`=> Added episode ${serie.title} S${episode.season}E${episode.episode}`);
+                    unique: true
+                });
+                const episodeUUID = existingEpisode?.UUID || generateEpisodeID();
+                if (existingEpisode == undefined) {
+                    await episodesTable.create({
+                        UUID: episodeUUID,
+                        serie_UUID: serie.ID,
+                        season_IDX: episode.season,
+                        episode_IDX: episode.episode,
+                        season_UUID: seasonUUID,
+                    } satisfies Episode);
+                    // console.log(`=> Added episode ${serie.title} S${episode.season}E${episode.episode}`);
+                } else {
+                    console.log(`=> Episode ${serie.title} S${existingEpisode.season_IDX}E${existingEpisode.episode_IDX} already exists, skipping`);
+                }
 
                 for (const lang of episode.langs) {
                     const iv = crypto.randomBytes(16);
@@ -120,6 +149,20 @@ async function importSerieses() {
                     if (episode.langs.length > 1) {
                         const { dir, name, ext } = path.parse(filePath);
                         filePath = path.join(dir, `${name.split('_')[0]}_${lang}${ext}`);
+                    }
+
+                    const existingWatchableEntity = await watchableEntitysTable.getOne({
+                        UUID: watchableEntityUUID,
+                        serie_UUID: serie.ID,
+                        watchable_UUID: episodeUUID,
+                        unique: true,
+                        lang: lang,
+                        subID: episode.subID || 'main',
+                        filePath: filePath,
+                    });
+                    if (existingWatchableEntity != undefined) {
+                        console.log(`=> Watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang}) already exists, skipping`);
+                        continue;
                     }
 
                     await watchableEntitysTable.create({
@@ -142,15 +185,21 @@ async function importSerieses() {
         let i = 0;
         for (const movie of serie.movies) {
             i++;
-            const movieUUID = generateMovieID();
+
             // console.log(`=> Adding movie ${serie.title} #${i} (${movie.primaryName})`);
-            await moviesTable.create({
-                UUID: movieUUID,
-                serie_UUID: serie.ID,
-                movie_IDX: i,
-                primaryName: movie.primaryName || `${serie.title} #${i}`,
-            } satisfies Movie);
-            // console.log(`=> Added movie ${serie.title} #${i} (${movie.primaryName})`);
+            const existingMovie = await moviesTable.getOne({ serie_UUID: serie.ID, movie_IDX: i, unique: true });
+            const movieUUID = existingMovie?.UUID || generateMovieID();
+            if (existingMovie == undefined) {
+                await moviesTable.create({
+                    UUID: movieUUID,
+                    serie_UUID: serie.ID,
+                    movie_IDX: i,
+                    primaryName: movie.primaryName || `${serie.title} #${i}`,
+                } satisfies Movie);
+                // console.log(`=> Added movie ${serie.title} #${i} (${movie.primaryName})`);
+            } else {
+                console.log(`=> Movie ${serie.title} #${i} already exists, skipping`);
+            }
             for (const lang of movie.langs) {
                 // const iv = crypto.randomBytes(16);
                 const watchableEntityUUID = generateEntityID();
@@ -160,6 +209,20 @@ async function importSerieses() {
                 if (movie.langs.length > 1) {
                     const { dir, name, ext } = path.parse(filePath);
                     filePath = path.join(dir, `${name.split('_')[0]}_${lang}${ext}`);
+                }
+
+                const existingWatchableEntity = await watchableEntitysTable.getOne({
+                    UUID: watchableEntityUUID,
+                    serie_UUID: serie.ID,
+                    watchable_UUID: movieUUID,
+                    unique: true,
+                    lang: lang,
+                    subID: movie.subID || 'main',
+                    filePath: filePath,
+                });
+                if (existingWatchableEntity != undefined) {
+                    console.log(`=> Watchable entity ${serie.title} Movie #${i} (${lang}) already exists, skipping`);
+                    continue;
                 }
 
                 await watchableEntitysTable.create({
@@ -192,6 +255,10 @@ async function importAccounts() {
     // }
 
     for (const account of oldAccounts) {
+        if (await accountsTable.getOne({ UUID: account.UUID }) != undefined) {
+            console.log(`Account ${account.username} already exists, skipping`);
+            continue;
+        }
         await accountsTable.create({
             UUID: account.UUID,
             username: account.username,
@@ -260,6 +327,16 @@ async function importWatchHistory() {
                     continue;
                 }
                 watchableEM = movie;
+            }
+
+            if (await watchHistoryTable.getOne({
+                account_UUID: watchString.account_UUID,
+                series_UUID: watchable.ID,
+                watchable_UUID: watchableEM.UUID,
+                watchTime: +watchable.time, unique: true
+            }) != undefined) {
+                console.log(`WatchHistory ${watchString.account_UUID} S${watchable.season}E${watchable.episode} M${watchable.movie} (${watchable.ID}) already exists, skipping`);
+                continue;
             }
 
             await watchHistoryTable.create({
