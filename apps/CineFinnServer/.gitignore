@@ -8,6 +8,8 @@
 .idea/usage.statistics.xml
 .idea/shelf
 temp/**
+accounts-creation-map.json
+account-map.json
 
 # deps
 node_modules/

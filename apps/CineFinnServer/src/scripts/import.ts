@@ -64,7 +64,7 @@ async function importAccountsCreationMap() {
     }
     const accountsCreationMapPath = path.join(process.cwd(), 'accounts-creation-map.json');
     if (!fs.existsSync(accountsCreationMapPath)) {
-        console.log('Accounts Creation Map not found, exiting');
+        console.log('Accounts Creation Map not found, exiting looking for', accountsCreationMapPath);
         process.exit(1);
     }
     const accountsCreationMap = JSON.parse(fs.readFileSync(accountsCreationMapPath, 'utf8')) as AccountCreation[];
@@ -137,12 +137,12 @@ async function importSerieses() {
                     } satisfies Episode);
                     // console.log(`=> Added episode ${serie.title} S${episode.season}E${episode.episode}`);
                 } else {
-                    console.log(`=> Episode ${serie.title} S${existingEpisode.season_IDX}E${existingEpisode.episode_IDX} already exists, skipping`);
+                    // console.log(`=> Episode ${serie.title} S${existingEpisode.season_IDX}E${existingEpisode.episode_IDX} already exists, skipping`);
                 }
 
                 for (const lang of episode.langs) {
-                    const iv = crypto.randomBytes(16);
-                    const watchableEntityUUID = generateEntityID();
+                    // const iv = crypto.randomBytes(16);
+
                     // console.log(`=> Adding watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang})`);
 
                     let filePath = episode.filePath;
@@ -152,7 +152,6 @@ async function importSerieses() {
                     }
 
                     const existingWatchableEntity = await watchableEntitysTable.getOne({
-                        UUID: watchableEntityUUID,
                         serie_UUID: serie.ID,
                         watchable_UUID: episodeUUID,
                         unique: true,
@@ -164,6 +163,7 @@ async function importSerieses() {
                         console.log(`=> Watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang}) already exists, skipping`);
                         continue;
                     }
+                    const watchableEntityUUID = generateEntityID();
 
                     await watchableEntitysTable.create({
                         UUID: watchableEntityUUID,
@@ -176,7 +176,7 @@ async function importSerieses() {
                         // IV: iv.toString('base64'),
                         // hash: '',
                     } satisfies WatchableEntity);
-                    // console.log(`=> Added watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang})`);
+                    console.log(`=> Added watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang})`);
                 }
             }
         }
@@ -198,11 +198,11 @@ async function importSerieses() {
                 } satisfies Movie);
                 // console.log(`=> Added movie ${serie.title} #${i} (${movie.primaryName})`);
             } else {
-                console.log(`=> Movie ${serie.title} #${i} already exists, skipping`);
+                console.log(`=> Movie ${serie.title} #${movie.primaryName || i} already exists, skipping`);
             }
             for (const lang of movie.langs) {
                 // const iv = crypto.randomBytes(16);
-                const watchableEntityUUID = generateEntityID();
+
                 // console.log(`=> Adding watchable entity ${serie.title} #${i} (${lang})`);
 
                 let filePath = movie.filePath;
@@ -212,7 +212,6 @@ async function importSerieses() {
                 }
 
                 const existingWatchableEntity = await watchableEntitysTable.getOne({
-                    UUID: watchableEntityUUID,
                     serie_UUID: serie.ID,
                     watchable_UUID: movieUUID,
                     unique: true,
@@ -224,6 +223,7 @@ async function importSerieses() {
                     console.log(`=> Watchable entity ${serie.title} Movie #${i} (${lang}) already exists, skipping`);
                     continue;
                 }
+                const watchableEntityUUID = generateEntityID();
 
                 await watchableEntitysTable.create({
                     UUID: watchableEntityUUID,
@@ -274,7 +274,8 @@ async function importAccounts() {
 
         const accountCreation = accountsCreationMap.find((a) => a.uuid === account.UUID);
         if (accountCreation == undefined) {
-            console.log('Account not found in creation map', account.UUID);
+            await accountsTable.delete({ UUID: account.UUID });
+            console.log('Account not found in creation map', account.UUID, account.username);
             process.exit(1);
         }
         //@ts-expect-error
