@@ -77,9 +77,19 @@ const onAddToPlaylist = (seriesUUID: string) => {
 	});
 };
 
-const selectedCategory = ref('Alle');
+const sortCookie = useCookie('list-sort');
+const categoryCookie = useCookie('list-category');
 
-const sort = ref(false);
+const selectedCategory = ref(categoryCookie.value || 'Alle');
+
+const sort = ref(sortCookie.value === 'true' ? true : false);
+
+watch([selectedCategory, sort], () => {
+	console.log('Sorting or Categorys changes saving');
+	sortCookie.value = sort.value.toString();
+	categoryCookie.value = selectedCategory.value;
+});
+
 const buttonInfo = computed(() => {
 	return sort.value ? '↑' : '↓';
 });
