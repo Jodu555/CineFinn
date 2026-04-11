@@ -15,8 +15,11 @@ import SocketConnection from '~/components/SocketConnection.client.vue';
 const authToken = useCookie('auth-token', { watch: true });
 
 const authStore = useAuthStore();
+const globalStore = useGlobalStore();
 
 await authStore.authenticate();
+
+await globalStore.loadGlobals();
 
 useHead({
 	bodyAttrs: {

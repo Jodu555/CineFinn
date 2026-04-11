@@ -42,7 +42,6 @@ async function checkIfRunning(type: string) {
     }
 }
 
-
 async function handleJob(type: JobType, c: Context<AuthedVars>, callFunction: (job: Job) => Promise<void>) {
     if (await checkIfRunning(type)) {
         return c.json({
@@ -107,15 +106,9 @@ const router = new Hono()
     })
     .get('/job/checkForUpdates-smart', authFullMiddleware((user) => user.role >= jobRegistry['checkForUpdates-smart'].minimumRole), async (c) => {
         return await handleJob('checkForUpdates-smart', c, (job) => checkForUpdates(job, true));
-        return c.json({
-            message: 'Not implemented yet',
-        });
     })
     .get('/job/checkForUpdates-old', authFullMiddleware((user) => user.role >= jobRegistry['checkForUpdates-old'].minimumRole), async (c) => {
         return await handleJob('checkForUpdates-old', c, (job) => checkForUpdates(job, false));
-        return c.json({
-            message: 'Not implemented yet',
-        });
     });
 
 export { router as managmentRouter };

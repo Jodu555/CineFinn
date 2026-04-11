@@ -1,7 +1,12 @@
 <template>
+	<div v-if="globalStore.motd.show" class="alert" :class="`alert-${globalStore.motd.type}`" role="alert">
+		<strong>Motd:</strong> {{ globalStore.motd.message }}
+	</div>
+
 	<nav
 		class="navbar sticky-top navbar-expand-lg"
-		style="backdrop-filter: blur(12px); background-color: color-mix(in oklab, var(--bs-body-bg) 77%, transparent)">
+		style="backdrop-filter: blur(12px); background-color: color-mix(in oklab, var(--bs-body-bg) 77%, transparent)"
+	>
 		<div class="container-fluid">
 			<router-link class="navbar-brand text-primary fw-bold" to="/">CineFinn</router-link>
 			<button
@@ -11,7 +16,8 @@
 				data-bs-target="#navbarNav"
 				aria-controls="navbarNav"
 				aria-expanded="false"
-				aria-label="Toggle navigation">
+				aria-label="Toggle navigation"
+			>
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarNav">
@@ -59,14 +65,16 @@
 						:options="{ placeholder: 'Search for a series...', clearAfterSelect: true, asLink: true }"
 						:data="autoCompleteSeries"
 						:prefetch-fn="autocompletePrefetch"
-						:link-builder-fn="autocompleteLinkBuilder" />
+						:link-builder-fn="autocompleteLinkBuilder"
+					/>
 					<div class="btn-group" role="group" aria-label="Basic outlined example">
 						<button
 							title="Settings"
 							class="btn btn-outline-primary"
 							data-bs-toggle="offcanvas"
 							data-bs-target="#offcanvasSettings"
-							aria-controls="offcanvasSettings">
+							aria-controls="offcanvasSettings"
+						>
 							<font-awesome-icon icon="fa-solid fa-gears" />
 						</button>
 						<button class="btn btn-outline-danger" title="Logout" @click="authStore.logout()">
@@ -82,10 +90,13 @@
 <script setup lang="ts">
 import { Role } from '@cinefinn/types';
 import AutoComplete from './AutoComplete.vue';
+import { vModelText } from 'vue';
 
 const authStore = useAuthStore();
 
 const indexStore = useIndexStore();
+
+const globalStore = useGlobalStore();
 
 const autoCompleteSeries = computed(() => {
 	const arr = [] as { ID: string; value: string }[];

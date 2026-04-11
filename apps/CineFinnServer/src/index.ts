@@ -60,15 +60,14 @@ export const app = new Hono({
         },
     }))
     .get('/health', (c) => {
-        // const cpus = os.cpus();
         return c.json({
             status: 'ok',
             version: packageJSON.version,
-            // memory: {
-            //     usage: process.memoryUsage(),
-            //     total: os.totalmem(),
-            //     free: os.freemem(),
-            // },
+            motd: {
+                show: false,
+                type: 'info',
+                message: '',
+            },
         }, 200);
     })
     .route('/auth', authRouter)
