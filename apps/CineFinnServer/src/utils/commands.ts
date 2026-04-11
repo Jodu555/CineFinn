@@ -1,9 +1,11 @@
 import { Command, CommandManager } from "@jodu555/commandmanager";
-import { accountsTable, authTokensTable } from "../database.js";
+import { accountsTable, authTokensTable, episodesTable, moviesTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../database.js";
 import type { AuthToken } from "@cinefinn/types";
 import { getIO, loggerInstances } from "../utils.js";
 import { sendSeriesReloadToAll, sendSiteReload, socketStateMap } from "../sockets/client.socket.js";
 import { cacheRegistry } from "../routes/admin/cache.js";
+import { indexStorage } from "../routes/index.js";
+import { recommendationStorage } from "../routes/recommendations/recommendations.js";
 
 
 export function setupCommandManager() {
@@ -155,6 +157,34 @@ function registerCommands() {
                         return `Logger instance ${instance} not found`;
                     }
                 }
+            }
+        )
+    );
+
+    commandManager.registerCommand(
+        new Command(
+            ['delete', 'del'],
+            'delete <Serie-UUID>',
+            'Deletes a series and clears its cache',
+            async (command, [...args], scope) => {
+                const serieUUID = args[1];
+                if (!serieUUID) {
+                    return 'Please provide a Series UUID to delete';
+                }
+                // Add logic here to delete the series and clear its cache
+
+                await seriesTable.delete({ UUID: serieUUID });
+                await moviesTable.delete({ serie_UUID: serieUUID });
+                await episodesTable.delete({ serie_UUID: serieUUID });
+                await watchableEntitysTable.delete({ serie_UUID: serieUUID });
+                await watchHistoryTable.delete({ series_UUID: serieUUID });
+
+                try { await indexStorage.clear(); } catch (e) { }
+                try { await recommendationStorage.clear(); } catch (e) { }
+
+                await sendSeriesReloadToAll();
+
+                return 'Series deleted and cache cleared!';
             }
         )
     );
