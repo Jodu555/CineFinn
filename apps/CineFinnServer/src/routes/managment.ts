@@ -83,7 +83,7 @@ const router = new Hono()
     .get('/jobs/info', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const jobs = await jobsTable.get();
         return c.json(jobs.filter(job => {
-            jobRegistry[job.type as JobType]?.minimumRole <= c.get('credentials').user.role;
+            return jobRegistry[job.type as JobType]?.minimumRole <= c.get('credentials').user.role;
         }));
     })
     .delete('/jobs/delete/:UUID', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
