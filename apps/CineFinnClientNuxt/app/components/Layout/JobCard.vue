@@ -1,6 +1,6 @@
 <template>
-	<li class="list-group-item">
-		<h5>{{ jobName }}</h5>
+	<li class="list-group-item" v-if="registeredJob != undefined && authStore.user.role >= registeredJob.minimumRole">
+		<h5>{{ registeredJob.name }}</h5>
 
 		<template v-if="currentJob != undefined">
 			<div v-if="isRunning">
@@ -48,7 +48,7 @@ const props = withDefaults(
 	},
 );
 
-const jobName = computed(() => managmentStore.jobRegistry[props.jobType]);
+const registeredJob = computed(() => managmentStore.jobRegistry[props.jobType]);
 
 async function run(id: JobType) {
 	const response = await $fetch(`${useAPIURL()}/managment/job/${id}`, {

@@ -4,16 +4,21 @@ import { defineStore } from 'pinia';
 
 import type { FetchError } from 'ofetch';
 
+type JobRegistry = Record<JobType, {
+    name: string;
+    minimumRole: number;
+}>;
+
 export const useManagmentStore = defineStore('managment', {
     state: () => ({
         loading: false,
         error: '',
         jobRegistry: {
-            crawl: 'Crawl the Archive',
-            generatePreviewImages: 'Generate Preview Images',
-            'checkForUpdates-old': 'Check for Updates Old',
-            'checkForUpdates-smart': 'Check for Updates Smart',
-        } as Record<JobType, string>,
+            crawl: { name: 'Crawl the Archive', minimumRole: 2 },
+            generatePreviewImages: { name: 'Generate Preview Images', minimumRole: 3 },
+            'checkForUpdates-old': { name: 'Check for Updates Old', minimumRole: 3 },
+            'checkForUpdates-smart': { name: 'Check for Updates Smart', minimumRole: 2 },
+        } as JobRegistry,
         jobs: [] as (Job & timestamped)[],
     }),
     actions: {

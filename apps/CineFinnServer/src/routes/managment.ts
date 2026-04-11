@@ -21,10 +21,10 @@ const jobRegistry: Record<JobType, JobRegister> = {
         minimumRole: 2,
     },
     generatePreviewImages: {
-        minimumRole: 2,
+        minimumRole: 3,
     },
     'checkForUpdates-old': {
-        minimumRole: 2,
+        minimumRole: 3,
     },
     'checkForUpdates-smart': {
         minimumRole: 2,
@@ -82,7 +82,9 @@ async function handleJob(type: JobType, c: Context<AuthedVars>, callFunction: (j
 const router = new Hono()
     .get('/jobs/info', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const jobs = await jobsTable.get();
-        return c.json(jobs);
+        return c.json(jobs.filter(job => {
+            jobRegistry[job.type as JobType]?.minimumRole <= c.get('credentials').user.role;
+        }));
     })
     .delete('/jobs/delete/:UUID', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const jobUUID = c.req.param('UUID');

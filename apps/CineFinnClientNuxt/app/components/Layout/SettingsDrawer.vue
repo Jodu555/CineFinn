@@ -31,7 +31,7 @@
 					<pre v-if="authStore.user.settings.developerMode.value">{{ { registry: managmentStore.jobRegistry } }}</pre>
 					<hr />
 					<ul v-if="managmentStore.error === ''" class="list-group list-group-flush mb-3">
-						<JobCard v-for="(jobName, jobType) in managmentStore.jobRegistry" :job-type="jobType" :key="jobType" />
+						<JobCard v-for="(registeredJob, jobType) in managmentStore.jobRegistry" :job-type="jobType" :key="jobType" />
 					</ul>
 					<div v-else class="alert alert-danger" role="alert"><strong>Error:</strong> {{ managmentStore.error }}</div>
 					<!-- <pre
