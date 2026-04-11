@@ -6,6 +6,7 @@ import { sendSeriesReloadToAll, sendSiteReload, socketStateMap } from "../socket
 import { cacheRegistry } from "../routes/admin/cache.js";
 import { indexStorage } from "../routes/index.js";
 import { recommendationStorage } from "../routes/recommendations/recommendations.js";
+import { wait } from "@cinefinn/utilities/time";
 
 
 export function setupCommandManager() {
@@ -171,7 +172,16 @@ function registerCommands() {
                 if (!serieUUID) {
                     return 'Please provide a Series UUID to delete';
                 }
-                // Add logic here to delete the series and clear its cache
+
+                console.log(`Are you sure you want to COMPLETELY DELETE ${serieUUID} from the DB`);
+                console.log('By Default this command wait\'s 10 seconds before Actually deleting the series');
+
+                await wait(1000 * 10)
+
+                console.log('Starting Deletion');
+
+                console.time('Deletion took')
+
 
                 await seriesTable.delete({ UUID: serieUUID });
                 await moviesTable.delete({ serie_UUID: serieUUID });
@@ -183,6 +193,8 @@ function registerCommands() {
                 try { await recommendationStorage.clear(); } catch (e) { }
 
                 await sendSeriesReloadToAll();
+
+                console.timeEnd('Deletion took')
 
                 return 'Series deleted and cache cleared!';
             }
