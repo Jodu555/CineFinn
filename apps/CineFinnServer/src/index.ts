@@ -39,6 +39,7 @@ import { previewImagesRouter } from './routes/previewImages.js';
 import { recommendationRouter } from './routes/recommendations/recommendations.js';
 import { wait } from '@cinefinn/utilities/time';
 import { setupCommandManager } from './utils/commands.js';
+import { franchiseRouter } from './routes/franchise.js';
 
 
 
@@ -80,6 +81,7 @@ export const app = new Hono({
     .route('', proxyRouter)
     .route('/previewImages', previewImagesRouter)
     .route('/recommendations', recommendationRouter)
+    .route('/franchise', franchiseRouter)
     .route('/video', videoRouter);
 
 export type definedSocket = Socket<AnythingToServerEvents, ServerToAnythingEvents, InterServerEvents, SocketData<Account | (Account & timestamped)>>;
