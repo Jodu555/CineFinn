@@ -1,5 +1,5 @@
+import type { WatchHistory } from '@cinefinn/types';
 import type { DetailedSeason, DetailedEpisode, WatchableEntity, DetailedSeries, DetailedMovie, FrontendSeries, Season } from '@cinefinn/types/models/media';
-import type { WatchHistory } from '@cinefinn/types/models/system';
 
 
 export const useIndexStore = defineStore('index', {
@@ -117,9 +117,10 @@ export const useIndexStore = defineStore('index', {
             //Taking the old watchlist basically deduplcating it by the history uuid and splicing it with the new one.
             // So we take the difference, this prevents overwriting when multiple tabs are open at different serieses
             this.watchHistory = [
-                ...this.watchHistory.filter(wh => watchList.some(w => w.UUID === wh.UUID)),
+                ...this.watchHistory.filter((wh: WatchHistory) => !watchList.some(w => w.UUID === wh.UUID)),
                 ...watchList,
             ]
+
             // watchList.forEach(w => {
             //     let index = this.watchHistory.findIndex(wh => w.UUID === wh.UUID);
             //     if (index === -1) {
