@@ -1,7 +1,7 @@
 <template>
 	<div class="franchise-page min-vh-100 text-white">
 		<!-- Loading Spinner -->
-		<div v-if="isLoading" class="d-flex justify-content-center align-items-center min-vh-100">
+		<div v-if="false" class="d-flex justify-content-center align-items-center min-vh-100">
 			<div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem"></div>
 		</div>
 
@@ -397,8 +397,7 @@ const route = useRoute();
 const router = useRouter();
 const slug = route.params.slug as string;
 
-const isLoading = ref(true);
-const franchise = ref<FranchiseData | null>(null);
+const franchise = computed(() => franchiseData[slug] || null);
 const activeSection = ref('all');
 const isNavScrolled = ref(false);
 const stickyNav = ref<HTMLElement | null>(null);
@@ -415,9 +414,6 @@ const allContent = computed(() => {
 });
 
 onMounted(() => {
-	franchise.value = franchiseData[slug] || null;
-	isLoading.value = false;
-
 	if (process.client) {
 		window.addEventListener('scroll', handleScroll, { passive: true });
 		setupIntersectionObserver();
