@@ -1,5 +1,5 @@
 <template>
-	<div class="min-vh-100 text-white">
+	<div class="franchise-page min-vh-100 text-white">
 		<!-- Loading Spinner -->
 		<div v-if="isLoading" class="d-flex justify-content-center align-items-center min-vh-100">
 			<div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem"></div>
@@ -8,8 +8,8 @@
 		<!-- Not Found -->
 		<div v-else-if="!franchise" class="d-flex justify-content-center align-items-center min-vh-100 text-center">
 			<div>
-				<h1 class="fw-bold mb-4">Franchise Not Found</h1>
-				<button class="btn btn-outline-light" @click="goBack">
+				<h1 class="fw-bold mb-4 display-4">Franchise Not Found</h1>
+				<button class="btn btn-outline-light btn-lg px-4 rounded-pill" @click="goBack">
 					<font-awesome-icon :icon="['fa-solid', 'fa-arrow-left']" class="me-2" />
 					Go Back
 				</button>
@@ -19,114 +19,132 @@
 		<!-- Franchise Page -->
 		<div v-else>
 			<!-- Hero Section -->
-			<div class="position-relative" style="height: 70vh; overflow: hidden">
-				<img
-					:src="franchise.backgroundImage || '/placeholder.svg'"
-					:alt="franchise.name"
-					class="w-100 h-100 object-fit-cover position-absolute top-0 start-0"
-				/>
-				<div
-					class="position-absolute top-0 start-0 w-100 h-100"
-					style="background: linear-gradient(to top, #000, rgba(0, 0, 0, 0.6), transparent)"
-				></div>
-
-				<div class="position-absolute bottom-0 start-0 end-0 p-4 p-md-5">
-					<div class="container">
-						<div class="mb-4">
-							<img :src="franchise.logo || '/placeholder.svg'" :alt="`${franchise.name} logo`" width="300" class="img-fluid" />
-						</div>
-						<p class="text-light mb-3">{{ franchise.description }}</p>
-						<div class="text-secondary small">
-							<span>{{ franchise.totalContent }} Titles</span>
-							<span class="mx-2">•</span>
-							<span>{{ franchise.subFranchises.length }} Sub-Franchises</span>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- Content Section -->
-			<div class="container py-5">
-				<!-- Sub-Franchise Filter -->
-				<div v-if="franchise.subFranchises.length" class="mb-4">
-					<h2 class="h5 fw-semibold mb-3">Browse by Collection</h2>
-					<div class="d-flex flex-wrap gap-2">
-						<button class="btn" :class="selectedSubFranchise === null ? 'btn-primary' : 'btn-outline-light'" @click="selectedSubFranchise = null">
-							All Content
-						</button>
-						<button
-							v-for="sf in franchise.subFranchises"
-							:key="sf.id"
-							class="btn"
-							:class="selectedSubFranchise === sf.id ? 'btn-primary' : 'btn-outline-light'"
-							@click="selectedSubFranchise = sf.id"
-						>
-							{{ sf.name }}
-						</button>
-					</div>
+			<div class="hero-section position-relative">
+				<div class="hero-image-wrapper">
+					<img :src="franchise.backgroundImage || '/placeholder.svg'" :alt="franchise.name" class="hero-image" />
+					<div class="hero-overlay"></div>
 				</div>
 
-				<!-- Selected Sub-Franchise Info -->
-				<div v-if="selectedSubFranchise" class="p-4 mb-4 bg-secondary bg-opacity-25 rounded">
-					<div v-if="selectedFranchise" class="d-flex align-items-center gap-3">
-						<img :src="selectedFranchise.logo || '/placeholder.svg'" :alt="selectedFranchise.name" width="120" class="img-fluid" />
-						<div>
-							<h3 class="h6 fw-bold">{{ selectedFranchise.name }}</h3>
-							<p class="text-light mb-1">{{ selectedFranchise.description }}</p>
-							<small class="text-secondary">{{ selectedFranchise.content.length }} titles</small>
-						</div>
-					</div>
-				</div>
-
-				<!-- Content Grid -->
-				<div class="row g-3">
-					<div v-for="content in filteredContent" :key="content.id" class="col-6 col-sm-4 col-md-3 col-lg-2">
-						<div
-							class="card bg-dark border-0 text-white h-100 position-relative overflow-hidden"
-							style="cursor: pointer"
-							@click="watchContent(content.id)"
-						>
-							<img :src="content.poster || '/placeholder.svg'" :alt="content.title" class="card-img-top object-fit-cover" style="aspect-ratio: 2/3" />
-							<span class="badge bg-secondary position-absolute top-0 end-0 m-2" style="background: rgba(0, 0, 0, 0.6) !important">
-								{{ content.type === 'movie' ? 'Movie' : 'Series' }}
-							</span>
-							<div class="card-body p-2">
-								<h6 class="card-title text-truncate mb-1">{{ content.title }}</h6>
-								<div class="d-flex align-items-center small text-muted mb-1">
-									<font-awesome-icon :icon="['fa-solid', 'fa-calendar']" class="me-1" />
-									<span>{{ content.year }}</span>
-									<span class="mx-1">•</span>
-									<span>{{ content.year + 5 }}</span>
+				<div class="hero-content position-absolute bottom-0 start-0 end-0">
+					<div class="container px-4 px-lg-5 pb-5">
+						<div class="row align-items-end">
+							<div class="col-lg-8">
+								<div :initial="{ opacity: 0, y: 30 }" :animate="{ opacity: 1, y: 0 }" class="franchise-logo mb-4">
+									<img :src="franchise.logo || '/placeholder.svg'" :alt="`${franchise.name} logo`" class="img-fluid franchise-logo-img" />
 								</div>
-								<div class="d-flex align-items-center small text-secondary mb-1">
-									<font-awesome-icon :icon="['fa-solid', 'fa-clock']" class="me-1" />
-									<span>{{ content.duration }}</span>
-								</div>
-								<div class="d-flex flex-wrap gap-1 mt-2">
-									<span
-										v-for="genre in content.genre.slice(0, 2)"
-										:key="genre"
-										class="badge bg-outline-light border text-light"
-										style="border: 1px solid #6c757d; font-size: 0.7rem"
-									>
-										{{ genre }}
-									</span>
+								<p class="hero-description lead mb-4 text-white-50">{{ franchise.description }}</p>
+								<div class="franchise-meta d-flex gap-4 text-white-50">
+									<div class="meta-item">
+										<span class="meta-number">{{ franchise.totalContent }}</span>
+										<span class="meta-label ms-2">Titles</span>
+									</div>
+									<div class="meta-divider"></div>
+									<div class="meta-item">
+										<span class="meta-number">{{ franchise.subFranchises.length }}</span>
+										<span class="meta-label ms-2">Collections</span>
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
+			</div>
 
-				<!-- Empty State -->
-				<div v-if="filteredContent.length === 0" class="text-center py-5 text-secondary">No content found for this selection.</div>
+			<!-- Sticky Sub-Franchise Navigation -->
+			<div class="sub-franchise-nav sticky-top" ref="stickyNav" :class="{ 'nav-scrolled': isNavScrolled }">
+				<div class="container px-4 px-lg-5">
+					<div class="nav-wrapper d-flex align-items-center gap-2 py-3 overflow-auto">
+						<button class="nav-pill" :class="{ active: activeSection === 'all' }" @click="scrollToSection('all')">
+							<span class="nav-icon">
+								<font-awesome-icon :icon="['fa-solid', 'fa-grid-2']" />
+							</span>
+							<span class="nav-text">All Content</span>
+						</button>
+
+						<div class="nav-divider"></div>
+
+						<button
+							v-for="sf in franchise.subFranchises"
+							:key="sf.id"
+							class="nav-pill"
+							:class="{ active: activeSection === sf.id }"
+							@click="scrollToSection(sf.id)"
+						>
+							<span class="nav-text">{{ sf.name }}</span>
+							<span class="nav-count">{{ sf.content.length }}</span>
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Content Sections -->
+			<div class="content-sections py-5">
+				<div class="container px-4 px-lg-5">
+					<!-- All Content Grid (when no specific section selected or as overview) -->
+					<div id="section-all" class="content-section mb-5" ref="sectionAll">
+						<div class="section-header mb-4 d-flex align-items-center justify-content-between">
+							<div>
+								<h2 class="section-title h3 mb-1">All Content</h2>
+								<p class="section-subtitle text-white-50 mb-0">Complete {{ franchise.name }} collection</p>
+							</div>
+						</div>
+
+						<div class="content-grid row g-4">
+							<div v-for="content in allContent" :key="content.id" class="col-6 col-sm-4 col-md-3 col-xl-2">
+								<content-card :content="content" @click="watchContent(content.id)" />
+							</div>
+						</div>
+					</div>
+
+					<!-- Individual Sub-Franchise Sections -->
+					<div
+						v-for="sf in franchise.subFranchises"
+						:key="sf.id"
+						:id="`section-${sf.id}`"
+						class="content-section sub-franchise-section mb-5"
+						:data-section="sf.id"
+					>
+						<!-- Sub-Franchise Header -->
+						<div class="sub-franchise-header mb-4 p-4 rounded-4 bg-glass">
+							<div class="row align-items-center g-4">
+								<div class="col-auto">
+									<div class="sub-franchise-logo-wrapper">
+										<img :src="sf.logo || '/placeholder.svg'" :alt="sf.name" class="sub-franchise-logo" />
+									</div>
+								</div>
+								<div class="col">
+									<h2 class="sub-franchise-title h4 mb-2">{{ sf.name }}</h2>
+									<p class="sub-franchise-desc text-white-50 mb-0">{{ sf.description }}</p>
+								</div>
+								<div class="col-auto">
+									<span class="content-count-badge"> {{ sf.content.length }} titles </span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Content Grid for this Sub-Franchise -->
+						<div class="content-grid row g-4">
+							<div v-for="content in sf.content" :key="content.id" class="col-6 col-sm-4 col-md-3 col-xl-2">
+								<ContentCard :content="content" @click="watchContent(content.id)" />
+							</div>
+						</div>
+					</div>
+
+					<!-- Empty State -->
+					<div v-if="franchise.subFranchises.length === 0 && franchise.mainContent.length === 0" class="text-center py-5 text-secondary">
+						<font-awesome-icon :icon="['fa-solid', 'fa-film']" class="display-1 mb-3 opacity-25" />
+						<p class="lead">No content available for this franchise.</p>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import ContentCard from '~/components/ContentCard.vue';
 
 definePageMeta({
 	middleware: 'auth',
@@ -163,6 +181,7 @@ interface FranchiseData {
 	mainContent: Content[];
 }
 
+// Data remains the same as your original
 const franchiseData: Record<string, FranchiseData> = {
 	'star-wars': {
 		id: 'star-wars',
@@ -379,31 +398,85 @@ const router = useRouter();
 const slug = route.params.slug as string;
 
 const isLoading = ref(true);
-const selectedSubFranchise = ref<string | null>(null);
 const franchise = ref<FranchiseData | null>(null);
+const activeSection = ref('all');
+const isNavScrolled = ref(false);
+const stickyNav = ref<HTMLElement | null>(null);
+
 useSeoMeta({
-	title: computed(() => 'Cinema | Franchise - ' + franchise.value?.name),
-	description: computed(() => franchise.value?.description),
+	title: computed(() => (franchise.value ? `Cinema | ${franchise.value.name}` : 'Cinema | Franchise')),
+	description: computed(() => franchise.value?.description || ''),
+});
+
+// Combine main content and sub-franchise content for "All" view
+const allContent = computed(() => {
+	if (!franchise.value) return [];
+	return [...franchise.value.mainContent, ...franchise.value.subFranchises.flatMap((sf) => sf.content)];
 });
 
 onMounted(() => {
 	franchise.value = franchiseData[slug] || null;
-	if (franchise.value) {
-		isLoading.value = false;
+	isLoading.value = false;
+
+	if (process.client) {
+		window.addEventListener('scroll', handleScroll, { passive: true });
+		setupIntersectionObserver();
+	}
+});
+
+onUnmounted(() => {
+	if (process.client) {
+		window.removeEventListener('scroll', handleScroll);
 	}
 });
 
 const goBack = () => router.back();
 
-const selectedFranchise = computed(() => franchise.value?.subFranchises.find((sf) => sf.id === selectedSubFranchise.value));
+const handleScroll = () => {
+	isNavScrolled.value = window.scrollY > 100;
+};
 
-const filteredContent = computed(() => {
-	if (!franchise.value) return [];
-	if (selectedSubFranchise.value) {
-		return franchise.value.subFranchises.find((sf) => sf.id === selectedSubFranchise.value)?.content || [];
+const scrollToSection = (sectionId: string) => {
+	const element = document.getElementById(`section-${sectionId}`);
+	if (element) {
+		const navHeight = stickyNav.value?.offsetHeight || 60;
+		const navbarHeight = 60; // Bootstrap navbar height
+		const totalOffset = navHeight + navbarHeight + 20;
+
+		const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+		window.scrollTo({
+			top: elementPosition - totalOffset,
+			behavior: 'smooth',
+		});
+		activeSection.value = sectionId;
 	}
-	return [...franchise.value.mainContent, ...franchise.value.subFranchises.flatMap((sf) => sf.content)];
-});
+};
+
+const setupIntersectionObserver = () => {
+	if (!process.client) return;
+
+	nextTick(() => {
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						const sectionId = entry.target.getAttribute('data-section') || 'all';
+						activeSection.value = sectionId;
+					}
+				});
+			},
+			{
+				rootMargin: '-20% 0px -60% 0px',
+				threshold: 0,
+			},
+		);
+
+		// Observe all sections
+		document.querySelectorAll('.content-section').forEach((section) => {
+			observer.observe(section);
+		});
+	});
+};
 
 const watchContent = (contentId: string) => {
 	router.push(`/watch/${contentId}`);
@@ -411,7 +484,364 @@ const watchContent = (contentId: string) => {
 </script>
 
 <style scoped>
-.object-fit-cover {
+/* CSS Variables for the dark theme */
+.franchise-page {
+	--franchise-bg: oklch(0.1436 0.0152 284.32);
+	--franchise-surface: oklch(0.2 0.02 284.32);
+	--franchise-accent: #3b82f6;
+	--franchise-glass: rgba(255, 255, 255, 0.05);
+	--franchise-glass-border: rgba(255, 255, 255, 0.1);
+}
+
+/* Hero Section */
+.hero-section {
+	height: 70vh;
+	position: relative;
+	overflow: hidden;
+}
+
+.hero-image-wrapper {
+	position: absolute;
+	inset: 0;
+}
+
+.hero-image {
+	width: 100%;
+	height: 100%;
 	object-fit: cover;
+	transform: scale(1.1);
+	animation: subtleZoom 20s ease-out forwards;
+}
+
+@keyframes subtleZoom {
+	to {
+		transform: scale(1);
+	}
+}
+
+.hero-overlay {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(to top, oklch(0.1436 0.0152 284.32) 0%, rgba(9, 9, 16, 0.8) 30%, rgba(9, 9, 16, 0.4) 60%, transparent 100%);
+}
+
+.hero-content {
+	z-index: 2;
+	background: linear-gradient(to top, oklch(0.1436 0.0152 284.32), transparent);
+	padding-bottom: 2rem;
+}
+
+.franchise-logo-img {
+	max-height: 180px;
+	width: auto;
+	filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.5));
+}
+
+.hero-description {
+	max-width: 600px;
+	line-height: 1.7;
+	font-size: 1.125rem;
+}
+
+.franchise-meta {
+	padding-top: 1rem;
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.meta-number {
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: white;
+}
+
+.meta-label {
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	font-size: 0.875rem;
+}
+
+.meta-divider {
+	width: 1px;
+	height: 30px;
+	background: rgba(255, 255, 255, 0.2);
+}
+
+/* Sticky Navigation */
+.sub-franchise-nav {
+	top: 56px; /* Bootstrap navbar height */
+	z-index: 1020;
+	background: transparent;
+	transition: all 0.3s ease;
+	border-bottom: 1px solid transparent;
+}
+
+.nav-scrolled {
+	background: color-mix(in oklab, var(--bs-body-bg) 85%, transparent);
+	backdrop-filter: blur(12px);
+	border-bottom-color: var(--franchise-glass-border);
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.nav-wrapper {
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+.nav-wrapper::-webkit-scrollbar {
+	display: none;
+}
+
+.nav-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 1rem;
+	background: rgba(255, 255, 255, 0.05);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 100px;
+	color: rgba(255, 255, 255, 0.7);
+	font-size: 0.875rem;
+	font-weight: 500;
+	white-space: nowrap;
+	transition: all 0.2s ease;
+	cursor: pointer;
+}
+
+.nav-pill:hover {
+	background: rgba(255, 255, 255, 0.1);
+	color: white;
+	transform: translateY(-1px);
+}
+
+.nav-pill.active {
+	background: var(--franchise-accent);
+	border-color: var(--franchise-accent);
+	color: white;
+	box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.nav-icon {
+	font-size: 0.875rem;
+}
+
+.nav-count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 20px;
+	height: 20px;
+	padding: 0 6px;
+	background: rgba(255, 255, 255, 0.2);
+	border-radius: 10px;
+	font-size: 0.75rem;
+	font-weight: 600;
+}
+
+.nav-pill.active .nav-count {
+	background: rgba(255, 255, 255, 0.3);
+}
+
+.nav-divider {
+	width: 1px;
+	height: 24px;
+	background: rgba(255, 255, 255, 0.1);
+	flex-shrink: 0;
+}
+
+/* Content Sections */
+.content-sections {
+	position: relative;
+}
+
+.content-section {
+	scroll-margin-top: 140px; /* Account for both navbars */
+}
+
+.section-title {
+	font-weight: 700;
+	letter-spacing: -0.02em;
+}
+
+.section-subtitle {
+	font-size: 0.95rem;
+}
+
+/* Sub-Franchise Header */
+.bg-glass {
+	background: var(--franchise-glass);
+	backdrop-filter: blur(10px);
+	border: 1px solid var(--franchise-glass-border);
+}
+
+.sub-franchise-header {
+	background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sub-franchise-logo-wrapper {
+	width: 80px;
+	height: 80px;
+	background: rgba(0, 0, 0, 0.3);
+	border-radius: 16px;
+	padding: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sub-franchise-logo {
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+}
+
+.sub-franchise-title {
+	font-weight: 700;
+	background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.7) 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+.content-count-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.5rem 1rem;
+	background: rgba(59, 130, 246, 0.15);
+	color: #60a5fa;
+	border: 1px solid rgba(59, 130, 246, 0.3);
+	border-radius: 100px;
+	font-size: 0.875rem;
+	font-weight: 600;
+}
+
+/* Content Cards */
+.content-grid {
+	margin-top: -0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991.98px) {
+	.hero-section {
+		height: 60vh;
+	}
+
+	.franchise-logo-img {
+		max-height: 120px;
+	}
+
+	.hero-description {
+		font-size: 1rem;
+	}
+}
+
+@media (max-width: 767.98px) {
+	.hero-section {
+		height: 50vh;
+	}
+
+	.franchise-logo-img {
+		max-height: 80px;
+	}
+
+	.sub-franchise-logo-wrapper {
+		width: 60px;
+		height: 60px;
+		padding: 8px;
+	}
+
+	.meta-number {
+		font-size: 1.25rem;
+	}
+
+	.meta-label {
+		font-size: 0.75rem;
+	}
+}
+
+/* Smooth scrolling */
+html {
+	scroll-behavior: smooth;
+}
+
+/* Content Card Component Styles (inline for single file) */
+:deep(.content-card) {
+	position: relative;
+	border-radius: 12px;
+	overflow: hidden;
+	background: rgba(255, 255, 255, 0.03);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	cursor: pointer;
+	height: 100%;
+}
+
+:deep(.content-card:hover) {
+	transform: translateY(-4px) scale(1.02);
+	border-color: rgba(255, 255, 255, 0.2);
+	box-shadow:
+		0 20px 40px rgba(0, 0, 0, 0.4),
+		0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+:deep(.card-poster) {
+	aspect-ratio: 2/3;
+	width: 100%;
+	object-fit: cover;
+}
+
+:deep(.card-badge) {
+	position: absolute;
+	top: 0.75rem;
+	right: 0.75rem;
+	background: rgba(0, 0, 0, 0.7);
+	backdrop-filter: blur(4px);
+	padding: 0.25rem 0.75rem;
+	border-radius: 100px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:deep(.card-content) {
+	padding: 1rem;
+}
+
+:deep(.card-title) {
+	font-weight: 600;
+	font-size: 0.95rem;
+	margin-bottom: 0.5rem;
+	color: white;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+:deep(.card-meta) {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	color: rgba(255, 255, 255, 0.5);
+	font-size: 0.8rem;
+	margin-bottom: 0.5rem;
+}
+
+:deep(.card-genres) {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.375rem;
+	margin-top: 0.75rem;
+}
+
+:deep(.genre-tag) {
+	font-size: 0.7rem;
+	padding: 0.25rem 0.5rem;
+	background: rgba(255, 255, 255, 0.08);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 4px;
+	color: rgba(255, 255, 255, 0.7);
 }
 </style>
