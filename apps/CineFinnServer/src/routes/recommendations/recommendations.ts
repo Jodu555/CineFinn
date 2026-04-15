@@ -84,6 +84,7 @@ type AdditionalCarouselMeta = {
     showNewRibbon?: boolean;
     showWatchableCount?: boolean;
     wrapAround?: boolean;
+    randomize?: boolean;
 };
 
 type CarouselMeta = {
@@ -349,7 +350,11 @@ async function getContinueWatchingEpisodes(user: Account, meta: CarouselMeta): C
         }
     }
 
-    return output.slice(0, meta.returnItemsCount);
+    if (meta.additionalMeta?.randomize) {
+        return output.sort(() => Math.random() - 0.5).slice(0, meta.returnItemsCount);
+    } else {
+        return output.slice(0, meta.returnItemsCount);
+    }
 }
 
 carouselRegistry.set('newly-added-series', {
@@ -410,6 +415,9 @@ carouselRegistry.set('watch-again', {
     type: 'series',
     userspecific: true,
     returnItemsCount: 25,
+    additionalMeta: {
+        randomize: true
+    },
     computeFn: getWatchAgainSeries
 });
 
@@ -422,6 +430,9 @@ carouselRegistry.set('continue-watching', {
     type: 'entity',
     userspecific: true,
     returnItemsCount: 25,
+    additionalMeta: {
+        randomize: false
+    },
     computeFn: getContinueWatchingEpisodes
 });
 
