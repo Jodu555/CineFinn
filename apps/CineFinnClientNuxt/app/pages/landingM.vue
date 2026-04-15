@@ -343,35 +343,43 @@ const episodeCarouselConfig = {
 
 const showFranchises = ref(true);
 
-const franchises = ref([
-	{
-		id: 1,
-		name: 'Star Wars',
-		slug: 'star-wars',
-		description: 'A galaxy far, far away...',
-		backgroundImage: 'https://cinema.jodu555.de/test/star-wars-space-battle-scene-with-starships.jpg',
-		logo: 'https://cinema.jodu555.de/test/star-wars-logo.jpg',
-		contentCount: '12 Movies & Series',
+const { data: franchises } = useFetch<any>(`${useAPIURL()}/franchise`, {
+	key: 'franchise',
+	server: true,
+	headers: {
+		'auth-token': authStore.authToken,
 	},
-	{
-		id: 2,
-		name: 'Barbie',
-		slug: 'barbie',
-		description: "Life in plastic, it's fantastic!",
-		backgroundImage: 'https://cinema.jodu555.de/test/barbie-pink-dreamhouse-fantasy-world.jpg',
-		logo: 'https://cinema.jodu555.de/test/barbie-logo-pink.jpg',
-		contentCount: '8 Movies & Specials',
-	},
-	{
-		id: 3,
-		name: 'Marvel Cinematic Universe',
-		slug: 'mcu',
-		description: "Earth's Mightiest Heroes",
-		backgroundImage: 'https://cinema.jodu555.de/test/marvel-superheroes-action-scene.jpg',
-		logo: 'https://cinema.jodu555.de/test/marvel-studios-logo.jpg',
-		contentCount: '30+ Movies & Series',
-	},
-]);
+});
+
+// const franchises = ref([
+// 	{
+// 		id: 1,
+// 		name: 'Star Wars',
+// 		slug: 'star-wars',
+// 		description: 'A galaxy far, far away...',
+// 		backgroundImage: 'https://cinema.jodu555.de/test/star-wars-space-battle-scene-with-starships.jpg',
+// 		logo: 'https://cinema.jodu555.de/test/star-wars-logo.jpg',
+// 		contentCount: '12 Movies & Series',
+// 	},
+// 	{
+// 		id: 2,
+// 		name: 'Barbie',
+// 		slug: 'barbie',
+// 		description: "Life in plastic, it's fantastic!",
+// 		backgroundImage: 'https://cinema.jodu555.de/test/barbie-pink-dreamhouse-fantasy-world.jpg',
+// 		logo: 'https://cinema.jodu555.de/test/barbie-logo-pink.jpg',
+// 		contentCount: '8 Movies & Specials',
+// 	},
+// 	{
+// 		id: 3,
+// 		name: 'Marvel Cinematic Universe',
+// 		slug: 'mcu',
+// 		description: "Earth's Mightiest Heroes",
+// 		backgroundImage: 'https://cinema.jodu555.de/test/marvel-superheroes-action-scene.jpg',
+// 		logo: 'https://cinema.jodu555.de/test/marvel-studios-logo.jpg',
+// 		contentCount: '30+ Movies & Series',
+// 	},
+// ]);
 
 if (import.meta.client) {
 	const inter = setInterval(() => {
