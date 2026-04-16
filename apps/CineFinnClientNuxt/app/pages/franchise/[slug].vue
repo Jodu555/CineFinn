@@ -53,25 +53,54 @@
 			<!-- Sticky Sub-Franchise Navigation -->
 			<div class="sub-franchise-nav sticky-top" ref="stickyNav" :class="{ 'nav-scrolled': isNavScrolled }">
 				<div class="container px-4 px-lg-5">
-					<div class="nav-wrapper d-flex align-items-center gap-2 py-3 overflow-auto">
-						<button class="nav-pill" :class="{ active: activeSection === 'all' }" @click="scrollToSection('all')">
-							<span class="nav-icon">
-								<font-awesome-icon :icon="['fa-solid', 'fa-grid-2']" />
-							</span>
-							<span class="nav-text">All Content</span>
+					<div class="nav-track-outer">
+						<!-- Left scroll button -->
+						<button
+							class="nav-scroll-btn nav-scroll-btn--left"
+							:class="{ visible: canScrollLeft }"
+							@click="scrollNav(-1)"
+							aria-label="Scroll navigation left"
+						>
+							<font-awesome-icon :icon="['fa-solid', 'fa-chevron-left']" />
 						</button>
 
-						<div class="nav-divider"></div>
+						<!-- Left fade mask -->
+						<div class="nav-fade nav-fade--left" :class="{ visible: canScrollLeft }"></div>
 
+						<!-- Scrollable pills wrapper -->
+						<div class="nav-wrapper d-flex align-items-center gap-2 py-3" ref="navWrapper" @scroll="updateScrollState">
+							<button class="nav-pill" :class="{ active: activeSection === 'all' }" @click="scrollToSection('all')">
+								<span class="nav-icon">
+									<font-awesome-icon :icon="['fa-solid', 'fa-grid-2']" />
+								</span>
+								<span class="nav-text">All Content</span>
+							</button>
+
+							<div class="nav-divider"></div>
+
+							<button
+								v-for="sf in franchise.subFranchises"
+								:key="sf.id"
+								class="nav-pill"
+								:class="{ active: activeSection === sf.id }"
+								@click="scrollToSection(sf.id)"
+							>
+								<span class="nav-text">{{ sf.name }}</span>
+								<span class="nav-count">{{ sf.content.length }}</span>
+							</button>
+						</div>
+
+						<!-- Right fade mask -->
+						<div class="nav-fade nav-fade--right" :class="{ visible: canScrollRight }"></div>
+
+						<!-- Right scroll button -->
 						<button
-							v-for="sf in franchise.subFranchises"
-							:key="sf.id"
-							class="nav-pill"
-							:class="{ active: activeSection === sf.id }"
-							@click="scrollToSection(sf.id)"
+							class="nav-scroll-btn nav-scroll-btn--right"
+							:class="{ visible: canScrollRight }"
+							@click="scrollNav(1)"
+							aria-label="Scroll navigation right"
 						>
-							<span class="nav-text">{{ sf.name }}</span>
-							<span class="nav-count">{{ sf.content.length }}</span>
+							<font-awesome-icon :icon="['fa-solid', 'fa-chevron-right']" />
 						</button>
 					</div>
 				</div>
@@ -80,7 +109,7 @@
 			<!-- Content Sections -->
 			<div class="content-sections py-5">
 				<div class="container px-4 px-lg-5">
-					<!-- All Content Grid (when no specific section selected or as overview) -->
+					<!-- All Content Grid -->
 					<div id="section-all" class="content-section mb-5" ref="sectionAll">
 						<div class="section-header mb-4 d-flex align-items-center justify-content-between">
 							<div>
@@ -194,26 +223,80 @@ const { data: franchise } = useFetch<FranchiseData>(`${useAPIURL()}/franchise/${
 	},
 });
 
-// const franchise = computed(() => franchiseData[slug] || null);
 const activeSection = ref('all');
 const isNavScrolled = ref(false);
 const stickyNav = ref<HTMLElement | null>(null);
+const navWrapper = ref<HTMLElement | null>(null);
+const canScrollLeft = ref(false);
+const canScrollRight = ref(false);
+
+// How many pixels to scroll per button click
+const NAV_SCROLL_STEP = 240;
 
 useSeoMeta({
 	title: computed(() => (franchise.value ? `Cinema | ${franchise.value.name}` : 'Cinema | Franchise')),
 	description: computed(() => franchise.value?.description || ''),
 });
 
-// Combine main content and sub-franchise content for "All" view
 const allContent = computed(() => {
 	if (!franchise.value) return [];
 	return [...franchise.value.mainContent, ...franchise.value.subFranchises.flatMap((sf) => sf.content)];
 });
 
+// ─── Nav overflow helpers ─────────────────────────────────────────────────────
+
+const updateScrollState = () => {
+	const el = navWrapper.value;
+	if (!el) return;
+	// Small epsilon (2px) to avoid float rounding jitter
+	canScrollLeft.value = el.scrollLeft > 2;
+	canScrollRight.value = el.scrollLeft + el.clientWidth < el.scrollWidth - 2;
+};
+
+const scrollNav = (direction: 1 | -1) => {
+	const el = navWrapper.value;
+	if (!el) return;
+	el.scrollBy({ left: direction * NAV_SCROLL_STEP, behavior: 'smooth' });
+};
+
+/** Scroll the active pill into view inside the nav strip */
+const scrollActivePillIntoView = (sectionId: string) => {
+	nextTick(() => {
+		const el = navWrapper.value;
+		if (!el) return;
+		const activePill = el.querySelector<HTMLElement>(`.nav-pill.active`);
+		if (!activePill) return;
+		const pillLeft = activePill.offsetLeft;
+		const pillRight = pillLeft + activePill.offsetWidth;
+		const containerLeft = el.scrollLeft;
+		const containerRight = containerLeft + el.clientWidth;
+
+		if (pillLeft < containerLeft + 40) {
+			el.scrollTo({ left: pillLeft - 16, behavior: 'smooth' });
+		} else if (pillRight > containerRight - 40) {
+			el.scrollTo({ left: pillRight - el.clientWidth + 16, behavior: 'smooth' });
+		}
+	});
+};
+
+// ─── Page scroll helpers ──────────────────────────────────────────────────────
+
 onMounted(() => {
 	if (process.client) {
 		window.addEventListener('scroll', handleScroll, { passive: true });
 		setupIntersectionObserver();
+
+		// Initial check once nav is rendered
+		nextTick(() => {
+			updateScrollState();
+
+			// Re-check whenever nav wrapper is resized (e.g. orientation change)
+			if (navWrapper.value && typeof ResizeObserver !== 'undefined') {
+				const ro = new ResizeObserver(updateScrollState);
+				ro.observe(navWrapper.value);
+				onUnmounted(() => ro.disconnect());
+			}
+		});
 	}
 });
 
@@ -233,15 +316,13 @@ const scrollToSection = (sectionId: string) => {
 	const element = document.getElementById(`section-${sectionId}`);
 	if (element) {
 		const navHeight = stickyNav.value?.offsetHeight || 60;
-		const navbarHeight = 60; // Bootstrap navbar height
+		const navbarHeight = 60;
 		const totalOffset = navHeight + navbarHeight + 20;
 
 		const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-		window.scrollTo({
-			top: elementPosition - totalOffset,
-			behavior: 'smooth',
-		});
+		window.scrollTo({ top: elementPosition - totalOffset, behavior: 'smooth' });
 		activeSection.value = sectionId;
+		scrollActivePillIntoView(sectionId);
 	}
 };
 
@@ -255,6 +336,7 @@ const setupIntersectionObserver = () => {
 					if (entry.isIntersecting) {
 						const sectionId = entry.target.getAttribute('data-section') || 'all';
 						activeSection.value = sectionId;
+						scrollActivePillIntoView(sectionId);
 					}
 				});
 			},
@@ -264,7 +346,6 @@ const setupIntersectionObserver = () => {
 			},
 		);
 
-		// Observe all sections
 		document.querySelectorAll('.content-section').forEach((section) => {
 			observer.observe(section);
 		});
@@ -286,7 +367,7 @@ const watchContent = (contentId: string) => {
 	--franchise-glass-border: rgba(255, 255, 255, 0.1);
 }
 
-/* Hero Section */
+/* ─── Hero Section ─────────────────────────────────────────────────────────── */
 .hero-section {
 	height: 70vh;
 	position: relative;
@@ -359,12 +440,15 @@ const watchContent = (contentId: string) => {
 	background: rgba(255, 255, 255, 0.2);
 }
 
-/* Sticky Navigation */
+/* ─── Sticky Navigation ────────────────────────────────────────────────────── */
 .sub-franchise-nav {
-	top: 56px; /* Bootstrap navbar height */
+	top: 56px;
 	z-index: 1020;
 	background: transparent;
-	transition: all 0.3s ease;
+	transition:
+		background 0.3s ease,
+		border-color 0.3s ease,
+		box-shadow 0.3s ease;
 	border-bottom: 1px solid transparent;
 }
 
@@ -375,15 +459,113 @@ const watchContent = (contentId: string) => {
 	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
+/* ─── Nav track: scroll buttons + fades + pill strip ──────────────────────── */
+.nav-track-outer {
+	position: relative;
+	display: flex;
+	align-items: center;
+}
+
+/* The scrollable pill strip — no native scrollbar */
 .nav-wrapper {
+	flex: 1;
+	overflow-x: auto;
+	overflow-y: hidden;
 	scrollbar-width: none;
 	-ms-overflow-style: none;
+	/* Slight horizontal padding so first/last pill isn't flush against the fade */
+	padding-left: 4px;
+	padding-right: 4px;
 }
 
 .nav-wrapper::-webkit-scrollbar {
 	display: none;
 }
 
+/* ─── Edge fade masks ──────────────────────────────────────────────────────── */
+.nav-fade {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 64px;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.2s ease;
+	z-index: 2;
+}
+
+.nav-fade.visible {
+	opacity: 1;
+}
+
+.nav-fade--left {
+	left: 0;
+	background: linear-gradient(to right, var(--franchise-bg, #0e0e18) 20%, transparent 100%);
+}
+
+.nav-scrolled .nav-fade--left {
+	/* Match the blurred/tinted nav background when scrolled */
+	background: linear-gradient(to right, color-mix(in oklab, var(--bs-body-bg, #0e0e18) 85%, transparent) 20%, transparent 100%);
+}
+
+.nav-fade--right {
+	right: 0;
+	background: linear-gradient(to left, var(--franchise-bg, #0e0e18) 20%, transparent 100%);
+}
+
+.nav-scrolled .nav-fade--right {
+	background: linear-gradient(to left, color-mix(in oklab, var(--bs-body-bg, #0e0e18) 85%, transparent) 20%, transparent 100%);
+}
+
+/* ─── Scroll arrow buttons ─────────────────────────────────────────────────── */
+.nav-scroll-btn {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	background: rgba(255, 255, 255, 0.08);
+	color: rgba(255, 255, 255, 0.7);
+	font-size: 0.75rem;
+	cursor: pointer;
+	transition:
+		opacity 0.2s ease,
+		transform 0.2s ease,
+		background 0.2s ease,
+		color 0.2s ease;
+	/* Hidden by default — shown when overflow exists */
+	opacity: 0;
+	pointer-events: none;
+	z-index: 3;
+}
+
+.nav-scroll-btn.visible {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.nav-scroll-btn:hover {
+	background: rgba(255, 255, 255, 0.18);
+	color: white;
+	transform: scale(1.1);
+}
+
+.nav-scroll-btn:active {
+	transform: scale(0.95);
+}
+
+.nav-scroll-btn--left {
+	margin-right: 6px;
+}
+
+.nav-scroll-btn--right {
+	margin-left: 6px;
+}
+
+/* ─── Nav pills ────────────────────────────────────────────────────────────── */
 .nav-pill {
 	display: inline-flex;
 	align-items: center;
@@ -396,7 +578,12 @@ const watchContent = (contentId: string) => {
 	font-size: 0.875rem;
 	font-weight: 500;
 	white-space: nowrap;
-	transition: all 0.2s ease;
+	transition:
+		background 0.2s ease,
+		color 0.2s ease,
+		transform 0.2s ease,
+		border-color 0.2s ease,
+		box-shadow 0.2s ease;
 	cursor: pointer;
 }
 
@@ -441,13 +628,13 @@ const watchContent = (contentId: string) => {
 	flex-shrink: 0;
 }
 
-/* Content Sections */
+/* ─── Content Sections ─────────────────────────────────────────────────────── */
 .content-sections {
 	position: relative;
 }
 
 .content-section {
-	scroll-margin-top: 140px; /* Account for both navbars */
+	scroll-margin-top: 140px;
 }
 
 .section-title {
@@ -459,7 +646,6 @@ const watchContent = (contentId: string) => {
 	font-size: 0.95rem;
 }
 
-/* Sub-Franchise Header */
 .bg-glass {
 	background: var(--franchise-glass);
 	backdrop-filter: blur(10px);
@@ -509,21 +695,18 @@ const watchContent = (contentId: string) => {
 	font-weight: 600;
 }
 
-/* Content Cards */
 .content-grid {
 	margin-top: -0.5rem;
 }
 
-/* Responsive adjustments */
+/* ─── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 991.98px) {
 	.hero-section {
 		height: 60vh;
 	}
-
 	.franchise-logo-img {
 		max-height: 120px;
 	}
-
 	.hero-description {
 		font-size: 1rem;
 	}
@@ -533,7 +716,6 @@ const watchContent = (contentId: string) => {
 	.hero-section {
 		height: 50vh;
 	}
-
 	.franchise-logo-img {
 		max-height: 80px;
 	}
@@ -547,18 +729,22 @@ const watchContent = (contentId: string) => {
 	.meta-number {
 		font-size: 1.25rem;
 	}
-
 	.meta-label {
 		font-size: 0.75rem;
 	}
+
+	/* Slightly smaller pills on mobile to fit more before overflow kicks in */
+	.nav-pill {
+		padding: 0.4rem 0.75rem;
+		font-size: 0.8125rem;
+	}
 }
 
-/* Smooth scrolling */
+/* ─── Misc ─────────────────────────────────────────────────────────────────── */
 html {
 	scroll-behavior: smooth;
 }
 
-/* Content Card Component Styles (inline for single file) */
 :deep(.content-card) {
 	position: relative;
 	border-radius: 12px;
