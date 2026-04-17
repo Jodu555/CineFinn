@@ -33,11 +33,6 @@ interface FranchiseData {
     mainContent: Content[];
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Image URL helpers
-// ─────────────────────────────────────────────────────────────────────────────
-const W500 = 'https://image.tmdb.org/t/p/w500';
-const ORIG = 'https://image.tmdb.org/t/p/original';
 
 const franchiseData: Record<string, FranchiseData> = {
     // starwars: {
