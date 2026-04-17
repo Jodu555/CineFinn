@@ -22,9 +22,9 @@
 					<button class="sov-btn" :class="{ 'sov-btn-danger': showRemoveButton }" @click.stop="$emit('addToList', itemId)">
 						<font-awesome-icon :icon="['fas', showRemoveButton ? 'minus' : 'plus']" />
 					</button>
-					<button class="sov-btn ms-auto" @click.stop="$emit('showInfo', itemId)">
+					<!-- <button class="sov-btn ms-auto" @click.stop="$emit('showInfo', itemId)">
 						<font-awesome-icon :icon="['fas', 'chevron-down']" />
-					</button>
+					</button> -->
 				</div>
 				<p class="sov-title">{{ itemTitle }}</p>
 				<div class="sov-meta">
@@ -39,6 +39,10 @@
 			<div v-if="!isMovie && showEpisodeCount && totalEpisodeCount > 0" class="episode-count-badge">
 				<font-awesome-icon :icon="['fas', 'film']" class="me-1" />
 				{{ totalEpisodeCount }} Folgen
+			</div>
+			<div v-if="isMovie" class="episode-count-badge">
+				<font-awesome-icon :icon="['fas', 'film']" class="me-1" />
+				{{ yearLabel }}
 			</div>
 		</div>
 		<div class="series-info">
