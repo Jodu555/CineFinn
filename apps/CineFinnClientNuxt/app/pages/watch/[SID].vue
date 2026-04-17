@@ -344,6 +344,20 @@
 														>
 															{{ movie.description }}
 														</p> -->
+														<div v-if="authStore.user.settings.developerMode.value" class="text-muted small mb-0">
+															<div class="d-flex gap-2">
+																<p class="mb-0">
+																	{{ movie.watchableEntitys.map((e) => e.subID).join(', ') }}
+																</p>
+																<p class="mb-0">
+																	{{ movie.watchableEntitys.map((e) => e.UUID).join(', ') }}
+																</p>
+																<p class="mb-0">
+																	{{ movie.UUID }}
+																</p>
+																<p class="mb-0">x{{ movie.movie_IDX }}</p>
+															</div>
+														</div>
 														<div class="progress mt-3" style="height: 4px">
 															<div
 																:class="['progress-bar', isMovieWatched(movie.UUID) ? 'bg-success' : 'bg-secondary']"
