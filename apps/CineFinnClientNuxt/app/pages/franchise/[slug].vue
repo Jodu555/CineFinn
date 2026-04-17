@@ -120,7 +120,14 @@
 
 						<div class="content-grid row g-4">
 							<div v-for="content in allContent" :key="content.id" class="col-6 col-sm-4 col-md-3 col-xl-2">
-								<content-card :content="content" @click="watchContent(content.id)" />
+								<LandingSeriesCard
+									v-if="content.type === 'series'"
+									:series-item="indexStore.seriesById.get(content.id)"
+									show-episode-count
+									@navigate="watchContent"
+									@show-info="showContentInfo"
+								/>
+								<LandingSeriesCard v-else :movie-item="content" show-episode-count @navigate="watchContent" @show-info="showContentInfo" />
 							</div>
 						</div>
 					</div>
@@ -154,7 +161,14 @@
 						<!-- Content Grid for this Sub-Franchise -->
 						<div class="content-grid row g-4">
 							<div v-for="content in sf.content" :key="content.id" class="col-6 col-sm-4 col-md-3 col-xl-2">
-								<ContentCard :content="content" @click="watchContent(content.id)" />
+								<LandingSeriesCard
+									v-if="content.type === 'series'"
+									:series-item="indexStore.seriesById.get(content.id)"
+									show-episode-count
+									@navigate="watchContent"
+									@show-info="showContentInfo"
+								/>
+								<LandingSeriesCard v-else :movie-item="content" show-episode-count @navigate="watchContent" @show-info="showContentInfo" />
 							</div>
 						</div>
 					</div>
@@ -173,9 +187,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import ContentCard from '~/components/ContentCard.vue';
+import LandingSeriesCard from '~/components/LandingSeriesCard.vue';
+import { useIndexStore } from '~/stores/index.store';
 
 const authStore = useAuthStore();
+const indexStore = useIndexStore();
 const route = useRoute();
 const router = useRouter();
 const slug = route.params.slug as string;
@@ -354,6 +370,10 @@ const setupIntersectionObserver = () => {
 
 const watchContent = (contentId: string) => {
 	router.push(`/watch/${contentId}`);
+};
+
+const showContentInfo = (contentId: string) => {
+	console.log('Show info:', contentId);
 };
 </script>
 

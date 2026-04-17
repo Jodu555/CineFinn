@@ -7,37 +7,42 @@
 		@focus="handleFocus"
 		@blur="handleBlur"
 		@mouseenter="handleMouseEnter"
-		@mouseleave="handleMouseLeave">
+		@mouseleave="handleMouseLeave"
+	>
 		<div class="series-thumb-wrap position-relative overflow-hidden rounded-3">
-			<img :src="seriesImage" class="series-thumb" :alt="item.title" loading="lazy" />
+			<img :src="itemImage" class="series-thumb" :alt="itemTitle" loading="lazy" />
+			<span class="type-badge" :class="isMovie ? 'movie' : 'series'">
+				{{ isMovie ? 'Movie' : 'Series' }}
+			</span>
 			<div class="series-overlay" :class="{ visible: isActive || isHovered }">
 				<div class="series-overlay-actions">
-					<button class="sov-btn sov-btn-light" @click.stop="$emit('navigate', item.UUID)">
+					<button class="sov-btn sov-btn-light" @click.stop="$emit('navigate', itemId)">
 						<font-awesome-icon :icon="['fas', 'play']" />
 					</button>
-					<button class="sov-btn" :class="{ 'sov-btn-danger': showRemoveButton }" @click.stop="$emit('addToList', item.UUID)">
+					<button class="sov-btn" :class="{ 'sov-btn-danger': showRemoveButton }" @click.stop="$emit('addToList', itemId)">
 						<font-awesome-icon :icon="['fas', showRemoveButton ? 'minus' : 'plus']" />
 					</button>
-					<button class="sov-btn ms-auto" @click.stop="$emit('showInfo', item.UUID)">
+					<button class="sov-btn ms-auto" @click.stop="$emit('showInfo', itemId)">
 						<font-awesome-icon :icon="['fas', 'chevron-down']" />
 					</button>
 				</div>
-				<p class="sov-title">{{ item.title }}</p>
+				<p class="sov-title">{{ itemTitle }}</p>
 				<div class="sov-meta">
 					<span class="sov-year">{{ yearLabel }}</span>
+					<span v-if="isMovie" class="sov-duration">{{ movieDuration }}</span>
 				</div>
 				<div class="sov-genres">
-					<span v-for="g in (item.tags || []).slice(0, 2)" :key="g" class="genre-chip">{{ g }}</span>
+					<span v-for="g in itemGenres.slice(0, 2)" :key="g" class="genre-chip">{{ g }}</span>
 				</div>
 			</div>
-			<span v-if="showNewRibbon" class="new-ribbon">NEU</span>
-			<div v-if="showEpisodeCount && totalEpisodeCount > 0" class="episode-count-badge">
+			<span v-if="showNewRibbon && !isMovie" class="new-ribbon">NEU</span>
+			<div v-if="!isMovie && showEpisodeCount && totalEpisodeCount > 0" class="episode-count-badge">
 				<font-awesome-icon :icon="['fas', 'film']" class="me-1" />
 				{{ totalEpisodeCount }} Folgen
 			</div>
 		</div>
 		<div class="series-info">
-			<p class="series-label-title">{{ item.title }}</p>
+			<p class="series-label-title">{{ itemTitle }}</p>
 			<p class="series-label-year">{{ yearLabel }}</p>
 		</div>
 	</div>
@@ -46,10 +51,23 @@
 <script lang="ts" setup>
 import type { FrontendSeries } from '@cinefinn/types';
 
+interface MovieContent {
+	id: string;
+	title: string;
+	year: number;
+	rating: number;
+	duration: string;
+	description: string;
+	poster: string;
+	type: 'movie' | 'series';
+	genre: string[];
+}
+
 const { decideSeriesImage } = useSeriesImage();
 
 const props = defineProps<{
-	item: FrontendSeries;
+	seriesItem?: FrontendSeries;
+	movieItem?: MovieContent;
 	showNewRibbon?: boolean;
 	showEpisodeCount?: boolean;
 	showRemoveButton?: boolean;
@@ -64,20 +82,59 @@ defineEmits<{
 const isActive = ref(false);
 const isHovered = ref(false);
 
+const isMovie = computed(() => !!props.movieItem);
+const hasSeries = computed(() => !!props.seriesItem);
+const hasValidItem = computed(() => isMovie.value || hasSeries.value);
+
+const itemId = computed(() => {
+	if (isMovie.value) return props.movieItem!.id;
+	if (hasSeries.value) return props.seriesItem!.UUID;
+	return '';
+});
+
+const itemTitle = computed(() => {
+	if (isMovie.value) return props.movieItem!.title;
+	if (hasSeries.value) return props.seriesItem!.title;
+	return 'Loading...';
+});
+
+const itemGenres = computed(() => {
+	if (isMovie.value) return props.movieItem!.genre;
+	if (hasSeries.value) return props.seriesItem!.tags || [];
+	return [];
+});
+
+const movieDuration = computed(() => (isMovie.value ? props.movieItem!.duration : ''));
+
 const randomNumber = Math.floor(Math.random() * 1000);
-const seriesImage = computed(() => decideSeriesImage(props.item, randomNumber));
+const itemImage = computed(() => {
+	if (isMovie.value) {
+		return props.movieItem!.poster || '/placeholder.svg';
+	}
+	if (hasSeries.value) {
+		return decideSeriesImage(props.seriesItem!, randomNumber);
+	}
+	return '/placeholder.svg';
+});
 
 const totalEpisodeCount = computed(() => {
-	return (props.item.seasons || []).reduce((sum, s) => sum + (s?.episodes || 0), 0);
+	if (isMovie.value || !hasSeries.value) return 0;
+	return (props.seriesItem!.seasons || []).reduce((sum, s) => sum + (s?.episodes || 0), 0);
 });
 
 const yearLabel = computed(() => {
-	const start = props.item.infos?.startDate?.split('-')[0] || '';
-	const end = props.item.infos?.endDate?.split('-')[0] || '';
-	if (!start) return '';
-	if (!end) return `${start}–`;
-	if (start === end) return start;
-	return `${start}–${end}`;
+	if (isMovie.value) {
+		return String(props.movieItem!.year);
+	}
+	if (hasSeries.value) {
+		const start = props.seriesItem!.infos?.startDate?.split('-')[0] || '';
+		const end = props.seriesItem!.infos?.endDate?.split('-')[0] || '';
+		if (!start) return '';
+		if (!end) return `${start}–`;
+		if (start === end) return start;
+		return `${start}–${end}`;
+	}
+	return '';
 });
 
 const handleCardClick = () => {
@@ -131,7 +188,8 @@ onUnmounted(() => {
 
 .series-card {
 	flex-shrink: 0;
-	width: 230px;
+	width: 100%;
+	max-width: 230px;
 	cursor: pointer;
 	margin: 0 auto;
 	outline: none;
@@ -144,8 +202,8 @@ onUnmounted(() => {
 }
 
 .series-thumb-wrap {
-	width: 230px;
-	height: 250px;
+	width: 100%;
+	aspect-ratio: 2/3;
 	background: var(--cs-surface);
 	border-radius: var(--radius) !important;
 }
@@ -295,6 +353,33 @@ onUnmounted(() => {
 	letter-spacing: 0.01em;
 }
 
+.type-badge {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	padding: 3px 8px;
+	border-radius: 100px;
+	font-size: 0.62rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	backdrop-filter: blur(4px);
+	z-index: 5;
+}
+
+.type-badge.movie {
+	background: rgba(239, 68, 68, 0.25);
+	color: #fca5a5;
+	border-color: rgba(239, 68, 68, 0.4);
+}
+
+.type-badge.series {
+	background: rgba(59, 130, 246, 0.25);
+	color: #93c5fd;
+	border-color: rgba(59, 130, 246, 0.4);
+}
+
 .new-ribbon {
 	position: absolute;
 	top: 10px;
@@ -344,27 +429,27 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
 	.series-card {
-		width: 150px;
+		max-width: 150px;
 	}
 	.series-thumb-wrap {
-		width: 150px;
+		width: 100%;
 		height: 165px;
 	}
 	.series-info {
-		max-width: 150px;
+		max-width: 100%;
 	}
 }
 
 @media (max-width: 480px) {
 	.series-card {
-		width: 130px;
+		max-width: 130px;
 	}
 	.series-thumb-wrap {
-		width: 130px;
+		width: 100%;
 		height: 143px;
 	}
 	.series-info {
-		max-width: 130px;
+		max-width: 100%;
 	}
 }
 </style>
