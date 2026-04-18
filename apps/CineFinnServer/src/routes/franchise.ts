@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { authMiddleware } from "../middleware/auth.js";
 import { HTTPException } from "hono/http-exception";
+import z from "zod";
 
 interface Content {
     id: string;
@@ -33,6 +34,47 @@ interface FranchiseData {
     mainContent: Content[];
 }
 
+const ContentSchema = z.object({
+    id: z.string().min(1, "Content ID is required"),
+    title: z.string(),
+    year: z.number().int(),
+    rating: z.number(),
+    duration: z.string(),
+    description: z.string(),
+    poster: z.string(),
+    type: z.enum(['movie', 'series']),
+    genre: z.array(z.string()),
+});
+
+const SubFranchiseSchema = z.object({
+    id: z.string().min(1, "Sub-franchise ID is required"),
+    name: z.string().min(1, "Sub-franchise name is required"),
+    description: z.string(),
+    logo: z.string(),
+    content: z.array(ContentSchema),
+});
+
+const FranchiseDataSchema = z.object({
+    id: z.string().min(1, "Franchise ID is required"),
+    name: z.string().min(1, "Franchise name is required"),
+    description: z.string(),
+    backgroundImage: z.string(),
+    logo: z.string(),
+    totalContent: z.number().int().min(0),
+    subFranchises: z.array(SubFranchiseSchema),
+    mainContent: z.array(ContentSchema),
+});
+
+const recalculateTotals = (data: FranchiseData): FranchiseData => {
+    const subTotal = data.subFranchises.reduce(
+        (acc, sub) => acc + sub.content.length,
+        0
+    );
+    return {
+        ...data,
+        totalContent: data.mainContent.length + subTotal,
+    };
+};
 
 const franchiseData: Record<string, FranchiseData> = {
     // starwars: {
@@ -874,6 +916,32 @@ const router = new Hono()
     .get('/', authMiddleware, async (c) => {
         return c.json(franchiseData);
     })
+    .post('/', authMiddleware, async (c) => {
+        const body = await c.req.json();
+        const result = FranchiseDataSchema.safeParse(body);
+
+        if (!result.success) {
+            return c.json(
+                {
+                    message: "Validation failed",
+                    errors: result.error.flatten(),
+                },
+                400
+            );
+        }
+
+        const data = recalculateTotals(result.data);
+        const key = data.id.toLowerCase();
+
+        if (franchiseData[key]) {
+            throw new HTTPException(409, {
+                message: `Franchise with id '${data.id}' already exists`,
+            });
+        }
+
+        franchiseData[key] = data;
+        return c.json(data, 201);
+    })
     .get('/:slug', authMiddleware, async (c) => {
         const { slug } = c.req.param();
         const franchise = franchiseData[slug.toLowerCase()];
@@ -885,6 +953,53 @@ const router = new Hono()
         }
 
         return c.json(franchise);
+    })
+    .put('/:id', authMiddleware, async (c) => {
+        const { id } = c.req.param();
+        const key = id.toLowerCase();
+
+        if (!franchiseData[key]) {
+            throw new HTTPException(404, {
+                message: `Franchise with id '${id}' not found`,
+            });
+        }
+
+        const body = await c.req.json();
+        const result = FranchiseDataSchema.safeParse(body);
+
+        if (!result.success) {
+            return c.json(
+                {
+                    message: "Validation failed",
+                    errors: result.error.flatten(),
+                },
+                400
+            );
+        }
+
+        const data = recalculateTotals(result.data);
+        const newKey = data.id.toLowerCase();
+
+        // If the ID itself changed, remove the old key
+        if (newKey !== key) {
+            delete franchiseData[key];
+        }
+
+        franchiseData[newKey] = data;
+        return c.json(data);
+    })
+    .delete('/:id', authMiddleware, async (c) => {
+        const { id } = c.req.param();
+        const key = id.toLowerCase();
+
+        if (!franchiseData[key]) {
+            throw new HTTPException(404, {
+                message: `Franchise with id '${id}' not found`,
+            });
+        }
+
+        delete franchiseData[key];
+        return c.body(null, 204);
     });
 
 export { router as franchiseRouter };
