@@ -61,7 +61,13 @@ export const langDetails = {
     },
 } as Record<string, { title: string; alt: string; }>;
 
-export const averageWatchableEntitysRuntimeToMs = (watchableEntities: WatchableEntity[], inSeconds = false) => {
+/**
+ * 
+ * @param watchableEntities The watchableEntities you want to sum up and average by
+ * @param inSeconds If you want the return in Seconds other wise in Milliseconds
+ * @returns The Total Average runtme of the watchableEntities provided. In Milliseconds. If inSeconds == true then in Seconds
+ */
+export const averageWatchableEntitysRuntime = (watchableEntities: WatchableEntity[], inSeconds = false) => {
     const totalRuntimeAvg = watchableEntities.reduce((sum, we) => sum + we.runtime, 0) / watchableEntities.length;
     if (inSeconds) return totalRuntimeAvg;
     return totalRuntimeAvg * 1000;

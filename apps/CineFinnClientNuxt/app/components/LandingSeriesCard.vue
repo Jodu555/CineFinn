@@ -55,6 +55,7 @@
 </template>
 
 <script lang="ts" setup>
+import { averageWatchableEntitysRuntime } from '#imports';
 import type { FrontendSeries, Movie, WatchableEntity } from '@cinefinn/types';
 import type { FranchiseContentMovie, FranchiseContentMovieExtened } from '@cinefinn/types/models/franchise';
 import { msToReadable } from '@cinefinn/utilities/time';
@@ -103,7 +104,7 @@ const itemGenres = computed(() => {
 
 const movieDuration = computed(() => {
 	if (!isMovie.value) return '';
-	return msToReadable(averageWatchableEntitysRuntimeToMs(props.movieItem!.watchableEntities));
+	return msToReadable(averageWatchableEntitysRuntime(props.movieItem!.watchableEntities));
 });
 
 const randomNumber = Math.floor(Math.random() * 1000);

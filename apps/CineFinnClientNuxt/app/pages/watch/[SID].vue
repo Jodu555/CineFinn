@@ -167,7 +167,7 @@
 																	<p class="text-muted small mb-0">
 																		<font-awesome-icon :icon="['far', 'clock']" class="me-1" />
 																		<!-- 20min -->
-																		{{ msToReadable(averageWatchableEntitysRuntimeToMs(episode.watchableEntitys)) }}
+																		{{ msToReadable(averageWatchableEntitysRuntime(episode.watchableEntitys)) }}
 																	</p>
 																</div>
 																<p class="text-muted small mb-0">
@@ -316,7 +316,7 @@
 														<div class="d-flex align-items-center gap-3 mb-2 small text-muted">
 															<span>
 																<font-awesome-icon :icon="['far', 'clock']" class="me-1" />
-																{{ msToReadable(averageWatchableEntitysRuntimeToMs(movie.watchableEntitys)) }}
+																{{ msToReadable(averageWatchableEntitysRuntime(movie.watchableEntitys)) }}
 															</span>
 															<span>•</span>
 															<span>
@@ -443,6 +443,7 @@
 </template>
 
 <script setup lang="ts">
+import { averageWatchableEntitysRuntime } from '#imports';
 import { Role, type DetailedEpisode, type DetailedSeason, type Langs } from '@cinefinn/types';
 import { msToReadable } from '@cinefinn/utilities/time';
 import { ref, computed, watch } from 'vue';
@@ -764,7 +765,7 @@ const getEpisodeProgress = (episodeUUID: string) => {
 	if (episode == undefined) {
 		return 0;
 	}
-	const totalRuntime = averageWatchableEntitysRuntimeToMs(episode.watchableEntitys, true);
+	const totalRuntime = averageWatchableEntitysRuntime(episode.watchableEntitys, true);
 	// const totalRuntime = episode.watchableEntitys.reduce((prev, curr) => prev + curr.runtime, 0) / episode.watchableEntitys.length;
 	if (totalRuntime === -1 && watchHistory.watchTime >= 500) {
 		return 95;
@@ -792,7 +793,7 @@ const getMovieProgress = (movieUUID: string) => {
 		return 0;
 	}
 	console.log(`movie:`, movie);
-	const totalRuntime = averageWatchableEntitysRuntimeToMs(movie.watchableEntitys, true);
+	const totalRuntime = averageWatchableEntitysRuntime(movie.watchableEntitys, true);
 	// const totalRuntime = movie.watchableEntitys.reduce((prev, curr) => prev + curr.runtime, 0) / movie.watchableEntitys.length;
 	if (totalRuntime === -1 && watchHistory.watchTime >= 500) {
 		return 95;
