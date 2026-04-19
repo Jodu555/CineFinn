@@ -71,7 +71,7 @@
 						<div class="nav-wrapper d-flex align-items-center gap-2 py-3" ref="navWrapper" @scroll="updateScrollState">
 							<button class="nav-pill" :class="{ active: activeSection === 'all' }" @click="scrollToSection('all')">
 								<span class="nav-icon">
-									<font-awesome-icon :icon="['fa-solid', 'fa-grid-2']" />
+									<font-awesome-icon :icon="['fa-solid', 'fa-grip']" />
 								</span>
 								<span class="nav-text">All Content</span>
 							</button>

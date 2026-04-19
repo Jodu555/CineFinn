@@ -52,7 +52,6 @@ export interface FranchiseData {
     description: string;
     backgroundImage: string;
     logo: string;
-    totalContent: number;
     subFranchises: SubFranchise[];
     mainContent: FranchiseContent[];
 }
@@ -60,4 +59,5 @@ export interface FranchiseData {
 export interface FranchiseDataExtended extends Omit<FranchiseData, 'mainContent' | 'subFranchises'> {
     mainContent: FranchiseContentExtended[];
     subFranchises: SubFranchiseExtended[];
+    totalContent: number;
 }

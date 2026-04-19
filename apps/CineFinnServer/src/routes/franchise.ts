@@ -38,17 +38,6 @@ const FranchiseDataSchema = z.object({
     mainContent: z.array(ContentSchema),
 });
 
-const recalculateTotals = (data: FranchiseData): FranchiseData => {
-    const subTotal = data.subFranchises.reduce(
-        (acc, sub) => acc + sub.content.length,
-        0
-    );
-    return {
-        ...data,
-        totalContent: data.mainContent.length + subTotal,
-    };
-};
-
 const franchiseData: Record<string, FranchiseData> = {
     // starwars: {
     //     id: 'starwars',
@@ -611,7 +600,6 @@ const franchiseData: Record<string, FranchiseData> = {
         description: 'The World of Magic in the Mahouka Universe explore all the intrigues and follow Tatsuya and Miyuki around the School and theyre personal Life.',
         backgroundImage: 'https://static.animecorner.me/2020/09/lasto-e1599669219322.jpg',
         logo: 'https://ih1.redbubble.net/image.1901501011.2665/st,small,507x507-pad,600x600,f8f8f8.jpg',
-        totalContent: 44,
         mainContent: [
 
         ],
@@ -913,6 +901,8 @@ async function augmentFranchiseData(data: FranchiseData): Promise<FranchiseDataE
         } satisfies SubFranchiseExtended;
     }));
 
+    extended.totalContent = data.mainContent.length + data.subFranchises.flatMap(s => s.content).length;
+
     return extended;
 }
 
@@ -950,7 +940,7 @@ const router = new Hono()
             );
         }
 
-        const data = recalculateTotals(result.data);
+        const data = result.data;
         const key = data.id.toLowerCase();
 
         if (franchiseData[key]) {
@@ -985,7 +975,7 @@ const router = new Hono()
             );
         }
 
-        const data = recalculateTotals(result.data);
+        const data = result.data;
         const newKey = data.id.toLowerCase();
 
         // If the ID itself changed, remove the old key

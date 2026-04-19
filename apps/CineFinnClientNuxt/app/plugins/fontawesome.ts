@@ -19,7 +19,7 @@ library.add(
     faEye, faUserPlus, faToggleOn, faShareNodes, faChartLine, faUserShield, faLock, faAt, faShieldHalved, faHashtag, faCheckCircle, faSyncAlt, faHourglassHalf,
     faBuilding, faEnvelope, faKey, faPlug, faServer, faBolt, faUser, faTable, faDatabase, faImage, faFilm, faGlobe, faCodeBranch, faSliders, faNetworkWired,
     faEyeSlash, faXmark, faExclamationTriangle, faStar, faFolder, faHandPointLeft, faFileCode, faBomb, faRightToBracket, faPaperPlane, faCircleInfo, faChevronLeft,
-    faFire, faBookmark, faMinus, faTowerBroadcast, faBell, faArrowRotateLeft, fasClock, faUpLong
+    faFire, faBookmark, faMinus, faTowerBroadcast, faBell, faArrowRotateLeft, fasClock, faUpLong, faGrip
 );
 library.add(faCalendar, farClock);
 
