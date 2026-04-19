@@ -120,39 +120,41 @@ const router = new Hono()
 
         const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, watchable_UUID: watchable.UUID, unique: true });
 
-        //To force hono to complete the request before doing the translation stuff cause that's more a failsafe than anything else
-        setImmediate(() => {
-            setTimeout(async () => {
-                if (isMovie(watchable)) {
-                    console.time('Translating');
-                    await translationV1WatchString.updateSegment(user.UUID, {
-                        series: watchable.serie_UUID,
-                        season: -1,
-                        episode: -1,
-                        movie: watchable.movie_IDX,
-                    }, (seg) => {
-                        if (seg.time < time) {
-                            seg.time = time;
-                        }
-                    });
-                    console.timeEnd('Translating');
-                } else {
-                    console.time('Translating');
-                    await translationV1WatchString.updateSegment(user.UUID, {
-                        series: watchable.serie_UUID,
-                        season: watchable.season_IDX,
-                        episode: watchable.episode_IDX,
-                        movie: -1,
-                    }, (seg) => {
-                        if (seg.time < time) {
-                            seg.time = time;
-                        }
-                    });
-                    console.timeEnd('Translating');
-                }
+        if (process.env.OLD_DB_WATCH_STRING_TRANSLATION! == 'true' || process.env.OLD_DB_WATCH_STRING_TRANSLATION! == '1') {
+            //To force hono to complete the request before doing the translation stuff cause that's more a failsafe than anything else
+            setImmediate(() => {
+                setTimeout(async () => {
+                    if (isMovie(watchable)) {
+                        console.time('Translating');
+                        await translationV1WatchString.updateSegment(user.UUID, {
+                            series: watchable.serie_UUID,
+                            season: -1,
+                            episode: -1,
+                            movie: watchable.movie_IDX,
+                        }, (seg) => {
+                            if (seg.time < time) {
+                                seg.time = time;
+                            }
+                        });
+                        console.timeEnd('Translating');
+                    } else {
+                        console.time('Translating');
+                        await translationV1WatchString.updateSegment(user.UUID, {
+                            series: watchable.serie_UUID,
+                            season: watchable.season_IDX,
+                            episode: watchable.episode_IDX,
+                            movie: -1,
+                        }, (seg) => {
+                            if (seg.time < time) {
+                                seg.time = time;
+                            }
+                        });
+                        console.timeEnd('Translating');
+                    }
 
-            }, 1000);
-        });
+                }, 1000);
+            });
+        }
 
 
         if (watchHistory == undefined) {

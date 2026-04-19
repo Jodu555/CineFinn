@@ -2,37 +2,10 @@ import { Hono } from "hono";
 import { authMiddleware } from "../middleware/auth.js";
 import { HTTPException } from "hono/http-exception";
 import z from "zod";
+import type { FranchiseContent, FranchiseContentExtended, FranchiseContentMovieExtened, FranchiseData, FranchiseDataExtended, SubFranchiseExtended } from "@cinefinn/types/models/franchise";
+import { moviesTable, watchableEntitysTable } from "../database.js";
 
-interface Content {
-    id: string;
-    title: string;
-    year: number;
-    rating: number;
-    duration: string;
-    description: string;
-    poster: string;
-    type: 'movie' | 'series';
-    genre: string[];
-}
 
-interface SubFranchise {
-    id: string;
-    name: string;
-    description: string;
-    logo: string;
-    content: Content[];
-}
-
-interface FranchiseData {
-    id: string;
-    name: string;
-    description: string;
-    backgroundImage: string;
-    logo: string;
-    totalContent: number;
-    subFranchises: SubFranchise[];
-    mainContent: Content[];
-}
 
 const ContentSchema = z.object({
     id: z.string().min(1, "Content ID is required"),
@@ -651,14 +624,14 @@ const franchiseData: Record<string, FranchiseData> = {
                 content: [
                     {
                         type: 'movie',
-                        id: 'M-b868dbeb',
-                        title: 'The Irregular at Magic High School: Reminiscence Arc',
+                        id: 'MO-57987539',
+                        // title: 'The Irregular at Magic High School: Reminiscence Arc',
                         year: 2021,
-                        rating: 9.9,
-                        duration: '1h 11m',
+                        // rating: 9.9,
+                        // duration: '1h 11m',
                         description: 'Looking at Miyuki and Tatsuya now, it might be hard to imagine them as anything other than loving siblings. But it wasn\'t always this way - Three years ago, Miyuki was always uncomfortable around her older brother. The rest of their family treated him no better than a lowly servant, even though he was the perfect Guardian, watching over Miyuki while she lived a normal middle school life. But what really bothered her was that he never showed any emotions or thoughts of his own. However, when danger comes calling during a fateful trip to Okinawa, their relationship as brother and sister will change forever.',
                         poster: 'https://m.media-amazon.com/images/M/MV5BYjY3MmM5NzYtMmEyMS00ODk0LWIxNmUtYmY3NzMwMmQzNjI1XkEyXkFqcGc@._V1_QL75_UX190_CR0,2,190,281_.jpg',
-                        genre: ['Action', 'Sci-Fi', 'Adventure', 'Superhero'],
+                        // genre: ['Action', 'Sci-Fi', 'Adventure', 'Superhero'],
                     },
                     //@ts-ignore
                     {
@@ -672,14 +645,14 @@ const franchiseData: Record<string, FranchiseData> = {
                     },
                     {
                         type: 'movie',
-                        id: 'M-f0oih32fn0',
-                        title: 'The Irregular at Magic High School: The Girl Who Calls the Stars',
+                        id: 'MO-95c16179',
+                        // title: 'The Irregular at Magic High School: The Girl Who Calls the Stars',
                         year: 2017,
-                        rating: 9.7,
-                        duration: '1h 30m',
+                        // rating: 9.7,
+                        // duration: '1h 30m',
                         description: 'In the story, the seasons have changed and it will soon be the second spring. Tatsuya and Miyuki have finished their first year at First Magic High School and are on their spring break. The two go to their villa on the Ogasawara Island archipelago. After only a small moment of peace a lone young woman named Kokoa appears before them. She has abandoned the Naval base and she tells Tatsuya her one wish.',
                         poster: 'https://m.media-amazon.com/images/M/MV5BNjRlNWFjNjYtNjZiMy00MDBlLWE4YzctNzA0NDA3MDBiYTVlXkEyXkFqcGc@._V1_QL75_UX190_CR0,4,190,281_.jpg',
-                        genre: ['Action', 'Sci-Fi', 'Adventure', 'Superhero'],
+                        // genre: ['Action', 'Sci-Fi', 'Adventure', 'Superhero'],
                     }
                 ]
             },
@@ -912,9 +885,56 @@ const franchiseData: Record<string, FranchiseData> = {
 // },
 // };
 
+async function augmentFranchiseData(data: FranchiseData): Promise<FranchiseDataExtended> {
+    const extended = data as FranchiseDataExtended;
+
+    const augmentFranchiseContent = async (c: FranchiseContent): Promise<FranchiseContentExtended> => {
+        if (c.type === 'movie') {
+            const movie = await moviesTable.getOne({ UUID: c.id });
+            if (!movie) throw new Error(`Movie with UUID ${c.id} not found`);
+            return {
+                ...c,
+                item: movie,
+                watchableEntities: await watchableEntitysTable.get({ UUID: c.id })!,
+            } satisfies FranchiseContentMovieExtened;
+        }
+        return c;
+    };
+
+    extended.mainContent = await Promise.all(data.mainContent.map(async c => {
+        return await augmentFranchiseContent(c);
+    }));
+    extended.subFranchises = await Promise.all(data.subFranchises.map(async s => {
+        return {
+            ...s,
+            content: await Promise.all(s.content.map(async c => {
+                return await augmentFranchiseContent(c);
+            })),
+        } satisfies SubFranchiseExtended;
+    }));
+
+    return extended;
+}
+
 const router = new Hono()
     .get('/', authMiddleware, async (c) => {
-        return c.json(franchiseData);
+        const localFranchiseData = {} as Record<string, FranchiseDataExtended>;
+        for (const franchise of Object.values(franchiseData)) {
+            localFranchiseData[franchise.id] = await augmentFranchiseData(franchise);
+        }
+        return c.json(localFranchiseData);
+    })
+    .get('/:slug', authMiddleware, async (c) => {
+        const { slug } = c.req.param();
+        const franchise = franchiseData[slug.toLowerCase()];
+
+        if (!franchise) {
+            throw new HTTPException(404, {
+                message: `Franchise with slug '${slug}' not found`,
+            });
+        }
+
+        return c.json(augmentFranchiseData(franchise));
     })
     .post('/', authMiddleware, async (c) => {
         const body = await c.req.json();
@@ -941,18 +961,6 @@ const router = new Hono()
 
         franchiseData[key] = data;
         return c.json(data, 201);
-    })
-    .get('/:slug', authMiddleware, async (c) => {
-        const { slug } = c.req.param();
-        const franchise = franchiseData[slug.toLowerCase()];
-
-        if (!franchise) {
-            throw new HTTPException(404, {
-                message: `Franchise with slug '${slug}' not found`,
-            });
-        }
-
-        return c.json(franchise);
     })
     .put('/:id', authMiddleware, async (c) => {
         const { id } = c.req.param();

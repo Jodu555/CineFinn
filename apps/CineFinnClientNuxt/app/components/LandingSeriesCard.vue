@@ -53,25 +53,14 @@
 </template>
 
 <script lang="ts" setup>
-import type { FrontendSeries } from '@cinefinn/types';
-
-interface MovieContent {
-	id: string;
-	title: string;
-	year: number;
-	rating: number;
-	duration: string;
-	description: string;
-	poster: string;
-	type: 'movie' | 'series';
-	genre: string[];
-}
+import type { FrontendSeries, Movie, WatchableEntity } from '@cinefinn/types';
+import type { FranchiseContentMovie, FranchiseContentMovieExtened } from '@cinefinn/types/models/franchise';
 
 const { decideSeriesImage } = useSeriesImage();
 
 const props = defineProps<{
 	seriesItem?: FrontendSeries;
-	movieItem?: MovieContent;
+	movieItem?: FranchiseContentMovieExtened;
 	showNewRibbon?: boolean;
 	showEpisodeCount?: boolean;
 	showRemoveButton?: boolean;
@@ -97,18 +86,19 @@ const itemId = computed(() => {
 });
 
 const itemTitle = computed(() => {
-	if (isMovie.value) return props.movieItem!.title;
+	if (isMovie.value) return props.movieItem!.item.primaryName;
 	if (hasSeries.value) return props.seriesItem!.title;
 	return 'Loading...';
 });
 
 const itemGenres = computed(() => {
-	if (isMovie.value) return props.movieItem!.genre;
+	if (isMovie.value) return [];
+	// if (isMovie.value) return props.movieItem!.genre;
 	if (hasSeries.value) return props.seriesItem!.tags || [];
 	return [];
 });
 
-const movieDuration = computed(() => (isMovie.value ? props.movieItem!.duration : ''));
+const movieDuration = computed(() => (isMovie.value ? props.movieItem!.watchableEntities.reduce((sum, we) => sum + we.runtime, 0) : ''));
 
 const randomNumber = Math.floor(Math.random() * 1000);
 const itemImage = computed(() => {

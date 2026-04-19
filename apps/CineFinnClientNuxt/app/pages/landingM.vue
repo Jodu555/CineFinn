@@ -10,14 +10,14 @@
 					<Slide v-for="franchise in franchises" :key="franchise.id">
 						<div class="carousel-item-wrapper" style="height: 100%; width: 100%">
 							<div class="franchise-slide">
-								<img :src="franchise.backgroundImage" class="d-block w-100 franchise-backdrop" :alt="franchise.slug" />
+								<img :src="franchise.backgroundImage" class="d-block w-100 franchise-backdrop" :alt="franchise.id" />
 								<div class="franchise-gradient-start"></div>
 								<div class="franchise-gradient-end"></div>
 								<div class="franchise-content">
-									<img :src="franchise.logo" :alt="franchise.slug" class="franchise-logo" />
+									<img :src="franchise.logo" :alt="franchise.id" class="franchise-logo" />
 									<p class="text-secondary mt-2 mb-1">{{ franchise.description }}</p>
-									<p class="text-info mb-2">{{ franchise.contentCount }}</p>
-									<NuxtLink class="btn btn-outline-info" :to="`/franchise/${franchise.slug}`">
+									<p class="text-info mb-2">{{ franchise.mainContent.length }} Titel</p>
+									<NuxtLink class="btn btn-outline-info" :to="`/franchise/${franchise.id}`">
 										<font-awesome-icon :icon="['fas', 'circle-info']" class="me-2" />
 										Mehr Infos
 									</NuxtLink>
@@ -131,6 +131,7 @@ import LandingSeriesCard from '~/components/LandingSeriesCard.vue';
 
 import { useIndexStore } from '~/stores/index.store';
 import type { FrontendSeries, timestamped, WatchableEntity } from '@cinefinn/types';
+import type { FranchiseDataExtended } from '@cinefinn/types/models/franchise';
 
 const authStore = useAuthStore();
 const indexStore = useIndexStore();
@@ -343,7 +344,7 @@ const episodeCarouselConfig = {
 
 const showFranchises = ref(true);
 
-const { data: franchises } = useFetch<any>(`${useAPIURL()}/franchise`, {
+const { data: franchises } = useFetch<Record<string, FranchiseDataExtended>>(`${useAPIURL()}/franchise`, {
 	key: 'franchise',
 	server: true,
 	headers: {

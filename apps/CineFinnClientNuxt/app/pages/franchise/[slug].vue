@@ -189,6 +189,7 @@ import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import LandingSeriesCard from '~/components/LandingSeriesCard.vue';
 import { useIndexStore } from '~/stores/index.store';
+import type { FranchiseData, FranchiseDataExtended } from '@cinefinn/types/models/franchise';
 
 const authStore = useAuthStore();
 const indexStore = useIndexStore();
@@ -200,38 +201,7 @@ definePageMeta({
 	middleware: 'auth',
 });
 
-interface Content {
-	id: string;
-	title: string;
-	year: number;
-	rating: number;
-	duration: string;
-	description: string;
-	poster: string;
-	type: 'movie' | 'series';
-	genre: string[];
-}
-
-interface SubFranchise {
-	id: string;
-	name: string;
-	description: string;
-	logo: string;
-	content: Content[];
-}
-
-interface FranchiseData {
-	id: string;
-	name: string;
-	description: string;
-	backgroundImage: string;
-	logo: string;
-	totalContent: number;
-	subFranchises: SubFranchise[];
-	mainContent: Content[];
-}
-
-const { data: franchise } = useFetch<FranchiseData>(`${useAPIURL()}/franchise/${slug}`, {
+const { data: franchise } = useFetch<FranchiseDataExtended>(`${useAPIURL()}/franchise/${slug}`, {
 	key: 'franchise',
 	server: true,
 	headers: {

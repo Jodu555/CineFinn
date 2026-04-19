@@ -30,6 +30,10 @@
 			"types": "./dist/models/system.d.ts",
 			"import": "./dist/models/system.js"
 		},
+		"./models/franchise": {
+			"types": "./dist/models/franchise.d.ts",
+			"import": "./dist/models/franchise.js"
+		},
 		"./socket": {
 			"types": "./dist/socket/index.d.ts",
 			"import": "./dist/socket/index.js"
