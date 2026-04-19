@@ -105,7 +105,7 @@ const itemGenres = computed(() => {
 
 const movieDuration = computed(() => {
 	if (!isMovie.value) return '';
-	return msToReadable(averageWatchableEntitysRuntime(props.movieItem!.watchableEntities));
+	return msToReadable(averageWatchableEntitysRuntime(props.movieItem!.watchableEntities), { millis: false, seconds: false });
 });
 
 const randomNumber = Math.floor(Math.random() * 1000);

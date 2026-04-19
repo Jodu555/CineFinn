@@ -16,7 +16,7 @@
 								<div class="franchise-content">
 									<img :src="franchise.logo" :alt="franchise.id" class="franchise-logo" />
 									<p class="text-secondary mt-2 mb-1">{{ franchise.description }}</p>
-									<p class="text-info mb-2">{{ franchise.mainContent.length }} Titel</p>
+									<p class="text-info mb-2">{{ franchise.totalContent }} Titel</p>
 									<NuxtLink class="btn btn-outline-info" :to="`/franchise/${franchise.id}`">
 										<font-awesome-icon :icon="['fas', 'circle-info']" class="me-2" />
 										Mehr Infos

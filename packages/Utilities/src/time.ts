@@ -1,7 +1,13 @@
-export function msToReadable(ms: number) {
+type Includes = {
+    millis: boolean;
+    seconds: boolean;
+};
+export function msToReadable(ms: number, includes: Includes = { millis: true, seconds: true }) {
 
     if (ms == 0) {
-        return '0ms'
+        if (includes.millis) return '0ms';
+        if (includes.seconds) return '0s';
+        return '0m';
     }
 
     const milliseconds = Math.floor((ms % 1000) / 100);
@@ -14,8 +20,12 @@ export function msToReadable(ms: number) {
     if (days > 0) result += `${days}d `;
     if (hours > 0) result += `${hours}h `;
     if (minutes > 0) result += `${minutes}m `;
-    if (seconds > 0) result += `${seconds}s`;
-    if (milliseconds > 0) result += `${result.length > 0 ? '.' : ''}${milliseconds}ms`;
+    if (includes.seconds) {
+        if (seconds > 0) result += `${seconds}s`;
+    }
+    if (includes.millis) {
+        if (milliseconds > 0) result += `${result.length > 0 ? '.' : ''}${milliseconds}ms`;
+    }
     return result.trim();
 }
 
