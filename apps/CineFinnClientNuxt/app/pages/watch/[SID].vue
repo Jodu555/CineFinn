@@ -764,7 +764,8 @@ const getEpisodeProgress = (episodeUUID: string) => {
 	if (episode == undefined) {
 		return 0;
 	}
-	const totalRuntime = episode.watchableEntitys.reduce((prev, curr) => prev + curr.runtime, 0) / episode.watchableEntitys.length;
+	const totalRuntime = averageWatchableEntitysRuntimeToMs(episode.watchableEntitys, true);
+	// const totalRuntime = episode.watchableEntitys.reduce((prev, curr) => prev + curr.runtime, 0) / episode.watchableEntitys.length;
 	if (totalRuntime === -1 && watchHistory.watchTime >= 500) {
 		return 95;
 	}
@@ -791,7 +792,8 @@ const getMovieProgress = (movieUUID: string) => {
 		return 0;
 	}
 	console.log(`movie:`, movie);
-	const totalRuntime = movie.watchableEntitys.reduce((prev, curr) => prev + curr.runtime, 0) / movie.watchableEntitys.length;
+	const totalRuntime = averageWatchableEntitysRuntimeToMs(movie.watchableEntitys, true);
+	// const totalRuntime = movie.watchableEntitys.reduce((prev, curr) => prev + curr.runtime, 0) / movie.watchableEntitys.length;
 	if (totalRuntime === -1 && watchHistory.watchTime >= 500) {
 		return 95;
 	}
