@@ -122,12 +122,20 @@
 							<div v-for="content in allContent" :key="content.id" class="col-6 col-sm-4 col-md-3 col-xl-2">
 								<LandingSeriesCard
 									v-if="content.type === 'series'"
+									:show-item-badge="true"
 									:series-item="indexStore.seriesById.get(content.id)"
 									show-episode-count
 									@navigate="watchContent"
 									@show-info="showContentInfo"
 								/>
-								<LandingSeriesCard v-else :movie-item="content" show-episode-count @navigate="watchContent" @show-info="showContentInfo" />
+								<LandingSeriesCard
+									v-else
+									:show-item-badge="true"
+									:movie-item="content"
+									show-episode-count
+									@navigate="watchContent"
+									@show-info="showContentInfo"
+								/>
 							</div>
 						</div>
 					</div>
@@ -153,7 +161,7 @@
 									<p class="sub-franchise-desc text-white-50 mb-0">{{ sf.description }}</p>
 								</div>
 								<div class="col-auto">
-									<span class="content-count-badge"> {{ sf.content.length }} titles </span>
+									<span class="content-count-badge"> {{ sf.content.length }} Titles </span>
 								</div>
 							</div>
 						</div>
@@ -163,12 +171,20 @@
 							<div v-for="content in sf.content" :key="content.id" class="col-6 col-sm-4 col-md-3 col-xl-2">
 								<LandingSeriesCard
 									v-if="content.type === 'series'"
+									:show-item-badge="true"
 									:series-item="indexStore.seriesById.get(content.id)"
 									show-episode-count
 									@navigate="watchContent"
 									@show-info="showContentInfo"
 								/>
-								<LandingSeriesCard v-else :movie-item="content" show-episode-count @navigate="watchContent" @show-info="showContentInfo" />
+								<LandingSeriesCard
+									v-else
+									:show-item-badge="true"
+									:movie-item="content"
+									show-episode-count
+									@navigate="watchContent"
+									@show-info="showContentInfo"
+								/>
 							</div>
 						</div>
 					</div>

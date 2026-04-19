@@ -11,7 +11,7 @@
 	>
 		<div class="series-thumb-wrap position-relative overflow-hidden rounded-3">
 			<img :src="itemImage" class="series-thumb" :alt="itemTitle" loading="lazy" />
-			<span class="type-badge" :class="isMovie ? 'movie' : 'series'">
+			<span v-if="props.showItemBadge" class="type-badge" :class="isMovie ? 'movie' : 'series'">
 				{{ isMovie ? 'Movie' : 'Series' }}
 			</span>
 			<div class="series-overlay" :class="{ visible: isActive || isHovered }">
@@ -68,6 +68,7 @@ const props = defineProps<{
 	showNewRibbon?: boolean;
 	showEpisodeCount?: boolean;
 	showRemoveButton?: boolean;
+	showItemBadge?: boolean;
 }>();
 
 defineEmits<{

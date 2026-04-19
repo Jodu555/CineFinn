@@ -60,7 +60,8 @@
 						<Slide v-for="item in carousel.mappedItems" :key="item.UUID">
 							<div class="carousel-slide-wrapper">
 								<LandingSeriesCard
-									:item="item"
+									:show-item-badge="false"
+									:series-item="item"
 									:show-episode-count="carousel.additionalMeta?.showWatchableCount"
 									:show-new-ribbon="carousel.additionalMeta?.showNewRibbon"
 									@navigate="navigateToSeries"
