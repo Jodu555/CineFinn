@@ -895,7 +895,7 @@ async function augmentFranchiseData(data: FranchiseData): Promise<FranchiseDataE
             return {
                 ...c,
                 item: movie,
-                watchableEntities: await watchableEntitysTable.get({ UUID: c.id })!,
+                watchableEntities: await watchableEntitysTable.get({ watchable_UUID: c.id })!,
             } satisfies FranchiseContentMovieExtened;
         }
         return c;
@@ -934,7 +934,7 @@ const router = new Hono()
             });
         }
 
-        return c.json(augmentFranchiseData(franchise));
+        return c.json(await augmentFranchiseData(franchise));
     })
     .post('/', authMiddleware, async (c) => {
         const body = await c.req.json();

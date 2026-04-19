@@ -36,13 +36,15 @@
 				</div>
 			</div>
 			<span v-if="showNewRibbon && !isMovie" class="new-ribbon">NEU</span>
-			<div v-if="!isMovie && showEpisodeCount && totalEpisodeCount > 0" class="episode-count-badge">
-				<font-awesome-icon :icon="['fas', 'film']" class="me-1" />
-				{{ totalEpisodeCount }} Folgen
-			</div>
-			<div v-if="isMovie" class="episode-count-badge">
-				<font-awesome-icon :icon="['fas', 'film']" class="me-1" />
-				{{ yearLabel }}
+			<div v-if="!isActive && !isHovered">
+				<div v-if="!isMovie && showEpisodeCount && totalEpisodeCount > 0" class="episode-count-badge">
+					<font-awesome-icon :icon="['fas', 'film']" class="me-1" />
+					{{ totalEpisodeCount }} Folgen
+				</div>
+				<div v-if="isMovie" class="episode-count-badge">
+					<font-awesome-icon :icon="['fas', 'film']" class="me-1" />
+					{{ yearLabel }}
+				</div>
 			</div>
 		</div>
 		<div class="series-info">
@@ -55,6 +57,7 @@
 <script lang="ts" setup>
 import type { FrontendSeries, Movie, WatchableEntity } from '@cinefinn/types';
 import type { FranchiseContentMovie, FranchiseContentMovieExtened } from '@cinefinn/types/models/franchise';
+import { msToReadable } from '@cinefinn/utilities/time';
 
 const { decideSeriesImage } = useSeriesImage();
 
@@ -98,7 +101,10 @@ const itemGenres = computed(() => {
 	return [];
 });
 
-const movieDuration = computed(() => (isMovie.value ? props.movieItem!.watchableEntities.reduce((sum, we) => sum + we.runtime, 0) : ''));
+const movieDuration = computed(() => {
+	if (!isMovie.value) return '';
+	return msToReadable(averageWatchableEntitysRuntimeToMs(props.movieItem!.watchableEntities));
+});
 
 const randomNumber = Math.floor(Math.random() * 1000);
 const itemImage = computed(() => {

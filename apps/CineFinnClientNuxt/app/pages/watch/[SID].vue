@@ -167,12 +167,7 @@
 																	<p class="text-muted small mb-0">
 																		<font-awesome-icon :icon="['far', 'clock']" class="me-1" />
 																		<!-- 20min -->
-																		{{
-																			msToReadable(
-																				(episode.watchableEntitys.reduce((prev, curr) => prev + curr.runtime, 0) / episode.watchableEntitys.length) *
-																					1000,
-																			)
-																		}}
+																		{{ msToReadable(averageWatchableEntitysRuntimeToMs(episode.watchableEntitys)) }}
 																	</p>
 																</div>
 																<p class="text-muted small mb-0">
@@ -321,15 +316,7 @@
 														<div class="d-flex align-items-center gap-3 mb-2 small text-muted">
 															<span>
 																<font-awesome-icon :icon="['far', 'clock']" class="me-1" />
-																{{
-																	msToReadable(
-																		(movie.watchableEntitys.reduce((prev, curr) => {
-																			return prev + curr.runtime;
-																		}, 0) /
-																			movie.watchableEntitys.length) *
-																			1000,
-																	)
-																}}
+																{{ msToReadable(averageWatchableEntitysRuntimeToMs(movie.watchableEntitys)) }}
 															</span>
 															<span>•</span>
 															<span>

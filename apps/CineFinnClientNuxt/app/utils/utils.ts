@@ -1,4 +1,4 @@
-import type { FrontendSeries } from "@cinefinn/types/models/media";
+import type { FrontendSeries, WatchableEntity } from "@cinefinn/types/models/media";
 
 
 export function roleIDToName(id: number) {
@@ -60,3 +60,8 @@ export const langDetails = {
         alt: 'Deutsche Flagge, Flagge, Untertitel, Flag, Chinesisch, Chinese',
     },
 } as Record<string, { title: string; alt: string; }>;
+
+export const averageWatchableEntitysRuntimeToMs = (watchableEntities: WatchableEntity[]) => {
+    const totalRuntimeAvg = watchableEntities.reduce((sum, we) => sum + we.runtime, 0) / watchableEntities.length;
+    return totalRuntimeAvg * 1000;
+};
