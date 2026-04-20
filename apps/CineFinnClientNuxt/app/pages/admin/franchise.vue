@@ -44,7 +44,7 @@
 						<div class="d-flex flex-wrap gap-2">
 							<span class="badge bg-info text-dark">
 								<font-awesome-icon :icon="['fas', 'film']" class="me-1" />
-								{{ franchise.totalContent }} items
+								{{ getTotalContent(franchise) }} items
 							</span>
 							<span class="badge bg-secondary">
 								<font-awesome-icon :icon="['fas', 'sitemap']" class="me-1" />
@@ -181,11 +181,6 @@
 													<p class="card-text small text-secondary text-truncate mb-2">
 														{{ resolveContent(content).description || 'No description' }}
 													</p>
-													<div class="d-flex gap-1 flex-wrap mb-2">
-														<span v-for="g in resolveContent(content).genre.slice(0, 3)" :key="g" class="badge border text-secondary fw-normal">{{
-															g
-														}}</span>
-													</div>
 													<div class="d-flex gap-2">
 														<button class="btn btn-outline-primary btn-sm" @click="openContentModal(content, idx, 'main')">
 															<font-awesome-icon :icon="['fas', 'pen']" />
@@ -345,23 +340,35 @@
 
 								<!-- Movie Fields -->
 								<template v-if="contentForm.type === 'movie'">
-									<div class="col-md-8">
-										<label class="form-label">Title</label>
-										<input v-model="contentForm.title" type="text" class="form-control border-secondary" required />
+									<div class="col-12">
+										<label class="form-label">Movie ID Verification</label>
+										<div class="input-group">
+											<input
+												v-model="contentForm.id"
+												type="text"
+												class="form-control border-secondary"
+												required
+												placeholder="Enter movie UUID"
+												@blur="validateMovieId"
+											/>
+											<button class="btn btn-outline-secondary" type="button" :disabled="movieQueryLoading" @click="validateMovieId">
+												<span v-if="movieQueryLoading" class="spinner-border spinner-border-sm"></span>
+												<template v-else>Verify</template>
+											</button>
+										</div>
+										<div v-if="movieQueryResult" class="form-text text-success">
+											<font-awesome-icon :icon="['fas', 'check']" class="me-1" />
+											{{ movieQueryResult.item.primaryName }}
+										</div>
+										<div v-if="movieQueryError" class="form-text text-danger">
+											{{ movieQueryError }}
+										</div>
 									</div>
 									<div class="col-md-4">
 										<label class="form-label">Year</label>
 										<input v-model.number="contentForm.year" type="number" class="form-control border-secondary" />
 									</div>
-									<div class="col-md-4">
-										<label class="form-label">Rating</label>
-										<input v-model.number="contentForm.rating" type="number" step="0.1" max="10" class="form-control border-secondary" />
-									</div>
-									<div class="col-md-4">
-										<label class="form-label">Duration</label>
-										<input v-model="contentForm.duration" type="text" class="form-control border-secondary" placeholder="2h 15m" />
-									</div>
-									<div class="col-md-4">
+									<div class="col-md-8">
 										<label class="form-label">Poster URL</label>
 										<input v-model="contentForm.poster" type="url" class="form-control border-secondary" />
 									</div>
@@ -369,15 +376,13 @@
 										<label class="form-label">Description</label>
 										<textarea v-model="contentForm.description" class="form-control border-secondary" rows="2"></textarea>
 									</div>
-									<div class="col-12">
-										<label class="form-label">Genres (comma separated)</label>
-										<input v-model="genreInput" type="text" class="form-control border-secondary" placeholder="Action, Adventure, Sci-Fi" />
-									</div>
 								</template>
 
 								<!-- Series Preview -->
 								<div v-if="contentForm.type === 'series'" class="col-12">
-									<div v-if="resolvedSeriesPreview" class="card border-info">
+									<label class="form-label">Series ID</label>
+									<input v-model="contentForm.id" type="text" class="form-control border-secondary" required placeholder="series-uuid" />
+									<div v-if="resolvedSeriesPreview" class="card border-info mt-3">
 										<div class="card-body">
 											<div class="d-flex gap-3">
 												<img
@@ -401,7 +406,7 @@
 											</div>
 										</div>
 									</div>
-									<div v-else class="alert alert-secondary py-2 small mb-0">
+									<div v-else class="alert alert-secondary py-2 small mb-0 mt-3">
 										<font-awesome-icon :icon="['fas', 'circle-info']" class="me-2" />
 										Enter a valid series ID to preview data from the index store.
 									</div>
@@ -468,11 +473,11 @@
 
 <script lang="ts" setup>
 import type { FrontendSeries } from '@cinefinn/types';
+import type { FranchiseContent, FranchiseData, SubFranchise } from '@cinefinn/types/models/franchise';
 import { useIndexStore } from '~/stores/index.store';
 
 const authStore = useAuthStore();
 const indexStore = useIndexStore();
-const route = useRoute();
 const { $swal } = useNuxtApp();
 const apiUrl = useAPIURL();
 
@@ -480,56 +485,41 @@ definePageMeta({
 	middleware: 'auth',
 });
 
-interface Content {
-	id: string;
-	title: string;
-	year: number;
-	rating: number;
-	duration: string;
-	description: string;
-	poster: string;
-	type: 'movie' | 'series';
-	genre: string[];
+/* ─── API Types ─── */
+interface MovieQueryResponse {
+	item: {
+		UUID: string;
+		primaryName: string;
+		serie_UUID: string;
+		movie_IDX: number;
+	};
+	watchableEntitys: {
+		UUID: string;
+		serie_UUID: string;
+		watchable_UUID: string;
+		lang: string;
+		subID: string;
+		filePath: string;
+		runtime: number;
+	};
 }
 
-interface SubFranchise {
-	id: string;
-	name: string;
-	description: string;
-	logo: string;
-	content: Content[];
-}
-
-interface FranchiseData {
-	id: string;
-	name: string;
-	description: string;
-	backgroundImage: string;
-	logo: string;
-	totalContent: number;
-	subFranchises: SubFranchise[];
-	mainContent: Content[];
-}
-
-interface ResolvedContent {
-	title: string;
-	image?: string;
-	description?: string;
-	genre: string[];
-}
-
+/* ─── Helpers ─── */
 const defaultFormData = (): FranchiseData => ({
 	id: '',
 	name: '',
 	description: '',
 	backgroundImage: '',
 	logo: '',
-	totalContent: 0,
 	subFranchises: [],
 	mainContent: [],
 });
 
-// Fetch franchises
+function getTotalContent(franchise: FranchiseData): number {
+	return franchise.mainContent.length + franchise.subFranchises.reduce((acc, sub) => acc + sub.content.length, 0);
+}
+
+/* ─── Fetch franchises ─── */
 const {
 	data: franchises,
 	pending,
@@ -547,7 +537,7 @@ const franchiseList = computed<FranchiseData[]>(() => {
 	return Object.values(franchises.value);
 });
 
-// --- Manage Franchise State ---
+/* ─── Manage Franchise State ─── */
 const managingFranchise = ref(false);
 const isNewFranchise = ref(false);
 const manageTab = ref<'details' | 'content' | 'subs'>('details');
@@ -564,6 +554,7 @@ function manageFranchise(franchise?: FranchiseData): void {
 	}
 	managingFranchise.value = true;
 	manageTab.value = 'details';
+	prefetchMovieNames();
 }
 
 function closeManage(): void {
@@ -574,10 +565,6 @@ function closeManage(): void {
 async function saveFranchise(): Promise<void> {
 	saving.value = true;
 	try {
-		// Recalculate totals based on current arrays
-		const subTotal = workingCopy.subFranchises.reduce((acc, sub) => acc + sub.content.length, 0);
-		workingCopy.totalContent = workingCopy.mainContent.length + subTotal;
-
 		const url = isNewFranchise.value ? `${apiUrl}/franchise` : `${apiUrl}/franchise/${workingCopy.id}`;
 		const method = isNewFranchise.value ? 'POST' : 'PUT';
 
@@ -612,25 +599,32 @@ async function saveFranchise(): Promise<void> {
 	}
 }
 
-// --- Content Modal State ---
+/* ─── Content Modal State ─── */
 const showContentModal = ref(false);
 const editingContentIndex = ref(-1);
 const contentParent = ref<'main' | 'sub'>('main');
 const contentSubIndex = ref(-1);
 const savingContent = ref(false);
-const genreInput = ref('');
 
-const contentForm = reactive<Content>({
-	id: '',
-	title: '',
-	year: 0,
-	rating: 0,
-	duration: '',
-	description: '',
-	poster: '',
+type ContentFormData = {
+	type: 'movie' | 'series';
+	id: string;
+	poster: string;
+	year: number;
+	description: string;
+};
+
+const contentForm = reactive<ContentFormData>({
 	type: 'movie',
-	genre: [],
+	id: '',
+	poster: '',
+	year: 0,
+	description: '',
 });
+
+const movieQueryLoading = ref(false);
+const movieQueryResult = ref<MovieQueryResponse | null>(null);
+const movieQueryError = ref('');
 
 const resolvedSeriesPreview = computed<FrontendSeries | undefined>(() => {
 	if (contentForm.type === 'series' && contentForm.id) {
@@ -639,27 +633,59 @@ const resolvedSeriesPreview = computed<FrontendSeries | undefined>(() => {
 	return undefined;
 });
 
-function openContentModal(content?: Content, index?: number, parent: 'main' | 'sub' = 'main', subIdx?: number): void {
+async function validateMovieId(): Promise<void> {
+	if (contentForm.type !== 'movie' || !contentForm.id) return;
+	movieQueryLoading.value = true;
+	movieQueryError.value = '';
+	try {
+		const res = await $fetch<MovieQueryResponse>(`${apiUrl}/franchise/query/${contentForm.id}`, {
+			headers: {
+				'auth-token': authStore.authToken,
+			},
+		});
+		movieQueryResult.value = res;
+	} catch (err: any) {
+		movieQueryError.value = err?.data?.message || 'Invalid movie ID';
+		movieQueryResult.value = null;
+	} finally {
+		movieQueryLoading.value = false;
+	}
+}
+
+function openContentModal(content?: FranchiseContent, index?: number, parent: 'main' | 'sub' = 'main', subIdx?: number): void {
 	contentParent.value = parent;
 	contentSubIndex.value = subIdx ?? -1;
 	editingContentIndex.value = index ?? -1;
+	movieQueryResult.value = null;
+	movieQueryError.value = '';
 
 	if (content) {
-		Object.assign(contentForm, JSON.parse(JSON.stringify(content)));
-		genreInput.value = content.genre?.join(', ');
+		if (content.type === 'movie') {
+			Object.assign(contentForm, {
+				type: 'movie' as const,
+				id: content.id,
+				poster: content.poster,
+				year: content.year,
+				description: content.description,
+			});
+			validateMovieId();
+		} else {
+			Object.assign(contentForm, {
+				type: 'series' as const,
+				id: content.id,
+				poster: '',
+				year: 0,
+				description: '',
+			});
+		}
 	} else {
 		Object.assign(contentForm, {
+			type: 'movie' as const,
 			id: '',
-			title: '',
-			year: 0,
-			rating: 0,
-			duration: '',
-			description: '',
 			poster: '',
-			type: 'movie',
-			genre: [],
+			year: 0,
+			description: '',
 		});
-		genreInput.value = '';
 	}
 	showContentModal.value = true;
 }
@@ -669,11 +695,22 @@ function closeContentModal(): void {
 }
 
 function saveContent(): void {
-	const genre = genreInput.value
-		.split(',')
-		.map((g) => g.trim())
-		.filter(Boolean);
-	const item: Content = { ...contentForm, genre };
+	let item: FranchiseContent;
+
+	if (contentForm.type === 'movie') {
+		item = {
+			type: 'movie',
+			id: contentForm.id,
+			poster: contentForm.poster,
+			year: contentForm.year,
+			description: contentForm.description,
+		};
+	} else {
+		item = {
+			type: 'series',
+			id: contentForm.id,
+		};
+	}
 
 	if (contentParent.value === 'main') {
 		if (editingContentIndex.value >= 0) {
@@ -700,7 +737,7 @@ function removeSubContent(subIndex: number, contentIndex: number): void {
 	workingCopy.subFranchises[subIndex]!.content.splice(contentIndex, 1);
 }
 
-// --- Sub Franchise Modal State ---
+/* ─── Sub Franchise Modal State ─── */
 const showSubFranchiseModal = ref(false);
 const editingSubFranchiseIndex = ref(-1);
 const subFranchiseForm = reactive<SubFranchise>({
@@ -748,8 +785,56 @@ function removeSubFranchise(index: number): void {
 	workingCopy.subFranchises.splice(index, 1);
 }
 
-// --- Content Resolution Helper ---
-function resolveContent(content: Content): ResolvedContent {
+/* ─── Content Resolution Helper ─── */
+interface ResolvedContent {
+	title: string;
+	image?: string;
+	description?: string;
+}
+
+const movieNameCache = reactive<Record<string, string>>({});
+
+async function fetchMovieName(id: string): Promise<void> {
+	if (movieNameCache[id] || !id) return;
+	try {
+		const res = await $fetch<MovieQueryResponse>(`${apiUrl}/franchise/query/${id}`, {
+			headers: {
+				'auth-token': authStore.authToken,
+			},
+		});
+		movieNameCache[id] = res.item.primaryName;
+	} catch {
+		movieNameCache[id] = id;
+	}
+}
+
+async function prefetchMovieNames(): Promise<void> {
+	const ids = new Set<string>();
+	workingCopy.mainContent.forEach((c) => {
+		if (c.type === 'movie') ids.add(c.id);
+	});
+	workingCopy.subFranchises.forEach((sub) => {
+		sub.content.forEach((c) => {
+			if (c.type === 'movie') ids.add(c.id);
+		});
+	});
+	for (const id of ids) {
+		await fetchMovieName(id);
+	}
+}
+
+watch(
+	() => workingCopy.mainContent,
+	() => prefetchMovieNames(),
+	{ deep: true },
+);
+watch(
+	() => workingCopy.subFranchises,
+	() => prefetchMovieNames(),
+	{ deep: true },
+);
+
+function resolveContent(content: FranchiseContent): ResolvedContent {
 	if (content.type === 'series') {
 		const series = indexStore.seriesById.get(content.id);
 		if (series) {
@@ -757,19 +842,19 @@ function resolveContent(content: Content): ResolvedContent {
 				title: series.title || series.infos?.title || content.id,
 				image: series.infos?.imageURL,
 				description: series.infos?.description,
-				genre: series.tags || [],
 			};
 		}
+		return { title: content.id };
 	}
+
 	return {
-		title: content.title,
+		title: movieNameCache[content.id] || content.id,
 		image: content.poster,
 		description: content.description,
-		genre: content.genre,
 	};
 }
 
-// --- Top Level Delete ---
+/* ─── Top Level Delete ─── */
 const deleting = ref<string | null>(null);
 
 async function confirmDelete(franchise: FranchiseData): Promise<void> {

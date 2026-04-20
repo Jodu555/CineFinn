@@ -1,15 +1,3 @@
-// export interface Content {
-//     id: string;
-//     title: string;
-//     year: number;
-//     rating: number;
-//     duration: string;
-//     description: string;
-//     poster: string;
-//     type: 'movie' | 'series';
-//     genre: string[];
-// }
-
 import type { timestamped } from "../shared/utilities.js";
 import type { Movie, WatchableEntity } from "./media.js";
 

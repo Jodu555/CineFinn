@@ -9,6 +9,7 @@ import type { TodoItem, IgnoranceItem } from '@cinefinn/types/shared';
 import type { timestamped } from '@cinefinn/types/shared';
 import { getConfig } from './config.js';
 import { debounce } from './utils.js';
+import type { FranchiseData } from '@cinefinn/types/models/franchise';
 
 
 export let database: Database;
@@ -34,6 +35,8 @@ export let playlistsTable: thingDatabase<Playlist, Playlist & timestamped>;
 export let todosTable: thingDatabase<TodoItem, TodoItem & timestamped>;
 
 export let ignoranceTable: thingDatabase<IgnoranceItem, IgnoranceItem & timestamped>;
+
+export let franchiseTable: thingDatabase<FranchiseData, FranchiseData & timestamped>;
 
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -453,6 +456,43 @@ async function createTables() {
         },
     });
 
+    await database.createTable('franchises', {
+        options: {
+            timestamps: true,
+            PK: 'id',
+        },
+        id: {
+            type: 'varchar(64)',
+            null: false,
+        },
+        name: {
+            type: 'varchar(256)',
+            null: false,
+        },
+        description: {
+            type: 'text',
+            null: false,
+        },
+        backgroundImage: {
+            type: 'varchar(256)',
+            null: false,
+        },
+        logo: {
+            type: 'varchar(256)',
+            null: false,
+        },
+        subFranchises: {
+            type: 'json',
+            null: false,
+            json: true,
+        },
+        mainContent: {
+            type: 'json',
+            null: false,
+            json: true,
+        },
+    });
+
     accountsTable = database.get<Account, Account & timestamped>('accounts');
     authTokensTable = database.get<AuthToken>('authtokens');
     emailsTable = database.get<Email, Email & timestamped>('emails');
@@ -475,4 +515,5 @@ async function createTables() {
 
     ignoranceTable = database.get<IgnoranceItem, IgnoranceItem & timestamped>('ignorance_items');
 
+    franchiseTable = database.get<FranchiseData, FranchiseData & timestamped>('franchises');
 }
