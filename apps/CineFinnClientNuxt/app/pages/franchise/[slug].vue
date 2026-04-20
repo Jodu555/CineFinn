@@ -40,7 +40,7 @@
 									</div>
 									<div class="meta-divider"></div>
 									<div class="meta-item">
-										<span class="meta-number">{{ franchise.subFranchises.length }}</span>
+										<span class="meta-number">{{ franchise.subFranchises?.length }}</span>
 										<span class="meta-label ms-2">Collections</span>
 									</div>
 								</div>
@@ -86,7 +86,7 @@
 								@click="scrollToSection(sf.id)"
 							>
 								<span class="nav-text">{{ sf.name }}</span>
-								<span class="nav-count">{{ sf.content.length }}</span>
+								<span class="nav-count">{{ sf.content?.length }}</span>
 							</button>
 						</div>
 
@@ -161,7 +161,7 @@
 									<p class="sub-franchise-desc text-white-50 mb-0">{{ sf.description }}</p>
 								</div>
 								<div class="col-auto">
-									<span class="content-count-badge"> {{ sf.content.length }} Titles </span>
+									<span class="content-count-badge"> {{ sf.content?.length }} Titles </span>
 								</div>
 							</div>
 						</div>
@@ -190,7 +190,7 @@
 					</div>
 
 					<!-- Empty State -->
-					<div v-if="franchise.subFranchises.length === 0 && franchise.mainContent.length === 0" class="text-center py-5 text-secondary">
+					<div v-if="franchise.subFranchises?.length === 0 && franchise.mainContent?.length === 0" class="text-center py-5 text-secondary">
 						<font-awesome-icon :icon="['fa-solid', 'fa-film']" class="display-1 mb-3 opacity-25" />
 						<p class="lead">No content available for this franchise.</p>
 					</div>
@@ -209,6 +209,7 @@ import type { FranchiseData, FranchiseDataExtended } from '@cinefinn/types/model
 
 const authStore = useAuthStore();
 const indexStore = useIndexStore();
+const franchiseStore = useFranchiseStore();
 const route = useRoute();
 const router = useRouter();
 const slug = route.params.slug as string;
@@ -217,13 +218,11 @@ definePageMeta({
 	middleware: 'auth',
 });
 
-const { data: franchise } = useFetch<FranchiseDataExtended>(`${useAPIURL()}/franchise/${slug}`, {
-	key: 'franchise',
-	server: true,
-	headers: {
-		'auth-token': authStore.authToken,
-	},
-});
+if (franchiseStore.franchises.length == 0) {
+	await callOnce('loadFranchises', async () => await franchiseStore.loadFranchises());
+}
+
+const franchise = computed(() => franchiseStore.franchises.find((f) => f.id === slug.toLowerCase()));
 
 const activeSection = ref('all');
 const isNavScrolled = ref(false);

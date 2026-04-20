@@ -1,6 +1,5 @@
 <template>
 	<div class="container">
-		<!-- <button @click="indexStore.loadSeries()">Load Series</button> -->
 		<div v-auto-animate style="z-index: 100">
 			<a v-auto-animate v-if="backToTop" @click="scrollToTop()" id="backToTop" class="btn btn-primary btn-lg back-to-top" role="button"
 				><font-awesome-icon icon="fa-solid fa-up-long" size="xl"

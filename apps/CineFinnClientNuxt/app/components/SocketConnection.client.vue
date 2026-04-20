@@ -20,6 +20,7 @@ const indexStore = useIndexStore();
 const authStore = useAuthStore();
 const adminStore = useAdminStore();
 const todoStore = useTodoStore();
+const franchiseStore = useFranchiseStore();
 
 onBeforeUnmount(() => {
 	socket.off('connect', onConnect);
@@ -34,6 +35,7 @@ onBeforeUnmount(() => {
 	socket.off('adminSubsystems', adminStore.updateSubsystems);
 	socket.off('adminMovingItems', adminStore.updateMovingItems);
 	socket.off('todoListUpdate', todoStore.updateTodoList);
+	socket.off('franchisesUpdate', franchiseStore.updateFranchises);
 });
 
 onMounted(() => {
@@ -47,6 +49,7 @@ onMounted(() => {
 	socket.on('adminSubsystems', adminStore.updateSubsystems);
 	socket.on('adminMovingItems', adminStore.updateMovingItems);
 	socket.on('todoListUpdate', todoStore.updateTodoList);
+	socket.on('franchisesUpdate', franchiseStore.updateFranchises);
 
 	socket.on('reload', () => {
 		window.location.reload();

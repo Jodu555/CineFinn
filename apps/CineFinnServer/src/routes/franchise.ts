@@ -4,6 +4,7 @@ import { HTTPException } from "hono/http-exception";
 import z from "zod";
 import type { FranchiseContent, FranchiseContentExtended, FranchiseContentMovieExtened, FranchiseData, FranchiseDataExtended, SubFranchiseExtended } from "@cinefinn/types/models/franchise";
 import { franchiseTable, moviesTable, watchableEntitysTable } from "../database.js";
+import { sendFranchisesUpdate } from "../sockets/client.socket.js";
 
 
 //This is so cool. basically a Union in ZOD thats crazy
@@ -667,7 +668,7 @@ const FranchiseDataSchema = z.object({
 
 // };
 
-async function augmentFranchiseData(data: FranchiseData): Promise<FranchiseDataExtended> {
+export async function augmentFranchiseData(data: FranchiseData): Promise<FranchiseDataExtended> {
     const extended = data as FranchiseDataExtended;
 
     const augmentFranchiseContent = async (c: FranchiseContent): Promise<FranchiseContentExtended> => {
@@ -703,12 +704,12 @@ async function augmentFranchiseData(data: FranchiseData): Promise<FranchiseDataE
 const router = new Hono()
     .get('/', authMiddleware, async (c) => {
         const franchises = await franchiseTable.get();
-        const localFranchiseData = await Promise.all(franchises.map(async f => await augmentFranchiseData(f)));
+        const augmentedFranchiseData = await Promise.all(franchises.map(async f => await augmentFranchiseData(f)));
         const obj = {} as Record<string, FranchiseDataExtended>;
-        for (const franchise of localFranchiseData) {
+        for (const franchise of augmentedFranchiseData) {
             obj[franchise.id] = franchise;
         }
-        return c.json(obj);
+        return c.json(augmentedFranchiseData);
     })
     .get('/:slug', authMiddleware, async (c) => {
         const { slug } = c.req.param();
@@ -759,6 +760,7 @@ const router = new Hono()
             });
         }
         await franchiseTable.create(data);
+        await sendFranchisesUpdate();
         return c.json(data, 201);
     })
     .put('/:id', authMiddleware, async (c) => {
@@ -787,6 +789,7 @@ const router = new Hono()
         const data = result.data;
         const newKey = data.id.toLowerCase();
         await franchiseTable.update({ id: key }, data);
+        await sendFranchisesUpdate();
         return c.json(data);
     })
     .delete('/:id', authMiddleware, async (c) => {
@@ -800,6 +803,7 @@ const router = new Hono()
         }
 
         await franchiseTable.delete({ id: key });
+        await sendFranchisesUpdate();
         return c.body(null, 204);
     });
 

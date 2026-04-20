@@ -5,6 +5,7 @@ import type { AniWorldSeriesInformations } from "../scrapers/aniworld.js";
 import type { SocketAuthData } from "./auth.js";
 import type { SubSystem, DiskStats, Overview, ClientInfo, RequestFileData, FileChunkData, FileStartData, ErrorData, UploadCompleteData } from "./subsystem.js";
 import type * as fs from "fs";
+import type { FranchiseDataExtended } from "../models/franchise.js";
 
 type rmvcActions = 'play' | 'pause' | 'forward' | 'backward' | 'nextEp' | 'prevEp' | 'volHigh' | 'volDown';
 
@@ -27,6 +28,7 @@ export interface ServerToClientEvents {
     adminSubsystems: (obj: SubSystem[]) => void;
     adminMovingItems: (obj: MovingItem[]) => void;
     todoListUpdate: (obj: TodoItem[]) => void;
+    franchisesUpdate: (obj: FranchiseDataExtended[]) => void;
 
     'rmvc-recieve-action': (action: rmvcActions) => void;
     'rmvc-get-videoState': () => void;

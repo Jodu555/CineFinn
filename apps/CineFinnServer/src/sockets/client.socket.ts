@@ -4,13 +4,14 @@ import type { Account } from "@cinefinn/types/models/user";
 import type { timestamped } from "@cinefinn/types/shared";
 import type { SocketConsumerMeta } from "./index.js";
 import { app, type definedSocket } from "../index.js";
-import { accountsTable } from "../database.js";
+import { accountsTable, franchiseTable } from "../database.js";
 import { debounce, getIO, loggerInstances } from "../utils.js";
 import { compareSettings } from "../utils/settings.js";
 import { getFrontEndSeries } from "../routes/index.js";
 import { randomUUID } from "crypto";
 import rmvcEmitterSocket from "./rmvcEmitter.socket.js";
 import { tryCatch } from "@cinefinn/utilities/tryCatch";
+import { augmentFranchiseData } from "../routes/franchise.js";
 
 type LocalAuthData = SocketAuthDataClient<Account | Account & timestamped>;
 
@@ -151,6 +152,15 @@ export async function sendSiteReload() {
         s.emit('reload');
     });
     return i;
+}
+
+export async function sendFranchisesUpdate() {
+    const franchises = await franchiseTable.get();
+    const augmentedFranchiseData = await Promise.all(franchises.map(async f => await augmentFranchiseData(f)));
+    const sockets = await getIO().fetchSockets();
+    sockets.filter((s) => s.data.auth.type === 'client').forEach((s) => {
+        s.emit('franchisesUpdate', augmentedFranchiseData);
+    });
 }
 
 export default {
