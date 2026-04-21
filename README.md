@@ -16,21 +16,21 @@ it is the successor to the CineFinn v1 Project which is now deprecated and will 
   - [x] Implement the Settings System
     - [x] Implement all the settings handling in the frontend (all that's possible at least)
 - [x] Home Page to find Series
-- [ ] Job system to handle jobs
+- [x] Job system to handle jobs
   - [x] Crawling
   - [x] Generate Preview Images
-  - [ ] Check for Updates
-    - [ ] Smart Check
-    - [ ] Old Check
+  - [x] Check for Updates
+    - [x] Smart Check
+    - [x] Old Check
 - [x] Series Indexing
 - [x] Watching Videos
 - [x] Series Watch Page
 - [x] Same VideoPlayer as in v1
 - [x] Create ConfigugrationManager package
-- [ ] Use the configugrationManager in all the app's
+- [x] Use the configugrationManager in all the app's
   - [x] Server
   - [x] Scraper
-  - [ ] PreviewImageGenerator
+  - [x] PreviewImageGenerator
   - [x] SubSystem
 
 Note: The JobSystem does not mean to already write the consumers for the jobs. It just means that the server will create a necessary job!
@@ -39,7 +39,7 @@ When all the boxes are checked, I will deploy the MVP to a testing environment a
 
 > Immediately after the MVP I want to implement the following features:
 
-- [ ] Preview Image Generation
+- [x] Preview Image Generation
 - [x] Scraper
 - [x] SubSystem
 - [x] Admin System
@@ -52,9 +52,10 @@ When all the boxes are checked, I will deploy the MVP to a testing environment a
 
 - [ ] The Hono Mp4 file streaming used in the Server and should be in the SubSystem
 - [ ] The File Crawler used in the Server and SubSystem
-- [ ] tryCatch should be in Server, Client, SubSystem, Scraper and PreviewImageGenerator
-- [ ] Time stuff (msToReadable, timeAgo) should be in Server, Client
-- [ ] Bytes stuff (formatBytes, bytesToUnit) should be in Server, Client and SubSystem
+- [x] tryCatch should be in Server, Client, SubSystem, Scraper and PreviewImageGenerator
+- [x] Time stuff (msToReadable, timeAgo) should be in Server, Client
+- [x] Bytes stuff (formatBytes, bytesToUnit) should be in Server, Client and SubSystem
+- [x] The ThrottleStream used in the Server and should be in the SubSystem for bidirectional large file streaming
 
 This would suggest a seperate new package for the hono mp4 file streaming and the file crawler.
 And a more general package for the tryCatch, time stuff.

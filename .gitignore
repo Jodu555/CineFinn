@@ -15,6 +15,7 @@ config.json
 __nogit.ts
 TEST/*.html
 TEST
+testImageManipulationHono/
 
 ChromeAnalyze/
 
