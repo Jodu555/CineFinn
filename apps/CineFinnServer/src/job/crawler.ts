@@ -10,7 +10,7 @@ import { generateSeriesID, generateMovieID, generateSeasonID, generateEpisodeID,
 import type { Episode, Langs, Movie, Season, Series, WatchableEntity } from '@cinefinn/types/models/media';
 import type { MovingItem } from '@cinefinn/types/models/system';
 import type { timestamped } from '@cinefinn/types/shared';
-import { fullIndexStorage, indexStorage } from '../routes/index.js';
+import { fullIndexStorage, indexStorage, seriesUpdateStorage } from '../routes/index.js';
 import { app } from '../index.js';
 import { getIO } from '../utils.js';
 import { sendSeriesReloadToAll } from '../sockets/client.socket.js';
@@ -795,11 +795,22 @@ export async function crawl(job: Job) {
 
 
     job.time('Invalidating Cache');
-    try { await crawlerEpisodesCache.clear(); } catch (e) { }
-    try { await crawlerSeriesSeasonsCache.clear(); } catch (e) { }
+    try { await crawlerEpisodesCache.clear(); } catch (e) {
+        job.log('Error clearing crawlerEpisodesCache', e);
+    }
+    try { await crawlerSeriesSeasonsCache.clear(); } catch (e) {
+        job.log('Error clearing crawlerSeriesSeasonsCache', e);
+    }
 
-    try { await indexStorage.clear(); } catch (e) { }
-    try { await recommendationStorage.clear(); } catch (e) { }
+    try { await indexStorage.clear(); } catch (e) {
+        job.log('Error clearing indexStorage', e);
+    }
+    try { await recommendationStorage.clear(); } catch (e) {
+        job.log('Error clearing recommendationStorage', e);
+    }
+    try { await seriesUpdateStorage.clear(); } catch (e) {
+        job.log('Error clearing seriesUpdateStorage', e);
+    }
     job.timeEnd('Invalidating Cache');
 
     await app.request('/index/all', {

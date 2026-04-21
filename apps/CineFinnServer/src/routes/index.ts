@@ -25,7 +25,7 @@ const indexStorage = createStorage();
 const fullIndexStorage = prefixStorage<DetailedSeries>(indexStorage, 'fullIndex');
 const undetailedIndexStorage = prefixStorage<FrontendSeries[]>(indexStorage, 'undetailedIndex');
 
-const seriesUpdateStorage = prefixStorage<any>(indexStorage, 'seriesUpdate');
+export const seriesUpdateStorage = prefixStorage<any>(indexStorage, 'seriesUpdate');
 
 cacheRegistry.set('index', indexStorage);
 cacheRegistry.set('fullIndex', fullIndexStorage);
