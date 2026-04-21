@@ -40,6 +40,7 @@ import { recommendationRouter } from './routes/recommendations/recommendations.j
 import { wait } from '@cinefinn/utilities/time';
 import { setupCommandManager } from './utils/commands.js';
 import { franchiseRouter } from './routes/franchise.js';
+import { sendSeriesReloadToAll } from './sockets/client.socket.js';
 
 
 
@@ -228,6 +229,7 @@ async function insertMissingWatchableEntityRuntimes() {
         }
         await watchableEntitysTable.update({ UUID: entity.UUID }, { runtime });
     }
+    await sendSeriesReloadToAll();
     console.log('Missing WatchableEntity runtimes inserted');
 }
 

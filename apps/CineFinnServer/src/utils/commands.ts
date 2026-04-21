@@ -115,8 +115,10 @@ function registerCommands() {
             'cacheclear',
             'Clears All caches that exist',
             async (command, [...args], scope) => {
-                for (const cacheKey in cacheRegistry) {
+                for (const cacheKey of cacheRegistry.keys()) {
                     const cache = cacheRegistry.get(cacheKey)!;
+                    const keys = await cache.keys();
+                    console.log(`Clearing ${cacheKey} with ${keys.length} keys`);
                     await cache.clear();
                 }
                 return 'All caches cleared!';
