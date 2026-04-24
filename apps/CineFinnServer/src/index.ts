@@ -41,6 +41,7 @@ import { wait } from '@cinefinn/utilities/time';
 import { setupCommandManager } from './utils/commands.js';
 import { franchiseRouter } from './routes/franchise.js';
 import { sendSeriesReloadToAll } from './sockets/client.socket.js';
+import { imageRouter } from './routes/image.js';
 
 
 
@@ -80,6 +81,7 @@ export const app = new Hono({
     .route('/admin', adminRouter)
     .route('/todo', todoRouter)
     .route('', proxyRouter)
+    .route('/image', imageRouter)
     .route('/previewImages', previewImagesRouter)
     .route('/recommendations', recommendationRouter)
     .route('/franchise', franchiseRouter)

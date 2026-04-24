@@ -68,6 +68,12 @@ onMounted(() => {
 		connectError.value = err.message + ' - ' + JSON.stringify(err);
 		umTrackEvent('socket_connect_error', { error: err.message });
 	});
+
+	setTimeout(() => {
+		if (!socket.connected) {
+			//Here notify the user that no connection could be established
+		}
+	}, 1000 * 30);
 });
 const router = useRouter();
 function onConnect() {

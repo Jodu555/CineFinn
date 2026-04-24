@@ -142,7 +142,7 @@ export function decideImageURL(element: TodoItem) {
             // console.log(img);
             if (img && typeof img == 'string') {
                 const authStore = useAuthStore();
-                return `${useAPIURL()}/imageRewrite?auth-token=${authStore.authToken}&url=${encodeURIComponent(img)}`;
+                return `${useAPIURL()}/image/rewrite?auth-token=${authStore.authToken}&url=${encodeURIComponent(img)}`;
                 // console.log(new URL(img).protocol);
                 // if (new URL(img).protocol == 'http:') {
                 // return `${useBaseURL()}/imageRewriteSSL?url=${encodeURIComponent(img)}`;
