@@ -25,6 +25,9 @@
 					<li class="nav-item">
 						<NuxtLink class="nav-link" exact-active-class="active" to="/">Home</NuxtLink>
 					</li>
+					<li class="nav-item">
+						<NuxtLink class="nav-link" exact-active-class="active" to="/list">List</NuxtLink>
+					</li>
 					<!-- <li class="nav-item">
 						<router-link class="nav-link" exact-active-class="active" to="/news">News</router-link>
 					</li> -->
