@@ -237,9 +237,13 @@ async function getWatchAgainSeries(user: Account, meta: CarouselMeta, map?: Cach
         });
     });
 
-    return output
+    const over80PercentCompletion = output
         .sort((a, b) => b.percentage - a.percentage)
-        .filter(x => x.percentage > 80)
+        .filter(x => x.percentage > 80);
+
+    const randomOrNot = meta.additionalMeta?.randomize ? over80PercentCompletion.sort(() => Math.random() - 0.5) : over80PercentCompletion;
+
+    return randomOrNot
         .slice(0, meta.returnItemsCount)
         .map(x => {
             return {
@@ -247,6 +251,7 @@ async function getWatchAgainSeries(user: Account, meta: CarouselMeta, map?: Cach
                 episodeCount: x.watchableCount,
             };
         });
+
 }
 
 async function getContinueWatchingEpisodes(user: Account, meta: CarouselMeta): CarouselEntityDetailsResult {
@@ -350,11 +355,8 @@ async function getContinueWatchingEpisodes(user: Account, meta: CarouselMeta): C
         }
     }
 
-    if (meta.additionalMeta?.randomize) {
-        return output.sort(() => Math.random() - 0.5).slice(0, meta.returnItemsCount);
-    } else {
-        return output.slice(0, meta.returnItemsCount);
-    }
+    const randomOrNot = meta.additionalMeta?.randomize ? output.sort(() => Math.random() - 0.5) : output;
+    return randomOrNot.slice(0, meta.returnItemsCount);
 }
 
 carouselRegistry.set('newly-added-series', {
