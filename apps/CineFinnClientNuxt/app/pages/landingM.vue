@@ -65,7 +65,7 @@
 									:show-episode-count="carousel.additionalMeta?.showWatchableCount"
 									:show-new-ribbon="carousel.additionalMeta?.showNewRibbon"
 									@navigate="navigateToSeries"
-									@add-to-list="addToList"
+									@add-to-list="onAddToPlaylist"
 									@show-info="showInfo"
 								/>
 							</div>
@@ -119,6 +119,16 @@
 				</div>
 			</div>
 		</div>
+
+		<AddToPlaylistDialog
+			ref="addToPlaylistDialog"
+			:item-u-u-i-d="selectedSeriesToAddToPlaylist || ''"
+			:content-title="indexStore.seriesById.get(selectedSeriesToAddToPlaylist || '')?.title || ''"
+		>
+			<template #trigger>
+				<div></div>
+			</template>
+		</AddToPlaylistDialog>
 	</div>
 </template>
 
@@ -203,6 +213,7 @@ const mapEntityItem = (entity: WatchableEntity & timestamped & { additional: Add
 	url.searchParams.append('auth-token', useAuthStore().authToken);
 	return {
 		id: entity.UUID,
+		watableUUID: entity.watchable_UUID,
 		seriesId: entity.serie_UUID,
 		seriesTitle: seriesData?.title || '',
 		episodeTitle: seriesData?.title || '',
@@ -258,8 +269,16 @@ const navigateToSeries = (id: string) => {
 	router.push(`/watch/${id}`);
 };
 
-const addToList = (id: string) => {
-	console.log('Add to list:', id);
+const addToPlaylistDialog = useTemplateRef('addToPlaylistDialog');
+
+const selectedSeriesToAddToPlaylist = ref<string | null>(null);
+
+const onAddToPlaylist = (seriesUUID: string) => {
+	selectedSeriesToAddToPlaylist.value = seriesUUID;
+	nextTick(() => {
+		if (!addToPlaylistDialog.value) return;
+		addToPlaylistDialog.value.openModal();
+	});
 };
 
 const showInfo = (id: string) => {
@@ -269,11 +288,12 @@ const showInfo = (id: string) => {
 
 const playEpisode = (item: EpisodeItem) => {
 	console.log('Play episode:', item);
-	router.push(`/watch/${item.seriesId}`);
+	router.push(`/watch/${item.seriesId}/?episode=${item.watableUUID}`);
 };
 
 interface EpisodeItem {
 	id: string;
+	watableUUID: string;
 	seriesId: string;
 	seriesTitle: string;
 	episodeTitle: string;
@@ -342,14 +362,6 @@ const episodeCarouselConfig = {
 };
 
 const showFranchises = ref(true);
-
-// const { data: franchises } = useFetch<FranchiseDataExtended[]>(`${useAPIURL()}/franchise`, {
-// 	key: 'franchise',
-// 	server: true,
-// 	headers: {
-// 		'auth-token': authStore.authToken,
-// 	},
-// });
 
 if (import.meta.client) {
 	const inter = setInterval(() => {
