@@ -345,16 +345,17 @@
 										<div class="input-group">
 											<input
 												v-model="contentForm.id"
+												@input="validateMovieId"
 												type="text"
 												class="form-control border-secondary"
 												required
 												placeholder="Enter movie UUID"
 												@blur="validateMovieId"
 											/>
-											<button class="btn btn-outline-secondary" type="button" :disabled="movieQueryLoading" @click="validateMovieId">
+											<!-- <button class="btn btn-outline-secondary" type="button" :disabled="movieQueryLoading" @click="validateMovieId">
 												<span v-if="movieQueryLoading" class="spinner-border spinner-border-sm"></span>
 												<template v-else>Verify</template>
-											</button>
+											</button> -->
 										</div>
 										<div v-if="movieQueryResult" class="form-text text-success">
 											<font-awesome-icon :icon="['fas', 'check']" class="me-1" />
