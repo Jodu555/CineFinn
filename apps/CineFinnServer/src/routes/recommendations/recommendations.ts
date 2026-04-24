@@ -442,21 +442,10 @@ carouselRegistry.set('continue-watching', {
 
 const recommendationStorage = createStorage<CarouselResponseItem>();
 
-
 cacheRegistry.set('recommendations', recommendationStorage);
 
-const tempStorage = createStorage({
-    driver: fsDriver({
-        base: './temp',
-    })
-});
-
-
-type ArrayElement<ArrayType extends readonly unknown[]> =
-    ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
 
 const router = new Hono()
-    // .get("/", cachingMiddleware(tempStorage), authMiddleware, async (c) => {
     .get("/", authMiddleware, async (c) => {
         const cacheMap = await prepareCachedSeriesMap();
         const user = c.get('credentials').user;
@@ -522,16 +511,5 @@ async function decideEntityImage(entity: WatchableEntity) {
     return path.parse(file).base;
 }
 
-
-// async function test() {
-//     const inputFolder = path.join(getConfig().imagePath, 'S-1de8d379', 'previewImages', 'EP-ecb7d610', 'WE-1c7fbed0');
-
-//     console.log(inputFolder);
-//     const files = await pickPreviewImage(inputFolder);
-//     console.log(files);
-
-// }
-
-// test().catch(console.error);
 
 export { router as recommendationRouter, recommendationStorage };
