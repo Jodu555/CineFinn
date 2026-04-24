@@ -834,13 +834,15 @@ watch(
 	{ deep: true },
 );
 
+const { decideSeriesImage } = useSeriesImage();
+
 function resolveContent(content: FranchiseContent): ResolvedContent {
 	if (content.type === 'series') {
 		const series = indexStore.seriesById.get(content.id);
 		if (series) {
 			return {
 				title: series.title || series.infos?.title || content.id,
-				image: series.infos?.imageURL,
+				image: decideSeriesImage(series),
 				description: series.infos?.description,
 			};
 		}
