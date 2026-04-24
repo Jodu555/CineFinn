@@ -127,6 +127,7 @@
 									show-episode-count
 									@navigate="watchContent"
 									@show-info="showContentInfo"
+									@add-to-list="onAddToPlaylist"
 								/>
 								<LandingSeriesCard
 									v-else
@@ -176,6 +177,7 @@
 									show-episode-count
 									@navigate="watchContent"
 									@show-info="showContentInfo"
+									@add-to-list="onAddToPlaylist"
 								/>
 								<LandingSeriesCard
 									v-else
@@ -196,6 +198,16 @@
 					</div>
 				</div>
 			</div>
+
+			<AddToPlaylistDialog
+				ref="addToPlaylistDialog"
+				:item-u-u-i-d="selectedSeriesToAddToPlaylist || ''"
+				:content-title="indexStore.seriesById.get(selectedSeriesToAddToPlaylist || '')?.title || ''"
+			>
+				<template #trigger>
+					<div></div>
+				</template>
+			</AddToPlaylistDialog>
 		</div>
 	</div>
 </template>
@@ -350,6 +362,18 @@ const setupIntersectionObserver = () => {
 		document.querySelectorAll('.content-section').forEach((section) => {
 			observer.observe(section);
 		});
+	});
+};
+
+const addToPlaylistDialog = useTemplateRef('addToPlaylistDialog');
+
+const selectedSeriesToAddToPlaylist = ref<string | null>(null);
+
+const onAddToPlaylist = (seriesUUID: string) => {
+	selectedSeriesToAddToPlaylist.value = seriesUUID;
+	nextTick(() => {
+		if (!addToPlaylistDialog.value) return;
+		addToPlaylistDialog.value.openModal();
 	});
 };
 

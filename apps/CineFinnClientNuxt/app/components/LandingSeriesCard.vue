@@ -19,7 +19,7 @@
 					<button class="sov-btn sov-btn-light" @click.stop="$emit('navigate', itemId)">
 						<font-awesome-icon :icon="['fas', 'play']" />
 					</button>
-					<button class="sov-btn" :class="{ 'sov-btn-danger': showRemoveButton }" @click.stop="$emit('addToList', itemId)">
+					<button v-if="!isMovie" class="sov-btn" :class="{ 'sov-btn-danger': showRemoveButton }" @click.stop="$emit('addToList', itemId)">
 						<font-awesome-icon :icon="['fas', showRemoveButton ? 'minus' : 'plus']" />
 					</button>
 					<!-- <button class="sov-btn ms-auto" @click.stop="$emit('showInfo', itemId)">
