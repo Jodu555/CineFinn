@@ -433,7 +433,7 @@ carouselRegistry.set('continue-watching', {
     userspecific: true,
     returnItemsCount: 25,
     additionalMeta: {
-        randomize: false
+        randomize: true
     },
     computeFn: getContinueWatchingEpisodes
 });

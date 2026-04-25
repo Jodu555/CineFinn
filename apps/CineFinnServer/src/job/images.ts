@@ -79,6 +79,7 @@ export async function generatePreviewImages(job: Job) {
     const previewImageQueue = 'previewImageQueue';
     const connection = getIORedis();
     const queue = new Queue<QueuedPreviewImageGenerationJobData>(previewImageQueue, { connection });
+    //TODO: Here queue.addBulk can be used to add all jobs at once
     await forEachNonBlockingAsync(queuedJobs, 2, async (p, i) => {
         await queue.add(p.data.seriesUUID, p.data, { removeOnComplete: false, removeOnFail: false });
     });

@@ -9,6 +9,8 @@
 </template>
 
 <script setup lang="ts">
+import type { FrontendSeries } from '@cinefinn/types';
+
 const isConnected = ref(false);
 const transport = ref('N/A');
 const socketID = ref('N/A');
@@ -22,6 +24,12 @@ const adminStore = useAdminStore();
 const todoStore = useTodoStore();
 const franchiseStore = useFranchiseStore();
 
+const externalSeriesReload = async (series: FrontendSeries[]) => {
+	await indexStore.reloadSeries(series);
+	await refreshNuxtData('recommendations');
+	await refreshNuxtData();
+};
+
 onBeforeUnmount(() => {
 	socket.off('connect', onConnect);
 	socket.off('disconnect', onDisconnect);
@@ -29,7 +37,7 @@ onBeforeUnmount(() => {
 	socket.off('jobUpdate', managmentStore.updateJob);
 	socket.off('watchListUpdate', indexStore.updateWatchList);
 	socket.off('settingsUpdate', authStore.updateSettings);
-	socket.off('seriesReload', indexStore.reloadSeries);
+	socket.off('seriesReload', externalSeriesReload);
 	socket.off('adminOverview', adminStore.updateOverview);
 	socket.off('adminAccounts', adminStore.updateAccounts);
 	socket.off('adminSubsystems', adminStore.updateSubsystems);
@@ -43,7 +51,7 @@ onMounted(() => {
 	socket.on('jobUpdate', managmentStore.updateJob);
 	socket.on('watchListUpdate', indexStore.updateWatchList);
 	socket.on('settingsUpdate', authStore.updateSettings);
-	socket.on('seriesReload', indexStore.reloadSeries);
+	socket.on('seriesReload', externalSeriesReload);
 	socket.on('adminOverview', adminStore.updateOverview);
 	socket.on('adminAccounts', adminStore.updateAccounts);
 	socket.on('adminSubsystems', adminStore.updateSubsystems);
