@@ -96,14 +96,38 @@ export function forEachNonBlocking<T>(array: T[], chunkSize: number, cb: (elemen
     processChunk();
 }
 
-export async function forEachNonBlockingAsync<T>(array: T[], chunkSize: number, cb: (element: T, index: number) => Promise<void>) {
-    return new Promise<void>((resolve, reject) => {
-        try {
-            forEachNonBlocking(array, chunkSize, cb, resolve);
-        } catch (error) {
-            reject(error);
+// export async function forEachNonBlockingAsync<T>(array: T[], chunkSize: number, cb: (element: T, index: number) => Promise<void>) {
+//     return new Promise<void>((resolve, reject) => {
+//         try {
+//             forEachNonBlocking(array, chunkSize, cb, resolve);
+//         } catch (error) {
+//             reject(error);
+//         }
+//     });
+// }
+
+export async function forEachNonBlockingAsync<T>(
+    array: T[],
+    chunkSize: number,
+    cb: (element: T, index: number) => Promise<void>
+) {
+    let index = 0;
+
+    while (index < array.length) {
+        const end = Math.min(index + chunkSize, array.length);
+
+        const promises: Promise<void>[] = [];
+        for (let i = index; i < end; i++) {
+            promises.push(cb(array[i], i));
         }
-    });
+
+        await Promise.all(promises);
+
+        index = end;
+
+        // Yield/Push to event loop between chunks thats what makes it non-blocking
+        await new Promise<void>(resolve => setImmediate(resolve));
+    }
 }
 
 export async function queryDatabase<R = any>(query: string, values = [] as any[], jsonFields = [] as string[]): Promise<R[]> {
