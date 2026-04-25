@@ -56,7 +56,7 @@ const circumference = 3.14 * radius * 2;
 const textX = computed(() => {
 	const isInt = Number.isInteger(props.percentage);
 
-	let len = props.percentage.toString().length;
+	let len = props.percentage?.toString()?.length || 0;
 	if (!isInt) len--;
 
 	if (len == 1) {
