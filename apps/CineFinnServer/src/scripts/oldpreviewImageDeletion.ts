@@ -14,6 +14,7 @@ async function main() {
     const seriesFolders = fs.readdirSync(imageFolder);
 
     const DANGER_DELETE = process.argv.includes('--danger-delete');
+    const REVERSE_MODE = process.argv.includes('--reverse');
 
     if (DANGER_DELETE) {
         console.log('-'.repeat(20));
@@ -52,9 +53,17 @@ async function main() {
         const previewFolders = fs.readdirSync(previewFolderPath);
         for (const previewFolder of previewFolders) {
             if (previewFolder.startsWith('EP-') || previewFolder.startsWith('MO-')) {
-                continue;
+                if (REVERSE_MODE) {
+                    toDelete.push(path.join(previewFolderPath, previewFolder));
+                } else {
+                    continue;
+                }
             } else {
-                toDelete.push(path.join(previewFolderPath, previewFolder));
+                if (REVERSE_MODE) {
+                    continue;
+                } else {
+                    toDelete.push(path.join(previewFolderPath, previewFolder));
+                }
             }
         }
     }
@@ -76,7 +85,7 @@ async function main() {
 
         let i = 0;
         for (const toDeletePath of toDelete) {
-            console.log('Deleting ', toDeletePath, ++i, '/', toDelete.length);
+            console.log('Deleting', ++i, '/', toDelete.length, toDeletePath);
             fs.rmSync(toDeletePath, { recursive: true });
         }
     }
