@@ -26,7 +26,7 @@ export async function generatePreviewImages(job: Job) {
     let i = 0;
     for await (const watchableEntity of watchableEntities) {
         i++;
-        i % 100 == 0 && job.log(`Handling File ${i}/${watchableEntities.length + 1}`);
+        i % 1000 == 0 && job.log(`Handling File ${i}/${watchableEntities.length + 1}`);
         // const watchable = await watchableUUIDToWatchable(watchableEntity.watchable_UUID, generatorEpisodesCache);
         // if (watchable == undefined) {
         //     job.log('Watchable not found', watchableEntity.watchable_UUID, 'for', watchableEntity.UUID);
@@ -73,7 +73,10 @@ export async function generatePreviewImages(job: Job) {
         //job.log(`Queued ${generatedQueueJob.type} series: ${series.UUID} watchableEntity: ${watchableEntity.UUID}`);
     }
     await job.timeEnd('Handling Watchable Entities');
-    await job.setData(queuedJobs);
+    await job.setResult({
+        count: queuedJobs.length,
+        first50: JSON.parse(JSON.stringify(queuedJobs)).slice(0, 50),
+    });
     job.log(`Finished Image Crawling (${queuedJobs.length})`);
     job.time('Added to Queue');
     const previewImageQueue = 'previewImageQueue';
