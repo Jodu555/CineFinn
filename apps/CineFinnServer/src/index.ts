@@ -187,34 +187,34 @@ const httpServer = serve({
     // }
     // console.log('Average', msArr.reduce((prev, curr) => prev + curr, 0) / msArr.length);
 
-    // await fixSeasons();
+    // await fixSeasons(Job.fromDummy('fixSeasons'));
 
     await wait(1000 * 15);
-    // await insertMissingWatchableEntityRuntimes();
+    // await insertMissingWatchableEntityRuntimes(Job.fromDummy('missingWatchableEntityRuntimes'));
 
 });
 
-async function fixSeasons() {
-    console.log('Fixing Seasons');
+async function fixSeasons(job: Job) {
+    job.time('Fixing Seasons');
     const seasons = await seasonsTable.get();
     for await (const season of seasons) {
         const episodes = await episodesTable.get({ season_UUID: season.UUID });
         if (episodes.length !== season.episodes) {
-            console.log(`Season ${season.UUID} has ${season.episodes} episodes, but should have ${episodes.length}. Updating...`);
+            job.log(`Season ${season.UUID} has ${season.episodes} episodes, but should have ${episodes.length}. Updating...`);
             await seasonsTable.update({ UUID: season.UUID }, { episodes: episodes.length });
         }
     }
-    console.log('Seasons Fixed');
+    job.timeEnd('Fixing Seasons');
 }
 
-async function insertMissingWatchableEntityRuntimes() {
-    console.log('Inserting Missing WatchableEntity runtimes');
+async function insertMissingWatchableEntityRuntimes(job: Job) {
+    job.log('Inserting Missing WatchableEntity runtimes');
     const entitys = await watchableEntitysTable.get({ runtime: -1, unique: true });
     let i = 0;
     for await (const entity of entitys) {
-        console.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`);
+        job.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`);
         if (entity.subID !== 'main' && await getSubSocketByID(entity.subID) == null) {
-            console.log(`Skipping entity ${i}/${entitys.length}: ${entity.UUID} because subID ${entity.subID} is not connected`);
+            job.log(`Skipping entity ${i}/${entitys.length}: ${entity.UUID} because subID ${entity.subID} is not connected`);
             continue;
         }
         const { data: runtime, error } = await tryCatch(() => Promise.race([
@@ -226,13 +226,13 @@ async function insertMissingWatchableEntityRuntimes() {
             })
         ]));
         if (error) {
-            console.error('Error getting runtime for entity', entity.UUID, error);
+            job.log('Error getting runtime for entity', entity.UUID, error);
             continue;
         }
         await watchableEntitysTable.update({ UUID: entity.UUID }, { runtime });
     }
     await sendSeriesReloadToAll();
-    console.log('Missing WatchableEntity runtimes inserted');
+    job.log('Missing WatchableEntity runtimes inserted');
 }
 
 function geFileRuntime(watchableUUID: string) {
