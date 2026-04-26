@@ -208,7 +208,7 @@ export function calculateMD5(filePath: string): Promise<string> {
     });
 }
 
-export const cachingMiddleware = <T extends StorageValue>(storage: Storage<T>, keyFunction = (c: Context<any>) => c.req.path) => {
+export const cachingMiddleware = <T extends StorageValue>(storage: Storage<T>, keyFunction = (c: Context<any>) => c.req.url) => {
     return createMiddleware(async (c, next) => {
         const key = keyFunction(c);
         if (await storage.hasItem(key)) {
