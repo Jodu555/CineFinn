@@ -496,7 +496,8 @@ carouselRegistry.set('marathon-worthy', {
     returnItemsCount: 30,
     additionalMeta: {
         showWatchableCount: true,
-        randomize: true
+        randomize: true,
+        wrapAround: true
     },
     computeFn: getMarathonWorthySeries
 });
