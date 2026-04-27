@@ -42,7 +42,7 @@
 						<SeriesInfo :series="series" :coverURL="coverURL" />
 						<!-- Episodes/Movies Section -->
 						<div v-if="(hasSeasons || hasMovies) && !isDisabled" class="mb-4">
-							<pre v-if="authStore.user?.settings?.developerMode?.value">
+							<pre v-if="authStore.loggedIn && authStore.user?.settings?.developerMode?.value">
 								{{ { activeTab, hasSeasons, hasMovies } }}
 							</pre
 							>
@@ -182,7 +182,7 @@
 																		}}
 																	</small>
 																</p>
-																<div v-if="authStore.user.settings.developerMode.value" class="text-muted small mb-0">
+																<div v-if="authStore.loggedIn && authStore.user.settings.developerMode.value" class="text-muted small mb-0">
 																	<div class="d-flex gap-2">
 																		<p class="mb-0">
 																			{{ episode.watchableEntitys.map((e) => e.subID).join(', ') }}
@@ -331,7 +331,7 @@
 														>
 															{{ movie.description }}
 														</p> -->
-														<div v-if="authStore.user.settings.developerMode.value" class="text-muted small mb-0">
+														<div v-if="authStore.loggedIn && authStore.user.settings.developerMode.value" class="text-muted small mb-0">
 															<div class="d-flex gap-2">
 																<p class="mb-0">
 																	{{ movie.watchableEntitys.map((e) => e.subID).join(', ') }}

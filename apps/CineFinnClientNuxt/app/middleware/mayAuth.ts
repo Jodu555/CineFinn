@@ -45,11 +45,11 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
                 await useIndexStore().loadSeries();
             }
         } catch (error) {
-            return navigateTo('/login');
+            // return navigateTo('/login'); We do not do this here cause of mayAuth
         }
     }
 
 
-    if (checkOnboarding()) return navigateTo('/onboarding');
+    if (authStore.loggedIn == true && checkOnboarding()) return navigateTo('/onboarding');
 
 });

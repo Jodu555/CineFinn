@@ -42,7 +42,8 @@ async function main() {
     const toDelete = [];
     let i = 0;
     for (const seriesFolder of seriesFolders) {
-        i % 50 == 0 && console.log('Processing...', ++i, '/', seriesFolders.length);
+        i++;
+        (i % 50 == 0 || i === 1 || i >= seriesFolders.length) && console.log('Processing...', i, '/', seriesFolders.length);
 
         const previewFolderPath = path.join(imageFolder, seriesFolder, 'previewImages');
         if (!fs.existsSync(previewFolderPath)) {
