@@ -74,16 +74,16 @@
 					<Carousel v-else-if="carousel.type === 'entity'" :ref="(el: any) => (carouselRefs[carousel.id] = el)" v-bind="episodeCarouselConfig">
 						<Slide v-for="item in carousel.mappedItems" :key="item.id">
 							<div class="carousel-slide-wrapper episode-wrapper">
-								<div
+								<NuxtLink
 									class="ep-card"
+									:to="`/watch/${item.seriesId}/?episode=${item.watableUUID}`"
 									@mouseenter="hoveredEntities[item.id] = true"
 									@mouseleave="hoveredEntities[item.id] = false"
-									@click.stop="playEpisode(item)"
 								>
 									<div class="ep-thumb-wrap position-relative overflow-hidden rounded-3">
 										<img :src="item.thumbnail" class="ep-thumb" :alt="item.episodeTitle" loading="lazy" />
 										<div class="ep-play-layer" :class="{ visible: hoveredEntities[item.id] }">
-											<div class="ep-play-circle" @click.stop="playEpisode(item)">
+											<div class="ep-play-circle">
 												<font-awesome-icon :icon="['fas', 'play']" />
 											</div>
 										</div>
@@ -98,7 +98,7 @@
 										<p class="ep-episode">{{ item.episodeTitle }}</p>
 										<p class="ep-pct"><font-awesome-icon :icon="['fas', 'clock']" class="me-1" />{{ Math.min(item.progress || 0, 100) }}% gesehen</p>
 									</div>
-								</div>
+								</NuxtLink>
 							</div>
 						</Slide>
 					</Carousel>
