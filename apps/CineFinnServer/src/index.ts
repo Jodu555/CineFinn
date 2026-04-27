@@ -1,47 +1,40 @@
-import { Redis } from 'ioredis';
-import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
-import crypto from 'crypto';
+import { Hono } from 'hono';
+import { Redis } from 'ioredis';
 // import dotenv from 'dotenv';
 // dotenv.config();
 import { Server, Socket } from 'socket.io';
-import { accountsTable, authTokensTable, connectDatabase, database, episodesTable, seasonsTable, watchableEntitysTable } from './database.js';
-
-import { trimTrailingSlash } from 'hono/trailing-slash';
-import { authRouter } from './middleware/auth.js';
-import { cors } from 'hono/cors';
-import { ownLogger } from './middleware/ownLogger.js';
-import { managmentRouter } from './routes/managment.js';
-import type { AnythingToServerEvents, InterServerEvents, ServerToAnythingEvents, SocketData } from '@cinefinn/types/socket';
+import { accountsTable, authTokensTable, connectDatabase, database } from './database.js';
 import type { Account } from '@cinefinn/types/models/user';
 import type { timestamped } from '@cinefinn/types/shared';
-import { getIO, setIO, setIORedis, getEmailManager } from './utils.js';
-import { watchRouter } from './routes/watch.js';
-import { videoRouter } from './routes/video.js';
-import { indexRouter } from './routes/index.js';
-import * as childProcess from 'node:child_process';
+import type { AnythingToServerEvents, InterServerEvents, ServerToAnythingEvents, SocketData } from '@cinefinn/types/socket';
+import { cors } from 'hono/cors';
+import { trimTrailingSlash } from 'hono/trailing-slash';
 import { getConfig } from './config.js';
-import { setupSocketIO } from './sockets/index.js';
-import { getKnownSubSystems, getSubSocketByID, toggleSeriesesForSubSystem } from './sockets/subsystem.socket.js';
-import { playlistRouter } from './routes/playlist.js';
-import { adminRouter } from './routes/admin/admin.js';
-import { todoRouter } from './routes/todo.js';
-import { proxyRouter } from './routes/proxys.js';
-import { handleSubSystemProminence } from './job/crawler.js';
+import { fixSeasons, handleSubSystemProminence, insertMissingWatchableEntityRuntimes } from './job/crawler.js';
 import { Job } from './job/Job.js';
-
+import { authRouter } from './middleware/auth.js';
+import { ownLogger } from './middleware/ownLogger.js';
+import { adminRouter } from './routes/admin/admin.js';
+import { indexRouter } from './routes/index.js';
+import { managmentRouter } from './routes/managment.js';
+import { playlistRouter } from './routes/playlist.js';
+import { proxyRouter } from './routes/proxys.js';
+import { todoRouter } from './routes/todo.js';
+import { videoRouter } from './routes/video.js';
+import { watchRouter } from './routes/watch.js';
+import { setupSocketIO } from './sockets/index.js';
+import { getKnownSubSystems, toggleSeriesesForSubSystem } from './sockets/subsystem.socket.js';
+import { getEmailManager, getIO, setIO, setIORedis } from './utils.js';
 import packageJSON from '../package.json' with { type: "json" };
-
+import { wait } from '@cinefinn/utilities/time';
 import { metricsRouter, registerMetrics } from './middleware/ownPrometheus.js';
-import { tryCatch } from '@cinefinn/utilities/tryCatch';
+import { franchiseRouter } from './routes/franchise.js';
+import { imageRouter } from './routes/image.js';
 import { previewImagesRouter } from './routes/previewImages.js';
 import { recommendationRouter } from './routes/recommendations/recommendations.js';
-import { wait } from '@cinefinn/utilities/time';
 import { setupCommandManager } from './utils/commands.js';
-import { franchiseRouter } from './routes/franchise.js';
-import { sendSeriesReloadToAll } from './sockets/client.socket.js';
-import { imageRouter } from './routes/image.js';
 
 
 
@@ -173,83 +166,31 @@ const httpServer = serve({
     });
 
     // await wait(1000)
-    // const msArr = [] as number[];
-    // for (let i = 0; i < 10; i++) {
-    //     const pre = performance.now();
-    //     await app.request('/index/00ba2a50', {
-    //         headers: {
-    //             'auth-token': 'SECR-DEV',
-    //         }
-    //     })
-    //     const ms = performance.now() - pre;
-    //     msArr.push(ms);
-    //     console.log('Request took', ms, 'ms');
-    // }
-    // console.log('Average', msArr.reduce((prev, curr) => prev + curr, 0) / msArr.length);
 
-    // await fixSeasons(Job.fromDummy('fixSeasons'));
+    // await fixSeasons(Job.fromDummy('crawl'));
 
-    await wait(1000 * 15);
-    // await insertMissingWatchableEntityRuntimes(Job.fromDummy('missingWatchableEntityRuntimes'));
+    // await wait(1000 * 15);
+    // await insertMissingWatchableEntityRuntimes(Job.fromDummy('crawl'));
 
+    // await benchmark();
 });
 
-async function fixSeasons(job: Job) {
-    job.time('Fixing Seasons');
-    const seasons = await seasonsTable.get();
-    for await (const season of seasons) {
-        const episodes = await episodesTable.get({ season_UUID: season.UUID });
-        if (episodes.length !== season.episodes) {
-            job.log(`Season ${season.UUID} has ${season.episodes} episodes, but should have ${episodes.length}. Updating...`);
-            await seasonsTable.update({ UUID: season.UUID }, { episodes: episodes.length });
-        }
-    }
-    job.timeEnd('Fixing Seasons');
-}
-
-async function insertMissingWatchableEntityRuntimes(job: Job) {
-    job.log('Inserting Missing WatchableEntity runtimes');
-    const entitys = await watchableEntitysTable.get({ runtime: -1, unique: true });
-    let i = 0;
-    for await (const entity of entitys) {
-        job.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`);
-        if (entity.subID !== 'main' && await getSubSocketByID(entity.subID) == null) {
-            job.log(`Skipping entity ${i}/${entitys.length}: ${entity.UUID} because subID ${entity.subID} is not connected`);
-            continue;
-        }
-        const { data: runtime, error } = await tryCatch(() => Promise.race([
-            geFileRuntime(entity.UUID),
-            new Promise<number>((resolve, reject) => {
-                setTimeout(() => {
-                    reject('Timeout');
-                }, 1000 * 60 * 2);
-            })
-        ]));
-        if (error) {
-            job.log('Error getting runtime for entity', entity.UUID, error);
-            continue;
-        }
-        await watchableEntitysTable.update({ UUID: entity.UUID }, { runtime });
-    }
-    await sendSeriesReloadToAll();
-    job.log('Missing WatchableEntity runtimes inserted');
-}
-
-function geFileRuntime(watchableUUID: string) {
-    return new Promise<number>((resolve, reject) => {
-        const videoURL = `${getConfig().system.PUBLIC_API_ENDPOINT}/video/${watchableUUID}?auth-token=${getConfig().system.PUBLIC_API_AUTH_TOKEN}`;
-        childProcess.exec(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${videoURL}"`, (error, stdout, stderr) => {
-            if (error) {
-                // console.log(error);
-                // console.log(stderr);
-                reject({ error, stderr });
-                return;
+async function benchmark() {
+    const msArr = [] as number[];
+    for (let i = 0; i < 10; i++) {
+        const pre = performance.now();
+        await app.request('/index/00ba2a50', {
+            headers: {
+                'auth-token': 'SECR-DEV',
             }
-            const runtime = parseFloat(stdout);
-            resolve(runtime);
-        });
-    });
+        })
+        const ms = performance.now() - pre;
+        msArr.push(ms);
+        console.log('Request took', ms, 'ms');
+    }
+    console.log('Average', msArr.reduce((prev, curr) => prev + curr, 0) / msArr.length);
 }
+
 
 export type ServerAppType = typeof app;
 

@@ -1,216 +1,24 @@
-import fs from 'fs';
-import path from 'path';
-import { listFiles } from '../fileutils.js';
-import { filenameParser } from '../parser.js';
-import { database, episodesTable, jobsTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable } from '../database.js';
-import { CacheContext } from '../LRUCache.js';
-import { Job } from './Job.js';
-import { getConfig } from '../config.js';
-import { generateSeriesID, generateMovieID, generateSeasonID, generateEpisodeID, generateEntityID } from '../utils/IdGenerators.js';
 import type { Episode, Langs, Movie, Season, Series, WatchableEntity } from '@cinefinn/types/models/media';
-import type { MovingItem } from '@cinefinn/types/models/system';
 import type { timestamped } from '@cinefinn/types/shared';
-import { fullIndexStorage, indexStorage, seriesUpdateStorage } from '../routes/index.js';
-import { app } from '../index.js';
-import { getIO } from '../utils.js';
-import { sendSeriesReloadToAll } from '../sockets/client.socket.js';
-import { getMovingItems } from '../utils/movingItems.js';
 import { tryCatch } from '@cinefinn/utilities/tryCatch';
-import { recommendationStorage } from '../routes/recommendations/recommendations.js';
+import * as childProcess from 'node:child_process';
+import path from 'path';
+import { getConfig } from '../config.js';
+import { episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable } from '../database.js';
+import { listFiles } from '../fileutils.js';
+import { app } from '../index.js';
+import { CacheContext } from '../LRUCache.js';
+import { filenameParser } from '../parser.js';
 import { rebroadcastMovingItems } from '../routes/admin/admin.js';
+import { indexStorage, seriesUpdateStorage } from '../routes/index.js';
+import { recommendationStorage } from '../routes/recommendations/recommendations.js';
+import { sendSeriesReloadToAll } from '../sockets/client.socket.js';
+import { getSubSocketByID } from '../sockets/subsystem.socket.js';
+import { getIO } from '../utils.js';
+import { generateEntityID, generateEpisodeID, generateMovieID, generateSeasonID, generateSeriesID } from '../utils/IdGenerators.js';
+import { getMovingItems } from '../utils/movingItems.js';
+import { Job } from './Job.js';
 
-
-// export async function crawl(job: Job) {
-
-//     const EMPTY_IV = Buffer.alloc(0);
-
-//     const crawlerSeriesSeasonsCache = new CacheContext('crawler-series', 500);
-//     const crawlerEpisodesCache = new CacheContext('crawler-episodes', 150);
-
-//     const pathEntries = [getConfig().videoPath];
-//     job.log('Listing Files');
-//     let { files } = await listFiles(pathEntries[0]);
-//     job.log(`Found ${files.length} files`);
-
-//     const viableExtensions = ['.mp4', '.mkv', '.webm'];
-
-//     const prevLength = files.length;
-//     files = files.filter((f) => viableExtensions.includes(path.parse(f).ext));
-//     job.log(`Filtered ${prevLength - files.length} files`);
-
-//     job.log(`Working on ${files.length} files`);
-//     // jobUUID !== undefined && await jobsTable.update({ UUID: jobUUID }, { data: { files } });
-//     // await job.setData({ files });
-
-//     job.time('Handling Files');
-
-//     // const seasonCountersMap = new Map<string, number>();
-
-//     const touchedSeasonsSet = new Set<string>();
-
-//     let i = 0;
-//     for (const file of files) {
-//         i++;
-//         i % 100 == 0 && job.log(`Handling File ${i}/${files.length + 1}`);
-//         const base = path.parse(file).base;
-//         const { error, data: parsedData } = tryCatch(() => filenameParser(file, base));
-
-//         if (error != null) {
-//             job.log('Error Parsing File', file, error);
-//             continue;
-//         }
-
-//         let { data: exsitingSeries, cacheInfo: existingSeriesCacheInfo } = await crawlerSeriesSeasonsCache.execute(seriesTable, 'getOne', [{ title: parsedData.title, unique: true }]);
-//         if (exsitingSeries == undefined) {
-//             job.log('Series Does not Exist', parsedData.title);
-//             const categorie = path.parse(path.join(path.parse(file).dir, '../../')).base;
-//             exsitingSeries = await seriesTable.create({
-//                 UUID: generateSeriesID(),
-//                 title: parsedData.title,
-//                 infos: {
-//                     disabled: false,
-//                 },
-//                 refs: {},
-//                 tags: JSON.stringify([categorie]),
-//             });
-//             crawlerSeriesSeasonsCache.invalidate(existingSeriesCacheInfo.cacheKey);
-//         }
-
-//         // job.log('Series Exists', exsitingSeries.UUID, exsitingSeries.title);
-
-//         let watchableUUID;
-//         if (parsedData.movie == true) {
-//             let existingMovie = await moviesTable.getOne({
-//                 serie_UUID: exsitingSeries.UUID,
-//                 primaryName: parsedData.movieTitle,
-//                 unique: true,
-//             });
-//             if (existingMovie == undefined) {
-//                 job.log('Movie Does not Exist', parsedData);
-//                 existingMovie = await moviesTable.create({
-//                     UUID: generateMovieID(),
-//                     primaryName: parsedData.movieTitle!,
-//                     serie_UUID: exsitingSeries.UUID,
-//                     movie_IDX: 0,
-//                 });
-//                 job.log('Created Movie', existingMovie.UUID, existingMovie.primaryName);
-//             }
-//             watchableUUID = existingMovie.UUID;
-//         } else {
-
-//             let { data: existingSeason, cacheInfo: existingSeasonCacheInfo } = await crawlerSeriesSeasonsCache.execute(seasonsTable, 'getOne', [{
-//                 serie_UUID: exsitingSeries.UUID,
-//                 season_IDX: parsedData.season,
-//                 unique: true,
-//             }]);
-//             if (existingSeason == undefined) {
-//                 job.log('Season Does not Exist', parsedData);
-//                 existingSeason = await seasonsTable.create({
-//                     UUID: generateSeasonID(),
-//                     serie_UUID: exsitingSeries.UUID,
-//                     season_IDX: parsedData.season,
-//                     episodes: 0,
-//                 });
-//                 job.log('Created Season', existingSeason.UUID, existingSeason.season_IDX);
-//                 crawlerSeriesSeasonsCache.invalidate(existingSeasonCacheInfo.cacheKey);
-//             }
-
-//             // let counter = seasonCountersMap.get(existingSeason.UUID);
-//             // if (counter == undefined) {
-//             //     seasonCountersMap.set(existingSeason.UUID, existingSeason.episodes);
-//             //     // seasonCountersMap.set(existingSeason.UUID, 1);
-//             //     counter = existingSeason.episodes;
-
-//             // } else {
-//             //     seasonCountersMap.set(existingSeason.UUID, counter + 1);
-//             // }
-
-
-//             let { data: existingEpisode, cacheInfo: existingEpisodeCacheInfo } = await crawlerEpisodesCache.execute(episodesTable, 'getOne', [{
-//                 season_UUID: existingSeason.UUID,
-//                 season_IDX: parsedData.season,
-//                 episode_IDX: parsedData.episode,
-//                 unique: true,
-//             }]);
-//             if (existingEpisode == undefined) {
-//                 job.log('Episode Does not Exist', parsedData);
-//                 existingEpisode = await episodesTable.create({
-//                     UUID: generateEpisodeID(),
-//                     serie_UUID: exsitingSeries.UUID,
-//                     season_UUID: existingSeason.UUID,
-//                     season_IDX: parsedData.season,
-//                     episode_IDX: parsedData.episode,
-//                 });
-//                 job.log('Created Episode', existingEpisode.UUID, existingEpisode.season_UUID, existingEpisode.season_IDX, existingEpisode.episode_IDX);
-//                 // seasonCountersMap.set(existingSeason.UUID, counter + 1);
-//                 touchedSeasonsSet.add(existingSeason.UUID);
-//                 crawlerEpisodesCache.invalidate(existingEpisodeCacheInfo.cacheKey);
-//             }
-//             watchableUUID = existingEpisode.UUID;
-
-//         }
-
-//         let existingWatchableEntity = await watchableEntitysTable.getOne({
-//             watchable_UUID: watchableUUID,
-//             lang: parsedData.language,
-//             unique: true,
-//         });
-//         if (existingWatchableEntity == undefined) {
-//             job.log('Watchable Entity Does not Exist', parsedData);
-//             existingWatchableEntity = await watchableEntitysTable.create({
-//                 UUID: generateEntityID(),
-//                 watchable_UUID: watchableUUID,
-//                 lang: parsedData.language,
-//                 subID: 'main',
-//                 filePath: file,
-//                 IV: EMPTY_IV,
-//                 runtime: -1,
-//                 hash: '',
-//             });
-//         }
-//     }
-
-//     job.timeEnd('Handling Files');
-//     job.log('Done Handling Files');
-
-//     job.log(`Updating ${touchedSeasonsSet.size} Seasons`);
-//     job.time('Updating Seasons');
-//     for (const seasonUUID of touchedSeasonsSet) {
-//         const season = await seasonsTable.getOne({ UUID: seasonUUID });
-//         if (season == undefined) {
-//             console.log('Season not found', seasonUUID);
-//             continue;
-//         }
-//         const episodes = await episodesTable.get({ season_UUID: season.UUID });
-//         await seasonsTable.update({ UUID: seasonUUID }, { episodes: episodes.length });
-//     }
-//     job.timeEnd('Updating Seasons');
-
-//     job.setResult({
-//         info: Array.from(touchedSeasonsSet)
-//     })
-
-//     job.time('Clearing Cache');
-//     crawlerEpisodesCache.clear();
-//     crawlerSeriesSeasonsCache.clear();
-//     job.timeEnd('Clearing Cache');
-
-//     await job.success();
-// }
-
-// Without Cache:
-// Handling Files: 1:01.662 (m:ss.mmm)
-//
-// With Cache:
-// Handling Files: 37.089s (ss.mmm)
-
-/**
- * Crawl optimized:
- * - Prefetch DB tables into Maps
- * - Use concurrency limiter to process files in parallel
- * - Guard concurrent creates to avoid dupes
- * - Compute season episode counts locally and update seasons in one pass
- */
 export async function crawl(job: Job) {
 
     interface SubFile {
@@ -782,6 +590,10 @@ export async function crawl(job: Job) {
         }
     }
 
+    const seasonEpisodeFixes = await fixSeasons(job);
+
+    const { sucessful: successInsertions, failed: failedInsertions } = await insertMissingWatchableEntityRuntimes(job);
+
     job.setResult({
         probablyMissingSeries: probablyMissingSeries,
         touchedSeasons: Array.from(touchedSeasonsSet),
@@ -789,6 +601,9 @@ export async function crawl(job: Job) {
         staleEpisodes: Array.from(staleEpisodes),
         staleMovies: Array.from(staleMovies),
         staleSeasons: Array.from(staleSeasons),
+        seasonEpisodeFixes,
+        successInsertions,
+        failedInsertions,
     });
 
     await handleSubSystemProminence(job);
@@ -876,4 +691,82 @@ export async function handleSubSystemProminence(job: Job) {
         }
     }
     await rebroadcastMovingItems();
+}
+
+export async function fixSeasons(job: Job) {
+    job.time('Fixing Seasons');
+    interface Fix {
+        seasonUUID: string;
+        expectedEpisodes: number;
+        actualEpisodes: number;
+    }
+
+    const fixes = [] as Fix[];
+    const seasons = await seasonsTable.get();
+    for await (const season of seasons) {
+        const episodes = await episodesTable.get({ season_UUID: season.UUID });
+        if (episodes.length !== season.episodes) {
+            job.log(`Season ${season.UUID} has ${season.episodes} episodes, but should have ${episodes.length}. Updating...`);
+            await seasonsTable.update({ UUID: season.UUID }, { episodes: episodes.length });
+            fixes.push({ seasonUUID: season.UUID, expectedEpisodes: episodes.length, actualEpisodes: season.episodes });
+        }
+    }
+    job.timeEnd('Fixing Seasons');
+    return fixes;
+}
+
+export async function insertMissingWatchableEntityRuntimes(job: Job) {
+    job.log('Inserting Missing WatchableEntity runtimes');
+
+    const sucessful = new Set<string>();
+    const failed = new Set<string>();
+
+    const entitys = await watchableEntitysTable.get({ runtime: -1, unique: true });
+    let i = 0;
+    for await (const entity of entitys) {
+        job.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`);
+        if (entity.subID !== 'main' && await getSubSocketByID(entity.subID) == null) {
+            job.log(`Skipping entity ${i}/${entitys.length}: ${entity.UUID} because subID ${entity.subID} is not connected`);
+            failed.add(entity.UUID);
+            continue;
+        }
+        const { data: runtime, error } = await tryCatch(() => Promise.race([
+            geFileRuntime(entity.UUID),
+            new Promise<number>((resolve, reject) => {
+                setTimeout(() => {
+                    reject('Timeout');
+                    failed.add(entity.UUID);
+                }, 1000 * 60 * 2);
+            })
+        ]));
+        if (error) {
+            job.log('Error getting runtime for entity', entity.UUID, error);
+            failed.add(entity.UUID);
+            continue;
+        }
+        await watchableEntitysTable.update({ UUID: entity.UUID }, { runtime });
+        sucessful.add(entity.UUID);
+    }
+    await sendSeriesReloadToAll();
+    job.log('Missing WatchableEntity runtimes inserted');
+    return {
+        sucessful: Array.from(sucessful),
+        failed: Array.from(failed),
+    }
+}
+
+function geFileRuntime(watchableUUID: string) {
+    return new Promise<number>((resolve, reject) => {
+        const videoURL = `${getConfig().system.PUBLIC_API_ENDPOINT}/video/${watchableUUID}?auth-token=${getConfig().system.PUBLIC_API_AUTH_TOKEN}`;
+        childProcess.exec(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${videoURL}"`, (error, stdout, stderr) => {
+            if (error) {
+                // console.log(error);
+                // console.log(stderr);
+                reject({ error, stderr });
+                return;
+            }
+            const runtime = parseFloat(stdout);
+            resolve(runtime);
+        });
+    });
 }
