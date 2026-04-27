@@ -76,7 +76,7 @@
 							<div class="carousel-slide-wrapper episode-wrapper">
 								<NuxtLink
 									class="ep-card"
-									:to="`/watch/${item.seriesId}/?episode=${item.watableUUID}`"
+									:to="`/watch/${item.seriesId}?episode=${item.watableUUID}`"
 									@mouseenter="hoveredEntities[item.id] = true"
 									@mouseleave="hoveredEntities[item.id] = false"
 								>
@@ -285,11 +285,6 @@ const onAddToPlaylist = (seriesUUID: string) => {
 		if (!addToPlaylistDialog.value) return;
 		addToPlaylistDialog.value.openModal();
 	});
-};
-
-const playEpisode = (item: EpisodeItem) => {
-	console.log('Play episode:', item);
-	router.push(`/watch/${item.seriesId}/?episode=${item.watableUUID}`);
 };
 
 interface EpisodeItem {
@@ -806,6 +801,8 @@ if (import.meta.client) {
 	width: 306px;
 	cursor: pointer;
 	margin: 8px auto;
+	color: inherit;
+	text-decoration: none;
 }
 
 .ep-thumb-wrap {
