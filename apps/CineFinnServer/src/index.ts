@@ -2,8 +2,6 @@ import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
 import { Redis } from 'ioredis';
-// import dotenv from 'dotenv';
-// dotenv.config();
 import { Server, Socket } from 'socket.io';
 import { accountsTable, authTokensTable, connectDatabase, database } from './database.js';
 import type { Account } from '@cinefinn/types/models/user';
@@ -27,7 +25,6 @@ import { watchRouter } from './routes/watch.js';
 import { setupSocketIO } from './sockets/index.js';
 import { getKnownSubSystems, toggleSeriesesForSubSystem } from './sockets/subsystem.socket.js';
 import { getEmailManager, getIO, setIO, setIORedis } from './utils.js';
-import packageJSON from '../package.json' with { type: "json" };
 import { wait } from '@cinefinn/utilities/time';
 import { metricsRouter, registerMetrics } from './middleware/ownPrometheus.js';
 import { franchiseRouter } from './routes/franchise.js';
@@ -35,6 +32,7 @@ import { imageRouter } from './routes/image.js';
 import { previewImagesRouter } from './routes/previewImages.js';
 import { recommendationRouter } from './routes/recommendations/recommendations.js';
 import { setupCommandManager } from './utils/commands.js';
+import { healthRouter } from './routes/health.js';
 
 
 
@@ -55,17 +53,7 @@ export const app = new Hono({
             c.header('Cache-Control', `public, immutable, max-age=31536000`);
         },
     }))
-    .get('/health', (c) => {
-        return c.json({
-            status: 'ok',
-            version: packageJSON.version,
-            motd: {
-                show: false,
-                type: 'info',
-                message: '',
-            },
-        }, 200);
-    })
+    .route('/health', healthRouter)
     .route('/auth', authRouter)
     .route('/index', indexRouter)
     .route('/managment', managmentRouter)
