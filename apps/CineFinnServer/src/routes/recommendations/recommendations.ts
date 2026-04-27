@@ -359,6 +359,53 @@ async function getContinueWatchingEpisodes(user: Account, meta: CarouselMeta): C
     return randomOrNot.slice(0, meta.returnItemsCount);
 }
 
+async function getMarathonWorthySeries(user: Account, meta: CarouselMeta, map?: CacheMap): CarouselSeriesDetailsResult {
+    // const cacheMap = map || await prepareCachedSeriesMap();
+    interface dbResponseRow {
+        UUID: string;
+        movieNum: number;
+        episodeNum: number;
+        totalNum: number;
+    }
+
+    const cutOffTotalNum = 90;
+
+    const sql = `
+        SELECT 
+            s.UUID,
+            s.title,
+            IFNULL(m.movieNum, 0) AS movieNum,
+            IFNULL(e.episodeNum, 0) AS episodeNum,
+            IFNULL(m.movieNum, 0) + IFNULL(e.episodeNum, 0) AS totalNum
+        FROM ${seriesTable.table_name} s
+        LEFT JOIN (
+            SELECT serie_UUID, COUNT(*) AS movieNum
+            FROM ${moviesTable.table_name}
+            GROUP BY serie_UUID
+        ) m ON m.serie_UUID = s.UUID
+        LEFT JOIN (
+            SELECT serie_UUID, COUNT(*) AS episodeNum
+            FROM ${episodesTable.table_name}
+            GROUP BY serie_UUID
+        ) e ON e.serie_UUID = s.UUID
+        HAVING totalNum > ?
+        ORDER BY totalNum DESC
+    `;
+
+    const dbResponse = await queryDatabase<dbResponseRow>(sql, [cutOffTotalNum]);
+
+    const result = await Promise.all(dbResponse.map(async s => {
+        return {
+            UUID: s.UUID,
+            episodeCount: s.episodeNum,
+        };
+    }))
+    const randomOrNot = meta.additionalMeta?.randomize ? result.sort(() => Math.random() - 0.5) : result;
+
+    return randomOrNot
+        .slice(0, meta.returnItemsCount)
+}
+
 carouselRegistry.set('newly-added-series', {
     order: 0,
     id: 'newly-added-series',
@@ -438,6 +485,22 @@ carouselRegistry.set('continue-watching', {
     computeFn: getContinueWatchingEpisodes
 });
 
+carouselRegistry.set('marathon-worthy', {
+    order: 5,
+    id: 'marathon-worthy',
+    title: 'Perfekt für den Marathon',
+    icon: ['fas', 'person-running'],
+    description: 'Top 30 Serien, die mehr als 90 Episoden haben',
+    type: 'series',
+    userspecific: false,
+    returnItemsCount: 30,
+    additionalMeta: {
+        showWatchableCount: true,
+        randomize: true
+    },
+    computeFn: getMarathonWorthySeries
+});
+
 //Missing: marathon-worthy, your-list, new-in-german, total-classic, category-specific like Drama or Isekai,
 
 const recommendationStorage = createStorage<CarouselResponseItem>();
@@ -498,7 +561,7 @@ const router = new Hono()
         return c.json(output.sort((a, b) => a.order - b.order));
     });
 
-async function decideEntityImage(entity: WatchableEntity) {
+async function decideEntityImage(entity: WatchableEntity, watchtime?: number) {
     const inputFolder = path.join(
         getConfig().imagePath,
         entity.serie_UUID,
@@ -506,7 +569,7 @@ async function decideEntityImage(entity: WatchableEntity) {
         entity.watchable_UUID,
         entity.UUID,
     );
-    const file = await pickPreviewImage(inputFolder);
+    const file = await pickPreviewImage(inputFolder, watchtime ? Math.floor(watchtime / 10) : undefined);
     if (file == undefined) return 'preview1.jpg';
     return path.parse(file).base;
 }

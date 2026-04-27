@@ -64,7 +64,7 @@ async function rejectReason(filePath: string) {
 }
 
 const DEBUG = false;
-export async function pickPreviewImage(folder: string) {
+export async function pickPreviewImage(folder: string, preSkipFrames?: number) {
 
     const absFolder = path.resolve(folder);
     if (!fs.existsSync(absFolder)) {
@@ -85,7 +85,7 @@ export async function pickPreviewImage(folder: string) {
     const sorted = allFiles.sort((a, b) => extractIndex(a) - extractIndex(b));
 
     const total = sorted.length;
-    const skipUntil = Math.max(CONFIG.skipFrames, Math.floor(total * CONFIG.minFractionIn));
+    const skipUntil = Math.max(CONFIG.skipFrames, Math.floor(total * CONFIG.minFractionIn), preSkipFrames ?? 0);
 
     DEBUG && console.error(`Found ${total} frames. Skipping first ${skipUntil}, then scanning…`);
 
