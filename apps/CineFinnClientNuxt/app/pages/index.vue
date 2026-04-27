@@ -72,12 +72,17 @@
 					</Carousel>
 					<!-- Entity/Episode carousel (type === 'entity') -->
 					<Carousel v-else-if="carousel.type === 'entity'" :ref="(el: any) => (carouselRefs[carousel.id] = el)" v-bind="episodeCarouselConfig">
-						<Slide v-for="item in carousel.mappedItems" :key="item._hovered">
+						<Slide v-for="item in carousel.mappedItems" :key="item.id">
 							<div class="carousel-slide-wrapper episode-wrapper">
-								<div class="ep-card" @mouseenter="item._hovered = true" @mouseleave="item._hovered = false" @click.stop="playEpisode(item)">
+								<div
+									class="ep-card"
+									@mouseenter="hoveredEntities[item.id] = true"
+									@mouseleave="hoveredEntities[item.id] = false"
+									@click.stop="playEpisode(item)"
+								>
 									<div class="ep-thumb-wrap position-relative overflow-hidden rounded-3">
 										<img :src="item.thumbnail" class="ep-thumb" :alt="item.episodeTitle" loading="lazy" />
-										<div class="ep-play-layer" :class="{ visible: item._hovered }">
+										<div class="ep-play-layer" :class="{ visible: hoveredEntities[item.id] }">
 											<div class="ep-play-circle" @click.stop="playEpisode(item)">
 												<font-awesome-icon :icon="['fas', 'play']" />
 											</div>
@@ -221,7 +226,6 @@ const mapEntityItem = (entity: WatchableEntity & timestamped & { additional: Add
 		thumbnail: url.href,
 		progress: Number(((watchTime / entity.runtime) * 100).toFixed(2)),
 		duration: `${Math.floor(entity.runtime / 60)} Min.`,
-		_hovered: false,
 	};
 };
 
@@ -243,6 +247,8 @@ const carouselData = computed(() => {
 		})
 		.sort((a, b) => a.order - b.order);
 });
+
+const hoveredEntities = reactive<Record<string, boolean>>({});
 
 const carouselRefs = ref<{ [key: string]: any }>({});
 const franchiseCarouselRef = ref<any>(null);
@@ -297,7 +303,6 @@ interface EpisodeItem {
 	thumbnail: string;
 	progress?: number;
 	duration: string;
-	_hovered?: boolean;
 }
 
 const franchiseCarouselConfig = {
