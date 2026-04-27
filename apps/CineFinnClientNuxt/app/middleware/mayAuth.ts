@@ -39,7 +39,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
             await authStore.authenticate();
             if (authStore.loggedIn == false) {
                 DEBUG && console.log('User is still not defined, redirecting to login');
-                return navigateTo('/login');
+                // return navigateTo('/login'); We do not do this here cause of mayAuth
             } else {
                 if (checkOnboarding()) return navigateTo('/onboarding');
                 await useIndexStore().loadSeries();

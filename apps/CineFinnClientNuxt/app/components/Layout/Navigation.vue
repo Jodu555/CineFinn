@@ -25,7 +25,7 @@
 					<li class="nav-item">
 						<NuxtLink class="nav-link" exact-active-class="active" to="/">Home</NuxtLink>
 					</li>
-					<li class="nav-item">
+					<li v-if="authStore.loggedIn" class="nav-item">
 						<NuxtLink class="nav-link" exact-active-class="active" to="/list">List</NuxtLink>
 					</li>
 					<!-- <li class="nav-item">
