@@ -4,7 +4,7 @@ import { type FrontendSeries, type Season, type Movie, type DetailedEpisode, typ
 import { Role } from "@cinefinn/types/models/user";
 import type { timestamped } from "@cinefinn/types/shared";
 import { Hono } from "hono";
-import { seriesTable, watchableEntitysTable } from "../database.js";
+import { ignoranceTable, seriesTable, watchableEntitysTable } from "../database.js";
 import { authFullMiddleware, authMiddleware } from "../middleware/auth.js";
 import { cachingMiddleware, forEachNonBlockingAsync, queryDatabase } from "../utils.js";
 import { createStorage, prefixStorage, type Storage } from "unstorage";
@@ -385,6 +385,12 @@ const router = new Hono()
         if (serieUUID == undefined) {
             return c.json({ error: 'No UUID provided' }, 400);
         }
+
+        const ingoranceItem = ignoranceTable.getOne({ serie_UUID: serieUUID });
+        if (ingoranceItem != undefined) {
+            return c.json({ error: 'Serie is ignored cause of ignorance list' }, 400);
+        }
+
         const scraperSocket = await getScraperSocket();
         if (scraperSocket == null) {
             return c.json({ error: 'Scraper Socket not found' }, 500);
