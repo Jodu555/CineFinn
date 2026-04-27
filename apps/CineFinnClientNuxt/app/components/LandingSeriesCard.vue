@@ -16,9 +16,13 @@
 			</span>
 			<div class="series-overlay" :class="{ visible: isActive || isHovered }">
 				<div class="series-overlay-actions">
-					<button class="sov-btn sov-btn-light" @click.stop="$emit('navigate', itemId)">
+					<button v-if="fnNavigation" class="sov-btn sov-btn-light" @click.stop="$emit('navigate', itemId)">
 						<font-awesome-icon :icon="['fas', 'play']" />
 					</button>
+					<NuxtLink v-else class="sov-btn sov-btn-light" :to="to">
+						<font-awesome-icon :icon="['fas', 'play']" />
+					</NuxtLink>
+
 					<button v-if="!isMovie" class="sov-btn" :class="{ 'sov-btn-danger': showRemoveButton }" @click.stop="$emit('addToList', itemId)">
 						<font-awesome-icon :icon="['fas', showRemoveButton ? 'minus' : 'plus']" />
 					</button>
@@ -69,6 +73,8 @@ const props = defineProps<{
 	showEpisodeCount?: boolean;
 	showRemoveButton?: boolean;
 	showItemBadge?: boolean;
+	fnNavigation?: boolean;
+	to?: string;
 }>();
 
 defineEmits<{

@@ -125,17 +125,15 @@
 									:show-item-badge="true"
 									:series-item="indexStore.seriesById.get(content.id)"
 									show-episode-count
-									@navigate="watchContent"
-									@show-info="showContentInfo"
 									@add-to-list="onAddToPlaylist"
+									:to="`/watch/${content.id}`"
 								/>
 								<LandingSeriesCard
 									v-else
 									:show-item-badge="true"
 									:movie-item="content"
 									show-episode-count
-									@navigate="watchContent"
-									@show-info="showContentInfo"
+									:to="`/watch/${content.item.serie_UUID}?movie=${content.id}`"
 								/>
 							</div>
 						</div>
@@ -175,17 +173,15 @@
 									:show-item-badge="true"
 									:series-item="indexStore.seriesById.get(content.id)"
 									show-episode-count
-									@navigate="watchContent"
-									@show-info="showContentInfo"
 									@add-to-list="onAddToPlaylist"
+									:to="`/watch/${content.id}`"
 								/>
 								<LandingSeriesCard
 									v-else
 									:show-item-badge="true"
 									:movie-item="content"
 									show-episode-count
-									@navigate="watchContent"
-									@show-info="showContentInfo"
+									:to="`/watch/${content.item.serie_UUID}?movie=${content.id}`"
 								/>
 							</div>
 						</div>
@@ -375,14 +371,6 @@ const onAddToPlaylist = (seriesUUID: string) => {
 		if (!addToPlaylistDialog.value) return;
 		addToPlaylistDialog.value.openModal();
 	});
-};
-
-const watchContent = (contentId: string) => {
-	router.push(`/watch/${contentId}`);
-};
-
-const showContentInfo = (contentId: string) => {
-	console.log('Show info:', contentId);
 };
 </script>
 
