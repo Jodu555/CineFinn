@@ -15,7 +15,7 @@ const CONFIG = {
 
     // How many frames to skip at the very start before even trying
     // (cold-opens often begin with dark/noisy frames)
-    skipFrames: 0,
+    skipFrames: 5,
 
     // Prefer a frame that is at least this far into the episode
     // expressed as a fraction of total frames (0–1).

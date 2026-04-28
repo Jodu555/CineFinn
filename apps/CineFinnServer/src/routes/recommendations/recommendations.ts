@@ -65,7 +65,15 @@ async function getCachedSeriesWatchableIndexes(seriesUUID: string, watchableUUID
                 }
             };
         }
-        return { season: returnEpisode?.season_IDX || 0, episode: returnEpisode?.episode_IDX || 0 };
+        if (returnEpisode !== undefined) {
+            return { season: returnEpisode.season_IDX, episode: returnEpisode.episode_IDX };
+        }
+        const episode = await episodesTable.getOne({ UUID: watchableUUID });
+        if (episode !== null) {
+            return { season: episode.season_IDX, episode: episode.episode_IDX };
+        }
+        return { season: 0, episode: 0 };
+
 
     } else if (watchableUUID.startsWith('MO-')) {
         let returnMovie: Movie | undefined;
@@ -75,7 +83,14 @@ async function getCachedSeriesWatchableIndexes(seriesUUID: string, watchableUUID
                 break;
             }
         }
-        return { season: 0, episode: returnMovie?.movie_IDX || 0 };
+        if (returnMovie !== undefined) {
+            return { season: 0, episode: returnMovie?.movie_IDX || 0 };
+        }
+        const movie = await moviesTable.getOne({ UUID: watchableUUID });
+        if (movie !== null) {
+            return { season: 0, episode: movie.movie_IDX };
+        }
+        return { season: 0, episode: 0 };
     }
     throw new Error('Unknown Watchable UUID ' + watchableUUID);
 }
@@ -548,12 +563,12 @@ const router = new Hono()
             carouselRegistry.entries().map(async ([carouselKey, carousel]) => {
                 console.time(carouselKey);
                 const item = await buildCarouselResponse(carouselKey, carousel);
-                // if (carousel.type === 'entity') {
-                //     console.log(item?.items.forEach(async e => {
-                //         const entity = e as ArrayElement<Awaited<CarouselEntityDetailsResult>>;
-                //         const file = await decideEntityImage(entity.entity);
-                //     }));
-                // }
+                if (carousel.type === 'entity') {
+                    const items = item?.items as Awaited<CarouselEntityDetailsResult>;
+                    item!.items = items.filter(async e => {
+                        return e.entity.additional.imageFile !== 'null.jpg';
+                    });
+                }
                 if (item) output.push(item);
                 console.timeEnd(carouselKey);
             })
@@ -571,7 +586,7 @@ async function decideEntityImage(entity: WatchableEntity, watchtime?: number) {
         entity.UUID,
     );
     const file = await pickPreviewImage(inputFolder, watchtime ? Math.floor(watchtime / 10) : undefined);
-    if (file == undefined) return 'preview1.jpg';
+    if (file == undefined) return 'null.jpg';
     return path.parse(file).base;
 }
 

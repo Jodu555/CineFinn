@@ -76,7 +76,7 @@
 							<div class="carousel-slide-wrapper episode-wrapper">
 								<NuxtLink
 									class="ep-card"
-									:to="`/watch/${item.seriesId}?episode=${item.watableUUID}`"
+									:to="`/watch/${item.seriesId}?${item.watchableUUID.startsWith('EP-') ? 'episode' : 'movie'}=${item.watchableUUID}`"
 									@mouseenter="hoveredEntities[item.id] = true"
 									@mouseleave="hoveredEntities[item.id] = false"
 								>
@@ -87,7 +87,9 @@
 												<font-awesome-icon :icon="['fas', 'play']" />
 											</div>
 										</div>
-										<span class="ep-badge top-start">S{{ item.season }} E{{ item.episode }}</span>
+										<span v-if="item.watchableUUID.startsWith('EP-')" class="ep-badge top-start">S{{ item.season }} E{{ item.episode }}</span>
+										<span v-if="item.watchableUUID.startsWith('MO-')" class="ep-badge top-start">Movie</span>
+
 										<span class="ep-badge top-end">{{ item.duration }}</span>
 										<div class="ep-progress-track">
 											<div class="ep-progress-fill" :style="{ width: item.progress + '%' }"></div>
@@ -217,7 +219,7 @@ const mapEntityItem = (entity: WatchableEntity & timestamped & { additional: Add
 	url.searchParams.append('auth-token', useAuthStore().authToken);
 	return {
 		id: entity.UUID,
-		watableUUID: entity.watchable_UUID,
+		watchableUUID: entity.watchable_UUID,
 		seriesId: entity.serie_UUID,
 		seriesTitle: seriesData?.title || '',
 		episodeTitle: seriesData?.title || '',
@@ -282,7 +284,7 @@ const onAddToPlaylist = (seriesUUID: string) => {
 
 interface EpisodeItem {
 	id: string;
-	watableUUID: string;
+	watchableUUID: string;
 	seriesId: string;
 	seriesTitle: string;
 	episodeTitle: string;
