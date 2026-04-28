@@ -158,11 +158,12 @@ async function getNewlyAddedSeries(user: Account, meta: CarouselMeta, map?: Cach
 }
 
 async function getNewlyReleasedEpisodes(user: Account, meta: CarouselMeta, map?: CacheMap): CarouselEntityDetailsResult {
+    const cacheMap = map || await prepareCachedSeriesMap();
     const watchableEntitys = await watchableEntitysTable.getLatest('created', {}, meta.returnItemsCount);
     return await Promise.all(watchableEntitys
         .map(async w => {
             delete (w as any).filePath;
-            const indezes = await getCachedSeriesWatchableIndexes(w.serie_UUID, w.watchable_UUID, map);
+            const indezes = await getCachedSeriesWatchableIndexes(w.serie_UUID, w.watchable_UUID, cacheMap);
             return {
                 watchTime: 0,
                 entity: {
