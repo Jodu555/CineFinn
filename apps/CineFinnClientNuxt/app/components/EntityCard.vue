@@ -1,5 +1,5 @@
 <template>
-	<div class="col" style="content-visibility: auto; contain: content; will-change: transform" :id="entity.UUID" @click="clicked">
+	<div class="col" style="content-visibility: auto; contain: content; will-change: transform" :id="entity.UUID">
 		<div class="card" :class="{ 'border-success': highlighted }">
 			<!-- <pre>{{ decideSeriesImage(entity, randomNumber) }}</pre> -->
 			<div v-if="!props.serverRendered">
@@ -11,7 +11,8 @@
 					root-margin="500px"
 					placeholder-height="400px"
 					class="entitycard-img"
-					:eager="isAboveFold" />
+					:eager="isAboveFold"
+				/>
 			</div>
 			<div v-else>
 				<LazyOptimizedNuxtImg
@@ -21,7 +22,8 @@
 					style="width: 100%; height: 100%"
 					:width="'100%'"
 					:height="'100%'"
-					:eager="isAboveFold" />
+					:eager="isAboveFold"
+				/>
 			</div>
 
 			<!-- <LazyOptimizedNuxtImg v-if="entity?.infos?.image" :src="buildCoverURL" loading="lazy" root-margin="100px"
@@ -40,10 +42,7 @@
 			<div class="card-body" v-if="props.showBody" v-auto-animate>
 				<h4 class="card-title">{{ entity.infos?.title || entity.infos?.infos || entity.title }}</h4>
 				<div class="card-text">
-					<ElongatedText
-						v-if="entity.infos.description"
-						:text="entity.infos.description || 'No Description available yet...'"
-						:max-length="125" />
+					<ElongatedText v-if="entity.infos.description" :text="entity.infos.description || 'No Description available yet...'" :max-length="125" />
 
 					<small v-if="entity.infos.startDate || entity.infos.endDate" class="text-secondary"
 						>{{ entity.infos.startDate }} - {{ entity.infos.endDate }}</small
@@ -51,13 +50,10 @@
 				</div>
 
 				<div class="d-flex justify-content-between">
-					<!-- <button @click="goAndWatch" class="btn btn-outline-primary btn-sm">Go & Watch</button> -->
 					<nuxt-link class="btn btn-outline-primary btn-sm mt-1 mb-2" :prefetch-on="{ interaction: true }" :to="`/watch/${entity.UUID}`"
 						>Go & Watch</nuxt-link
 					>
 
-					<!-- <AddToPlaylistDialog :item-u-u-i-d="entity.UUID" :content-title="entity.title" open-button-text=""
-						open-button-color="outline-primary" icon-size="sm" /> -->
 					<div>
 						<button class="btn bg-transparent btn-outline-primary" @click="addToPlaylist()" title="Add To Playlist">
 							<font-awesome-icon :icon="['fas', 'plus']" size="sm" />
@@ -128,10 +124,7 @@
 					</form>
 				</div>
 			</div>
-			<div
-				v-if="props.showFooter"
-				class="card-footer"
-				:class="{ 'text-secondary': !entity.infos.disabled, 'text-danger': entity.infos.disabled }">
+			<div v-if="props.showFooter" class="card-footer" :class="{ 'text-secondary': !entity.infos.disabled, 'text-danger': entity.infos.disabled }">
 				{{ entityInfoString }}
 			</div>
 		</div>
@@ -149,7 +142,6 @@ const props = withDefaults(
 		highlighted?: boolean;
 		showBody?: boolean;
 		showFooter?: boolean;
-		beClickable?: boolean;
 		serverRendered?: boolean;
 		index?: number;
 	}>(),
@@ -157,7 +149,6 @@ const props = withDefaults(
 		highlighted: false,
 		showBody: true,
 		showFooter: true,
-		beClickable: false,
 		serverRendered: false,
 		index: 0,
 	},
@@ -257,21 +248,6 @@ const entityInfoString = computed(() => {
 		entity.value.seasons.length >= 1 ? entity.value.seasons.length + ' ' + (entity.value.seasons.length > 1 ? 'Seasons' : 'Season') : '';
 	return entity.value.movies.length >= 1 && entity.value.seasons.length >= 1 ? moviePart + ' | ' + seasonPart : moviePart + seasonPart;
 });
-
-function clicked() {
-	if (props.beClickable) {
-		goAndWatch();
-	}
-}
-
-const goAndWatch = () => {
-	console.log('Go and watch', entity.value);
-
-	useRouter().push({ path: '/watch/' + entity.value.UUID });
-	localStorage.setItem('lastSeriesRow', JSON.stringify({ ID: entity.value.UUID }));
-
-	// $router.push({ path: '/watch', query: { id: props.entity.ID } });
-};
 </script>
 
 <style scoped>

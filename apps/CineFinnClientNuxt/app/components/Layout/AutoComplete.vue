@@ -178,8 +178,6 @@ async function input() {
 function keydown(e: KeyboardEvent) {
 	if (!dropdown) return;
 
-	console.log('Came');
-
 	if (e.keyCode === 27) {
 		dropdown.hide();
 		return;

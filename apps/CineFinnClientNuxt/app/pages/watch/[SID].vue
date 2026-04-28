@@ -781,18 +781,14 @@ const isMovieWatched = (movieUUID: string) => {
 };
 
 const getMovieProgress = (movieUUID: string) => {
-	console.log(`getMovieProgress: ${movieUUID}`);
-
 	const watchHistory = indexStore.watchHistory.find((w) => w.watchable_UUID === movieUUID);
 	if (watchHistory == undefined) {
 		return 0;
 	}
-	console.log(`watchHistory:`, watchHistory);
 	const movie = indexStore.detailedMovies.find((m) => m.UUID === movieUUID);
 	if (movie == undefined) {
 		return 0;
 	}
-	console.log(`movie:`, movie);
 	const totalRuntime = averageWatchableEntitysRuntime(movie.watchableEntitys, true);
 	// const totalRuntime = movie.watchableEntitys.reduce((prev, curr) => prev + curr.runtime, 0) / movie.watchableEntitys.length;
 	if (totalRuntime === -1 && watchHistory.watchTime >= 500) {
@@ -801,11 +797,6 @@ const getMovieProgress = (movieUUID: string) => {
 
 	const watchTime = Math.max(0, Math.min(watchHistory.watchTime, totalRuntime));
 	const percent = (watchTime / totalRuntime) * 100;
-	console.log({
-		percent,
-		totalRuntime,
-		watchTime,
-	});
 
 	return percent;
 };

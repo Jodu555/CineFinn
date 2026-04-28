@@ -112,12 +112,6 @@ const autoCompleteSeries = computed(() => {
 	return arr;
 });
 
-async function autocompleteSearch(ID: string, value: string) {
-	console.log('Autocomplete Search', ID, value);
-	const router = useRouter();
-	await router.push(`/watch/${ID}`);
-}
-
 function autocompleteLinkBuilder(ID: string, value: string) {
 	console.log('Autocomplete Link Builder', ID, value);
 	return `/watch/${ID}`;

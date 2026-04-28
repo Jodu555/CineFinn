@@ -268,13 +268,6 @@ const slideNext = (carouselId?: any) => {
 	}
 };
 
-const router = useRouter();
-
-const navigateToSeries = (id: string) => {
-	console.log('Navigate to series:', id);
-	router.push(`/watch/${id}`);
-};
-
 const addToPlaylistDialog = useTemplateRef('addToPlaylistDialog');
 
 const selectedSeriesToAddToPlaylist = ref<string | null>(null);
