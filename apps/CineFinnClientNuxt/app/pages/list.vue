@@ -130,10 +130,7 @@ function handleScroll(e: Event) {
 		[0, window.innerHeight - (document.querySelector('.footer')?.getBoundingClientRect().height || 0) - 25],
 	);
 
-	// console.log('SCROLL', height, document.documentElement.scrollTop);
-	// console.log('MAPPING', Math.ceil(mapping));
-
-	if (document.documentElement.scrollTop > 100) {
+	if (document.documentElement.scrollTop > 300) {
 		backToTop.value = true;
 		const backToTopElem = document.querySelector<HTMLDivElement>('#backToTop');
 		if (backToTopElem) backToTopElem.style.top = `${Math.ceil(mapping)}px`;
