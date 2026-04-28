@@ -319,6 +319,8 @@ async function main() {
             if (config.useReadRate && job.data.bandwidth != 0) {
                 const readRate = calcReadrate(job.data.bandwidth, job.data.publicStreamURL);
                 await job.log(`Calculated readrate: ${readRate}`);
+                console.log('Using Readrate:', readRate);
+
                 if (readRate > 0) {
                     readRateArg = `-readrate ${readRate}`;
                 }
