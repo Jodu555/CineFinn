@@ -23,7 +23,7 @@
 		<div v-auto-animate v-for="job in queues.find((x) => x.name == activeTab)?.jobs" :key="job.id" class="row">
 			<div class="col-auto ms-5 me-auto">
 				<div class="align-middle h-100" style="transform: translate(0px, 35%)">
-					<h4 class="mb-3">#{{ job.id }} - {{ job.name }}</h4>
+					<h4 class="mb-3">#{{ job.id }} - {{ job.name }}({{ indexStore.seriesById.get(job.data.entity.serie_UUID)?.title || '' }})</h4>
 					<h5>
 						"{{ job.data.entity.UUID }}" On: {{ job.data.generatorName ? job.data.generatorName : 'TBD' }} Lang:
 						{{ job.data.entity.lang ? job.data.entity.lang : '- -' }} Sub:
@@ -64,6 +64,8 @@
 import type { QueuedPreviewImageGenerationJobData } from '@cinefinn/types';
 import { onMounted, onUnmounted, ref } from 'vue';
 import Progress from '~/components/Progress.vue';
+
+const indexStore = useIndexStore();
 
 function upperCaseFirstLetter(str: string) {
 	return str.at(0)?.toUpperCase() + str.split('').slice(1).join('');
