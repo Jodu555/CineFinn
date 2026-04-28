@@ -77,7 +77,7 @@
 												</option>
 											</select>
 										</div>
-										<!-- Change View Mode -->
+										<!-- Change View Mode / Mark Season Dropdown -->
 										<div class="d-flex align-items-center gap-2 w-100 justify-content-center justify-content-sm-end">
 											<!-- Mark Season Dropdown -->
 											<div class="dropdown flex-shrink-0 me-2" v-if="authStore.loggedIn">
@@ -106,6 +106,7 @@
 												</ul>
 											</div>
 
+											<!-- Change View Mode-->
 											<div class="btn-group" role="group">
 												<button
 													type="button"
@@ -281,6 +282,52 @@
 
 								<!-- Movies Tab -->
 								<div v-if="activeTab === 'movies' && hasMovies" class="tab-pane fade show active">
+									<!-- Mark Movies Dropdown -->
+									<div class="d-flex flex-column flex-md-row justify-content-end align-items-start align-items-md-center gap-3 mb-4">
+										<div class="dropdown flex-shrink-0" v-if="authStore.loggedIn">
+											<button
+												class="btn btn-outline-secondary dropdown-toggle bg-transparent"
+												type="button"
+												data-bs-toggle="dropdown"
+												aria-expanded="false"
+											>
+												<font-awesome-icon :icon="['fas', 'check']" class="me-2" />
+												Mark Movies
+											</button>
+											<ul class="dropdown-menu dropdown-menu-end">
+												<li>
+													<button class="dropdown-item d-flex align-items-center" type="button" @click="handleMarkMoviesWatched(true)">
+														<font-awesome-icon :icon="['fas', 'check']" class="me-2 text-success" />
+														Mark (all) as Watched
+													</button>
+													<button
+														class="dropdown-item d-flex align-items-center"
+														type="button"
+														:disabled="currentMovieUUID == null"
+														@click="handleMarkMovieWatched(true, currentMovieUUID!)"
+													>
+														<font-awesome-icon :icon="['fas', 'check']" class="me-2 text-success" />
+														Mark (current) as Watched
+													</button>
+												</li>
+												<li>
+													<button class="dropdown-item d-flex align-items-center" type="button" @click="handleMarkMoviesWatched(false)">
+														<font-awesome-icon :icon="['fas', 'xmark']" class="me-2 text-secondary" />
+														Mark (all) as Unwatched
+													</button>
+													<button
+														class="dropdown-item d-flex align-items-center"
+														:disabled="currentMovieUUID == null"
+														type="button"
+														@click="handleMarkMovieWatched(false, currentMovieUUID!)"
+													>
+														<font-awesome-icon :icon="['fas', 'xmark']" class="me-2 text-secondary" />
+														Mark (current) as Unwatched
+													</button>
+												</li>
+											</ul>
+										</div>
+									</div>
 									<div class="d-flex flex-column gap-3">
 										<div
 											v-for="movie in indexStore.detailedMovies"
@@ -834,6 +881,15 @@ const handleMarkSeasonWatched = async (watched: boolean) => {
 	if (seasonUUID == undefined) return;
 
 	await indexStore.markSeasonWatched(seasonUUID, watched);
+};
+
+const handleMarkMoviesWatched = async (watched: boolean) => {
+	await indexStore.markMoviesWatched(watched);
+};
+
+const handleMarkMovieWatched = async (watched: boolean, movieUUID?: string) => {
+	if (movieUUID == undefined) return;
+	await indexStore.markMovieWatched(movieUUID, watched);
 };
 
 const { data: additionalList, execute: loadCheckForUpdates } = await useFetch<

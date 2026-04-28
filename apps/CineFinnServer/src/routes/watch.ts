@@ -30,7 +30,7 @@ const router = new Hono()
         const seasonUUID = c.req.param('seasonUUID');
         const bool = c.req.param('bool') === 'true';
 
-        console.log('Marking', bool);
+        console.log('Marking', seasonUUID, bool);
 
 
         const episodes = await episodesTable.get({ season_UUID: seasonUUID });
@@ -40,15 +40,16 @@ const router = new Hono()
             });
         }
 
-
-        //To force hono to complete the request before doing the translation stuff cause that's more a failsafe than anything else
-        setImmediate(() => {
-            setTimeout(async () => {
-                console.time('Translating');
-                await translationV1WatchString.markSeason(user.UUID, episodes[0].serie_UUID, episodes[0].season_IDX, bool ? 'true' : 'false');
-                console.timeEnd('Translating');
-            }, 1000);
-        });
+        if (process.env.OLD_DB_WATCH_STRING_TRANSLATION! == 'true' || process.env.OLD_DB_WATCH_STRING_TRANSLATION! == '1') {
+            //To force hono to complete the request before doing the translation stuff cause that's more a failsafe than anything else
+            setImmediate(() => {
+                setTimeout(async () => {
+                    console.time('Translating');
+                    await translationV1WatchString.markSeason(user.UUID, episodes[0].serie_UUID, episodes[0].season_IDX, bool ? 'true' : 'false');
+                    console.timeEnd('Translating');
+                }, 1000);
+            });
+        }
 
         const promises = episodes.map(async (episode) => {
             const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, watchable_UUID: episode.UUID, unique: true });
@@ -81,6 +82,62 @@ const router = new Hono()
         });
 
         return c.json(episodes);
+    })
+    .post('/markMovie/:movieUUID/:bool', authMiddleware, async (c) => {
+        const user = c.get('credentials').user;
+        const movieUUID = c.req.param('movieUUID');
+        const bool = c.req.param('bool') === 'true';
+
+        console.log('Marking', movieUUID, bool);
+
+        const movie = await moviesTable.getOne({ UUID: movieUUID });
+        if (movie == undefined) {
+            return c.json({
+                message: 'Movie not found',
+            });
+        }
+
+        if (process.env.OLD_DB_WATCH_STRING_TRANSLATION! == 'true' || process.env.OLD_DB_WATCH_STRING_TRANSLATION! == '1') {
+            //To force hono to complete the request before doing the translation stuff cause that's more a failsafe than anything else
+            setImmediate(() => {
+                setTimeout(async () => {
+                    console.time('Translating');
+                    await translationV1WatchString.markMovie(user.UUID, movie.serie_UUID, movie.movie_IDX, bool ? 'true' : 'false');
+                    console.timeEnd('Translating');
+                }, 1000);
+            });
+        }
+
+        const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, watchable_UUID: movie.UUID, unique: true });
+
+        const watchableEntities = await watchableEntitysTable.get({ watchable_UUID: movie.UUID });
+        const averageRuntime = watchableEntities.map(we => {
+            return we.runtime === -1 ? 500 : we.runtime;
+        }).reduce((prev, curr) => prev + curr, 0) / watchableEntities.length;
+
+        if (watchHistory == undefined) {
+            await watchHistoryTable.create({
+                UUID: generateWatchHistoryID(),
+                account_UUID: user.UUID,
+                series_UUID: movie.serie_UUID,
+                watchable_UUID: movie.UUID,
+                watchTime: bool ? averageRuntime : 0,
+            });
+        } else {
+            const finalTime = bool ? Math.max(watchHistory.watchTime, bool ? averageRuntime : 0) : 0;
+            await watchHistoryTable.update({ UUID: watchHistory.UUID }, {
+                watchTime: finalTime,
+            });
+        }
+
+        (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'client' && s.data.auth.user.UUID === user.UUID).forEach(async s => {
+            const watchList = await watchHistoryTable.get({ series_UUID: movie.serie_UUID, account_UUID: user.UUID, unique: true });
+            s.emit('watchListUpdate', watchList);
+        });
+
+        return c.json({
+            message: 'Movie marked as ' + (bool ? 'watched' : 'unwatched'),
+        });
     })
     .post('/updateTime/:watchableUUID/:time', authMiddleware, async (c) => {
         const user = c.get('credentials').user;

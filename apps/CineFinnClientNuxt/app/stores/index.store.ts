@@ -192,13 +192,45 @@ export const useIndexStore = defineStore('index', {
                 });
                 return;
             }
-            // $swal.fire({
-            //     title: 'Success',
-            //     text: 'Season marked as ' + (watched ? 'watched' : 'unwatched'),
-            //     icon: 'success',
-            //     confirmButtonText: 'Ok',
-            // });
-
+        },
+        async markMovieWatched(movieUUID: string, watched: boolean, showError: boolean = true) {
+            const { $swal } = useNuxtApp();
+            const { data, error } = await tryCatch<Promise<void>, Error>(() => $fetch<void>(`${useAPIURL()}/watch/markMovie/${movieUUID}/${watched}`, {
+                method: 'POST',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+            }));
+            if (error) {
+                console.log(error);
+                if (showError) {
+                    $swal.fire({
+                        title: 'Error',
+                        text: 'An error occurred while marking the movie as ' + (watched ? 'watched' : 'unwatched'),
+                        icon: 'error',
+                        confirmButtonText: 'Ok',
+                    });
+                }
+                return error;
+            }
+        },
+        async markMoviesWatched(watched: boolean) {
+            const { $swal } = useNuxtApp();
+            let errored = new Set<string>();
+            for (const movie of this.detailedMovies) {
+                const result = await this.markMovieWatched(movie.UUID, watched, false);
+                if (result instanceof Error) {
+                    errored.add(movie.UUID);
+                }
+            }
+            if (errored.size > 0) {
+                $swal.fire({
+                    title: 'Error',
+                    text: 'An error occurred while marking the movies as ' + (watched ? 'watched' : 'unwatched') + ' for ' + [...errored].join(', '),
+                    icon: 'error',
+                    confirmButtonText: 'Ok',
+                });
+            }
         },
         async updateSeries(seriesID: string, series: any) {
             const { $swal } = useNuxtApp();
