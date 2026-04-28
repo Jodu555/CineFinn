@@ -34,16 +34,6 @@
 					<!-- <li class="nav-item">
 						<router-link class="nav-link" active-class="active" to="/sync">Sync</router-link>
 					</li> -->
-					<!-- <li class="nav-item">
-						<router-link class="nav-link" active-class="active" to="/todo">Todo</router-link>
-					</li> -->
-					<!-- <li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Todo</a>
-						<ul class="dropdown-menu">
-							<li><router-link class="dropdown-item" active-class="active" to="/todo">Todo</router-link></li>
-							<li><router-link class="dropdown-item" active-class="active" to="/anidb">AniDB</router-link></li>
-						</ul>
-					</li> -->
 					<li v-if="authStore.loggedIn" class="nav-item">
 						<NuxtLink class="nav-link" active-class="active" to="/playlists">Playlists</NuxtLink>
 					</li>
