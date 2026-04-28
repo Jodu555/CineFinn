@@ -26,7 +26,7 @@ export async function generatePreviewImages(job: Job) {
     let i = 0;
     for await (const watchableEntity of watchableEntities) {
         i++;
-        i % 1000 == 0 && job.log(`Handling File ${i}/${watchableEntities.length + 1}`);
+        (i % 5000 == 0 || i == 1) && job.log(`Handling File ${i}/${watchableEntities.length + 1}`);
         // const watchable = await watchableUUIDToWatchable(watchableEntity.watchable_UUID, generatorEpisodesCache);
         // if (watchable == undefined) {
         //     job.log('Watchable not found', watchableEntity.watchable_UUID, 'for', watchableEntity.UUID);

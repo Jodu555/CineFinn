@@ -592,7 +592,7 @@ export async function crawl(job: Job) {
 
     const seasonEpisodeFixes = await fixSeasons(job);
 
-    const { sucessful: successInsertions, failed: failedInsertions } = await insertMissingWatchableEntityRuntimes(job);
+    const { sucessful: successRuntimeInsertions, failed: failedRuntimeInsertions } = await insertMissingWatchableEntityRuntimes(job);
 
     job.setResult({
         probablyMissingSeries: probablyMissingSeries,
@@ -602,8 +602,8 @@ export async function crawl(job: Job) {
         staleMovies: Array.from(staleMovies),
         staleSeasons: Array.from(staleSeasons),
         seasonEpisodeFixes,
-        successInsertions,
-        failedInsertions,
+        successRuntimeInsertions,
+        failedInsertions: failedRuntimeInsertions,
     });
 
     await handleSubSystemProminence(job);
