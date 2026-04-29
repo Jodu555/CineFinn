@@ -20,7 +20,7 @@
 				</a>
 			</li>
 		</ul>
-		<div v-auto-animate v-for="job in queues.find((x) => x.name == activeTab)?.jobs" :key="job.id" class="row">
+		<div v-auto-animate v-for="job in selectedTabsJobs" :key="job.id" class="row">
 			<div class="col-auto ms-5 me-auto">
 				<div class="align-middle h-100" style="transform: translate(0px, 35%)">
 					<h4 class="mb-3">#{{ job.id }} - {{ job.name }}({{ indexStore.seriesById.get(job.data.entity.serie_UUID)?.title || '' }})</h4>
@@ -84,6 +84,14 @@ const isPaused = ref<boolean>(false);
 const queues = ref<{ name: string; jobs: Job[] }[]>([]);
 
 const activeTab = ref('active');
+
+const selectedTabsJobs = computed(() => {
+	const queue = queues.value.find((x) => {
+		return x.name == activeTab.value;
+	});
+	if (queue == undefined) return [];
+	return queue.jobs.slice(0, 50);
+});
 
 // const testProgress = ref(0);
 
