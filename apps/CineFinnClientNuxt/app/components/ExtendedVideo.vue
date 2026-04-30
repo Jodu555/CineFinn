@@ -337,9 +337,10 @@ const updateVueVideoData = () => {
 };
 
 const generatePreviewImageURL = (previewImgNumber: number): string => {
-	// if (!currentSeries.value || currentSeries.value.ID === '-1') return '';
-	// Implementation omitted in original - return empty or real url if you have one
-	return `${useAPIURL()}/images/${indexStore.detailedSerie?.UUID}/previewImages/${indexStore.selectedEntity?.UUID}/${indexStore.selectedWatchableEntity?.UUID}/${previewImgNumber}`;
+	if (indexStore.detailedSerie == undefined || indexStore.selectedEntity == undefined || indexStore.selectedWatchableEntity == undefined) return '';
+
+	const SERIES_BASE = `${useAPIURL()}/images/${indexStore.detailedSerie.UUID}`;
+	return `${SERIES_BASE}/previewImages/${indexStore.selectedEntity.UUID}/${indexStore.selectedWatchableEntity.UUID}/preview${previewImgNumber}.jpg`;
 };
 
 const skipSegment = () => {
