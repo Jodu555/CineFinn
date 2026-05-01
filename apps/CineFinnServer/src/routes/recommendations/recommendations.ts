@@ -100,6 +100,7 @@ type AdditionalCarouselMeta = {
     showWatchableCount?: boolean;
     wrapAround?: boolean;
     randomize?: boolean;
+    autoplay?: number;
 };
 
 type CarouselMeta = {
@@ -501,7 +502,8 @@ carouselRegistry.set('marathon-worthy', {
     additionalMeta: {
         showWatchableCount: true,
         randomize: true,
-        wrapAround: true
+        wrapAround: true,
+        autoplay: 1000 * 10
     },
     computeFn: getMarathonWorthySeries
 });

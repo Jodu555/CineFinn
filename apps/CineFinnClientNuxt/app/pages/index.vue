@@ -55,7 +55,7 @@
 					<Carousel
 						v-if="carousel.type === 'series'"
 						:ref="(el: any) => (carouselRefs[carousel.id] = el)"
-						v-bind="{ ...carouselConfig, wrapAround: carousel.additionalMeta?.wrapAround }"
+						v-bind="{ ...carouselConfig, wrapAround: carousel.additionalMeta?.wrapAround, autoplay: carousel.additionalMeta?.autoplay }"
 					>
 						<Slide v-for="item in carousel.mappedItems" :key="item.UUID">
 							<div class="carousel-slide-wrapper">
@@ -71,7 +71,11 @@
 						</Slide>
 					</Carousel>
 					<!-- Entity/Episode carousel (type === 'entity') -->
-					<Carousel v-else-if="carousel.type === 'entity'" :ref="(el: any) => (carouselRefs[carousel.id] = el)" v-bind="episodeCarouselConfig">
+					<Carousel
+						v-else-if="carousel.type === 'entity'"
+						:ref="(el: any) => (carouselRefs[carousel.id] = el)"
+						v-bind="{ ...episodeCarouselConfig, wrapAround: carousel.additionalMeta?.wrapAround, autoplay: carousel.additionalMeta?.autoplay }"
+					>
 						<Slide v-for="item in carousel.mappedItems" :key="item.id">
 							<div class="carousel-slide-wrapper episode-wrapper">
 								<NuxtLink
@@ -158,6 +162,7 @@ type AdditionalCarouselMeta = {
 	showNewRibbon?: boolean;
 	showWatchableCount?: boolean;
 	wrapAround?: boolean;
+	autoplay?: number;
 };
 
 type CarouselMeta = {
