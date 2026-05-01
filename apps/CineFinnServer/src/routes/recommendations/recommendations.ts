@@ -334,13 +334,7 @@ async function getContinueWatchingEpisodes(user: Account, meta: CarouselMeta): C
         }
     });
 
-    console.log(seriesMap.size);
-
-
-    // const output: Awaited<CarouselEntityDetailsResult> = [];
-
     const output = await Promise.all(Array.from(seriesMap.entries()).map(async ([seriesUUID, rows]) => {
-
         let row: dbResponseRow | undefined;
         if (rows.length === 1) {
             row = rows[0]!;
@@ -364,42 +358,6 @@ async function getContinueWatchingEpisodes(user: Account, meta: CarouselMeta): C
             },
         };
     }));
-
-
-    // for (const [seriesUUID, rows] of seriesMap) {
-    //     if (rows.length === 1) {
-    //         const rowZero = rows[0]!;
-    //         output.push({
-    //             watchTime: rowZero.watchTime,
-    //             entity: {
-    //                 ...rowZero.watchableEntity,
-    //                 additional: {
-    //                     imageFile: await decideEntityImage(rowZero.watchableEntity),
-    //                     season: rowZero.season_Idx,
-    //                     episode: rowZero.episode_Idx,
-    //                 }
-    //             },
-    //         });
-    //     } else {
-    //         const latestRow = rows.reduce((best, current) => {
-    //             if (current.season_Idx > best.season_Idx) return current;
-    //             if (current.season_Idx === best.season_Idx && current.episode_Idx > best.episode_Idx) return current;
-    //             return best;
-    //         });
-
-    //         output.push({
-    //             watchTime: latestRow.watchTime,
-    //             entity: {
-    //                 ...latestRow.watchableEntity,
-    //                 additional: {
-    //                     imageFile: await decideEntityImage(latestRow.watchableEntity),
-    //                     season: latestRow.season_Idx,
-    //                     episode: latestRow.episode_Idx || latestRow.movie_Idx,
-    //                 }
-    //             },
-    //         });
-    //     }
-    // }
 
     const randomOrNot = meta.additionalMeta?.randomize ? output.sort(() => Math.random() - 0.5) : output;
     return randomOrNot.slice(0, meta.returnItemsCount);
