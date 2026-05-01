@@ -1,6 +1,6 @@
 <template>
 	<div data-bs-theme="dark" class="landing-m-page">
-		<!-- ── FRANCHISE CAROUSEL ───────────────────────────────────────────────────── -->
+		<!-- FRANCHISE CAROUSEL -->
 		<div v-if="showFranchises" class="container mt-3 shadow-lg p-2 mb-3 mt-1 rounded franchise-container">
 			<div class="franchise-carousel-wrapper">
 				<button class="franchise-nav-btn franchise-nav-prev" @click="slidePrev(franchiseCarouselRef)" aria-label="Previous">
@@ -32,11 +32,12 @@
 			</div>
 		</div>
 
-		<!-- ── CONTENT ROWS ─────────────────────────────────────────────────────────── -->
+		<!-- RECOMMENDATION ROWS -->
 		<div class="content-zone ssr-active px-2 px-lg-4">
-			<!-- Dynamic carousels from API -->
+			<!-- Dynamic recommendation carousels -->
 			<template v-if="carouselData!.length > 0">
 				<div v-for="carousel in carouselData" :key="carousel.id" class="content-row">
+					<!-- Carousel Header -->
 					<div class="row-header px-2">
 						<div class="row-title-group">
 							<font-awesome-icon :icon="carousel.icon" class="row-icon text-danger" />
@@ -51,7 +52,7 @@
 							</button>
 						</div>
 					</div>
-					<!-- Series carousel (type === 'series') -->
+					<!-- Carousel for Series -->
 					<Carousel
 						v-if="carousel.type === 'series'"
 						:ref="(el: any) => (carouselRefs[carousel.id] = el)"
@@ -70,7 +71,7 @@
 							</div>
 						</Slide>
 					</Carousel>
-					<!-- Entity/Episode carousel (type === 'entity') -->
+					<!-- Carousel for Movie or Episode -->
 					<Carousel
 						v-else-if="carousel.type === 'entity'"
 						:ref="(el: any) => (carouselRefs[carousel.id] = el)"
@@ -110,7 +111,7 @@
 					</Carousel>
 				</div>
 			</template>
-			<!-- Loading state -->
+			<!-- Recommendations Loading state -->
 			<div v-else-if="status === 'pending'" class="content-row">
 				<div class="row-header px-2">
 					<div class="row-title-group">
@@ -119,7 +120,7 @@
 					</div>
 				</div>
 			</div>
-			<!-- Error state -->
+			<!-- Recommendations Error state -->
 			<div v-else-if="status === 'error'" class="content-row">
 				<div class="row-header px-2">
 					<div class="row-title-group">
@@ -200,7 +201,7 @@ type CarouselAddSeries = {
 
 type CarouselResponseItem = CarouselMeta & (CarouselAddEntity | CarouselAddSeries);
 
-const { data, status } = useFetch<CarouselResponseItem[]>(`${useAPIURL()}/recommendations`, {
+const { data: recommendations, status } = useFetch<CarouselResponseItem[]>(`${useAPIURL()}/recommendations`, {
 	key: 'recommendations',
 	server: true,
 	headers: {
@@ -237,8 +238,8 @@ const mapEntityItem = (entity: WatchableEntity & timestamped & { additional: Add
 };
 
 const carouselData = computed(() => {
-	if (!data.value) return [];
-	return data.value
+	if (!recommendations.value) return [];
+	return recommendations.value
 		.map((carousel) => {
 			if (carousel.type === 'series') {
 				return {
