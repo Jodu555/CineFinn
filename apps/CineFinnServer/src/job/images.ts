@@ -25,7 +25,7 @@ export async function generatePreviewImages(job: Job) {
     const queuedJobs: QueuedPreviewImageGenerationJob[] = [];
     // let i = 0;
     // for await (const watchableEntity of watchableEntities) {
-    forEachNonBlockingAsync(watchableEntities, 15, async (watchableEntity, i) => {
+    await forEachNonBlockingAsync(watchableEntities, 15, async (watchableEntity, i) => {
         // i++;
         (i % 5000 == 0 || i == 1) && job.log(`Handling File ${i}/${watchableEntities.length + 1}`);
         // const watchable = await watchableUUIDToWatchable(watchableEntity.watchable_UUID, generatorEpisodesCache);
