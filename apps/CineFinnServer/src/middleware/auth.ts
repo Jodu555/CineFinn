@@ -232,6 +232,7 @@ export const authRouter = new Hono()
             message: 'Successfully logged out',
         });
     }).get('/info', authMiddleware, async (c) => {
+        console.log('Auth-Info:', c.get('credentials')?.user?.username)
         return c.json(c.get('credentials').user);
     }).post('/onboarding/stepOne', authMiddleware, async (c) => {
         const jsonBody = await c.req.json();
