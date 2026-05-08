@@ -23,9 +23,10 @@ export async function generatePreviewImages(job: Job) {
 
     await job.time('Handling Watchable Entities');
     const queuedJobs: QueuedPreviewImageGenerationJob[] = [];
-    let i = 0;
-    for await (const watchableEntity of watchableEntities) {
-        i++;
+    // let i = 0;
+    // for await (const watchableEntity of watchableEntities) {
+    forEachNonBlockingAsync(watchableEntities, 15, async (watchableEntity, i) => {
+        // i++;
         (i % 5000 == 0 || i == 1) && job.log(`Handling File ${i}/${watchableEntities.length + 1}`);
         // const watchable = await watchableUUIDToWatchable(watchableEntity.watchable_UUID, generatorEpisodesCache);
         // if (watchable == undefined) {
@@ -38,7 +39,7 @@ export async function generatePreviewImages(job: Job) {
         }]);
         if (series == undefined) {
             job.log('Series not found', watchableEntity.watchable_UUID, 'for', watchableEntity.UUID, 'seriesuuid', watchableEntity.serie_UUID);
-            continue;
+            return;
         }
 
 
@@ -47,7 +48,7 @@ export async function generatePreviewImages(job: Job) {
             //We may predict that greater than 0 files means it worked not the best
             //TODO: lets get back to this and compute it with the actual file length and a rough estimation of how many images there should be
             // Around 15% to 20% deviation should be okay
-            continue;
+            return;
         }
         fs.mkdirSync(resultPath, { recursive: true });
 
@@ -71,7 +72,10 @@ export async function generatePreviewImages(job: Job) {
         } satisfies QueuedPreviewImageGenerationJob;
         queuedJobs.push(generatedQueueJob);
         //job.log(`Queued ${generatedQueueJob.type} series: ${series.UUID} watchableEntity: ${watchableEntity.UUID}`);
-    }
+    });
+    // }
+
+
     await job.timeEnd('Handling Watchable Entities');
     await job.setResult({
         count: queuedJobs.length,
