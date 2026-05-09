@@ -23,8 +23,13 @@ let io: Server<AnythingToServerEvents,
 //     SocketData<Account | Account & timestamped>>;
 
 export const loggerInstances = {
-    updateTime: false
-} as Record<string, boolean>;
+    updateTime: false,
+    pickPreviewImage: false
+};
+
+export const featureFlags = {
+    useSmartImageDecision: true,
+};
 
 export function setIO(newIO: Server<ClientToServerEvents,
     ServerToClientEvents,

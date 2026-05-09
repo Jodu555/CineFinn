@@ -1,8 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
-
-// ─── Tuneable thresholds ──────────────────────────────────────────────────────
+import { loggerInstances } from '../../utils.js';
 
 const CONFIG = {
     // Brightness (0-255 mean of all pixels)
@@ -63,12 +62,18 @@ async function rejectReason(filePath: string) {
     return null; // We like the frame
 }
 
-const DEBUG = false;
+/**
+ * Uses Multiple weighted threshold to pick the best image skiping some frames per default and checking the image
+ * to not be too dark or too bright. As well as checking the image for uniformity. As well as the image not to be a single solid color.
+ * @param folder The Folder Path to look for images that follow the preview([0-9]+).(jpe?g|png|webp) pattern 
+ * @param preSkipFrames Start from this frame and skip the rest
+ * @returns The path to the best image or null if no image was found
+ */
 export async function pickPreviewImage(folder: string, preSkipFrames?: number) {
 
     const absFolder = path.resolve(folder);
     if (!fs.existsSync(absFolder)) {
-        DEBUG && console.error(`Folder not found: ${absFolder}`);
+        loggerInstances.pickPreviewImage && console.error(`Folder not found: ${absFolder}`);
         return null;
     }
 
@@ -77,7 +82,7 @@ export async function pickPreviewImage(folder: string, preSkipFrames?: number) {
     );
 
     if (allFiles.length === 0) {
-        DEBUG && console.error('No image files found in folder.');
+        loggerInstances.pickPreviewImage && console.error('No image files found in folder.');
         return null;
     }
 
@@ -87,14 +92,14 @@ export async function pickPreviewImage(folder: string, preSkipFrames?: number) {
     const total = sorted.length;
     const skipUntil = Math.max(CONFIG.skipFrames, Math.floor(total * CONFIG.minFractionIn), preSkipFrames ?? 0);
 
-    DEBUG && console.error(`Found ${total} frames. Skipping first ${skipUntil}, then scanning…`);
+    loggerInstances.pickPreviewImage && console.error(`Found ${total} frames. Skipping first ${skipUntil}, then scanning…`);
 
     for (let i = 0; i < sorted.length; i++) {
         const filename = sorted[i];
         const filePath = path.join(absFolder, filename);
 
         if (i < skipUntil) {
-            DEBUG && console.error(`  [${i + 1}/${total}] ${filename} → skipped (too early)`);
+            // loggerInstances.pickPreviewImage && console.error(`  [${i + 1}/${total}] ${filename} → skipped (too early)`);
             continue;
         }
 
@@ -102,26 +107,22 @@ export async function pickPreviewImage(folder: string, preSkipFrames?: number) {
         try {
             reason = await rejectReason(filePath);
         } catch (err: any) {
-            DEBUG && console.error(`  [${i + 1}/${total}] ${filename} → error reading file: ${err.message}`);
+            loggerInstances.pickPreviewImage && console.error(`  [${i + 1}/${total}] ${filename} → error reading file: ${err.message}`);
             continue;
         }
 
         if (reason) {
-            DEBUG && console.error(`  [${i + 1}/${total}] ${filename} → rejected: ${reason}`);
+            loggerInstances.pickPreviewImage && console.error(`  [${i + 1}/${total}] ${filename} → rejected: ${reason}`);
         } else {
-            DEBUG && console.error(`  [${i + 1}/${total}] ${filename} → ✓ selected`);
+            loggerInstances.pickPreviewImage && console.error(`  [${i + 1}/${total}] ${filename} → ✓ selected`);
             // Print ONLY the path to stdout so callers can capture it cleanly
-            DEBUG && console.log(filePath);
+            loggerInstances.pickPreviewImage && console.log(filePath);
             return filePath;
         }
     }
 
-    // Fallback: nothing passed – return the middle frame
     const fallback = path.join(absFolder, sorted[Math.floor(total / 2)]);
-    DEBUG && console.error(`No ideal frame found - falling back to middle frame.`);
-    DEBUG && console.log(fallback);
+    loggerInstances.pickPreviewImage && console.error(`No ideal frame found - falling back to middle frame.`);
+    loggerInstances.pickPreviewImage && console.log(fallback);
     return fallback;
 }
-
-// Run when called directly
-// pickPreviewImage(process.argv[2]);

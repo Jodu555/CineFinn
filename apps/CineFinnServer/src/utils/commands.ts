@@ -1,7 +1,7 @@
 import { Command, CommandManager } from "@jodu555/commandmanager";
 import { accountsTable, authTokensTable, episodesTable, moviesTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../database.js";
 import type { AuthToken } from "@cinefinn/types";
-import { getIO, loggerInstances } from "../utils.js";
+import { featureFlags, getIO, loggerInstances } from "../utils.js";
 import { sendSeriesReloadToAll, sendSiteReload, socketStateMap } from "../sockets/client.socket.js";
 import { cacheRegistry } from "../routes/admin/cache.js";
 import { indexStorage } from "../routes/index.js";
@@ -16,6 +16,7 @@ export function setupCommandManager() {
 
 function registerCommands() {
     const commandManager = CommandManager.getCommandManager();
+
 
     commandManager.registerCommand(
         new Command(['authsession', 'as'], 'authsession [list/pool]', 'Lists the current authenticated session', async (command, [...args], scope) => {
@@ -50,6 +51,7 @@ function registerCommands() {
         })
     );
 
+    //Command: socketsessions
     commandManager.registerCommand(
         new Command(['socketsessions', 'ss'], 'socketsessions', 'Lists the current active socket sessions', async (command, [...args], scope) => {
             const output = ['Current socket sessions:'];
@@ -79,6 +81,7 @@ function registerCommands() {
         })
     );
 
+    //Command: reloadClient
     commandManager.registerCommand(
         new Command(
             ['reloadClient', 'rlc'],
@@ -109,6 +112,7 @@ function registerCommands() {
         )
     );
 
+    //Command: cacheclear
     commandManager.registerCommand(
         new Command(
             ['cacheclear', 'cac'],
@@ -126,6 +130,7 @@ function registerCommands() {
         )
     );
 
+    //Command: sendSeriesReload
     commandManager.registerCommand(
         new Command(
             ['sendSeriesReload', 'ssr'],
@@ -138,6 +143,7 @@ function registerCommands() {
         )
     );
 
+    //Command: logger
     commandManager.registerCommand(
         new Command(
             ['logger', 'l'],
@@ -146,24 +152,49 @@ function registerCommands() {
             async (command, [...args], scope) => {
                 if (args[1] == 'list') {
                     const output = ['Logger Instances:'];
-                    for (const instance in loggerInstances) {
+                    for (const _instance in loggerInstances) {
+                        const instance = _instance as keyof typeof loggerInstances;
                         output.push(` - ${instance}: ${loggerInstances[instance] ? 'enabled' : 'disabled'}`);
                     }
                     output.push('');
                     return output;
                 } else {
-                    const instance = args[1];
-                    if (instance in loggerInstances) {
+                    const _instance = args[1];
+                    if (_instance in loggerInstances) {
+                        const instance = _instance as keyof typeof loggerInstances;
                         loggerInstances[instance] = !loggerInstances[instance];
                         return `Logger instance ${instance} has been toggled to ${loggerInstances[instance] ? 'enabled' : 'disabled'}`;
                     } else {
-                        return `Logger instance ${instance} not found`;
+                        return `Logger instance ${_instance} not found`;
                     }
                 }
             }
         )
     );
 
+    //Command: featureflags
+    commandManager.registerCommand(new Command(['featureflags', 'ff'], 'featureflags [list/set]', 'Lists or sets feature flags', async (command, [...args], scope) => {
+        if (args[1] == 'list') {
+            const output = ['Feature Flags:'];
+            for (const _flag in featureFlags) {
+                const flag = _flag as keyof typeof featureFlags;
+                output.push(` - ${flag}: ${featureFlags[flag] ? 'enabled' : 'disabled'}`);
+            }
+            output.push('');
+            return output;
+        } else {
+            const _flag = args[1];
+            if (_flag in featureFlags) {
+                const flag = _flag as keyof typeof featureFlags;
+                featureFlags[flag] = !featureFlags[flag];
+                return `Feature flag ${flag} has been toggled to ${featureFlags[flag] ? 'enabled' : 'disabled'}`;
+            } else {
+                return `Feature flag ${_flag} not found`;
+            }
+        }
+    }));
+
+    //Command: delete
     commandManager.registerCommand(
         new Command(
             ['delete', 'del'],

@@ -8,7 +8,7 @@ import { cacheRegistry } from "../admin/cache.js";
 import { authMiddleware } from "../../middleware/auth.js";
 import { fullIndexStorage, indexStorage } from "../index.js";
 import { episodesTable, moviesTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../../database.js";
-import { cachingMiddleware, forEachNonBlockingAsync, queryDatabase } from "../../utils.js";
+import { cachingMiddleware, featureFlags, forEachNonBlockingAsync, queryDatabase } from "../../utils.js";
 import { getConfig } from '../../config.js';
 import path from 'path';
 import { pickPreviewImage } from './imageHelper.js';
@@ -514,6 +514,14 @@ const recommendationStorage = createStorage<CarouselResponseItem>();
 
 cacheRegistry.set('recommendations', recommendationStorage);
 
+//TODO: Think about streaming the recommendations to the client
+/**
+ * Mental Idea:
+ * 1 Everything that is already in the cache is sent to the client on request
+ * 2 Everything that is userspecific stream to the client over socket.^
+ * Maybe add an option to opt in per carousel if streaming should be used
+ * For every carousel if non userspecific items should be cached but if not compute on the fly
+ */
 
 const router = new Hono()
     .get("/", authMiddleware, async (c) => {
@@ -568,7 +576,17 @@ const router = new Hono()
         return c.json(output.sort((a, b) => a.order - b.order));
     });
 
+/**
+ * If featureFlags.useSmartImageDecision is enabled this function decides the image for a WE
+ * If featureFlags.useSmartImageDecision is disabled this function returns preview1.jpg
+ * @param entity The WatchableEntity(WE) to decide the image for
+ * @param watchtime Optional: The Watchtime of the entity in seconds to determine if there are images to skip
+ * @returns the Filename decided for the WE, and watchtime if provided, in form of preview[0-9]+.jpg
+ */
 async function decideEntityImage(entity: WatchableEntity, watchtime?: number) {
+    if (!featureFlags.useSmartImageDecision) {
+        return 'preview1.jpg';
+    }
     const inputFolder = path.join(
         getConfig().imagePath,
         entity.serie_UUID,
@@ -577,7 +595,8 @@ async function decideEntityImage(entity: WatchableEntity, watchtime?: number) {
         entity.UUID,
     );
     const file = await pickPreviewImage(inputFolder, watchtime ? Math.floor(watchtime / 10) : undefined);
-    if (file == undefined) return 'null.jpg';
+    //TODO: Maybe return a placeholder image here. Cause maybe preview0.jpg also does not exist when folder or file not found
+    if (file == undefined || file == null) return 'preview1.jpg'; //Return First image if no image was found
     return path.parse(file).base;
 }
 
