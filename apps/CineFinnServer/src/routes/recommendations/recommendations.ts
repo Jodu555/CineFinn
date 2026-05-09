@@ -278,6 +278,7 @@ async function getContinueWatchingEpisodes(user: Account, meta: CarouselMeta): C
         watchable_UUID: string;
         watchTime: number;
         series_UUID: string;
+        updated_at: string;
         watchableEntity_UUID: string;
         episode_Idx: number;
         season_Idx: number;
@@ -294,6 +295,7 @@ async function getContinueWatchingEpisodes(user: Account, meta: CarouselMeta): C
             wh.watchable_UUID,
             wh.watchTime,
             wh.series_UUID,
+            wh.updated_at,
             we.\`UUID\` AS watchableEntity_UUID,
             ep.season_IDX AS season_Idx,
             ep.episode_IDX AS episode_Idx,
@@ -321,6 +323,7 @@ async function getContinueWatchingEpisodes(user: Account, meta: CarouselMeta): C
             wh.watchable_UUID,
             wh.watchTime
         HAVING watched_percent > ? AND watched_percent < ?
+        ORDER BY updated_at DESC
         `;
     const betweenPercentage = [20, 80];
     const dbResponse = await queryDatabase<dbResponseRow>(sql, [user.UUID, betweenPercentage[0], betweenPercentage[1]], ['watchableEntity']);
@@ -480,12 +483,12 @@ carouselRegistry.set('continue-watching', {
     id: 'continue-watching',
     title: 'Weiterschauen',
     icon: ['fas', 'clock-rotate-left'],
-    description: 'Top 25 Folgen bei denen du zwischen 20% & 80% Wiedergabe beendet hast',
+    description: 'Die Letzten 25 Folgen bei denen du zwischen 20% & 80% Wiedergabe beendet hast sortier nach der aktuellsten Wiedergabe',
     type: 'entity',
     userspecific: true,
     returnItemsCount: 25,
     additionalMeta: {
-        randomize: true
+        randomize: false
     },
     computeFn: getContinueWatchingEpisodes
 });
