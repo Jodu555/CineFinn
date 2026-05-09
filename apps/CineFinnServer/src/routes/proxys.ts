@@ -7,7 +7,7 @@ const router = new Hono()
     .all('/anidb/*', async (c) => {
         const proxyURL = `${getConfig().proxyAPIs.anidbapi.url}${c.req.path || ''}`
         // console.log('Proxying to:', proxyURL);
-        const res = await proxy(
+        const { data: res, error } = await tryCatch<Promise<Response>, Error>(() => proxy(
             proxyURL,
             {
                 method: c.req.method,
@@ -18,7 +18,14 @@ const router = new Hono()
                     'auth-token': '',
                 },
             }
-        )
+        ));
+        if (error) {
+            console.log({ reqUrl: c.req.url, proxyURL, error });
+            return c.json({
+                status: false,
+                message: 'Error proxying request',
+            });
+        }
         res.headers.delete('Set-Cookie')
         return res
     })
@@ -38,7 +45,7 @@ const router = new Hono()
             }
         ));
         if (error) {
-            console.log(error);
+            console.log({ reqUrl: c.req.url, proxyURL, error });
             return c.json({
                 status: false,
                 message: 'Error proxying request',
