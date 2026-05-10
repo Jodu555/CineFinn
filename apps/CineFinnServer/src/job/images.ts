@@ -82,7 +82,7 @@ export async function generatePreviewImages(job: Job) {
         first50: JSON.parse(JSON.stringify(queuedJobs)).slice(0, 50),
     });
     job.log(`Finished Image Crawling (${queuedJobs.length})`);
-    job.time('Added to Queue');
+    job.time('Adding to Queue');
     const previewImageQueue = 'previewImageQueue';
     const connection = getIORedis();
     const queue = new Queue<QueuedPreviewImageGenerationJobData>(previewImageQueue, { connection });
@@ -90,63 +90,6 @@ export async function generatePreviewImages(job: Job) {
     await forEachNonBlockingAsync(queuedJobs, 2, async (p, i) => {
         await queue.add(p.data.seriesUUID, p.data, { removeOnComplete: false, removeOnFail: false });
     });
-    job.timeEnd('Added to Queue');
+    job.timeEnd('Adding to Queue');
     await job.success();
-
 }
-
-// interface QueueItem<T> {
-//     UUID: string;
-//     queueID: string;
-//     data: T;
-//     finished_at: string;
-//     created_at: string;
-//     failtimes: number;
-// }
-
-// class Queue<T> {
-//     name: string;
-//     state: 'paused' | 'running';
-//     constructor(name: string) {
-//         this.name = name;
-//         this.state = 'paused';
-//     }
-
-//     static async fromDB() {
-//         //TODO: Load the queue from the DB
-//     }
-
-//     add(item: QueueItem<T>) {
-//         //TODO: Add the item to the queue
-//     }
-//     pause() {
-//         //TODO: Pause the queue
-//     }
-//     resume() {
-//         //TODO: Resume the queue
-//     }
-// }
-
-// class Worker<T> {
-//     name: string;
-//     state: 'paused' | 'running';
-//     concurrency: number;
-//     constructor(name: string, workerFunction: (item: T) => Promise<void>) {
-//         this.name = name;
-//         this.state = 'paused';
-//         this.concurrency = 1;
-//         this.work();
-//     }
-
-//     static async fromDB() {
-//         //TODO: Load the worker from the DB
-//     }
-
-//     async work() {
-//         setTimeout(async () => {
-//             //TODO: Get the next item from the queue
-//             // await workerFunction(item);
-//             this.work();
-//         }, 1000);
-//     }
-// }

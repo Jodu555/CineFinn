@@ -150,7 +150,7 @@ function registerCommands() {
             'logger [instance/list]',
             'Toggles a logger instance or lists all logger instances with their current state',
             async (command, [...args], scope) => {
-                if (args[1] == 'list') {
+                if (args[1] == undefined || args[1] == 'list') {
                     const output = ['Logger Instances:'];
                     for (const _instance in loggerInstances) {
                         const instance = _instance as keyof typeof loggerInstances;
@@ -174,7 +174,7 @@ function registerCommands() {
 
     //Command: featureflags
     commandManager.registerCommand(new Command(['featureflags', 'ff'], 'featureflags [list/set]', 'Lists or sets feature flags', async (command, [...args], scope) => {
-        if (args[1] == 'list') {
+        if (args[1] == undefined || args[1] == 'list') {
             const output = ['Feature Flags:'];
             for (const _flag in featureFlags) {
                 const flag = _flag as keyof typeof featureFlags;
