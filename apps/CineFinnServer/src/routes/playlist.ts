@@ -3,6 +3,10 @@ import { authMiddleware } from "../middleware/auth.js";
 import { playlistsTable, seriesTable } from "../database.js";
 import z from "zod";
 import { generatePlaylistID } from '../utils/IdGenerators.js';
+import { createStorage } from "unstorage";
+import { cacheRegistry } from "./admin/cache.js";
+import { cachingMiddleware } from "../utils.js";
+import type { Account, Playlist, timestamped } from "@cinefinn/types";
 
 const playlistCreateSchema = z.object({
     name: z.string().min(3).max(64).trim(),
@@ -13,8 +17,15 @@ const playlistItemsSchema = z.object({
     items: z.array(z.string()).min(4).max(50),
 });
 
+const playlistStorage = createStorage<(Playlist & timestamped)[]>();
+
+cacheRegistry.set('playlist', playlistStorage);
+
+const getCacheKey = (user: Account) => `playlist-${user.UUID}`;
+
+
 const router = new Hono()
-    .get('/', authMiddleware, async (c) => {
+    .get('/', authMiddleware, cachingMiddleware(playlistStorage, (c) => getCacheKey(c.get('credentials').user)), async (c) => {
         const user = c.get('credentials').user;
         const playlists = await playlistsTable.get({
             account_UUID: user.UUID,
@@ -38,6 +49,7 @@ const router = new Hono()
                 sendEmailOnUpdate: false,
             },
         });
+        await playlistStorage.del('playlist-' + user.UUID);
 
         return c.json({
             message: 'Successfully created playlist',
@@ -70,6 +82,7 @@ const router = new Hono()
             name: playlistData.name,
             description: playlistData.description || '',
         });
+        await playlistStorage.del(getCacheKey(user));
 
         return c.json({
             message: 'Successfully updated playlist',
@@ -94,6 +107,7 @@ const router = new Hono()
             UUID: playlist.UUID,
             account_UUID: user.UUID,
         });
+        await playlistStorage.del(getCacheKey(user));
 
         return c.json({
             message: 'Successfully deleted playlist',
@@ -139,6 +153,7 @@ const router = new Hono()
         }, {
             items: playlist.items.concat([itemUUID]),
         });
+        await playlistStorage.del(getCacheKey(user));
 
         return c.json({
             message: 'Successfully added items to playlist',
@@ -175,6 +190,7 @@ const router = new Hono()
         }, {
             items: playlist.items.filter((i) => i !== itemUUID),
         });
+        await playlistStorage.del(getCacheKey(user));
 
         return c.json({
             message: 'Successfully removed items from playlist',

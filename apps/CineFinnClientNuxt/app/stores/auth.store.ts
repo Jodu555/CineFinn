@@ -85,11 +85,21 @@ export const useAuthStore = defineStore('auth', {
             }
         },
         async logout() {
-            const response = await $fetch<Account>(`${useAPIURL()}/auth/logout`, {
+            const { data, error } = await tryCatch<Promise<void>, FetchError>(() => $fetch<void>(`${useAPIURL()}/auth/logout`, {
                 headers: {
                     'auth-token': this.authToken as string,
                 },
-            });
+            }));
+            if (error) {
+                console.log(error);
+                const { $swal } = useNuxtApp();
+                $swal.fire({
+                    title: 'Error',
+                    text: 'An error occurred while logging out: ' + error.message,
+                    icon: 'error',
+                    confirmButtonText: 'Ok',
+                });
+            }
             const authCookie = useAuthCookie();
             authCookie.value = '';
             this.authToken = '';

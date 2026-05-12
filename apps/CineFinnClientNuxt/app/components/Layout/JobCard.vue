@@ -51,12 +51,23 @@ const props = withDefaults(
 const registeredJob = computed(() => managmentStore.jobRegistry[props.jobType]);
 
 async function run(id: JobType) {
-	const response = await $fetch(`${useAPIURL()}/managment/job/${id}`, {
-		method: 'GET',
-		headers: {
-			'auth-token': authStore.authToken,
-		},
-	});
+	const { data, error } = await tryCatch(() =>
+		$fetch(`${useAPIURL()}/managment/job/${id}`, {
+			method: 'GET',
+			headers: {
+				'auth-token': authStore.authToken,
+			},
+		}),
+	);
+	if (error) {
+		const { $swal } = useNuxtApp();
+		$swal.fire({
+			title: 'Error',
+			text: 'An error occurred while running the job ' + id + ': ' + error.message,
+			icon: 'error',
+			confirmButtonText: 'Ok',
+		});
+	}
 	await managmentStore.loadJobs();
 }
 

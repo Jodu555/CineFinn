@@ -1,6 +1,7 @@
 import type { Series, SeriesInfos } from '@cinefinn/types/models/media';
 import type { TodoItem } from '@cinefinn/types/shared';
 import { defineStore } from 'pinia';
+import type { FetchError } from 'ofetch';
 
 
 export interface permAcc {
@@ -21,17 +22,23 @@ export const useTodoStore = defineStore('todo', {
     actions: {
         async loadTodoList() {
             this.loading = true;
-            const todos = await $fetch<TodoItem[]>(useAPIURL() + '/todo', {
+            const { data: todos, error } = await tryCatch<Promise<TodoItem[]>, FetchError>(() => $fetch<TodoItem[]>(useAPIURL() + '/todo', {
                 method: 'GET',
                 headers: {
                     'auth-token': useAuthStore().authToken,
                 },
-            });
+            }));
+            if (error) {
+                console.log(error);
+                this.loading = false;
+                this.error = error.message;
+                return;
+            }
             this.list = todos;
             this.loading = false;
         },
         async loadPermittedAccounts() {
-            const { data, error } = await tryCatch(() => $fetch<permAcc[]>(useAPIURL() + '/todo/permittedAccounts', {
+            const { data, error } = await tryCatch<Promise<permAcc[]>, FetchError>(() => $fetch<permAcc[]>(useAPIURL() + '/todo/permittedAccounts', {
                 method: 'GET',
                 headers: {
                     'auth-token': useAuthStore().authToken,
@@ -86,7 +93,7 @@ export const useTodoStore = defineStore('todo', {
                 delete x.edited;
                 return x;
             });
-            const { data, error } = await tryCatch(() => $fetch(useAPIURL() + '/todo', {
+            const { data, error } = await tryCatch<Promise<any>, FetchError>(() => $fetch(useAPIURL() + '/todo', {
                 method: 'POST',
                 body: JSON.stringify(saveList),
                 headers: {
@@ -158,7 +165,7 @@ export const useTodoStore = defineStore('todo', {
                     delete seriesObject?.infos?.image;
                 }
 
-                const { data, error } = await tryCatch(() => $fetch<Series>(useAPIURL() + '/index/', {
+                const { data, error } = await tryCatch<Promise<Series>, FetchError>(() => $fetch<Series>(useAPIURL() + '/index/', {
                     method: 'POST',
                     body: JSON.stringify(seriesObject),
                     headers: {
@@ -184,15 +191,16 @@ export const useTodoStore = defineStore('todo', {
                 const imageUrl = decideImageURL(todoObject);
 
 
-                const { data: imageData, error: imageError } = await tryCatch(() => $fetch<string>(useAPIURL() + `/index/${data.UUID}/cover`, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        imageUrl: imageUrl,
-                    }),
-                    headers: {
-                        'auth-token': useAuthStore().authToken
-                    }
-                }));
+                const { data: imageData, error: imageError } = await tryCatch<Promise<string>, FetchError>(
+                    () => $fetch<string>(useAPIURL() + `/index/${data.UUID}/cover`, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            imageUrl: imageUrl,
+                        }),
+                        headers: {
+                            'auth-token': useAuthStore().authToken
+                        }
+                    }));
 
                 if (imageError) {
                     $swal.fire({
