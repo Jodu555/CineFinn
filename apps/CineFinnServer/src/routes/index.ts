@@ -14,12 +14,22 @@ import { sendSeriesReloadToAll } from "../sockets/client.socket.js";
 import { generateSeriesID } from "../utils/IdGenerators.js";
 import { getConfig } from "../config.js";
 import type { CheckForUpdatesOutput } from "@cinefinn/types/socket";
-import { filenameParser, type ParsedInformation } from "../parser.js";
+import { filenameParser, type Langs, type ParsedInformation } from "../parser.js";
 import { getScraperSocket } from "../sockets/scraper.socket.js";
 import { cacheRegistry } from "./admin/cache.js";
 import { tryCatch } from "@cinefinn/utilities/tryCatch";
 
-
+const languageSortIndex = {
+    'GerDub': 0,
+    'GerSub': 1,
+    'GerSubK': 2,
+    'GerSubC': 3,
+    'EngDub': 4,
+    'EngSub': 5,
+    'EngSubK': 6,
+    'EngSubC': 7,
+    'JapDub': 8,
+} as Record<Langs, number>;
 
 const indexStorage = createStorage();
 const fullIndexStorage = prefixStorage<DetailedSeries>(indexStorage, 'fullIndex');
@@ -208,7 +218,10 @@ const router = new Hono()
                 const episode = episodeBySeasonUUID.get(season.UUID)!;
                 const newEpisodes = episode.map((episode) => {
                     const watchableEntitys = watchableEntitysByWatchableUUID.get(episode.UUID)!;
-                    watchableEntitys.map(we => { delete (we as any).filePath; return we; });
+                    //TODO: Maybe Precompute this before where episodeBySeasonUUID get's filled
+                    watchableEntitys
+                        .map(we => { delete (we as any).filePath; return we; })
+                        .sort((a, b) => languageSortIndex[a.lang] - languageSortIndex[b.lang]);
                     return {
                         ...episode,
                         watchableEntitys,
@@ -223,7 +236,10 @@ const router = new Hono()
 
             const newMovies = movies.map((movie) => {
                 const watchableEntitys = watchableEntitysByWatchableUUID.get(movie.UUID)!;
-                watchableEntitys.map(we => { delete (we as any).filePath; return we; });
+                //TODO: Maybe Precompute this before where episodeBySeasonUUID get's filled
+                watchableEntitys
+                    .map(we => { delete (we as any).filePath; return we; })
+                    .sort((a, b) => languageSortIndex[a.lang] - languageSortIndex[b.lang]);
                 return {
                     ...movie,
                     watchableEntitys,
@@ -333,7 +349,10 @@ const router = new Hono()
                 const newEpisodes = episode.map((episode) => {
                     // const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == episode.UUID);
                     const watchableEntitys = watchableEntitysByWatchableUUID.get(episode.UUID)!;
-                    watchableEntitys.map(we => { delete (we as any).filePath; return we; });
+                    //TODO: Maybe Precompute this before where episodeBySeasonUUID get's filled
+                    watchableEntitys
+                        .map(we => { delete (we as any).filePath; return we; })
+                        .sort((a, b) => languageSortIndex[a.lang] - languageSortIndex[b.lang]);
                     return {
                         ...episode,
                         watchableEntitys,
@@ -349,7 +368,10 @@ const router = new Hono()
             const newMovies = movies.map((movie) => {
                 // const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == movie.UUID);
                 const watchableEntitys = watchableEntitysByWatchableUUID.get(movie.UUID)!;
-                watchableEntitys.map(we => { delete (we as any).filePath; return we; });
+                //TODO: Maybe Precompute this before where episodeBySeasonUUID get's filled
+                watchableEntitys
+                    .map(we => { delete (we as any).filePath; return we; })
+                    .sort((a, b) => languageSortIndex[a.lang] - languageSortIndex[b.lang]);
                 return {
                     ...movie,
                     watchableEntitys,
