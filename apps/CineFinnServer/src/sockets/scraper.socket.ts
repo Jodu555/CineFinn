@@ -9,6 +9,8 @@ import type { Account } from "@cinefinn/types/models/user";
 import type { timestamped } from "@cinefinn/types/shared";
 import { Job } from "../job/Job.js";
 import { cacheRegistry } from "../routes/admin/cache.js";
+import type { JobType } from "bullmq";
+import { callJob } from "../routes/managment.js";
 
 export let isScraperSocketConnected = false;
 
@@ -47,6 +49,11 @@ async function connectionFunction(socket: definedSocket) {
             return;
         }
         job.setResult(result);
+    });
+
+    socket.on('callJob', async (type, callback) => {
+        const response = await callJob(type);
+        callback(response);
     });
 
     socket.on('disconnect', () => {

@@ -1,33 +1,37 @@
+import type { CallJobResponse, JobType } from '@cinefinn/types/models/system';
+import { Role } from '@cinefinn/types/models/user';
 import { Hono, type Context } from 'hono';
-import { authFullMiddleware, type AuthedVars } from '../middleware/auth.js';
 import { jobsTable } from '../database.js';
 import { crawl } from '../job/crawler.js';
-import type { Job as IJob, JobType } from '@cinefinn/types/models/system';
-import type { timestamped } from '@cinefinn/types/shared';
-import { Role } from '@cinefinn/types/models/user';
 import { generatePreviewImages } from '../job/images.js';
 import { Job } from '../job/Job.js';
-import { generateJobID } from '../utils/IdGenerators.js';
+import { authFullMiddleware, type AuthedVars } from '../middleware/auth.js';
 import { checkForUpdates } from '../sockets/scraper.socket.js';
+import { generateJobID } from '../utils/IdGenerators.js';
 
 
 
 interface JobRegister {
     minimumRole: number;
+    callFunction: (job: Job) => Promise<void>;
 }
 
 const jobRegistry: Record<JobType, JobRegister> = {
     crawl: {
         minimumRole: 2,
+        callFunction: crawl,
     },
     generatePreviewImages: {
         minimumRole: 3,
+        callFunction: generatePreviewImages,
     },
     'checkForUpdates-old': {
         minimumRole: 3,
+        callFunction: (job) => checkForUpdates(job, false),
     },
     'checkForUpdates-smart': {
         minimumRole: 2,
+        callFunction: (job) => checkForUpdates(job, true),
     },
 };
 
@@ -42,11 +46,21 @@ async function checkIfRunning(type: string) {
     }
 }
 
-async function handleJob(type: JobType, c: Context<AuthedVars>, callFunction: (job: Job) => Promise<void>) {
+export async function callJob(type: JobType): Promise<CallJobResponse> {
+
+    const jobRegister = jobRegistry[type];
+    if (jobRegister == undefined) {
+        return {
+            error: true,
+            message: 'Job not found in jobRegistry',
+        };
+    }
+
     if (await checkIfRunning(type)) {
-        return c.json({
+        return {
+            error: true,
             message: 'Job is already running!',
-        });
+        };
     }
     const jobUUID = generateJobID();
     await jobsTable.create({
@@ -62,20 +76,31 @@ async function handleJob(type: JobType, c: Context<AuthedVars>, callFunction: (j
     const dbJob = await jobsTable.getOne({ UUID: jobUUID });
     if (dbJob == undefined) {
         //WHAT: This should never happen
-        return c.json({
+        return {
+            error: true,
             message: 'Job not found',
-        });
+        };
     }
     const job = Job.fromDB(dbJob);
-    callFunction(job).catch(async e => {
+    jobRegister.callFunction(job).catch(async e => {
         console.log(`Job Processing ERROR: ${e}`);
         await job.log(`Job Processing ERROR: ${e}`);
         await job.fail();
     });
-    return c.json({
+    return {
+        error: false,
         message: 'Job started',
         jobUUID: job.UUID,
-    });
+    };
+}
+
+async function handleJobHonoContext(type: JobType, c: Context<AuthedVars>) {
+    const jobCallResponse = await callJob(type);
+    if (jobCallResponse.error) {
+        return c.json(jobCallResponse.message, 400);
+    } else {
+        return c.json(jobCallResponse);
+    }
 }
 
 const router = new Hono()
@@ -99,16 +124,16 @@ const router = new Hono()
         });
     })
     .get('/job/crawl', authFullMiddleware((user) => user.role >= jobRegistry.crawl.minimumRole), async (c) => {
-        return await handleJob('crawl', c, crawl);
+        return await handleJobHonoContext('crawl', c);
     })
     .get('/job/generatePreviewImages', authFullMiddleware((user) => user.role >= jobRegistry.generatePreviewImages.minimumRole), async (c) => {
-        return await handleJob('generatePreviewImages', c, generatePreviewImages);
+        return await handleJobHonoContext('generatePreviewImages', c);
     })
     .get('/job/checkForUpdates-smart', authFullMiddleware((user) => user.role >= jobRegistry['checkForUpdates-smart'].minimumRole), async (c) => {
-        return await handleJob('checkForUpdates-smart', c, (job) => checkForUpdates(job, true));
+        return await handleJobHonoContext('checkForUpdates-smart', c);
     })
     .get('/job/checkForUpdates-old', authFullMiddleware((user) => user.role >= jobRegistry['checkForUpdates-old'].minimumRole), async (c) => {
-        return await handleJob('checkForUpdates-old', c, (job) => checkForUpdates(job, false));
+        return await handleJobHonoContext('checkForUpdates-old', c);
     });
 
 export { router as managmentRouter };

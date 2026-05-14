@@ -13,7 +13,9 @@ import { Server } from 'socket.io';
 import { getAniworldCalendarFromFile, storeAniworldCalendar } from './calendars/aniworldCalendar.js';
 import { getStoCalendarFromFile, storeStoCalendar } from './calendars/stoCalendar.js';
 import { msToReadable, wait } from '@cinefinn/utilities/time';
-import type { IgnoranceItem } from '@cinefinn/types/shared';
+import type { ExtendedEpisodeDownload, IgnoranceItem } from '@cinefinn/types/shared';
+import type { JobType } from '@cinefinn/types';
+import { tryCatch } from '@cinefinn/utilities/tryCatch';
 
 const config = getConfig();
 
@@ -92,10 +94,9 @@ const httpServer = serve({
 
 });
 
-let socket: Socket<ServerToScraperEvents, ScraperToServerEvents> | null = null;
 
 
-socket = Client(config.CORE.URL, {
+const socket = Client(config.CORE.URL, {
     transports: ['websocket'],
     reconnection: true,
     upgrade: true,
@@ -104,7 +105,7 @@ socket = Client(config.CORE.URL, {
         type: 'scraper',
         authToken: config.CORE.SCRAPER_SOCKET_TOKEN,
     } satisfies AuthHandshake,
-});
+}) as Socket<ServerToScraperEvents, ScraperToServerEvents>;
 
 socket.on('connect', () => {
     console.log('Connected to Core');
@@ -169,7 +170,7 @@ socket.on('scrape:sto', async (url, cb) => {
 async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart = false, alreadyCheckedForUpdates: string[] = []) {
     const timingMap = new Map<string, number>();
     const log = (...args: any[]) => {
-        socket!.emit('job:log', jobUUID, ...args);
+        socket.emit('job:log', jobUUID, ...args);
         console.log(`[${jobUUID}]`, ...args);
     };
     const time = (label: string) => {
@@ -273,17 +274,104 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
         ...output.aniworld.map(x => ({ _categorie: 'Aniworld', ...x })),
         ...output.sto.map(x => ({ _categorie: 'STO', ...x }))
     ];
-    socket!.emit('job:setResult', jobUUID, condensedArray);
+    socket.emit('job:setResult', jobUUID, condensedArray);
     log(condensedArray);
     log(condensedArray.length);
     if (condensedArray.length == 0) return;
 
     // return;
 
-    // await kickOffAniDl(condensedArray);
+    await kickOffAniDl(jobUUID, condensedArray);
 
-    // await recrawlArchive();
-    // await generateImages();
+    await callJob('crawl');
+
+    //TODO: since the callJob method does not wait till the job finished but just starts it, we somehow need to wait for the job to finish
+    // await callJob('generatePreviewImages');
+
+}
+
+async function kickOffAniDl(jobUUID: string, list: ExtendedEpisodeDownload[]) {
+    const timingMap = new Map<string, number>();
+    const log = (...args: any[]) => {
+        socket.emit('job:log', jobUUID, ...args);
+        console.log(`[${jobUUID}]`, ...args);
+    };
+    const time = (label: string) => {
+        timingMap.set(label, Date.now());
+    };
+    const timeEnd = (label: string) => {
+        const time = timingMap.get(label);
+        if (time == undefined) return;
+        timingMap.delete(label);
+        log(`[${label}] Took ${msToReadable(Date.now() - time)}`);
+    };
+    const headers = {
+        token: config.ANI_DL.TOKEN,
+    };
+
+    try {
+        time('Upload');
+
+        const { data: uploadData, error: uploadError } = await tryCatch(() => axios.post(`${config.ANI_DL.HOST}/upload`,
+            {
+                data: list,
+            },
+            {
+                headers,
+            }
+        ));
+        if (uploadError) {
+            log('Error uploading', uploadError);
+            return;
+        }
+
+        const ID = uploadData.data.ID;
+        timeEnd('Upload');
+
+        time('Collect');
+        const { data: collectData, error: collectError } = await tryCatch(() => axios.get(`${process.env.ANI_DL_HOST}/collect/${ID}`, {
+            headers,
+        }));
+        if (collectError) {
+            log('Error collecting', collectError);
+            return;
+        }
+        timeEnd('Collect');
+
+        time('Download');
+        const { data: downloadData, error: downloadError } = await tryCatch(() => axios.get(`${process.env.ANI_DL_HOST}/download/${ID}`, {
+            headers,
+        }));
+        if (downloadError) {
+            log('Error downloading', downloadError);
+            return;
+        }
+        timeEnd('Download');
+
+        time('Finish');
+        const { data: finishData, error: finishError } = await tryCatch(() => axios.get(`${process.env.ANI_DL_HOST}/finish/${ID}`, {
+            headers,
+        }));
+        if (finishError) {
+            log('Error finishing', finishError);
+            return;
+        }
+        timeEnd('Finish');
+    } catch (error) {
+        log('ERROR:', error);
+    }
+}
+
+async function callJob(type: JobType) {
+    socket.emit('callJob', type, (response => {
+        console.log(`Call Job ${type} resulted in ${response}`);
+        if (response.error) {
+            throw new Error(response.message);
+        } else {
+            console.log('Job', type, 'got ID:', response.jobUUID);
+        }
+        return response;
+    }));
 }
 
 socket.connect();

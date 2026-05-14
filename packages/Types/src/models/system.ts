@@ -21,6 +21,19 @@ export interface SyncRoomMember {
 
 export type JobType = 'crawl' | 'generatePreviewImages' | 'checkForUpdates-smart' | 'checkForUpdates-old';
 
+export type CallJobError = {
+    error: true;
+    message: string;
+}
+
+export type CallJobSuccess = {
+    error: false;
+    message: string;
+    jobUUID: string;
+}
+
+export type CallJobResponse = CallJobError | CallJobSuccess;
+
 export interface Job {
     UUID: string;
     type: JobType;

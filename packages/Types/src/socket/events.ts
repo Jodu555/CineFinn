@@ -68,6 +68,7 @@ export interface ScraperToServerEvents {
     'job:generatePreviewImages': () => void;
     'job:log': (jobUUID: string, ...logArgs: any[]) => void;
     'job:setResult': (jobUUID: string, result: any) => void;
+    'callJob': (type: database.JobType, callback: (response: database.CallJobResponse) => void) => void;
 }
 
 export interface SubSystemToServerEvents {
