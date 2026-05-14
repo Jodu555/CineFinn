@@ -91,7 +91,7 @@
 						<div v-else class="row row-cols-2 row-cols-sm-3 row-cols-md-4 gap-4">
 							<div v-for="item in selectedPlaylistItems" :key="item.UUID" class="col">
 								<LandingSeriesCard
-									:item="item"
+									:seriesItem="item"
 									:show-remove-button="true"
 									@navigate="watchItem"
 									@add-to-list="handleRemoveFromPlaylist(selectedPlaylist.UUID, $event)"

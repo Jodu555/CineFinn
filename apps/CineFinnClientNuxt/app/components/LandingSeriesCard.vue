@@ -67,13 +67,37 @@ import { msToReadable } from '@cinefinn/utilities/time';
 const { decideSeriesImage } = useSeriesImage();
 
 const props = defineProps<{
+	/**
+	 * The series item to show (if no movie item is provided)
+	 */
 	seriesItem?: FrontendSeries;
+	/**
+	 * The movie item to show (if no series item is provided)
+	 */
 	movieItem?: FranchiseContentMovieExtened;
+	/**
+	 * Whether to show the new ribbon
+	 */
 	showNewRibbon?: boolean;
+	/**
+	 * Whether to show the episode count badge
+	 */
 	showEpisodeCount?: boolean;
+	/**
+	 * Whether to show the playlist remove button
+	 */
 	showRemoveButton?: boolean;
+	/**
+	 * Whether to show the item type badge (Series / Movie)
+	 */
 	showItemBadge?: boolean;
+	/**
+	 * Whether to emit a navigation event and let the caller handle the navigation or use a router link
+	 */
 	fnNavigation?: boolean;
+	/**
+	 * The router link to navigate to if fnNavigation is false
+	 */
 	to?: string;
 }>();
 
