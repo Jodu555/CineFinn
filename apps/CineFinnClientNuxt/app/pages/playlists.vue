@@ -93,9 +93,10 @@
 								<LandingSeriesCard
 									:seriesItem="item"
 									:show-remove-button="true"
-									@navigate="watchItem"
 									@add-to-list="handleRemoveFromPlaylist(selectedPlaylist.UUID, $event)"
 									@show-info="watchItem"
+									:fn-navigation="false"
+									:to="`/watch/${item.UUID}`"
 								/>
 							</div>
 						</div>
