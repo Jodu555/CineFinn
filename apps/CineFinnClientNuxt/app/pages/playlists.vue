@@ -94,9 +94,8 @@
 									:seriesItem="item"
 									:show-remove-button="true"
 									@add-to-list="handleRemoveFromPlaylist(selectedPlaylist.UUID, $event)"
-									@show-info="watchItem"
 									:fn-navigation="false"
-									:to="`/watch/${item.UUID}`"
+									:to="`/watch/${item.UUID}?playlist=${selectedPlaylist.UUID}`"
 								/>
 							</div>
 						</div>
@@ -272,15 +271,6 @@ const formatDate = (stamp: string | number): string => {
 	const timestamp = typeof stamp === 'string' ? Number(stamp) : stamp;
 
 	return new Date(timestamp).toLocaleString();
-};
-
-const watchItem = (itemUUID: string) => {
-	router.push({
-		path: `/watch/${itemUUID}`,
-		query: {
-			playlist: selectedPlaylistUUID.value,
-		},
-	});
 };
 
 const closeAllModals = () => {
