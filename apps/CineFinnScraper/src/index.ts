@@ -14,7 +14,7 @@ import { getAniworldCalendarFromFile, storeAniworldCalendar } from './calendars/
 import { getStoCalendarFromFile, storeStoCalendar } from './calendars/stoCalendar.js';
 import { msToReadable, wait } from '@cinefinn/utilities/time';
 import type { ExtendedEpisodeDownload, IgnoranceItem } from '@cinefinn/types/shared';
-import type { JobType } from '@cinefinn/types';
+import type { CallJobResponse, JobType } from '@cinefinn/types';
 import { tryCatch } from '@cinefinn/utilities/tryCatch';
 
 const config = getConfig();
@@ -363,14 +363,12 @@ async function kickOffAniDl(jobUUID: string, list: ExtendedEpisodeDownload[]) {
 }
 
 async function callJob(type: JobType, blocking = false, timeout = 1000 * 60 * 10) {
-    return new Promise((resolve, reject) => {
-
-        const timeoutID = setTimeout(() => {
-            reject(new Error('Timeout'));
-        }, timeout);
-
-        socket.emit('callJob', type, blocking, (response => {
-            timeoutID && clearTimeout(timeoutID);
+    return new Promise<CallJobResponse>((resolve, reject) => {
+        socket.timeout(timeout).emit('callJob', type, blocking, (err, response) => {
+            if (err) {
+                console.log(`Call Job ${type} resulted in ${err}`);
+                reject(err);
+            }
             console.log(`Call Job ${type} resulted in ${response}`);
             if (response.error) {
                 reject(response);
@@ -380,9 +378,7 @@ async function callJob(type: JobType, blocking = false, timeout = 1000 * 60 * 10
                 resolve(response);
                 return;
             }
-        }));
-
-
+        });
     })
 }
 
