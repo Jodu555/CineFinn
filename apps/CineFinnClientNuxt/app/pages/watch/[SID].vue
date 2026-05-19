@@ -406,6 +406,7 @@
 								</div>
 							</div>
 						</div>
+						<!-- TODO: Technically a series is not completely disabled if it has a WE that is on the wrong SubID so in the future we will add a check here -->
 						<div class="text-center" v-if="isDisabled">
 							<h2 class="text-danger">It Seems there is currently no video data for this Series</h2>
 							<p class="text-danger mb-0">It either got removed, or is on a node which is currently un reachable, or is currently being transcoded</p>
@@ -553,7 +554,8 @@ const hasSeasons = computed(() => series.value?.seasons && series.value.seasons.
 
 const hasMovies = computed(() => series.value?.movies && series.value.movies.length > 0);
 
-const isDisabled = computed(() => series.value?.infos.disabled);
+//Check the frontendSeries and the Detailed Series for is disabled cause sometimes the caching is a little weird
+const isDisabled = computed(() => series.value?.infos.disabled || indexStore.detailedSerie?.infos.disabled);
 
 const currentDetailedSeasonData = computed(() => {
 	return indexStore.detailedSeasons.find((s) => s.UUID === selectedSeason.value);
