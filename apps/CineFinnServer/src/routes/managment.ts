@@ -8,6 +8,7 @@ import { Job } from '../job/Job.js';
 import { authFullMiddleware, type AuthedVars } from '../middleware/auth.js';
 import { checkForUpdates } from '../sockets/scraper.socket.js';
 import { generateJobID } from '../utils/IdGenerators.js';
+import { tryCatch } from '@cinefinn/utilities/tryCatch';
 
 
 
@@ -46,7 +47,8 @@ async function checkIfRunning(type: string) {
     }
 }
 
-export async function callJob(type: JobType): Promise<CallJobResponse> {
+
+export async function callJob(type: JobType, blocking = false): Promise<CallJobResponse> {
 
     const jobRegister = jobRegistry[type];
     if (jobRegister == undefined) {
@@ -82,16 +84,42 @@ export async function callJob(type: JobType): Promise<CallJobResponse> {
         };
     }
     const job = Job.fromDB(dbJob);
-    jobRegister.callFunction(job).catch(async e => {
-        console.log(`Job Processing ERROR: ${e}`);
-        await job.log(`Job Processing ERROR: ${e}`);
+
+    const onJobError = async (error: Error) => {
+        console.log(`Job Processing ERROR: ${error}`);
+        await job.log(`Job Processing ERROR: ${error}`);
         await job.fail();
-    });
-    return {
-        error: false,
-        message: 'Job started',
-        jobUUID: job.UUID,
     };
+
+    if (blocking === true) {
+
+        const { data: result, error } = await tryCatch<Promise<any>, Error>(() => jobRegister.callFunction(job));
+
+        if (error) {
+            await onJobError(error);
+            return {
+                error: true,
+                message: error.message,
+            };
+        }
+
+        return {
+            error: false,
+            message: 'Job started',
+            jobUUID: job.UUID,
+        };
+
+
+    } else {
+        jobRegister.callFunction(job)
+            .catch(onJobError);
+        return {
+            error: false,
+            message: 'Job started',
+            jobUUID: job.UUID,
+        };
+
+    }
 }
 
 async function handleJobHonoContext(type: JobType, c: Context<AuthedVars>) {

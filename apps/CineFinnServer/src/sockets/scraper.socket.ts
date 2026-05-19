@@ -51,8 +51,8 @@ async function connectionFunction(socket: definedSocket) {
         job.setResult(result);
     });
 
-    socket.on('callJob', async (type, callback) => {
-        const response = await callJob(type);
+    socket.on('callJob', async (type, blocking = false, callback) => {
+        const response = await callJob(type, blocking);
         callback(response);
     });
 

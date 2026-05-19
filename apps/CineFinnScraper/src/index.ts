@@ -362,16 +362,28 @@ async function kickOffAniDl(jobUUID: string, list: ExtendedEpisodeDownload[]) {
     }
 }
 
-async function callJob(type: JobType) {
-    socket.emit('callJob', type, (response => {
-        console.log(`Call Job ${type} resulted in ${response}`);
-        if (response.error) {
-            throw new Error(response.message);
-        } else {
-            console.log('Job', type, 'got ID:', response.jobUUID);
-        }
-        return response;
-    }));
+async function callJob(type: JobType, blocking = false, timeout = 1000 * 60 * 10) {
+    return new Promise((resolve, reject) => {
+
+        const timeoutID = setTimeout(() => {
+            reject(new Error('Timeout'));
+        }, timeout);
+
+        socket.emit('callJob', type, blocking, (response => {
+            timeoutID && clearTimeout(timeoutID);
+            console.log(`Call Job ${type} resulted in ${response}`);
+            if (response.error) {
+                reject(response);
+                return;
+            } else {
+                console.log('Job', type, 'got ID:', response.jobUUID);
+                resolve(response);
+                return;
+            }
+        }));
+
+
+    })
 }
 
 socket.connect();
