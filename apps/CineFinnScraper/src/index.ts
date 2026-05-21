@@ -16,6 +16,7 @@ import { msToReadable, wait } from '@cinefinn/utilities/time';
 import type { ExtendedEpisodeDownload, IgnoranceItem } from '@cinefinn/types/shared';
 import type { CallJobResponse, JobType } from '@cinefinn/types';
 import { tryCatch } from '@cinefinn/utilities/tryCatch';
+import { DownloaderConnector } from './class/DownloaderConnector.js';
 
 const config = getConfig();
 
@@ -281,86 +282,17 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
 
     // return;
 
-    await kickOffAniDl(jobUUID, condensedArray);
+    const downloaderConnector = new DownloaderConnector(jobUUID, socket);
 
-    await callJob('crawl');
+    await downloaderConnector.kickOffAniDl(condensedArray);
 
-    //TODO: since the callJob method does not wait till the job finished but just starts it, we somehow need to wait for the job to finish
-    // await callJob('generatePreviewImages');
+    await callJob('crawl', true);
+
+    await callJob('generatePreviewImages', true);
 
 }
 
-async function kickOffAniDl(jobUUID: string, list: ExtendedEpisodeDownload[]) {
-    const timingMap = new Map<string, number>();
-    const log = (...args: any[]) => {
-        socket.emit('job:log', jobUUID, ...args);
-        console.log(`[${jobUUID}]`, ...args);
-    };
-    const time = (label: string) => {
-        timingMap.set(label, Date.now());
-    };
-    const timeEnd = (label: string) => {
-        const time = timingMap.get(label);
-        if (time == undefined) return;
-        timingMap.delete(label);
-        log(`[${label}] Took ${msToReadable(Date.now() - time)}`);
-    };
-    const headers = {
-        token: config.ANI_DL.TOKEN,
-    };
 
-    try {
-        time('Upload');
-
-        const { data: uploadData, error: uploadError } = await tryCatch(() => axios.post(`${config.ANI_DL.HOST}/upload`,
-            {
-                data: list,
-            },
-            {
-                headers,
-            }
-        ));
-        if (uploadError) {
-            log('Error uploading', uploadError);
-            return;
-        }
-
-        const ID = uploadData.data.ID;
-        timeEnd('Upload');
-
-        time('Collect');
-        const { data: collectData, error: collectError } = await tryCatch(() => axios.get(`${process.env.ANI_DL_HOST}/collect/${ID}`, {
-            headers,
-        }));
-        if (collectError) {
-            log('Error collecting', collectError);
-            return;
-        }
-        timeEnd('Collect');
-
-        time('Download');
-        const { data: downloadData, error: downloadError } = await tryCatch(() => axios.get(`${process.env.ANI_DL_HOST}/download/${ID}`, {
-            headers,
-        }));
-        if (downloadError) {
-            log('Error downloading', downloadError);
-            return;
-        }
-        timeEnd('Download');
-
-        time('Finish');
-        const { data: finishData, error: finishError } = await tryCatch(() => axios.get(`${process.env.ANI_DL_HOST}/finish/${ID}`, {
-            headers,
-        }));
-        if (finishError) {
-            log('Error finishing', finishError);
-            return;
-        }
-        timeEnd('Finish');
-    } catch (error) {
-        log('ERROR:', error);
-    }
-}
 
 async function callJob(type: JobType, blocking = false, timeout = 1000 * 60 * 10) {
     return new Promise<CallJobResponse>((resolve, reject) => {
