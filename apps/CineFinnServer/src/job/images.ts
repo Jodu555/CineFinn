@@ -7,18 +7,26 @@ import { episodesTable, moviesTable, seriesTable, watchableEntitysTable } from "
 import { getConfig } from "../config.js";
 import { forEachNonBlockingAsync, getIORedis, watchableUUIDToWatchable } from '../utils.js';
 import { Queue, QueueEvents } from 'bullmq';
-import type { QueuedPreviewImageGenerationJob, QueuedPreviewImageGenerationJobData } from '@cinefinn/types';
+import type { QueuedPreviewImageGenerationJob, QueuedPreviewImageGenerationJobData, Series, timestamped } from '@cinefinn/types';
 import { getSubSocketByID } from '../sockets/subsystem.socket.js';
 
 export async function generatePreviewImages(job: Job) {
     const config = getConfig();
     await job.log('Started Image Crawling');
-    const generatorEpisodesCache = new CacheContext('crawler-generator-episodes', 250);
-    const generatorSeriesCache = new CacheContext('crawler-generator-series', 500);
+    // const generatorEpisodesCache = new CacheContext('crawler-generator-episodes', 250);
+    // const generatorSeriesCache = new CacheContext('crawler-generator-series', 500);
 
     await job.time('Loading Watchable Entities from DB');
     const watchableEntities = await watchableEntitysTable.get();
     await job.timeEnd('Loading Watchable Entities from DB');
+
+    const seriesIDMap = new Map<string, (Series & timestamped)>();
+    await job.time('Loading Series from DB');
+    const series = await seriesTable.get();
+    for (const serie of series) {
+        seriesIDMap.set(serie.UUID, serie);
+    }
+    await job.timeEnd('Loading Series from DB');
 
 
     await job.time('Handling Watchable Entities');
@@ -33,17 +41,18 @@ export async function generatePreviewImages(job: Job) {
         //     job.log('Watchable not found', watchableEntity.watchable_UUID, 'for', watchableEntity.UUID);
         //     continue;
         // }
-        const { data: series, cacheInfo: existingSeriesCacheInfo } = await generatorSeriesCache.execute(seriesTable, 'getOne', [{
-            UUID: watchableEntity.serie_UUID,
-            unique: true,
-        }]);
-        if (series == undefined) {
+        // const { data: series, cacheInfo: existingSeriesCacheInfo } = await generatorSeriesCache.execute(seriesTable, 'getOne', [{
+        //     UUID: watchableEntity.serie_UUID,
+        //     unique: true,
+        // }]);
+        const serie = seriesIDMap.get(watchableEntity.serie_UUID)!;
+        if (serie == undefined) {
             job.log('Series not found', watchableEntity.watchable_UUID, 'for', watchableEntity.UUID, 'seriesuuid', watchableEntity.serie_UUID);
             return;
         }
 
 
-        const resultPath = path.join(config.imagePath, series.UUID, 'previewImages', watchableEntity.watchable_UUID, watchableEntity.UUID);
+        const resultPath = path.join(config.imagePath, serie.UUID, 'previewImages', watchableEntity.watchable_UUID, watchableEntity.UUID);
         if (fs.existsSync(resultPath) && (await fsPromises.readdir(resultPath)).length != 0) {
             //We may predict that greater than 0 files means it worked not the best
             //TODO: lets get back to this and compute it with the actual file length and a rough estimation of how many images there should be
@@ -64,7 +73,7 @@ export async function generatePreviewImages(job: Job) {
             type: 'generatePreviewImages',
             data: {
                 publicStreamURL: videoURL.toString(),
-                seriesUUID: series.UUID,
+                seriesUUID: serie.UUID,
                 entity: watchableEntity,
                 resultPath,
                 bandwidth,
