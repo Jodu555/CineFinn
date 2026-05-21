@@ -44,7 +44,7 @@ export class DownloaderConnector {
 
     async upload(list: ExtendedEpisodeDownload[]): Promise<string | undefined> {
         this.time('Upload');
-        const { data: uploadData, error: uploadError } = await tryCatch(() => this.axiosInstance.post(`/upload`,
+        const { data: uploadData, error: uploadError } = await tryCatch(() => this.axiosInstance.post<{ ID: string }>(`/upload`,
             {
                 data: list,
             }
@@ -53,29 +53,31 @@ export class DownloaderConnector {
             this.log('Error uploading', uploadError);
             return;
         }
-        const ID = uploadData.data.ID as string;
+        const ID = uploadData.data.ID;
         this.timeEnd('Upload');
         return ID;
     }
 
     async collect(ID: string) {
         this.time('Collect');
-        const { data: collectData, error: collectError } = await tryCatch(() => this.axiosInstance.get(`/collect/${ID}`));
+        const { data: collectData, error: collectError } = await tryCatch(() => this.axiosInstance.get<ExtendedEpisodeDownload[]>(`/collect/${ID}`));
         if (collectError) {
             this.log('Error collecting', collectError);
             return;
         }
         this.timeEnd('Collect');
+        return collectData;
     }
 
     async download(ID: string) {
         this.time('Download');
-        const { data: downloadData, error: downloadError } = await tryCatch(() => this.axiosInstance.get(`/download/${ID}`));
+        const { data: downloadData, error: downloadError } = await tryCatch(() => this.axiosInstance.get<ExtendedEpisodeDownload[]>(`/download/${ID}`));
         if (downloadError) {
             this.log('Error downloading', downloadError);
             return;
         }
         this.timeEnd('Download');
+        return downloadData;
     }
 
     async finish(ID: string) {
