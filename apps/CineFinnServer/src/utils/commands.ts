@@ -1,5 +1,5 @@
 import { Command, CommandManager } from "@jodu555/commandmanager";
-import { accountsTable, authTokensTable, episodesTable, moviesTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../database.js";
+import { accountsTable, authTokensTable, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../database.js";
 import type { AuthToken } from "@cinefinn/types";
 import { featureFlags, getIO, loggerInstances } from "../utils.js";
 import { sendSeriesReloadToAll, sendSiteReload, socketStateMap } from "../sockets/client.socket.js";
@@ -230,6 +230,53 @@ function registerCommands() {
                 console.timeEnd('Deletion took')
 
                 return 'Series deleted and cache cleared!';
+            }
+        )
+    );
+
+    //Command: inspect
+    commandManager.registerCommand(
+        new Command(
+            ['inspect', 'is'],
+            'inspect <Series/Season/Episode/Movie/WE/WH-UUID>',
+            'Inspects a series and prints out all its data',
+            async (command, [...args], scope) => {
+                const uuid = args[1];
+                if (!uuid) {
+                    return 'Please provide a UUID to inspect.';
+                }
+
+                const serie = await seriesTable.getOne({ UUID: uuid });
+                if (serie != null) {
+                    console.log(serie);
+                }
+
+                const season = await seasonsTable.getOne({ UUID: uuid });
+                if (season != null) {
+                    console.log(season);
+                }
+
+                const episode = await episodesTable.getOne({ UUID: uuid });
+                if (episode != null) {
+                    console.log(episode);
+                }
+
+                const movie = await moviesTable.getOne({ UUID: uuid });
+                if (movie != null) {
+                    console.log(movie);
+                }
+
+                const watchableEntity = await watchableEntitysTable.getOne({ UUID: uuid });
+                if (watchableEntity != null) {
+                    console.log(watchableEntity);
+                }
+
+                const watchHistory = await watchHistoryTable.getOne({ UUID: uuid });
+                if (watchHistory != null) {
+                    console.log(watchHistory);
+                }
+
+                return 'Series inspected!';
             }
         )
     );
