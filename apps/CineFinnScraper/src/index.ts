@@ -29,6 +29,9 @@ const app = new Hono({
     .use(cors())
     .use(trimTrailingSlash())
     .route('/calendars', calendarRouter)
+    .get('/humanIntervention', async (c) => {
+        return c.json(getHumanInterventionList());
+    });
 
 export let io: Server;
 
