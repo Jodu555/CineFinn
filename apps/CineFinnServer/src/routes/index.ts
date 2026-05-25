@@ -408,9 +408,9 @@ const router = new Hono()
             return c.json({ error: 'No UUID provided' }, 400);
         }
 
-        const ingoranceItem = ignoranceTable.getOne({ serie_UUID: serieUUID });
+        const ingoranceItem = await ignoranceTable.getOne({ serie_UUID: serieUUID });
         if (ingoranceItem != undefined) {
-            return c.json({ error: 'Serie is ignored cause of ignorance list' }, 400);
+            return c.json({ error: 'Serie is ignored cause of ignorance list', serieUUID, ingoranceItem }, 400);
         }
 
         const scraperSocket = await getScraperSocket();
