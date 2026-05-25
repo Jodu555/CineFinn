@@ -219,12 +219,12 @@ const router = new Hono()
                 const newEpisodes = episode.map((episode) => {
                     const watchableEntitys = watchableEntitysByWatchableUUID.get(episode.UUID)!;
                     //TODO: Maybe Precompute this before where episodeBySeasonUUID get's filled
-                    watchableEntitys
+                    const output = watchableEntitys
                         .map(we => { delete (we as any).filePath; return we; })
                         .sort((a, b) => languageSortIndex[a.lang] - languageSortIndex[b.lang]);
                     return {
                         ...episode,
-                        watchableEntitys,
+                        watchableEntitys: output,
                     } as DetailedEpisode;
                 });
 
@@ -237,12 +237,12 @@ const router = new Hono()
             const newMovies = movies.map((movie) => {
                 const watchableEntitys = watchableEntitysByWatchableUUID.get(movie.UUID)!;
                 //TODO: Maybe Precompute this before where episodeBySeasonUUID get's filled
-                watchableEntitys
+                const output = watchableEntitys
                     .map(we => { delete (we as any).filePath; return we; })
                     .sort((a, b) => languageSortIndex[a.lang] - languageSortIndex[b.lang]);
                 return {
                     ...movie,
-                    watchableEntitys,
+                    watchableEntitys: output,
                 } as DetailedMovie;
             });
 
@@ -350,12 +350,12 @@ const router = new Hono()
                     // const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == episode.UUID);
                     const watchableEntitys = watchableEntitysByWatchableUUID.get(episode.UUID)!;
                     //TODO: Maybe Precompute this before where episodeBySeasonUUID get's filled
-                    watchableEntitys
+                    const output = watchableEntitys
                         .map(we => { delete (we as any).filePath; return we; })
                         .sort((a, b) => languageSortIndex[a.lang] - languageSortIndex[b.lang]);
                     return {
                         ...episode,
-                        watchableEntitys,
+                        watchableEntitys: output,
                     } as DetailedEpisode;
                 });
 
@@ -369,12 +369,12 @@ const router = new Hono()
                 // const watchableEntitys = allWatchableEntitys.filter(we => we.watchable_UUID == movie.UUID);
                 const watchableEntitys = watchableEntitysByWatchableUUID.get(movie.UUID)!;
                 //TODO: Maybe Precompute this before where episodeBySeasonUUID get's filled
-                watchableEntitys
+                const output = watchableEntitys
                     .map(we => { delete (we as any).filePath; return we; })
                     .sort((a, b) => languageSortIndex[a.lang] - languageSortIndex[b.lang]);
                 return {
                     ...movie,
-                    watchableEntitys,
+                    watchableEntitys: output,
                 } as DetailedMovie;
             });
 

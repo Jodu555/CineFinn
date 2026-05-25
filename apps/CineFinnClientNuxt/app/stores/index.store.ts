@@ -154,7 +154,14 @@ export const useIndexStore = defineStore('index', {
                 return;
             }
 
+
             let preferredLanguage = preferredLanguageList.find(l => entity.watchableEntitys.find(we => we.lang === l));
+            if (this.selectedWatchableEntity != null) {
+                if (entity.watchableEntitys.find(we => we.lang === this.selectedWatchableEntity!.lang)) {
+                    preferredLanguage = this.selectedWatchableEntity!.lang;
+                }
+            }
+
             if (language) {
                 if (entity.watchableEntitys.find(we => we.lang === language)) {
                     preferredLanguage = language;
