@@ -17,6 +17,9 @@ import type { ExtendedEpisodeDownload, IgnoranceItem } from '@cinefinn/types/sha
 import type { CallJobResponse, JobType } from '@cinefinn/types';
 import { tryCatch } from '@cinefinn/utilities/tryCatch';
 import { DownloaderConnector } from './class/DownloaderConnector.js';
+import { calendarRouter } from './calendars/router.js';
+import { getHumanInterventionList, setCoreSocket, setHumanInterventionList } from './utils/utils.js';
+
 
 const config = getConfig();
 
@@ -25,26 +28,7 @@ const app = new Hono({
 })
     .use(cors())
     .use(trimTrailingSlash())
-    .get('/calendars/store/sto', async (c) => {
-        console.time('Store STO Calendar');
-        const calendar = await storeStoCalendar();
-        console.timeEnd('Store STO Calendar');
-        return c.json(calendar);
-    })
-    .get('/calendars/show/sto', async (c) => {
-        const calendar = await getStoCalendarFromFile();
-        return c.json(calendar);
-    })
-    .get('/calendars/store/aniworld', async (c) => {
-        console.time('Store Aniworld Calendar');
-        const calendar = await storeAniworldCalendar();
-        console.timeEnd('Store Aniworld Calendar');
-        return c.json(calendar);
-    })
-    .get('/calendars/show/aniworld', async (c) => {
-        const calendar = await getAniworldCalendarFromFile();
-        return c.json(calendar);
-    });
+    .route('/calendars', calendarRouter)
 
 export let io: Server;
 
@@ -107,6 +91,8 @@ const socket = Client(config.CORE.URL, {
         authToken: config.CORE.SCRAPER_SOCKET_TOKEN,
     } satisfies AuthHandshake,
 }) as Socket<ServerToScraperEvents, ScraperToServerEvents>;
+
+setCoreSocket(socket);
 
 socket.on('connect', () => {
     console.log('Connected to Core');
@@ -284,7 +270,15 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
 
     const downloaderConnector = new DownloaderConnector(jobUUID, socket);
 
-    await downloaderConnector.kickOffAniDl(condensedArray);
+    const result = await downloaderConnector.kickOffAniDl(condensedArray);
+
+    if (result !== undefined) {
+        setHumanInterventionList([
+            ...getHumanInterventionList(),
+            ...result.collectResult.filter(x => x.finished === false),
+            ...result.downloadResult.filter(x => x.finished === false),
+        ]);
+    }
 
     await callJob('crawl', true);
 

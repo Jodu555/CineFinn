@@ -60,24 +60,24 @@ export class DownloaderConnector {
 
     async collect(ID: string) {
         this.time('Collect');
-        const { data: collectData, error: collectError } = await tryCatch(() => this.axiosInstance.get<ExtendedEpisodeDownload[]>(`/collect/${ID}`));
+        const { data: collectData, error: collectError } = await tryCatch(() => this.axiosInstance.get<{ success: boolean; urls: ExtendedEpisodeDownload[] }>(`/collect/${ID}`));
         if (collectError) {
             this.log('Error collecting', collectError);
             return;
         }
         this.timeEnd('Collect');
-        return collectData;
+        return collectData.data;
     }
 
     async download(ID: string) {
         this.time('Download');
-        const { data: downloadData, error: downloadError } = await tryCatch(() => this.axiosInstance.get<ExtendedEpisodeDownload[]>(`/download/${ID}`));
+        const { data: downloadData, error: downloadError } = await tryCatch(() => this.axiosInstance.get<{ success: boolean; urls: ExtendedEpisodeDownload[] }>(`/download/${ID}`));
         if (downloadError) {
             this.log('Error downloading', downloadError);
             return;
         }
         this.timeEnd('Download');
-        return downloadData;
+        return downloadData.data;
     }
 
     async finish(ID: string) {
@@ -90,17 +90,27 @@ export class DownloaderConnector {
         this.timeEnd('Finish');
     }
 
-    async kickOffAniDl(list: ExtendedEpisodeDownload[]) {
+    async kickOffAniDl(list: ExtendedEpisodeDownload[]): Promise<
+        {
+            collectResult: ExtendedEpisodeDownload[];
+            downloadResult: ExtendedEpisodeDownload[];
+        } | undefined
+    > {
         try {
             const ID = await this.upload(list);
             if (ID == undefined) {
                 return;
             }
-            await this.collect(ID);
-            await this.download(ID);
+            const resultCollectList = await this.collect(ID);
+            const resultDownloadList = await this.download(ID);
             await this.finish(ID);
+            return {
+                collectResult: resultCollectList!.urls,
+                downloadResult: resultDownloadList!.urls,
+            };
         } catch (error) {
             this.log('ERROR:', error);
         }
+        return;
     }
 }
