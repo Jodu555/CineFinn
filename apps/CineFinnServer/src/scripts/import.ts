@@ -301,53 +301,62 @@ async function importWatchHistory() {
             list.push({ ID, season: Number(se), episode: Number(ep), movie: Number(movie), time: time });
         }
         console.log(watchString.account_UUID, list.length);
-        for (const watchable of list) {
-            console.log(`=> Adding watchHistory entity ${watchString.account_UUID} S${watchable.season}E${watchable.episode} (${watchable.ID})`);
+        for (const segment of list) {
+            console.log(`=> Adding watchHistory entity ${watchString.account_UUID} S${segment.season}E${segment.episode} (${segment.ID})`);
 
-            let watchableEM: Episode | Movie;
-            if (watchable.movie == -1) {
+            let watchableEpisodeOrMovie: Episode | Movie;
+            if (segment.movie == -1) {
                 const episode = await episodesTable.getOne({
-                    serie_UUID: watchable.ID,
-                    season_IDX: watchable.season,
-                    episode_IDX: watchable.episode,
+                    serie_UUID: segment.ID,
+                    season_IDX: segment.season,
+                    episode_IDX: segment.episode,
                     unique: true,
                 });
                 if (episode == undefined) {
-                    console.log('Episode not found', watchable.ID, watchable.season, watchable.episode);
+                    console.log('Episode not found', segment.ID, segment.season, segment.episode);
                     continue;
                 }
-                watchableEM = episode;
+                watchableEpisodeOrMovie = episode;
             } else {
                 const movie = await moviesTable.getOne({
-                    serie_UUID: watchable.ID,
-                    movie_IDX: watchable.movie,
+                    serie_UUID: segment.ID,
+                    movie_IDX: segment.movie,
                     unique: true,
                 });
                 if (movie == undefined) {
-                    console.log('Movie not found', watchable.ID, watchable.movie);
+                    console.log('Movie not found', segment.ID, segment.movie);
                     continue;
                 }
-                watchableEM = movie;
+                watchableEpisodeOrMovie = movie;
             }
 
             if (await watchHistoryTable.getOne({
                 account_UUID: watchString.account_UUID,
-                series_UUID: watchable.ID,
-                watchable_UUID: watchableEM.UUID,
-                watchTime: +watchable.time, unique: true
+                series_UUID: segment.ID,
+                watchable_UUID: watchableEpisodeOrMovie.UUID,
+                //watchTime: +watchable.time, This is not a good idea cause it could leed to duplication if the user has changed theyre watchtime to something
+                unique: true
             }) != undefined) {
-                console.log(`WatchHistory ${watchString.account_UUID} S${watchable.season}E${watchable.episode} M${watchable.movie} (${watchable.ID}) already exists, skipping`);
+                console.log(`WatchHistory ${watchString.account_UUID} S${segment.season}E${segment.episode} M${segment.movie} (${segment.ID}) already exists, skipping`);
+                await watchHistoryTable.update({
+                    account_UUID: watchString.account_UUID,
+                    series_UUID: segment.ID,
+                    watchable_UUID: watchableEpisodeOrMovie.UUID,
+                }, {
+                    watchTime: +segment.time
+                });
+                console.log(`=> Updated watchHistory entity ${watchString.account_UUID} S${segment.season}E${segment.episode} M${segment.movie} (${segment.ID}) to ${segment.time}`);
                 continue;
             }
 
             await watchHistoryTable.create({
                 UUID: generateWatchHistoryID(),
                 account_UUID: watchString.account_UUID,
-                series_UUID: watchable.ID,
-                watchable_UUID: watchableEM.UUID,
-                watchTime: +watchable.time,
+                series_UUID: segment.ID,
+                watchable_UUID: watchableEpisodeOrMovie.UUID,
+                watchTime: +segment.time,
             });
-            console.log(`=> Added watchHistory entity ${watchString.account_UUID} S${watchable.season}E${watchable.episode} M${watchable.movie} (${watchable.ID})`);
+            console.log(`=> Added watchHistory entity ${watchString.account_UUID} S${segment.season}E${segment.episode} M${segment.movie} (${segment.ID})`);
         }
     }
 }
