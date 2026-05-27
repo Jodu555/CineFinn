@@ -55,7 +55,7 @@ export const app = new Hono({
     }))
     .route('/health', healthRouter)
     .get('/status', async (c) => {
-        return c.status(200);
+        return c.text('', 200);
     })
     .route('/auth', authRouter)
     .route('/index', indexRouter)
