@@ -41,7 +41,7 @@ export const app = new Hono({
 })
     .use(cors())
     .use(trimTrailingSlash())
-    .use(ownLogger(console.log, ['/socket.io', '/video', '/images', '/bullboard']))
+    .use(ownLogger(console.log, ['/socket.io', '/video', '/images', '/bullboard', '/status']))
     .use('*', registerMetrics)
     .route('', metricsRouter)
     .use('/images/*', serveStatic({
