@@ -891,7 +891,7 @@ const switchTo = async (vel: number) => {
 const changeLanguage = async (lang: string) => {
 	if (indexStore.selectedEntity == null) return;
 
-	const { apply } = videoKeepState();
+	const { apply } = videoKeepState(true);
 	indexStore.setSelectedWatchableEntityUUID(indexStore.selectedEntity.UUID, lang);
 
 	const { error, data: videoElem } = await tryCatch(() => apply());
