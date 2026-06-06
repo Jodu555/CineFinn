@@ -668,9 +668,19 @@ const skipToLatestTime = () => {
 const videoKeepState = () => {
 	const videoElement = document.querySelector('video');
 	let previouslyPaused = false;
+	let previouslyMuted = false;
+	let previouslyTime = 0;
 	if (videoElement) {
 		previouslyPaused = videoElement.paused;
+		previouslyMuted = videoElement.muted;
+		previouslyTime = videoElement.currentTime;
 	}
+	console.log({
+		previouslyPaused,
+		previouslyMuted,
+		previouslyTime,
+	});
+
 	return {
 		apply: () => {
 			return new Promise<HTMLVideoElement>((resolve, reject) => {
@@ -682,6 +692,10 @@ const videoKeepState = () => {
 						if (interVideoElement.readyState >= 3) {
 							if (!previouslyPaused) {
 								interVideoElement.play();
+							}
+							interVideoElement.muted = previouslyMuted;
+							if (previouslyTime > 0) {
+								interVideoElement.currentTime = previouslyTime;
 							}
 							clearInterval(inter);
 							if (timeout) clearTimeout(timeout);
@@ -704,7 +718,7 @@ const videoKeepState = () => {
 						route: useRoute().fullPath,
 					});
 					reject(null);
-				}, 1000 * 10);
+				}, 1000 * 30);
 			});
 		},
 	};
@@ -873,9 +887,18 @@ const switchTo = async (vel: number) => {
 	}
 };
 
-const changeLanguage = (lang: string) => {
+const changeLanguage = async (lang: string) => {
 	if (indexStore.selectedEntity == null) return;
+
+	const { apply } = videoKeepState();
 	indexStore.setSelectedWatchableEntityUUID(indexStore.selectedEntity.UUID, lang);
+
+	const { error, data: videoElem } = await tryCatch(() => apply());
+	if (error) {
+		console.log(error);
+		return;
+	}
+	actualScrollIntoView(videoElem);
 };
 
 const handleMarkSeasonWatched = async (watched: boolean) => {
