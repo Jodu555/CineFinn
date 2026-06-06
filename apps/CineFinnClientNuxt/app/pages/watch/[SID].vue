@@ -665,7 +665,11 @@ const skipToLatestTime = () => {
 	}
 };
 
-const videoKeepState = () => {
+/**
+ *
+ * @param interEpisodeUpdate This specified if the currTime should be saved. For when it is only a lang change then this needs to be true
+ */
+const videoKeepState = (interEpisodeUpdate: boolean = false) => {
 	const videoElement = document.querySelector('video');
 	let previouslyPaused = false;
 	let previouslyMuted = false;
@@ -673,13 +677,10 @@ const videoKeepState = () => {
 	if (videoElement) {
 		previouslyPaused = videoElement.paused;
 		previouslyMuted = videoElement.muted;
-		previouslyTime = videoElement.currentTime;
+		if (interEpisodeUpdate == true) {
+			previouslyTime = videoElement.currentTime;
+		}
 	}
-	console.log({
-		previouslyPaused,
-		previouslyMuted,
-		previouslyTime,
-	});
 
 	return {
 		apply: () => {
@@ -694,7 +695,7 @@ const videoKeepState = () => {
 								interVideoElement.play();
 							}
 							interVideoElement.muted = previouslyMuted;
-							if (previouslyTime > 0) {
+							if (interEpisodeUpdate == true) {
 								interVideoElement.currentTime = previouslyTime;
 							}
 							clearInterval(inter);
