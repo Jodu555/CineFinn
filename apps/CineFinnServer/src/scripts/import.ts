@@ -290,7 +290,9 @@ async function importWatchHistory() {
     const watchStrings = await oldDB.get('watch_strings').get({}) as { account_UUID: string; watch_string: string; }[];
     console.log(watchStrings);
 
+    let i = 0;
     for (const watchString of watchStrings) {
+        i++;
         const re = /(\w+):(?:(\d+)-(\d+)|(\d+))\.(\d+);/gim;
         const list: Segment[] = [];
         var outp: RegExpExecArray | null;
@@ -301,9 +303,13 @@ async function importWatchHistory() {
             list.push({ ID, season: Number(se), episode: Number(ep), movie: Number(movie), time: time });
         }
         console.log(watchString.account_UUID, list.length);
+        let j = 0;
         for (const segment of list) {
-            console.log(`=> Adding watchHistory entity ${watchString.account_UUID} S${segment.season}E${segment.episode} (${segment.ID})`);
+            // console.log(`=> Adding watchHistory entity ${watchString.account_UUID} S${segment.season}E${segment.episode} (${segment.ID})`);
 
+            j == 0 || j % 50 == 0 || j >= list.length - 1 && console.log(`=> Working.... ${i}/${watchStrings.length} ${j}/${list.length} watchStrings`);
+
+            j++;
             let watchableEpisodeOrMovie: Episode | Movie;
             if (segment.movie == -1) {
                 const episode = await episodesTable.getOne({
@@ -330,13 +336,14 @@ async function importWatchHistory() {
                 watchableEpisodeOrMovie = movie;
             }
 
-            if (await watchHistoryTable.getOne({
+            const existingWatchHistory = await watchHistoryTable.getOne({
                 account_UUID: watchString.account_UUID,
                 series_UUID: segment.ID,
                 watchable_UUID: watchableEpisodeOrMovie.UUID,
                 //watchTime: +watchable.time, This is not a good idea cause it could leed to duplication if the user has changed theyre watchtime to something
                 unique: true
-            }) != undefined) {
+            })
+            if (existingWatchHistory != undefined && existingWatchHistory.watchTime !== +segment.time) {
                 console.log(`WatchHistory ${watchString.account_UUID} S${segment.season}E${segment.episode} M${segment.movie} (${segment.ID}) already exists, skipping`);
                 await watchHistoryTable.update({
                     account_UUID: watchString.account_UUID,
