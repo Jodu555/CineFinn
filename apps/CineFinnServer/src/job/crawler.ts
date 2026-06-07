@@ -236,7 +236,7 @@ export async function crawl(job: Job) {
 
     // ---- Helper: get-or-create episode
     async function ensureEpisode(seasonUUID: string, seasonIdx: number, episodeIdx: number, serieUUID: string): Promise<Episode & timestamped> {
-        const key = `${seasonUUID}::${episodeIdx}`;
+        const key = `${serieUUID}::${seasonUUID}::${seasonIdx}::${episodeIdx}`;
         const cached = episodesByKey.get(key);
         if (cached) return cached;
         if (creatingEpisodes.has(key)) return creatingEpisodes.get(key)!;
@@ -396,7 +396,14 @@ export async function crawl(job: Job) {
                 watchableEntity.filePath = subFile.path;
             }
             if (watchableEntity.filePath !== subFile.path) {
-                job.log('FilePath mismatch', watchableEntity.filePath, subFile.path, { file, lang: parsedData.language, serieUUID: serie.UUID, watchableUUID });
+                job.log('FilePath mismatch', watchableEntity.filePath, subFile.path, {
+                    file,
+                    parsedData,
+                    serieUUID: serie.UUID,
+                    watchableUUID,
+                    watchableEntity,
+                    subFile,
+                });
                 await watchableEntitysTable.update({ UUID: watchableEntity.UUID }, { filePath: subFile.path });
                 watchableEntity.filePath = subFile.path;
             }
