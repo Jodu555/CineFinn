@@ -514,24 +514,14 @@ carouselRegistry.set('marathon-worthy', {
     computeFn: getMarathonWorthySeries
 });
 
-//Missing: marathon-worthy, your-list, new-in-german, total-classic, category-specific like Drama or Isekai,
+//Missing: your-list, new-in-german, total-classic, category-specific like Drama or Isekai,
 
 const recommendationStorage = createStorage<CarouselResponseItem>();
 
 cacheRegistry.set('recommendations', recommendationStorage);
 
-//TODO: Think about streaming the recommendations to the client
-/**
- * Mental Idea:
- * 1 Everything that is already in the cache is sent to the client on request
- * 2 Everything that is userspecific stream to the client over socket.^
- * Maybe add an option to opt in per carousel if streaming should be used
- * For every carousel if non userspecific items should be cached but if not compute on the fly
- */
-
 const router = new Hono()
     .get("/", authMiddleware, async (c) => {
-        console.log('HEADER', c.req.header('socketID'))
         const cacheMap = await prepareCachedSeriesMap();
         const user = c.get('credentials').user;
         const output = [] as CarouselResponseItem[];
@@ -565,17 +555,20 @@ const router = new Hono()
             return responseCarousel;
         };
 
+        const socketID = c.get('credentials').socketID;
+
         await Promise.all(
             carouselRegistry.entries().map(async ([carouselKey, carousel]) => {
                 console.time(carouselKey);
 
-                if (carousel.additionalMeta?.stream) {
+                // Only Do streaming if the carousel should be streamed and we have a socketID of the user
+                if (carousel.additionalMeta?.stream && socketID) {
                     new Promise<void>(async (resolve, reject) => {
                         console.log('In Promise call');
                         let dataProm: Promise<CarouselResponseItem | null>;
                         dataProm = buildCarouselResponse(carouselKey, carousel);
 
-                        addSocketAwaitConnection(c.req.header('socketID')!, {
+                        addSocketAwaitConnection(socketID, {
                             once: true,
                             timeoutMs: 1000 * 10,
                             resolve: async (socket) => {
@@ -598,7 +591,7 @@ const router = new Hono()
                     });
                 }
                 if (item) output.push(item);
-                // console.timeEnd(carouselKey);
+                console.timeEnd(carouselKey);
             })
         );
 
@@ -627,36 +620,6 @@ async function decideEntityImage(entity: WatchableEntity, watchtime?: number) {
     //TODO: Maybe return a placeholder image here. Cause maybe preview0.jpg also does not exist when folder or file not found
     if (file == undefined || file == null) return 'preview1.jpg'; //Return First image if no image was found
     return path.parse(file).base;
-}
-
-export async function testSendRecommendationsAdd() {
-    const item = {
-        title: 'Test',
-        description: 'Test',
-        icon: ['fas', 'circle-info'],
-        order: Number.MAX_SAFE_INTEGER,
-        userspecific: false,
-        returnItemsCount: 1,
-        id: 'test',
-        //@ts-ignore
-        type: 'series',
-        items: [
-            {
-                UUID: 'S-cd39b84e',
-                episodeCount: 555,
-            },
-            {
-                UUID: 'S-27c1e0d0',
-                episodeCount: 555,
-            },
-            {
-                UUID: 'S-cae71d95',
-                episodeCount: 555,
-            }
-        ]
-    } satisfies CarouselResponseItem;
-
-    getIO().emit('recommendationsAdd', [item]);
 }
 
 

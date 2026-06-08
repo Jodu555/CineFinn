@@ -80,6 +80,7 @@ export interface AuthedVars {
         credentials: {
             token: string;
             user: Account;
+            socketID?: string;
         };
     };
 }
@@ -116,6 +117,7 @@ export const authFullMiddleware = (cb: (user: Account) => boolean) => createMidd
     c.set('credentials', {
         token,
         user,
+        socketID: c.req.header('socketID'),
     });
     await next();
 });
