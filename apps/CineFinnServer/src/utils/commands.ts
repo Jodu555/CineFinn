@@ -5,7 +5,7 @@ import { featureFlags, getIO, loggerInstances } from "../utils.js";
 import { sendSeriesReloadToAll, sendSiteReload, socketStateMap } from "../sockets/client.socket.js";
 import { cacheRegistry } from "../routes/admin/cache.js";
 import { indexStorage } from "../routes/index.js";
-import { recommendationStorage } from "../routes/recommendations/recommendations.js";
+import { recommendationStorage, testSendRecommendationsAdd } from "../routes/recommendations/recommendations.js";
 import { wait } from "@cinefinn/utilities/time";
 
 
@@ -280,4 +280,9 @@ function registerCommands() {
             }
         )
     );
+
+    commandManager.registerCommand(new Command('triggerTest', 'triggerTest', 'Triggers a test command', async (command, [...args], scope) => {
+        await testSendRecommendationsAdd();
+        return 'Test command triggered!';
+    }));
 }

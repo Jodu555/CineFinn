@@ -8,7 +8,7 @@ import { cacheRegistry } from "../admin/cache.js";
 import { authMiddleware } from "../../middleware/auth.js";
 import { fullIndexStorage, indexStorage } from "../index.js";
 import { episodesTable, moviesTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../../database.js";
-import { cachingMiddleware, featureFlags, forEachNonBlockingAsync, queryDatabase } from "../../utils.js";
+import { cachingMiddleware, featureFlags, forEachNonBlockingAsync, getIO, queryDatabase } from "../../utils.js";
 import { getConfig } from '../../config.js';
 import path from 'path';
 import { pickPreviewImage } from './imageHelper.js';
@@ -528,6 +528,7 @@ cacheRegistry.set('recommendations', recommendationStorage);
 
 const router = new Hono()
     .get("/", authMiddleware, async (c) => {
+        console.log('HEADER', c.req.header('socketID'))
         const cacheMap = await prepareCachedSeriesMap();
         const user = c.get('credentials').user;
         const output = [] as CarouselResponseItem[];
@@ -601,6 +602,36 @@ async function decideEntityImage(entity: WatchableEntity, watchtime?: number) {
     //TODO: Maybe return a placeholder image here. Cause maybe preview0.jpg also does not exist when folder or file not found
     if (file == undefined || file == null) return 'preview1.jpg'; //Return First image if no image was found
     return path.parse(file).base;
+}
+
+export async function testSendRecommendationsAdd() {
+    const item = {
+        title: 'Test',
+        description: 'Test',
+        icon: ['fas', 'circle-info'],
+        order: Number.MAX_SAFE_INTEGER,
+        userspecific: false,
+        returnItemsCount: 1,
+        id: 'test',
+        //@ts-ignore
+        type: 'series',
+        items: [
+            {
+                UUID: 'S-cd39b84e',
+                episodeCount: 555,
+            },
+            {
+                UUID: 'S-27c1e0d0',
+                episodeCount: 555,
+            },
+            {
+                UUID: 'S-cae71d95',
+                episodeCount: 555,
+            }
+        ]
+    } satisfies CarouselResponseItem;
+
+    getIO().emit('recommendationsAdd', [item]);
 }
 
 

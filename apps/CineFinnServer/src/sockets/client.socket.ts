@@ -17,6 +17,8 @@ type LocalAuthData = SocketAuthDataClient<Account | Account & timestamped>;
 
 async function authFunction(authHandshake: AuthHandshakeClient): Promise<LocalAuthData> {
     const { authToken: token } = authHandshake;
+    console.log(authHandshake);
+
 
     if (token === undefined) {
         throw new Error('Unauthorized');

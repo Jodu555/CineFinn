@@ -4,7 +4,13 @@ import { io, Socket } from "socket.io-client";
 
 
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
+export let socketUniqueID: ReturnType<typeof useState<string>>;
+
+
 export default function useSocket(type: 'client' | 'rmvcEmitter' = 'client') {
+    socketUniqueID = useState('socketUniqueID', () => {
+        return Math.random().toString(36).slice(2, 15);
+    });
     if (socket !== null) {
         return socket;
     }
@@ -24,6 +30,8 @@ export default function useSocket(type: 'client' | 'rmvcEmitter' = 'client') {
         auth: {
             type,
             authToken: authStore.authToken,
+            //@ts-ignore
+            uniqueID: socketUniqueID.value
         } satisfies AuthHandshake,
     });
     return socket;

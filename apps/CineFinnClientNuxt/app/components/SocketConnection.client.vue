@@ -23,6 +23,7 @@ const authStore = useAuthStore();
 const adminStore = useAdminStore();
 const todoStore = useTodoStore();
 const franchiseStore = useFranchiseStore();
+const homeStore = useHomeStore();
 
 const externalSeriesReload = async (series: FrontendSeries[]) => {
 	await indexStore.reloadSeries(series);
@@ -44,6 +45,7 @@ onBeforeUnmount(() => {
 	socket.off('adminMovingItems', adminStore.updateMovingItems);
 	socket.off('todoListUpdate', todoStore.updateTodoList);
 	socket.off('franchisesUpdate', franchiseStore.updateFranchises);
+	socket.off('recommendationsAdd', homeStore.addRecommendations);
 });
 
 onMounted(() => {
@@ -58,6 +60,7 @@ onMounted(() => {
 	socket.on('adminMovingItems', adminStore.updateMovingItems);
 	socket.on('todoListUpdate', todoStore.updateTodoList);
 	socket.on('franchisesUpdate', franchiseStore.updateFranchises);
+	socket.on('recommendationsAdd', homeStore.addRecommendations);
 
 	socket.on('reload', () => {
 		window.location.reload();

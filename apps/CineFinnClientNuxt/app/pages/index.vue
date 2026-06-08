@@ -112,7 +112,7 @@
 				</div>
 			</template>
 			<!-- Recommendations Loading state -->
-			<div v-else-if="status === 'pending'" class="content-row">
+			<div v-else-if="recommendationsFetchState === 'pending'" class="content-row">
 				<div class="row-header px-2">
 					<div class="row-title-group">
 						<font-awesome-icon :icon="['fas', 'spinner']" class="row-icon text-danger fa-spin" />
@@ -121,7 +121,7 @@
 				</div>
 			</div>
 			<!-- Recommendations Error state -->
-			<div v-else-if="status === 'error'" class="content-row">
+			<div v-else-if="recommendationsFetchState === 'error'" class="content-row">
 				<div class="row-header px-2">
 					<div class="row-title-group">
 						<font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="row-icon text-danger" />
@@ -158,60 +158,16 @@ import type { FranchiseDataExtended } from '@cinefinn/types/models/franchise';
 const authStore = useAuthStore();
 const indexStore = useIndexStore();
 const franchiseStore = useFranchiseStore();
+const homeStore = useHomeStore();
 
-type AdditionalCarouselMeta = {
-	showNewRibbon?: boolean;
-	showWatchableCount?: boolean;
-	wrapAround?: boolean;
-	autoplay?: number;
-};
-
-type CarouselMeta = {
-	order: number;
-	id: string;
-	title: string;
-	icon: string[];
-	description: string;
-	userspecific: boolean;
-	returnItemsCount: number;
-	additionalMeta?: AdditionalCarouselMeta;
-};
-
-type CarouselAddEntity = {
-	type: 'entity';
-	items: {
-		watchTime: number;
-		entity: WatchableEntity & timestamped & { additional: AdditionalEntityData };
-	}[];
-};
-
-type AdditionalEntityData = {
-	imageFile: string;
-	season: number;
-	episode: number;
-};
-
-type CarouselAddSeries = {
-	type: 'series';
-	items: {
-		UUID: string;
-		episodeCount: number;
-	}[];
-};
-
-type CarouselResponseItem = CarouselMeta & (CarouselAddEntity | CarouselAddSeries);
-
-const { data: recommendations, status } = useFetch<CarouselResponseItem[]>(`${useAPIURL()}/recommendations`, {
-	key: 'recommendations',
-	server: true,
-	headers: {
-		'auth-token': authStore.authToken,
-	},
-});
-
-await callOnce('loadFranchises', async () => await franchiseStore.loadFranchises());
+await Promise.all([
+	callOnce('loadFranchises', async () => await franchiseStore.loadFranchises()),
+	callOnce('loadRecommendations', async () => await homeStore.loadRecommendations()),
+]);
 
 const franchises = computed(() => franchiseStore.franchises);
+const recommendations = computed(() => homeStore.recommendations);
+const recommendationsFetchState = computed(() => homeStore.recommendationsFetchState);
 
 const mapSeriesItem = (UUID: string): FrontendSeries | undefined => {
 	return indexStore.seriesById.get(UUID);

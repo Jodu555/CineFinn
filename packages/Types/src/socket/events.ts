@@ -29,6 +29,7 @@ export interface ServerToClientEvents {
     adminMovingItems: (obj: MovingItem[]) => void;
     todoListUpdate: (obj: TodoItem[]) => void;
     franchisesUpdate: (obj: FranchiseDataExtended[]) => void;
+    recommendationsAdd: (obj: any[]) => void;
 
     'rmvc-recieve-action': (action: rmvcActions) => void;
     'rmvc-get-videoState': () => void;

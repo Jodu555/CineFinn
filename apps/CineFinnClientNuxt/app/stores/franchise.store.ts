@@ -14,7 +14,7 @@ export const useFranchiseStore = defineStore('franchise', {
                 },
             }));
             if (error) {
-                console.error('Failed to fetch server health:', error);
+                console.error('Failed to fetch franchises:', error);
                 this.franchises = [];
                 return;
             }
