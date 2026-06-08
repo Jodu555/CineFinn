@@ -1,4 +1,4 @@
-import type { AuthHandshake, AuthHandshakeClient, SocketAuthDataClient } from "@cinefinn/types/socket";
+import type { AuthHandshake, AuthHandshakeClient, ServerToAnythingEvents, SocketAuthDataClient, SocketData } from "@cinefinn/types/socket";
 import { getUser } from "../middleware/auth.js";
 import type { Account } from "@cinefinn/types/models/user";
 import type { timestamped } from "@cinefinn/types/shared";
@@ -12,6 +12,7 @@ import { randomUUID } from "crypto";
 import rmvcEmitterSocket from "./rmvcEmitter.socket.js";
 import { tryCatch } from "@cinefinn/utilities/tryCatch";
 import { augmentFranchiseData } from "../routes/franchise.js";
+import type { RemoteSocket } from "socket.io";
 
 type LocalAuthData = SocketAuthDataClient<Account | Account & timestamped>;
 
@@ -50,6 +51,38 @@ async function authFunction(authHandshake: AuthHandshakeClient): Promise<LocalAu
 }
 
 export const socketStateMap = new Map<string, string>();
+
+interface SocketAwaitConnection {
+    once: boolean;
+    timeoutMs?: number;
+    resolve: (socket?: definedSocket) => Promise<void>;
+}
+
+const socketAwaitConnectionMap = new Map<string, SocketAwaitConnection>();
+
+export async function addSocketAwaitConnection(socketID: string, awaitConnection: SocketAwaitConnection) {
+    socketAwaitConnectionMap.set(socketID, awaitConnection);
+    const sockets = await getIO().fetchSockets();
+    const socket = sockets.find(s => s.data.auth.type === 'client' && s.data.auth.uniqueID === socketID);
+    if (socket) {
+        await awaitConnection.resolve(socket as any as definedSocket);
+        if (awaitConnection.once) {
+            socketAwaitConnectionMap.delete(socketID);
+        }
+    }
+
+    if (awaitConnection.timeoutMs !== undefined) {
+        setTimeout(async () => {
+            if (socketAwaitConnectionMap.has(socketID)) {
+                const awaitConnection = socketAwaitConnectionMap.get(socketID)!;
+                if (awaitConnection.once) {
+                    socketAwaitConnectionMap.delete(socketID);
+                    await awaitConnection.resolve(undefined);
+                }
+            }
+        }, awaitConnection.timeoutMs);
+    }
+}
 
 async function connectionFunction(socket: definedSocket) {
     const socketAuth = socket.data.auth as LocalAuthData;
@@ -127,7 +160,15 @@ async function connectionFunction(socket: definedSocket) {
         socketStateMap.delete(socket.id);
     });
 
-    rmvcEmitterSocket.meta.connectionFunction(socket);;
+    rmvcEmitterSocket.meta.connectionFunction(socket);
+
+    if (socketAwaitConnectionMap.has(socketAuth.uniqueID)) {
+        const awaitConnection = socketAwaitConnectionMap.get(socketAuth.uniqueID)!;
+        await awaitConnection.resolve(socket);
+        if (awaitConnection.once) {
+            socketAwaitConnectionMap.delete(socketAuth.uniqueID);
+        }
+    }
 
     accountsTable.update({ UUID: socketAuth.user.UUID }, {
         activityDetails: {

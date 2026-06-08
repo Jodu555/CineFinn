@@ -12,6 +12,7 @@ import { cachingMiddleware, featureFlags, forEachNonBlockingAsync, getIO, queryD
 import { getConfig } from '../../config.js';
 import path from 'path';
 import { pickPreviewImage } from './imageHelper.js';
+import { addSocketAwaitConnection } from '../../sockets/client.socket.js';
 
 type CacheMap = Map<string, DetailedSeries>;
 
@@ -101,6 +102,7 @@ type AdditionalCarouselMeta = {
     wrapAround?: boolean;
     randomize?: boolean;
     autoplay?: number;
+    stream?: boolean; // If true, the carousel will be streamed to the client via socket.io
 };
 
 type CarouselMeta = {
@@ -488,7 +490,8 @@ carouselRegistry.set('continue-watching', {
     userspecific: true,
     returnItemsCount: 25,
     additionalMeta: {
-        randomize: false
+        randomize: false,
+        stream: true,
     },
     computeFn: getContinueWatchingEpisodes
 });
@@ -565,6 +568,28 @@ const router = new Hono()
         await Promise.all(
             carouselRegistry.entries().map(async ([carouselKey, carousel]) => {
                 console.time(carouselKey);
+
+                if (carousel.additionalMeta?.stream) {
+                    new Promise<void>(async (resolve, reject) => {
+                        console.log('In Promise call');
+                        let dataProm: Promise<CarouselResponseItem | null>;
+                        dataProm = buildCarouselResponse(carouselKey, carousel);
+
+                        addSocketAwaitConnection(c.req.header('socketID')!, {
+                            once: true,
+                            timeoutMs: 1000 * 10,
+                            resolve: async (socket) => {
+                                if (socket === undefined) {
+                                    console.log('Socket not resolved hit timeout');
+                                    return;
+                                }
+                                socket.emit('recommendationsAdd', [await dataProm]);
+                                resolve();
+                            }
+                        });
+                    });
+                    return;
+                }
                 const item = await buildCarouselResponse(carouselKey, carousel);
                 if (carousel.type === 'entity') {
                     const items = item?.items as Awaited<CarouselEntityDetailsResult>;
@@ -573,7 +598,7 @@ const router = new Hono()
                     });
                 }
                 if (item) output.push(item);
-                console.timeEnd(carouselKey);
+                // console.timeEnd(carouselKey);
             })
         );
 
