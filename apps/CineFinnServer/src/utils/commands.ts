@@ -1,13 +1,15 @@
 import { Command, CommandManager } from "@jodu555/commandmanager";
 import { accountsTable, authTokensTable, episodesTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../database.js";
-import type { AuthToken } from "@cinefinn/types";
+import type { AuthToken, WatchableEntity } from "@cinefinn/types";
 import { featureFlags, getIO, loggerInstances } from "../utils.js";
 import { sendSeriesReloadToAll, sendSiteReload, socketStateMap } from "../sockets/client.socket.js";
 import { cacheRegistry } from "../routes/admin/cache.js";
 import { indexStorage } from "../routes/index.js";
-import { recommendationStorage, testSendRecommendationsAdd } from "../routes/recommendations/recommendations.js";
+import { recommendationStorage } from "../routes/recommendations/recommendations.js";
 import { wait } from "@cinefinn/utilities/time";
-
+import path from 'path';
+import fs from 'fs';
+import { getConfig } from "../config.js";
 
 export function setupCommandManager() {
     CommandManager.createCommandManager(process.stdin, process.stdout);
@@ -281,8 +283,88 @@ function registerCommands() {
         )
     );
 
+    //Command: update
+    commandManager.registerCommand(
+        new Command(
+            ['update', 'upd'],
+            'update <Series/Season/Episode/Movie/WE>-UUID',
+            'Updates a series and clears its cache NULLS runtime and removes generated previewImages',
+            async (command, [...args], scope) => {
+
+                const nullWatchableEntity = async (watchableEntity: WatchableEntity) => {
+                    //TODO: If we ever use a hash and phashes we clear them here 
+                    await watchableEntitysTable.update({ UUID: watchableEntity.UUID }, {
+                        runtime: -1,
+                        // IV: null,
+                        // hash: null,
+                    });
+                    const imagePath = path.join(getConfig().imagePath, watchableEntity.serie_UUID, 'previewImages', watchableEntity.watchable_UUID, watchableEntity.UUID);
+                    await fs.promises.rmdir(imagePath, { recursive: true });
+                    console.log(`Nulled WE(${watchableEntity.UUID}) and deleted Path: ${imagePath}`);
+                }
+
+                const uuid = args[1];
+                if (!uuid) {
+                    return 'Please provide a UUID to update.';
+                }
+
+                if (args.length > 1) {
+                    return 'Wrong Usage.';
+                }
+
+                const serie = await seriesTable.getOne({ UUID: uuid });
+                if (serie != null) {
+                    const entitys = await watchableEntitysTable.get({ serie_UUID: serie.UUID });
+                    for (const entity of entitys) {
+                        await nullWatchableEntity(entity);
+                    }
+                    console.log('Nulled ' + entitys.length + ' WE\'s');
+                }
+
+                const season = await seasonsTable.getOne({ UUID: uuid });
+                if (season != null) {
+                    const episodes = await episodesTable.get({ season_UUID: season.UUID });
+                    for (const episode of episodes) {
+                        const entitys = await watchableEntitysTable.get({ watchable_UUID: episode.UUID });
+                        for (const entity of entitys) {
+                            await nullWatchableEntity(entity);
+                        }
+                        console.log('Nulled ' + entitys.length + ' WE\'s');
+                    }
+
+                }
+
+                const episode = await episodesTable.getOne({ UUID: uuid });
+                if (episode != null) {
+                    const entitys = await watchableEntitysTable.get({ watchable_UUID: episode.UUID });
+                    for (const entity of entitys) {
+                        await nullWatchableEntity(entity);
+                    }
+                    console.log('Nulled ' + entitys.length + ' WE\'s');
+                }
+
+                const movie = await moviesTable.getOne({ UUID: uuid });
+                if (movie != null) {
+                    const entitys = await watchableEntitysTable.get({ watchable_UUID: movie.UUID });
+                    for (const entity of entitys) {
+                        await nullWatchableEntity(entity);
+                    }
+                    console.log('Nulled ' + entitys.length + ' WE\'s');
+                }
+
+                const watchableEntity = await watchableEntitysTable.getOne({ UUID: uuid });
+                if (watchableEntity != null) {
+                    await nullWatchableEntity(watchableEntity);
+                    console.log('Nulled WE');
+                }
+
+                return 'Series updated!';
+            }
+        )
+    );
+
+    //Command: triggerTest
     commandManager.registerCommand(new Command('triggerTest', 'triggerTest', 'Triggers a test command', async (command, [...args], scope) => {
-        await testSendRecommendationsAdd();
-        return 'Test command triggered!';
+        return 'Test command triggered/issued!';
     }));
 }
