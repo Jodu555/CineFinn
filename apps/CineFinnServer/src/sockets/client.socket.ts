@@ -16,12 +16,11 @@ import { augmentFranchiseData } from "../routes/franchise.js";
 type LocalAuthData = SocketAuthDataClient<Account | Account & timestamped>;
 
 async function authFunction(authHandshake: AuthHandshakeClient): Promise<LocalAuthData> {
-    const { authToken: token } = authHandshake;
-    console.log(authHandshake);
+    const { authToken: token, uniqueID } = authHandshake;
 
 
-    if (token === undefined) {
-        throw new Error('Unauthorized');
+    if (token === undefined || uniqueID === undefined) {
+        throw new Error('Auth-Token or UniqueID missing');
     }
 
     const { error, data: user } = await tryCatch(() => getUser(token));
@@ -34,18 +33,19 @@ async function authFunction(authHandshake: AuthHandshakeClient): Promise<LocalAu
         throw new Error('Unauthorized');
     }
 
-    const result = await tryCatch(() => rmvcEmitterSocket.meta.authFunction(authHandshake));
+    const rmvcAuthFunctionResult = await tryCatch(() => rmvcEmitterSocket.meta.authFunction(authHandshake));
 
-    if (result.error != null) {
-        console.log(result.error);
+    if (rmvcAuthFunctionResult.error != null) {
+        console.log(rmvcAuthFunctionResult.error);
         throw new Error('Unauthorized Error in RMVC Emitter Auth');
     }
 
     return {
         type: 'client',
+        uniqueID: uniqueID,
         token,
         user,
-        rmvcEmitterSessionID: result.data.rmvcEmitterSessionID,
+        rmvcEmitterSessionID: rmvcAuthFunctionResult.data.rmvcEmitterSessionID,
     };
 }
 

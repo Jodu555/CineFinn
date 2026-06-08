@@ -4,7 +4,8 @@ export type AuthHandshake = AuthHandshakeClient | AuthHandshakeScraper | AuthHan
 
 export interface AuthHandshakeClient {
     type: 'client';
-    authToken: string;
+    authToken: string; // This is the authToken for a user
+    uniqueID: string; // This is the uniqueID for the socket which is known on SSR and SPA
 }
 
 export interface AuthHandshakeRmvcEmitter {
@@ -36,6 +37,7 @@ export interface SocketAuthDataRmvcEmitter<U = any> {
 export interface SocketAuthDataClient<U = any> {
     type: 'client';
     token: string;
+    uniqueID: string;
     user: U;
     rmvcSessionID?: string;
     rmvcEmitterSessionID?: string;

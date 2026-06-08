@@ -30,7 +30,6 @@ export default function useSocket(type: 'client' | 'rmvcEmitter' = 'client') {
         auth: {
             type,
             authToken: authStore.authToken,
-            //@ts-ignore
             uniqueID: socketUniqueID.value
         } satisfies AuthHandshake,
     });
