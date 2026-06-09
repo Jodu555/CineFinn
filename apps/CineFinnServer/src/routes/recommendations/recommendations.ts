@@ -429,6 +429,7 @@ carouselRegistry.set('newly-added-series', {
         showNewRibbon: true,
         showWatchableCount: true,
         wrapAround: false,
+        stream: true
     },
     computeFn: getNewlyAddedSeries
 });
@@ -564,7 +565,6 @@ const router = new Hono()
                 // Only Do streaming if the carousel should be streamed and we have a socketID of the user
                 if (carousel.additionalMeta?.stream && socketID) {
                     new Promise<void>(async (resolve, reject) => {
-                        console.log('In Promise call');
                         let dataProm: Promise<CarouselResponseItem | null>;
                         dataProm = buildCarouselResponse(carouselKey, carousel);
 
@@ -581,6 +581,7 @@ const router = new Hono()
                             }
                         });
                     });
+                    console.timeEnd(carouselKey);
                     return;
                 }
                 const item = await buildCarouselResponse(carouselKey, carousel);

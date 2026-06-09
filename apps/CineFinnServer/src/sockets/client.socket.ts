@@ -13,6 +13,7 @@ import rmvcEmitterSocket from "./rmvcEmitter.socket.js";
 import { tryCatch } from "@cinefinn/utilities/tryCatch";
 import { augmentFranchiseData } from "../routes/franchise.js";
 import type { RemoteSocket } from "socket.io";
+import crypto from "crypto";
 
 type LocalAuthData = SocketAuthDataClient<Account | Account & timestamped>;
 
@@ -53,30 +54,51 @@ async function authFunction(authHandshake: AuthHandshakeClient): Promise<LocalAu
 export const socketStateMap = new Map<string, string>();
 
 interface SocketAwaitConnection {
+    _ID: string;
     once: boolean;
     timeoutMs?: number;
     resolve: (socket?: definedSocket) => Promise<void>;
 }
 
-const socketAwaitConnectionMap = new Map<string, SocketAwaitConnection>();
+const socketAwaitConnectionMap = new Map<string, SocketAwaitConnection[]>();
 
-export async function addSocketAwaitConnection(socketID: string, awaitConnection: SocketAwaitConnection) {
-    socketAwaitConnectionMap.set(socketID, awaitConnection);
-    const sockets = await getIO().fetchSockets();
-    const socket = sockets.find(s => s.data.auth.type === 'client' && s.data.auth.uniqueID === socketID);
-    if (socket) {
-        await awaitConnection.resolve(socket as any as definedSocket);
-        if (awaitConnection.once) {
-            socketAwaitConnectionMap.delete(socketID);
+export async function removeSocketAwaitConnection(socketID: string, awaitConnectionID: string) {
+    socketAwaitConnectionMap.set(socketID, socketAwaitConnectionMap.get(socketID)!.filter(x => x._ID !== awaitConnectionID));
+    if (socketAwaitConnectionMap.get(socketID)?.length === 0) {
+        socketAwaitConnectionMap.delete(socketID);
+    }
+}
+
+export async function addSocketAwaitConnection(socketID: string, awaitConnectionProps: Omit<SocketAwaitConnection, '_ID'>) {
+    const awaitConnection = {
+        ...awaitConnectionProps,
+        _ID: crypto.randomUUID(),
+    };
+    socketAwaitConnectionMap.set(socketID, socketAwaitConnectionMap.get(socketID)?.concat(awaitConnection) || [awaitConnection]);
+
+    const checkSocket = async () => {
+        if (!socketAwaitConnectionMap.get(socketID)?.find(x => x._ID === awaitConnection._ID)) {
+            //The Socket may have been already finalized in the meantime.
+            return;
+        }
+        const sockets = await getIO().fetchSockets();
+        const socket = sockets.find(s => s.data.auth.type === 'client' && s.data.auth.uniqueID === socketID);
+        if (socket) {
+            await awaitConnection.resolve(socket as any as definedSocket);
+            if (awaitConnection.once) {
+                removeSocketAwaitConnection(socketID, awaitConnection._ID);
+            }
         }
     }
+    await checkSocket(); // Check if the socket already exists
+    setTimeout(checkSocket, 100); // Check again to prevent race conditions
+
 
     if (awaitConnection.timeoutMs !== undefined) {
         setTimeout(async () => {
             if (socketAwaitConnectionMap.has(socketID)) {
-                const awaitConnection = socketAwaitConnectionMap.get(socketID)!;
                 if (awaitConnection.once) {
-                    socketAwaitConnectionMap.delete(socketID);
+                    removeSocketAwaitConnection(socketID, awaitConnection._ID);
                     await awaitConnection.resolve(undefined);
                 }
             }
@@ -163,11 +185,13 @@ async function connectionFunction(socket: definedSocket) {
     rmvcEmitterSocket.meta.connectionFunction(socket);
 
     if (socketAwaitConnectionMap.has(socketAuth.uniqueID)) {
-        const awaitConnection = socketAwaitConnectionMap.get(socketAuth.uniqueID)!;
-        await awaitConnection.resolve(socket);
-        if (awaitConnection.once) {
-            socketAwaitConnectionMap.delete(socketAuth.uniqueID);
-        }
+        const awaitConnections = socketAwaitConnectionMap.get(socketAuth.uniqueID)!;
+        await Promise.all(awaitConnections.map(async awaitConnection => {
+            await awaitConnection.resolve(socket);
+            if (awaitConnection.once) {
+                removeSocketAwaitConnection(socketAuth.uniqueID, awaitConnection._ID);
+            }
+        }));
     }
 
     accountsTable.update({ UUID: socketAuth.user.UUID }, {
