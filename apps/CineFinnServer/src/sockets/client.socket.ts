@@ -63,6 +63,9 @@ interface SocketAwaitConnection {
 const socketAwaitConnectionMap = new Map<string, SocketAwaitConnection[]>();
 
 export async function removeSocketAwaitConnection(socketID: string, awaitConnectionID: string) {
+    if (!socketAwaitConnectionMap.has(socketID)) {
+        return;
+    }
     socketAwaitConnectionMap.set(socketID, socketAwaitConnectionMap.get(socketID)!.filter(x => x._ID !== awaitConnectionID));
     if (socketAwaitConnectionMap.get(socketID)?.length === 0) {
         socketAwaitConnectionMap.delete(socketID);
@@ -74,6 +77,9 @@ export async function addSocketAwaitConnection(socketID: string, awaitConnection
         ...awaitConnectionProps,
         _ID: crypto.randomUUID(),
     };
+
+    console.log('Adding SocketAwaitConnection', awaitConnection);
+
     socketAwaitConnectionMap.set(socketID, socketAwaitConnectionMap.get(socketID)?.concat(awaitConnection) || [awaitConnection]);
 
     const checkSocket = async () => {
@@ -108,7 +114,7 @@ export async function addSocketAwaitConnection(socketID: string, awaitConnection
 
 async function connectionFunction(socket: definedSocket) {
     const socketAuth = socket.data.auth as LocalAuthData;
-    console.log(socket.id, socketAuth.user.username, 'connected');
+    console.log(socket.id, socketAuth.user.username, socketAuth.uniqueID, 'connected');
     const debouncedUpdateTime = debounce(
         async (data: { watchableUUID: string; time: number; }) => {
             loggerInstances.updateTime && console.log('debounced updateTime', data, socketAuth.user.username);

@@ -13,6 +13,7 @@ import { getConfig } from '../../config.js';
 import path from 'path';
 import { pickPreviewImage } from './imageHelper.js';
 import { addSocketAwaitConnection } from '../../sockets/client.socket.js';
+import { wait } from '@cinefinn/utilities/time';
 
 type CacheMap = Map<string, DetailedSeries>;
 
@@ -366,6 +367,9 @@ async function getContinueWatchingEpisodes(user: Account, meta: CarouselMeta): C
     }));
 
     const randomOrNot = meta.additionalMeta?.randomize ? output.sort(() => Math.random() - 0.5) : output;
+
+    await wait(1000 * 10);
+
     return randomOrNot.slice(0, meta.returnItemsCount);
 }
 
@@ -429,7 +433,6 @@ carouselRegistry.set('newly-added-series', {
         showNewRibbon: true,
         showWatchableCount: true,
         wrapAround: false,
-        stream: true
     },
     computeFn: getNewlyAddedSeries
 });
@@ -565,17 +568,23 @@ const router = new Hono()
                 // Only Do streaming if the carousel should be streamed and we have a socketID of the user
                 if (carousel.additionalMeta?.stream && socketID) {
                     new Promise<void>(async (resolve, reject) => {
+                        console.time('promiseCall' + carouselKey);
+                        console.time('socketAwaitConnection' + socketID);
                         let dataProm: Promise<CarouselResponseItem | null>;
                         dataProm = buildCarouselResponse(carouselKey, carousel);
-
+                        dataProm.then(() => {
+                            console.timeEnd('promiseCall' + carouselKey);
+                        });
                         addSocketAwaitConnection(socketID, {
                             once: true,
-                            timeoutMs: 1000 * 10,
+                            timeoutMs: 1000 * 25,
                             resolve: async (socket) => {
                                 if (socket === undefined) {
                                     console.log('Socket not resolved hit timeout');
                                     return;
                                 }
+                                console.log('Socket resolved');
+                                console.timeEnd('socketAwaitConnection' + socketID);
                                 socket.emit('recommendationsAdd', [await dataProm]);
                                 resolve();
                             }
@@ -595,6 +604,7 @@ const router = new Hono()
                 console.timeEnd(carouselKey);
             })
         );
+        console.log('Recommendation response finished!');
 
         return c.json(output.sort((a, b) => a.order - b.order));
     });
