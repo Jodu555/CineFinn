@@ -8,7 +8,7 @@ import { cacheRegistry } from "../admin/cache.js";
 import { authMiddleware } from "../../middleware/auth.js";
 import { fullIndexStorage, indexStorage } from "../index.js";
 import { episodesTable, moviesTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../../database.js";
-import { cachingMiddleware, featureFlags, forEachNonBlockingAsync, getIO, queryDatabase } from "../../utils.js";
+import { cachingMiddleware, featureFlags, forEachNonBlockingAsync, getIO, loggerInstances, queryDatabase } from "../../utils.js";
 import { getConfig } from '../../config.js';
 import path from 'path';
 import { pickPreviewImage } from './imageHelper.js';
@@ -368,8 +368,6 @@ async function getContinueWatchingEpisodes(user: Account, meta: CarouselMeta): C
 
     const randomOrNot = meta.additionalMeta?.randomize ? output.sort(() => Math.random() - 0.5) : output;
 
-    await wait(1000 * 10);
-
     return randomOrNot.slice(0, meta.returnItemsCount);
 }
 
@@ -563,34 +561,29 @@ const router = new Hono()
 
         await Promise.all(
             carouselRegistry.entries().map(async ([carouselKey, carousel]) => {
-                console.time(carouselKey);
+                loggerInstances.recommendationTimings && console.time(carouselKey);
+
+                const TIMEOUT = 1000 * 25;
 
                 // Only Do streaming if the carousel should be streamed and we have a socketID of the user
                 if (carousel.additionalMeta?.stream && socketID) {
                     new Promise<void>(async (resolve, reject) => {
-                        console.time('promiseCall' + carouselKey);
-                        console.time('socketAwaitConnection' + socketID);
                         let dataProm: Promise<CarouselResponseItem | null>;
                         dataProm = buildCarouselResponse(carouselKey, carousel);
-                        dataProm.then(() => {
-                            console.timeEnd('promiseCall' + carouselKey);
-                        });
                         addSocketAwaitConnection(socketID, {
                             once: true,
-                            timeoutMs: 1000 * 25,
+                            timeoutMs: TIMEOUT,
                             resolve: async (socket) => {
                                 if (socket === undefined) {
-                                    console.log('Socket not resolved hit timeout');
+                                    console.log('Socket not resolved for recommendation streaming, hit timeout: ', TIMEOUT, 'ms');
                                     return;
                                 }
-                                console.log('Socket resolved');
-                                console.timeEnd('socketAwaitConnection' + socketID);
                                 socket.emit('recommendationsAdd', [await dataProm]);
                                 resolve();
                             }
                         });
                     });
-                    console.timeEnd(carouselKey);
+                    loggerInstances.recommendationTimings && console.timeEnd(carouselKey);
                     return;
                 }
                 const item = await buildCarouselResponse(carouselKey, carousel);
@@ -601,10 +594,9 @@ const router = new Hono()
                     });
                 }
                 if (item) output.push(item);
-                console.timeEnd(carouselKey);
+                loggerInstances.recommendationTimings && console.timeEnd(carouselKey);
             })
         );
-        console.log('Recommendation response finished!');
 
         return c.json(output.sort((a, b) => a.order - b.order));
     });

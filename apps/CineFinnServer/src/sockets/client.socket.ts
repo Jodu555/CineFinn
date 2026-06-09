@@ -78,8 +78,6 @@ export async function addSocketAwaitConnection(socketID: string, awaitConnection
         _ID: crypto.randomUUID(),
     };
 
-    console.log('Adding SocketAwaitConnection', awaitConnection);
-
     socketAwaitConnectionMap.set(socketID, socketAwaitConnectionMap.get(socketID)?.concat(awaitConnection) || [awaitConnection]);
 
     const checkSocket = async () => {

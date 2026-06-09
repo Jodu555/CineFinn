@@ -24,7 +24,8 @@ let io: Server<AnythingToServerEvents,
 
 export const loggerInstances = {
     updateTime: false,
-    pickPreviewImage: false
+    pickPreviewImage: false,
+    recommendationTimings: false
 };
 
 export const featureFlags = {
