@@ -10,6 +10,8 @@ import { wait } from "@cinefinn/utilities/time";
 import path from 'path';
 import fs from 'fs';
 import { getConfig } from "../config.js";
+import { fixSeasons, insertMissingWatchableEntityRuntimes } from "../job/crawler.js";
+import { Job } from "../job/Job.js";
 
 export function setupCommandManager() {
     CommandManager.createCommandManager(process.stdin, process.stdout);
@@ -367,4 +369,30 @@ function registerCommands() {
     commandManager.registerCommand(new Command('triggerTest', 'triggerTest', 'Triggers a test command', async (command, [...args], scope) => {
         return 'Test command triggered/issued!';
     }));
+
+    //Command: insertMissingWatchableEntityRuntimes
+    commandManager.registerCommand(
+        new Command(
+            ['insertMissingWatchableEntityRuntimes', 'imwer'],
+            'insertMissingWatchableEntityRuntimes',
+            'Inserts missing watchable entity runtimes',
+            async (command, [...args], scope) => {
+                await insertMissingWatchableEntityRuntimes(Job.fromDummy('crawl'));
+                return 'Missing watchable entity runtimes inserted!';
+            }
+        )
+    );
+
+    //Command: fixSeasons
+    commandManager.registerCommand(
+        new Command(
+            ['fixSeasons', 'fixSe'],
+            'fixSeasons',
+            'Fixes seasons',
+            async (command, [...args], scope) => {
+                await fixSeasons(Job.fromDummy('crawl'));
+                return 'Seasons fixed!';
+            }
+        )
+    );
 }

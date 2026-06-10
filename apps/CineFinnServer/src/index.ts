@@ -156,13 +156,6 @@ const httpServer = serve({
         headers: { 'auth-token': getConfig().system.PUBLIC_API_AUTH_TOKEN },
     });
 
-    // await wait(1000)
-
-    // await fixSeasons(Job.fromDummy('crawl'));
-
-    // await wait(1000 * 15);
-    // await insertMissingWatchableEntityRuntimes(Job.fromDummy('crawl'));
-
     // await benchmark();
 });
 
