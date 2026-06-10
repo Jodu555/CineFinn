@@ -59,9 +59,9 @@ export async function connectDatabase(clean: boolean = false) {
     const adminRouter = await import('./routes/admin/admin.js');
 
     const rebAccounts = throttle(async () => {
-        await sleep(50);
+        await sleep(100);
         await adminRouter.rebroadcastAccounts();
-    }, 1000);
+    }, 1000 * 5);
 
     database.setCallback('accounts-CREATE', rebAccounts);
     database.setCallback('accounts-UPDATE', rebAccounts);
