@@ -377,7 +377,9 @@ function registerCommands() {
             'insertMissingWatchableEntityRuntimes',
             'Inserts missing watchable entity runtimes',
             async (command, [...args], scope) => {
+                console.time('insertMissingWatchableEntityRuntimes');
                 await insertMissingWatchableEntityRuntimes(Job.fromDummy('crawl'));
+                console.timeEnd('insertMissingWatchableEntityRuntimes');
                 return 'Missing watchable entity runtimes inserted!';
             }
         )
@@ -390,7 +392,9 @@ function registerCommands() {
             'fixSeasons',
             'Fixes seasons',
             async (command, [...args], scope) => {
+                console.time('fixSeasons');
                 await fixSeasons(Job.fromDummy('crawl'));
+                console.timeEnd('fixSeasons');
                 return 'Seasons fixed!';
             }
         )
