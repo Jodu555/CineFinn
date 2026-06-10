@@ -61,19 +61,20 @@ export async function connectDatabase(clean: boolean = false) {
     const rebAccounts = throttle(async () => {
         await sleep(200);
         await adminRouter.rebroadcastAccounts();
-    }, 1000)();
+    }, 1000);
 
-    database.setCallback('accounts-CREATE', rebAccounts);
-    database.setCallback('accounts-UPDATE', rebAccounts);
-    database.setCallback('accounts-DELETE', rebAccounts);
+    database.setCallback('accounts-CREATE', () => rebAccounts);
+    database.setCallback('accounts-UPDATE', () => rebAccounts);
+    database.setCallback('accounts-DELETE', () => rebAccounts);
 
     const rebOverview = throttle(async () => {
         await sleep(200);
         await adminRouter.rebroadcastOverview();
-    }, 1000)();
-    database.setCallback('*-CREATE', rebOverview);
-    database.setCallback('*-UPDATE', rebOverview);
-    database.setCallback('*-DELETE', rebOverview);
+    }, 1000);
+
+    database.setCallback('*-CREATE', () => rebOverview);
+    database.setCallback('*-UPDATE', () => rebOverview);
+    database.setCallback('*-DELETE', () => rebOverview);
 }
 
 

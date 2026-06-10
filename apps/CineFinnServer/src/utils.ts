@@ -203,8 +203,28 @@ export function debounce(cb: Function, delay = 1000, getKey?: (...args: any[]) =
 
 export function throttle(func: Function, delay: number): Function {
     let wait = false;
+    let trailingCall: (() => void) | null = null;
+
+    const runTrailing = () => {
+        if (trailingCall) {
+            const call = trailingCall;
+            trailingCall = null;
+            call();
+            // Keep the cooldown going for the trailing call too
+            wait = true;
+            setTimeout(() => {
+                wait = false;
+                runTrailing();
+            }, delay);
+        } else {
+            wait = false;
+        }
+    };
+
     return (...args: any[]) => {
         if (wait) {
+            // Overwrite with latest args — only the most recent pending call matters
+            trailingCall = () => func(...args);
             return;
         }
 
@@ -212,6 +232,7 @@ export function throttle(func: Function, delay: number): Function {
         wait = true;
         setTimeout(() => {
             wait = false;
+            runTrailing();
         }, delay);
     };
 }
