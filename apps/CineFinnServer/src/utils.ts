@@ -201,7 +201,7 @@ export function debounce(cb: Function, delay = 1000, getKey?: (...args: any[]) =
     };
 }
 
-export function throttle(func: Function, delay: number): Function {
+export function throttle<T extends (...args: any[]) => any>(func: T, delay: number): T {
     let wait = false;
     let trailingCall: (() => void) | null = null;
 
@@ -210,7 +210,6 @@ export function throttle(func: Function, delay: number): Function {
             const call = trailingCall;
             trailingCall = null;
             call();
-            // Keep the cooldown going for the trailing call too
             wait = true;
             setTimeout(() => {
                 wait = false;
@@ -221,9 +220,8 @@ export function throttle(func: Function, delay: number): Function {
         }
     };
 
-    return (...args: any[]) => {
+    return ((...args: any[]) => {
         if (wait) {
-            // Overwrite with latest args — only the most recent pending call matters
             trailingCall = () => func(...args);
             return;
         }
@@ -234,7 +232,7 @@ export function throttle(func: Function, delay: number): Function {
             wait = false;
             runTrailing();
         }, delay);
-    };
+    }) as T;
 }
 
 export function calculateMD5(filePath: string): Promise<string> {
