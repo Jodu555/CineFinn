@@ -53,6 +53,12 @@
 						<NuxtLink class="nav-link" active-class="active" to="/admin">Admin</NuxtLink>
 					</li>
 				</ul>
+				<div v-if="!authStore.loggedIn" class="d-flex flex-wrap align-items-center gap-2 justify-content-end">
+					<button v-if="!authStore.loggedIn" class="btn btn-outline-info">
+						<NuxtLink class="nav-link" active-class="active" to="/login">Login</NuxtLink>
+					</button>
+				</div>
+
 				<div v-if="authStore.loggedIn" class="d-flex flex-wrap align-items-center gap-2 justify-content-end">
 					<AutoComplete
 						:options="{ placeholder: 'Search for a series...', clearAfterSelect: true, asLink: true }"
