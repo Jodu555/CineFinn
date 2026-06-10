@@ -201,6 +201,21 @@ export function debounce(cb: Function, delay = 1000, getKey?: (...args: any[]) =
     };
 }
 
+export function throttle(func: Function, delay: number): Function {
+    let wait = false;
+    return (...args: any[]) => {
+        if (wait) {
+            return;
+        }
+
+        func(...args);
+        wait = true;
+        setTimeout(() => {
+            wait = false;
+        }, delay);
+    };
+}
+
 export function calculateMD5(filePath: string): Promise<string> {
     return new Promise((resolve, reject) => {
         const hash = crypto.createHash('md5');

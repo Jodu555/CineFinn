@@ -8,7 +8,7 @@ import type { WatchHistory, SyncRoom, Job } from '@cinefinn/types/models/system'
 import type { TodoItem, IgnoranceItem } from '@cinefinn/types/shared';
 import type { timestamped } from '@cinefinn/types/shared';
 import { getConfig } from './config.js';
-import { debounce } from './utils.js';
+import { debounce, throttle } from './utils.js';
 import type { FranchiseData } from '@cinefinn/types/models/franchise';
 
 
@@ -58,19 +58,19 @@ export async function connectDatabase(clean: boolean = false) {
     // const { rebroadcastAccounts, rebroadcastOverview } = await import('./routes/admin.js')
     const adminRouter = await import('./routes/admin/admin.js');
 
-    const rebAccounts = async () => {
+    const rebAccounts = throttle(async () => {
         await sleep(200);
         await adminRouter.rebroadcastAccounts();
-    };
+    }, 1000)();
 
     database.setCallback('accounts-CREATE', rebAccounts);
     database.setCallback('accounts-UPDATE', rebAccounts);
     database.setCallback('accounts-DELETE', rebAccounts);
 
-    const rebOverview = debounce(async () => {
+    const rebOverview = throttle(async () => {
         await sleep(200);
         await adminRouter.rebroadcastOverview();
-    }, 1000);
+    }, 1000)();
     database.setCallback('*-CREATE', rebOverview);
     database.setCallback('*-UPDATE', rebOverview);
     database.setCallback('*-DELETE', rebOverview);
