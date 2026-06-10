@@ -23,7 +23,7 @@ export default function useSocket(type: 'client' | 'rmvcEmitter' = 'client') {
     });
 
     socket = io(useAPIURL(), {
-        transports: ['websocket'],
+        // transports: ['websocket'],
         upgrade: true,
         reconnection: true,
         autoConnect: false,
