@@ -79,6 +79,7 @@ async function run() {
     //     }
     // }
 
+    console.log('Finished Processing ' + autoMarkedEpisodes.length + ' Episodes');
 }
 
 run().catch(console.error);
