@@ -282,7 +282,7 @@ export async function crawl(job: Job) {
 
     // ---- Helper: get-or-create watchable entity
     async function ensureWatchable(watchableUUID: string, serieUUID: string, lang: string, file: SubFile): Promise<WatchableEntity & timestamped> {
-        const key = `${watchableUUID}::${lang}::${file.subID}`;
+        const key = `${watchableUUID}::${lang}`;
         const cached = watchableByKey.get(key);
         if (cached) return cached;
         if (creatingWatchables.has(key)) return creatingWatchables.get(key)!;
