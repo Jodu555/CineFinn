@@ -130,6 +130,7 @@
 
 									<!-- List View -->
 									<div v-if="viewMode === 'list'" class="d-flex flex-column gap-2">
+										<!-- TODO: Move this to a separate component called: EpisodeListViewCard.vue -->
 										<div
 											v-for="episode in currentDetailedSeasonData?.episodes"
 											:key="episode.UUID"
@@ -193,6 +194,15 @@
 																				{{ episode.UUID }}
 																			</p>
 																			<p class="mb-0">{{ episode.season_IDX }}x{{ episode.episode_IDX }}</p>
+																			<p class="mb-0">
+																				WH:&nbsp;
+																				{{
+																					indexStore.watchHistory
+																						.filter((w) => w.watchable_UUID === episode.UUID)
+																						.map((w) => `${w.UUID} = ${w.watchTime}`)
+																						.join(', ')
+																				}}
+																			</p>
 																		</div>
 																	</div>
 																</div>
