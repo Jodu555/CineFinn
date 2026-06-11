@@ -477,7 +477,8 @@ carouselRegistry.set('watch-again', {
     userspecific: true,
     returnItemsCount: 25,
     additionalMeta: {
-        randomize: true
+        randomize: true,
+        stream: true,
     },
     computeFn: getWatchAgainSeries
 });
