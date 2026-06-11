@@ -18,6 +18,7 @@ import { getIO } from '../utils.js';
 import { generateEntityID, generateEpisodeID, generateMovieID, generateSeasonID, generateSeriesID } from '../utils/IdGenerators.js';
 import { getMovingItems } from '../utils/movingItems.js';
 import { Job } from './Job.js';
+import pLimit from 'p-limit';
 
 export async function crawl(job: Job) {
 
@@ -729,32 +730,63 @@ export async function insertMissingWatchableEntityRuntimes(job: Job) {
     const sucessful = new Set<string>();
     const failed = new Set<string>();
 
+    const limit = pLimit(5);
+
     const entitys = await watchableEntitysTable.get({ runtime: -1, unique: true });
     let i = 0;
-    for await (const entity of entitys) {
-        job.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`);
-        if (entity.subID !== 'main' && await getSubSocketByID(entity.subID) == null) {
-            job.log(`Skipping entity ${i}/${entitys.length}: ${entity.UUID} because subID ${entity.subID} is not connected`);
-            failed.add(entity.UUID);
-            continue;
-        }
-        const { data: runtime, error } = await tryCatch(() => Promise.race([
-            geFileRuntime(entity.UUID),
-            new Promise<number>((resolve, reject) => {
-                setTimeout(() => {
-                    reject('Timeout');
-                    failed.add(entity.UUID);
-                }, 1000 * 60 * 2);
-            })
-        ]));
-        if (error) {
-            job.log('Error getting runtime for entity', entity.UUID, error);
-            failed.add(entity.UUID);
-            continue;
-        }
-        await watchableEntitysTable.update({ UUID: entity.UUID }, { runtime });
-        sucessful.add(entity.UUID);
-    }
+
+
+    await Promise.all(entitys.map(entity => {
+        limit(async () => {
+            job.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`);
+            if (entity.subID !== 'main' && await getSubSocketByID(entity.subID) == null) {
+                job.log(`Skipping entity ${i}/${entitys.length}: ${entity.UUID} because subID ${entity.subID} is not connected`);
+                failed.add(entity.UUID);
+                return;
+            }
+            const { data: runtime, error } = await tryCatch(() => Promise.race([
+                geFileRuntime(entity.UUID),
+                new Promise<number>((resolve, reject) => {
+                    setTimeout(() => {
+                        reject('Timeout');
+                        failed.add(entity.UUID);
+                    }, 1000 * 60 * 1);
+                })
+            ]));
+            if (error) {
+                job.log('Error getting runtime for entity', entity.UUID, error);
+                failed.add(entity.UUID);
+                return;
+            }
+            await watchableEntitysTable.update({ UUID: entity.UUID }, { runtime });
+            sucessful.add(entity.UUID);
+        });
+    }))
+
+    // for await (const entity of entitys) {
+    //     job.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`);
+    //     if (entity.subID !== 'main' && await getSubSocketByID(entity.subID) == null) {
+    //         job.log(`Skipping entity ${i}/${entitys.length}: ${entity.UUID} because subID ${entity.subID} is not connected`);
+    //         failed.add(entity.UUID);
+    //         continue;
+    //     }
+    //     const { data: runtime, error } = await tryCatch(() => Promise.race([
+    //         geFileRuntime(entity.UUID),
+    //         new Promise<number>((resolve, reject) => {
+    //             setTimeout(() => {
+    //                 reject('Timeout');
+    //                 failed.add(entity.UUID);
+    //             }, 1000 * 60 * 1);
+    //         })
+    //     ]));
+    //     if (error) {
+    //         job.log('Error getting runtime for entity', entity.UUID, error);
+    //         failed.add(entity.UUID);
+    //         continue;
+    //     }
+    //     await watchableEntitysTable.update({ UUID: entity.UUID }, { runtime });
+    //     sucessful.add(entity.UUID);
+    // }
     await sendSeriesReloadToAll();
     job.log('Missing WatchableEntity runtimes inserted');
     return {
