@@ -36,12 +36,12 @@ async function run() {
         if (autoMarkedEpisode.watchTime !== averageWatchTime) {
             console.log('Updating', autoMarkedEpisode.watchable_UUID, 'from', autoMarkedEpisode.watchTime, 'to', averageWatchTime);
 
-            const averageWatchTimeMius5Percent = averageWatchTime - averageWatchTime * 0.05;
+            const averageWatchTimeMius5PercentRounded = Math.floor(averageWatchTime - averageWatchTime * 0.05);
 
             await watchHistoryTable.update({
                 UUID: autoMarkedEpisode.UUID,
             }, {
-                watchTime: averageWatchTimeMius5Percent,
+                watchTime: averageWatchTimeMius5PercentRounded,
             });
         }
     }
