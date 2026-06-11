@@ -17,6 +17,7 @@ async function run() {
     const autoMarkedEpisodes = await watchHistoryTable.get({
         watchTime: 310,
     });
+    console.log('Found ' + autoMarkedEpisodes.length + ' Episodes to Process');
 
     const limit = pLimit(5);
 
@@ -82,4 +83,7 @@ async function run() {
     console.log('Finished Processing ' + autoMarkedEpisodes.length + ' Episodes');
 }
 
-run().catch(console.error);
+run().catch(console.error).then(() => {
+    console.log('Done');
+    process.exit(0);
+});
