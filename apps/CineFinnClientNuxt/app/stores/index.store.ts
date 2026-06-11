@@ -294,6 +294,8 @@ export const useIndexStore = defineStore('index', {
                 // movies: detailedSeriesClone?.movies.map((s: any) => s.episodes = s.episodes.length) || [],
                 // seasons: detailedSeriesClone?.seasons || [],
                 movies: detailedSeriesClone?.movies || [],
+                created_at: detailedSeriesClone?.created_at || 0,
+                updated_at: detailedSeriesClone?.updated_at || 0,
             } satisfies FrontendSeries;
             return undetailedSeries;
         },

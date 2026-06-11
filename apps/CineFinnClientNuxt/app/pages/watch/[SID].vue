@@ -41,11 +41,10 @@
 						<!-- Series Info -->
 						<SeriesInfo :series="series" :coverURL="coverURL" />
 						<!-- Episodes/Movies Section -->
+						<p class="small mb-0 text-muted" v-if="authStore.loggedIn && authStore.user?.settings?.developerMode?.value">
+							{{ { activeTab, hasSeasons, hasMovies, viewMode } }}
+						</p>
 						<div v-if="(hasSeasons || hasMovies) && !isDisabled" class="mb-4">
-							<pre v-if="authStore.loggedIn && authStore.user?.settings?.developerMode?.value">
-								{{ { activeTab, hasSeasons, hasMovies } }}
-							</pre
-							>
 							<div class="d-flex justify-content-center">
 								<ul class="nav nav-tabs mb-4" role="tablist">
 									<li v-if="hasSeasons" class="nav-item" role="presentation">
@@ -126,6 +125,20 @@
 												</button>
 											</div>
 										</div>
+									</div>
+
+									<div v-if="authStore.loggedIn && authStore.user.settings.developerMode.value" class="text-muted small mb-0">
+										<p>
+											{{
+												{
+													seasonUUID: currentDetailedSeasonData?.UUID,
+													seasonIdx: currentDetailedSeasonData?.season_IDX,
+													episodeCount: currentDetailedSeasonData?.episodes.length,
+													created_at: new Date(+currentDetailedSeasonData!.created_at!).toLocaleString('de'),
+													updated_at: new Date(+currentDetailedSeasonData!.updated_at!).toLocaleString('de'),
+												}
+											}}
+										</p>
 									</div>
 
 									<!-- List View -->

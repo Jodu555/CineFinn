@@ -1,3 +1,5 @@
+import type { timestamped } from "../shared/utilities.js";
+
 export interface Series {
     UUID: string;
     tags: string[];
@@ -6,17 +8,17 @@ export interface Series {
     refs: SeriesRefs;
 }
 
-export interface FrontendSeries extends Omit<Series, 'seasons' | 'movies'> {
+export interface FrontendSeries extends Omit<Series & timestamped, 'seasons' | 'movies'> {
     seasons: Season[];
     movies: Movie[];
 }
 
-export interface DetailedSeries extends Omit<Series, 'seasons' | 'movies'> {
+export interface DetailedSeries extends Omit<Series & timestamped, 'seasons' | 'movies'> {
     seasons: DetailedSeason[];
     movies: DetailedMovie[];
 }
 
-export interface DetailedSeason extends Omit<Season, 'episodes'> {
+export interface DetailedSeason extends Omit<Season & timestamped, 'episodes'> {
     episodes: DetailedEpisode[];
 }
 
