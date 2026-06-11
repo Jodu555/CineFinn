@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import { connectDatabase, watchableEntitysTable, watchHistoryTable } from '../database.js';
+import pLimit from 'p-limit';
 dotenv.config();;
 
 /**
@@ -17,34 +18,66 @@ async function run() {
         watchTime: 310,
     });
 
+    const limit = pLimit(5);
+
     let i = 0;
-    for (const autoMarkedEpisode of autoMarkedEpisodes) {
-        i++;
-        (i === 1 || i % 50 === 0) && console.log(`Working on (${i}/${autoMarkedEpisodes.length}): ${autoMarkedEpisode.watchable_UUID}`);
+    await Promise.all(autoMarkedEpisodes.map(async autoMarkedEpisode => {
+        await limit(async () => {
+            i++;
+            (i === 1 || i % 50 === 0) && console.log(`Working on (${i}/${autoMarkedEpisodes.length}): ${autoMarkedEpisode.watchable_UUID}`);
 
-        const watchableEntitys = await watchableEntitysTable.get({
-            watchable_UUID: autoMarkedEpisode.watchable_UUID
+            const watchableEntitys = await watchableEntitysTable.get({
+                watchable_UUID: autoMarkedEpisode.watchable_UUID
+            })
+
+            if (watchableEntitys.some(x => x.runtime === -1)) {
+                console.log('Skipping', autoMarkedEpisode.watchable_UUID, 'because of missing runtime');
+                return;
+            }
+
+            const averageWatchTime = watchableEntitys.reduce((prev, curr) => prev + curr.runtime, 0) / watchableEntitys.length;
+
+            if (autoMarkedEpisode.watchTime !== averageWatchTime) {
+                console.log('Updating', autoMarkedEpisode.watchable_UUID, 'from', autoMarkedEpisode.watchTime, 'to', averageWatchTime);
+
+                const averageWatchTimeMius5PercentRounded = Math.floor(averageWatchTime - averageWatchTime * 0.05);
+
+                await watchHistoryTable.update({
+                    UUID: autoMarkedEpisode.UUID,
+                }, {
+                    watchTime: averageWatchTimeMius5PercentRounded,
+                });
+            }
         })
+    }));
 
-        if (watchableEntitys.some(x => x.runtime === -1)) {
-            console.log('Skipping', autoMarkedEpisode.watchable_UUID, 'because of missing runtime');
-            continue;
-        }
+    // for (const autoMarkedEpisode of autoMarkedEpisodes) {
+    //     i++;
+    //     (i === 1 || i % 50 === 0) && console.log(`Working on (${i}/${autoMarkedEpisodes.length}): ${autoMarkedEpisode.watchable_UUID}`);
 
-        const averageWatchTime = watchableEntitys.reduce((prev, curr) => prev + curr.runtime, 0) / watchableEntitys.length;
+    //     const watchableEntitys = await watchableEntitysTable.get({
+    //         watchable_UUID: autoMarkedEpisode.watchable_UUID
+    //     })
 
-        if (autoMarkedEpisode.watchTime !== averageWatchTime) {
-            console.log('Updating', autoMarkedEpisode.watchable_UUID, 'from', autoMarkedEpisode.watchTime, 'to', averageWatchTime);
+    //     if (watchableEntitys.some(x => x.runtime === -1)) {
+    //         console.log('Skipping', autoMarkedEpisode.watchable_UUID, 'because of missing runtime');
+    //         continue;
+    //     }
 
-            const averageWatchTimeMius5PercentRounded = Math.floor(averageWatchTime - averageWatchTime * 0.05);
+    //     const averageWatchTime = watchableEntitys.reduce((prev, curr) => prev + curr.runtime, 0) / watchableEntitys.length;
 
-            await watchHistoryTable.update({
-                UUID: autoMarkedEpisode.UUID,
-            }, {
-                watchTime: averageWatchTimeMius5PercentRounded,
-            });
-        }
-    }
+    //     if (autoMarkedEpisode.watchTime !== averageWatchTime) {
+    //         console.log('Updating', autoMarkedEpisode.watchable_UUID, 'from', autoMarkedEpisode.watchTime, 'to', averageWatchTime);
+
+    //         const averageWatchTimeMius5PercentRounded = Math.floor(averageWatchTime - averageWatchTime * 0.05);
+
+    //         await watchHistoryTable.update({
+    //             UUID: autoMarkedEpisode.UUID,
+    //         }, {
+    //             watchTime: averageWatchTimeMius5PercentRounded,
+    //         });
+    //     }
+    // }
 
 }
 
