@@ -172,6 +172,7 @@ const router = new Hono()
         if (watchable == undefined) {
             return c.json({
                 message: 'Watchable does not match any known type',
+                watchableUUID,
             });
         }
 

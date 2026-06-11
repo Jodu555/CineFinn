@@ -72,7 +72,8 @@ export async function watchableUUIDToWatchable(watchableUUID: string, cache?: Ca
         const movie = await moviesTable.getOne({ UUID: watchableUUID });
         return movie;
     } else {
-        throw new Error('Unknown Watchable UUID ' + watchableUUID);
+        console.log('Unknown Watchable UUID ' + watchableUUID);
+        return undefined;
     }
 }
 
