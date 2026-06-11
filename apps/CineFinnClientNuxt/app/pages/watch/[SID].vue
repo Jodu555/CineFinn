@@ -184,17 +184,16 @@
 																	</small>
 																</p>
 																<div v-if="authStore.loggedIn && authStore.user.settings.developerMode.value" class="text-muted small mb-0">
-																	<div class="d-flex gap-2">
-																		<p class="mb-0">
-																			{{ episode.watchableEntitys.map((e) => e.subID).join(', ') }}
+																	<div class="small mb-0 row">
+																		<p class="mb-1 mt-1 col-4" v-for="entity in episode.watchableEntitys">
+																			{{ entity.UUID }} ({{ entity.subID }}) [{{ entity.lang }}] = {{ entity.runtime }}
 																		</p>
-																		<p class="mb-0">
-																			{{ episode.watchableEntitys.map((e) => e.UUID).join(', ') }}
-																		</p>
-																		<p class="mb-0">
-																			{{ episode.UUID }}
-																		</p>
-																		<p class="mb-0">{{ episode.season_IDX }}x{{ episode.episode_IDX }}</p>
+																		<div class="col-12 d-flex gap-3">
+																			<p class="mb-0">
+																				{{ episode.UUID }}
+																			</p>
+																			<p class="mb-0">{{ episode.season_IDX }}x{{ episode.episode_IDX }}</p>
+																		</div>
 																	</div>
 																</div>
 															</div>

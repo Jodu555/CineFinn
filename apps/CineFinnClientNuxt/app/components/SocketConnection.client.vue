@@ -4,6 +4,7 @@
 		<p class="mb-0">Status: {{ isConnected ? 'connected' : 'disconnected' }}</p>
 		<p class="mb-0">Transport: {{ transport }}</p>
 		<p class="mb-0">Socket ID: {{ socketID }}</p>
+		<p class="mb-0">Socket UniqueID: {{ socketUniqueID }}</p>
 		<p v-if="connectError.length > 0">Connect Error: {{ connectError }}</p>
 	</div>
 </template>
