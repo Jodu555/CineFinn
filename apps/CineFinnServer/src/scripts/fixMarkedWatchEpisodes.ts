@@ -22,8 +22,8 @@ async function run() {
     const limit = pLimit(5);
 
     let i = 0;
-    await Promise.all(autoMarkedEpisodes.map(async autoMarkedEpisode => {
-        await limit(async () => {
+    await Promise.all(autoMarkedEpisodes.map(autoMarkedEpisode => {
+        return limit(async () => {
             i++;
             (i === 1 || i % 50 === 0) && console.log(`Working on (${i}/${autoMarkedEpisodes.length}): ${autoMarkedEpisode.watchable_UUID}`);
 

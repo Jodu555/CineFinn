@@ -380,7 +380,7 @@ async function importWatchHistory() {
         const limit = pLimit(5);
 
         await Promise.all(list.map(segment => {
-            limit(async () => {
+            return limit(async () => {
                 j == 0 || j % 50 == 0 || j >= list.length - 1 && console.log(`=> Working.... ${i}/${watchStrings.length} ${j}/${list.length} watchStrings`);
 
                 j++;
