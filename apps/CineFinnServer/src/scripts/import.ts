@@ -77,7 +77,76 @@ async function importAccountsCreationMap() {
 }
 
 async function importSerieses() {
-    const response = await axios.get(`${IMPORT_API_ENDPOINT}/index/all?auth-token=${IMPORT_API_AUTH_TOKEN}`);
+
+
+    interface SerieEpisodeObject {
+        filePath: string;
+        primaryName: string;
+        secondaryName: string;
+        season: number;
+        episode: number;
+        langs: Langs[];
+        subID: string;
+    }
+    interface SerieEpisode {
+        filePath: string;
+        primaryName: string;
+        secondaryName: string;
+        season: number;
+        episode: number;
+        langs: Langs[];
+        subID: string;
+    }
+    interface SerieMovieObject {
+        filePath: string;
+        primaryName: string;
+        secondaryName: string;
+        langs: Langs[];
+        subID: string;
+    }
+    interface SerieMovie {
+        filePath: string;
+        primaryName: string;
+        secondaryName: string;
+        langs: Langs[];
+        subID: string;
+    }
+
+    interface SerieInfo {
+        image?: boolean;
+        imageURL?: string;
+        infos?: string;
+        title?: string;
+        startDate?: string;
+        endDate?: string;
+        description?: string;
+        disabled?: boolean;
+    }
+
+    interface Serie {
+        ID: string;
+        categorie: string;
+        title: string;
+        seasons: SerieEntity[][];
+        movies: SerieEntity[];
+        references: SerieReference;
+        infos: SerieInfo;
+    }
+
+    interface SerieEntity {
+        filePath: string;
+        primaryName: string;
+        secondaryName: string;
+        season: number;
+        episode: number;
+        langs: Langs[];
+        subID: string;
+    }
+
+    type SerieReference = Record<'aniworld' | 'zoro' | 'sto' | string, string | Record<string, string>>;
+
+    type Langs = 'GerDub' | 'GerSub' | 'EngDub' | 'EngSub' | 'JapDub' | 'EngSubK' | 'GerSubK' | 'GerSubC' | 'EngSubC';
+    const response = await axios.get<Serie[]>(`${IMPORT_API_ENDPOINT}/index/all?auth-token=${IMPORT_API_AUTH_TOKEN}`);
     const data = response.data;
 
     let k = 0;
@@ -95,7 +164,7 @@ async function importSerieses() {
                 tags: [serie.categorie],
                 title: serie.title,
                 infos: serie.infos,
-                refs: serie.references,
+                refs: serie.references as any,
             } satisfies Series);
             console.log(`=> Added ${serie.title}`);
         }
@@ -104,14 +173,15 @@ async function importSerieses() {
         let s = 0;
         for (const season of serie.seasons) {
             s++;
-            const existingSeason = await seasonsTable.getOne({ serie_UUID: serie.ID, season_IDX: s, episodes: season.length, unique: true });
+            const seasonIndex = season[0].season;
+            const existingSeason = await seasonsTable.getOne({ serie_UUID: serie.ID, season_IDX: seasonIndex, episodes: season.length, unique: true });
             const seasonUUID = existingSeason?.UUID || generateSeasonID();
             // console.log(`=> Adding season ${serie.title} S${season.season}`);
             if (existingSeason == undefined) {
                 await seasonsTable.create({
                     UUID: seasonUUID,
                     serie_UUID: serie.ID,
-                    season_IDX: s,
+                    season_IDX: seasonIndex,
                     episodes: season.length,
                 });
             } else {
