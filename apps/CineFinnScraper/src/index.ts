@@ -74,6 +74,8 @@ const httpServer = serve({
                 sto: 'http://186.2.175.5/serie/hudson-and-rex/',
             },
             tags: [],
+            created_at: 0,
+            updated_at: 0,
         },
     ];
 
