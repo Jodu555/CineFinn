@@ -33,6 +33,7 @@ import { previewImagesRouter } from './routes/previewImages.js';
 import { recommendationRouter } from './routes/recommendations/recommendations.js';
 import { setupCommandManager } from './utils/commands.js';
 import { healthRouter } from './routes/health.js';
+import { filenameParser } from './parser.js';
 
 
 
@@ -57,6 +58,12 @@ export const app = new Hono({
     .get('/status', async (c) => {
         return c.text('', 200);
     })
+    // .post('/tooling/parser', async (c) => {
+    //     const body = await c.req.json();
+    //     console.log(body);
+    //     const parsed = filenameParser(body.filepath, body.filename);
+    //     return c.json(parsed);
+    // })
     .route('/auth', authRouter)
     .route('/index', indexRouter)
     .route('/managment', managmentRouter)

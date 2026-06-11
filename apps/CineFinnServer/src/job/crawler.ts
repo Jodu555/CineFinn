@@ -71,6 +71,7 @@ export async function crawl(job: Job) {
 
     job.time('Handling Files');
 
+    //TODO: this feels duplicated with the touchedSeasons in general ?
     const touchedSeasonsSet = new Set<string>(); // season_UUID
     const seasonEpisodeCounts = new Map<string, number>(); // season_UUID -> count
 
@@ -535,7 +536,7 @@ export async function crawl(job: Job) {
             job.log('WatchableEntity not found', UUID);
             continue;
         }
-        await job.log(`Deleting stale watchable entity ${UUID} from file ${watchableEntity.filePath} with subID ${watchableEntity.subID} and series ${watchableEntity.serie_UUID}`);
+        await job.log(`Deleting stale watchable entity ${UUID} from file ${watchableEntity.filePath} with subID ${watchableEntity.subID} and lang ${watchableEntity.lang} and series ${watchableEntity.serie_UUID}`);
         await watchableEntitysTable.delete({ UUID });
     }
 
