@@ -52,7 +52,7 @@ const router = new Hono()
         }
 
         const promises = episodes.map(async (episode) => {
-            const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, watchable_UUID: episode.UUID, unique: true });
+            const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, series_UUID: episode.serie_UUID, watchable_UUID: episode.UUID, unique: true });
 
             const watchableEntities = await watchableEntitysTable.get({ watchable_UUID: episode.UUID });
             const averageRuntime = watchableEntities.map(we => {
@@ -176,7 +176,7 @@ const router = new Hono()
             });
         }
 
-        const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, watchable_UUID: watchable.UUID, unique: true });
+        const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, series_UUID: watchable.serie_UUID, watchable_UUID: watchable.UUID, unique: true });
 
         if (process.env.OLD_DB_WATCH_STRING_TRANSLATION! == 'true' || process.env.OLD_DB_WATCH_STRING_TRANSLATION! == '1') {
             //To force hono to complete the request before doing the translation stuff cause that's more a failsafe than anything else
