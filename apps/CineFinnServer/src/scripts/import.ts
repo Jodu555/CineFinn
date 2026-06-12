@@ -486,16 +486,20 @@ async function importWatchHistory() {
                 //watchTime: +watchable.time, This is not a good idea cause it could leed to duplication if the user has changed theyre watchtime to something
                 unique: true
             })
-            if (existingWatchHistory != undefined && existingWatchHistory.watchTime !== +segment.time) {
-                console.log(`WatchHistory ${watchString.account_UUID} S${segment.season}E${segment.episode} M${segment.movie} (${segment.ID}) already exists, skipping`);
-                await watchHistoryTable.update({
-                    account_UUID: watchString.account_UUID,
-                    series_UUID: segment.ID,
-                    watchable_UUID: watchableEpisodeOrMovie.UUID,
-                }, {
-                    watchTime: +segment.time
-                });
-                console.log(`=> Updated watchHistory entity ${watchString.account_UUID} S${segment.season}E${segment.episode} M${segment.movie} (${segment.ID}) to ${segment.time}`);
+
+            if (existingWatchHistory != undefined) {
+                if (existingWatchHistory.watchTime !== +segment.time) {
+                    await watchHistoryTable.update({
+                        account_UUID: watchString.account_UUID,
+                        series_UUID: segment.ID,
+                        watchable_UUID: watchableEpisodeOrMovie.UUID,
+                    }, {
+                        watchTime: +segment.time
+                    });
+                    console.log(`=> Updated watchHistory entity ${watchString.account_UUID} S${segment.season}E${segment.episode} M${segment.movie} (${segment.ID}) to ${segment.time}`);
+                } else {
+                    console.log(`WatchHistory ${watchString.account_UUID} S${segment.season}E${segment.episode} M${segment.movie} (${segment.ID}) already exists, skipping`);
+                }
                 continue;
             }
 
