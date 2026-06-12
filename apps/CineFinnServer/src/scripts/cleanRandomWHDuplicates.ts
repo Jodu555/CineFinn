@@ -20,6 +20,7 @@ async function run() {
             duplicateDetector.add(key);
         }
     }
+    console.log(duplicateIDMap);
     console.log(duplicateCountMap);
     console.log('Finished Processing ' + historys.length + ' Episodes BUT ' + duplicateDetector.size);
 }
