@@ -1,20 +1,29 @@
+import type { timestamped, WatchHistory } from "@cinefinn/types";
 import { connectDatabase, watchHistoryTable } from "../database.js";
 
 async function run() {
     await connectDatabase(true);
     const historys = await watchHistoryTable.get();
+    const watchHistoryUUIDToHistory = new Map<string, (WatchHistory & timestamped)>();
+
     const duplicateDetector = new Set();
     const duplicateCountMap = new Map<string, number>();
     const duplicateIDMap = new Map<string, string[]>();
-    for (const element of historys) {
-        const key = `${element.account_UUID}:${element.series_UUID}:${element.watchable_UUID}`;
+    for (const history of historys) {
+        if (watchHistoryUUIDToHistory.has(history.UUID)) {
+            console.log('Duplicate', history.UUID, history.account_UUID, history.series_UUID, history.watchable_UUID);
+            process.exit(1);
+            continue;
+        }
+        watchHistoryUUIDToHistory.set(history.UUID, history);
+        const key = `${history.account_UUID}:${history.series_UUID}:${history.watchable_UUID}`;
         if (duplicateDetector.has(key)) {
-            console.log('Duplicate', element.UUID, element.account_UUID, element.series_UUID, element.watchable_UUID);
-            duplicateCountMap.set(element.account_UUID, (duplicateCountMap.get(element.account_UUID) ?? 0) + 1);
+            console.log('Duplicate', history.UUID, history.account_UUID, history.series_UUID, history.watchable_UUID);
+            duplicateCountMap.set(history.account_UUID, (duplicateCountMap.get(history.account_UUID) ?? 0) + 1);
             if (duplicateIDMap.has(key)) {
-                duplicateIDMap.get(key)!.push(element.UUID);
+                duplicateIDMap.get(key)!.push(history.UUID);
             } else {
-                duplicateIDMap.set(key, [element.UUID]);
+                duplicateIDMap.set(key, [history.UUID]);
             }
         } else {
             duplicateDetector.add(key);
