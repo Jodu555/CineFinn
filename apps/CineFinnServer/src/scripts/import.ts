@@ -190,71 +190,76 @@ async function importSerieses() {
                 console.log(`=> Season ${serie.title} S${existingSeason.season_IDX} already exists, skipping`);
             }
 
-            for (const episode of season) {
-                // console.log(`=> Adding episode ${serie.title} S${episode.season}E${episode.episode}`);
-                const existingEpisode = await episodesTable.getOne({
-                    serie_UUID: serie.ID,
-                    season_UUID: seasonUUID,
-                    season_IDX: episode.season,
-                    episode_IDX: episode.episode,
-                    unique: true
-                });
-                const episodeUUID = existingEpisode?.UUID || generateEpisodeID();
-                if (existingEpisode == undefined) {
-                    await episodesTable.create({
-                        UUID: episodeUUID,
+            const limit = pLimit(3);
+            // for (const episode of season) {
+            await Promise.all(season.map(episode => {
+                return limit(async () => {
+                    // console.log(`=> Adding episode ${serie.title} S${episode.season}E${episode.episode}`);
+                    const existingEpisode = await episodesTable.getOne({
                         serie_UUID: serie.ID,
+                        season_UUID: seasonUUID,
                         season_IDX: episode.season,
                         episode_IDX: episode.episode,
-                        season_UUID: seasonUUID,
-                    } satisfies Episode);
-                    // console.log(`=> Added episode ${serie.title} S${episode.season}E${episode.episode}`);
-                } else {
-                    // console.log(`=> Episode ${serie.title} S${existingEpisode.season_IDX}E${existingEpisode.episode_IDX} already exists, skipping`);
-                }
-
-                for (const lang of episode.langs) {
-                    // const iv = crypto.randomBytes(16);
-
-                    // console.log(`=> Adding watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang})`);
-
-                    let filePath = episode.filePath;
-                    if (episode.langs.length > 1) {
-                        const { dir, name, ext } = path.parse(filePath);
-                        filePath = path.join(dir, `${name.split('_')[0]}_${lang}${ext}`);
-                    }
-
-                    const existingWatchableEntity = await watchableEntitysTable.getOne({
-                        serie_UUID: serie.ID,
-                        watchable_UUID: episodeUUID,
-                        unique: true,
-                        lang: lang,
-                        subID: episode.subID || 'main',
-                        filePath: filePath,
+                        unique: true
                     });
-                    if (existingWatchableEntity != undefined) {
-                        console.log(`=> Watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang}) already exists, skipping`);
-                        continue;
+                    const episodeUUID = existingEpisode?.UUID || generateEpisodeID();
+                    if (existingEpisode == undefined) {
+                        await episodesTable.create({
+                            UUID: episodeUUID,
+                            serie_UUID: serie.ID,
+                            season_IDX: episode.season,
+                            episode_IDX: episode.episode,
+                            season_UUID: seasonUUID,
+                        } satisfies Episode);
+                        // console.log(`=> Added episode ${serie.title} S${episode.season}E${episode.episode}`);
+                    } else {
+                        // console.log(`=> Episode ${serie.title} S${existingEpisode.season_IDX}E${existingEpisode.episode_IDX} already exists, skipping`);
                     }
-                    retryDBActionOnDuplicateKey(() => {
-                        const watchableEntityUUID = generateEntityID();
 
-                        return watchableEntitysTable.create({
-                            UUID: watchableEntityUUID,
+                    for (const lang of episode.langs) {
+                        // const iv = crypto.randomBytes(16);
+
+                        // console.log(`=> Adding watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang})`);
+
+                        let filePath = episode.filePath;
+                        if (episode.langs.length > 1) {
+                            const { dir, name, ext } = path.parse(filePath);
+                            filePath = path.join(dir, `${name.split('_')[0]}_${lang}${ext}`);
+                        }
+
+                        const existingWatchableEntity = await watchableEntitysTable.getOne({
                             serie_UUID: serie.ID,
                             watchable_UUID: episodeUUID,
+                            unique: true,
                             lang: lang,
                             subID: episode.subID || 'main',
                             filePath: filePath,
-                            runtime: -1,
-                            // IV: iv.toString('base64'),
-                            // hash: '',
-                        } satisfies WatchableEntity);
+                        });
+                        if (existingWatchableEntity != undefined) {
+                            console.log(`=> Watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang}) already exists, skipping`);
+                            continue;
+                        }
+                        retryDBActionOnDuplicateKey(() => {
+                            const watchableEntityUUID = generateEntityID();
 
-                    })
-                    console.log(`=> Added watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang})`);
-                }
-            }
+                            return watchableEntitysTable.create({
+                                UUID: watchableEntityUUID,
+                                serie_UUID: serie.ID,
+                                watchable_UUID: episodeUUID,
+                                lang: lang,
+                                subID: episode.subID || 'main',
+                                filePath: filePath,
+                                runtime: -1,
+                                // IV: iv.toString('base64'),
+                                // hash: '',
+                            } satisfies WatchableEntity);
+
+                        })
+                        console.log(`=> Added watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang})`);
+                    }
+                })
+            }));
+            // }
         }
 
 
@@ -366,8 +371,6 @@ async function importWatchHistory() {
     const watchStrings = await oldDB.get('watch_strings').get({}) as { account_UUID: string; watch_string: string; }[];
     console.log(watchStrings);
 
-
-
     let i = 0;
     for (const watchString of watchStrings) {
         i++;
@@ -384,135 +387,75 @@ async function importWatchHistory() {
         let j = 0;
         const limit = pLimit(5);
 
-        // await Promise.all(list.map(segment => {
-        //     return limit(async () => {
-        //         j == 0 || j % 50 == 0 || j >= list.length - 1 && console.log(`=> Working.... ${i}/${watchStrings.length} ${j}/${list.length} watchStrings`);
+        // for (const segment of list) {
+        await Promise.all(list.map(segment => {
+            return limit(async () => {
+                // console.log(`=> Adding watchHistory entity ${watchString.account_UUID} S${segment.season}E${segment.episode} (${segment.ID})`);
 
-        //         j++;
-        //         let watchableEpisodeOrMovie: Episode | Movie;
-        //         if (segment.movie == -1) {
-        //             const episode = await episodesTable.getOne({
-        //                 serie_UUID: segment.ID,
-        //                 season_IDX: segment.season,
-        //                 episode_IDX: segment.episode,
-        //                 unique: true,
-        //             });
-        //             if (episode == undefined) {
-        //                 console.log('Episode not found', segment.ID, segment.season, segment.episode);
-        //                 return;
-        //             }
-        //             watchableEpisodeOrMovie = episode;
-        //         } else {
-        //             const movie = await moviesTable.getOne({
-        //                 serie_UUID: segment.ID,
-        //                 movie_IDX: segment.movie,
-        //                 unique: true,
-        //             });
-        //             if (movie == undefined) {
-        //                 console.log('Movie not found', segment.ID, segment.movie);
-        //                 return;
-        //             }
-        //             watchableEpisodeOrMovie = movie;
-        //         }
+                j == 0 || j % 50 == 0 || j >= list.length - 1 && console.log(`=> Working.... ${i}/${watchStrings.length} ${j}/${list.length} watchStrings`);
 
-        //         const existingWatchHistory = await watchHistoryTable.getOne({
-        //             account_UUID: watchString.account_UUID,
-        //             series_UUID: segment.ID,
-        //             watchable_UUID: watchableEpisodeOrMovie.UUID,
-        //             //watchTime: +watchable.time, This is not a good idea cause it could leed to duplication if the user has changed theyre watchtime to something
-        //             unique: true
-        //         })
-        //         if (existingWatchHistory != undefined && existingWatchHistory.watchTime !== +segment.time) {
-        //             console.log(`WatchHistory ${watchString.account_UUID} S${segment.season}E${segment.episode} M${segment.movie} (${segment.ID}) already exists, skipping`);
-        //             await watchHistoryTable.update({
-        //                 account_UUID: watchString.account_UUID,
-        //                 series_UUID: segment.ID,
-        //                 watchable_UUID: watchableEpisodeOrMovie.UUID,
-        //             }, {
-        //                 watchTime: +segment.time
-        //             });
-        //             console.log(`=> Updated watchHistory entity ${watchString.account_UUID} S${segment.season}E${segment.episode} M${segment.movie} (${segment.ID}) to ${segment.time}`);
-        //             return;
-        //         }
-
-        //         await watchHistoryTable.create({
-        //             UUID: generateWatchHistoryID(),
-        //             account_UUID: watchString.account_UUID,
-        //             series_UUID: segment.ID,
-        //             watchable_UUID: watchableEpisodeOrMovie.UUID,
-        //             watchTime: +segment.time,
-        //         });
-        //         console.log(`=> Added watchHistory entity ${watchString.account_UUID} S${segment.season}E${segment.episode} M${segment.movie} (${segment.ID})`);
-        //     })
-        // }));
-
-
-        for (const segment of list) {
-            // console.log(`=> Adding watchHistory entity ${watchString.account_UUID} S${segment.season}E${segment.episode} (${segment.ID})`);
-
-            j == 0 || j % 50 == 0 || j >= list.length - 1 && console.log(`=> Working.... ${i}/${watchStrings.length} ${j}/${list.length} watchStrings`);
-
-            j++;
-            let watchableEpisodeOrMovie: Episode | Movie;
-            if (segment.movie == -1) {
-                const episode = await episodesTable.getOne({
-                    serie_UUID: segment.ID,
-                    season_IDX: segment.season,
-                    episode_IDX: segment.episode,
-                    unique: true,
-                });
-                if (episode == undefined) {
-                    console.log('Episode not found', segment.ID, segment.season, segment.episode);
-                    continue;
-                }
-                watchableEpisodeOrMovie = episode;
-            } else {
-                const movie = await moviesTable.getOne({
-                    serie_UUID: segment.ID,
-                    movie_IDX: segment.movie,
-                    unique: true,
-                });
-                if (movie == undefined) {
-                    console.log('Movie not found', segment.ID, segment.movie);
-                    continue;
-                }
-                watchableEpisodeOrMovie = movie;
-            }
-
-            const existingWatchHistory = await watchHistoryTable.getOne({
-                account_UUID: watchString.account_UUID,
-                series_UUID: segment.ID,
-                watchable_UUID: watchableEpisodeOrMovie.UUID,
-                //watchTime: +watchable.time, This is not a good idea cause it could leed to duplication if the user has changed theyre watchtime to something
-                unique: true
-            })
-
-            if (existingWatchHistory != undefined) {
-                if (existingWatchHistory.watchTime !== +segment.time) {
-                    await watchHistoryTable.update({
-                        account_UUID: watchString.account_UUID,
-                        series_UUID: segment.ID,
-                        watchable_UUID: watchableEpisodeOrMovie.UUID,
-                    }, {
-                        watchTime: +segment.time
+                j++;
+                let watchableEpisodeOrMovie: Episode | Movie;
+                if (segment.movie == -1) {
+                    const episode = await episodesTable.getOne({
+                        serie_UUID: segment.ID,
+                        season_IDX: segment.season,
+                        episode_IDX: segment.episode,
+                        unique: true,
                     });
-                    console.log(`=> Updated watchHistory entity ${watchString.account_UUID} S${segment.season}E${segment.episode} M${segment.movie} (${segment.ID}) to ${segment.time}`);
+                    if (episode == undefined) {
+                        console.log('Episode not found', segment.ID, segment.season, segment.episode);
+                        return;
+                    }
+                    watchableEpisodeOrMovie = episode;
                 } else {
-                    console.log(`WatchHistory ${watchString.account_UUID} S${segment.season}E${segment.episode} M${segment.movie} (${segment.ID}) already exists, skipping`);
+                    const movie = await moviesTable.getOne({
+                        serie_UUID: segment.ID,
+                        movie_IDX: segment.movie,
+                        unique: true,
+                    });
+                    if (movie == undefined) {
+                        console.log('Movie not found', segment.ID, segment.movie);
+                        return;
+                    }
+                    watchableEpisodeOrMovie = movie;
                 }
-                continue;
-            }
 
-            retryDBActionOnDuplicateKey(() => watchHistoryTable.create({
-                UUID: generateWatchHistoryID(),
-                account_UUID: watchString.account_UUID,
-                series_UUID: segment.ID,
-                watchable_UUID: watchableEpisodeOrMovie.UUID,
-                watchTime: +segment.time,
-            }));
-            console.log(`=> Added watchHistory entity ${watchString.account_UUID} S${segment.season}E${segment.episode} M${segment.movie} (${segment.ID})`);
-        }
+                const existingWatchHistory = await watchHistoryTable.getOne({
+                    account_UUID: watchString.account_UUID,
+                    series_UUID: segment.ID,
+                    watchable_UUID: watchableEpisodeOrMovie.UUID,
+                    //watchTime: +watchable.time, This is not a good idea cause it could leed to duplication if the user has changed theyre watchtime to something
+                    unique: true
+                })
 
+                if (existingWatchHistory != undefined) {
+                    if (existingWatchHistory.watchTime !== +segment.time) {
+                        await watchHistoryTable.update({
+                            account_UUID: watchString.account_UUID,
+                            series_UUID: segment.ID,
+                            watchable_UUID: watchableEpisodeOrMovie.UUID,
+                        }, {
+                            watchTime: +segment.time
+                        });
+                        console.log(`=> Updated watchHistory entity ${watchString.account_UUID} S${segment.season}E${segment.episode} M${segment.movie} (${segment.ID}) to ${segment.time}`);
+                    } else {
+                        console.log(`WatchHistory ${watchString.account_UUID} S${segment.season}E${segment.episode} M${segment.movie} (${segment.ID}) already exists, skipping`);
+                    }
+                    return;
+                }
+
+                retryDBActionOnDuplicateKey(() => watchHistoryTable.create({
+                    UUID: generateWatchHistoryID(),
+                    account_UUID: watchString.account_UUID,
+                    series_UUID: segment.ID,
+                    watchable_UUID: watchableEpisodeOrMovie.UUID,
+                    watchTime: +segment.time,
+                }));
+                console.log(`=> Added watchHistory entity ${watchString.account_UUID} S${segment.season}E${segment.episode} M${segment.movie} (${segment.ID})`);
+            })
+        }));
+        // }
     }
 }
 
