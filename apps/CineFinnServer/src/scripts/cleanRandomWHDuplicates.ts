@@ -32,6 +32,12 @@ async function run() {
     console.log(duplicateIDMap);
     console.log(duplicateCountMap);
     console.log('Finished Processing ' + historys.length + ' Episodes BUT ' + duplicateDetector.size);
+
+    for (const [key, WHIDs] of duplicateIDMap) {
+        const allWatchtimes = WHIDs.map(x => watchHistoryUUIDToHistory.get(x)!.watchTime).filter(x => x != undefined)
+        const highestWatchTime = Math.max(...allWatchtimes);
+        console.log('Highest Watchtime', highestWatchTime, 'for', key, 'is', allWatchtimes);
+    }
 }
 
 run().catch(console.error).then(() => {
