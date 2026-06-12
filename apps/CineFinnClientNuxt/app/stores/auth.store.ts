@@ -15,6 +15,7 @@ export const useAuthStore = defineStore('auth', {
     }),
     actions: {
         async login(credentials: { username: string; password: string; }) {
+            this.error = '';
             const { data, error } = await tryCatch<Promise<{ token: string; error?: { message: string; }; }>, FetchError>(() => $fetch<{ token: string; error?: { message: string; }; }>(useAPIURL() + '/auth/login', {
                 method: 'POST',
                 body: JSON.stringify(credentials),
@@ -30,6 +31,7 @@ export const useAuthStore = defineStore('auth', {
             await this.authenticate(true);
         },
         async register(credentials: { username: string; password: string; token: string; }) {
+            this.error = '';
             const { data, error } = await tryCatch<Promise<{ token: string, user: Account; }>, FetchError>(() => $fetch<{ token: string, user: Account; }>(useAPIURL() + '/auth/register', {
                 method: 'POST',
                 body: JSON.stringify(credentials),

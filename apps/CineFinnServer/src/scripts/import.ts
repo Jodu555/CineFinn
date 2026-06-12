@@ -4,11 +4,12 @@ import dotenv from 'dotenv';
 dotenv.config();;
 import axios from 'axios';
 import { accountsTable, connectDatabase, episodesTable, ignoranceTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, watchHistoryTable } from '../database.js';
-import { Database } from '@jodu555/mysqlapi';
+import { Database, type MysqlError } from '@jodu555/mysqlapi';
 import path from 'path';
 import type { Series, Episode, WatchableEntity, Movie } from '@cinefinn/types/models/media';
 import { generateEntityID, generateEpisodeID, generateMovieID, generateSeasonID, generateWatchHistoryID } from '../utils/IdGenerators.js';
 import pLimit from 'p-limit';
+import { tryCatch } from '@cinefinn/utilities/tryCatch';
 
 interface Segment {
     ID: string;
@@ -173,7 +174,8 @@ async function importSerieses() {
         let s = 0;
         for (const season of serie.seasons) {
             s++;
-            const seasonIndex = season[0].season;
+            // const seasonIndex = season[0].season;
+            const seasonIndex = s;
             const existingSeason = await seasonsTable.getOne({ serie_UUID: serie.ID, season_IDX: seasonIndex, episodes: season.length, unique: true });
             const seasonUUID = existingSeason?.UUID || generateSeasonID();
             // console.log(`=> Adding season ${serie.title} S${season.season}`);
@@ -234,19 +236,22 @@ async function importSerieses() {
                         console.log(`=> Watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang}) already exists, skipping`);
                         continue;
                     }
-                    const watchableEntityUUID = generateEntityID();
+                    retryDBActionOnDuplicateKey(() => {
+                        const watchableEntityUUID = generateEntityID();
 
-                    await watchableEntitysTable.create({
-                        UUID: watchableEntityUUID,
-                        serie_UUID: serie.ID,
-                        watchable_UUID: episodeUUID,
-                        lang: lang,
-                        subID: episode.subID || 'main',
-                        filePath: filePath,
-                        runtime: -1,
-                        // IV: iv.toString('base64'),
-                        // hash: '',
-                    } satisfies WatchableEntity);
+                        return watchableEntitysTable.create({
+                            UUID: watchableEntityUUID,
+                            serie_UUID: serie.ID,
+                            watchable_UUID: episodeUUID,
+                            lang: lang,
+                            subID: episode.subID || 'main',
+                            filePath: filePath,
+                            runtime: -1,
+                            // IV: iv.toString('base64'),
+                            // hash: '',
+                        } satisfies WatchableEntity);
+
+                    })
                     console.log(`=> Added watchable entity ${serie.title} S${episode.season}E${episode.episode} (${lang})`);
                 }
             }
@@ -494,17 +499,34 @@ async function importWatchHistory() {
                 continue;
             }
 
-            await watchHistoryTable.create({
+            retryDBActionOnDuplicateKey(() => watchHistoryTable.create({
                 UUID: generateWatchHistoryID(),
                 account_UUID: watchString.account_UUID,
                 series_UUID: segment.ID,
                 watchable_UUID: watchableEpisodeOrMovie.UUID,
                 watchTime: +segment.time,
-            });
+            }));
             console.log(`=> Added watchHistory entity ${watchString.account_UUID} S${segment.season}E${segment.episode} M${segment.movie} (${segment.ID})`);
         }
 
     }
+}
+
+async function retryDBActionOnDuplicateKey<T>(fn: () => Promise<T>, retries = 5): Promise<T> {
+    let i = 0;
+    while (i < retries) {
+        const { data, error } = await tryCatch.withError<MysqlError>()(() => fn());
+
+        if (error == null) {
+            return data;
+        }
+
+        if (error.code !== 'ER_DUP_ENTRY') {
+            console.log('Retrying...', error.code);
+            i++;
+        }
+    }
+    throw new Error('Retries exhausted');
 }
 
 run().catch(console.error).finally(() => {

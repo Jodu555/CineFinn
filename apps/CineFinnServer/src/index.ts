@@ -33,7 +33,6 @@ import { previewImagesRouter } from './routes/previewImages.js';
 import { recommendationRouter } from './routes/recommendations/recommendations.js';
 import { setupCommandManager } from './utils/commands.js';
 import { healthRouter } from './routes/health.js';
-import { filenameParser } from './parser.js';
 
 
 
