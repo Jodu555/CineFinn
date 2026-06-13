@@ -45,7 +45,7 @@ const scrapers = [
                 throw new Error('Scraper Socket not found');
             }
             const data = await new Promise<AniWorldSeriesInformations | void>((resolve, reject) => {
-                scraperSocket.emit('scrape:aniworld', url, (data) => resolve(data));
+                scraperSocket.emit('scrape:sto', url, (data) => resolve(data));
             });
 
             if (data == undefined) {
