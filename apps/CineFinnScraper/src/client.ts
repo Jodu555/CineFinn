@@ -3,17 +3,37 @@ import promiseLimit from 'promise-limit';
 import type { AniWorldSerieCompare } from './utils/compare.js';
 import type { DetailedSeries } from '@cinefinn/types/models/media';
 import Aniworld from './class/Aniworld.js';
+import { setupConfigurationManagment } from '@cinefinn/configuration-manager';
 
 let socket: Socket;
 
-socket = io('http://localhost:4000', {
-    transports: ['websocket'],
+interface ClientConfig {
+    version: string;
+    scraper: {
+        url: string;
+        authToken: string;
+    }
+    concurrencyLimit: number;
+}
+
+const defaultClientConfig: ClientConfig = {
+    version: '1.0.0',
+    scraper: {
+        url: 'http://localhost:4000',
+        authToken: 'SUPER_SECURE-SCRAPER_CLIENT_TOKEN',
+    },
+    concurrencyLimit: 10,
+}
+
+const config = setupConfigurationManagment<ClientConfig>(defaultClientConfig, [], 'client.config.json');
+
+socket = io(config.scraper.url, {
     reconnection: true,
     upgrade: true,
     autoConnect: false,
     auth: {
         type: 'scraperClient',
-        authToken: 'SUPER_SECURE-SCRAPER_CLIENT_TOKEN',
+        authToken: config.scraper.authToken,
     },
 });
 
@@ -29,7 +49,7 @@ socket.on('disconnect', () => {
     console.log('Disconnected from ScraperServer');
 });
 
-const limit = promiseLimit<AniWorldSerieCompare>(10);
+const limit = promiseLimit<AniWorldSerieCompare>(config.concurrencyLimit);
 
 socket.on('scrapeChunk', async (seriesList: DetailedSeries[], refKey: string, cb) => {
     console.log('Received scrapeChunk with', seriesList.length, 'series');

@@ -2,8 +2,8 @@ import path from 'path';
 import fs from 'fs';
 import 'dotenv/config';
 
-export function updateConfigurationManagment<CI extends { version: string; }>(updated: Partial<CI>) {
-    const cfgPath = path.join('.', 'config.json');
+export function updateConfigurationManagment<CI extends { version: string; }>(updated: Partial<CI>, configFilename: string = 'config.json') {
+    const cfgPath = path.join('.', configFilename);
     const loadedConfig: CI = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
     if (loadedConfig?.version !== updated?.version) {
         console.error('Config version mismatch! It could be that your config is outdated. Exiting...');
@@ -13,8 +13,12 @@ export function updateConfigurationManagment<CI extends { version: string; }>(up
     fs.writeFileSync(cfgPath, JSON.stringify(final, null, 3));
 }
 
-export function setupConfigurationManagment<CI extends { version: string; }>(defaultConfig: CI, cliOptions: string[][]): CI {
-    const cfgPath = path.join('.', 'config.json');
+export function setupConfigurationManagment<CI extends { version: string; }>(
+    defaultConfig: CI,
+    cliOptions: string[][],
+    configFilename: string = 'config.json'
+): CI {
+    const cfgPath = path.join('.', configFilename);
     if (!fs.existsSync(cfgPath)) {
         fs.writeFileSync(cfgPath, JSON.stringify(defaultConfig, null, 3));
         console.error('Config file not found, creating default config...');
