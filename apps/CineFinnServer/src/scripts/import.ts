@@ -3,7 +3,7 @@ import crypto, { randomUUID } from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();;
 import axios from 'axios';
-import { accountsTable, connectDatabase, episodesTable, ignoranceTable, moviesTable, seasonsTable, seriesTable, watchableEntitysTable, watchHistoryTable } from '../database.js';
+import { accountsTable, connectDatabase, episodesTable, ignoranceTable, moviesTable, seasonsTable, seriesTable, todosTable, watchableEntitysTable, watchHistoryTable } from '../database.js';
 import { Database, type MysqlError } from '@jodu555/mysqlapi';
 import path from 'path';
 import type { Series, Episode, WatchableEntity, Movie } from '@cinefinn/types/models/media';
@@ -24,14 +24,17 @@ const IMPORT_API_AUTH_TOKEN = 'SECR-DEV';
 
 async function run() {
     await connectDatabase(true);
+    const oldDB = Database.createDatabase(process.env.OLD_DB_HOST!, process.env.OLD_DB_USERNAME!, process.env.OLD_DB_PASSWORD!, process.env.OLD_DB_DATABASE!);
+    await oldDB.connect();
 
 
     // console.log(await seriesTable.get({}));
 
-    await importAccounts();
+    await importAccounts(oldDB);
     await importIgnoreList();
     await importSerieses();
-    await importWatchHistory();
+    await importWatchHistory(oldDB);
+    await importTodos(oldDB);
 }
 
 async function importIgnoreList() {
@@ -323,9 +326,7 @@ async function importSerieses() {
     }
 }
 
-async function importAccounts() {
-    const oldDB = Database.createDatabase(process.env.OLD_DB_HOST!, process.env.OLD_DB_USERNAME!, process.env.OLD_DB_PASSWORD!, process.env.OLD_DB_DATABASE!, false);
-    await oldDB.connect();
+async function importAccounts(oldDB: Database) {
     const oldAccounts = await oldDB.get('accounts').get({}) as { UUID: string; username: string; password: string; email: string; role: number; settings: string; activityDetails: string; }[];
 
     const accountsCreationMap = await importAccountsCreationMap();
@@ -365,9 +366,7 @@ async function importAccounts() {
     }
 }
 
-async function importWatchHistory() {
-    const oldDB = Database.createDatabase(process.env.OLD_DB_HOST!, process.env.OLD_DB_USERNAME!, process.env.OLD_DB_PASSWORD!, process.env.OLD_DB_DATABASE!);
-    await oldDB.connect();
+async function importWatchHistory(oldDB: Database) {
     const watchStrings = await oldDB.get('watch_strings').get({}) as { account_UUID: string; watch_string: string; }[];
     console.log(watchStrings);
 
@@ -457,6 +456,36 @@ async function importWatchHistory() {
         }));
         // }
     }
+}
+
+async function importTodos(oldDB: Database) {
+    interface OldTodo {
+        ID: string;
+        order: number;
+        name: string;
+        creator: string;
+        categorie: string;
+        references: {
+            aniworld: string;
+            zoro: string;
+            sto: string;
+        };
+    }
+
+    const oldTodos = await oldDB.get('todos').get({}) as { ID: number; content: string; }[];
+    for (const oldDbTodo of oldTodos) {
+        const oldTodo = JSON.parse(oldDbTodo.content) as OldTodo;
+        await todosTable.create({
+            ID: String(oldDbTodo.ID),
+            sortOrder: oldTodo.order,
+            name: oldTodo.name,
+            creator: oldTodo.creator,
+            categorie: oldTodo.categorie as any,
+            refs: oldTodo.references,
+        });
+        console.log(`=> Added Todo ${oldTodo.ID} => ${oldTodo.name}`);
+    }
+
 }
 
 async function retryDBActionOnDuplicateKey<T>(fn: () => Promise<T>, retries = 5): Promise<T> {
