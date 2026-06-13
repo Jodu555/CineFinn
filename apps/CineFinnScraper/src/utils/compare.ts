@@ -429,7 +429,12 @@ async function compareForNewReleasesAniWorldOrSTO(
     }
 }
 
-// Computes the Levenshtein distance between two strings and returns a similarity score between 0 and 1
+/**
+ * Computes the Levenshtein distance (How many steps are needed to get from one string to the other)
+ * @param a The first string
+ * @param b The second string
+ * @returns The similarity score Meaning the higher the score the less similar the strings are
+ */
 function computeLevenshteinDistance(a: string, b: string): number {
     const matrix: number[][] = [];
     const m = a.length;

@@ -18,7 +18,7 @@ import type { CallJobResponse, JobType } from '@cinefinn/types';
 import { tryCatch } from '@cinefinn/utilities/tryCatch';
 import { DownloaderConnector } from './class/DownloaderConnector.js';
 import { calendarRouter } from './calendars/router.js';
-import { getHumanInterventionList, setCoreSocket, setHumanInterventionList } from './utils/utils.js';
+import { callJob, getHumanInterventionList, setCoreSocket, setHumanInterventionList } from './utils/utils.js';
 
 
 const config = getConfig();
@@ -56,7 +56,7 @@ const httpServer = serve({
     });
 
     io.on('connection', (socket) => {
-        console.log('New Scraper Client Connected');
+        console.log('New Scraper Client Connected', socket.id);
         socket.on('disconnect', () => {
             console.log('Scraper Client Disconnected');
         });
@@ -85,9 +85,7 @@ const httpServer = serve({
 });
 
 
-
 const socket = Client(config.CORE.URL, {
-    transports: ['websocket'],
     reconnection: true,
     upgrade: true,
     autoConnect: false,
@@ -101,7 +99,6 @@ setCoreSocket(socket);
 
 socket.on('connect', () => {
     console.log('Connected to Core');
-    // checkForUpdates([]);
 });
 
 socket.on('disconnect', () => {
@@ -291,27 +288,6 @@ async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart =
 
 }
 
-
-
-async function callJob(type: JobType, blocking = false, timeout = 1000 * 60 * 10) {
-    return new Promise<CallJobResponse>((resolve, reject) => {
-        socket.timeout(timeout).emit('callJob', type, blocking, (err, response) => {
-            if (err) {
-                console.log(`Call Job ${type} resulted in ${err}`);
-                reject(err);
-            }
-            console.log(`Call Job ${type} resulted in ${response}`);
-            if (response.error) {
-                reject(response);
-                return;
-            } else {
-                console.log('Job', type, 'got ID:', response.jobUUID);
-                resolve(response);
-                return;
-            }
-        });
-    })
-}
 
 socket.connect();
 
