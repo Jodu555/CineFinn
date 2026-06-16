@@ -11,13 +11,8 @@ import { generateEntityID, generateEpisodeID, generateMovieID, generateSeasonID,
 import pLimit from 'p-limit';
 import { tryCatch } from '@cinefinn/utilities/tryCatch';
 
-interface Segment {
-    ID: string;
-    season: number;
-    episode: number;
-    movie: number;
-    time: string;
-}
+import watchStringUtils, { type ISegment } from '../utils/translationV1WatchString.js';
+
 
 const IMPORT_API_ENDPOINT = 'https://cinema-api.jodu555.de'
 const IMPORT_API_AUTH_TOKEN = 'SECR-DEV';
@@ -373,16 +368,7 @@ async function importWatchHistory(oldDB: Database) {
     let i = 0;
     for (const watchString of watchStrings) {
         i++;
-        const re = /(\w+):(?:(\d+)-(\d+)|(\d+))\.(\d+);/gim;
-        const list: Segment[] = [];
-        var outp: RegExpExecArray | null;
-        while ((outp = re.exec(watchString.watch_string)) !== null) {
-            // console.log(outp);
-            let isMovie = false;
-            const [og, ID, se = -1, ep = -1, movie = -1, time] = outp;
-            list.push({ ID, season: Number(se), episode: Number(ep), movie: Number(movie), time: time });
-        }
-        console.log(watchString.account_UUID, list.length);
+        const list = watchStringUtils.parse(watchString.watch_string);
         let j = 0;
         const limit = pLimit(5);
 

@@ -16,6 +16,13 @@ const generateStr = (segmentList: Segment[]): string => {
     return str;
 };
 
+export interface ISegment {
+    ID: string;
+    season: number;
+    episode: number;
+    movie: number;
+    time: string;
+}
 
 interface DatabaseWatchStringItem {
     account_UUID: string;
@@ -24,7 +31,7 @@ interface DatabaseWatchStringItem {
 
 // 'ID:se-ep.time;repeat'
 const parse = (str: string): Segment[] => {
-    const re = /(\w+):(?:(\d+)-(\d+)|(\d+))\.(\d+);/gim;
+    const re = /(\w+):(?:(\d+)-(\d+)|(\d+))\.((?:\d+(?:\.\d+)*));/gim;
 
     const list: Segment[] = [];
 

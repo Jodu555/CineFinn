@@ -142,7 +142,10 @@ const router = new Hono()
     .post('/updateTime/:watchableUUID/:time', authMiddleware, async (c) => {
         const user = c.get('credentials').user;
 
-        const time = Number(c.req.param('time'));
+        /**
+         * The Time in seconds the watchable was watched
+         */
+        const time = parseInt(c.req.param('time'));
 
         if (isNaN(time) || time < 0) {
             return c.json({
