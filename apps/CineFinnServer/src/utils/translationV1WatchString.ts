@@ -30,6 +30,7 @@ interface DatabaseWatchStringItem {
 }
 
 // 'ID:se-ep.time;repeat'
+// 'ID:se-ep.time.time;repeat'
 const parse = (str: string): Segment[] => {
     const re = /(\w+):(?:(\d+)-(\d+)|(\d+))\.((?:\d+(?:\.\d+)*));/gim;
 
