@@ -177,8 +177,8 @@ async function importSerieses() {
         let s = 0;
         for (const season of serie.seasons) {
             s++;
-            // const seasonIndex = season[0].season;
-            const seasonIndex = s;
+            const seasonIndex = season[0].season;
+            // const seasonIndex = s;
             const existingSeason = await seasonsTable.getOne({ serie_UUID: serie.ID, season_IDX: seasonIndex, episodes: season.length, unique: true });
             const seasonUUID = existingSeason?.UUID || generateSeasonID();
             // console.log(`=> Adding season ${serie.title} S${season.season}`);
