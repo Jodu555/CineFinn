@@ -1,4 +1,4 @@
-import type { ServerConfig } from '@cinefinn/types';
+import type { Langs, ServerConfig } from '@cinefinn/types';
 import type { Account, Email } from '@cinefinn/types/models/user';
 import type { MovingItem } from '@cinefinn/types/models/system';
 import type { IgnoranceItem, timestamped } from '@cinefinn/types/shared';
@@ -260,6 +260,41 @@ export const useAdminStore = defineStore('admin', {
         },
         async updateAccounts(accounts: (Account & timestamped)[]) {
             this.accounts = accounts;
+        },
+        async invokeToolingFilenameParser(filepath: string, filename: string) {
+            const { data, error } = await tryCatch<Promise<ParsedInformation>, FetchError>(() => $fetch<ParsedInformation>(useAPIURL() + '/admin/tooling/filenameParser', {
+                method: 'POST',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+                body: {
+                    filepath,
+                    filename,
+                },
+            }));
+            if (error) {
+                this.error = error.data || 'An unknown error occurred.';
+                return;
+            } else {
+                return data;
+            }
         }
     }
 });
+
+export type ParsedInformation = ParsedMInformation | ParsedEInformation;
+
+interface ParsedMInformation {
+    movie: true;
+    title: string;
+    language: Langs;
+    movieTitle: string;
+}
+
+interface ParsedEInformation {
+    movie: false;
+    title: string;
+    language: Langs;
+    season: number;
+    episode: number;
+}

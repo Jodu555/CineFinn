@@ -59,6 +59,11 @@
 								<span class="ms-1 d-none d-sm-inline">Franchises</span>
 							</NuxtLink>
 						</li>
+						<li>
+							<NuxtLink class="nav-link px-0 align-middle" exact-active-class="active" to="/admin/tooling">
+								<span class="ms-1 d-none d-sm-inline">Tooling</span>
+							</NuxtLink>
+						</li>
 					</ul>
 				</div>
 			</div>
