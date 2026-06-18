@@ -8,6 +8,8 @@ import {
     faEyeSlash, faXmark, faExclamationTriangle, faChevronUp, faChevronDown, faCheckCircle, faTasks, faHistory, faSyncAlt, faHourglassHalf, faFileExport, faTerminal,
     faRightToBracket, faPaperPlane, faCircleInfo, faChevronLeft, faFire, faBookmark, faMinus, faTowerBroadcast, faBell, faArrowRotateLeft,
     faClock as fasClock, faUpLong, faPenRuler, faSitemap, faSpinner, faPersonRunning,
+    faWrench,
+    faFile,
 } from '@fortawesome/free-solid-svg-icons';
 import { faCalendar, faClock as farClock } from '@fortawesome/free-regular-svg-icons';
 
@@ -15,11 +17,11 @@ config.autoAddCss = false;
 
 library.add(
     faPen, faCheck, faTrash, faDownLong, faRightFromBracket, faGears, faEdit, faForwardStep, faBackwardStep, faBackward, faForward, faFileExport, faTerminal,
-    faPlus, faArrowLeft, faTv, faList, faGrip, faPlay, faPause, faLanguage, faHeart, faChevronRight, faChevronUp, faChevronDown, faTasks, faHistory,
+    faPlus, faArrowLeft, faTv, faList, faGrip, faPlay, faPause, faLanguage, faHeart, faChevronRight, faChevronUp, faChevronDown, faTasks, faHistory, faFile,
     faEye, faUserPlus, faToggleOn, faShareNodes, faChartLine, faUserShield, faLock, faAt, faShieldHalved, faHashtag, faCheckCircle, faSyncAlt, faHourglassHalf,
     faBuilding, faEnvelope, faKey, faPlug, faServer, faBolt, faUser, faTable, faDatabase, faImage, faFilm, faGlobe, faCodeBranch, faSliders, faNetworkWired,
     faEyeSlash, faXmark, faExclamationTriangle, faStar, faFolder, faHandPointLeft, faFileCode, faBomb, faRightToBracket, faPaperPlane, faCircleInfo, faChevronLeft,
-    faFire, faBookmark, faMinus, faTowerBroadcast, faBell, faArrowRotateLeft, fasClock, faUpLong, faGrip, faPenRuler, faSitemap, faSpinner, faPersonRunning
+    faFire, faBookmark, faMinus, faTowerBroadcast, faBell, faArrowRotateLeft, fasClock, faUpLong, faGrip, faPenRuler, faSitemap, faSpinner, faPersonRunning, faWrench
 );
 library.add(faCalendar, farClock);
 

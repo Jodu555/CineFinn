@@ -3,9 +3,10 @@ import { getUser } from "../middleware/auth.js";
 import type { Account } from "@cinefinn/types/models/user";
 import type { timestamped } from "@cinefinn/types/shared";
 import type { SocketConsumerMeta } from "./index.js";
+import { debounce } from "@cinefinn/utilities/index";
 import { app, type definedSocket } from "../index.js";
 import { accountsTable, franchiseTable } from "../database.js";
-import { debounce, getIO, loggerInstances } from "../utils.js";
+import { getIO, loggerInstances } from "../utils.js";
 import { compareSettings } from "../utils/settings.js";
 import { getFrontEndSeries } from "../routes/index.js";
 import { randomUUID } from "crypto";
@@ -113,6 +114,7 @@ export async function addSocketAwaitConnection(socketID: string, awaitConnection
 async function connectionFunction(socket: definedSocket) {
     const socketAuth = socket.data.auth as LocalAuthData;
     console.log(socket.id, socketAuth.user.username, socketAuth.uniqueID, 'connected');
+
     const debouncedUpdateTime = debounce(
         async (data: { watchableUUID: string; time: number; }) => {
             loggerInstances.updateTime && console.log('debounced updateTime', data, socketAuth.user.username);

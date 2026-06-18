@@ -8,8 +8,8 @@ import type { WatchHistory, SyncRoom, Job } from '@cinefinn/types/models/system'
 import type { TodoItem, IgnoranceItem } from '@cinefinn/types/shared';
 import type { timestamped } from '@cinefinn/types/shared';
 import { getConfig } from './config.js';
-import { debounce, throttle } from './utils.js';
 import type { FranchiseData } from '@cinefinn/types/models/franchise';
+import { throttle } from '@cinefinn/utilities/index';
 
 
 export let database: Database;

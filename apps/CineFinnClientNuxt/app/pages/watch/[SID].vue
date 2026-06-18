@@ -516,6 +516,7 @@
 import { averageWatchableEntitysRuntime } from '#imports';
 import { Role, type DetailedEpisode, type DetailedSeason, type Langs } from '@cinefinn/types';
 import { msToReadable } from '@cinefinn/utilities/time';
+import { debounce } from '@cinefinn/utilities/index';
 import { ref, computed, watch } from 'vue';
 import AddToPlaylistDialog from '~/components/AddToPlaylistDialog.vue';
 import ExtendedVideo from '~/components/ExtendedVideo.vue';
@@ -557,17 +558,29 @@ const coverURL = computed(() => {
 	return decideSeriesImage(series.value!, randomNumber.value);
 });
 
+const debouncedUpdateTime = debounce(
+	async (data: { watchableUUID: string; time: number }) => {
+		$fetch(`${useAPIURL()}/watch/updateTime/${data.watchableUUID}/${data.time}`);
+	},
+	2000,
+	(data) => data.watchableUUID, // This is the key for debouncing, if this changes then the debounce will be flushed!
+);
+
 const sendVideoTimeUpdate = async (time: number) => {
 	if (time == undefined) return;
 	console.log('Sending time update to server', time);
-	// useAxios().post(`/watch/updateTime/${currentEpisodeUUID.value}/${time}`, {});
 
-	useSocket().emit('updateTime', {
+	const data = {
 		watchableUUID: indexStore.selectedWatchableEntity?.UUID!,
 		time,
-	});
-
-	// await $fetch(`${useAPIURL()}/watch/updateTime/${indexStore.selectedWatchableEntity?.UUID.replace('#', '-')}/${time}`);
+	};
+	if (useSocket().connected) {
+		console.log('Socket Connected, emit updateTime', data);
+		useSocket().emit('updateTime', data);
+	} else {
+		console.log('No Socket, debouncedUpdateTime', data);
+		debouncedUpdateTime(data);
+	}
 };
 
 const randomNumber = useState('randomNumber' + series.value!.UUID, () => Math.floor(Math.random() * 1000));

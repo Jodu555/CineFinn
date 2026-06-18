@@ -185,7 +185,7 @@ template
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount, reactive } from 'vue';
-import { throttle } from '@/utils/debounceAndThrottle';
+import { throttle } from '@cinefinn/utilities/index';
 import RmvcModal from './RmvcModal.vue';
 import type { DetailedEpisode, DetailedMovie } from '@cinefinn/types';
 // import ShareModal from '@/components/Watch/ShareModal.vue';
