@@ -156,7 +156,6 @@
 
 									<!-- List View -->
 									<div v-if="viewMode === 'list'" class="d-flex flex-column gap-2">
-										<!-- TODO: Move this to a separate component called: EpisodeListViewCard.vue -->
 										<EpisodeListViewCard
 											v-for="episode in currentDetailedSeasonData?.episodes"
 											:key="episode.UUID"
@@ -417,6 +416,7 @@
 				hasMovies: {{ hasMovies }}
 				currentDetailedSeasonData: {{ currentDetailedSeasonData }}
 				series: {{ series }}
+				additionalList: {{ additionalList }}
 			</pre
 				>
 			</div>
