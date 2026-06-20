@@ -30,7 +30,8 @@
 				<ElongatedText
 					class="text-muted mb-4 text-center text-xs-center text-md-start"
 					:text="series.infos.description || 'No Description available yet...'"
-					:max-length="200"></ElongatedText>
+					:max-length="200"
+				></ElongatedText>
 
 				<div class="d-flex gap-3" v-if="authStore.loggedIn">
 					<!-- Existing Button -->
@@ -39,7 +40,8 @@
 						:content-title="series.title"
 						open-button-text="Add to Playlist"
 						open-button-color="outline-primary"
-						hydrate-on-idle />
+						hydrate-on-idle
+					/>
 
 					<!-- New Edit Button -->
 					<button @click="enterEditMode" v-if="authStore.user.role >= Role.Mod" class="btn btn-outline-secondary">
