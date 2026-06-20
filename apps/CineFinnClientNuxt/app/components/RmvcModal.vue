@@ -106,13 +106,13 @@ function handleMounting() {
 	}
 	boundToVideo = true;
 	video.addEventListener('play', () => {
-		sessionStarted && useSocket().emit('rmvc-send-videoStateChange', { isPlaying: true });
+		sessionStarted.value && useSocket().emit('rmvc-send-videoStateChange', { isPlaying: true });
 	});
 	video.addEventListener('pause', () => {
-		sessionStarted && useSocket().emit('rmvc-send-videoStateChange', { isPlaying: false });
+		sessionStarted.value && useSocket().emit('rmvc-send-videoStateChange', { isPlaying: false });
 	});
 	useSocket().on('rmvc-get-videoState', () => {
-		sessionStarted && useSocket().emit('rmvc-send-videoStateChange', { isPlaying: !video.paused });
+		sessionStarted.value && useSocket().emit('rmvc-send-videoStateChange', { isPlaying: !video.paused });
 	});
 	useSocket().on('rmvc-recieve-action', (action) => {
 		console.log('Recieved Action', action);
