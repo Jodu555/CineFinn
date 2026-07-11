@@ -50,10 +50,7 @@
 								</div>
 
 								<div class="progress" style="height: 4px">
-									<div
-										class="progress-bar progress-bar-striped progress-bar-animated bg-info"
-										role="progressbar"
-										style="width: 100%"></div>
+									<div class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" style="width: 100%"></div>
 								</div>
 
 								<div class="mt-3">
@@ -61,12 +58,13 @@
 										class="btn btn-sm btn-outline-secondary w-100"
 										type="button"
 										data-bs-toggle="collapse"
-										:data-bs-target="`#logs-${job.UUID}`">
+										:data-bs-target="`#logs-${job.UUID}`"
+									>
 										<font-awesome-icon :icon="['fas', 'terminal']" class="me-1" /> View Logs
 									</button>
 									<div class="collapse mt-2" :id="`logs-${job.UUID}`">
 										<div class="code-block small">
-											<pre class="mb-0">{{ job.logs.join('\n') || 'No logs available yet...' }}</pre>
+											<pre class="mb-0">{{ job.logs.reverse().join('\n') || 'No logs available yet...' }}</pre>
 										</div>
 									</div>
 								</div>
@@ -105,7 +103,8 @@
 											<font-awesome-icon
 												:icon="job.failed_at ? ['fas', 'times-circle'] : ['fas', 'check-circle']"
 												:class="job.failed_at ? 'text-danger' : 'text-success'"
-												size="lg" />
+												size="lg"
+											/>
 										</td>
 										<td>
 											<span :class="['badge', job.failed_at ? 'bg-danger' : 'bg-success']">
@@ -124,8 +123,7 @@
 										<td>
 											<div class="btn-group w-100" role="group">
 												<button class="btn btn-sm btn-outline-info" @click="toggleDetails(job.UUID)" title="View Details">
-													<font-awesome-icon
-														:icon="['fas', openedJobs.includes(job.UUID) ? 'chevron-up' : 'chevron-down']" />
+													<font-awesome-icon :icon="['fas', openedJobs.includes(job.UUID) ? 'chevron-up' : 'chevron-down']" />
 												</button>
 												<button class="btn btn-sm btn-outline-danger" @click="deleteJob(job.UUID)" title="Delete Job">
 													<font-awesome-icon :icon="['fas', 'trash']" />
@@ -138,31 +136,23 @@
 										<td colspan="6" class="p-3">
 											<div class="row">
 												<div class="col-md-6 mb-3">
-													<h6 class="text-muted mb-2">
-														<font-awesome-icon :icon="['far', 'clock']" class="me-1" />Started At
-													</h6>
+													<h6 class="text-muted mb-2"><font-awesome-icon :icon="['far', 'clock']" class="me-1" />Started At</h6>
 													<pre class="mb-0">{{ formatDate(job.created_at) }}</pre>
 												</div>
 												<div class="col-md-6 mb-3">
-													<h6 class="text-muted mb-2">
-														<font-awesome-icon :icon="['far', 'clock']" class="me-1" />Running Time
-													</h6>
+													<h6 class="text-muted mb-2"><font-awesome-icon :icon="['far', 'clock']" class="me-1" />Running Time</h6>
 													<pre class="mb-0">{{ msToReadable(job.finished_at - job.created_at) }}</pre>
 												</div>
 												<!-- Data Input -->
 												<div class="col-md-6 mb-3">
-													<h6 class="text-muted mb-2">
-														<font-awesome-icon :icon="['fas', 'database']" class="me-1" /> Data Input
-													</h6>
+													<h6 class="text-muted mb-2"><font-awesome-icon :icon="['fas', 'database']" class="me-1" /> Data Input</h6>
 													<div class="code-block small">
 														<pre class="mb-0">{{ JSON.stringify(job.data, null, 2) }}</pre>
 													</div>
 												</div>
 												<!-- Result -->
 												<div class="col-md-6 mb-3">
-													<h6 class="text-muted mb-2">
-														<font-awesome-icon :icon="['fas', 'file-export']" class="me-1" /> Result
-													</h6>
+													<h6 class="text-muted mb-2"><font-awesome-icon :icon="['fas', 'file-export']" class="me-1" /> Result</h6>
 													<div class="code-block small">
 														<pre class="mb-0 text-wrap">{{ JSON.stringify(job.result, null, 2) }}</pre>
 													</div>
@@ -170,9 +160,7 @@
 
 												<!-- NEW: Logs Section (Full Width) -->
 												<div class="col-12">
-													<h6 class="text-muted mb-2">
-														<font-awesome-icon :icon="['fas', 'terminal']" class="me-1" /> Execution Logs
-													</h6>
+													<h6 class="text-muted mb-2"><font-awesome-icon :icon="['fas', 'terminal']" class="me-1" /> Execution Logs</h6>
 													<div class="code-block small" style="max-height: 250px">
 														<!-- Check if logs exist, otherwise show placeholder -->
 														<pre v-if="job.logs && job.logs.length" class="mb-0">{{ job.logs.join('\n') }}</pre>
