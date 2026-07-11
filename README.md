@@ -47,6 +47,12 @@ When all the boxes are checked, I will deploy the MVP to a testing environment a
   - [x] Have a way to view emails and the status of them
 - [x] Playlist System
 - [ ] Sync System
+- [ ] Calendar System
+  - [ ] View Toggle by just Name or with Images
+  - [ ] Filtering by Language
+  - [ ] Filtering by Watched Status
+  - [ ] Filtering by Playlist
+  - [ ] Filtering by in any Playlist
 
 ### Possible Duplicate Code to move to a new package
 
