@@ -1,9 +1,10 @@
 import type { DetailedSeries } from '@cinefinn/types/models/media';
-import type { IgnoranceItem } from '@cinefinn/types/shared';
+import type { ExtendedEpisodeDownload, IgnoranceItem } from '@cinefinn/types/shared';
 import type { AuthHandshake, ScraperToServerEvents, ServerToScraperEvents, } from '@cinefinn/types/socket';
 import { msToReadable } from '@cinefinn/utilities/time';
 import { serve } from '@hono/node-server';
 import axios from 'axios';
+import crypto from 'crypto';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
@@ -17,9 +18,12 @@ import Aniworld from './class/Aniworld.js';
 import { DownloaderConnector } from './class/DownloaderConnector.js';
 import { getConfig } from './config.js';
 import { compareForNewReleases } from './utils/compare.js';
-import { callJob, getHumanInterventionList, setCoreSocket, setHumanInterventionList } from './utils/utils.js';
+import { callJob, getHumanInterventionList, getPtoken, setCoreSocket, setHumanInterventionList, setPtoken } from './utils/utils.js';
 import { ownLogger } from '@cinefinn/honoutils/ownLogger';
 
+setPtoken(crypto.randomUUID().replaceAll('-', ''))
+
+console.log('Current pToken:', getPtoken());
 
 const config = getConfig();
 
@@ -29,9 +33,27 @@ const app = new Hono({
     .use(cors())
     .use(trimTrailingSlash())
     .use(ownLogger(console.log, ['/socket.io']))
+    .use(async (c, next) => {
+        if (c.req.url.includes('/calendars/store')) {
+            next();
+            return;
+        }
+        if (c.req.header('ptoken') === getPtoken() ||
+            c.req.query('ptoken') === getPtoken()
+        ) {
+            next();
+            return;
+        }
+        return c.json({ message: 'Unauthorized access (wrong or missing ptoken)' }, 401);
+    })
     .route('/calendars', calendarRouter)
     .get('/humanIntervention', async (c) => {
         return c.json(getHumanInterventionList());
+    })
+    .post('/humanIntervention', async (c) => {
+        const newList = await c.req.json() as ExtendedEpisodeDownload[];
+        setHumanInterventionList(newList);
+        return c.json({ success: true });
     });
 
 export let io: Server;
@@ -93,6 +115,7 @@ const socket = Client(config.CORE.URL, {
     auth: {
         type: 'scraper',
         authToken: config.CORE.SCRAPER_SOCKET_TOKEN,
+        ptoken: getPtoken(),
     } satisfies AuthHandshake,
 }) as Socket<ServerToScraperEvents, ScraperToServerEvents>;
 

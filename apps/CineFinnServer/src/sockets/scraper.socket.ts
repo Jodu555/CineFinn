@@ -15,7 +15,7 @@ import { callJob } from "../routes/managment.js";
 export let isScraperSocketConnected = false;
 
 async function authFunction(authHandshake: AuthHandshakeScraper): Promise<SocketAuthDataScraper> {
-    const { authToken } = authHandshake;
+    const { authToken, ptoken } = authHandshake;
 
     if (authToken === undefined) {
         throw new Error('Unauthorized');
@@ -26,6 +26,7 @@ async function authFunction(authHandshake: AuthHandshakeScraper): Promise<Socket
     return {
         type: 'scraper',
         token: authToken,
+        ptoken,
     };
 }
 

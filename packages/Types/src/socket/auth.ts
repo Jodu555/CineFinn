@@ -15,6 +15,7 @@ export interface AuthHandshakeRmvcEmitter {
 export interface AuthHandshakeScraper {
     type: 'scraper';
     authToken: string;
+    ptoken: string;
 }
 
 export interface AuthHandshakeSubsystem {
@@ -46,6 +47,7 @@ export interface SocketAuthDataClient<U = any> {
 export interface SocketAuthDataScraper<U = any> {
     type: 'scraper';
     token: string;
+    ptoken: string;
 }
 
 export interface SocketAuthDataSubsystem<U = any> {

@@ -1,7 +1,7 @@
+import fs from 'fs';
 import type { CallJobResponse, ExtendedEpisodeDownload, JobType, ScraperToServerEvents, ServerToScraperEvents } from "@cinefinn/types";
+import path from "path";
 import type { Socket } from "socket.io-client";
-
-let humanInterventionList: ExtendedEpisodeDownload[] = [];
 
 let coreSocket: Socket<ServerToScraperEvents, ScraperToServerEvents>;
 
@@ -13,12 +13,29 @@ export const setCoreSocket = (socket: Socket<ServerToScraperEvents, ScraperToSer
     coreSocket = socket;
 };
 
-export const getHumanInterventionList = () => {
-    return humanInterventionList;
+let ptoken: string;
+
+export const getPtoken = () => {
+    return ptoken;
+};
+
+export const setPtoken = (token: string) => {
+    ptoken = token;
+};
+
+const humanInterventionListPath = path.join(process.cwd(), 'hiList.json');
+
+export const getHumanInterventionList = (): ExtendedEpisodeDownload[] => {
+    if (fs.existsSync(humanInterventionListPath) == false) {
+        return [];
+    }
+    const fileData = fs.readFileSync(humanInterventionListPath, 'utf-8');
+    const list = JSON.parse(fileData) as ExtendedEpisodeDownload[];
+    return list;
 };
 
 export const setHumanInterventionList = (list: ExtendedEpisodeDownload[]) => {
-    humanInterventionList = list;
+    fs.writeFileSync(humanInterventionListPath, JSON.stringify(list, null, 3));
 };
 
 export async function callJob(type: JobType, blocking = false, timeout = 1000 * 60 * 10) {
