@@ -28,9 +28,9 @@
 					<li v-if="authStore.loggedIn" class="nav-item">
 						<NuxtLink class="nav-link" exact-active-class="active" to="/list">List</NuxtLink>
 					</li>
-					<!-- <li class="nav-item">
-						<router-link class="nav-link" exact-active-class="active" to="/news">News</router-link>
-					</li> -->
+					<li v-if="authStore.loggedIn && authStore.user?.role >= Role.Admin" class="nav-item">
+						<router-link class="nav-link" exact-active-class="active" to="/calendarkimi">Calendar</router-link>
+					</li>
 					<!-- <li class="nav-item">
 						<router-link class="nav-link" active-class="active" to="/sync">Sync</router-link>
 					</li> -->

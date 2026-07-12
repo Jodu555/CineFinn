@@ -6,6 +6,7 @@ import { serve } from '@hono/node-server';
 import axios from 'axios';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { logger } from 'hono/logger';
 import { trimTrailingSlash } from 'hono/trailing-slash';
 import { Server } from 'socket.io';
 import { io as Client, Socket } from 'socket.io-client';
@@ -26,6 +27,7 @@ const app = new Hono({
 })
     .use(cors())
     .use(trimTrailingSlash())
+    .use(logger())
     .route('/calendars', calendarRouter)
     .get('/humanIntervention', async (c) => {
         return c.json(getHumanInterventionList());

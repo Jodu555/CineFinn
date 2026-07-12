@@ -5,7 +5,7 @@ export interface Playlist {
     account_UUID: string;
     name: string;
     description: string;
-    items: string[];
+    items: string[]; //The Series UUID's
     settings: PlaylistSettings;
 }
 
