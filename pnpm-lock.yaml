@@ -114,6 +114,9 @@ importers:
       '@cinefinn/configuration-manager':
         specifier: workspace:*
         version: link:../../packages/ConfigurationManager
+      '@cinefinn/honoutils':
+        specifier: workspace:*
+        version: link:../../packages/HonoUtils
       '@cinefinn/types':
         specifier: workspace:*
         version: link:../../packages/Types
@@ -163,6 +166,9 @@ importers:
       '@cinefinn/configuration-manager':
         specifier: workspace:*
         version: link:../../packages/ConfigurationManager
+      '@cinefinn/honoutils':
+        specifier: workspace:*
+        version: link:../../packages/HonoUtils
       '@cinefinn/types':
         specifier: workspace:*
         version: link:../../packages/Types
@@ -273,6 +279,16 @@ importers:
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
+    devDependencies:
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.10.1
+
+  packages/HonoUtils:
+    dependencies:
+      hono:
+        specifier: ^4.12.29
+        version: 4.12.29
     devDependencies:
       '@types/node':
         specifier: ^24.10.1
@@ -3193,6 +3209,10 @@ packages:
 
   hono@4.12.0:
     resolution: {integrity: sha512-NekXntS5M94pUfiVZ8oXXK/kkri+5WpX2/Ik+LVsl+uvw+soj4roXIsPqO+XsWrAw20mOzaXOZf3Q7PfB9A/IA==}
+    engines: {node: '>=16.9.0'}
+
+  hono@4.12.29:
+    resolution: {integrity: sha512-1hNiRjawYrLq/4m3DQQjPGFg0VZkk4RjQJDff/excI6Dm9BiL75qxGrd7/c6YOxPdq6AscP3LiXhQ6fKFC1Waw==}
     engines: {node: '>=16.9.0'}
 
   hookable@5.5.3:
@@ -8232,6 +8252,8 @@ snapshots:
       function-bind: 1.1.2
 
   hono@4.12.0: {}
+
+  hono@4.12.29: {}
 
   hookable@5.5.3: {}
 

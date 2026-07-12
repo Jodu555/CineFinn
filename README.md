@@ -58,6 +58,7 @@ When all the boxes are checked, I will deploy the MVP to a testing environment a
 
 - [ ] The Hono Mp4 file streaming used in the Server and should be in the SubSystem
 - [ ] The File Crawler used in the Server and SubSystem
+- [ ] Hono ownLogger should be in Server, Scraper, SubSystem
 - [x] tryCatch should be in Server, Client, SubSystem, Scraper and PreviewImageGenerator
 - [x] Time stuff (msToReadable, timeAgo) should be in Server, Client
 - [x] Bytes stuff (formatBytes, bytesToUnit) should be in Server, Client and SubSystem

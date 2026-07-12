@@ -13,6 +13,7 @@
 		"@cinefinn/configuration-manager": "workspace:*",
 		"@cinefinn/types": "workspace:*",
 		"@cinefinn/utilities": "workspace:*",
+		"@cinefinn/honoutils": "workspace:*",
 		"@hono/node-server": "^1.19.5",
 		"@hono/prometheus": "^1.0.2",
 		"@jodu555/commandmanager": "^1.5.5",

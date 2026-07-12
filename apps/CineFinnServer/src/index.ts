@@ -13,7 +13,6 @@ import { getConfig } from './config.js';
 import { fixSeasons, handleSubSystemProminence, insertMissingWatchableEntityRuntimes } from './job/crawler.js';
 import { Job } from './job/Job.js';
 import { authRouter } from './middleware/auth.js';
-import { ownLogger } from './middleware/ownLogger.js';
 import { adminRouter } from './routes/admin/admin.js';
 import { indexRouter } from './routes/index.js';
 import { managmentRouter } from './routes/managment.js';
@@ -33,6 +32,7 @@ import { previewImagesRouter } from './routes/previewImages.js';
 import { recommendationRouter } from './routes/recommendations/recommendations.js';
 import { setupCommandManager } from './utils/commands.js';
 import { healthRouter } from './routes/health.js';
+import { ownLogger } from '@cinefinn/honoutils/ownLogger';
 
 
 
@@ -41,6 +41,7 @@ export const app = new Hono({
 })
     .use(cors())
     .use(trimTrailingSlash())
+    // .use(ownLogger(console.log, ['/socket.io', '/video', '/images', '/bullboard', '/status', '/health', '/auth/registerEnabled']))
     .use(ownLogger(console.log, ['/socket.io', '/video', '/images', '/bullboard', '/status', '/health', '/auth/registerEnabled']))
     .use('*', registerMetrics)
     .route('', metricsRouter)

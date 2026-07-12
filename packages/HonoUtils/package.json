@@ -1,0 +1,33 @@
+{
+	"name": "@cinefinn/honoutils",
+	"version": "1.0.0",
+	"description": "",
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"exports": {
+		"./index": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./ownLogger": {
+			"types": "./dist/ownLogger.d.ts",
+			"import": "./dist/ownLogger.js"
+		}
+	},
+	"scripts": {
+		"dev": "tsc --watch",
+		"build": "tsc",
+		"typecheck": "tsc --noEmit"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"packageManager": "pnpm@10.18.1",
+	"devDependencies": {
+		"@types/node": "^24.10.1"
+	},
+	"dependencies": {
+		"hono": "^4.12.29"
+	}
+}

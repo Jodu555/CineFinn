@@ -18,6 +18,7 @@ import { DownloaderConnector } from './class/DownloaderConnector.js';
 import { getConfig } from './config.js';
 import { compareForNewReleases } from './utils/compare.js';
 import { callJob, getHumanInterventionList, setCoreSocket, setHumanInterventionList } from './utils/utils.js';
+import { ownLogger } from '@cinefinn/honoutils/ownLogger';
 
 
 const config = getConfig();
@@ -27,7 +28,7 @@ const app = new Hono({
 })
     .use(cors())
     .use(trimTrailingSlash())
-    .use(logger())
+    .use(ownLogger(console.log, ['/socket.io']))
     .route('/calendars', calendarRouter)
     .get('/humanIntervention', async (c) => {
         return c.json(getHumanInterventionList());
