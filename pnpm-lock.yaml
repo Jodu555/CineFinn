@@ -125,7 +125,7 @@ importers:
         version: link:../../packages/Utilities
       '@hono/node-server':
         specifier: ^1.19.5
-        version: 1.19.5(hono@4.12.0)
+        version: 1.19.5(hono@4.12.29)
       axios:
         specifier: ^1.13.1
         version: 1.13.5
@@ -133,8 +133,8 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2
       hono:
-        specifier: ^4.10.3
-        version: 4.12.0
+        specifier: ^4.12.29
+        version: 4.12.29
       jsdom:
         specifier: ^27.2.0
         version: 27.2.0
@@ -177,10 +177,10 @@ importers:
         version: link:../../packages/Utilities
       '@hono/node-server':
         specifier: ^1.19.5
-        version: 1.19.5(hono@4.12.0)
+        version: 1.19.5(hono@4.12.29)
       '@hono/prometheus':
         specifier: ^1.0.2
-        version: 1.0.2(hono@4.12.0)(prom-client@15.1.3)
+        version: 1.0.2(hono@4.12.29)(prom-client@15.1.3)
       '@jodu555/commandmanager':
         specifier: ^1.5.5
         version: 1.5.5
@@ -200,8 +200,8 @@ importers:
         specifier: ^17.2.3
         version: 17.2.3
       hono:
-        specifier: ^4.9.10
-        version: 4.12.0
+        specifier: ^4.12.29
+        version: 4.12.29
       ioredis:
         specifier: ^5.8.2
         version: 5.10.0
@@ -251,6 +251,9 @@ importers:
       '@cinefinn/configuration-manager':
         specifier: workspace:*
         version: link:../../packages/ConfigurationManager
+      '@cinefinn/honoutils':
+        specifier: workspace:*
+        version: link:../../packages/HonoUtils
       '@cinefinn/types':
         specifier: workspace:*
         version: link:../../packages/Types
@@ -259,10 +262,10 @@ importers:
         version: link:../../packages/Utilities
       '@hono/node-server':
         specifier: ^1.19.5
-        version: 1.19.5(hono@4.12.0)
+        version: 1.19.5(hono@4.12.29)
       hono:
-        specifier: ^4.12.0
-        version: 4.12.0
+        specifier: ^4.12.29
+        version: 4.12.29
       socket.io-client:
         specifier: ^4.8.1
         version: 4.8.1
@@ -3207,10 +3210,6 @@ packages:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
 
-  hono@4.12.0:
-    resolution: {integrity: sha512-NekXntS5M94pUfiVZ8oXXK/kkri+5WpX2/Ik+LVsl+uvw+soj4roXIsPqO+XsWrAw20mOzaXOZf3Q7PfB9A/IA==}
-    engines: {node: '>=16.9.0'}
-
   hono@4.12.29:
     resolution: {integrity: sha512-1hNiRjawYrLq/4m3DQQjPGFg0VZkk4RjQJDff/excI6Dm9BiL75qxGrd7/c6YOxPdq6AscP3LiXhQ6fKFC1Waw==}
     engines: {node: '>=16.9.0'}
@@ -5827,13 +5826,13 @@ snapshots:
       '@fortawesome/fontawesome-svg-core': 7.1.0
       vue: 3.5.30(typescript@5.9.3)
 
-  '@hono/node-server@1.19.5(hono@4.12.0)':
+  '@hono/node-server@1.19.5(hono@4.12.29)':
     dependencies:
-      hono: 4.12.0
+      hono: 4.12.29
 
-  '@hono/prometheus@1.0.2(hono@4.12.0)(prom-client@15.1.3)':
+  '@hono/prometheus@1.0.2(hono@4.12.29)(prom-client@15.1.3)':
     dependencies:
-      hono: 4.12.0
+      hono: 4.12.29
       prom-client: 15.1.3
 
   '@img/colour@1.1.0': {}
@@ -8250,8 +8249,6 @@ snapshots:
   hasown@2.0.2:
     dependencies:
       function-bind: 1.1.2
-
-  hono@4.12.0: {}
 
   hono@4.12.29: {}
 

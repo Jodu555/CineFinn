@@ -8,11 +8,11 @@ import { formatBytes } from '@cinefinn/utilities/bytes';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { trimTrailingSlash } from 'hono/trailing-slash';
-import { ownLogger } from './utils/ownLogger.js';
 import { serve } from '@hono/node-server';
 import { getPtoken, setPtoken, setSocket } from './utils/utils.js';
 import { setupTransmitFile } from './transmitFile.js';
 import { videoRouter } from './routes/video.js';
+import { ownLogger } from '@cinefinn/honoutils/ownLogger';
 
 const config = getConfig();
 
