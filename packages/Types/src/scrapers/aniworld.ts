@@ -21,3 +21,30 @@ export interface AniWorldSeriesInformations {
     movies?: AniWorldEntity[];
     seasons: AniWorldEntity[][];
 }
+
+
+export type Calendar<T> = Record<number, T[]>;
+
+export interface CalendarEntry {
+    type: 'aniworld' | 'sto';
+    href: string;
+    title: string;
+    parsed: {
+        filmID: string | null;
+        season: string | null;
+        episode: string | null;
+        serieSlug: string;
+    }
+}
+
+export type StoCalendarEntry = CalendarEntry & {
+    type: 'sto';
+}
+
+export type AniworldCalendarEntry = CalendarEntry & {
+    type: 'aniworld';
+    additionalInfo?: {
+        marker: string;
+        releasedAt: string;
+    }
+}

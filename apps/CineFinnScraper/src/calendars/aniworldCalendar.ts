@@ -2,21 +2,8 @@ import axios from 'axios';
 import jsdom from 'jsdom';
 import fs from 'fs';
 import path from 'path';
+import type { AniworldCalendarEntry, Calendar } from '@cinefinn/types';
 
-interface AniworldCalendarEntry {
-    href: string;
-    title: string;
-    marker: string;
-    releasedAt: string;
-    parsed: {
-        filmID: string | null;
-        season: string | null;
-        episode: string | null;
-        serieSlug: string;
-    }
-}
-
-type Calendar = Record<number, AniworldCalendarEntry[]>;
 
 async function getAniworldCalendar(): Promise<AniworldCalendarEntry[]> {
     const response = await axios.get('https://aniworld.to/neue-episoden');
@@ -45,17 +32,20 @@ async function getAniworldCalendar(): Promise<AniworldCalendarEntry[]> {
         const serieSlug = href.split('/')[3];
 
         return {
+            type: 'aniworld',
             href,
             title,
-            marker,
-            releasedAt,
+            additionalInfo: {
+                marker,
+                releasedAt,
+            },
             parsed: {
                 filmID,
                 season,
                 episode,
                 serieSlug
             }
-        };
+        } satisfies AniworldCalendarEntry;
     }).filter(x => x != null);
     return newEpisodes;
 
@@ -76,6 +66,6 @@ export async function getAniworldCalendarFromFile() {
         await fs.promises.writeFile(filePath, JSON.stringify({}, null, 2));
     }
     const fileData = await fs.promises.readFile(filePath, 'utf-8');
-    const calendar = JSON.parse(fileData) as Calendar;
+    const calendar = JSON.parse(fileData) as Calendar<AniworldCalendarEntry>;
     return calendar;
 }

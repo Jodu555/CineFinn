@@ -14,7 +14,7 @@ import { fixSeasons, handleSubSystemProminence, insertMissingWatchableEntityRunt
 import { Job } from './job/Job.js';
 import { authRouter } from './middleware/auth.js';
 import { adminRouter } from './routes/admin/admin.js';
-import { indexRouter } from './routes/index.js';
+import { getFrontEndSeries, indexRouter } from './routes/index.js';
 import { managmentRouter } from './routes/managment.js';
 import { playlistRouter } from './routes/playlist.js';
 import { proxyRouter } from './routes/proxys.js';
@@ -33,6 +33,8 @@ import { recommendationRouter } from './routes/recommendations/recommendations.j
 import { setupCommandManager } from './utils/commands.js';
 import { healthRouter } from './routes/health.js';
 import { ownLogger } from '@cinefinn/honoutils/ownLogger';
+import { getScraperSocket, isScraperSocketConnected } from './sockets/scraper.socket.js';
+import type { AniworldCalendarEntry, Calendar, StoCalendarEntry } from '@cinefinn/types';
 
 
 
@@ -56,6 +58,82 @@ export const app = new Hono({
     .route('/health', healthRouter)
     .get('/status', async (c) => {
         return c.text('', 200);
+    })
+    .get('/calendar', async (c) => {
+        const scraperSocket = await getScraperSocket();
+        if (scraperSocket == null) {
+            return c.json({ message: 'Scraper Socket not connected Calendar not available' }, 400);
+        }
+        const calendarMap = await new Promise<{
+            aniworld: Calendar<AniworldCalendarEntry>;
+            sto: Calendar<StoCalendarEntry>;
+        }>((resolve, reject) => {
+            scraperSocket.timeout(5000).emit('getCalendar', async (err, calendarMap) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve(calendarMap);
+            });
+        });
+
+        type newCalendarEntry = {
+            type: 'aniworld' | 'sto';
+            ts: number;
+            title: string;
+            slug: string;
+            href: string;
+            season: string | null;
+            episode: string | null;
+            filmID: string | null;
+            serieID: string;
+        }
+
+        const aniworldEntrys = [] as newCalendarEntry[];
+
+
+        /**
+         * Maps the slugs to a seriesID
+         */
+        const slugMap = new Map<string, string>();
+
+        const series = await getFrontEndSeries();
+
+        [...Object.entries(calendarMap.aniworld), ...Object.entries(calendarMap.sto)].forEach(([calendarTimestamp, calendarEntry]) => {
+            const newCalEntrys = calendarEntry.map(e => {
+                const slug = e.parsed.serieSlug;
+                let serieID = slugMap.get(slug);
+                if (serieID == undefined) {
+                    for (const serie of series) {
+                        if (serie.refs.aniworld?.includes(slug)) {
+                            serieID = serie.UUID;
+                            slugMap.set(slug, serieID);
+                            break;
+                        }
+                        if (serie.refs.sto?.includes(slug)) {
+                            serieID = serie.UUID;
+                            slugMap.set(slug, serieID);
+                            break;
+                        }
+                    }
+                }
+                return {
+                    type: e.type,
+                    ts: calendarTimestamp,
+                    date: new Date(+calendarTimestamp).toLocaleString(),
+                    title: e.title,
+                    slug: slug,
+                    href: e.href,
+                    season: e.parsed.season,
+                    episode: e.parsed.episode,
+                    filmID: e.parsed.filmID,
+                    serieID: serieID,
+                } as any as newCalendarEntry;
+            });
+            aniworldEntrys.push(...newCalEntrys);
+        });
+
+        return c.json(aniworldEntrys.filter(x => x.serieID != undefined));
     })
     .route('/auth', authRouter)
     .route('/index', indexRouter)

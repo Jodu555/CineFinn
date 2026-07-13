@@ -1,7 +1,7 @@
 import type * as database from "../models/index.js";
 import type { Job, WatchHistory, SettingsObject, FrontendSeries, Account, MovingItem, DetailedSeries } from "../models/index.js";
 import type { TodoItem, ExtendedEpisodeDownload } from "../shared/crawler.js";
-import type { AniWorldSeriesInformations } from "../scrapers/aniworld.js";
+import type { AniworldCalendarEntry, AniWorldSeriesInformations, Calendar, CalendarEntry, StoCalendarEntry } from "../scrapers/aniworld.js";
 import type { SocketAuthData } from "./auth.js";
 import type { SubSystem, DiskStats, Overview, ClientInfo, RequestFileData, FileChunkData, FileStartData, ErrorData, UploadCompleteData } from "./subsystem.js";
 import type * as fs from "fs";
@@ -56,6 +56,7 @@ export interface ServerToScraperEvents {
     'scrape:aniworld': (url: string, callback: (informations: AniWorldSeriesInformations | void) => void) => void;
     'scrape:sto': (url: string, callback: (informations: AniWorldSeriesInformations | void) => void) => void;
     'checkSerieForUpdates': (serieUUID: string, callback: (output: CheckForUpdatesOutput) => void) => void;
+    'getCalendar': (callback: (calendarMap: { aniworld: Calendar<AniworldCalendarEntry>, sto: Calendar<StoCalendarEntry> }) => void) => void;
 }
 
 export interface CheckForUpdatesOutput {

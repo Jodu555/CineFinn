@@ -2,19 +2,8 @@ import axios from 'axios';
 import jsdom from 'jsdom';
 import fs from 'fs';
 import path from 'path';
+import type { Calendar, StoCalendarEntry } from '@cinefinn/types';
 
-interface StoCalendarEntry {
-    href: string;
-    title: string;
-    parsed: {
-        filmID: string | null;
-        season: string | null;
-        episode: string | null;
-        serieSlug: string;
-    }
-}
-
-type Calendar = Record<number, StoCalendarEntry[]>;
 
 async function getStoCalendar(): Promise<StoCalendarEntry[]> {
     const response = await axios.get('http://186.2.175.5/');
@@ -39,6 +28,7 @@ async function getStoCalendar(): Promise<StoCalendarEntry[]> {
         const filmID = season === '0' ? episode : null;
 
         return {
+            type: 'sto',
             href,
             title,
             parsed: {
@@ -47,7 +37,7 @@ async function getStoCalendar(): Promise<StoCalendarEntry[]> {
                 episode: filmID == null ? episode : null,
                 serieSlug
             }
-        };
+        } satisfies StoCalendarEntry;
     }).filter(x => x != null);
 
     return newEpisodes;
@@ -69,6 +59,6 @@ export async function getStoCalendarFromFile() {
     if (fs.existsSync(filePath) == false) {
         fs.writeFileSync(filePath, JSON.stringify({}, null, 2));
     }
-    const calendar = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Calendar;
+    const calendar = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Calendar<StoCalendarEntry>;
     return calendar;
 }

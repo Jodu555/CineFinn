@@ -180,6 +180,15 @@ socket.on('scrape:sto', async (url, cb) => {
     cb(informations);
 });
 
+socket.on('getCalendar', async (cb) => {
+    const aniworldCalendar = await getAniworldCalendarFromFile();
+    const stoCalendar = await getStoCalendarFromFile();
+    cb({
+        aniworld: aniworldCalendar,
+        sto: stoCalendar,
+    });
+})
+
 async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart = false, alreadyCheckedForUpdates: string[] = []) {
     const timingMap = new Map<string, number>();
     const log = (...args: any[]) => {
