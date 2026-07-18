@@ -69,7 +69,7 @@ class Aniworld {
     private checkV2(data: string) {
         const $ = cheerio.load(data);
         const isV2 = $('nav.navbar span.logo-summary').text();
-        this.isv2 = isV2 === 'UPDATE';
+        this.isv2 = isV2 === 'UPDATE' || isV2 === 'Version 2';
     }
 
     private parseEntityInformations(data: string): { numberOfSeasons: number; hasMovies: boolean; } {
