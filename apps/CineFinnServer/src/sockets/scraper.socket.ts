@@ -6,11 +6,12 @@ import type { definedSocket } from "../index.js";
 import { getIO } from "../utils.js";
 import type { Socket } from "socket.io";
 import type { Account } from "@cinefinn/types/models/user";
-import type { timestamped } from "@cinefinn/types/shared";
+import type { ExtendedEpisodeDownload, timestamped } from "@cinefinn/types/shared";
 import { Job } from "../job/Job.js";
 import { cacheRegistry } from "../routes/admin/cache.js";
 import type { JobType } from "bullmq";
 import { callJob } from "../routes/managment.js";
+import type { AniworldCalendarEntry, Calendar, StoCalendarEntry } from "@cinefinn/types";
 
 export let isScraperSocketConnected = false;
 
@@ -120,6 +121,50 @@ export async function checkForUpdates(job: Job, smart: boolean) {
         });
     });
     await job.success();
+}
+
+/**
+ * Gets the Calendar from the Scraper Socket
+ * @returns undefined if the sracper socket is not connected
+ */
+export async function getCalendar(): Promise<{
+    aniworld: Calendar<AniworldCalendarEntry>;
+    sto: Calendar<StoCalendarEntry>;
+} | undefined> {
+    const scraperSocket = await getScraperSocket();
+    if (scraperSocket == null) {
+        return undefined;
+    }
+    const calendarMap = await new Promise<{
+        aniworld: Calendar<AniworldCalendarEntry>;
+        sto: Calendar<StoCalendarEntry>;
+    }>((resolve, reject) => {
+        scraperSocket.timeout(5000).emit('getCalendar', async (err, calendarMap) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve(calendarMap);
+        });
+    });
+    return calendarMap;
+}
+
+/**
+ * Gets the Human Intervention List from the Scraper Socket
+ * @returns undefined if the sracper socket is not connected
+ */
+export async function getHumanInterventionList() {
+    const scraperSocket = await getScraperSocket();
+    if (scraperSocket == null) {
+        return undefined;
+    }
+    const humanInterventionList = await new Promise<ExtendedEpisodeDownload[]>((resolve) => {
+        scraperSocket.emit('getHumanInterventionList', (list) => {
+            resolve(list);
+        });
+    });
+    return humanInterventionList;
 }
 
 export default {

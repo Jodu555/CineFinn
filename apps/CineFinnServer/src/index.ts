@@ -33,7 +33,7 @@ import { recommendationRouter } from './routes/recommendations/recommendations.j
 import { setupCommandManager } from './utils/commands.js';
 import { healthRouter } from './routes/health.js';
 import { ownLogger } from '@cinefinn/honoutils/ownLogger';
-import { getScraperSocket, isScraperSocketConnected } from './sockets/scraper.socket.js';
+import { getCalendar, getScraperSocket, isScraperSocketConnected } from './sockets/scraper.socket.js';
 import type { AniworldCalendarEntry, Calendar, StoCalendarEntry } from '@cinefinn/types';
 
 
@@ -60,22 +60,10 @@ export const app = new Hono({
         return c.text('', 200);
     })
     .get('/calendar', async (c) => {
-        const scraperSocket = await getScraperSocket();
-        if (scraperSocket == null) {
+        const calendarMap = await getCalendar();
+        if (calendarMap == undefined) {
             return c.json({ message: 'Scraper Socket not connected Calendar not available' }, 400);
         }
-        const calendarMap = await new Promise<{
-            aniworld: Calendar<AniworldCalendarEntry>;
-            sto: Calendar<StoCalendarEntry>;
-        }>((resolve, reject) => {
-            scraperSocket.timeout(5000).emit('getCalendar', async (err, calendarMap) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                resolve(calendarMap);
-            });
-        });
 
         type newCalendarEntry = {
             type: 'aniworld' | 'sto';

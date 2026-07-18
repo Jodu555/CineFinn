@@ -57,6 +57,7 @@ export interface ServerToScraperEvents {
     'scrape:sto': (url: string, callback: (informations: AniWorldSeriesInformations | void) => void) => void;
     'checkSerieForUpdates': (serieUUID: string, callback: (output: CheckForUpdatesOutput) => void) => void;
     'getCalendar': (callback: (calendarMap: { aniworld: Calendar<AniworldCalendarEntry>, sto: Calendar<StoCalendarEntry> }) => void) => void;
+    'getHumanInterventionList': (callback: (list: ExtendedEpisodeDownload[]) => void) => void;
 }
 
 export interface CheckForUpdatesOutput {

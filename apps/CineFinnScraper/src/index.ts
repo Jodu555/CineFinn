@@ -189,6 +189,11 @@ socket.on('getCalendar', async (cb) => {
     });
 })
 
+socket.on('getHumanInterventionList', async (cb) => {
+    const humanInterventionList = getHumanInterventionList();
+    cb(humanInterventionList);
+})
+
 async function checkForUpdates(jobUUID: string, index: DetailedSeries[], smart = false, alreadyCheckedForUpdates: string[] = []) {
     const timingMap = new Map<string, number>();
     const log = (...args: any[]) => {
