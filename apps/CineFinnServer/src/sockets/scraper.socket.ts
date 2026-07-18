@@ -1,17 +1,16 @@
 
-import type { AuthHandshakeScraper, InterServerEvents, ScraperToServerEvents, ServerToScraperEvents, SocketAuthDataScraper } from "@cinefinn/types/socket";
-import type { SocketConsumerMeta } from "./index.js";
-import { getConfig } from "../config.js";
-import type { definedSocket } from "../index.js";
-import { getIO } from "../utils.js";
-import type { Socket } from "socket.io";
+import type { AniworldCalendarEntry, Calendar, StoCalendarEntry } from "@cinefinn/types";
 import type { Account } from "@cinefinn/types/models/user";
 import type { ExtendedEpisodeDownload, timestamped } from "@cinefinn/types/shared";
+import type { AuthHandshakeScraper, InterServerEvents, ScraperToServerEvents, ServerToScraperEvents, SocketAuthDataScraper } from "@cinefinn/types/socket";
+import type { Socket } from "socket.io";
+import { getConfig } from "../config.js";
+import type { definedSocket } from "../index.js";
 import { Job } from "../job/Job.js";
 import { cacheRegistry } from "../routes/admin/cache.js";
-import type { JobType } from "bullmq";
 import { callJob } from "../routes/managment.js";
-import type { AniworldCalendarEntry, Calendar, StoCalendarEntry } from "@cinefinn/types";
+import { getIO } from "../utils.js";
+import type { SocketConsumerMeta } from "./index.js";
 
 export let isScraperSocketConnected = false;
 

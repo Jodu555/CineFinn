@@ -1,40 +1,39 @@
-import { serve } from '@hono/node-server';
-import { serveStatic } from '@hono/node-server/serve-static';
-import { Hono } from 'hono';
-import { Redis } from 'ioredis';
-import { Server, Socket } from 'socket.io';
-import { accountsTable, authTokensTable, connectDatabase, database } from './database.js';
+import { ownLogger } from '@cinefinn/honoutils/ownLogger';
 import type { Account } from '@cinefinn/types/models/user';
 import type { timestamped } from '@cinefinn/types/shared';
 import type { AnythingToServerEvents, InterServerEvents, ServerToAnythingEvents, SocketData } from '@cinefinn/types/socket';
+import { wait } from '@cinefinn/utilities/time';
+import { serve } from '@hono/node-server';
+import { serveStatic } from '@hono/node-server/serve-static';
+import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { trimTrailingSlash } from 'hono/trailing-slash';
+import { Redis } from 'ioredis';
+import { Server, Socket } from 'socket.io';
 import { getConfig } from './config.js';
-import { fixSeasons, handleSubSystemProminence, insertMissingWatchableEntityRuntimes } from './job/crawler.js';
+import { accountsTable, authTokensTable, connectDatabase, database } from './database.js';
+import { handleSubSystemProminence } from './job/crawler.js';
 import { Job } from './job/Job.js';
 import { authRouter } from './middleware/auth.js';
+import { metricsRouter, registerMetrics } from './middleware/ownPrometheus.js';
 import { adminRouter } from './routes/admin/admin.js';
-import { getFrontEndSeries, indexRouter } from './routes/index.js';
+import { calendarRouter } from './routes/calendar.js';
+import { franchiseRouter } from './routes/franchise.js';
+import { healthRouter } from './routes/health.js';
+import { imageRouter } from './routes/image.js';
+import { indexRouter } from './routes/index.js';
 import { managmentRouter } from './routes/managment.js';
 import { playlistRouter } from './routes/playlist.js';
+import { previewImagesRouter } from './routes/previewImages.js';
 import { proxyRouter } from './routes/proxys.js';
+import { recommendationRouter } from './routes/recommendations/recommendations.js';
 import { todoRouter } from './routes/todo.js';
 import { videoRouter } from './routes/video.js';
 import { watchRouter } from './routes/watch.js';
 import { setupSocketIO } from './sockets/index.js';
 import { getKnownSubSystems, toggleSeriesesForSubSystem } from './sockets/subsystem.socket.js';
 import { getEmailManager, getIO, setIO, setIORedis } from './utils.js';
-import { wait } from '@cinefinn/utilities/time';
-import { metricsRouter, registerMetrics } from './middleware/ownPrometheus.js';
-import { franchiseRouter } from './routes/franchise.js';
-import { imageRouter } from './routes/image.js';
-import { previewImagesRouter } from './routes/previewImages.js';
-import { recommendationRouter } from './routes/recommendations/recommendations.js';
 import { setupCommandManager } from './utils/commands.js';
-import { healthRouter } from './routes/health.js';
-import { ownLogger } from '@cinefinn/honoutils/ownLogger';
-import { getCalendar, getScraperSocket, isScraperSocketConnected } from './sockets/scraper.socket.js';
-import type { AniworldCalendarEntry, Calendar, StoCalendarEntry } from '@cinefinn/types';
 
 
 
@@ -59,70 +58,6 @@ export const app = new Hono({
     .get('/status', async (c) => {
         return c.text('', 200);
     })
-    .get('/calendar', async (c) => {
-        const calendarMap = await getCalendar();
-        if (calendarMap == undefined) {
-            return c.json({ message: 'Scraper Socket not connected Calendar not available' }, 400);
-        }
-
-        type newCalendarEntry = {
-            type: 'aniworld' | 'sto';
-            ts: number;
-            title: string;
-            slug: string;
-            href: string;
-            season: string | null;
-            episode: string | null;
-            filmID: string | null;
-            serieID: string;
-        }
-
-        const aniworldEntrys = [] as newCalendarEntry[];
-
-
-        /**
-         * Maps the slugs to a seriesID
-         */
-        const slugMap = new Map<string, string>();
-
-        const series = await getFrontEndSeries();
-
-        [...Object.entries(calendarMap.aniworld), ...Object.entries(calendarMap.sto)].forEach(([calendarTimestamp, calendarEntry]) => {
-            const newCalEntrys = calendarEntry.map(e => {
-                const slug = e.parsed.serieSlug;
-                let serieID = slugMap.get(slug);
-                if (serieID == undefined) {
-                    for (const serie of series) {
-                        if (serie.refs.aniworld?.includes(slug)) {
-                            serieID = serie.UUID;
-                            slugMap.set(slug, serieID);
-                            break;
-                        }
-                        if (serie.refs.sto?.includes(slug)) {
-                            serieID = serie.UUID;
-                            slugMap.set(slug, serieID);
-                            break;
-                        }
-                    }
-                }
-                return {
-                    type: e.type,
-                    ts: calendarTimestamp,
-                    date: new Date(+calendarTimestamp).toLocaleString(),
-                    title: e.title,
-                    slug: slug,
-                    href: e.href,
-                    season: e.parsed.season,
-                    episode: e.parsed.episode,
-                    filmID: e.parsed.filmID,
-                    serieID: serieID,
-                } as any as newCalendarEntry;
-            });
-            aniworldEntrys.push(...newCalEntrys);
-        });
-
-        return c.json(aniworldEntrys.filter(x => x.serieID != undefined));
-    })
     .route('/auth', authRouter)
     .route('/index', indexRouter)
     .route('/managment', managmentRouter)
@@ -135,6 +70,7 @@ export const app = new Hono({
     .route('/previewImages', previewImagesRouter)
     .route('/recommendations', recommendationRouter)
     .route('/franchise', franchiseRouter)
+    .route('/video', calendarRouter)
     .route('/video', videoRouter);
 
 export type definedSocket = Socket<AnythingToServerEvents, ServerToAnythingEvents, InterServerEvents, SocketData<Account | (Account & timestamped)>>;

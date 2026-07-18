@@ -1,3 +1,4 @@
+import { ownLogger } from '@cinefinn/honoutils/ownLogger';
 import type { DetailedSeries } from '@cinefinn/types/models/media';
 import type { ExtendedEpisodeDownload, IgnoranceItem } from '@cinefinn/types/shared';
 import type { AuthHandshake, ScraperToServerEvents, ServerToScraperEvents, } from '@cinefinn/types/socket';
@@ -7,7 +8,6 @@ import axios from 'axios';
 import crypto from 'crypto';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { logger } from 'hono/logger';
 import { trimTrailingSlash } from 'hono/trailing-slash';
 import { Server } from 'socket.io';
 import { io as Client, Socket } from 'socket.io-client';
@@ -19,7 +19,6 @@ import { DownloaderConnector } from './class/DownloaderConnector.js';
 import { getConfig } from './config.js';
 import { compareForNewReleases } from './utils/compare.js';
 import { callJob, getHumanInterventionList, getPtoken, setCoreSocket, setHumanInterventionList, setPtoken } from './utils/utils.js';
-import { ownLogger } from '@cinefinn/honoutils/ownLogger';
 
 setPtoken(crypto.randomUUID().replaceAll('-', ''))
 
