@@ -236,6 +236,10 @@ async function compareForNewReleasesAniWorldOrSTO(
     //TODO: the system currently only checks if the gerdub is relased, but when we initially have the engsub and the gersub is released, the system does not care
 
     const addtoOutputList = (title: string, reference: string, season: number, episode: number, lang: Langs) => {
+        if (lang === undefined) {
+            console.log('Lang is undefined', title, reference, season, episode, lang);
+            return;
+        }
         outputDlList.push({
             _animeFolder: title,
             finished: false,
@@ -246,6 +250,10 @@ async function compareForNewReleasesAniWorldOrSTO(
         });
     };
     const addtoOutputListMovie = (title: string, reference: string, movieTitle: string, movieIdx: number, lang: Langs) => {
+        if (lang === undefined) {
+            console.log('Lang is undefined', title, reference, movieTitle, movieIdx, lang);
+            return;
+        }
         outputDlList.push({
             _animeFolder: title,
             finished: false,
