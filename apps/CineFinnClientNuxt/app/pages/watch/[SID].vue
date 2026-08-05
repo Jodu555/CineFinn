@@ -473,18 +473,24 @@ const coverURL = computed(() => {
 	return decideSeriesImage(series.value!, randomNumber.value);
 });
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const debouncedUpdateTime = debounce(
 	async (data: { watchableUUID: string; time: number }) => {
-		$fetch(`${useAPIURL()}/watch/updateTime/${data.watchableUUID}/${data.time}`, {
+		await $fetch(`${useAPIURL()}/watch/updateTime/${data.watchableUUID}/${data.time}`, {
 			method: 'POST',
 			headers: {
 				'auth-token': authStore.authToken,
 			},
 		});
+		await sleep(1000);
+		await indexStore.loadWatchHistory(route.params.SID as string);
 	},
 	2000,
 	(data) => data.watchableUUID, // This is the key for debouncing, if this changes then the debounce will be flushed!
 );
+
+let triedReconnect = false;
 
 const sendVideoTimeUpdate = async (time: number) => {
 	if (time == undefined) return;
@@ -498,6 +504,10 @@ const sendVideoTimeUpdate = async (time: number) => {
 		console.log('Socket Connected, emit updateTime', data);
 		useSocket().emit('updateTime', data);
 	} else {
+		if (!triedReconnect) {
+			triedReconnect = true;
+			useSocket().connect();
+		}
 		console.log('No Socket, debouncedUpdateTime', data);
 		debouncedUpdateTime(data);
 	}
