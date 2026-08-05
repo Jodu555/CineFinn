@@ -475,7 +475,12 @@ const coverURL = computed(() => {
 
 const debouncedUpdateTime = debounce(
 	async (data: { watchableUUID: string; time: number }) => {
-		$fetch(`${useAPIURL()}/watch/updateTime/${data.watchableUUID}/${data.time}`);
+		$fetch(`${useAPIURL()}/watch/updateTime/${data.watchableUUID}/${data.time}`, {
+			method: 'POST',
+			headers: {
+				'auth-token': authStore.authToken,
+			},
+		});
 	},
 	2000,
 	(data) => data.watchableUUID, // This is the key for debouncing, if this changes then the debounce will be flushed!

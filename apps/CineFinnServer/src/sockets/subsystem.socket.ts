@@ -115,7 +115,7 @@ export async function toggleSeriesesForSubSystem(subID: string, disabled: boolea
     }
     await indexStorage.clear();
     await sendSeriesReloadToAll();
-    console.log(`Toggling Serieses(${seriesIDs.length}) for SubSystem: ${subID} to Disabled: ${disabled}`);
+    console.log(`Toggling Serieses(${seriesIDs.length}) for SubSystem: ${subID} to ${disabled ? 'Disabled' : 'Enabled'}`);
 }
 
 export type definedSubSystemSocket = Socket<SubSystemToServerEvents, ServerToSubSystemEvents, InterServerEvents, { auth: SocketAuthDataSubsystem<Account | (Account & timestamped)>; }>;
