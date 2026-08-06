@@ -139,7 +139,7 @@ const router = new Hono()
             message: 'Movie marked as ' + (bool ? 'watched' : 'unwatched'),
         });
     })
-    .post('/updateTime/:watchableUUID/:time', authMiddleware, async (c) => {
+    .on(['GET', 'POST'], '/updateTime/:watchableUUID/:time', authMiddleware, async (c) => {
         const user = c.get('credentials').user;
 
         /**
