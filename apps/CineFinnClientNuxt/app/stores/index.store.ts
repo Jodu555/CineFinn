@@ -117,6 +117,7 @@ export const useIndexStore = defineStore('index', {
             this.watchHistoryPreteched[seriesID] = watchHistoryresponse;
         },
         async loadWatchHistory(seriesID: string) {
+            if (useAuthStore().loggedIn === false) return;
             if (this.watchHistoryPreteched[seriesID] !== undefined && this.watchHistoryPreteched[seriesID] !== true) {
                 this.watchHistory = this.watchHistoryPreteched[seriesID];
                 this.watchHistoryPreteched = {};
