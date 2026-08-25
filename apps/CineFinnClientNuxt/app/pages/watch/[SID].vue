@@ -490,7 +490,8 @@ const debouncedUpdateTime = debounce(
 	(data) => data.watchableUUID, // This is the key for debouncing, if this changes then the debounce will be flushed!
 );
 
-let triedReconnect = false;
+const MAX_SOCKET_TRY_RECONNECT = 10;
+let triedReconnect = 0;
 
 const sendVideoTimeUpdate = async (time: number) => {
 	if (time == undefined) return;
@@ -504,8 +505,11 @@ const sendVideoTimeUpdate = async (time: number) => {
 		console.log('Socket Connected, emit updateTime', data);
 		useSocket().emit('updateTime', data);
 	} else {
-		if (!triedReconnect) {
-			triedReconnect = true;
+		if (triedReconnect > MAX_SOCKET_TRY_RECONNECT) {
+			triedReconnect++;
+			umTrackEvent('socket_connect_error', {
+				error: `Send video time update over REST no socket connection, retrying ${triedReconnect} / ${MAX_SOCKET_TRY_RECONNECT} times`,
+			});
 			useSocket().connect();
 		}
 		console.log('No Socket, debouncedUpdateTime', data);
@@ -883,7 +887,7 @@ const handleMarkMovieWatched = async (watched: boolean, movieUUID?: string) => {
 	await indexStore.markMovieWatched(movieUUID, watched);
 };
 
-const { data: additionalList, execute: loadCheckForUpdates } = await useFetch<
+const { data: additionalList, execute: loadCheckForUpdates } = useFetch<
 	{
 		outPath: string;
 		file: string;
@@ -916,7 +920,7 @@ const dynamicRelatedContent = computed(() => {
 
 const dynamicRelatedContentPlaylist = ref<string[]>([]);
 
-const { data: dynamicRelatedContentAPI, execute: loadDynamicRelatedContent } = await useFetch<string[]>(
+const { data: dynamicRelatedContentAPI, execute: loadDynamicRelatedContent } = useFetch<string[]>(
 	`${useAPIURL()}/index/${route.params.SID}/related`,
 	{
 		headers: {

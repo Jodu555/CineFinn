@@ -67,12 +67,6 @@ onMounted(() => {
 		window.location.reload();
 	});
 
-	if (authStore.loggedIn !== true) return;
-	socket.connect();
-
-	if (socket.connected) {
-		onConnect();
-	}
 	socket.on('connect', onConnect);
 
 	socket.on('connect_error', (err) => {
@@ -84,8 +78,19 @@ onMounted(() => {
 	setTimeout(() => {
 		if (!socket.connected) {
 			//Here notify the user that no connection could be established
+			if (authStore.loggedIn) {
+				umTrackEvent('socket_connect_error', { error: 'No connection could be established after 30 seconds, retrying...' });
+				socket.connect();
+			}
 		}
 	}, 1000 * 30);
+
+	if (authStore.loggedIn !== true) return;
+	socket.connect();
+
+	if (socket.connected) {
+		onConnect();
+	}
 });
 const router = useRouter();
 function onConnect() {
