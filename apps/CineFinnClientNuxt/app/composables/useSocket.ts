@@ -26,6 +26,8 @@ export default function useSocket(type: 'client' | 'rmvcEmitter' = 'client') {
         upgrade: true,
         reconnection: true,
         autoConnect: false,
+        retries: 15,
+        tryAllTransports: true,
         auth: {
             type,
             authToken: authStore.authToken,

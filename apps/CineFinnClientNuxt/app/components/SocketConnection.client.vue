@@ -136,5 +136,6 @@ watch(
 function onDisconnect() {
 	isConnected.value = false;
 	transport.value = 'N/A';
+	socket.connect();
 }
 </script>
