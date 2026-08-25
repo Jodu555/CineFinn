@@ -11,7 +11,8 @@ export const useIndexStore = defineStore('index', {
         detailedMovies: [] as DetailedMovie[],
         selectedEntity: null as DetailedEpisode | DetailedMovie | null,
         selectedWatchableEntity: null as WatchableEntity | null,
-        detailedPrefetchedSeriesObj: {} as { [key: string]: DetailedSeries | true; },
+        detailedPrefetchedSeriesObj: {} as { [key: string]: DetailedSeries | true | undefined; },
+        watchHistoryPreteched: {} as { [key: string]: WatchHistory[] | true | undefined; },
         watchHistory: [] as WatchHistory[],
     }),
     getters: {
@@ -52,7 +53,7 @@ export const useIndexStore = defineStore('index', {
         async loadDetailedSeasonInfo(seriesID: string) {
             this.loading = true;
             // console.log(`loadDetailedSeasonInfo for seriesID: ${seriesID}`);
-            if (this.detailedPrefetchedSeriesObj[seriesID] && this.detailedPrefetchedSeriesObj[seriesID] !== true) {
+            if (this.detailedPrefetchedSeriesObj[seriesID] !== undefined && this.detailedPrefetchedSeriesObj[seriesID] !== true) {
                 const prefetched = this.detailedPrefetchedSeriesObj[seriesID];
                 this.detailedSeasons = prefetched.seasons;
                 this.detailedMovies = prefetched.movies;
@@ -93,7 +94,8 @@ export const useIndexStore = defineStore('index', {
                 return;
             }
             this.detailedPrefetchedSeriesObj[seriesID] = true;
-            const response = await $fetch<DetailedSeries>(useAPIURL() + '/index/' + seriesID, {
+            //Prefetch Series itself
+            const serieResponse = await $fetch<DetailedSeries>(useAPIURL() + '/index/' + seriesID, {
                 headers: {
                     'auth-token': useAuthStore().authToken,
                 },
@@ -102,9 +104,24 @@ export const useIndexStore = defineStore('index', {
             const url = new URL(useAPIURL() + `/images/${seriesID}/cover.jpg`);
             url.searchParams.append('auth-token', useAuthStore().authToken);
             img.src = url.href;
-            this.detailedPrefetchedSeriesObj[seriesID] = response;
+            this.detailedPrefetchedSeriesObj[seriesID] = serieResponse;
+
+            //Prefetch WatchHistory
+            this.watchHistoryPreteched[seriesID] = true;
+            const watchHistoryresponse = await $fetch<WatchHistory[]>(`${useAPIURL()}/watch/info/${seriesID}`, {
+                method: 'GET',
+                headers: {
+                    'auth-token': useAuthStore().authToken,
+                },
+            });
+            this.watchHistoryPreteched[seriesID] = watchHistoryresponse;
         },
         async loadWatchHistory(seriesID: string) {
+            if (this.watchHistoryPreteched[seriesID] !== undefined && this.watchHistoryPreteched[seriesID] !== true) {
+                this.watchHistory = this.watchHistoryPreteched[seriesID];
+                this.watchHistoryPreteched = {};
+                return;
+            }
             const response = await $fetch<WatchHistory[]>(`${useAPIURL()}/watch/info/${seriesID}`, {
                 method: 'GET',
                 headers: {
