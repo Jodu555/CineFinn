@@ -87,6 +87,10 @@ onMounted(() => {
 			if (authStore.loggedIn) {
 				umTrackEvent('socket_connect_error', { error: 'No connection could be established after 30 seconds, retrying...' });
 				socket.connect();
+				socket.io.open((err) => {
+					console.log(err);
+					umTrackEvent('socket_connect_error', { error: 'Reopen failed cause of: ' + JSON.stringify(err) });
+				});
 				clearInterval(socketCheckInterval);
 			}
 		}
@@ -97,6 +101,10 @@ onMounted(() => {
 
 	if (authStore.loggedIn == false) return;
 	socket.connect();
+	socket.io.open((err) => {
+		console.log(err);
+		umTrackEvent('socket_connect_error', { error: 'Reopen failed cause of: ' + JSON.stringify(err) });
+	});
 
 	if (socket.connected) {
 		onConnect();
@@ -126,6 +134,10 @@ watch(
 	(loggedIn) => {
 		if (loggedIn) {
 			socket.connect();
+			socket.io.open((err) => {
+				console.log(err);
+				umTrackEvent('socket_connect_error', { error: 'Reopen failed cause of: ' + JSON.stringify(err) });
+			});
 		} else {
 			socket.disconnect();
 		}

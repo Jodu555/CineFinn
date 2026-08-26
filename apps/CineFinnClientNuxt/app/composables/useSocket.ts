@@ -22,6 +22,10 @@ export default function useSocket(type: 'client' | 'rmvcEmitter' = 'client') {
         await socket.disconnect();
         await wait(150);
         socket.connect();
+        socket.io.open((err) => {
+            console.log(err)
+            umTrackEvent('socket_connect_error', { error: 'Reopen failed cause of: ' + JSON.stringify(err) });
+        })
         await wait(10);
     });
 
