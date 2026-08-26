@@ -512,7 +512,7 @@ const sendVideoTimeUpdate = async (time: number) => {
 			});
 			useSocket().connect();
 		}
-		console.log('No Socket, debouncedUpdateTime', data);
+		console.log('No Socket, debouncedUpdateTime', data, triedReconnect, MAX_SOCKET_TRY_RECONNECT);
 		debouncedUpdateTime(data);
 	}
 };
