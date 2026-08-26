@@ -47,7 +47,11 @@ onBeforeUnmount(() => {
 	socket.off('todoListUpdate', todoStore.updateTodoList);
 	socket.off('franchisesUpdate', franchiseStore.updateFranchises);
 	socket.off('recommendationsAdd', homeStore.addRecommendations);
+
+	clearInterval(socketCheckInterval);
 });
+
+let socketCheckInterval: ReturnType<typeof setInterval>;
 
 onMounted(() => {
 	socket.on('disconnect', onDisconnect);
@@ -75,17 +79,23 @@ onMounted(() => {
 		umTrackEvent('socket_connect_error', { error: err.message });
 	});
 
-	setTimeout(() => {
+	socketCheckInterval = setInterval(() => {
+		console.log('socketCheckInterval', { socketConnected: socket.connected, authStoreLoggedIn: authStore.loggedIn });
 		if (!socket.connected) {
+			console.log('socket not connected');
 			//Here notify the user that no connection could be established
 			if (authStore.loggedIn) {
 				umTrackEvent('socket_connect_error', { error: 'No connection could be established after 30 seconds, retrying...' });
 				socket.connect();
+				clearInterval(socketCheckInterval);
 			}
 		}
 	}, 1000 * 30);
 
-	if (authStore.loggedIn !== true) return;
+	//@ts-expect-error vueSocket is not defined but this is for debugging why the socket does not reconnect after disconnect
+	window.vueSocket = socket;
+
+	if (authStore.loggedIn == false) return;
 	socket.connect();
 
 	if (socket.connected) {
