@@ -738,7 +738,7 @@ export async function insertMissingWatchableEntityRuntimes(job: Job) {
 
     await Promise.all(entitys.map(entity => {
         return limit(async () => {
-            job.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`);
+            job.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID} Errored: ${failed.size}`);
             if (entity.subID !== 'main' && await getSubSocketByID(entity.subID) == null) {
                 job.log(`Skipping entity ${i}/${entitys.length}: ${entity.UUID} because subID ${entity.subID} is not connected`);
                 failed.add(entity.UUID);
