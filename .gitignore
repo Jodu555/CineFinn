@@ -13,8 +13,8 @@ apps/CineFinnScraper/*.json
 config.json
 *.mp4
 __nogit.ts
-TEST/*.html
-TEST
+TEST_AI/*.html
+TEST_AI
 testImageManipulationHono/
 
 ChromeAnalyze/
