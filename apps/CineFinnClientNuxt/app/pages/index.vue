@@ -144,6 +144,16 @@
 </template>
 
 <script lang="ts" setup>
+useSeoMeta({
+	title: 'Cinema | Browse',
+	ogTitle: 'Cinema | Browse',
+	description: 'Browse the latest movies and series',
+	ogDescription: 'Browse the latest movies and series',
+	twitterTitle: 'Cinema | Browse',
+	twitterDescription: 'Browse the latest movies and series',
+	ogType: 'website',
+});
+
 definePageMeta({
 	middleware: 'auth',
 });
