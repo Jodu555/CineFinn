@@ -317,6 +317,57 @@ async function createTables() {
         // }
     });
 
+    if (false) {
+        await database.createTable('watchableEntitysMeta', {
+            options: {
+                timestamps: true,
+                PK: 'UUID',
+            },
+            UUID: UUID_FIELD,
+
+            // Reference to the internal video entity
+            watchableEntity_UUID: UUID_FIELD,
+
+            // File
+            fileSize: 'bigint',
+            md5sum: 'varchar(32)',
+            // sha256sum: 'varchar(64)',
+
+            // Container
+            containerFormat: 'varchar(32)',
+
+            // Video
+            duration: 'int',
+            videoWidth: 'int',
+            videoHeight: 'int',
+            videoCodec: 'varchar(32)',
+            videoProfile: 'varchar(32)',
+            videoLevel: 'varchar(16)',
+            videoBitrate: 'bigint',
+            videoFps: 'decimal(7,3)',
+            videoColorSpace: 'varchar(32)',
+            videoPixelFormat: 'varchar(32)',
+            videoBitDepth: 'tinyint',
+            videoFrameCount: 'bigint',
+            videoInterlaced: 'boolean',
+
+            // Audio
+            audioCodec: 'varchar(32)',
+            audioChannels: 'tinyint',
+            audioChannelLayout: 'varchar(32)',
+            audioSampleRate: 'int',
+            audioBitrate: 'bigint',
+            audioBitDepth: 'tinyint',
+
+            // Analysis/checking
+            lastchecked_at: 'datetime',
+            metadataVersion: 'int',
+            checkStatus: 'varchar(32)',
+            checkError: 'text',
+        })
+    }
+
+
     await database.createTable('watchHistory', {
         options: {
             timestamps: true,
