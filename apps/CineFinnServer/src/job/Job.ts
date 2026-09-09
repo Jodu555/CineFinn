@@ -154,7 +154,7 @@ export class Job extends EventEmitter<EventMap> {
     }
 
     time(label: string) {
-        this.timers.set(label, Date.now());
+        this.timers.set(label, performance.now());
     }
 
     async timeEnd(label: string) {
@@ -162,7 +162,7 @@ export class Job extends EventEmitter<EventMap> {
         if (start == undefined) {
             throw new Error('Timer not found');
         }
-        const end = Date.now();
+        const end = performance.now();
         this.timers.delete(label);
         await this.log(`[${label}] Took ${msToReadable(end - start)}`);
     }
