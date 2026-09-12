@@ -35,6 +35,7 @@ export default defineNuxtConfig({
                 'sweetalert2',
                 'socket.io-client',
                 'vue-draggable-next',
+                'bootstrap',
             ]
         },
 

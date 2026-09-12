@@ -13,6 +13,12 @@ import type { Storage, StorageValue } from 'unstorage';
 import type { Context } from 'hono';
 import { createMiddleware } from 'hono/factory';
 
+import packageJson from '../package.json' with { type: 'json' };
+
+export const getServiceName = () => {
+    return packageJson.name;
+}
+
 let io: Server<AnythingToServerEvents,
     ServerToAnythingEvents,
     InterServerEvents,
@@ -198,3 +204,27 @@ export const cachingMiddleware = <T extends StorageValue>(storage: Storage<T>, k
         }
     });
 };
+
+import { context, trace, SpanStatusCode, type Span } from '@opentelemetry/api'
+
+const tracer = trace.getTracer(getServiceName())
+
+export async function withSpan<T>(
+    name: string,
+    fn: (span: ReturnType<typeof tracer.startSpan>) => Promise<T> | T,
+    attrs: Record<string, any> = {}
+): Promise<T> {
+    const span = tracer.startSpan(name, { attributes: attrs });
+    try {
+        return await context.with(trace.setSpan(context.active(), span), async () => {
+            const result = await fn(span);
+            return result;
+        });
+    } catch (err: any) {
+        span.recordException(err);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: err.message });
+        throw err;
+    } finally {
+        span.end();
+    }
+}

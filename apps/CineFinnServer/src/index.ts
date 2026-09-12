@@ -34,12 +34,22 @@ import { setupSocketIO } from './sockets/index.js';
 import { getKnownSubSystems, toggleSeriesesForSubSystem } from './sockets/subsystem.socket.js';
 import { getEmailManager, getIO, setIO, setIORedis } from './utils.js';
 import { setupCommandManager } from './utils/commands.js';
-
+import packageJson from '../package.json' with { type: 'json' };
+import { httpInstrumentationMiddleware } from '@hono/otel';
 
 
 export const app = new Hono({
     strict: false,
 })
+    .use(httpInstrumentationMiddleware({
+        serviceName: packageJson.name,
+        serviceVersion: packageJson.version,
+        captureRequestHeaders: [
+            'user-agent',
+            'service-name',
+            'auth-token',
+        ],
+    }))
     .use(cors())
     .use(trimTrailingSlash())
     .use(ownLogger(console.log, ['/socket.io', '/video', '/images', '/bullboard', '/status', '/health', '/auth/registerEnabled']))

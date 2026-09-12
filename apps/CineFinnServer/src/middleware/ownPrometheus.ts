@@ -7,7 +7,7 @@ import { generateOverview } from '../routes/admin/admin.js';
 import { getConfig } from '../config.js';
 import { Hono, type Context } from 'hono';
 
-const prefix = getConfig().prometheus.METRICS_PREFIX;
+const prefix = getConfig().openTelemetry.prometheus.METRICS_PREFIX;
 
 const registry = new Registry()
 const watchableEntitiesGauge = new Gauge({
@@ -59,15 +59,15 @@ const { registerMetrics: internalRegisterMetrics } = prometheus({
 
 
 const registerMetrics = createMiddleware(async (c, next) => {
-    if (getConfig().prometheus.ENABLED == false) {
+    if (getConfig().openTelemetry.prometheus.ENABLED == false) {
         return next();
     }
     return internalRegisterMetrics(c, next);
 });
 
 const metricsRouter = new Hono()
-    .get('/metrics', basicAuth(getConfig().prometheus.basicAuth), async (c) => {
-        if (getConfig().prometheus.ENABLED == false) {
+    .get('/metrics', basicAuth(getConfig().openTelemetry.prometheus.basicAuth), async (c) => {
+        if (getConfig().openTelemetry.prometheus.ENABLED == false) {
             return c.text('Prometheus Metrics are disabled');
         }
         const overview = await generateOverview();

@@ -8,8 +8,9 @@ import z from 'zod';
 import type { Account } from '@cinefinn/types/models/user';
 import { getConfig } from '../config.js';
 import { compareSettings, defaultSettings } from '../utils/settings.js';
-import { getEmailManager } from '../utils.js';
+import { getEmailManager, getServiceName, withSpan } from '../utils.js';
 import type { DataType } from '../utils/EmailManager.js';
+import { trace } from '@opentelemetry/api'
 
 const registerLoginSchema = z.object({
     username: z.string().min(3).max(15).trim().regex(/^[a-zA-Z0-9]+$/, {
@@ -86,39 +87,42 @@ export interface AuthedVars {
 }
 
 export const authFullMiddleware = (cb: (user: Account) => boolean) => createMiddleware<AuthedVars>(async (c, next) => {
-    const token = c.req.header('auth-token') || c.req.query('auth-token');
-    if (token == undefined) {
-        throw new HTTPException(401, {
-            message: 'Missing auth-token in headers'
-        });
-    }
-
-    const user = await getUser(token);
-
-    if (user == undefined) {
-        throw new HTTPException(401, {
-            message: 'Invalid auth-token'
-        });
-    }
-
-    await accountsTable.update({ UUID: user.UUID }, {
-        activityDetails: {
-            lastHandshake: new Date().toLocaleString('de'),
-            lastLogin: user.activityDetails.lastLogin || new Date().toLocaleString('de'),
+    await withSpan('authFullMiddleware', async (span) => {
+        const token = c.req.header('auth-token') || c.req.query('auth-token');
+        if (token == undefined) {
+            throw new HTTPException(401, {
+                message: 'Missing auth-token in headers'
+            });
         }
-    });
 
-    if (!cb(user)) {
-        throw new HTTPException(403, {
-            message: 'Insufficent Permission'
+        const user = await getUser(token);
+
+        if (user == undefined) {
+            throw new HTTPException(401, {
+                message: 'Invalid auth-token'
+            });
+        }
+        span.setAttribute('user', JSON.stringify(user))
+
+        await accountsTable.update({ UUID: user.UUID }, {
+            activityDetails: {
+                lastHandshake: new Date().toLocaleString('de'),
+                lastLogin: user.activityDetails.lastLogin || new Date().toLocaleString('de'),
+            }
         });
-    }
 
-    c.set('credentials', {
-        token,
-        user,
-        socketID: c.req.header('socketID'),
-    });
+        if (!cb(user)) {
+            throw new HTTPException(403, {
+                message: 'Insufficent Permission'
+            });
+        }
+
+        c.set('credentials', {
+            token,
+            user,
+            socketID: c.req.header('socketID'),
+        });
+    })
     await next();
 });
 
