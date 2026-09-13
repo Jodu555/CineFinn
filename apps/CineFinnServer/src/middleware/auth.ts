@@ -11,6 +11,8 @@ import { compareSettings, defaultSettings } from '../utils/settings.js';
 import { getEmailManager, getServiceName, withSpan } from '../utils.js';
 import type { DataType } from '../utils/EmailManager.js';
 import { trace } from '@opentelemetry/api'
+import { createStorage } from 'unstorage';
+import type { timestamped } from '@cinefinn/types';
 
 const registerLoginSchema = z.object({
     username: z.string().min(3).max(15).trim().regex(/^[a-zA-Z0-9]+$/, {
@@ -51,29 +53,50 @@ const fotgotPasswordSchemaStage3 = z.object({
     newPassword: z.string().min(4).max(128).trim(),
 });
 
+const authStorage = createStorage<Account & timestamped>();
+
+(async () => {
+    const cacheRouter = await import('../routes/admin/cache.js');
+    cacheRouter.cacheRegistry.set('auth', authStorage);
+})();
+
+
 export async function getUser(token: string) {
-    const authToken = await authTokensTable.getOne({
-        TOKEN: token,
-        unique: true,
+    return await withSpan('authGetUser', async (span) => {
+
+        let user: Account & timestamped | null = await authStorage.getItem(token);
+
+        span.setAttribute('user.cache_hit', user != null);
+        span.setAttribute('user.token', token);
+
+        if (user == null) {
+            const authToken = await authTokensTable.getOne({
+                TOKEN: token,
+                unique: true,
+            });
+
+            if (authToken == undefined) {
+                return null;
+            }
+
+            user = await accountsTable.getOne({
+                UUID: authToken.account_UUID,
+                unique: true,
+            });
+        }
+
+        if (user == undefined) {
+            return null;
+        }
+
+        user.settings = compareSettings(user.settings);
+        delete user.password;
+        span.setAttribute('user.UUID', user.UUID);
+        span.setAttribute('user.username', user.username);
+        const cloneUser = JSON.parse(JSON.stringify(user));
+        await authStorage.setItem(token, cloneUser);
+        return user;
     });
-
-    if (authToken == undefined) {
-        return null;
-    }
-
-    const user = await accountsTable.getOne({
-        UUID: authToken.account_UUID,
-        unique: true,
-    });
-
-
-    if (user == undefined) {
-        return null;
-    }
-
-    user.settings = compareSettings(user.settings);
-    delete user.password;
-    return user;
 }
 
 export interface AuthedVars {
@@ -234,6 +257,7 @@ export const authRouter = new Hono()
             TOKEN: c.get('credentials').token,
             account_UUID: c.get('credentials').user.UUID,
         });
+        await authStorage.removeItem(c.get('credentials').token);
         return c.json({
             message: 'Successfully logged out',
         });
