@@ -209,6 +209,22 @@ import { context, trace, SpanStatusCode, type Span } from '@opentelemetry/api'
 
 const tracer = trace.getTracer(getServiceName())
 
+export async function withNewSpan<T>(name: string, fn: (span: ReturnType<typeof tracer.startSpan>) => Promise<T> | T, attrs: Record<string, any> = {}): Promise<T> {
+    const span = tracer.startSpan(name, { attributes: attrs, root: true });
+    try {
+        return await context.with(trace.setSpan(context.active(), span), async () => {
+            const result = await fn(span);
+            return result;
+        });
+    } catch (err: any) {
+        span.recordException(err);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: err.message });
+        throw err;
+    } finally {
+        span.end();
+    }
+}
+
 export async function withSpan<T>(
     name: string,
     fn: (span: ReturnType<typeof tracer.startSpan>) => Promise<T> | T,

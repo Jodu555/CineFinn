@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { authFullMiddleware } from "../../middleware/auth.js";
 import { accountsTable, emailsTable, episodesTable, ignoranceTable, moviesTable, playlistsTable, seasonsTable, seriesTable, watchableEntitysTable, watchHistoryTable } from "../../database.js";
 import { getSubSystems } from "../../sockets/subsystem.socket.js";
-import { getIO, queryDatabase } from "../../utils.js";
+import { getIO, queryDatabase, withSpan } from "../../utils.js";
 import type { Overview } from "@cinefinn/types/socket";
 import { Role } from "@cinefinn/types/models/user";
 import { getMovingItems } from "../../utils/movingItems.js";
@@ -23,53 +23,55 @@ async function getTotalRuntime(): Promise<number> {
 }
 
 export async function generateOverview() {
-    const [
-        accounts,
-        subsystems,
-        series,
-        seasons,
-        episodes,
-        movies,
-        watchableEntitys,
-        totalRuntime,
-        watchHistoryEntrys,
-        playlists,
-        ignoreItems,
-        sockets,
-    ] = await Promise.allSettled([
-        accountsTable.count(),
-        getSubSystems(),
-        seriesTable.count(),
-        seasonsTable.count(),
-        episodesTable.count(),
-        moviesTable.count(),
-        watchableEntitysTable.count(),
-        getTotalRuntime(),
-        watchHistoryTable.count(),
-        playlistsTable.count(),
-        ignoranceTable.count(),
-        getIO().fetchSockets(),
-    ]);
-    const overview = {
-        accounts: accounts.status === 'fulfilled' ? accounts.value : 0,
-        subsystems: {
-            all: subsystems.status === 'fulfilled' ? subsystems.value.length : 0,
-            offline: subsystems.status === 'fulfilled' ? subsystems.value.filter(s => s.status === 'offline').length : 0,
-            online: subsystems.status === 'fulfilled' ? subsystems.value.filter(s => s.status === 'online').length : 0,
-        },
-        series: series.status === 'fulfilled' ? series.value : 0,
-        seasons: seasons.status === 'fulfilled' ? seasons.value : 0,
-        episodes: episodes.status === 'fulfilled' ? episodes.value : 0,
-        movies: movies.status === 'fulfilled' ? movies.value : 0,
-        watchableEntitys: watchableEntitys.status === 'fulfilled' ? watchableEntitys.value : 0,
-        totalRuntime: totalRuntime.status === 'fulfilled' ? totalRuntime.value : 0,
-        watchHistoryEntrys: watchHistoryEntrys.status === 'fulfilled' ? watchHistoryEntrys.value : 0,
-        playlists: playlists.status === 'fulfilled' ? playlists.value : 0,
-        ignoranceItems: ignoreItems.status === 'fulfilled' ? ignoreItems.value : 0,
-        sockets: sockets.status === 'fulfilled' ? sockets.value.length : 0,
-        scraper: sockets.status === 'fulfilled' ? sockets.value.find(s => s.data.auth.type === 'scraper') !== undefined : false,
-    } satisfies Overview;
-    return overview;
+    return withSpan('generateOverview', async (span) => {
+        const [
+            accounts,
+            subsystems,
+            series,
+            seasons,
+            episodes,
+            movies,
+            watchableEntitys,
+            totalRuntime,
+            watchHistoryEntrys,
+            playlists,
+            ignoreItems,
+            sockets,
+        ] = await Promise.allSettled([
+            accountsTable.count(),
+            getSubSystems(),
+            seriesTable.count(),
+            seasonsTable.count(),
+            episodesTable.count(),
+            moviesTable.count(),
+            watchableEntitysTable.count(),
+            getTotalRuntime(),
+            watchHistoryTable.count(),
+            playlistsTable.count(),
+            ignoranceTable.count(),
+            getIO().fetchSockets(),
+        ]);
+        const overview = {
+            accounts: accounts.status === 'fulfilled' ? accounts.value : 0,
+            subsystems: {
+                all: subsystems.status === 'fulfilled' ? subsystems.value.length : 0,
+                offline: subsystems.status === 'fulfilled' ? subsystems.value.filter(s => s.status === 'offline').length : 0,
+                online: subsystems.status === 'fulfilled' ? subsystems.value.filter(s => s.status === 'online').length : 0,
+            },
+            series: series.status === 'fulfilled' ? series.value : 0,
+            seasons: seasons.status === 'fulfilled' ? seasons.value : 0,
+            episodes: episodes.status === 'fulfilled' ? episodes.value : 0,
+            movies: movies.status === 'fulfilled' ? movies.value : 0,
+            watchableEntitys: watchableEntitys.status === 'fulfilled' ? watchableEntitys.value : 0,
+            totalRuntime: totalRuntime.status === 'fulfilled' ? totalRuntime.value : 0,
+            watchHistoryEntrys: watchHistoryEntrys.status === 'fulfilled' ? watchHistoryEntrys.value : 0,
+            playlists: playlists.status === 'fulfilled' ? playlists.value : 0,
+            ignoranceItems: ignoreItems.status === 'fulfilled' ? ignoreItems.value : 0,
+            sockets: sockets.status === 'fulfilled' ? sockets.value.length : 0,
+            scraper: sockets.status === 'fulfilled' ? sockets.value.find(s => s.data.auth.type === 'scraper') !== undefined : false,
+        } satisfies Overview;
+        return overview;
+    });
 }
 
 export async function rebroadcastOverview() {

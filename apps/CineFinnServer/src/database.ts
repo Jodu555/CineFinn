@@ -10,6 +10,7 @@ import type { timestamped } from '@cinefinn/types/shared';
 import { getConfig } from './config.js';
 import type { FranchiseData } from '@cinefinn/types/models/franchise';
 import { throttle } from '@cinefinn/utilities/index';
+import { withNewSpan, withSpan } from './utils.js';
 
 
 export let database: Database;
@@ -50,7 +51,9 @@ export async function connectDatabase(clean: boolean = false) {
         acquireTimeout: 1000000,
         connectTimeout: 30000,
     });
-    await createTables();
+    await withSpan('createTables', async (span) => {
+        await createTables();
+    });
 
     if (clean === true) return;
 
@@ -59,8 +62,12 @@ export async function connectDatabase(clean: boolean = false) {
     const adminRouter = await import('./routes/admin/admin.js');
 
     const rebAccounts = throttle(async () => {
-        await sleep(100);
-        await adminRouter.rebroadcastAccounts();
+        setTimeout(async () => {
+            withNewSpan('admin-rebroadcastAccounts', async (span) => {
+                await sleep(100);
+                await adminRouter.rebroadcastAccounts();
+            });
+        }, 5);
     }, 1000 * 5);
 
     database.setCallback('accounts-CREATE', rebAccounts);
@@ -68,8 +75,12 @@ export async function connectDatabase(clean: boolean = false) {
     database.setCallback('accounts-DELETE', rebAccounts);
 
     const rebOverview = throttle(async () => {
-        await sleep(50);
-        await adminRouter.rebroadcastOverview();
+        setTimeout(async () => {
+            withNewSpan('admin-rebroadcastOverview', async (span) => {
+                await sleep(50);
+                await adminRouter.rebroadcastOverview();
+            });
+        }, 5);
     }, 1000);
 
     database.setCallback('*-CREATE', rebOverview);
