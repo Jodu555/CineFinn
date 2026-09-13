@@ -18,8 +18,9 @@ const sdk = new NodeSDK({
         new SocketIoInstrumentation({
             enabled: true,
             emitHook: (span, info) => {
-                const originalName = (span as any).name
-                span.updateName(`socket.io ${originalName}`)
+                const originalName = (span as any).name as string;
+                const attributes = (span as any).attributes as Record<string, any>;
+                span.updateName(`socket.io ${originalName} ${attributes['messaging.socket.io.event_name']}`);
                 span.setAttribute('messaging.socket.io.payload', JSON.stringify(info.payload))
             }
         }),

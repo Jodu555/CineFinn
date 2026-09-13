@@ -51,12 +51,13 @@ watch(
 watch(
 	authToken,
 	async (newValue) => {
-		// if (newValue) {
-		// 	connectSocket();
-		// } else {
-		// 	useSocket()?.disconnect();
-		// 	console.log('No auth token found');
-		// }
+		if (newValue) {
+			useSocket().connect();
+			// connectSocket();
+		} else {
+			useSocket()?.disconnect();
+			console.log('No auth token found');
+		}
 		// await useIndexStore().loadSeries();
 	},
 	{ immediate: true },
