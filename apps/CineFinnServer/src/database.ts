@@ -60,11 +60,13 @@ export async function connectDatabase(clean: boolean = false) {
     // import { rebroadcastAccounts, rebroadcastOverview } from './routes/admin.js';
     // const { rebroadcastAccounts, rebroadcastOverview } = await import('./routes/admin.js')
     const adminRouter = await import('./routes/admin/admin.js');
+    const cacheRouter = await import('./routes/admin/cache.js');
 
     const rebAccounts = throttle(async () => {
         setTimeout(async () => {
             withNewSpan('admin-rebroadcastAccounts', async (span) => {
                 await sleep(100);
+                cacheRouter.cacheRegistry.get('auth')?.clear();
                 await adminRouter.rebroadcastAccounts();
             });
         }, 5);

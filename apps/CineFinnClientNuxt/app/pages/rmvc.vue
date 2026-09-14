@@ -133,11 +133,7 @@ onMounted(() => {
 		const socket = useSocket();
 		(socket as any).io.opts.auth.type = 'rmvcEmitter';
 		socket.disconnect();
-		socket.connect();
-		socket.io.open((err) => {
-			console.log(err);
-			umTrackEvent('socket_connect_error', { error: 'Reopen failed cause of: ' + JSON.stringify(err) });
-		});
+		socketConnect();
 	}
 
 	useSocket().on('rmvc-recieve-videoStateChange', ({ isPlaying: k }) => {

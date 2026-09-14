@@ -46,3 +46,12 @@ export default function useSocket(type: 'client' | 'rmvcEmitter' = 'client') {
     return socket;
 
 }
+
+export function socketConnect() {
+    const socket = useSocket();
+    socket.connect();
+    socket.io.open((err) => {
+        console.log(err);
+        umTrackEvent('socket_connect_error', { error: 'Reopen failed cause of: ' + JSON.stringify(err) });
+    });
+}

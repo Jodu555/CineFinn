@@ -52,7 +52,7 @@ watch(
 	authToken,
 	async (newValue) => {
 		if (newValue) {
-			useSocket().connect();
+			socketConnect();
 			// connectSocket();
 		} else {
 			useSocket()?.disconnect();

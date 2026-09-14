@@ -11,6 +11,7 @@
 
 <script setup lang="ts">
 import type { FrontendSeries } from '@cinefinn/types';
+import { socketConnect } from '~/composables/useSocket';
 
 const isConnected = ref(false);
 const transport = ref('N/A');
@@ -86,11 +87,7 @@ onMounted(() => {
 			//Here notify the user that no connection could be established
 			if (authStore.loggedIn) {
 				umTrackEvent('socket_connect_error', { error: 'No connection could be established after 30 seconds, retrying...' });
-				socket.connect();
-				socket.io.open((err) => {
-					console.log(err);
-					umTrackEvent('socket_connect_error', { error: 'Reopen failed cause of: ' + JSON.stringify(err) });
-				});
+				socketConnect();
 				clearInterval(socketCheckInterval);
 			}
 		}
@@ -100,11 +97,7 @@ onMounted(() => {
 	window.vueSocket = socket;
 
 	if (authStore.loggedIn == false) return;
-	socket.connect();
-	socket.io.open((err) => {
-		console.log(err);
-		umTrackEvent('socket_connect_error', { error: 'Reopen failed cause of: ' + JSON.stringify(err) });
-	});
+	socketConnect();
 
 	if (socket.connected) {
 		onConnect();
@@ -133,11 +126,7 @@ watch(
 	() => authStore.loggedIn,
 	(loggedIn) => {
 		if (loggedIn) {
-			socket.connect();
-			socket.io.open((err) => {
-				console.log(err);
-				umTrackEvent('socket_connect_error', { error: 'Reopen failed cause of: ' + JSON.stringify(err) });
-			});
+			socketConnect();
 		} else {
 			socket.disconnect();
 		}
@@ -151,6 +140,8 @@ watch(
 			socket.emit('state', {
 				url: newURL,
 			});
+		} else if (authStore.loggedIn) {
+			socketConnect();
 		}
 	},
 );
@@ -158,6 +149,6 @@ watch(
 function onDisconnect() {
 	isConnected.value = false;
 	transport.value = 'N/A';
-	socket.connect();
+	socketConnect();
 }
 </script>

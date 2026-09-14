@@ -510,7 +510,7 @@ const sendVideoTimeUpdate = async (time: number) => {
 			umTrackEvent('socket_connect_error', {
 				error: `Send video time update over REST no socket connection, retrying ${triedReconnect} / ${MAX_SOCKET_TRY_RECONNECT} times`,
 			});
-			useSocket().connect();
+			socketConnect();
 		}
 		console.log('No Socket, debouncedUpdateTime', data, triedReconnect, MAX_SOCKET_TRY_RECONNECT);
 		debouncedUpdateTime(data);
