@@ -54,11 +54,47 @@ const fotgotPasswordSchemaStage3 = z.object({
 });
 
 const authStorage = createStorage<Account & timestamped>();
+const activityDetailsStorage = createStorage<number>();
 
 (async () => {
     const cacheRouter = await import('../routes/admin/cache.js');
     cacheRouter.cacheRegistry.set('auth', authStorage);
+    cacheRouter.cacheRegistry.set('authActivityDetails', activityDetailsStorage);
 })();
+
+//Update every 30 seconds on handshake of any kind.
+const HANDSHAKE_INTERVAL_MS = 30_000;
+export async function touchActivityDetails(user: Account) {
+    await withSpan('touchActivityDetails', async (span) => {
+        span.setAttribute('user.UUID', user.UUID);
+        span.setAttribute('user.username', user.username);
+        const key = `handshake:${user.UUID}`;
+        const now = Date.now();
+        const last = await activityDetailsStorage.getItem<number>(key);
+        last != null && span.setAttribute('activity.deduplication.last', last);
+        // Window already claimed, we bail
+        if (last != null && now - last < HANDSHAKE_INTERVAL_MS) {
+            span.setAttribute('activity.deduplication.bail', true);
+            return;
+        }
+
+        // Claim the window FIRST so concurrent requests bail out above.
+        await activityDetailsStorage.setItem(key, now);
+
+        try {
+            await accountsTable.update({ UUID: user.UUID }, {
+                activityDetails: {
+                    lastHandshake: new Date().toLocaleString('de'),
+                    lastLogin: user.activityDetails.lastLogin || new Date().toLocaleString('de'),
+                },
+            });
+        } catch (err) {
+            // On failure, release the claim so the next request retries.
+            await activityDetailsStorage.removeItem(key);
+            console.error('[auth] lastHandshake update failed', err);
+        }
+    });
+}
 
 
 export async function getUser(token: string) {
@@ -127,12 +163,13 @@ export const authFullMiddleware = (cb: (user: Account) => boolean) => createMidd
         }
         span.setAttribute('user', JSON.stringify(user))
 
-        await accountsTable.update({ UUID: user.UUID }, {
-            activityDetails: {
-                lastHandshake: new Date().toLocaleString('de'),
-                lastLogin: user.activityDetails.lastLogin || new Date().toLocaleString('de'),
-            }
-        });
+        touchActivityDetails(user);
+        // await accountsTable.update({ UUID: user.UUID }, {
+        //     activityDetails: {
+        //         lastHandshake: new Date().toLocaleString('de'),
+        //         lastLogin: user.activityDetails.lastLogin || new Date().toLocaleString('de'),
+        //     }
+        // });
 
         if (!cb(user)) {
             throw new HTTPException(403, {

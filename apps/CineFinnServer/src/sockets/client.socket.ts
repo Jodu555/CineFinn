@@ -1,5 +1,5 @@
 import type { AuthHandshake, AuthHandshakeClient, ServerToAnythingEvents, SocketAuthDataClient, SocketData } from "@cinefinn/types/socket";
-import { getUser } from "../middleware/auth.js";
+import { getUser, touchActivityDetails } from "../middleware/auth.js";
 import type { Account } from "@cinefinn/types/models/user";
 import type { timestamped } from "@cinefinn/types/shared";
 import type { SocketConsumerMeta } from "./index.js";
@@ -200,12 +200,14 @@ async function connectionFunction(socket: definedSocket) {
         }));
     }
 
-    accountsTable.update({ UUID: socketAuth.user.UUID }, {
-        activityDetails: {
-            lastHandshake: new Date().toLocaleString('de'),
-            lastLogin: socketAuth.user.activityDetails.lastLogin || new Date().toLocaleString('de'),
-        }
-    });
+
+    touchActivityDetails(socketAuth.user);
+    // accountsTable.update({ UUID: socketAuth.user.UUID }, {
+    //     activityDetails: {
+    //         lastHandshake: new Date().toLocaleString('de'),
+    //         lastLogin: socketAuth.user.activityDetails.lastLogin || new Date().toLocaleString('de'),
+    //     }
+    // });
 
 }
 
