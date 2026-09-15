@@ -10,6 +10,7 @@ export interface ServerConfig {
     };
     openTelemetry: {
         tracing: {
+            tracer: 'otlp' | 'zipkin';
             url: string;
         };
         prometheus: {

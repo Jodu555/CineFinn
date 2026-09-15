@@ -12,7 +12,10 @@ const defaultConfig: ServerConfig = {
     },
     openTelemetry: {
         tracing: {
-            url: 'your-zapkin-url'
+            tracer: 'otlp',
+            url: 'your-otlp-or-zapkin-url'
+            // If zapkin format http://zapkin.host:9411/api/v2/spans
+            // If otlp jaeger format http://jaeger.host:4317/v1/traces
         },
         prometheus: {
             ENABLED: true,

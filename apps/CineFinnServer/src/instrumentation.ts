@@ -3,6 +3,7 @@ import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 import { SocketIoInstrumentation } from '@opentelemetry/instrumentation-socket.io';
 import { MySQLInstrumentation } from '@opentelemetry/instrumentation-mysql';
 import { IORedisInstrumentation } from '@opentelemetry/instrumentation-ioredis';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { getConfig } from './config.js';
 
 const config = getConfig();
@@ -11,9 +12,11 @@ import packageJson from '../package.json' with { type: 'json' };
 
 const sdk = new NodeSDK({
     serviceName: packageJson.name,
-    traceExporter: new ZipkinExporter({
-        url: config.openTelemetry.tracing.url
-    }),
+    traceExporter: config.openTelemetry.tracing.tracer === 'otlp' ? new OTLPTraceExporter({
+        url: config.openTelemetry.tracing.url,
+    }) : config.openTelemetry.tracing.tracer === 'zipkin' ? new ZipkinExporter({
+        url: config.openTelemetry.tracing.url,
+    }) : undefined,
     instrumentations: [
         new SocketIoInstrumentation({
             enabled: true,
