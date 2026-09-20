@@ -1,5 +1,4 @@
 <template>
-	<!-- <div v-if="(authStore.loggedIn && authStore.user.settings.developerMode.value) || globalStore.developerMode"> -->
 	<div v-if="useDeveloperMode()">
 		<p class="mb-0">API: {{ useAPIURL() }}</p>
 		<p class="mb-0">Status: {{ isConnected ? 'connected' : 'disconnected' }}</p>

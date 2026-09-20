@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<pre v-if="authStore.loggedIn && authStore.user.settings.developerMode.value">
+		<pre v-if="useDeveloperMode()">
 		{{ indexStore.selectedWatchableEntity }}
 		</pre
 		>
@@ -12,7 +12,7 @@
 		</div>
 		<ClientOnly>
 			<div v-if="showVideo">
-				<div v-if="authStore.loggedIn && authStore.user.settings.developerMode.value" class="d-flex justify-content-center mt-2 mb-4">
+				<div v-if="useDeveloperMode()" class="d-flex justify-content-center mt-2 mb-4">
 					<div class="form-check form-switch">
 						<input class="form-check-input" type="checkbox" role="switch" id="videoDebug" v-model="videoDebug" />
 						<label class="form-check-label" for="videoDebug">Video Debug</label>
@@ -140,7 +140,7 @@
 										</div>
 									</div>
 
-									<div v-if="authStore.loggedIn && authStore.user.settings.developerMode.value" class="text-muted small mb-0">
+									<div v-if="useDeveloperMode()" class="text-muted small mb-0">
 										<p>
 											{{
 												{
@@ -311,7 +311,7 @@
 														>
 															{{ movie.description }}
 														</p> -->
-														<div v-if="authStore.loggedIn && authStore.user.settings.developerMode.value" class="text-muted small mb-0">
+														<div v-if="useDeveloperMode()" class="text-muted small mb-0">
 															<div class="d-flex gap-2">
 																<p class="mb-0">
 																	{{ movie.watchableEntitys.map((e) => e.subID).join(', ') }}
@@ -400,13 +400,13 @@
 				</div>
 			</div>
 			<!-- Developer Debug Infos -->
-			<div v-if="authStore.loggedIn">
-				<pre v-if="authStore.user.settings.developerMode.value">
+			<div v-if="useDeveloperMode()">
+				<pre v-if="useDeveloperMode()">
 				selectedWatchableEntity: {{ indexStore.selectedWatchableEntity }}
 				selectedEntity: {{ indexStore.selectedEntity }}
 				</pre
 				>
-				<pre v-if="authStore.user.settings.developerMode.value">
+				<pre v-if="useDeveloperMode()">
 				activeTab: {{ activeTab }}
 				viewMode: {{ viewMode }}
 				showVideo: {{ showVideo }}

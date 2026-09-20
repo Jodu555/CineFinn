@@ -150,7 +150,7 @@ template
 				</div>
 			</div>
 
-			<pre v-if="settings.developerMode.value" class="internal-video-devinfos">
+			<pre v-if="useDeveloperMode()" class="internal-video-devinfos">
 	VideoLoading: {{ videoLoading }}
 	ReadyState: {{ videoData.readyState }}
 	CurrentTime: {{ videoData.currentTime }}ms

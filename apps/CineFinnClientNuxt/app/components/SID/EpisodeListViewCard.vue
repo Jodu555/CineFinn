@@ -51,7 +51,7 @@
 									}}
 								</small>
 							</p>
-							<div v-if="authStore.loggedIn && authStore.user.settings.developerMode.value" class="text-muted small mb-0">
+							<div v-if="useDeveloperMode()" class="text-muted small mb-0">
 								<div class="small mb-0 row">
 									<p class="mb-1 mt-1 col-4" v-for="entity in episode.watchableEntitys">
 										{{ entity.UUID }} ({{ entity.subID }}) [{{ entity.lang }}] = {{ entity.runtime }}

@@ -7,7 +7,7 @@
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<div class="modal-body" v-auto-animate>
-					<pre v-if="authStore.user.settings.developerMode.value">{{ { loading, sessionStarted, sessionID } }}</pre>
+					<pre v-if="useDeveloperMode()">{{ { loading, sessionStarted, sessionID } }}</pre>
 					<div v-if="loading" class="d-flex justify-content-center">
 						<div class="spinner-border" role="status">
 							<span class="visually-hidden">Loading...</span>

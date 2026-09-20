@@ -7,7 +7,7 @@
 			</div>
 			<div class="offcanvas-body">
 				<h2>User Infos:</h2>
-				<pre v-if="authStore.user.settings.developerMode.value">{{ { ...authStore.user, settings: null } }}</pre>
+				<pre v-if="useDeveloperMode()">{{ { ...authStore.user, settings: null } }}</pre>
 				<hr />
 				<ul class="list-group list-group-flush mb-2" style="background: transparent">
 					<li class="list-group-item">
@@ -28,7 +28,7 @@
 				</ul>
 				<div v-if="authStore.user.role >= Role.Mod">
 					<h2>Jobs</h2>
-					<pre v-if="authStore.user.settings.developerMode.value">{{ { registry: managmentStore.jobRegistry } }}</pre>
+					<pre v-if="useDeveloperMode()">{{ { registry: managmentStore.jobRegistry } }}</pre>
 					<hr />
 					<ul v-if="managmentStore.error === ''" class="list-group list-group-flush mb-3">
 						<JobCard v-for="(registeredJob, jobType) in managmentStore.jobRegistry" :job-type="jobType" :key="jobType" />
@@ -41,7 +41,7 @@
 				</div>
 				<div>
 					<h2>Settings</h2>
-					<pre v-if="authStore.user.settings.developerMode.value">{{ authStore.user.settings }}</pre>
+					<pre v-if="useDeveloperMode()">{{ authStore.user.settings }}</pre>
 					<hr />
 					<div v-for="(setting, key) of authStore.user.settings" :key="key">
 						<template v-if="setting.type === 'checkbox'">
