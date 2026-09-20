@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 
 interface ServerHealth {
+    developerMode: boolean;
     status: 'ok' | 'error';
     version: string;
     motd: {
@@ -12,6 +13,7 @@ interface ServerHealth {
 
 export const useGlobalStore = defineStore('global', {
     state: () => ({
+        developerMode: false,
         serverVersion: '0.0.0',
         motd: {
             show: false,
@@ -43,6 +45,11 @@ export const useGlobalStore = defineStore('global', {
             }
             this.serverVersion = data.version;
             this.motd = data.motd;
+        },
+        setDeveloperMode(value: boolean) {
+            console.log('previous developerMode', this.developerMode);
+            console.log('setDeveloperMode', value);
+            this.developerMode = value;
         }
     }
 })

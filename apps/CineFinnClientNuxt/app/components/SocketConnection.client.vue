@@ -1,5 +1,6 @@
 <template>
-	<div v-if="authStore.loggedIn && authStore.user.settings.developerMode.value">
+	<!-- <div v-if="(authStore.loggedIn && authStore.user.settings.developerMode.value) || globalStore.developerMode"> -->
+	<div v-if="useDeveloperMode()">
 		<p class="mb-0">API: {{ useAPIURL() }}</p>
 		<p class="mb-0">Status: {{ isConnected ? 'connected' : 'disconnected' }}</p>
 		<p class="mb-0">Transport: {{ transport }}</p>
@@ -12,6 +13,8 @@
 <script setup lang="ts">
 import type { FrontendSeries } from '@cinefinn/types';
 import { socketConnect } from '~/composables/useSocket';
+
+const globalStore = useGlobalStore();
 
 const isConnected = ref(false);
 const transport = ref('N/A');

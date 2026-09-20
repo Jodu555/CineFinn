@@ -67,7 +67,7 @@ export const langDetails = {
  * @param inSeconds If you want the return in Seconds other wise in Milliseconds
  * @returns The Total Average runtme of the watchableEntities provided. In Milliseconds. If inSeconds == true then in Seconds
  */
-export const averageWatchableEntitysRuntime = (watchableEntities: WatchableEntity[], inSeconds = false) => {
+export function averageWatchableEntitysRuntime(watchableEntities: WatchableEntity[], inSeconds = false) {
     const cleanedRuntimes = watchableEntities.filter(we => we.runtime !== -1);
     const totalRuntimeAvg = cleanedRuntimes.reduce((sum, we) => sum + we.runtime, 0) / cleanedRuntimes.length;
     if (inSeconds) return totalRuntimeAvg;
