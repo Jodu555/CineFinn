@@ -14,19 +14,22 @@ import { trace } from '@opentelemetry/api'
 import { createStorage } from 'unstorage';
 import type { timestamped } from '@cinefinn/types';
 
+const USERNAME_LENGTH = [3, 20];
+const PASSWORD_LENGTH = [3, 50];
+
 const registerLoginSchema = z.object({
-    username: z.string().min(3).max(15).trim().regex(/^[a-zA-Z0-9]+$/, {
+    username: z.string().min(USERNAME_LENGTH[0]).max(USERNAME_LENGTH[1]).trim().regex(/^[a-zA-Z0-9]+$/, {
         message: "Muss nur alphanumerische Zeichen enthalten.",
     }),
-    password: z.string().min(4).max(128).trim(),
+    password: z.string().min(PASSWORD_LENGTH[0]).max(PASSWORD_LENGTH[1]).trim(),
     token: z.string().min(5).max(15).optional(),
 });
 
 const loginSchema = z.object({
-    username: z.string().min(3).max(15).trim().regex(/^[a-zA-Z0-9]+$/, {
+    username: z.string().min(USERNAME_LENGTH[0]).max(USERNAME_LENGTH[1]).trim().regex(/^[a-zA-Z0-9]+$/, {
         message: "Muss nur alphanumerische Zeichen enthalten.",
     }),
-    password: z.string().min(4).max(128).trim(),
+    password: z.string().min(PASSWORD_LENGTH[0]).max(PASSWORD_LENGTH[1]).trim(),
 });
 
 const onboardingSchemaStepOne = z.object({
@@ -50,7 +53,7 @@ const fotgotPasswordSchemaStage2 = z.object({
 const fotgotPasswordSchemaStage3 = z.object({
     email: z.email(),
     token: z.string().min(5).max(15),
-    newPassword: z.string().min(4).max(128).trim(),
+    newPassword: z.string().min(PASSWORD_LENGTH[0]).max(PASSWORD_LENGTH[1]).trim(),
 });
 
 const authStorage = createStorage<Account & timestamped>();

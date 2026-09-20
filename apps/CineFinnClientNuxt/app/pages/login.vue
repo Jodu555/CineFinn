@@ -200,13 +200,13 @@ const rules = {
 	usernameRules: [
 		(value: string) => !!value || 'Cannot be empty.',
 		(value: string) => !!value.match(/^[a-zA-Z0-9]+$/) || 'Must be alphanumeric',
-		(value: string) => value.length >= 4 || 'Must be at least 4 Characters and can only be 20',
-		(value: string) => value.length <= 20 || 'Must be below 15 Characters',
+		(value: string) => value.length >= 3 || 'Must be at least 3 Characters and can only be 20',
+		(value: string) => value.length <= 20 || 'Must be below 20 Characters',
 	],
 	passwordRules: [
 		(value: string) => !!value || 'Cannot be empty.',
-		(value: string) => value.length >= 4 || 'Must be at least 4 Characters and can only be 100',
-		(value: string) => value.length <= 100 || 'Must be below 100 Characters',
+		(value: string) => value.length >= 3 || 'Must be at least 3 Characters',
+		(value: string) => value.length <= 50 || 'Must be below 50 Characters',
 	],
 };
 
