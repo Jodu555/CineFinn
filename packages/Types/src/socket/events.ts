@@ -7,7 +7,7 @@ import type { SubSystem, DiskStats, Overview, ClientInfo, RequestFileData, FileC
 import type * as fs from "fs";
 import type { FranchiseDataExtended } from "../models/franchise.js";
 
-type rmvcActions = 'play' | 'pause' | 'forward' | 'backward' | 'nextEp' | 'prevEp' | 'volHigh' | 'volDown';
+export type rmvcActions = 'play' | 'pause' | 'forward' | 'backward' | 'nextEp' | 'prevEp' | 'volHigh' | 'volDown';
 
 interface videoStateChangeArg {
     isPlaying: boolean;

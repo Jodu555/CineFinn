@@ -11,6 +11,7 @@
 //@ts-ignore
 // import * as bootstrap from 'bootstrap';
 // import 'bootstrap';
+import { useDocumentVisibility } from '@vueuse/core';
 import SocketConnection from '~/components/SocketConnection.client.vue';
 const authToken = useCookie('auth-token', { watch: true });
 
@@ -62,6 +63,15 @@ watch(
 	},
 	{ immediate: true },
 );
+
+const visibility = useDocumentVisibility();
+
+watch(visibility, (newValue) => {
+	if (newValue === 'visible') {
+		if (useSocket().connected) return;
+		socketConnect();
+	}
+});
 </script>
 
 <style lang="scss">

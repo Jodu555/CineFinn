@@ -31,19 +31,19 @@
 		</div>
 		<div v-if="isConnected" class="rmvc">
 			<div class="group d-flex gap-4 justify-content-evenly mb-5">
-				<button title="5 Sek. Zurück" @click="useSocket().emit('rmvc-send-action', { rmvcID, action: 'backward' })">
+				<button title="5 Sek. Zurück" @click="sendAction('backward')">
 					<font-awesome-icon class="skip skip-left" size="xl" icon="fa-solid fa-backward" />
 				</button>
-				<button :title="isPlaying ? 'Pause' : 'Play'" @click="useSocket().emit('rmvc-send-action', { rmvcID, action: isPlaying ? 'pause' : 'play' })">
+				<button :title="isPlaying ? 'Pause' : 'Play'" @click="sendAction(isPlaying ? 'pause' : 'play')">
 					<font-awesome-icon v-if="!isPlaying" size="xl" icon="fa-solid fa-play" />
 					<font-awesome-icon v-if="isPlaying" size="xl" icon="fa-solid fa-pause" />
 				</button>
-				<button title="5 Sek. Vorwärts" @click="useSocket().emit('rmvc-send-action', { rmvcID, action: 'forward' })">
+				<button title="5 Sek. Vorwärts" @click="sendAction('forward')">
 					<font-awesome-icon class="skip skip-right" size="xl" icon="fa-solid fa-forward" />
 				</button>
 			</div>
 			<div class="group d-flex gap-4 justify-content-evenly mt-5 mb-5">
-				<button title="Vorherige Episode" @click="useSocket().emit('rmvc-send-action', { rmvcID, action: 'prevEp' })">
+				<button title="Vorherige Episode" @click="sendAction('prevEp')">
 					<svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path
 							fill-rule="evenodd"
@@ -53,7 +53,7 @@
 						/>
 					</svg>
 				</button>
-				<button title="Lauter" @click="useSocket().emit('rmvc-send-action', { rmvcID, action: 'volHigh' })">
+				<button title="Lauter" @click="sendAction('volHigh')">
 					<svg class="volume-high-icon" viewBox="0 0 24 24">
 						<path
 							fill="currentColor"
@@ -61,7 +61,7 @@
 						/>
 					</svg>
 				</button>
-				<button title="Nächste Episode" @click="useSocket().emit('rmvc-send-action', { rmvcID, action: 'nextEp' })">
+				<button title="Nächste Episode" @click="sendAction('nextEp')">
 					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="Hawkins-Icon Hawkins-Icon-Standard">
 						<path
 							fill-rule="evenodd"
@@ -73,7 +73,7 @@
 				</button>
 			</div>
 			<div class="group d-flex justify-content-center mt-5 mb-5">
-				<button title="Leiser" @click="useSocket().emit('rmvc-send-action', { rmvcID, action: 'volDown' })">
+				<button title="Leiser" @click="sendAction('volDown')">
 					<svg class="volume-low-icon" viewBox="0 0 24 24">
 						<path fill="currentColor" d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
 					</svg>
@@ -81,14 +81,15 @@
 			</div>
 
 			<div class="row justify-content-center mt-5">
-				<button type="button" @click="isConnected = false" class="col-8 col-sm-3 btn btn-outline-danger">Disconnect</button>
+				<button type="button" @click="disconnect" class="col-8 col-sm-3 btn btn-outline-danger">Disconnect</button>
 			</div>
 		</div>
 	</div>
 </template>
 
 <script lang="ts" setup>
-import type { ClientToServerEvents, ServerToClientEvents } from '@cinefinn/types/socket';
+import type { ClientToServerEvents, rmvcActions, ServerToClientEvents } from '@cinefinn/types/socket';
+import { useDocumentVisibility } from '@vueuse/core';
 import type { Socket } from 'socket.io-client';
 
 definePageMeta({
@@ -107,6 +108,15 @@ const isPlaying = ref(true);
 const error = ref('');
 const rmvcID = ref('');
 
+function sendAction(action: rmvcActions) {
+	useSocket().emit('rmvc-send-action', { rmvcID: rmvcID.value, action });
+}
+
+function disconnect() {
+	isConnected.value = false;
+	// useSocket().emit('rmvc-destroySession');
+}
+
 function connect() {
 	if (rmvcID.value.length === 0) {
 		error.value = 'Please enter a valid Remote Control ID!';
@@ -123,6 +133,15 @@ function connect() {
 		}
 	});
 }
+
+const visibility = useDocumentVisibility();
+watch(visibility, (newValue) => {
+	if (newValue === 'visible') {
+		if (useSocket().connected) return;
+		socketConnect();
+		connect();
+	}
+});
 
 onMounted(() => {
 	document.title = `Cinema | RMVC`;
