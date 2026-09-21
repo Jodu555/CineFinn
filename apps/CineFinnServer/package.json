@@ -6,7 +6,8 @@
 		"dev": "nodemon --watch src --exec \"tsx --import ./src/instrumentation.ts src/index.ts\"",
 		"dev_old": "tsx watch --import ./src/instrumentation.ts src/index.ts",
 		"build": "tsc",
-		"start": "node --import ./dist/instrumentation.ts dist/index.js",
+		"start": "node --import ./dist/instrumentation.js dist/index.js",
+		"start_old": "node dist/index.js",
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
