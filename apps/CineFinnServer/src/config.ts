@@ -12,6 +12,7 @@ const defaultConfig: ServerConfig = {
     },
     openTelemetry: {
         tracing: {
+            enabled: false,
             tracer: 'otlp',
             url: 'your-otlp-or-zapkin-url'
             // If zapkin format http://zapkin.host:9411/api/v2/spans

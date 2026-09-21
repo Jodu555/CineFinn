@@ -10,6 +10,7 @@ export interface ServerConfig {
     };
     openTelemetry: {
         tracing: {
+            enabled: boolean;
             tracer: 'otlp' | 'zipkin';
             url: string;
         };
