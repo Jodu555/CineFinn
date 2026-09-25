@@ -14,7 +14,7 @@ interface ServerHealth {
 export const useGlobalStore = defineStore('global', {
     state: () => ({
         developerMode: false,
-        serverVersion: '0.0.0',
+        serverVersion: '?.?.?',
         motd: {
             show: false,
             type: 'info',
