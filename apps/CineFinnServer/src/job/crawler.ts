@@ -749,7 +749,6 @@ export async function insertMissingWatchableEntityRuntimes(job: Job) {
                 new Promise<number>((resolve, reject) => {
                     setTimeout(() => {
                         reject('Timeout');
-                        failed.add(entity.UUID);
                     }, 1000 * 60 * 1);
                 })
             ]));
