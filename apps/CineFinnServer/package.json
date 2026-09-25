@@ -10,7 +10,7 @@
 		"start_old": "node dist/index.js",
 		"typecheck": "tsc --noEmit",
 		"start:script:import": "rm -f importer.log && time node ./dist/src/scripts/import.js | tee importer.log",
-		"start:script:fixMarkedEpisodes": "time node src/scripts/fixMarkedWatchEpisodes.js"
+		"start:script:fixMarkedEpisodes": "time node ./dist/src/scripts/fixMarkedWatchEpisodes.js"
 	},
 	"dependencies": {
 		"@cinefinn/configuration-manager": "workspace:*",
