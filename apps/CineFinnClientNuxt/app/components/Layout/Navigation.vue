@@ -1,5 +1,5 @@
 <template>
-	<div v-if="globalStore.motd.show" class="alert" :class="`alert-${globalStore.motd.type}`" role="alert">
+	<div v-if="globalStore.motd.show" class="alert" :class="`alert-${globalStore.getBootstrapClassForMotdType}`" role="alert">
 		<strong>Motd:</strong> {{ globalStore.motd.message }}
 	</div>
 

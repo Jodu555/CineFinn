@@ -24,6 +24,18 @@ export const useGlobalStore = defineStore('global', {
     getters: {
         clientVersion: (state) => {
             return useClientVersion();
+        },
+        getBootstrapClassForMotdType: (state) => {
+            switch (state.motd.type) {
+                case 'info':
+                    return 'info';
+                case 'warning':
+                    return 'warning';
+                case 'error':
+                    return 'danger';
+                default:
+                    return '';
+            }
         }
     },
     actions: {
