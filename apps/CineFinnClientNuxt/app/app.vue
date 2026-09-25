@@ -50,7 +50,7 @@ watch(
 );
 
 watch(
-	authToken,
+	() => authStore.authToken,
 	async (newValue) => {
 		if (newValue) {
 			socketConnect();
