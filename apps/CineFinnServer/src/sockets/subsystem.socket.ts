@@ -55,7 +55,7 @@ async function connectionFunction(socket: definedSocket) {
 
 export async function getKnownSubSystems() {
     const subIDs = new Set<string>();
-    const rows = await queryDatabase(`SELECT * FROM watchableEntitys WHERE subID != 'main'`);
+    const rows = await queryDatabase<{ subID: string }>(`SELECT subID FROM watchableEntitys WHERE subID != 'main' GROUP BY subID`);
     rows.forEach(row => {
         subIDs.add(row.subID);
     });
