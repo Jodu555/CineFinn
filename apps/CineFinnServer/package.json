@@ -8,7 +8,9 @@
 		"build": "tsc",
 		"start": "node --import ./dist/src/instrumentation.js ./dist/src/index.js",
 		"start_old": "node dist/index.js",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"start:script:import": "rm -f importer.log && time node ./dist/src/scripts/import.js | tee importer.log",
+		"start:script:fixMarkedEpisodes": "time node src/scripts/fixMarkedWatchEpisodes.js"
 	},
 	"dependencies": {
 		"@cinefinn/configuration-manager": "workspace:*",
