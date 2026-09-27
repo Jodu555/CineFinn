@@ -1,7 +1,7 @@
 import { Hono, type Context } from 'hono';
 import { authFullMiddleware, authMiddleware, type AuthedVars } from '../middleware/auth.js';
 import { episodesTable, moviesTable, seasonsTable, watchableEntitysTable, watchHistoryTable } from '../database.js';
-import { getIO, isMovie, watchableUUIDToWatchable } from '../utils.js';
+import { getIO, isMovie, watchableUUIDToWatchable, withSpan } from '../utils.js';
 import type { Episode, Movie, WatchableEntity } from '@cinefinn/types/models/media';
 import type { WatchHistory } from '@cinefinn/types/models/system';
 import type { timestamped } from '@cinefinn/types/shared';
@@ -140,111 +140,125 @@ const router = new Hono()
         });
     })
     .on(['GET', 'POST'], '/updateTime/:watchableUUID/:time', authMiddleware, async (c) => {
-        const user = c.get('credentials').user;
+        return await withSpan('updateTime', async (span) => {
+            const user = c.get('credentials').user;
 
-        /**
-         * The Time in seconds the watchable was watched
-         */
-        const time = parseInt(c.req.param('time'));
+            /**
+             * The Time in seconds the watchable was watched
+             */
+            const time = parseInt(c.req.param('time'));
 
-        if (isNaN(time) || time < 0) {
-            return c.json({
-                message: 'Time must be a positive number',
-            });
-        }
-
-        const updated = async (seriesUUID: string) => {
-            (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'client' && s.data.auth.user.UUID === user.UUID).forEach(async s => {
-                const watchList = await watchHistoryTable.get({ series_UUID: seriesUUID, account_UUID: user.UUID, unique: true });
-                s.emit('watchListUpdate', watchList);
-            });
-        };
-
-        let watchableUUID = c.req.param('watchableUUID');
-        if (watchableUUID.startsWith('WE-')) {
-            const watchableEntity = await watchableEntitysTable.getOne({ UUID: watchableUUID });
-            if (!watchableEntity) {
+            if (isNaN(time) || time < 0) {
                 return c.json({
-                    message: 'Watchable Entity not found',
+                    message: 'Time must be a positive number',
                 });
             }
-            watchableUUID = watchableEntity.watchable_UUID;
-        }
+            span.setAttribute('time', time);
 
-        const watchable = await watchableUUIDToWatchable(watchableUUID);
-        if (watchable == undefined) {
-            return c.json({
-                message: 'Watchable does not match any known type',
-                watchableUUID,
-            });
-        }
+            const updated = async (seriesUUID: string) => {
+                span.addEvent('watchHistory.updated');
+                (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'client' && s.data.auth.user.UUID === user.UUID).forEach(async s => {
+                    const watchList = await watchHistoryTable.get({ series_UUID: seriesUUID, account_UUID: user.UUID, unique: true });
+                    s.emit('watchListUpdate', watchList);
+                });
+            };
 
-        const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, series_UUID: watchable.serie_UUID, watchable_UUID: watchable.UUID, unique: true });
+            let watchableUUID = c.req.param('watchableUUID');
+            if (watchableUUID.startsWith('WE-')) {
+                span.addEvent('watchableUUID.startsWith.WE-');
+                const watchableEntity = await watchableEntitysTable.getOne({ UUID: watchableUUID });
+                if (!watchableEntity) {
+                    return c.json({
+                        message: 'Watchable Entity not found',
+                    });
+                }
+                watchableUUID = watchableEntity.watchable_UUID;
+            }
+            span.setAttribute('watchableUUID', watchableUUID);
 
-        if (process.env.OLD_DB_WATCH_STRING_TRANSLATION! == 'true' || process.env.OLD_DB_WATCH_STRING_TRANSLATION! == '1') {
-            //To force hono to complete the request before doing the translation stuff cause that's more a failsafe than anything else
-            setImmediate(() => {
-                setTimeout(async () => {
-                    if (isMovie(watchable)) {
-                        console.time('Translating');
-                        await translationV1WatchString.updateSegment(user.UUID, {
-                            series: watchable.serie_UUID,
-                            season: -1,
-                            episode: -1,
-                            movie: watchable.movie_IDX,
-                        }, (seg) => {
-                            if (seg.time < time) {
-                                seg.time = time;
+            const watchable = await watchableUUIDToWatchable(watchableUUID);
+            if (watchable == undefined) {
+                return c.json({
+                    message: 'Watchable does not match any known type',
+                    watchableUUID,
+                });
+            }
+
+            const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, series_UUID: watchable.serie_UUID, watchable_UUID: watchable.UUID, unique: true });
+
+            span.setAttribute('watchHistory', JSON.stringify(watchHistory));
+
+            if (process.env.OLD_DB_WATCH_STRING_TRANSLATION! == 'true' || process.env.OLD_DB_WATCH_STRING_TRANSLATION! == '1') {
+                //To force hono to complete the request before doing the translation stuff cause that's more a failsafe than anything else
+                setImmediate(() => {
+                    setTimeout(async () => {
+                        await withSpan('watchStringTranslation', async (translationSpan) => {
+                            if (isMovie(watchable)) {
+                                translationSpan.addEvent('isMovie');
+                                console.time('Translating');
+                                await translationV1WatchString.updateSegment(user.UUID, {
+                                    series: watchable.serie_UUID,
+                                    season: -1,
+                                    episode: -1,
+                                    movie: watchable.movie_IDX,
+                                }, (seg) => {
+                                    if (seg.time < time) {
+                                        seg.time = time;
+                                    }
+                                });
+                                console.timeEnd('Translating');
+                            } else {
+                                translationSpan.addEvent('!isMovie');
+                                console.time('Translating');
+                                await translationV1WatchString.updateSegment(user.UUID, {
+                                    series: watchable.serie_UUID,
+                                    season: watchable.season_IDX,
+                                    episode: watchable.episode_IDX,
+                                    movie: -1,
+                                }, (seg) => {
+                                    if (seg.time < time) {
+                                        seg.time = time;
+                                    }
+                                });
+                                console.timeEnd('Translating');
                             }
                         });
-                        console.timeEnd('Translating');
-                    } else {
-                        console.time('Translating');
-                        await translationV1WatchString.updateSegment(user.UUID, {
-                            series: watchable.serie_UUID,
-                            season: watchable.season_IDX,
-                            episode: watchable.episode_IDX,
-                            movie: -1,
-                        }, (seg) => {
-                            if (seg.time < time) {
-                                seg.time = time;
-                            }
-                        });
-                        console.timeEnd('Translating');
-                    }
-
-                }, 1000);
-            });
-        }
+                    }, 1000);
+                });
+            }
 
 
-        if (watchHistory == undefined) {
-            await watchHistoryTable.create({
-                UUID: generateWatchHistoryID(),
-                account_UUID: user.UUID,
-                series_UUID: watchable.serie_UUID,
-                watchable_UUID: watchable.UUID,
-                watchTime: time,
-            });
-            await updated(watchable.serie_UUID);
-            return c.json({
-                message: 'Watchable watchTime updated',
-            });
-        } else {
-            if (watchHistory.watchTime < time) {
-                await watchHistoryTable.update({ UUID: watchHistory.UUID }, {
+            if (watchHistory == undefined) {
+                await watchHistoryTable.create({
+                    UUID: generateWatchHistoryID(),
+                    account_UUID: user.UUID,
+                    series_UUID: watchable.serie_UUID,
+                    watchable_UUID: watchable.UUID,
                     watchTime: time,
                 });
+                span.addEvent('watchHistory.create');
                 await updated(watchable.serie_UUID);
                 return c.json({
                     message: 'Watchable watchTime updated',
                 });
+            } else {
+                span.addEvent('watchHistory.update');
+                if (watchHistory.watchTime < time) {
+                    span.addEvent('watchHistory.update.watchTime.lower');
+                    await watchHistoryTable.update({ UUID: watchHistory.UUID }, {
+                        watchTime: time,
+                    });
+                    await updated(watchable.serie_UUID);
+                    return c.json({
+                        message: 'Watchable watchTime updated',
+                    });
+                }
+                await updated(watchable.serie_UUID);
+                return c.json({
+                    message: 'Watchable watchTime not updated because lower',
+                });
             }
-            await updated(watchable.serie_UUID);
-            return c.json({
-                message: 'Watchable watchTime not updated because lower',
-            });
-        }
+        });
     })
     .get('/history', authMiddleware, async (c) => {
         const user = c.get('credentials').user;
