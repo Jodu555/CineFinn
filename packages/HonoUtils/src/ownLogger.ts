@@ -1,3 +1,4 @@
+import type { Context } from 'hono';
 import { createMiddleware } from 'hono/factory';
 import { getColorEnabledAsync } from 'hono/utils/color';
 
@@ -57,7 +58,11 @@ async function log(
     fn(out);
 }
 
-export const ownLogger = (fn: PrintFunc = console.log, ignorePaths: string[] = []) =>
+export const ownLogger = (
+    fn: PrintFunc = console.log,
+    ignorePaths: string[] = [],
+    checkIfShouldLogBefore: (c: Context<any, string, {}>) => boolean = () => true,
+    checkIfShouldLogAfter: (c: Context<any, string, {}>) => boolean = () => true) =>
     createMiddleware(async (c, next) => {
         const { method, url } = c.req;
 
@@ -75,11 +80,14 @@ export const ownLogger = (fn: PrintFunc = console.log, ignorePaths: string[] = [
             await next();
             return;
         }
-        await log(console.log, LogPrefix.Incoming, method, path);
+        if (typeof checkIfShouldLogBefore === 'function' && checkIfShouldLogBefore(c)) {
+            await log(console.log, LogPrefix.Incoming, method, path);
+        }
 
         const start = Date.now();
 
         await next();
-
-        await log(console.log, LogPrefix.Outgoing, method, path, c.res.status, time(start));
+        if (typeof checkIfShouldLogAfter === 'function' && checkIfShouldLogAfter(c)) {
+            await log(console.log, LogPrefix.Outgoing, method, path, c.res.status, time(start));
+        }
     });

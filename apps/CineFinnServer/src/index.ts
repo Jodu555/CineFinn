@@ -36,6 +36,7 @@ import { getEmailManager, getIO, setIO, setIORedis } from './utils.js';
 import { setupCommandManager } from './utils/commands.js';
 import packageJson from '../package.json' with { type: 'json' };
 import { httpInstrumentationMiddleware } from '@hono/otel';
+import { matchedRoutes } from 'hono/route';
 
 
 export const app = new Hono({
@@ -52,7 +53,19 @@ export const app = new Hono({
     }))
     .use(cors())
     .use(trimTrailingSlash())
-    .use(ownLogger(console.log, ['/socket.io', '/video', '/images', '/bullboard', '/status', '/health', '/auth/registerEnabled']))
+    .use(ownLogger(console.log, ['/socket.io', '/video', '/images', '/bullboard', '/status', '/health', '/auth/registerEnabled'], (c) => {
+        const availableRoutes = matchedRoutes(c);
+        const actualNonCatchAllRoutes = availableRoutes.filter(r => r.path !== '/*' && r.method !== 'ALL');
+        if (actualNonCatchAllRoutes.length === 0) {
+            return false;
+        }
+        return true;
+    }, (c) => {
+        if (c.res.status === 404) {
+            return false;
+        }
+        return true;
+    }))
     .use('*', registerMetrics)
     .route('', metricsRouter)
     .use('/images/*', serveStatic({
