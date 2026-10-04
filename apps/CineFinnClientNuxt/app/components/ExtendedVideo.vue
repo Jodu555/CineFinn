@@ -640,9 +640,22 @@ const initializeVideoControls = () => {
 
 	const toggleFullScreen = () => {
 		if (document.fullscreenElement == null) {
-			videoContainer.requestFullscreen();
+			// videoContainer.requestFullscreen();
+			if ((video as any).webkitEnterFullscreen) {
+				//F IOS
+				(video as any).webkitEnterFullscreen(); // Specific to iOS Safari for video elements
+			} else if (video.requestFullscreen) {
+				video.requestFullscreen(); // Standard for other browsers
+			}
 		} else {
-			document.exitFullscreen();
+			// document.exitFullscreen();
+			if ((video as any).webkitExitFullscreen) {
+				//F IOS
+				(video as any).webkitExitFullscreen(); // Specific to iOS Safari for video elements
+			} else if (video.requestFullscreen) {
+				video.requestFullscreen(); // Standard for other browsers
+				document.exitFullscreen();
+			}
 		}
 		umTrackEvent('video_toggle_fullscreen', { fullscreen: document.fullscreenElement != null });
 	};
