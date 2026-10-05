@@ -17,7 +17,7 @@ export default function useSocket(type: 'client' | 'rmvcEmitter' = 'client') {
     const authStore = useAuthStore();
     watch(() => authStore.authToken, async () => {
         if (socket === null) return;
-        (socket as any).io.opts.auth.token = authStore.authToken;
+        (socket as any).io.opts.auth.authToken = authStore.authToken;
         await wait(100);
         await socket.disconnect();
         await wait(150);
