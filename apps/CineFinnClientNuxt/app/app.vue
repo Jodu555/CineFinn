@@ -49,10 +49,11 @@ watch(
 	},
 );
 
+//TODO: Is this useless because of the same logic in the useSocket function
 watch(
 	() => authStore.authToken,
 	async (newValue) => {
-		if (newValue) {
+		if (newValue && newValue !== '' && newValue != null && newValue.trim() != '') {
 			socketConnect();
 			// connectSocket();
 		} else {

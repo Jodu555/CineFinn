@@ -20,12 +20,12 @@ export default function useSocket(type: 'client' | 'rmvcEmitter' = 'client') {
         (socket as any).io.opts.auth.authToken = authStore.authToken;
         await wait(100);
         await socket.disconnect();
+        //If authtoken changes to empty string, don't reconnect probably because of a logout
+        if (authStore.authToken == '') {
+            return;
+        }
         await wait(150);
-        socket.connect();
-        socket.io.open((err) => {
-            console.log(err)
-            umTrackEvent('socket_connect_error', { error: 'Reopen failed cause of: ' + JSON.stringify(err) });
-        })
+        socketConnect();
         await wait(10);
     });
 
@@ -49,6 +49,11 @@ export default function useSocket(type: 'client' | 'rmvcEmitter' = 'client') {
 
 export function socketConnect() {
     const socket = useSocket();
+    if (socket.connected) {
+        console.log('socketConnect called but socket already connected');
+        umTrackEvent('socket_connect_error', { error: 'socketConnect called but socket already connected' });
+        return;
+    }
     socket.connect();
     socket.io.open((err) => {
         console.log(err);
