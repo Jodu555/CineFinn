@@ -93,6 +93,7 @@ export const useTodoStore = defineStore('todo', {
                 delete x.edited;
                 return x;
             });
+            //@ts-ignore
             const { data, error } = await tryCatch<Promise<any>, FetchError>(() => $fetch(useAPIURL() + '/todo', {
                 method: 'POST',
                 body: JSON.stringify(saveList),
