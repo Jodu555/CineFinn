@@ -426,7 +426,7 @@
 
 <script setup lang="ts">
 import { averageWatchableEntitysRuntime } from '#imports';
-import { Role, type DetailedEpisode, type DetailedSeason, type Langs } from '@cinefinn/types';
+import { Role, type DetailedEpisode, type DetailedMovie, type DetailedSeason, type Langs } from '@cinefinn/types';
 import { msToReadable } from '@cinefinn/utilities/time';
 import { debounce } from '@cinefinn/utilities/index';
 import { ref, computed, watch } from 'vue';
@@ -583,8 +583,27 @@ const showVideo = computed(() => {
 
 const videoDebug = ref(false);
 
+const videoTitle = computed(() => {
+	if (indexStore.selectedEntity?.UUID.startsWith('MO-')) {
+		return (indexStore.selectedEntity as DetailedMovie).primaryName;
+	} else {
+		const episode = indexStore.selectedEntity as DetailedEpisode;
+		const prettySeasonIndex = String(episode.season_IDX).padStart(2, '0');
+		const prettyEpisodeIndex = String(episode.episode_IDX).padStart(2, '0');
+		return `${indexStore.detailedSerie?.title} - ${prettySeasonIndex}x${prettyEpisodeIndex}`;
+	}
+});
+
 const videoSrc = computed(() => {
 	if (series.value === undefined) return '';
+
+	if ('mediaSession' in navigator) {
+		navigator.mediaSession.metadata = new MediaMetadata({
+			title: videoTitle.value.split(' - ')[1] || videoTitle.value,
+			artist: series.value.infos.title || series.value.title,
+			artwork: [{ src: coverURL.value }],
+		});
+	}
 
 	const oldVideoAPI = false;
 
@@ -611,6 +630,22 @@ const videoSrc = computed(() => {
 		return url;
 	}
 	return '';
+});
+
+onMounted(() => {});
+
+onUnmounted(() => {
+	if ('mediaSession' in navigator) {
+		navigator.mediaSession.metadata = null;
+		navigator.mediaSession.setActionHandler('play', null);
+		navigator.mediaSession.setActionHandler('pause', null);
+		navigator.mediaSession.setActionHandler('stop', null);
+		navigator.mediaSession.setActionHandler('seekbackward', null);
+		navigator.mediaSession.setActionHandler('seekforward', null);
+		navigator.mediaSession.setActionHandler('seekto', null);
+		navigator.mediaSession.setActionHandler('previoustrack', null);
+		navigator.mediaSession.setActionHandler('nexttrack', null);
+	}
 });
 
 const forceHideLatestWatchButton = ref('');

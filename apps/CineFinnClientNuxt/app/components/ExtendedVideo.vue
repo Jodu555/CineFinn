@@ -1,4 +1,3 @@
-template
 <template>
 	<div>
 		<div v-if="!inSyncRoom">
@@ -1005,6 +1004,30 @@ onMounted(async () => {
 	cleanup = data.cleanup;
 
 	window.addEventListener('resize', handleResize);
+
+	if ('mediaSession' in navigator) {
+		navigator.mediaSession.setActionHandler('play', () => {
+			togglePlay();
+		});
+		navigator.mediaSession.setActionHandler('pause', () => {
+			togglePlay();
+		});
+		navigator.mediaSession.setActionHandler('stop', () => {
+			togglePlay();
+		});
+		navigator.mediaSession.setActionHandler('seekbackward', () => {
+			skip(-10);
+		});
+		navigator.mediaSession.setActionHandler('seekforward', () => {
+			skip(10);
+		});
+		navigator.mediaSession.setActionHandler('previoustrack', () => {
+			props.switchTo(-1);
+		});
+		navigator.mediaSession.setActionHandler('nexttrack', () => {
+			props.switchTo(1);
+		});
+	}
 
 	onBeforeUnmount(() => {
 		cleanup();
