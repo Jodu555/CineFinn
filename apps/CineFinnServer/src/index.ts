@@ -110,11 +110,11 @@ const httpServer = serve({
     });
     if (adminUser != undefined) {
         const adminToken = await authTokensTable.getOne({
-            TOKEN: 'SECR-DEV',
+            TOKEN: getConfig().system.PUBLIC_API_AUTH_TOKEN,
         });
         if (adminToken == undefined) {
             authTokensTable.create({
-                TOKEN: 'SECR-DEV',
+                TOKEN: getConfig().system.PUBLIC_API_AUTH_TOKEN,
                 account_UUID: adminUser.UUID,
             });
             console.log('Creating Token for admin user', adminUser.username);
