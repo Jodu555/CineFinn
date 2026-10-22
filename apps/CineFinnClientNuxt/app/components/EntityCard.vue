@@ -234,7 +234,7 @@ const buildCoverURL = computed(() => {
 	// const CURRENT_EXTERNAL_API = 'http://localhost:3000';
 	const url = new URL('https://cinema-api.jodu555.de' + `/images/${props.seriesID}/cover.jpg`);
 
-	url.searchParams.append('auth-token', 'SECR-DEV');
+	url.searchParams.append('auth-token', authStore.authToken);
 
 	return url.href;
 });

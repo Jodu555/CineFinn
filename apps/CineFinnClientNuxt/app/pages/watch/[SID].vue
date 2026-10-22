@@ -605,31 +605,10 @@ const videoSrc = computed(() => {
 		});
 	}
 
-	const oldVideoAPI = false;
-
-	if (oldVideoAPI) {
-		const BASE_URL = 'https://cinema-api.jodu555.de/video?auth-token=SECR-DEV';
-
-		if (currentMovieUUID.value !== null) {
-			const movie = indexStore.detailedMovies.find((m) => m.UUID === currentMovieUUID.value);
-			if (movie === undefined) return '';
-			return `${BASE_URL}&series=${series.value.UUID}&language=EngDub&movie=${movie.movie_IDX}`;
-		}
-		if (currentEpisodeUUID.value !== null) {
-			if (currentDetailedSeasonData.value === undefined) return '';
-			const episode = currentDetailedSeasonData.value.episodes.find((e) => e.UUID === currentEpisodeUUID.value);
-			if (episode === undefined) return '';
-			return `${BASE_URL}&series=${series.value.UUID}&language=EngDub&season=${episode.season_IDX}&episode=${episode.episode_IDX}`;
-		}
-	}
-
-	if (!oldVideoAPI) {
-		let url = `${useAPIURL()}/video/`;
-		url += `${indexStore.selectedWatchableEntity?.UUID}`;
-		url += `?auth-token=${authStore.authToken}&subsystem=${indexStore.selectedWatchableEntity?.subID}&debug=${videoDebug.value}`;
-		return url;
-	}
-	return '';
+	let url = `${useAPIURL()}/video/`;
+	url += `${indexStore.selectedWatchableEntity?.UUID}`;
+	url += `?auth-token=${authStore.authToken}&subsystem=${indexStore.selectedWatchableEntity?.subID}&debug=${videoDebug.value}`;
+	return url;
 });
 
 onMounted(() => {});

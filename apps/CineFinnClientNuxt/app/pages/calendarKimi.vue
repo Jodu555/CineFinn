@@ -233,25 +233,27 @@ const playlistStore = usePlaylistStore();
 const availableLanguages = ['EngDub', 'EngSub', 'GerDub', 'GerSub', 'JpnSub'];
 const weekDays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
+const authStore = useAuthStore();
+
 // --- Mock Data ---
 const generateMockData = (): CalendarEvent[] => {
 	const pool = [
 		{
 			title: 'A Chivalry of a Failed Knight',
-			img: 'https://v2.cinema-api.jodu555.de/images/ee28ef23/cover.jpg?auth-token=d3b9ad8d-fc5c-4e32-b489-88fe2170a3d1',
+			img: 'https://v2.cinema-api.jodu555.de/images/ee28ef23/cover.jpg?auth-token=' + authStore.authToken,
 		},
 		{
 			title: 'Bastard!! Heavy Metal, Dark Fantasy',
-			img: 'https://v2.cinema-api.jodu555.de/images/dbc0aa61/cover.jpg?auth-token=d3b9ad8d-fc5c-4e32-b489-88fe2170a3d1',
+			img: 'https://v2.cinema-api.jodu555.de/images/dbc0aa61/cover.jpg?auth-token=' + authStore.authToken,
 		},
 		{
 			title: 'By the Grace of the Gods',
-			img: 'https://v2.cinema-api.jodu555.de/images/00ba2a50/cover.jpg?auth-token=d3b9ad8d-fc5c-4e32-b489-88fe2170a3d1',
+			img: 'https://v2.cinema-api.jodu555.de/images/00ba2a50/cover.jpg?auth-token=' + authStore.authToken,
 		},
-		{ title: 'Date a Live', img: 'https://v2.cinema-api.jodu555.de/images/48ccd6f0/cover.jpg?auth-token=d3b9ad8d-fc5c-4e32-b489-88fe2170a3d1' },
+		{ title: 'Date a Live', img: 'https://v2.cinema-api.jodu555.de/images/48ccd6f0/cover.jpg?auth-token=' + authStore.authToken },
 		{
 			title: 'The Irregular at Magic High School',
-			img: 'https://v2.cinema-api.jodu555.de/images/814f331c/cover.jpg?auth-token=d3b9ad8d-fc5c-4e32-b489-88fe2170a3d1',
+			img: 'https://v2.cinema-api.jodu555.de/images/814f331c/cover.jpg?auth-token=' + authStore.authToken,
 		},
 	];
 
