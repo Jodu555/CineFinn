@@ -194,7 +194,7 @@ async function markSeason(UUID: string, seriesID: string, seasonID: number, bool
             return segment.ID !== seriesID || segment.season !== seasonID;
         });
 
-        const episodes = await episodesTable.get({ serie_UUID: seriesID, season_IDX: seasonID });
+        const episodes = await episodesTable.get({ serie_UUID: seriesID, season_IDX: seasonID, unique: true });
 
         segmentList.push(
             ...episodes.map((ep) => {
