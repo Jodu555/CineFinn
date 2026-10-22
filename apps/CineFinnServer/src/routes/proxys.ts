@@ -2,9 +2,11 @@ import { tryCatch } from "@cinefinn/utilities/tryCatch";
 import { Hono } from "hono";
 import { proxy } from 'hono/proxy';
 import { getConfig } from "../config.js";
+import { authFullMiddleware, authMiddleware } from "../middleware/auth.js";
+import { Role } from "@cinefinn/types";
 
 const router = new Hono()
-    .all('/anidb/*', async (c) => {
+    .all('/anidb/*', authMiddleware, async (c) => {
         const proxyURL = `${getConfig().proxyAPIs.anidbapi.url}${c.req.path || ''}`
         // console.log('Proxying to:', proxyURL);
         const { data: res, error } = await tryCatch<Promise<Response>, Error>(() => proxy(
@@ -29,7 +31,7 @@ const router = new Hono()
         res.headers.delete('Set-Cookie')
         return res
     })
-    .all('/bullboard/*', async (c) => {
+    .all('/bullboard/*', authFullMiddleware(user => user.role >= Role.Mod), async (c) => {
         const param = c.req.url.split('?')[1];
         const proxyURL = `${getConfig().proxyAPIs.bullboardapi.url}/admin/queues/api${c.req.path.replace('bullboard/', '') || ''}?${param || ''}`
         // console.log('Proxying to:', proxyURL);
