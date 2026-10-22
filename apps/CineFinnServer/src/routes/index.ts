@@ -397,7 +397,7 @@ const router = new Hono()
         if (outputSeries == undefined) {
             return c.json({
                 error: 'Serie not found',
-            });
+            }, 404);
         }
 
         return c.json(outputSeries as DetailedSeries);
@@ -468,7 +468,7 @@ const router = new Hono()
         if (series == undefined) {
             return c.json({
                 message: 'Series not found',
-            });
+            }, 404);
         }
         const seriesList = await seriesTable.get();
         const relatedCategorieSeries = seriesList.filter(s => s.UUID !== seriesUUID && s.tags.includes(series.tags[0])).map(x => x.UUID);
@@ -484,7 +484,7 @@ const router = new Hono()
         if (series == undefined) {
             return c.json({
                 message: 'Series not found',
-            });
+            }, 404);
         }
         const body = await c.req.json();
         const editSeriesData = editSeriesSchema.parse(body);
@@ -549,7 +549,7 @@ const router = new Hono()
         if (series == undefined) {
             return c.json({
                 message: 'Series not found',
-            });
+            }, 404);
         }
         const body = await c.req.json();
         const newCoverData = newCoverSchema.parse(body);
