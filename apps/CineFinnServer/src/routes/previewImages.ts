@@ -34,8 +34,17 @@ const router = new Hono()
             throw new HTTPException(400, { message: 'No such watchable' });
         }
 
-        if (await watchableEntitysTable.getOne({ UUID: presignMetaData.watchableEntityUUID, serie_UUID: presignMetaData.seriesUUID }) == undefined) {
+        if (watchable.serie_UUID !== presignMetaData.seriesUUID) {
+            throw new HTTPException(400, { message: 'Watchable does not belong to the specified series' });
+        }
+
+        const watchableEntity = await watchableEntitysTable.getOne({ UUID: presignMetaData.watchableEntityUUID, serie_UUID: presignMetaData.seriesUUID })
+        if (watchableEntity == undefined) {
             throw new HTTPException(400, { message: 'No such watchable entity' });
+        }
+
+        if (watchableEntity.watchable_UUID !== watchable.UUID) {
+            throw new HTTPException(400, { message: 'Watchable entity does not belong to the specified watchable' });
         }
 
         if (isMovie(watchable) && presignMetaData.type !== 'movie') {
@@ -85,13 +94,18 @@ const router = new Hono()
 
         const saved: string[] = [];
 
+        const validExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+
         await Promise.all(
             fileEntries.map(async (file) => {
                 const filename = sanitizeFileName(file.name);
                 const dest = path.join(destDir, filename);
-                const buffer = Buffer.from(await file.arrayBuffer());
-                await fs.promises.writeFile(dest, buffer);
-                saved.push(filename);
+                const info = path.parse(dest);
+                if (validExtensions.includes(info.ext)) {
+                    const buffer = Buffer.from(await file.arrayBuffer());
+                    await fs.promises.writeFile(dest, buffer);
+                    saved.push(filename);
+                }
             }),
         );
 
