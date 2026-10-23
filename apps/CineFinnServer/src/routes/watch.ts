@@ -148,9 +148,9 @@ const router = new Hono()
              */
             const time = parseInt(c.req.param('time'));
 
-            if (isNaN(time) || time < 0) {
+            if (isNaN(time) || time < 0 || time > 1000000) {
                 return c.json({
-                    message: 'Time must be a positive number',
+                    message: 'Time must be a positive number between 0 and 1000000',
                 });
             }
             span.setAttribute('time', time);
