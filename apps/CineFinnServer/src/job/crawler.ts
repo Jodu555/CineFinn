@@ -62,7 +62,7 @@ export async function crawl(job: Job) {
     }
     job.log(`Found ${files.length} total files`);
 
-    const viableExtensions = ['.mp4', '.mkv', '.webm'];
+    const viableExtensions = ['.mp4'];
 
     const prevLength = files.length;
     files = files.filter((f) => viableExtensions.includes(path.parse(f.path).ext));

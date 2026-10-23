@@ -7,6 +7,9 @@ import path from "path";
 import fs from "fs";
 import { tryCatch } from "@cinefinn/utilities/tryCatch";
 import { HTTPException } from "hono/http-exception";
+import { seriesTable, watchableEntitysTable } from "../database.js";
+import { isEpisode, isMovie, watchableUUIDToWatchable } from "../utils.js";
+import { sanitizeFileName } from "../fileutils.js";
 
 const presignMeta = z.object({
     type: z.enum(['movie', 'episode']),
@@ -21,6 +24,27 @@ const router = new Hono()
     .post('/createPresignedURL', authFullMiddleware((user) => user.role >= Role.Mod), async (c) => {
         const jsonBody = await c.req.json();
         const presignMetaData = presignMeta.parse(jsonBody);
+
+        if (seriesTable.getOne({ UUID: presignMetaData.seriesUUID }) == undefined) {
+            throw new HTTPException(400, { message: 'No such series' });
+        }
+
+        const watchable = await watchableUUIDToWatchable(presignMetaData.watchableUUID);
+        if (watchable == undefined) {
+            throw new HTTPException(400, { message: 'No such watchable' });
+        }
+
+        if (watchableEntitysTable.getOne({ UUID: presignMetaData.watchableEntityUUID, serie_UUID: presignMetaData.seriesUUID }) == undefined) {
+            throw new HTTPException(400, { message: 'No such watchable entity' });
+        }
+
+        if (isMovie(watchable) && presignMetaData.type !== 'movie') {
+            throw new HTTPException(400, { message: 'Invalid type for watchable expected episode got movie' });
+        }
+
+        if (isEpisode(watchable) && presignMetaData.type !== 'episode') {
+            throw new HTTPException(400, { message: 'Invalid type for watchable expected movie got episode' });
+        }
 
         const key = crypto.randomUUID();
         presignedRequests.set(key, presignMetaData);
@@ -63,10 +87,11 @@ const router = new Hono()
 
         await Promise.all(
             fileEntries.map(async (file) => {
-                const dest = path.join(destDir, file.name);
+                const filename = sanitizeFileName(file.name);
+                const dest = path.join(destDir, filename);
                 const buffer = Buffer.from(await file.arrayBuffer());
                 await fs.promises.writeFile(dest, buffer);
-                saved.push(file.name);
+                saved.push(filename);
             }),
         );
 
