@@ -583,6 +583,8 @@ const router = new Hono()
                                 resolve();
                             }
                         });
+                    }).catch(err => {
+                        console.error('Error in streaming recommendation carousel', carouselKey, socketID, err);
                     });
                     loggerInstances.recommendationTimings && console.timeEnd(carouselKey);
                     return;
