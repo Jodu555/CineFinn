@@ -425,6 +425,10 @@ const router = new Hono()
                         reject(err);
                         return;
                     }
+                    if (output == undefined) {
+                        reject(new Error('Output is undefined Check Scraper for logs'));
+                        return;
+                    }
                     resolve(output);
                 });
             });

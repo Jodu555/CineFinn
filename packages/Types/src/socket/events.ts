@@ -55,7 +55,7 @@ export interface ServerToScraperEvents {
     'job:checkForUpdates': (arg0: { jobUUID: string, smart: boolean, index: DetailedSeries[]; alreadyCheckedForUpdates: string[] }, callback: (arg0: { result: boolean, changedSeries: DetailedSeries[]; }) => void) => void;
     'scrape:aniworld': (url: string, callback: (informations: AniWorldSeriesInformations | void) => void) => void;
     'scrape:sto': (url: string, callback: (informations: AniWorldSeriesInformations | void) => void) => void;
-    'checkSerieForUpdates': (serieUUID: string, callback: (output: CheckForUpdatesOutput) => void) => void;
+    'checkSerieForUpdates': (serieUUID: string, callback: (output: CheckForUpdatesOutput | undefined) => void) => void;
     'getCalendar': (callback: (calendarMap: { aniworld: Calendar<AniworldCalendarEntry>, sto: Calendar<StoCalendarEntry> }) => void) => void;
     'getHumanInterventionList': (callback: (list: ExtendedEpisodeDownload[]) => void) => void;
 }

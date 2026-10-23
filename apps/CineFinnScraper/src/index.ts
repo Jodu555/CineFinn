@@ -156,6 +156,12 @@ socket.on('checkSerieForUpdates', async (serieUUID, cb) => {
 
     if (response.status != 200) {
         console.log('Error fetching index');
+        console.log(response.status);
+        console.log(response.statusText);
+        console.log(response.config);
+        console.log(response.headers);
+        console.log(response.data);
+        cb(undefined);
         return;
     }
     const serie = response.data;
