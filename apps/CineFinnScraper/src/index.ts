@@ -152,6 +152,7 @@ socket.on('checkSerieForUpdates', async (serieUUID, cb) => {
             'auth-token': config.CORE.REST_AUTH_TOKEN,
         },
         timeout: 1000 * 60,
+        validateStatus: () => true,
     });
 
     if (response.status != 200) {
