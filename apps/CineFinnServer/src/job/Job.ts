@@ -5,6 +5,7 @@ import { jobsTable } from "../database.js";
 import { getIO } from "../utils.js";
 import { EventEmitter } from "events";
 import { generateJobID } from '../utils/IdGenerators.js';
+import { Role } from "@cinefinn/types";
 
 type EventMap = {
     finished: [];
@@ -70,7 +71,7 @@ export class Job extends EventEmitter<EventMap> {
         // socketJob.data = {};
         // socketJob.logs = socketJob.logs.slice(-10);
         (await getIO().fetchSockets()).forEach(socket => {
-            if (socket.data.auth.type === 'client') {
+            if (socket.data.auth.type === 'client' && socket.data.auth.user.role >= Role.Mod) {
                 if (immediate) {
                     // console.log('Sending Socket Update ', socket.data.auth.user.username)
                     socket.emit('jobUpdate', socketJob);
