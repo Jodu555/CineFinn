@@ -57,7 +57,7 @@ const defaultConfig: ServerConfig = {
     },
     registration: {
         enabled: true,
-        token: 'Registration-TOKEN'
+        token: 'Register-TOKEN'
     },
     proxyAPIs: {
         segmentapi: {
