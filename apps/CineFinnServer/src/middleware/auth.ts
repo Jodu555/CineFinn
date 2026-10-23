@@ -413,6 +413,12 @@ export const authRouter = new Hono()
             });
         }
         const latestEmail = emails[0];
+        //Check if the email is older than 1 day
+        if (latestEmail.sent_at < Date.now() - 1000 * 60 * 60 * 24 * 1) {
+            throw new HTTPException(400, {
+                message: 'Reset Token is older than 1 day, please request a new one!',
+            });
+        }
 
         const emailData = latestEmail.data as any as EmailDataType<'PASSWORD_RESET'>;
 

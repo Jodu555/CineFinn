@@ -33,7 +33,7 @@ const app = new Hono({
     .use(trimTrailingSlash())
     .use(ownLogger(console.log, ['/socket.io']))
     .use(async (c, next) => {
-        if (c.req.url.includes('/calendars/store')) {
+        if (c.req.path.includes('/calendars/store')) {
             await next();
             return;
         }

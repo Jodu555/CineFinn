@@ -25,7 +25,7 @@ const router = new Hono()
         const jsonBody = await c.req.json();
         const presignMetaData = presignMeta.parse(jsonBody);
 
-        if (seriesTable.getOne({ UUID: presignMetaData.seriesUUID }) == undefined) {
+        if (await seriesTable.getOne({ UUID: presignMetaData.seriesUUID }) == undefined) {
             throw new HTTPException(400, { message: 'No such series' });
         }
 
@@ -34,7 +34,7 @@ const router = new Hono()
             throw new HTTPException(400, { message: 'No such watchable' });
         }
 
-        if (watchableEntitysTable.getOne({ UUID: presignMetaData.watchableEntityUUID, serie_UUID: presignMetaData.seriesUUID }) == undefined) {
+        if (await watchableEntitysTable.getOne({ UUID: presignMetaData.watchableEntityUUID, serie_UUID: presignMetaData.seriesUUID }) == undefined) {
             throw new HTTPException(400, { message: 'No such watchable entity' });
         }
 
