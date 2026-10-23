@@ -186,7 +186,7 @@ async function getStillRunningSeries(user: Account, meta: CarouselMeta, map?: Ca
     const cacheMap = map || await prepareCachedSeriesMap();
 
     const newlyAddedSeriesCarousel = await getNewlyAddedSeries(user, meta, cacheMap);
-    const ignoreSeriesList = new Set(...newlyAddedSeriesCarousel.map(x => x.UUID));
+    const ignoreSeriesList = new Set(newlyAddedSeriesCarousel.map(x => x.UUID));
 
     const seriesUUIDs = await queryDatabase<{ UUID: string; }>(`SELECT UUID FROM ${seriesTable.table_name}`);
     const possibleSeries = new Set(seriesUUIDs.map(s => s.UUID).filter(s => !ignoreSeriesList.has(s)));
@@ -590,7 +590,7 @@ const router = new Hono()
                 const item = await buildCarouselResponse(carouselKey, carousel);
                 if (carousel.type === 'entity') {
                     const items = item?.items as Awaited<CarouselEntityDetailsResult>;
-                    item!.items = items.filter(async e => {
+                    item!.items = items.filter(e => {
                         return e.entity.additional.imageFile !== 'null.jpg';
                     });
                 }
