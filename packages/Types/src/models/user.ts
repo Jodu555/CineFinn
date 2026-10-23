@@ -95,18 +95,23 @@ export interface AuthToken {
     account_UUID: string;
 }
 
-export interface Email {
+export interface Email<T extends EmailTypes = EmailTypes> {
     UUID: string;
     account_UUID: string;
-    email_type: EmailTypes;
+    email_type: T;
     status: EmailStatus;
     subject: string;
     html: string;
     text: string;
-    data: string;
+    data: EmailDataType<T>;
     sent_at: number;
     created_at: number;
 }
 
 export type EmailTypes = 'VERIFICATION' | 'PASSWORD_RESET';
 export type EmailStatus = 'PENDING' | 'SENT';
+
+export type EmailDataType<T extends EmailTypes> =
+    T extends 'VERIFICATION' ? { verificationToken: string; } :
+    T extends 'PASSWORD_RESET' ? { forgotPasswordToken: string; } :
+    undefined;

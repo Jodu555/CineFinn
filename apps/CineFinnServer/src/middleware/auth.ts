@@ -5,11 +5,10 @@ import bcrypt from 'bcryptjs';
 import { randomUUID } from 'node:crypto';
 import { HTTPException } from 'hono/http-exception';
 import z from 'zod';
-import type { Account } from '@cinefinn/types/models/user';
+import type { Account, EmailDataType } from '@cinefinn/types/models/user';
 import { getConfig } from '../config.js';
 import { compareSettings, defaultSettings } from '../utils/settings.js';
 import { getEmailManager, getServiceName, withSpan } from '../utils.js';
-import type { DataType } from '../utils/EmailManager.js';
 import { trace } from '@opentelemetry/api'
 import { createStorage } from 'unstorage';
 import type { timestamped } from '@cinefinn/types';
@@ -365,19 +364,28 @@ export const authRouter = new Hono()
 
         emails.sort((a, b) => b.sent_at - a.sent_at);
 
-        if (emails.length == 0 || emails[0].data == '') {
+
+        if (emails.length == 0 || emails[0].data == undefined || emails[0].data == null) {
             throw new HTTPException(400, {
                 message: 'No reset token found, please request a new one!',
             });
         }
+        const latestEmail = emails[0];
+        //Check if the email is older than 1 day
+        if (latestEmail.sent_at < Date.now() - 1000 * 60 * 60 * 24 * 1) {
+            throw new HTTPException(400, {
+                message: 'Reset Token is older than 1 day, please request a new one!',
+            });
+        }
 
-        const emailData = emails[0].data as any as DataType<'PASSWORD_RESET'>;
+        const emailData = latestEmail.data as any as EmailDataType<'PASSWORD_RESET'>;
 
         if (emailData.forgotPasswordToken !== forgotPasswordData.token) {
             throw new HTTPException(400, {
                 message: 'Invalid reset token!',
             });
         }
+
         return c.json({
             message: 'Valid reset token',
         });
@@ -399,13 +407,14 @@ export const authRouter = new Hono()
 
         emails.sort((a, b) => b.sent_at - a.sent_at);
 
-        if (emails.length == 0 || emails[0].data == '') {
+        if (emails.length == 0 || emails[0].data == undefined || emails[0].data == null) {
             throw new HTTPException(400, {
                 message: 'No reset token found, please request a new one!',
             });
         }
+        const latestEmail = emails[0];
 
-        const emailData = emails[0].data as any as DataType<'PASSWORD_RESET'>;
+        const emailData = latestEmail.data as any as EmailDataType<'PASSWORD_RESET'>;
 
         if (emailData.forgotPasswordToken !== forgotPasswordData.token) {
             throw new HTTPException(400, {
@@ -416,6 +425,10 @@ export const authRouter = new Hono()
         await accountsTable.update({ UUID: user.UUID }, {
             password: newPassword,
         });
+
+        emailData.forgotPasswordToken = '';
+        await emailsTable.update({ UUID: latestEmail.UUID }, { data: emailData });
+
         return c.json({
             message: 'Successfully reset password',
         });

@@ -1,14 +1,9 @@
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import { getConfig } from '../config.js';
-import type { Email, EmailTypes } from '@cinefinn/types/models/user';
+import type { Email, EmailDataType, EmailTypes } from '@cinefinn/types/models/user';
 import { accountsTable, emailsTable } from '../database.js';
 import { generateEmailID } from './IdGenerators.js';
-
-export type DataType<T> =
-  T extends 'VERIFICATION' ? { verificationToken: string; } :
-  T extends 'PASSWORD_RESET' ? { forgotPasswordToken: string; } :
-  undefined;
 
 export default class EmailManager {
   transporter: nodemailer.Transporter;
@@ -65,23 +60,23 @@ export default class EmailManager {
     setTimeout(() => this.processEmails(), 1000 * 60 * 5); // Check for stall emails every 5 minutes
   }
 
-  async sendEmail<T extends EmailTypes>(account_UUID: string, email_type: T, data: DataType<T> & { email?: string; }) {
+  async sendEmail<T extends EmailTypes>(account_UUID: string, email_type: T, data: EmailDataType<T> & { email?: string; }) {
     this.inflight = true;
     try {
 
       data.email = data.email || (await accountsTable.getOne({ UUID: account_UUID }))?.email;
       const obj = await this.getEmailData(email_type, data);
 
-      const email: Email = {
+      const email: Email<T> = {
         UUID: generateEmailID(),
         account_UUID,
         email_type,
         status: 'PENDING',
-        data: JSON.stringify(data),
+        data: data,
         sent_at: -1,
         created_at: Date.now(),
         ...obj,
-      } satisfies Email;
+      } satisfies Email<T>;
 
       await emailsTable.create(email);
 
@@ -130,14 +125,14 @@ export default class EmailManager {
           console.log('Email sent:', { ID: email.UUID, subject: email.subject, to: (email.data as any).email });
           email.sent_at = Date.now();
           email.status = 'SENT';
-          email.data = JSON.stringify(email.data);
+          email.data = email.data;
           emailsTable.update({ UUID: email.UUID }, email);
         }
       }
     );
   }
 
-  generateEmailVerification(data: DataType<'VERIFICATION'> & { email: string; }) {
+  generateEmailVerification(data: EmailDataType<'VERIFICATION'> & { email: string; }) {
     const { email, verificationToken } = data;
 
     const html = `<!DOCTYPE html>
@@ -245,7 +240,7 @@ export default class EmailManager {
     return { subject: 'Email Verification', html, text };
   }
 
-  generateEmailForgotPassword(data: DataType<'PASSWORD_RESET'> & { email: string; }) {
+  generateEmailForgotPassword(data: EmailDataType<'PASSWORD_RESET'> & { email: string; }) {
     const { email, forgotPasswordToken } = data;
 
     const html = `<!DOCTYPE html>
