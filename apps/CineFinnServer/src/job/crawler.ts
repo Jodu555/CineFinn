@@ -49,8 +49,12 @@ export async function crawl(job: Job) {
             let timeout: NodeJS.Timeout;
             s.emit('listFiles', (files) => {
                 job.log(`Found ${files.length} subsystem files for ${subSystemID}`);
-                loadedSubsystems.add(subSystemID);
                 clearTimeout(timeout);
+                if (files.length === 0) {
+                    reject('No files found');
+                    return;
+                }
+                loadedSubsystems.add(subSystemID);
                 resolve(files.map(f => ({ subID: subSystemID, path: f })));
             });
             timeout = setTimeout(() => {
