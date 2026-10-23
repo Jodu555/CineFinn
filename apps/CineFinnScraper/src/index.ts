@@ -34,13 +34,13 @@ const app = new Hono({
     .use(ownLogger(console.log, ['/socket.io']))
     .use(async (c, next) => {
         if (c.req.url.includes('/calendars/store')) {
-            next();
+            await next();
             return;
         }
         if (c.req.header('ptoken') === getPtoken() ||
             c.req.query('ptoken') === getPtoken()
         ) {
-            next();
+            await next();
             return;
         }
         return c.json({ message: 'Unauthorized access (wrong or missing ptoken)' }, 401);
