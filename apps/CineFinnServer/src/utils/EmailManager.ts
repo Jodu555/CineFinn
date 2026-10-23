@@ -52,7 +52,7 @@ export default class EmailManager {
             return;
         }
         const emails = await emailsTable.get({ status: 'PENDING' });
-        for (const email of emails) {
+        for await (const email of emails) {
             if (email.status == 'PENDING') {
                 await this.deepSendEmail(email);
             }
