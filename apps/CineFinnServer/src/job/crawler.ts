@@ -755,8 +755,11 @@ export async function insertMissingWatchableEntityRuntimes(job: Job) {
                 failed.add(entity.UUID);
                 return;
             }
+            const controller = new AbortController();
+            const { signal } = controller;
+
             const { data: runtime, error } = await tryCatch(() => Promise.race([
-                geFileRuntime(entity.UUID),
+                geFileRuntime(entity.UUID, { signal }),
                 new Promise<number>((resolve, reject) => {
                     setTimeout(() => {
                         reject('Timeout');
@@ -766,6 +769,7 @@ export async function insertMissingWatchableEntityRuntimes(job: Job) {
             if (error) {
                 job.log('Error getting runtime for entity', entity.UUID, error);
                 failed.add(entity.UUID);
+                controller.abort();
                 return;
             }
             await watchableEntitysTable.update({ UUID: entity.UUID }, { runtime });
@@ -805,10 +809,10 @@ export async function insertMissingWatchableEntityRuntimes(job: Job) {
     }
 }
 
-function geFileRuntime(watchableUUID: string) {
+function geFileRuntime(watchableUUID: string, { signal }: { signal: AbortSignal } = { signal: new AbortController().signal }) {
     return new Promise<number>((resolve, reject) => {
         const videoURL = `${getConfig().system.PUBLIC_API_ENDPOINT}/video/${watchableUUID}?auth-token=${getConfig().system.PUBLIC_API_AUTH_TOKEN}`;
-        childProcess.exec(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${videoURL}"`, (error, stdout, stderr) => {
+        childProcess.exec(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${videoURL}"`, { signal }, (error, stdout, stderr) => {
             if (error) {
                 // console.log(error);
                 // console.log(stderr);
