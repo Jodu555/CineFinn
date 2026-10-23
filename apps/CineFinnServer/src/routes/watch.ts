@@ -15,7 +15,20 @@ type WatchHistoryWithDetails = WatchHistory & {
     movie_IDX: number;
 };
 
-
+/**
+ * Calculates the average runtime of the watchableEntities array if the array is empty it returns 300
+ * @param watchableEntities Watchable Entitys on which the average needs to be calculated
+ * @returns The Average number over the watchableEntities if the array is empty it returns 300
+ */
+function getAverageRuntime(watchableEntities: WatchableEntity[]) {
+    if (watchableEntities.length > 0) {
+        const averageRuntime = watchableEntities.map(we => {
+            return we.runtime === -1 ? 500 : we.runtime;
+        }).reduce((prev, curr) => prev + curr, 0) / watchableEntities.length;
+        return averageRuntime;
+    }
+    return 300;
+}
 
 const router = new Hono()
     .get('/info/:seriesUUID', authMiddleware, async (c) => {
@@ -55,9 +68,8 @@ const router = new Hono()
             const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, series_UUID: episode.serie_UUID, watchable_UUID: episode.UUID, unique: true });
 
             const watchableEntities = await watchableEntitysTable.get({ watchable_UUID: episode.UUID });
-            const averageRuntime = watchableEntities.map(we => {
-                return we.runtime === -1 ? 500 : we.runtime;
-            }).reduce((prev, curr) => prev + curr, 0) / watchableEntities.length;
+
+            const averageRuntime = getAverageRuntime(watchableEntities);
 
             if (watchHistory == undefined) {
                 await watchHistoryTable.create({
@@ -111,9 +123,7 @@ const router = new Hono()
         const watchHistory = await watchHistoryTable.getOne({ account_UUID: user.UUID, watchable_UUID: movie.UUID, unique: true });
 
         const watchableEntities = await watchableEntitysTable.get({ watchable_UUID: movie.UUID });
-        const averageRuntime = watchableEntities.map(we => {
-            return we.runtime === -1 ? 500 : we.runtime;
-        }).reduce((prev, curr) => prev + curr, 0) / watchableEntities.length;
+        const averageRuntime = getAverageRuntime(watchableEntities);
 
         if (watchHistory == undefined) {
             await watchHistoryTable.create({
