@@ -98,38 +98,42 @@ export default class EmailManager {
         throw new Error('Email type not found');
     }
 
-    private async deepSendEmail(email: Email) {
+    private deepSendEmail(email: Email) {
+        return new Promise<void>(async (resolve, reject) => {
 
-        if (typeof email.data === 'string') {
-            email.data = JSON.parse(email.data);
-        }
-
-        if (!this.ready) {
-            console.log('Email transporter not ready for', email.UUID);
-            return;
-        }
-
-        this.transporter.sendMail(
-            {
-                from: process.env.MAIL_APP_MAIL,
-                to: (email.data as any).email,
-                subject: email.subject,
-                html: email.html,
-                text: email.text,
-            },
-            function (error, info) {
-                if (error) {
-                    console.log(error);
-                    return;
-                } else {
-                    console.log('Email sent:', { ID: email.UUID, subject: email.subject, to: (email.data as any).email });
-                    email.sent_at = Date.now();
-                    email.status = 'SENT';
-                    email.data = email.data;
-                    emailsTable.update({ UUID: email.UUID }, email);
-                }
+            if (typeof email.data === 'string') {
+                email.data = JSON.parse(email.data);
             }
-        );
+
+            if (!this.ready) {
+                console.log('Email transporter not ready for', email.UUID);
+                return resolve();
+            }
+
+            this.transporter.sendMail(
+                {
+                    from: process.env.MAIL_APP_MAIL,
+                    to: (email.data as any).email,
+                    subject: email.subject,
+                    html: email.html,
+                    text: email.text,
+                },
+                async function (error, info) {
+                    if (error) {
+                        console.log(error);
+                        return reject(error);
+                    } else {
+                        console.log('Email sent:', { ID: email.UUID, subject: email.subject, to: (email.data as any).email });
+                        email.sent_at = Date.now();
+                        email.status = 'SENT';
+                        email.data = email.data;
+                        await emailsTable.update({ UUID: email.UUID }, email);
+                        resolve();
+                    }
+                }
+            );
+        });
+
     }
 
     generateEmailVerification(data: EmailDataType<'VERIFICATION'> & { email: string; }) {
