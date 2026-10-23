@@ -44,7 +44,7 @@ export const filenameParser = (filepath: string, filename: string): Prettify<Par
     const parsers: pars[] = [
         {
             //v1 Episode Parser
-            re: /^(.*)St#(\d+) Flg#(\d+).mp4/gi,
+            re: /^(.*)St#(\d+) Flg#(\d+)\.mp4/gi,
             parse: (match) => {
                 const [original, title, season, episode] = match;
                 return { movie: false, title: title.trim(), season: Number(season), episode: Number(episode), language: 'GerDub' } as ParsedInformation;
