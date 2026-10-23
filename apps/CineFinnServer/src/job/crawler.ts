@@ -45,20 +45,27 @@ export async function crawl(job: Job) {
 
     const subSystemFilesPromise = subSystemSockets.map(s => {
         return new Promise<SubFile[]>((resolve, reject) => {
+            const subSystemID = s.data.auth.type === 'subsystem' ? s.data.auth.id : 'main';
+            let timeout: NodeJS.Timeout;
             s.emit('listFiles', (files) => {
-                job.log(`Found ${files.length} subsystem files for ${s.data.auth.type === 'subsystem' ? s.data.auth.id : 'main'}`);
-                loadedSubsystems.add(s.data.auth.type === 'subsystem' ? s.data.auth.id : 'main');
-                resolve(files.map(f => ({ subID: s.data.auth.type === 'subsystem' ? s.data.auth.id : 'main', path: f })));
+                job.log(`Found ${files.length} subsystem files for ${subSystemID}`);
+                loadedSubsystems.add(subSystemID);
+                clearTimeout(timeout);
+                resolve(files.map(f => ({ subID: subSystemID, path: f })));
             });
-            setTimeout(() => {
+            timeout = setTimeout(() => {
                 reject('Timeout');
             }, 1000 * 60 * 5);
         });
     });
 
-    const subSystemFiles = await Promise.all(subSystemFilesPromise);
+    const subSystemFiles = await Promise.allSettled(subSystemFilesPromise);
     for (const subSystemFile of subSystemFiles) {
-        files = files.concat(subSystemFile);
+        if (subSystemFile.status === 'fulfilled') {
+            files = files.concat(subSystemFile.value);
+        } else {
+            job.log(`Error loading subSystemFiles: ${subSystemFile.reason}`);
+        }
     }
     job.log(`Found ${files.length} total files`);
 
