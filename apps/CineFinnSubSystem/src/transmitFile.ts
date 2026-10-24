@@ -23,7 +23,14 @@ export function setupTransmitFile() {
     const socket = getSocket();
     let currentDownload: DownloadSession | null = null;
 
+    const closeSession = () => {
+        currentDownload?.stream?.destroy();
+        currentDownload = null;
+    };
+
+
     socket.on('file_start', (data) => {
+        closeSession();
         console.log(`Receiving file: ${data.filename} (${data.size} bytes)`);
         const downloadPath = `${path.join(getConfig().entrypoint, data.resultPath)}`;
         console.log(`Download Path: ${downloadPath}`);
@@ -97,6 +104,7 @@ export function setupTransmitFile() {
         currentDownload?.stream.destroy();
         currentDownload?.hash.destroy();
         currentDownload = null;
+        closeSession();
     });
 
     socket.on(

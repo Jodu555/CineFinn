@@ -25,6 +25,9 @@ const PROGRESS_BROADCAST_THRESHOLD = 0.5; // percent
 const POST_TRANSFER_WAIT_MS = 5_000;
 const STREAM_HIGH_WATER_MARK = 64 * 1024;
 
+const ACK_TIMEOUT_MS = 15_000; // 15s
+const TRANSFER_TIMEOUT_MS = 15 * 60_000; // 15 minutes
+
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 2_000;
 
@@ -71,7 +74,14 @@ class MovingItemQueue {
         const item = movingItems.find((m) => m.ID === id);
 
         if (item) {
-            await processMovingItem(item);
+            try {
+                await processMovingItem(item);
+            } catch (error) {
+                console.error(`[Queue] Item ${id} crashed:`, error);
+                item.meta.progress = -1;
+                item.meta.result = JSON.stringify(error);
+                await rebroadcastMovingItems().catch(() => { });
+            }
         } else {
             console.warn(`[Queue] Moving item ${id} not found — skipping`);
         }
@@ -119,9 +129,24 @@ export async function prepareProcessMovingItem(id: string) {
 }
 
 export async function processMovingItem(movingItem: MovingItem) {
-    if (movingItem.fromSubID === "main" && movingItem.toSubID !== "main") {
+    /**
+     * isPush: Pushing a file from the main subSystem to a subSystem
+     */
+    const isPush = movingItem.fromSubID === "main" && movingItem.toSubID !== "main";
+    /**
+     * isPull: Pulling a file from a subSystem to the main subSystem
+     */
+    const isPull = movingItem.fromSubID !== "main" && movingItem.toSubID === "main";
+
+    if (!isPush && !isPull) {
+        const message = `[Transfer] Unsupported direction ${movingItem.fromSubID} -> ${movingItem.toSubID}, dropping: ${movingItem.ID}`;
+        console.error(message);
+        throw new Error(message);
+    }
+
+    if (isPush) {
         await sendMovingItemToSubSystem(movingItem);
-    } else if (movingItem.fromSubID !== "main" && movingItem.toSubID === "main") {
+    } else if (isPull) {
         await receiveMovingItemFromSubSystem(movingItem);
     }
 }
@@ -161,11 +186,22 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
         return;
     }
 
+    if (!fs.existsSync(filePath)) {
+        console.error(`[Transfer] File not found: ${filePath}`);
+        return;
+    }
+
+
     let resultDir = "";
-    if (isEpisode(watchable)) {
-        resultDir = path.join(series.tags[0], series.title, `Season-${watchable.season_IDX}`);
-    } else if (isMovie(watchable)) {
-        resultDir = path.join(series.tags[0], series.title, "Movies");
+    try {
+        if (isEpisode(watchable)) {
+            resultDir = path.join(series.tags[0], series.title, `Season-${watchable.season_IDX}`);
+        } else if (isMovie(watchable)) {
+            resultDir = path.join(series.tags[0], series.title, "Movies");
+        }
+    } catch (error) {
+        console.error(`[Transfer] Error determining resultDir for ${watchable.UUID}:`, error);
+        return;
     }
 
     let lastError: Error | null = null;
@@ -325,9 +361,6 @@ interface TransferAttemptParams {
 }
 
 async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemSocket }: TransferAttemptParams): Promise<string> {
-    if (!fs.existsSync(filePath)) {
-        throw new Error(`File not found: ${filePath}`);
-    }
 
     const stats = fs.statSync(filePath);
     const fileSize = stats.size;
@@ -340,11 +373,6 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
     movingItem.meta.progress = 0;
     await rebroadcastMovingItems();
 
-    subSystemSocket.emit("file_start", { filename, size: fileSize, resultPath });
-
-    const readStream = fs.createReadStream(filePath, { highWaterMark: STREAM_HIGH_WATER_MARK });
-
-
     const rawBandwidth = subSystemSocket.data.auth.bandwidth;
     if (!rawBandwidth || rawBandwidth <= 0) {
         throw new Error(`Invalid bandwidth value on sub-system socket: ${rawBandwidth}`);
@@ -352,18 +380,35 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
     const bandwidth = rawBandwidth * 1024 * 1024;
     const throttle = new ThrottleStream(bandwidth);
 
+    subSystemSocket.emit("file_start", { filename, size: fileSize, resultPath });
+
+    const readStream = fs.createReadStream(filePath, { highWaterMark: STREAM_HIGH_WATER_MARK });
+
     let bytesSent = 0;
     let lastProgress = 0;
     let ackPending = false;
 
-    const waitForAck = (): Promise<void> =>
-        new Promise((resolve) => {
-            if (!ackPending) return resolve();
-            subSystemSocket.once("ack", () => {
-                ackPending = false;
-                resolve();
-            });
+    const withTimeout = <T>(p: Promise<T>, ms: number, label: string) => {
+        return Promise.race(
+            [
+                p,
+                new Promise<never>((_, reject) => {
+                    setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
+                }
+                )
+            ]);
+
+    }
+
+    const waitForAck = () => new Promise<void>((resolve, reject) => {
+        if (!ackPending) return resolve();
+        const timeout = setTimeout(() => reject(new Error("No ack from sub-system")), ACK_TIMEOUT_MS);
+        subSystemSocket.once("ack", () => {
+            clearTimeout(timeout);
+            ackPending = false;
+            resolve();
         });
+    });
 
     subSystemSocket.on("ack", () => { ackPending = false; });
 
@@ -401,7 +446,19 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
         throw err;
     });
 
-    await pipelineAsync(readStream, throttle);
+    const onTransferAbort = () => {
+        console.error(`[Transfer] Transfer aborted Sub-system ${movingItem.toSubID} disconnected`);
+        readStream.destroy();
+        throttle.destroy();
+    };
+
+    subSystemSocket.once("disconnect", onTransferAbort);
+    try {
+        await withTimeout(pipelineAsync(readStream, throttle), TRANSFER_TIMEOUT_MS, "Push");
+    } finally {
+        subSystemSocket.off("disconnect", onTransferAbort);
+        subSystemSocket.removeAllListeners("ack");
+    }
 
     const md5 = md5Hash.digest('hex');
     console.log(`[Transfer] MD5: ${md5}`);
