@@ -27,6 +27,7 @@ const STREAM_HIGH_WATER_MARK = 64 * 1024;
 
 const ACK_TIMEOUT_MS = 15_000; // 15s
 const TRANSFER_TIMEOUT_MS = 15 * 60_000; // 15 minutes
+const FINALIZE_TIMEOUT_MS = 30_000; // 30s
 
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 2_000;
@@ -446,38 +447,51 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
         throw err;
     });
 
-    const onTransferAbort = () => {
+    const onTransferAbortDisconnect = () => {
         console.error(`[Transfer] Transfer aborted Sub-system ${movingItem.toSubID} disconnected`);
         readStream.destroy();
         throttle.destroy();
     };
 
-    subSystemSocket.once("disconnect", onTransferAbort);
+    subSystemSocket.once("disconnect", onTransferAbortDisconnect);
     try {
         await withTimeout(pipelineAsync(readStream, throttle), TRANSFER_TIMEOUT_MS, "Push");
     } finally {
-        subSystemSocket.off("disconnect", onTransferAbort);
+        subSystemSocket.off("disconnect", onTransferAbortDisconnect);
         subSystemSocket.removeAllListeners("ack");
     }
 
     const md5 = md5Hash.digest('hex');
     console.log(`[Transfer] MD5: ${md5}`);
 
-    const finalPath = await new Promise<string>((resolve, reject) => {
-        subSystemSocket.emit("file_end", md5, (result: string | false) => {
-            if (result === false) {
-                reject(new Error("Remote rejected the file transfer"));
-            } else {
-                resolve(result);
-            }
-        });
-    });
+    // Keep handling disconnects until the very end of the interaction.
+    const onTransferAbort = () => {
+        console.error(`[Transfer] Sub-system disconnected during file_end wait`);
+        readStream.destroy();
+        throttle.destroy();
+    };
+    subSystemSocket.once("disconnect", onTransferAbort);
 
-    console.log(`[Transfer] Complete: ${finalPath}`);
-    movingItem.meta.result = finalPath;
-    await rebroadcastMovingItems();
+    try {
+        // IMPORTANT: file_end race must be with the SAME withTimeout used for the pipeline.
+        const finalPath = await withTimeout(
+            new Promise<string>((resolve, reject) => {
+                subSystemSocket.emit("file_end", md5, (result: string | false) => {
+                    if (result === false) reject(new Error("Remote rejected the file transfer"));
+                    else resolve(result);
+                });
+            }),
+            FINALIZE_TIMEOUT_MS,
+            "file_end"
+        );
 
-    return finalPath;
+        console.log(`[Transfer] Complete: ${finalPath}`);
+        movingItem.meta.result = finalPath;
+        await rebroadcastMovingItems();
+        return finalPath;
+    } finally {
+        subSystemSocket.off("disconnect", onTransferAbort);
+    }
 }
 
 interface ReceiveAttemptParams {

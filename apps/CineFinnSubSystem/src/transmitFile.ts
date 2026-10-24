@@ -34,6 +34,16 @@ export function setupTransmitFile() {
         console.log(`Receiving file: ${data.filename} (${data.size} bytes)`);
         const downloadPath = `${path.join(getConfig().entrypoint, data.resultPath)}`;
         console.log(`Download Path: ${downloadPath}`);
+
+        // 1. Make sure the destination directory exists before opening the stream
+        try {
+            fs.mkdirSync(path.dirname(downloadPath), { recursive: true });
+        } catch (err) {
+            console.error(`[file_start] mkdir failed: ${(err as Error).message}`);
+            //TODO: socket.emit('file_error', { message: `Cannot create directory: ${(err as Error).message}` }); 
+            return;
+        }
+
         const downloadStream = fs.createWriteStream(downloadPath);
         const downloadHash = crypto.createHash('md5');
 
@@ -44,6 +54,12 @@ export function setupTransmitFile() {
             totalSize: data.size,
             expectedPath: downloadPath,
         };
+
+        downloadStream.on('error', (err) => {
+            console.error(`[file_start] WriteStream error: ${err.message}`);
+            //TODO: socket.emit('file_error', { message: `Write error: ${err.message}` });
+            closeSession();
+        });
 
         downloadStream.on('drain', () => {
             socket.emit('ack');
