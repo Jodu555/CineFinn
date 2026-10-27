@@ -26,11 +26,15 @@ const POST_TRANSFER_WAIT_MS = 5_000;
 const STREAM_HIGH_WATER_MARK = 64 * 1024;
 
 const ACK_TIMEOUT_MS = 15_000; // 15s
-const TRANSFER_TIMEOUT_MS = 15 * 60_000; // 15 minutes
 const FINALIZE_TIMEOUT_MS = 30_000; // 30s
+const PULL_IDLE_TIMEOUT_MS = 30_000; // 30s — no data for this long while pulling → retry
 
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 2_000;
+
+// Retries for the DB pointer update AFTER a completed transfer. A delivered
+// file must never be re-transmitted because of a database hiccup.
+const DB_UPDATE_RETRY_ATTEMPTS = 3;
 
 //If the sub-system does not respond within this time, it will be retried
 const PULL_REQUEST_TIMEOUT_MS = 10_000;
@@ -39,10 +43,25 @@ const movingItems: MovingItem[] = [];
 
 export const getMovingItems = () => movingItems;
 
+/**
+ * Terminal failure marker: progress = -1 plus a human-readable result, then
+ * rebroadcast so admins see the failure instead of a stale moving item.
+ * Only call once per item, after all retries are exhausted (or on fatal
+ * validation errors).
+ */
+async function finalizeMovingItemFailure(movingItem: MovingItem, message: string) {
+    movingItem.meta.progress = -1;
+    movingItem.meta.result = message;
+    console.error(`[Transfer] Finalizing failure for ${movingItem.ID}: ${message}`);
+    await rebroadcastMovingItems().catch(() => { });
+}
+
 
 class MovingItemQueue {
     private items: string[] = [];
     private timeout: NodeJS.Timeout | null = null;
+    private processing = false;
+    private runningId: string | null = null;
     private onFinishedCallback: () => void = () => { };
 
     onFinished(callback: () => void) {
@@ -50,13 +69,27 @@ class MovingItemQueue {
     }
 
     enqueue(id: string) {
+        // Dedupe: an id enqueued twice (double-click, admin retry) must not
+        // be processed twice — neither while PENDING nor while IN FLIGHT.
+        if (this.items.includes(id) || this.runningId === id) {
+            console.log("[Queue] Enqueue ignored — already pending/in-flight:", id);
+            return;
+        }
         console.log("[Queue] Enqueue:", id);
         this.items.push(id);
-        this.scheduleNext();
+        // While an item is being processed, dequeue() schedules the next tick
+        // itself when it finishes — scheduling an extra tick here would start a
+        // SECOND concurrent transfer on the same sub socket.
+        if (!this.timeout && !this.processing) this.scheduleNext();
     }
 
     private scheduleNext() {
-        if (this.timeout) clearTimeout(this.timeout);
+        // Never reset a pending tick — resetting it on every enqueue delays
+        // the whole queue unboundedly while items flood in.
+        if (this.timeout) return;
+        // A transfer is in flight: dequeue() will schedule the follow-up when
+        // it finishes.
+        if (this.processing) return;
         this.timeout = setTimeout(() => {
             this.timeout = null;
             this.dequeue();
@@ -64,6 +97,13 @@ class MovingItemQueue {
     }
 
     async dequeue() {
+        // Hard single-flight guarantee. The transfer protocol is
+        // single-channel per sub socket (the sub keeps one download session),
+        // so two items must never be processed concurrently.
+        if (this.processing) {
+            this.scheduleNext();
+            return null;
+        }
         const id = this.items.shift();
 
         if (id == null) {
@@ -72,24 +112,32 @@ class MovingItemQueue {
         }
 
         console.log("[Queue] Dequeue:", id);
-        const item = movingItems.find((m) => m.ID === id);
+        this.processing = true;
+        this.runningId = id;
+        try {
+            const item = movingItems.find((m) => m.ID === id);
 
-        if (item) {
-            try {
-                await processMovingItem(item);
-            } catch (error) {
-                console.error(`[Queue] Item ${id} crashed:`, error);
-                item.meta.progress = -1;
-                item.meta.result = JSON.stringify(error);
-                await rebroadcastMovingItems().catch(() => { });
+            if (item) {
+                try {
+                    await processMovingItem(item);
+                } catch (error) {
+                    console.error(`[Queue] Item ${id} crashed:`, error);
+                    await finalizeMovingItemFailure(item, error instanceof Error ? error.message : String(error));
+                }
+            } else {
+                console.warn(`[Queue] Moving item ${id} not found — skipping`);
             }
-        } else {
-            console.warn(`[Queue] Moving item ${id} not found — skipping`);
+        } finally {
+            this.processing = false;
+            this.runningId = null;
         }
 
         if (this.items.length === 0) {
             this.onFinishedCallback();
-            if (this.timeout) clearTimeout(this.timeout);
+            if (this.timeout) {
+                clearTimeout(this.timeout);
+                this.timeout = null;
+            }
         } else {
             this.scheduleNext();
         }
@@ -106,22 +154,32 @@ export const movingItemQueue = new MovingItemQueue();
 
 movingItemQueue.onFinished(async () => {
     console.log('MovingItemQueue Drained');
-    await rebroadcastMovingItems();
-    await rebroadcastOverview();
+
+    try { await rebroadcastMovingItems(); } catch (error) { console.error('[Queue] rebroadcastMovingItems failed:', error); }
+    try { await rebroadcastOverview(); } catch (error) { console.error('[Queue] rebroadcastOverview failed:', error); }
 
     console.log('Clearing Cache');
     try { await indexStorage.clear(); } catch (e) { }
     try { await recommendationStorage.clear(); } catch (e) { }
 
     console.log('Filling Cache');
-    await app.request('/index/all', {
-        headers: { 'auth-token': getConfig().system.PUBLIC_API_AUTH_TOKEN },
-    });
+    try {
+        const res = await app.request('/index/all', {
+            headers: { 'auth-token': getConfig().system.PUBLIC_API_AUTH_TOKEN },
+        });
+        if (!res.ok) console.error('[Queue] /index/all returned non-OK status:', res.status);
+    } catch (error) {
+        console.error('[Queue] Filling cache via /index/all failed:', error);
+    }
 
     await wait(1000 * 1);
 
     console.log('Reloading Series');
-    await sendSeriesReloadToAll();
+    try {
+        await sendSeriesReloadToAll();
+    } catch (error) {
+        console.error('[Queue] sendSeriesReloadToAll failed:', error);
+    }
 });
 
 
@@ -154,41 +212,32 @@ export async function processMovingItem(movingItem: MovingItem) {
 
 
 export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
-    const { data: subSystemSocket, error: socketError } = await tryCatch(() =>
-        getSubSocketByID(movingItem.toSubID)
-    );
-
-    if (socketError || subSystemSocket == null) {
-        console.error(`[Transfer] Sub-system socket not found: ${movingItem.toSubID}`);
-        return;
-    }
-
     const watchableEntity = await watchableEntitysTable.getOne({ UUID: movingItem.watchableEntityUUID });
     if (!watchableEntity) {
-        console.error(`[Transfer] WatchableEntity not found: ${movingItem.watchableEntityUUID}`);
+        await finalizeMovingItemFailure(movingItem, `WatchableEntity not found: ${movingItem.watchableEntityUUID}`);
         return;
     }
 
     const series = await seriesTable.getOne({ UUID: watchableEntity.serie_UUID });
     if (!series) {
-        console.error(`[Transfer] Series not found: ${watchableEntity.serie_UUID}`);
+        await finalizeMovingItemFailure(movingItem, `Series not found: ${watchableEntity.serie_UUID}`);
         return;
     }
 
     const watchable = await watchableUUIDToWatchable(watchableEntity.watchable_UUID);
     if (!watchable) {
-        console.error(`[Transfer] Watchable not found: ${watchableEntity.watchable_UUID}`);
+        await finalizeMovingItemFailure(movingItem, `Watchable not found: ${watchableEntity.watchable_UUID}`);
         return;
     }
 
     const { filePath } = watchableEntity;
     if (!filePath) {
-        console.error(`[Transfer] No filePath for WatchableEntity: ${movingItem.watchableEntityUUID}`);
+        await finalizeMovingItemFailure(movingItem, `No filePath for WatchableEntity: ${movingItem.watchableEntityUUID}`);
         return;
     }
 
     if (!fs.existsSync(filePath)) {
-        console.error(`[Transfer] File not found: ${filePath}`);
+        await finalizeMovingItemFailure(movingItem, `File not found: ${filePath}`);
         return;
     }
 
@@ -202,6 +251,14 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
         }
     } catch (error) {
         console.error(`[Transfer] Error determining resultDir for ${watchable.UUID}:`, error);
+        await finalizeMovingItemFailure(movingItem, `Could not determine result directory: ${(error as Error)?.message ?? error}`);
+        return;
+    }
+
+    // An unknown watchable type leaves resultDir empty — the sub would then
+    // write the file into the library root instead of its series folder.
+    if (!resultDir) {
+        await finalizeMovingItemFailure(movingItem, `Unsupported watchable type for ${movingItem.watchableEntityUUID}`);
         return;
     }
 
@@ -214,7 +271,20 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
             await wait(delay);
         }
 
+        // Re-fetch the socket on every attempt — the sub may have reconnected
+        // between retries; pushing chunks into a dead socket loses the file.
+        const { data: subSystemSocket, error: socketError } = await tryCatch(() =>
+            getSubSocketByID(movingItem.toSubID)
+        );
+        if (socketError || subSystemSocket == null) {
+            lastError = new Error(`Sub-system socket not found: ${movingItem.toSubID}`);
+            console.error(`[Transfer] Attempt ${attempt}:`, lastError.message);
+            continue;
+        }
+
         try {
+            // Transfer only. DB + file mutations happen below, after a real
+            // success, so a cleanup hiccup can never fail a delivered file.
             const finalPath = await attemptFileTransfer({
                 movingItem,
                 filePath,
@@ -222,84 +292,144 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
                 subSystemSocket,
             });
 
-            // Success — update DB and clean up
-            await watchableEntitysTable.update(
-                { UUID: watchableEntity.UUID },
-                { filePath: finalPath, subID: movingItem.toSubID }
-            );
+            // The transfer itself is DONE — the sub holds the complete file.
+            // A DB failure here must never re-push (that re-truncates the
+            // already-delivered destination on every retry): retry the DB
+            // update in place instead.
+            let dbUpdated = false;
+            for (let dbAttempt = 1; dbAttempt <= DB_UPDATE_RETRY_ATTEMPTS; dbAttempt++) {
+                if (dbAttempt > 1) {
+                    console.log(`[Transfer] DB update retry ${dbAttempt}/${DB_UPDATE_RETRY_ATTEMPTS} in ${RETRY_BASE_DELAY_MS}ms...`);
+                    await wait(RETRY_BASE_DELAY_MS);
+                }
+                const { error: dbError } = await tryCatch(() =>
+                    watchableEntitysTable.update(
+                        { UUID: watchableEntity.UUID },
+                        { filePath: finalPath, subID: movingItem.toSubID }
+                    )
+                );
+                if (!dbError) {
+                    dbUpdated = true;
+                    break;
+                }
+                console.error(`[Transfer] DB update attempt ${dbAttempt}/${DB_UPDATE_RETRY_ATTEMPTS} failed:`, dbError);
+            }
+            if (!dbUpdated) {
+                // Terminal: keep BOTH copies. The delivered file on the sub is
+                // the only fully validated content; our source still exists
+                // here. Surface the DB failure without destroying anything.
+                await finalizeMovingItemFailure(
+                    movingItem,
+                    `Transfer succeeded but the database update failed — file was delivered to sub-system ` +
+                    `${movingItem.toSubID} at ${finalPath}; original kept at ${filePath}`
+                );
+                return;
+            }
 
-            fs.rmSync(filePath, { recursive: true });
+            movingItem.meta.progress = 100;
+            movingItem.meta.result = finalPath;
+            await rebroadcastMovingItems().catch(() => { });
+
+            try {
+                fs.rmSync(filePath, { recursive: true });
+            } catch (rmError: any) {
+                console.error(`[Transfer] Removing source file failed:`, rmError?.message ?? rmError);
+                // Not fatal — the file was delivered; never fail the transfer for this
+            }
 
             await wait(POST_TRANSFER_WAIT_MS);
 
             const index = movingItems.findIndex((m) => m.ID === movingItem.ID);
             if (index !== -1) movingItems.splice(index, 1);
 
-            await rebroadcastMovingItems();
+            await rebroadcastMovingItems().catch(() => { });
             return;
         } catch (err) {
-            lastError = err as Error;
+            lastError = err instanceof Error ? err : new Error(String(err));
             console.error(`[Transfer] Attempt ${attempt} failed:`, lastError.message);
             movingItem.meta.progress = 0;
-            await rebroadcastMovingItems();
+            await rebroadcastMovingItems().catch(() => { });
         }
     }
 
     console.error(`[Transfer] All ${MAX_RETRY_ATTEMPTS} attempts failed for ${movingItem.ID}:`, lastError?.message);
-    subSystemSocket.emit("file_error", { message: lastError?.message ?? "Unknown error" });
+    {
+        const { data: subSystemSocket, error: socketError } = await tryCatch(() =>
+            getSubSocketByID(movingItem.toSubID)
+        );
+        if (!socketError && subSystemSocket != null) {
+            subSystemSocket.emit("file_error", { message: lastError?.message ?? "Unknown error" });
+        }
+    }
+    await finalizeMovingItemFailure(movingItem, lastError?.message ?? "Unknown error");
 }
 
 export async function receiveMovingItemFromSubSystem(movingItem: MovingItem) {
-    const { data: subSystemSocket, error: socketError } = await tryCatch(() =>
+    // Resolve the socket up-front for validation (re-fetched per attempt below)
+    const { data: initialSocket, error: socketError } = await tryCatch(() =>
         getSubSocketByID(movingItem.fromSubID)
     );
+    if (socketError || initialSocket == null) {
+        await finalizeMovingItemFailure(movingItem, `Sub-system socket not found: ${movingItem.fromSubID}`);
+        return;
+    }
 
-    if (socketError || subSystemSocket == null) {
-        console.error(`[Transfer] Sub-system socket not found: ${movingItem.fromSubID}`);
+    const rawBandwidth = initialSocket.data.auth.bandwidth;
+    if (!rawBandwidth || rawBandwidth <= 0) {
+        console.error(`[Transfer] Invalid bandwidth on sub socket: ${rawBandwidth}`);
+        await finalizeMovingItemFailure(movingItem, `Invalid bandwidth on sub-system ${movingItem.fromSubID}: ${rawBandwidth}`);
         return;
     }
 
     const watchableEntity = await watchableEntitysTable.getOne({ UUID: movingItem.watchableEntityUUID });
     if (!watchableEntity) {
-        console.error(`[Transfer] WatchableEntity not found: ${movingItem.watchableEntityUUID}`);
+        await finalizeMovingItemFailure(movingItem, `WatchableEntity not found: ${movingItem.watchableEntityUUID}`);
         return;
     }
 
     const series = await seriesTable.getOne({ UUID: watchableEntity.serie_UUID });
     if (!series) {
-        console.error(`[Transfer] Series not found: ${watchableEntity.serie_UUID}`);
+        await finalizeMovingItemFailure(movingItem, `Series not found: ${watchableEntity.serie_UUID}`);
         return;
     }
 
     const watchable = await watchableUUIDToWatchable(watchableEntity.watchable_UUID);
     if (!watchable) {
-        console.error(`[Transfer] Watchable not found: ${watchableEntity.watchable_UUID}`);
+        await finalizeMovingItemFailure(movingItem, `Watchable not found: ${watchableEntity.watchable_UUID}`);
         return;
     }
 
     const { filePath } = watchableEntity; // path on the sub system
     if (!filePath) {
-        console.error(`[Transfer] No filePath for WatchableEntity: ${movingItem.watchableEntityUUID}`);
-        return;
-    }
-
-    const rawBandwidth = subSystemSocket.data.auth.bandwidth;
-    if (!rawBandwidth || rawBandwidth <= 0) {
-        console.error(`[Transfer] Invalid bandwidth on sub socket: ${rawBandwidth}`);
+        await finalizeMovingItemFailure(movingItem, `No filePath for WatchableEntity: ${movingItem.watchableEntityUUID}`);
         return;
     }
 
     // Build the local destination path (same logic as the push direction)
     let resultDir = "";
-    if (isEpisode(watchable)) {
-        resultDir = path.join(series.tags[0], series.title, `Season-${watchable.season_IDX}`);
-    } else if (isMovie(watchable)) {
-        resultDir = path.join(series.tags[0], series.title, "Movies");
+    try {
+        if (isEpisode(watchable)) {
+            resultDir = path.join(series.tags[0], series.title, `Season-${watchable.season_IDX}`);
+        } else if (isMovie(watchable)) {
+            resultDir = path.join(series.tags[0], series.title, "Movies");
+        }
+    } catch (error) {
+        console.error(`[Transfer] Error determining resultDir for ${watchable.UUID}:`, error);
+        await finalizeMovingItemFailure(movingItem, `Could not determine result directory: ${(error as Error)?.message ?? error}`);
+        return;
+    }
+
+    // Unknown watchable type would wipe resultDir and write to the library root — refuse.
+    if (!resultDir) {
+        await finalizeMovingItemFailure(movingItem, `Unsupported watchable type for ${movingItem.watchableEntityUUID}`);
+        return;
     }
 
     const filename = path.basename(filePath);
     const localResultPath = path.join(getConfig().videoPath, resultDir, filename);
-    fs.mkdirSync(path.dirname(localResultPath), { recursive: true });
+    // NOTE: the destination directory is created when the transfer actually
+    // starts (inside attemptFileReceive) — a validation failure or a pull that
+    // never began must not leave empty tags/title/Season-x folders behind.
 
     console.log(
         `[Transfer] Requesting ${filePath} from sub-system ${movingItem.fromSubID} ` +
@@ -315,6 +445,16 @@ export async function receiveMovingItemFromSubSystem(movingItem: MovingItem) {
             await wait(delay);
         }
 
+        // Re-fetch the socket on every attempt — the sub may have reconnected.
+        const { data: subSystemSocket, error: socketError } = await tryCatch(() =>
+            getSubSocketByID(movingItem.fromSubID)
+        );
+        if (socketError || subSystemSocket == null) {
+            lastError = new Error(`Sub-system socket not found: ${movingItem.fromSubID}`);
+            console.error(`[Transfer] Attempt ${attempt}:`, lastError.message);
+            continue;
+        }
+
         try {
             const finalPath = await attemptFileReceive({
                 movingItem,
@@ -324,24 +464,50 @@ export async function receiveMovingItemFromSubSystem(movingItem: MovingItem) {
                 subSystemSocket,
             });
 
-            // Success — update DB, remove file on sub, clean up moving list
-            await watchableEntitysTable.update(
-                { UUID: watchableEntity.UUID },
-                { filePath: finalPath, subID: "main" }
-            );
+            // The sub accepted the file_end ack — its source is ALREADY DELETED.
+            // A DB failure here must never re-transmit (the source no longer
+            // exists) and must never delete the only good copy of the data.
+            // Retry the DB update in place instead.
+            let dbUpdated = false;
+            for (let dbAttempt = 1; dbAttempt <= DB_UPDATE_RETRY_ATTEMPTS; dbAttempt++) {
+                if (dbAttempt > 1) {
+                    console.log(`[Transfer] DB update retry ${dbAttempt}/${DB_UPDATE_RETRY_ATTEMPTS} in ${RETRY_BASE_DELAY_MS}ms...`);
+                    await wait(RETRY_BASE_DELAY_MS);
+                }
+                const { error: dbError } = await tryCatch(() =>
+                    watchableEntitysTable.update(
+                        { UUID: watchableEntity.UUID },
+                        { filePath: finalPath, subID: "main" }
+                    )
+                );
+                if (!dbError) {
+                    dbUpdated = true;
+                    break;
+                }
+                console.error(`[Transfer] DB update attempt ${dbAttempt}/${DB_UPDATE_RETRY_ATTEMPTS} failed:`, dbError);
+            }
+            if (!dbUpdated) {
+                // Terminal: the file stays on disk at finalPath, referenced by
+                // nobody. Admin can see the message and re-point manually.
+                await finalizeMovingItemFailure(
+                    movingItem,
+                    `Transfer succeeded but the database update failed — file kept at ${finalPath}`
+                );
+                return;
+            }
 
             await wait(POST_TRANSFER_WAIT_MS);
 
             const index = movingItems.findIndex((m) => m.ID === movingItem.ID);
             if (index !== -1) movingItems.splice(index, 1);
 
-            await rebroadcastMovingItems();
+            await rebroadcastMovingItems().catch(() => { });
             return;
         } catch (err) {
-            lastError = err as Error;
+            lastError = err instanceof Error ? err : new Error(String(err));
             console.error(`[Transfer] Attempt ${attempt} failed:`, lastError.message);
             movingItem.meta.progress = 0;
-            await rebroadcastMovingItems();
+            await rebroadcastMovingItems().catch(() => { });
         }
     }
 
@@ -349,7 +515,15 @@ export async function receiveMovingItemFromSubSystem(movingItem: MovingItem) {
         `[Transfer] All ${MAX_RETRY_ATTEMPTS} attempts failed for ${movingItem.ID}:`,
         lastError?.message
     );
-    subSystemSocket.emit("pull_file_error", { message: lastError?.message ?? "Unknown error" });
+    {
+        const { data: subSystemSocket, error: socketError } = await tryCatch(() =>
+            getSubSocketByID(movingItem.fromSubID)
+        );
+        if (!socketError && subSystemSocket != null) {
+            subSystemSocket.emit("pull_file_error", { message: lastError?.message ?? "Unknown error" });
+        }
+    }
+    await finalizeMovingItemFailure(movingItem, lastError?.message ?? "Unknown error");
 }
 
 
@@ -372,92 +546,158 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
 
     movingItem.meta.movingStarted = Date.now();
     movingItem.meta.progress = 0;
-    await rebroadcastMovingItems();
+    await rebroadcastMovingItems().catch(() => { });
 
     const rawBandwidth = subSystemSocket.data.auth.bandwidth;
-    if (!rawBandwidth || rawBandwidth <= 0) {
+    if (!rawBandwidth || rawBandwidth <= 0 || !Number.isFinite(rawBandwidth)) {
         throw new Error(`Invalid bandwidth value on sub-system socket: ${rawBandwidth}`);
     }
     const bandwidth = rawBandwidth * 1024 * 1024;
     const throttle = new ThrottleStream(bandwidth);
 
-    subSystemSocket.emit("file_start", { filename, size: fileSize, resultPath });
+    // Tag every event of this attempt so the sub can reject leftovers of an
+    // older attempt that overlap with a retry.
+    const transferId = crypto.randomUUID();
+
+    subSystemSocket.emit("file_start", { filename, size: fileSize, resultPath, transferId });
 
     const readStream = fs.createReadStream(filePath, { highWaterMark: STREAM_HIGH_WATER_MARK });
 
     let bytesSent = 0;
     let lastProgress = 0;
     let ackPending = false;
+    let failed = false;
+    // Serialized tail of the current chunk: ack-wait, emit, hash and resume
+    // happen strictly one after another. The pipeline can RESOLVE while the
+    // final chunk still sits in the previous chunk's async ack-wait — without
+    // the chain, digest + file_end could run before the tail reached the sub
+    // and both sides would agree on a truncated file.
+    let tailWork: Promise<void> = Promise.resolve();
 
+    // Race p against a bounded timer, clearing the timer in BOTH cases so a
+    // pending rejection cannot linger after success.
     const withTimeout = <T>(p: Promise<T>, ms: number, label: string) => {
-        return Promise.race(
-            [
-                p,
-                new Promise<never>((_, reject) => {
-                    setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
-                }
-                )
-            ]);
-
-    }
+        return new Promise<T>((resolve, reject) => {
+            const timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+            p.then(
+                (value) => { clearTimeout(timer); resolve(value); },
+                (error) => { clearTimeout(timer); reject(error); }
+            );
+        });
+    };
 
     const waitForAck = () => new Promise<void>((resolve, reject) => {
         if (!ackPending) return resolve();
-        const timeout = setTimeout(() => reject(new Error("No ack from sub-system")), ACK_TIMEOUT_MS);
-        subSystemSocket.once("ack", () => {
+        const timeout = setTimeout(() => {
+            subSystemSocket.off("ack", onAck); // don't leak the once-listener on the timeout path
+            reject(new Error("No ack from sub-system"));
+        }, ACK_TIMEOUT_MS);
+        const onAck = () => {
             clearTimeout(timeout);
             ackPending = false;
             resolve();
-        });
+        };
+        subSystemSocket.once("ack", onAck);
     });
 
+    // Keep ack state in sync for acks that arrive between chunk sends
     subSystemSocket.on("ack", () => { ackPending = false; });
 
-    throttle.on("data", async (chunk: Buffer) => {
+    // Sub cannot receive (disk full, bad destination, write error) — abort the
+    // push; destroying both streams makes pipelineAsync reject cleanly.
+    const onSubFileError = (data: { message: string }) => {
+        console.error(`[Transfer] Sub-system reported file error: ${data.message}`);
+        failed = true;
+        readStream.destroy();
+        throttle.destroy();
+    };
+    subSystemSocket.on("file_error", onSubFileError);
+
+    throttle.on("data", (chunk: Buffer) => {
+        if (failed) return;
         readStream.pause();
-        await waitForAck();
 
-        ackPending = true;
-        md5Hash.update(chunk);
-        subSystemSocket.emit("file_chunk", chunk);
+        tailWork = tailWork.then(async () => {
+            if (failed) return;
+            try {
+                await waitForAck();
+                if (failed) return;
 
-        bytesSent += chunk.length;
-        const progress = (bytesSent / fileSize) * 100;
+                ackPending = true;
+                md5Hash.update(chunk);
+                subSystemSocket.emit("file_chunk", chunk, transferId);
 
-        if (progress - lastProgress >= PROGRESS_BROADCAST_THRESHOLD || progress >= 100) {
-            lastProgress = progress;
-            movingItem.meta.progress = parseFloat(progress.toFixed(2));
-            await rebroadcastMovingItems();
-        }
+                bytesSent += chunk.length;
+                const progress = (bytesSent / fileSize) * 100;
 
-        readStream.resume();
+                if (progress - lastProgress >= PROGRESS_BROADCAST_THRESHOLD || progress >= 100) {
+                    lastProgress = progress;
+                    movingItem.meta.progress = parseFloat(progress.toFixed(2));
+                    await rebroadcastMovingItems();
+                }
+
+                if (!readStream.destroyed) readStream.resume();
+            } catch {
+                // Abort cleanly instead of throwing out of the 'data' handler
+                // (that would surface as an uncaughtException). Destroying both
+                // streams makes pipelineAsync reject with a clean error.
+                failed = true;
+                readStream.destroy();
+                throttle.destroy();
+            }
+        });
     });
 
     readStream.on('error', (err) => {
         console.error(`[Transfer] ReadStream error: ${err.message}`);
+        failed = true;
         readStream.destroy();
         throttle.destroy();
-        throw err;
     });
 
     throttle.on('error', (err) => {
         console.error(`[Transfer] Throttle error: ${err.message}`);
+        failed = true;
         readStream.destroy();
         throttle.destroy();
-        throw err;
     });
 
+    // Bound scales with payload: 3× the ideal transfer time at the negotiated
+    // bandwidth, floored at 60s so small files still get a reasonable window.
+    // (bandwidth is validated > 0 above, so no division by zero.)
+    const transferTimeoutMs = Math.max(60_000, Math.ceil((fileSize / bandwidth) * 1000 * 3));
+
     const onTransferAbortDisconnect = () => {
-        console.error(`[Transfer] Transfer aborted Sub-system ${movingItem.toSubID} disconnected`);
+        console.error(`[Transfer] Transfer aborted — sub-system ${movingItem.toSubID} disconnected`);
         readStream.destroy();
         throttle.destroy();
     };
 
     subSystemSocket.once("disconnect", onTransferAbortDisconnect);
     try {
-        await withTimeout(pipelineAsync(readStream, throttle), TRANSFER_TIMEOUT_MS, "Push");
+        await withTimeout(pipelineAsync(readStream, throttle), transferTimeoutMs, "Push");
+
+        // The serialized tail (final chunk) must complete BEFORE the digest —
+        // it is bounded by the sub's ack timeout on its own, plus a hard cap
+        // here so a never-answering sub cannot hang the attempt forever.
+        await withTimeout(tailWork, ACK_TIMEOUT_MS * 2, "Final chunk tail");
+        if (failed) throw new Error("Push aborted while handling the final chunk");
+
+        // Hard byte-count guarantee: never finalize a short transmission.
+        if (bytesSent !== fileSize) {
+            throw new Error(`Push byte count mismatch — sent ${bytesSent} of ${fileSize} bytes`);
+        }
+    } catch (error) {
+        // Timeout fired or a stream failed — make sure NO zombie transfer keeps
+        // pushing into the sub while the retry starts a second one (the sub
+        // keeps a single download session — the zombie would corrupt it).
+        failed = true;
+        try { readStream.destroy(); } catch { }
+        try { throttle.destroy(); } catch { }
+        throw error;
     } finally {
         subSystemSocket.off("disconnect", onTransferAbortDisconnect);
+        subSystemSocket.off("file_error", onSubFileError);
         subSystemSocket.removeAllListeners("ack");
     }
 
@@ -476,7 +716,7 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
         // IMPORTANT: file_end race must be with the SAME withTimeout used for the pipeline.
         const finalPath = await withTimeout(
             new Promise<string>((resolve, reject) => {
-                subSystemSocket.emit("file_end", md5, (result: string | false) => {
+                subSystemSocket.emit("file_end", { md5, transferId }, (result: string | false) => {
                     if (result === false) reject(new Error("Remote rejected the file transfer"));
                     else resolve(result);
                 });
@@ -486,8 +726,7 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
         );
 
         console.log(`[Transfer] Complete: ${finalPath}`);
-        movingItem.meta.result = finalPath;
-        await rebroadcastMovingItems();
+        await rebroadcastMovingItems().catch(() => { });
         return finalPath;
     } finally {
         subSystemSocket.off("disconnect", onTransferAbort);
@@ -516,47 +755,109 @@ async function attemptFileReceive({
         let totalSize = 0;
         let lastProgress = 0;
         let startTimeout: ReturnType<typeof setTimeout> | null = null;
+        let idleTimer: ReturnType<typeof setTimeout> | null = null;
+        let finished = false;
+
+        // Unique id for this attempt so stale events of an earlier attempt on
+        // the same socket can never mix into this transfer.
+        const transferId = crypto.randomUUID();
+        const transferIdShort = transferId.split("-")[0];
+
+        // Attempt-owned temp file: each attempt writes its own .part file and
+        // only an accepted (MD5-verified) transfer is renamed onto
+        // localResultPath. A failed attempt can therefore never destroy a
+        // previously valid file at localResultPath.
+        const tmpPath = `${localResultPath}.${transferIdShort}.part`;
+
+        const resetIdle = () => {
+            if (idleTimer) clearTimeout(idleTimer);
+            idleTimer = setTimeout(() => {
+                fail(new Error(`No data from sub-system for ${PULL_IDLE_TIMEOUT_MS / 1000}s — aborting transfer`));
+            }, PULL_IDLE_TIMEOUT_MS);
+        };
 
         const cleanup = () => {
             if (startTimeout) clearTimeout(startTimeout);
+            if (idleTimer) clearTimeout(idleTimer);
             subSystemSocket.off("pull_file_start", onStart);
             subSystemSocket.off("pull_file_chunk", onChunk);
             subSystemSocket.off("pull_file_end", onEnd);
             subSystemSocket.off("pull_file_error", onError);
+            subSystemSocket.off("disconnect", onSubDisconnect);
         };
 
         const fail = (err: Error) => {
+            if (finished) return;
+            finished = true;
             cleanup();
-            writeStream?.destroy();
-            // Try to remove a partial file so retries start clean
-            try { if (fs.existsSync(localResultPath)) fs.unlinkSync(localResultPath); } catch { }
+            try { writeStream?.destroy(); } catch { }
+            // Remove only the temp file THIS attempt owned — localResultPath
+            // may hold a previously valid copy that must survive the failure.
+            if (writeStream) {
+                try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch { }
+            }
+            // Tell the sub to stop streaming — it may still be mid-pipeline
+            subSystemSocket.emit("pull_transfer_cancel", { transferId });
             reject(err);
         };
 
-        const onStart = (data: { size: number }) => {
+        const onStart = (data: { size: number; transferId?: string }) => {
+            // Ignore zombie pull_file_start events from an earlier attempt
+            if (data.transferId && data.transferId !== transferId) return;
+            if (finished) return;
+            // A duplicate start of the SAME transfer must never open a second
+            // write stream — the old stream would be orphaned while both write
+            // to the same file.
+            if (writeStream) {
+                return fail(new Error("Duplicate pull_file_start for an already started transfer"));
+            }
             if (startTimeout) clearTimeout(startTimeout);
+
             totalSize = data.size;
+            if (!Number.isFinite(totalSize) || totalSize <= 0) {
+                return fail(new Error(`Sub-system reported invalid file size: ${data.size}`));
+            }
+
             console.log(
-                `[Transfer] Receiving ${filePath} ` +
+                `[Transfer] Receiving ${filePath} (${transferIdShort}) ` +
                 `(${(totalSize / (1024 * 1024)).toFixed(2)} MB) from sub-system`
             );
 
             movingItem.meta.movingStarted = Date.now();
             movingItem.meta.progress = 0;
-            rebroadcastMovingItems();
+            rebroadcastMovingItems().catch(() => { });
 
-            writeStream = fs.createWriteStream(localResultPath);
+            // Create the destination directory only when the transfer actually
+            // starts — failures before this point leave no empty season dirs.
+            try {
+                fs.mkdirSync(path.dirname(localResultPath), { recursive: true });
+            } catch (mkdirError: any) {
+                return fail(new Error(`Could not create destination directory: ${mkdirError?.message ?? 'mkdir failed'}`));
+            }
+
+            try {
+                try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch { }
+                writeStream = fs.createWriteStream(tmpPath);
+            } catch (openError: any) {
+                return fail(new Error(`Could not open temp file: ${openError?.message ?? openError}`));
+            }
 
             writeStream.on("error", (err) => fail(err));
 
             // Back-pressure: ack when the write buffer drains
             writeStream.on("drain", () => {
-                subSystemSocket.emit("pull_ack");
+                subSystemSocket.emit("pull_ack", { transferId });
             });
+
+            resetIdle();
         };
 
-        const onChunk = (chunk: Buffer) => {
+        const onChunk = (chunk: Buffer, chunkTransferId?: string) => {
+            if (chunkTransferId && chunkTransferId !== transferId) return;
+            if (finished) return;
             if (!writeStream) return fail(new Error("Received chunk before pull_file_start"));
+
+            resetIdle();
 
             md5Hash.update(chunk);
             const canWrite = writeStream.write(chunk);
@@ -566,51 +867,103 @@ async function attemptFileReceive({
             if (progress - lastProgress >= PROGRESS_BROADCAST_THRESHOLD || progress >= 100) {
                 lastProgress = progress;
                 movingItem.meta.progress = parseFloat(progress.toFixed(2));
-                rebroadcastMovingItems(); // fire-and-forget for chunk hot path
+                rebroadcastMovingItems().catch(() => { }); // fire-and-forget for chunk hot path
             }
 
             if (canWrite) {
-                subSystemSocket.emit("pull_ack");
+                subSystemSocket.emit("pull_ack", { transferId });
             }
             // If canWrite is false, the 'drain' listener above will ack
         };
 
-        const onEnd = (remoteMD5: string, callback: (result: string | false) => void) => {
+        const onEnd = (
+            md5OrData: string | { md5: string; transferId: string },
+            callback: (result: string | false) => void,
+        ) => {
+            // Rolling-update tolerance: legacy subs send a bare md5 string.
+            const payload: { md5?: string; transferId?: string } =
+                typeof md5OrData === 'string' ? { md5: md5OrData } : (md5OrData ?? { md5: '' });
+            // A stale finalize from an older attempt must never close THIS
+            // stream — answer negatively so its attempt can fail fast.
+            if (payload.transferId && payload.transferId !== transferId) {
+                callback(false);
+                return;
+            }
+            if (finished) {
+                callback(false);
+                return;
+            }
             if (!writeStream) return fail(new Error("Received pull_file_end before pull_file_start"));
+
+            const remoteMD5 = payload.md5;
 
             writeStream.end();
             writeStream.once("finish", () => {
+                // A short transmission must be rejected even when both sides
+                // compute an MD5 over the SAME short stream — the sub finishing
+                // its pipeline early could otherwise produce agreeing hashes
+                // over truncated data.
+                const byteCountOk = bytesReceived === totalSize;
                 const calculatedMD5 = md5Hash.digest("hex");
-                const isValid = calculatedMD5 === remoteMD5;
+                const isValid = byteCountOk && calculatedMD5 === remoteMD5;
 
-                console.log(`[Transfer] Download complete: ${localResultPath}`);
+                console.log(`[Transfer] Download complete: ${tmpPath}`);
                 console.log(`[Transfer] Expected MD5:   ${remoteMD5}`);
                 console.log(`[Transfer] Calculated MD5: ${calculatedMD5}`);
                 console.log(`[Transfer] File integrity: ${isValid ? "VALID" : "CORRUPTED"}`);
-                console.log(`[Transfer] Total bytes received: ${bytesReceived}`);
+                console.log(`[Transfer] Total bytes received: ${bytesReceived} / expected ${totalSize}`);
 
                 cleanup();
+                finished = true;
 
-                if (isValid) {
+                if (isValid && writeStream) {
+                    // Promote the accepted temp file atomically BEFORE the sub
+                    // is told the transfer is accepted (it deletes its source
+                    // at that point — the local copy must already be durable).
+                    let renameError: unknown = null;
+                    let renamed = false;
+                    try {
+                        if (fs.existsSync(tmpPath)) fs.renameSync(tmpPath, localResultPath);
+                        renamed = true;
+                    } catch (err) {
+                        renameError = err;
+                    }
+                    if (!renamed) {
+                        callback(false);
+                        try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch { }
+                        reject(new Error(`Could not promote temp file to ${localResultPath}: ${(renameError as Error)?.message ?? renameError}`));
+                        return;
+                    }
                     callback(localResultPath);
                     movingItem.meta.result = localResultPath;
-                    rebroadcastMovingItems();
+                    rebroadcastMovingItems().catch(() => { });
                     resolve(localResultPath);
                 } else {
                     callback(false);
-                    fail(new Error(`MD5 mismatch — file corrupted (expected ${remoteMD5}, got ${calculatedMD5})`));
+                    try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch { }
+                    if (!byteCountOk) {
+                        reject(new Error(`Byte count mismatch — received ${bytesReceived} of ${totalSize} bytes`));
+                    } else {
+                        reject(new Error(`MD5 mismatch — file corrupted (expected ${remoteMD5}, got ${calculatedMD5})`));
+                    }
                 }
             });
         };
 
-        const onError = (data: { message: string }) => {
+        const onError = (data: { message: string; transferId?: string }) => {
+            if (data.transferId && data.transferId !== transferId) return;
             fail(new Error(`Sub-system reported error: ${data.message}`));
+        };
+
+        const onSubDisconnect = () => {
+            fail(new Error("Sub-system disconnected during pull transfer"));
         };
 
         subSystemSocket.on("pull_file_start", onStart);
         subSystemSocket.on("pull_file_chunk", onChunk);
         subSystemSocket.on("pull_file_end", onEnd);
         subSystemSocket.on("pull_file_error", onError);
+        subSystemSocket.on("disconnect", onSubDisconnect);
 
         // Guard against sub never responding
         startTimeout = setTimeout(() => {
@@ -620,6 +973,7 @@ async function attemptFileReceive({
         subSystemSocket.emit("pull_request", {
             filePath,      // sub's local path
             bandwidth,     // MB/s — sub uses this for ThrottleStream
+            transferId,    // unique attempt id — sub registers it for cancellation
         });
     });
 }

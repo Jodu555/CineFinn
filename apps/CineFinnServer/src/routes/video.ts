@@ -6,43 +6,10 @@ import { stream, streamSSE } from 'hono/streaming';
 import { getSubSocketByID } from '../sockets/subsystem.socket.js';
 import { tryCatch } from '@cinefinn/utilities/tryCatch';
 import { proxy } from 'hono/proxy';
+import { parseHttpRange } from '@cinefinn/utilities/range';
 
 
 
-function decodeRangeHeader(range: string, fileSize: number) {
-    const bytesPrefix = 'bytes=';
-    if (!range || !range.startsWith(bytesPrefix)) {
-        return { start: 0, end: fileSize - 1 };
-    }
-
-    const bytesRange = range.substring(bytesPrefix.length);
-    const parts = bytesRange.split('-');
-
-    let start = 0;
-    let end = fileSize - 1;
-
-    if (parts.length === 2) {
-        const rangeStart = parts[0]?.trim();
-        const rangeEnd = parts[1]?.trim();
-
-        if (rangeStart) {
-            start = parseInt(rangeStart, 10);
-        }
-
-        if (rangeEnd) {
-            end = parseInt(rangeEnd, 10);
-        } else if (rangeStart) {
-            // If only start is provided, go to end of file
-            end = fileSize - 1;
-        }
-    }
-
-    // Ensure valid range
-    start = Math.max(0, start);
-    end = Math.min(fileSize - 1, end);
-
-    return { start, end };
-}
 
 const router = new Hono()
     .get('/:watchableEntityUUID', authMiddleware, async (c) => {
@@ -61,7 +28,13 @@ const router = new Hono()
             const filePath = watchableEntity.filePath;
             debug && console.log('Got filePath', filePath);
 
-            let stat: fs.Stats | null = null;
+            // Video URLs carry auth tokens in the query and files can be
+            // replaced or moved without the UUID changing — this content must
+            // never be cached anywhere.
+            const CACHE_CONTROL = 'no-store';
+
+            // Only `.size` is consumed downstream for every sub-system flavor.
+            let stat: { size: number } | null = null;
             if (watchableEntity.subID === 'main') {
                 if (!fs.existsSync(filePath)) {
                     return c.json({ message: 'Video file not found' }, 404);
@@ -83,10 +56,32 @@ const router = new Hono()
                     });
                 }
 
-                stat = await new Promise<fs.Stats>((resolve, reject) => {
-                    subSocket.emit('videoStats', { filePath }, (stats) => {
-                        debug && console.log('Recieved Socket Stats', stats);
-                        resolve(stats);
+                stat = await new Promise<{ size: number }>((resolve, reject) => {
+                    const timeout = setTimeout(() => reject(new Error('Sub-system did not respond to videoStats within 5s')), 5_000);
+                    subSocket.emit('videoStats', { filePath }, (info) => {
+                        clearTimeout(timeout);
+                        debug && console.log('Recieved Socket Stats', info);
+                        if (info == null) {
+                            reject(new Error('Sub-system sent an empty videoStats response'));
+                            return;
+                        }
+                        if (info.ok === false) {
+                            reject(new Error(info.error ?? 'videoStats failed'));
+                            return;
+                        }
+                        if (info.ok === true) {
+                            resolve({ size: info.size });
+                            return;
+                        }
+                        // Legacy path for a mid rolling update: an older sub
+                        // answered with a plain fs.Stats object instead of the
+                        // new ok/size envelope.
+                        const legacySize = (info as unknown as { size?: unknown }).size;
+                        if (typeof legacySize === 'number' && Number.isFinite(legacySize)) {
+                            resolve({ size: legacySize });
+                            return;
+                        }
+                        reject(new Error('Sub-system sent an invalid videoStats response'));
                     });
                 });
             }
@@ -94,20 +89,43 @@ const router = new Hono()
             const fileSize = stat.size;
             const range = c.req.header('Range');
 
-            // Handle HEAD requests
+            // Decode range BEFORE the HEAD handling so HEAD mirrors GET exactly:
+            // unfulfillable -> 416 for both methods, an applied range -> 206 and
+            // Content-Range for both, no/unsupported range -> plain 200.
+            const parsedRange = parseHttpRange(range || undefined, fileSize);
+            if (parsedRange.state === 'invalid') {
+                debug && console.log('Unfulfillable Range header:', range);
+                c.header('Content-Range', `bytes */${fileSize}`);
+                return c.body(null, 416);
+            }
+            const start = parsedRange.state === 'applied' ? parsedRange.start : 0;
+            const end = parsedRange.state === 'applied' ? parsedRange.end : fileSize - 1;
+            const contentLength = end - start + 1;
+            const rangeApplied = parsedRange.state === 'applied';
+            debug && console.log('Range:', { start, end, contentLength, fileSize, rangeApplied });
+
+            // Handle HEAD with the same range semantics as GET
             if (c.req.method === 'HEAD') {
                 c.header('Accept-Ranges', 'bytes');
-                c.header('Content-Length', fileSize.toString());
+                c.header('Content-Length', contentLength.toString());
                 c.header('Content-Type', 'video/mp4');
+                c.header('Cache-Control', CACHE_CONTROL);
+                if (rangeApplied) {
+                    c.header('Content-Range', `bytes ${start}-${end}/${fileSize}`);
+                }
                 debug && console.log('HEAD request, sending headers only');
-                return c.body(null, 200);
+                return c.body(null, rangeApplied ? 206 : 200);
             }
 
-            // Decode range header
-            const { start, end } = decodeRangeHeader(range || '', fileSize);
-            const contentLength = end - start + 1;
-
-            debug && console.log('Range:', { start, end, contentLength, fileSize });
+            if (fileSize <= 0) {
+                // An empty file has a degenerate range; serving an empty 200 is
+                // safer than letting createReadStream(end:-1) throw a 500.
+                c.header('Content-Type', 'video/mp4');
+                c.header('Accept-Ranges', 'bytes');
+                c.header('Content-Length', '0');
+                c.header('Cache-Control', CACHE_CONTROL);
+                return c.body(null, 200);
+            }
 
             if (watchableEntity.subID === 'main') {
                 // Create file stream
@@ -119,14 +137,15 @@ const router = new Hono()
                 debug && console.log('Creating file stream');
 
                 // Set status code first
-                c.status(range ? 206 : 200);
+                c.status(rangeApplied ? 206 : 200);
 
                 // Set headers
                 c.header('Content-Type', 'video/mp4');
                 c.header('Accept-Ranges', 'bytes');
                 c.header('Content-Length', contentLength.toString());
+                c.header('Cache-Control', CACHE_CONTROL);
 
-                if (range) {
+                if (rangeApplied) {
                     c.header('Content-Range', `bytes ${start}-${end}/${fileSize}`);
                 }
 
@@ -146,9 +165,7 @@ const router = new Hono()
         }
     });
 
-const testMap = new Map<string, { time: number; }>();
-
-const countMap = new Map<string, number>();
+const VIDEO_IDLE_TIMEOUT_MS = 30_000;
 
 async function createVideoStreamOverSocket(
     subID: string,
@@ -158,13 +175,13 @@ async function createVideoStreamOverSocket(
     c: Context,
     fileSize: number // Add fileSize as a parameter to build the Content-Range header
 ) {
-    console.time('createVideoStreamOverSocket-' + requestId.split('-')[0]);
-    testMap.set(requestId, { time: Date.now() });
+    const requestIdShort = requestId.split('-')[0];
+    console.time('createVideoStreamOverSocket-' + requestIdShort);
 
     const { data: subSocket, error } = await tryCatch(() => getSubSocketByID(subID));
 
     if (error != null || subSocket == null) {
-        return c.json(error, 500);
+        return c.json(error ?? { message: 'SubSystem not found' }, 500);
     }
 
     const contentLength = opts.end - opts.start + 1;
@@ -175,50 +192,101 @@ async function createVideoStreamOverSocket(
     c.header('Accept-Ranges', 'bytes');
     c.header('Content-Length', contentLength.toString());
     c.header('Content-Range', `bytes ${opts.start}-${opts.end}/${fileSize}`);
+    // Video URLs carry auth tokens in the query and files can be replaced or
+    // moved without the UUID changing — this content must never be cached.
+    c.header('Cache-Control', 'no-store');
 
     return stream(c, async (stream) => {
+        let finished = false;
+        let idleTimer: ReturnType<typeof setTimeout> | undefined;
         let resolveStream: () => void;
         const streamCompletionPromise = new Promise<void>((resolve) => {
             resolveStream = resolve;
         });
 
-        const cleanup = () => {
+        const finish = () => {
+            if (finished) return;
+            finished = true;
+            if (idleTimer) clearTimeout(idleTimer);
             subSocket.off('video-chunk', handleData);
             subSocket.off('video-chunk-end', handleEnd);
             subSocket.off('video-chunk-error', handleError);
-            countMap.delete(requestId);
-            console.timeEnd('createVideoStreamOverSocket-' + requestId.split('-')[0]);
+            subSocket.off('disconnect', onSubDisconnect);
+            // Always tell the sub the stream is gone. Without this the idle
+            // watchdog path would leave the sub paused at its in-flight window
+            // with an open read stream forever.
+            subSocket.emit('video-cancel', { requestId });
+            console.timeEnd('createVideoStreamOverSocket-' + requestIdShort);
             resolveStream();
         };
 
-        const handleData = ({ chunk, requestId: reqID }: { chunk: any; requestId: string; }) => {
-            if (requestId === reqID) {
-                if (testMap.has(reqID)) {
-                    testMap.delete(reqID);
-                }
-                countMap.set(reqID, (countMap.get(reqID) ?? 0) + 1);
-                stream.write(chunk);
+        // Watchdog: a stalled sub (no chunks, no end, no error) must not hold
+        // the HTTP response open forever.
+        const resetIdle = () => {
+            if (idleTimer) clearTimeout(idleTimer);
+            idleTimer = setTimeout(finish, VIDEO_IDLE_TIMEOUT_MS);
+        };
+
+        const handleData = async (payload: { chunk: string | Buffer; requestId: string; }, ack?: () => void) => {
+            if (payload.requestId !== requestId) {
+                // This chunk belongs to a different HTTP stream sharing the
+                // same socket. Never ack a foreign chunk here — that would
+                // inflate the other stream's in-flight window from the wrong
+                // handler and defeat its backpressure entirely.
+                return;
+            }
+            if (finished) {
+                // Our own leftover (cancel raced a chunk — the map entry on the
+                // sub is being torn down anyway).
+                ack?.();
+                return;
+            }
+
+            try {
+                // Writing hangs backpressure onto the sub: the socket.io ack only
+                // fires once this write has drained into the HTTP response.
+                const buf = typeof payload.chunk === 'string' ? new TextEncoder().encode(payload.chunk) : new Uint8Array(payload.chunk);
+                await stream.write(buf);
+                // Activity is a *completed* write, not chunk arrival: while a
+                // write is backpressured (paused client with a full buffer) the
+                // stream is alive and must not have its response closed by the
+                // idle watchdog.
+                resetIdle();
+                ack?.();
+            } catch (error: any) {
+                console.error(`[VideoStream] Write failed (${requestIdShort}):`, error?.message ?? error);
+                finish(); // also emits video-cancel to the sub
+                ack?.();
             }
         };
 
         const handleEnd = ({ requestId: reqID }: { requestId: string; }) => {
-            if (requestId === reqID) {
-                cleanup();
-            }
+            if (requestId === reqID) finish();
         };
 
         const handleError = ({ error, requestId: reqID }: { error: any; requestId: string; }) => {
+            console.error(`[VideoStream] Sub reported error for ${requestIdShort}: ${error}`);
             if (requestId === reqID) {
-                cleanup();
+                finish(); // also emits video-cancel to the sub
             }
+        };
+
+        const onSubDisconnect = () => {
+            console.warn(`[VideoStream] Sub-system disconnected mid-stream (${requestIdShort})`);
+            finish();
         };
 
         subSocket.on('video-chunk', handleData);
         subSocket.on('video-chunk-end', handleEnd);
         subSocket.on('video-chunk-error', handleError);
+        subSocket.on('disconnect', onSubDisconnect);
+
+        resetIdle();
 
         stream.onAbort(() => {
-            cleanup();
+            finish();
+            // finish() already emitted video-cancel — the sub stops reading the
+            // file as part of its own teardown.
         });
 
         subSocket.emit('video-range', { ...opts, filePath, requestId });

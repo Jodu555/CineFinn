@@ -384,7 +384,7 @@
 											<div class="d-flex align-items-center small mt-2">
 												<!-- <font-awesome-icon :icon="['fas', 'star']" class="text-warning me-1" />
 												<span>{{ 5 }}</span> -->
-												<span class="badge bg-secondary me-2" v-for="(tag, idx) in series.tags.slice(1, 5)" :key="idx">
+												<span class="badge bg-secondary me-2" v-for="(tag, idx) in (item.tags || []).slice(1, 5)" :key="idx">
 													{{ idx == 0 ? tag.toLowerCase() : tag }}
 												</span>
 											</div>
@@ -429,7 +429,7 @@ import { averageWatchableEntitysRuntime } from '#imports';
 import { Role, type DetailedEpisode, type DetailedMovie, type DetailedSeason, type Langs } from '@cinefinn/types';
 import { msToReadable } from '@cinefinn/utilities/time';
 import { debounce } from '@cinefinn/utilities/index';
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, watchEffect } from 'vue';
 import AddToPlaylistDialog from '~/components/AddToPlaylistDialog.vue';
 import ExtendedVideo from '~/components/ExtendedVideo.vue';
 import SeriesInfo from '~/components/SID/SeriesInfo.vue';
@@ -469,6 +469,15 @@ if (authStore.loggedIn) {
 
 const series = computed(() => indexStore.seriesById.get(route.params.SID as string));
 
+// Unknown or failed-to-load SID — show the Nuxt error page instead of
+// crashing deeper down on `series.value!`.
+// NOTE: the store guarantees that every successfully loaded detailed series
+// also lands in seriesById (see loadDetailedSeasonInfo), so this guard no
+// longer 404s a valid second series for a logged-out visitor.
+if (!series.value) {
+	throw createError({ statusCode: 404, statusMessage: 'Series not found', fatal: true });
+}
+
 const coverURL = computed(() => {
 	return decideSeriesImage(series.value!, randomNumber.value);
 });
@@ -492,6 +501,45 @@ const debouncedUpdateTime = debounce(
 
 const MAX_SOCKET_TRY_RECONNECT = 10;
 let triedReconnect = 0;
+
+// A successful (re)connect must reset the fallback counter, otherwise one
+// flaky connection window permanently locks out socket updates.
+const handleSocketConnect = () => {
+	if (triedReconnect > 0) {
+		triedReconnect = 0;
+		console.log('Socket connected — reset video time update reconnect counter');
+	}
+};
+
+// Flush the current watch time when the tab is hidden. If the socket is gone
+// the flush triggers the existing REST fallback via sendVideoTimeUpdate.
+const handleVisibilityChange = () => {
+	if (document.visibilityState !== 'hidden') return;
+	const video = document.querySelector('video');
+	const entity = indexStore.selectedWatchableEntity;
+	if (!video || !entity || video.currentTime === 0) return;
+
+	// A hidden tab must not rely on the socket emit or the debounced REST call
+	// of the normal path — neither is guaranteed to fire. keepalive lets this
+	// request survive tab hide / page close.
+	fetch(`${useAPIURL()}/watch/updateTime/${entity.UUID}/${video.currentTime}`, {
+		method: 'POST',
+		headers: { 'auth-token': authStore.authToken },
+		keepalive: true,
+	}).catch(() => { });
+};
+
+// Both registrations live in onMounted — running them during setup would
+// create the module-global socket (and touch `document`) on the SERVER during
+// SSR and crash every request.
+onMounted(() => {
+	useSocket().on('connect', handleSocketConnect);
+	document.addEventListener('visibilitychange', handleVisibilityChange);
+});
+onUnmounted(() => {
+	useSocket().off('connect', handleSocketConnect);
+	document.removeEventListener('visibilitychange', handleVisibilityChange);
+});
 
 const sendVideoTimeUpdate = async (time: number) => {
 	if (time == undefined) return;
@@ -584,7 +632,11 @@ const showVideo = computed(() => {
 const videoDebug = ref(false);
 
 const videoTitle = computed(() => {
-	if (indexStore.selectedEntity?.UUID.startsWith('MO-')) {
+	// Null selection (series landing page — no ?episode/?movie yet): the cast
+	// in the else branch would dereference null and crash the mediaSession
+	// effect. An empty title simply hides the label (template checks it).
+	if (indexStore.selectedEntity == null) return '';
+	if (indexStore.selectedEntity.UUID.startsWith('MO-')) {
 		return (indexStore.selectedEntity as DetailedMovie).primaryName;
 	} else {
 		const episode = indexStore.selectedEntity as DetailedEpisode;
@@ -597,21 +649,27 @@ const videoTitle = computed(() => {
 const videoSrc = computed(() => {
 	if (series.value === undefined) return '';
 
-	if ('mediaSession' in navigator) {
-		navigator.mediaSession.metadata = new MediaMetadata({
-			title: videoTitle.value.split(' - ')[1] || videoTitle.value,
-			artist: series.value.infos.title || series.value.title,
-			artwork: [{ src: coverURL.value }],
-		});
-	}
-
 	let url = `${useAPIURL()}/video/`;
 	url += `${indexStore.selectedWatchableEntity?.UUID}`;
 	url += `?auth-token=${authStore.authToken}&subsystem=${indexStore.selectedWatchableEntity?.subID}&debug=${videoDebug.value}`;
 	return url;
 });
 
-onMounted(() => {});
+// Media session metadata is a side effect — writing it inside the videoSrc
+// computed caused re-entrance (computed that writes state). It belongs in an
+// effect that runs after the reactive deps change. The selectedEntity guard is
+// mandatory: with no ?episode/?movie the selection is null and the episode
+// branch of videoTitle would dereference it.
+watchEffect(() => {
+	if (series.value === undefined) return;
+	if (indexStore.selectedEntity == null) return;
+	if (!('mediaSession' in navigator)) return;
+	navigator.mediaSession.metadata = new MediaMetadata({
+		title: videoTitle.value.split(' - ')[1] || videoTitle.value,
+		artist: series.value.infos.title || series.value.title,
+		artwork: [{ src: coverURL.value }],
+	});
+});
 
 onUnmounted(() => {
 	if ('mediaSession' in navigator) {
@@ -651,8 +709,9 @@ const skipToLatestTime = () => {
 /**
  *
  * @param interEpisodeUpdate This specified if the currTime should be saved. For when it is only a lang change then this needs to be true
+ * @param forcePlay Play the next entity even when the previous video was ended/paused — this is how auto-advance keeps the next episode playing.
  */
-const videoKeepState = (interEpisodeUpdate: boolean = false) => {
+const videoKeepState = (interEpisodeUpdate: boolean = false, forcePlay: boolean = false) => {
 	const videoElement = document.querySelector('video');
 	let previouslyPaused = false;
 	let previouslyMuted = false;
@@ -674,7 +733,7 @@ const videoKeepState = (interEpisodeUpdate: boolean = false) => {
 					if (interVideoElement) {
 						console.log('interVideoElement', interVideoElement.readyState);
 						if (interVideoElement.readyState >= 3) {
-							if (!previouslyPaused) {
+							if (!previouslyPaused || forcePlay) {
 								interVideoElement.play();
 							}
 							interVideoElement.muted = previouslyMuted;
@@ -692,7 +751,7 @@ const videoKeepState = (interEpisodeUpdate: boolean = false) => {
 
 					clearInterval(inter);
 					const interVideoElement = document.querySelector('video');
-					if (interVideoElement && !previouslyPaused) {
+					if (interVideoElement && (!previouslyPaused || forcePlay)) {
 						interVideoElement.play();
 					}
 					umTrackEvent('videoKeepState_timeout', {
@@ -740,7 +799,7 @@ function actualScrollIntoView(element: HTMLElement) {
 	});
 }
 
-const handleEpisodeClick = async (episodeUUID: string) => {
+const handleEpisodeClick = async (episodeUUID: string, autoplay?: boolean) => {
 	const router = useRouter();
 	const prevQuery = JSON.parse(JSON.stringify(route.query));
 	delete prevQuery.movie;
@@ -753,7 +812,7 @@ const handleEpisodeClick = async (episodeUUID: string) => {
 		return;
 	}
 
-	const { apply } = videoKeepState();
+	const { apply } = videoKeepState(false, autoplay === true);
 
 	currentEpisodeUUID.value = episodeUUID;
 	currentMovieUUID.value = null;
@@ -771,7 +830,7 @@ const isCurrentEpisode = (episodeUUID: string) => {
 	return currentEpisodeUUID.value === episodeUUID;
 };
 
-const handleMovieClick = async (movieUUID: string) => {
+const handleMovieClick = async (movieUUID: string, autoplay?: boolean) => {
 	const router = useRouter();
 	const prevQuery = JSON.parse(JSON.stringify(route.query));
 	delete prevQuery.movie;
@@ -782,7 +841,7 @@ const handleMovieClick = async (movieUUID: string) => {
 		await router.push({ path: `/watch/${series.value!.UUID}`, query: { ...prevQuery } });
 		return;
 	}
-	const { apply } = videoKeepState();
+	const { apply } = videoKeepState(false, autoplay === true);
 
 	currentMovieUUID.value = movieUUID;
 	currentEpisodeUUID.value = null;
@@ -799,6 +858,46 @@ const handleMovieClick = async (movieUUID: string) => {
 const isCurrentMovie = (movieUUID: string) => {
 	return currentMovieUUID.value === movieUUID;
 };
+
+// Keep local selection state in sync when the route query changes WITHOUT
+// going through handleEpisodeClick/handleMovieClick (browser back/forward,
+// direct URL navigation, video-advance router pushes).
+watch(
+	() => route.query.episode,
+	(newUUID) => {
+		// Query values can be string[] — only a single (first) value is valid here.
+		const raw = Array.isArray(newUUID) ? newUUID[0] : newUUID;
+		const episodeUUID = raw || null;
+		if (episodeUUID === currentEpisodeUUID.value) return;
+		currentEpisodeUUID.value = episodeUUID;
+		// Only clear the OTHER field when this one is actually set — otherwise
+		// a toggle-off push would wipe a freshly selected movie.
+		if (episodeUUID) {
+			currentMovieUUID.value = null;
+			// Keep season + tab consistent with what is playing — otherwise
+			// back/forward across seasons lists the wrong season and
+			// "mark season watched" would mark the WRONG season.
+			const season = indexStore.detailedSeasons.find((s) => s.episodes.some((e) => e.UUID === episodeUUID));
+			if (season) selectedSeason.value = season.UUID;
+			activeTab.value = 'seasons';
+		}
+		indexStore.setSelectedWatchableEntityUUID(episodeUUID);
+	},
+);
+watch(
+	() => route.query.movie,
+	(newUUID) => {
+		const raw = Array.isArray(newUUID) ? newUUID[0] : newUUID;
+		const movieUUID = raw || null;
+		if (movieUUID === currentMovieUUID.value) return;
+		currentMovieUUID.value = movieUUID;
+		if (movieUUID) {
+			currentEpisodeUUID.value = null;
+			activeTab.value = 'movies';
+		}
+		indexStore.setSelectedWatchableEntityUUID(movieUUID);
+	},
+);
 
 const isEpisodeWatched = (episodeUUID: string) => {
 	return getEpisodeProgress(episodeUUID) > 90;
@@ -848,24 +947,31 @@ const getMovieProgress = (movieUUID: string) => {
 	return percent;
 };
 
-const switchTo = async (vel: number) => {
+const switchTo = async (vel: number, autoplay?: boolean) => {
 	console.log('switchTo', vel);
 
 	if (currentMovieUUID.value !== null) {
 		const arr = indexStore.detailedMovies;
 		const index = arr.findIndex((x) => x.UUID === currentMovieUUID.value);
+		if (index === -1) return; // current movie is not in the list — nothing to switch to
 		const { idxptr, value } = singleDimSwitcher(arr, index, vel);
 		if (value == undefined) return;
 		// currentMovieUUID.value = value.UUID;
-		await handleMovieClick(value.UUID);
+		await handleMovieClick(value.UUID, autoplay);
 	} else {
 		const arr = indexStore.detailedSeasons.map((x) => x.episodes);
 		const seasonIndexPtr = arr.findIndex((x) => x.find((y) => y.UUID === currentEpisodeUUID.value));
-		const episodeIndexPtr = arr[seasonIndexPtr]!.findIndex((x) => x.UUID === currentEpisodeUUID.value);
+		const episodeIndexPtr =
+			seasonIndexPtr !== -1 ? arr[seasonIndexPtr]!.findIndex((x) => x.UUID === currentEpisodeUUID.value) : -1;
+		// A missing episode would crash the switcher on `arr[-1]!` — bail out.
+		if (seasonIndexPtr === -1 || episodeIndexPtr === -1) {
+			console.warn('switchTo — current episode not found in seasons:', currentEpisodeUUID.value);
+			return;
+		}
 		const { arrptr, idxptr, value } = multiDimSwitcher(arr, seasonIndexPtr, episodeIndexPtr, vel);
 		if (value == undefined) return;
 		selectedSeason.value = value.season_UUID;
-		await handleEpisodeClick(value.UUID);
+		await handleEpisodeClick(value.UUID, autoplay);
 		// currentEpisodeUUID.value = value.UUID;
 		// selectedSeason.value = arr[arrptr]![idxptr]!.season_UUID;
 	}

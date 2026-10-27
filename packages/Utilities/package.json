@@ -25,6 +25,10 @@
 		"./stream": {
 			"types": "./dist/stream.d.ts",
 			"import": "./dist/stream.js"
+		},
+		"./range": {
+			"types": "./dist/range.d.ts",
+			"import": "./dist/range.js"
 		}
 	},
 	"scripts": {

@@ -146,6 +146,13 @@
 				</div>
 			</div>
 
+			<div v-if="errorMsg" class="video-error-container">
+				<font-awesome-icon icon="fa-solid fa-triangle-exclamation" style="color: #ff4d4f; font-size: xx-large" />
+				<p class="video-error-title">{{ errorMsg }}</p>
+				<p class="video-error-desc">{{ videoErrorDesc }}</p>
+				<button type="button" class="btn btn-outline-light video-error-retry-btn" @click="videoErrorRetry?.()">Retry</button>
+			</div>
+
 			<pre v-if="useDeveloperMode()" class="internal-video-devinfos">
 	VideoLoading: {{ videoLoading }}
 	ReadyState: {{ videoData.readyState }}
@@ -215,7 +222,8 @@ interface VideoData {
 // Props
 interface Props {
 	videoSrc: string;
-	switchTo: (vel: number) => void;
+	/** `autoplay` resolves the ended-video state (auto-advance must KEEP playing) */
+	switchTo: (vel: number, autoplay?: boolean) => void;
 	sendVideoTimeUpdate: (time: number) => void;
 	inSyncRoom?: boolean;
 	canPlay?: boolean;
@@ -244,6 +252,30 @@ const dataLoading = ref(false);
 const screenWidth = ref(window.innerWidth);
 const segmentData = ref<Segment[]>([]);
 const alreadySkipped = ref<string[]>([]);
+
+// Track the pending restore listener of a failed-load retry so it can be
+// removed when the source changes or the component unmounts — otherwise every
+// retry leaves an untracked closure that late-fires on an unrelated
+// 'loadeddata' event and stomps the position of the NEXT episode.
+let pendingRestore: { video: HTMLVideoElement; handler: EventListener } | null = null;
+const cancelPendingRestore = () => {
+	if (!pendingRestore) return;
+	try {
+		pendingRestore.video.removeEventListener('loadeddata', pendingRestore.handler);
+	} catch { }
+	pendingRestore = null;
+};
+
+// Error UI — kept at setup top level so the template can access them
+const errorMsg = ref('');
+const videoErrorDesc = ref('');
+const videoErrorRetry = ref<null | (() => void)>(null);
+
+const clearVideoError = () => {
+	errorMsg.value = '';
+	videoErrorDesc.value = '';
+	videoErrorRetry.value = null;
+};
 
 const videoTitle = computed(() => {
 	if (indexStore.selectedEntity?.UUID.startsWith('MO-')) {
@@ -562,8 +594,10 @@ const initializeVideoControls = () => {
 
 	// Keyboard controls
 	const handleKeyDown = (e: KeyboardEvent) => {
-		const tagName = document.activeElement?.tagName.toLowerCase();
-		if (tagName === 'input') return;
+		const activeEl = document.activeElement as (HTMLElement & { isContentEditable?: boolean }) | null;
+		const tagName = (activeEl?.tagName ?? '').toLowerCase();
+		// Only swallow keys when a text-input-ish element has focus
+		if (tagName === 'input' || tagName === 'textarea' || tagName === 'select' || activeEl?.isContentEditable) return;
 
 		switch (e.key.toLowerCase()) {
 			case ' ':
@@ -733,6 +767,7 @@ const initializeVideoControls = () => {
 	const onCanPlay = () => {
 		updateVueVideoData();
 		videoLoading.value = false;
+		clearVideoError();
 		console.log('Video Can Play');
 		if (stallTimeout) {
 			clearTimeout(stallTimeout);
@@ -787,9 +822,40 @@ const initializeVideoControls = () => {
 		}, 10000);
 	};
 	const onError = () => {
-		videoLoading.value = true;
 		console.log('Video Error');
 		umTrackEvent('video_error', { url: useRoute().fullPath, error: video.error });
+
+		const errorCode = video.error?.code;
+		const desc =
+			(errorCode == null
+				? null
+				: {
+						1: 'Loading was aborted.',
+						2: 'A network error occurred — please check your connection.',
+						3: 'The video could not be decoded.',
+						4: 'The video source is not supported or missing.',
+					}[errorCode]) ?? 'Unknown playback error';
+
+		// Without this the player would be stuck: no <video> rebuild happens
+		// while the src attribute stays the same. Retry = reload the element
+		// and restore the last known position.
+		const retryTime = video.currentTime;
+		const retry = () => {
+			clearVideoError();
+			cancelPendingRestore();
+			video.load();
+			const restore = () => {
+				if (Number.isFinite(retryTime) && retryTime > 0) video.currentTime = retryTime;
+				video.play().catch(() => {});
+			};
+			video.addEventListener('loadeddata', restore, { once: true });
+			pendingRestore = { video, handler: restore };
+		};
+
+		videoLoading.value = false;
+		errorMsg.value = 'Video could not be played';
+		videoErrorDesc.value = desc;
+		videoErrorRetry.value = retry;
 	};
 	const onWaiting = () => {
 		console.log('Video Waiting');
@@ -814,11 +880,19 @@ const initializeVideoControls = () => {
 		percent = isNaN(percent) ? 0 : percent;
 		timelineContainer.style.setProperty('--progress-position', String(percent));
 
-		if (settings.value.autoSkip.value == true && video.currentTime >= video.duration) {
-			props.switchTo(1);
-			setTimeout(() => {
-				video.play();
-			}, 400);
+		if (
+			settings.value.autoSkip.value == true &&
+			// Only advance when the media actually finished — a NaN/0 duration
+			// (unsupported source, still loading) previously fired switchTo on
+			// every timeupdate and then blindly called play().
+			Number.isFinite(video.duration) &&
+			video.duration > 0 &&
+			video.ended
+		) {
+			// The captured pre-switch state is "paused" once the video ended —
+			// pass the explicit autoplay intent so the NEXT episode actually
+			// plays instead of sitting paused.
+			props.switchTo(1, true);
 		}
 		if (
 			(isInterceptingWithIntro && !alreadySkipped.value.find((x) => x == 'intro')) ||
@@ -978,6 +1052,14 @@ const initializeVideoControls = () => {
 			clearTimeout(hoverTimeoutId);
 			hoverTimeoutId = undefined;
 		}
+		// Clear a pending stall-reload timer — otherwise it can fire during or
+		// after unmount and call play() on a detached <video>.
+		if (stallTimeout) {
+			clearTimeout(stallTimeout);
+			stallTimeout = undefined;
+		}
+		// Remove a pending retry-restore listener — it must never late-fire.
+		cancelPendingRestore();
 	};
 
 	// return the control functions for outside use
@@ -1034,6 +1116,13 @@ watch(
 	() => props.videoSrc,
 	async () => {
 		segmentData.value = [];
+		// New source — the intro/outro flags of the previous episode must not
+		// suppress auto-skip in the new one.
+		alreadySkipped.value = [];
+		// A stale error overlay (or pending retry restore) from the previous
+		// episode must never cover or interfere with the next source.
+		cancelPendingRestore();
+		clearVideoError();
 		// await loadIntroData();
 	},
 );
@@ -1108,6 +1197,31 @@ defineExpose({
 .video-spinner {
 	width: 5rem;
 	height: 5rem;
+}
+
+.video-error-container {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	text-align: center;
+	z-index: 300;
+	background: rgba(0, 0, 0, 0.85);
+	padding: 1.5rem 2rem;
+	border-radius: 8px;
+	max-width: 80%;
+}
+
+.video-error-title {
+	color: white;
+	font-size: 1.15rem;
+	margin-top: 0.75rem;
+	margin-bottom: 0.5rem;
+}
+
+.video-error-desc {
+	color: #cfcfcf;
+	margin-bottom: 1rem;
 }
 
 .skip {

@@ -75,35 +75,42 @@ export interface ScraperToServerEvents {
 }
 
 export interface SubSystemToServerEvents {
-    'video-chunk': (obj: { chunk: string | Buffer; requestId: string; }) => void;
+    /** chunk deliveries carry an optional ack so the sub can keep a bounded in-flight window */
+    'video-chunk': (obj: { chunk: string | Buffer; requestId: string; }, ack?: () => void) => void;
     'video-chunk-end': (obj: { requestId: string; }) => void;
     'video-chunk-error': (obj: { error: string; requestId: string; }) => void;
     'diskStats': (obj: DiskStats) => void;
     client_info: (info: ClientInfo) => void;
     request_file: (data: RequestFileData) => void;
     file_chunk: (data: FileChunkData) => void;
+    file_error: (data: ErrorData) => void;
     ack: () => void;
-    pull_file_start: (data: { size: number }) => void;
-    pull_file_chunk: (chunk: Buffer) => void;
-    pull_file_end: (md5: string, callback: (result: string | false) => void) => void;
-    pull_file_error: (data: { message: string }) => void;
+    pull_file_start: (data: { size: number; transferId: string }) => void;
+    // NOTE: kept positional (chunk first) on purpose — every consumer in both
+    // apps handles this pair in order and the buffer carrying protocol shape
+    // would make a mid-update mixup far worse than a trailing tag.
+    pull_file_chunk: (chunk: Buffer, transferId?: string) => void;
+    pull_file_end: (data: { md5: string; transferId: string }, callback: (result: string | false) => void) => void;
+    pull_file_error: (data: { message: string; transferId?: string }) => void;
 }
 
 export interface ServerToSubSystemEvents {
     'listFiles': (callback: (files: string[]) => void) => void;
-    'videoStats': (obj: { filePath: string; }, callback: (stats: fs.Stats) => void) => void;
+    'videoStats': (obj: { filePath: string; }, callback: (stats: { ok: true; size: number; } | { ok: false; error: string; }) => void) => void;
     'video-range': (obj: { start: number, end: number, filePath: string, requestId: string; }) => void;
+    'video-cancel': (obj: { requestId: string; }) => void;
     getDiskStats: () => void;
     file_start: (data: FileStartData) => void;
-    file_chunk: (chunk: Buffer) => void;
-    file_end: (md5: string, callback: (finalPath: string | false) => void) => void;
+    file_chunk: (chunk: Buffer, transferId?: string) => void;
+    file_end: (data: { md5: string; transferId?: string }, callback: (finalPath: string | false) => void) => void;
     file_error: (data: ErrorData) => void;
     upload_ack: () => void;
     upload_complete: (data: UploadCompleteData) => void;
     upload_error: (data: ErrorData) => void;
-    pull_request: (data: { filePath: string; bandwidth: number }) => void;
-    pull_ack: () => void;
-    pull_file_error: (data: { message: string }) => void;
+    pull_request: (data: { filePath: string; bandwidth: number; transferId: string }) => void;
+    pull_ack: (data?: { transferId?: string }) => void;
+    pull_file_error: (data: { message: string; transferId?: string }) => void;
+    pull_transfer_cancel: (data: { transferId: string }) => void;
 }
 
 export type ServerToAnythingEvents = ServerToClientEvents & ServerToScraperEvents & ServerToSubSystemEvents;

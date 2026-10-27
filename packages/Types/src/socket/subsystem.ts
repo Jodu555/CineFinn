@@ -66,6 +66,8 @@ export interface FileStartData {
     filename: string;
     size: number;
     resultPath: string;
+    /** Optional tag so a newer push attempt can reject leftovers of an older one */
+    transferId?: string;
 }
 
 export interface ErrorData {

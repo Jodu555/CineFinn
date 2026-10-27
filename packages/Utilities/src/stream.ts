@@ -7,6 +7,11 @@ export class ThrottleStream extends Transform {
 
     constructor(bytesPerSecond: number) {
         super();
+        // Guard against an invalid rate: it would produce NaN/Infinity delays
+        // (or a divide-by-zero) deep inside _transform, corrupting the stream.
+        if (!Number.isFinite(bytesPerSecond) || bytesPerSecond <= 0) {
+            throw new Error(`ThrottleStream: invalid bytesPerSecond: ${bytesPerSecond}`);
+        }
         this.bytesPerSecond = bytesPerSecond;
     }
 

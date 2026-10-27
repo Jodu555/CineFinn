@@ -62,6 +62,7 @@ export const useIndexStore = defineStore('index', {
                 this.detailedPrefetchedSeriesObj = {};
                 this.loading = false;
                 // console.log(`loadDetailedSeasonInfo for seriesID: ${seriesID} from cache`);
+                await this.ensureSeriesInList(prefetched);
                 return;
             }
             const { data, error } = await tryCatch<Promise<DetailedSeries>, Error>(() => $fetch<DetailedSeries>(`${useAPIURL()}/index/${seriesID}`, {
@@ -82,12 +83,19 @@ export const useIndexStore = defineStore('index', {
             this.detailedSerie = data;
             this.loading = false;
 
-            if (this.series.length == 0) {
-                const undetailedSeries = await this.detailedSeriesToFrontendSeries(data);
-                this.series.push(undetailedSeries);
-            }
+            await this.ensureSeriesInList(data);
             // console.log(`loadDetailedSeasonInfo for seriesID: ${seriesID} from network`);
 
+        },
+        async ensureSeriesInList(detailedSeries: DetailedSeries) {
+            // seriesById is derived from state.series, which was historically
+            // only filled when the list was completely empty — visiting a
+            // second valid series (logged out, empty cache) left it missing
+            // there and made the watch page 404. Make sure every successfully
+            // loaded series has exactly one entry.
+            if (this.series.some((s) => s.UUID === detailedSeries.UUID)) return;
+            const undetailedSeries = await this.detailedSeriesToFrontendSeries(detailedSeries);
+            this.series.push(undetailedSeries);
         },
         async prefetchSeries(seriesID: string) {
             if (this.detailedPrefetchedSeriesObj[seriesID]) {
@@ -155,12 +163,14 @@ export const useIndexStore = defineStore('index', {
             const preferredLanguageList = ['GerDub', 'EngDub', 'GerSub', 'EngSub'];
             let entity: DetailedMovie | DetailedEpisode | null = null;
             if (entityUUID?.startsWith('MO-')) {
-                entity = this.detailedMovies.find((m) => m.UUID === entityUUID)!;
+                // ?? null — the find may legitimately miss (stale id); '!' would
+                // put undefined into state and break downstream null checks.
+                entity = this.detailedMovies.find((m) => m.UUID === entityUUID) ?? null;
             }
             if (entityUUID?.startsWith('EP-')) {
                 // console.log('Is Episode', this.detailedSeasons);
 
-                entity = this.detailedSeasons.map(s => s.episodes).flat().find((e) => e.UUID === entityUUID)!;
+                entity = this.detailedSeasons.map(s => s.episodes).flat().find((e) => e.UUID === entityUUID) ?? null;
             }
 
             this.selectedEntity = entity;
@@ -186,7 +196,9 @@ export const useIndexStore = defineStore('index', {
                 }
             }
 
-            this.selectedWatchableEntity = entity.watchableEntitys.find(we => we.lang === preferredLanguage)!;
+            // ?? null — if no entity matches the preferred language (e.g. stale
+            // lang value), fall back to null instead of keeping a stale entity.
+            this.selectedWatchableEntity = entity.watchableEntitys.find(we => we.lang === preferredLanguage) ?? null;
         },
         setSelectedWatchableEntity(entity: WatchableEntity | null) {
             this.selectedWatchableEntity = entity;

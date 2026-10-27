@@ -9,7 +9,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { trimTrailingSlash } from 'hono/trailing-slash';
 import { serve } from '@hono/node-server';
-import { getPtoken, setPtoken, setSocket } from './utils/utils.js';
+import { assertInsideEntry, getPtoken, setPtoken, setSocket } from './utils/utils.js';
 import { setupTransmitFile } from './transmitFile.js';
 import { videoRouter } from './routes/video.js';
 import { ownLogger } from '@cinefinn/honoutils/ownLogger';
@@ -130,9 +130,24 @@ const map = new Map<
 
 socket.on('videoStats', ({ filePath }, callback) => {
     // filePath = path.join(getConfig().entrypoint, filePath);
-    const stats = fs.statSync(filePath);
-    console.log('Got Stats for:', filePath, stats.ino);
-    callback(stats);
+    try {
+        const containment = assertInsideEntry(filePath);
+        if (!containment.ok) {
+            console.warn('videoStats rejected:', containment.error, filePath);
+            callback({ ok: false, error: containment.error });
+            return;
+        }
+        if (!fs.existsSync(containment.resolved)) {
+            callback({ ok: false, error: 'File not found' });
+            return;
+        }
+        const stats = fs.statSync(containment.resolved);
+        console.log('Got Stats for:', containment.resolved, stats.ino);
+        callback({ ok: true, size: stats.size });
+    } catch (error: any) {
+        console.error('videoStats failed for', filePath, error);
+        callback({ ok: false, error: error?.message ?? 'stat failed' });
+    }
 });
 
 interface VideoRangeRequest {
@@ -146,42 +161,87 @@ socket.on('video-range', ({ filePath, start, end, requestId }: VideoRangeRequest
     // filePath = path.join(getConfig().entrypoint, filePath);
     console.log(filePath, start, end, requestId);
 
-    if (!fs.existsSync(filePath)) {
+    // Containment guard: remote-triggered reads must never escape the library
+    const containment = assertInsideEntry(filePath);
+    if (!containment.ok) {
+        console.warn('video-range rejected:', containment.error, filePath);
+        socket.emit('video-chunk-error', { error: containment.error, requestId });
+        return;
+    }
+
+    // A repeat video-range with the same id would multiplex two read streams —
+    // reject it instead of overwriting the map entry.
+    if (map.has(requestId)) {
+        socket.emit('video-chunk-error', { error: 'Duplicate requestId — stream already active', requestId });
+        return;
+    }
+
+    if (!fs.existsSync(containment.resolved)) {
         socket.emit('video-chunk-error', { error: 'File not found', requestId });
         return;
     }
-    const videoStream = fs.createReadStream(filePath, { start, end });
-    if (map.get(requestId) == undefined) {
-        map.set(requestId, { stream: videoStream, start, end, num: 0, chunks: [], data: { len: 0, all: 0 } });
+
+    const stat = fs.statSync(containment.resolved);
+    const fileSize = stat.size;
+
+    // Sanitize the requested window — a bogus range must never leak into the
+    // read stream options.
+    let safeStart = Number.isFinite(start) && start > 0 ? Math.floor(start) : 0;
+    let safeEnd = !Number.isFinite(end) || end === -1 ? fileSize - 1 : Math.floor(end);
+    safeStart = Math.min(Math.max(0, safeStart), Math.max(0, fileSize - 1));
+    safeEnd = Math.min(Math.max(safeEnd, safeStart), Math.max(0, fileSize - 1));
+
+    if (safeStart > fileSize - 1) {
+        socket.emit('video-chunk-error', { error: `Range start ${start} is beyond end of file (size ${fileSize})`, requestId });
+        return;
     }
 
-    videoStream.on('data', (chunk) => {
-        map.get(requestId)!.num += 1;
-        // map.get(requestId).chunks.push(chunk);
-        map.get(requestId)!.data.all += 1;
-        map.get(requestId)!.data.len += chunk.length;
+    const videoStream = fs.createReadStream(containment.resolved, { start: safeStart, end: safeEnd });
+    map.set(requestId, { stream: videoStream, start: safeStart, end: safeEnd, num: 0, chunks: [], data: { len: 0, all: 0 } });
 
-        socket.emit('video-chunk', { chunk, requestId });
+    // Bounded in-flight window: read at most MAX_IN_FLIGHT chunks ahead of the
+    // main server's acks, so a stalled consumer cannot balloon memory.
+    const MAX_IN_FLIGHT = 4;
+    let inFlight = 0;
+
+    videoStream.on('data', (chunk) => {
+        inFlight += 1;
+        const mapObj = map.get(requestId);
+        if (mapObj) {
+            mapObj.num += 1;
+            // mapObj.chunks.push(chunk);
+            mapObj.data.all += 1;
+            mapObj.data.len += chunk.length;
+        }
+
+        socket.emit('video-chunk', { chunk, requestId }, () => {
+            inFlight -= 1;
+            if (inFlight < MAX_IN_FLIGHT && !videoStream.destroyed) {
+                videoStream.resume();
+            }
+        });
+
+        if (inFlight >= MAX_IN_FLIGHT) {
+            videoStream.pause();
+        }
     });
 
     videoStream.on('end', () => {
+        // A video-cancel/disconnect may have deleted the map entry before this
+        // queued 'end' event runs — a bare mapObj!.stream.destroy() would throw.
         const mapObj = map.get(requestId);
-        mapObj!.stream.destroy();
-        const chunks = mapObj!.chunks;
-        //@ts-expect-error
-        delete mapObj!.stream;
-        //@ts-expect-error
-        delete mapObj!.chunks;
+        if (!mapObj) {
+            console.log('Stream ended but entry already gone (cancelled):', requestId);
+            return;
+        }
+        mapObj.stream.destroy();
         console.log(
             'Sent:',
             requestId,
-            mapObj,
-            mapObj!.data.len / 1024 / 1024,
-            // chunks.reduce((a, b) => a + b.length, 0) / 1024 / 1024,
+            mapObj.data.len / 1024 / 1024,
             'MB',
             'Evrage Chunk length ',
-            mapObj!.data.len / mapObj!.data.all
-            // chunks.reduce((a, b) => a + b.length, 0) / chunks.length
+            mapObj.data.len / mapObj.data.all
         );
         map.delete(requestId); //This is very important so i dont leak memory all over the place
 
@@ -191,7 +251,35 @@ socket.on('video-range', ({ filePath, start, end, requestId }: VideoRangeRequest
     videoStream.on('error', (error) => {
         console.error('Error reading video file:', error);
         socket.emit('video-chunk-error', { error: error.message, requestId });
+        map.delete(requestId);
     });
+});
+
+// Main aborts the HTTP response (client seek / navigation) — tear the stream down
+socket.on('video-cancel', ({ requestId }) => {
+    const mapObj = map.get(requestId);
+    if (!mapObj) return;
+    try {
+        mapObj.stream?.destroy();
+    } catch (error) {
+        console.error('video-cancel destroy failed:', error);
+    }
+    map.delete(requestId);
+    console.log('video-cancel destroyed stream for', requestId);
+});
+
+// If we lose the main server, any paused/reserved video streams are orphaned — release them
+socket.on('disconnect', () => {
+    if (map.size === 0) return;
+    for (const [requestId, mapObj] of map) {
+        try {
+            mapObj.stream?.destroy();
+        } catch (error) {
+            console.error('disconnect cleanup destroy failed:', error);
+        }
+        map.delete(requestId);
+    }
+    console.warn('Disconnected from main — destroyed all active video streams');
 });
 
 
