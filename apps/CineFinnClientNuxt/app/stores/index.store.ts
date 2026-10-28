@@ -88,11 +88,6 @@ export const useIndexStore = defineStore('index', {
 
         },
         async ensureSeriesInList(detailedSeries: DetailedSeries) {
-            // seriesById is derived from state.series, which was historically
-            // only filled when the list was completely empty — visiting a
-            // second valid series (logged out, empty cache) left it missing
-            // there and made the watch page 404. Make sure every successfully
-            // loaded series has exactly one entry.
             if (this.series.some((s) => s.UUID === detailedSeries.UUID)) return;
             const undetailedSeries = await this.detailedSeriesToFrontendSeries(detailedSeries);
             this.series.push(undetailedSeries);
@@ -196,8 +191,7 @@ export const useIndexStore = defineStore('index', {
                 }
             }
 
-            // ?? null — if no entity matches the preferred language (e.g. stale
-            // lang value), fall back to null instead of keeping a stale entity.
+            // Fall back to null if we have some stale data that actually does not exist
             this.selectedWatchableEntity = entity.watchableEntitys.find(we => we.lang === preferredLanguage) ?? null;
         },
         setSelectedWatchableEntity(entity: WatchableEntity | null) {

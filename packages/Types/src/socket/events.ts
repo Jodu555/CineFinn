@@ -75,7 +75,6 @@ export interface ScraperToServerEvents {
 }
 
 export interface SubSystemToServerEvents {
-    /** chunk deliveries carry an optional ack so the sub can keep a bounded in-flight window */
     'video-chunk': (obj: { chunk: string | Buffer; requestId: string; }, ack?: () => void) => void;
     'video-chunk-end': (obj: { requestId: string; }) => void;
     'video-chunk-error': (obj: { error: string; requestId: string; }) => void;
@@ -86,9 +85,6 @@ export interface SubSystemToServerEvents {
     file_error: (data: ErrorData) => void;
     ack: () => void;
     pull_file_start: (data: { size: number; transferId: string }) => void;
-    // NOTE: kept positional (chunk first) on purpose — every consumer in both
-    // apps handles this pair in order and the buffer carrying protocol shape
-    // would make a mid-update mixup far worse than a trailing tag.
     pull_file_chunk: (chunk: Buffer, transferId?: string) => void;
     pull_file_end: (data: { md5: string; transferId: string }, callback: (result: string | false) => void) => void;
     pull_file_error: (data: { message: string; transferId?: string }) => void;

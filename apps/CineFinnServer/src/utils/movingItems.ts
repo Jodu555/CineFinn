@@ -27,28 +27,19 @@ const STREAM_HIGH_WATER_MARK = 64 * 1024;
 
 const ACK_TIMEOUT_MS = 15_000; // 15s
 const FINALIZE_TIMEOUT_MS = 30_000; // 30s
-const PULL_IDLE_TIMEOUT_MS = 30_000; // 30s — no data for this long while pulling → retry
+const PULL_IDLE_TIMEOUT_MS = 30_000; // 30s — no data for this long while pulling leads to retry
 
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 2_000;
 
-// Retries for the DB pointer update AFTER a completed transfer. A delivered
-// file must never be re-transmitted because of a database hiccup.
 const DB_UPDATE_RETRY_ATTEMPTS = 3;
 
-//If the sub-system does not respond within this time, it will be retried
 const PULL_REQUEST_TIMEOUT_MS = 10_000;
 
 const movingItems: MovingItem[] = [];
 
 export const getMovingItems = () => movingItems;
 
-/**
- * Terminal failure marker: progress = -1 plus a human-readable result, then
- * rebroadcast so admins see the failure instead of a stale moving item.
- * Only call once per item, after all retries are exhausted (or on fatal
- * validation errors).
- */
 async function finalizeMovingItemFailure(movingItem: MovingItem, message: string) {
     movingItem.meta.progress = -1;
     movingItem.meta.result = message;
@@ -69,27 +60,20 @@ class MovingItemQueue {
     }
 
     enqueue(id: string) {
-        // Dedupe: an id enqueued twice (double-click, admin retry) must not
-        // be processed twice — neither while PENDING nor while IN FLIGHT.
         if (this.items.includes(id) || this.runningId === id) {
             console.log("[Queue] Enqueue ignored — already pending/in-flight:", id);
             return;
         }
         console.log("[Queue] Enqueue:", id);
         this.items.push(id);
-        // While an item is being processed, dequeue() schedules the next tick
-        // itself when it finishes — scheduling an extra tick here would start a
-        // SECOND concurrent transfer on the same sub socket.
+
         if (!this.timeout && !this.processing) this.scheduleNext();
     }
 
     private scheduleNext() {
-        // Never reset a pending tick — resetting it on every enqueue delays
-        // the whole queue unboundedly while items flood in.
         if (this.timeout) return;
-        // A transfer is in flight: dequeue() will schedule the follow-up when
-        // it finishes.
         if (this.processing) return;
+
         this.timeout = setTimeout(() => {
             this.timeout = null;
             this.dequeue();
@@ -97,9 +81,6 @@ class MovingItemQueue {
     }
 
     async dequeue() {
-        // Hard single-flight guarantee. The transfer protocol is
-        // single-channel per sub socket (the sub keeps one download session),
-        // so two items must never be processed concurrently.
         if (this.processing) {
             this.scheduleNext();
             return null;
@@ -248,17 +229,14 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
             resultDir = path.join(series.tags[0], series.title, `Season-${watchable.season_IDX}`);
         } else if (isMovie(watchable)) {
             resultDir = path.join(series.tags[0], series.title, "Movies");
+        } else {
+            //If we have in the future more types this is a safeguard
+            await finalizeMovingItemFailure(movingItem, `Unsupported watchable type for ${movingItem.watchableEntityUUID}`);
+            return;
         }
     } catch (error) {
         console.error(`[Transfer] Error determining resultDir for ${watchable.UUID}:`, error);
         await finalizeMovingItemFailure(movingItem, `Could not determine result directory: ${(error as Error)?.message ?? error}`);
-        return;
-    }
-
-    // An unknown watchable type leaves resultDir empty — the sub would then
-    // write the file into the library root instead of its series folder.
-    if (!resultDir) {
-        await finalizeMovingItemFailure(movingItem, `Unsupported watchable type for ${movingItem.watchableEntityUUID}`);
         return;
     }
 
@@ -271,8 +249,6 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
             await wait(delay);
         }
 
-        // Re-fetch the socket on every attempt — the sub may have reconnected
-        // between retries; pushing chunks into a dead socket loses the file.
         const { data: subSystemSocket, error: socketError } = await tryCatch(() =>
             getSubSocketByID(movingItem.toSubID)
         );
@@ -283,8 +259,6 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
         }
 
         try {
-            // Transfer only. DB + file mutations happen below, after a real
-            // success, so a cleanup hiccup can never fail a delivered file.
             const finalPath = await attemptFileTransfer({
                 movingItem,
                 filePath,
@@ -293,9 +267,7 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
             });
 
             // The transfer itself is DONE — the sub holds the complete file.
-            // A DB failure here must never re-push (that re-truncates the
-            // already-delivered destination on every retry): retry the DB
-            // update in place instead.
+            // A DB failure here must never re-push THIS IS IMPORTANT
             let dbUpdated = false;
             for (let dbAttempt = 1; dbAttempt <= DB_UPDATE_RETRY_ATTEMPTS; dbAttempt++) {
                 if (dbAttempt > 1) {
@@ -318,6 +290,7 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
                 // Terminal: keep BOTH copies. The delivered file on the sub is
                 // the only fully validated content; our source still exists
                 // here. Surface the DB failure without destroying anything.
+                // This is essentially a pretty rough to revocer from failure state.
                 await finalizeMovingItemFailure(
                     movingItem,
                     `Transfer succeeded but the database update failed — file was delivered to sub-system ` +
@@ -334,7 +307,6 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
                 fs.rmSync(filePath, { recursive: true });
             } catch (rmError: any) {
                 console.error(`[Transfer] Removing source file failed:`, rmError?.message ?? rmError);
-                // Not fatal — the file was delivered; never fail the transfer for this
             }
 
             await wait(POST_TRANSFER_WAIT_MS);
@@ -365,7 +337,6 @@ export async function sendMovingItemToSubSystem(movingItem: MovingItem) {
 }
 
 export async function receiveMovingItemFromSubSystem(movingItem: MovingItem) {
-    // Resolve the socket up-front for validation (re-fetched per attempt below)
     const { data: initialSocket, error: socketError } = await tryCatch(() =>
         getSubSocketByID(movingItem.fromSubID)
     );
@@ -405,13 +376,16 @@ export async function receiveMovingItemFromSubSystem(movingItem: MovingItem) {
         return;
     }
 
-    // Build the local destination path (same logic as the push direction)
     let resultDir = "";
     try {
         if (isEpisode(watchable)) {
             resultDir = path.join(series.tags[0], series.title, `Season-${watchable.season_IDX}`);
         } else if (isMovie(watchable)) {
             resultDir = path.join(series.tags[0], series.title, "Movies");
+        } else {
+            //If we have in the future more types this is a safeguard
+            await finalizeMovingItemFailure(movingItem, `Unsupported watchable type for ${movingItem.watchableEntityUUID}`);
+            return;
         }
     } catch (error) {
         console.error(`[Transfer] Error determining resultDir for ${watchable.UUID}:`, error);
@@ -419,17 +393,8 @@ export async function receiveMovingItemFromSubSystem(movingItem: MovingItem) {
         return;
     }
 
-    // Unknown watchable type would wipe resultDir and write to the library root — refuse.
-    if (!resultDir) {
-        await finalizeMovingItemFailure(movingItem, `Unsupported watchable type for ${movingItem.watchableEntityUUID}`);
-        return;
-    }
-
     const filename = path.basename(filePath);
     const localResultPath = path.join(getConfig().videoPath, resultDir, filename);
-    // NOTE: the destination directory is created when the transfer actually
-    // starts (inside attemptFileReceive) — a validation failure or a pull that
-    // never began must not leave empty tags/title/Season-x folders behind.
 
     console.log(
         `[Transfer] Requesting ${filePath} from sub-system ${movingItem.fromSubID} ` +
@@ -489,6 +454,7 @@ export async function receiveMovingItemFromSubSystem(movingItem: MovingItem) {
             if (!dbUpdated) {
                 // Terminal: the file stays on disk at finalPath, referenced by
                 // nobody. Admin can see the message and re-point manually.
+                // This is a total Failure State pretty much impossible to recover from
                 await finalizeMovingItemFailure(
                     movingItem,
                     `Transfer succeeded but the database update failed — file kept at ${finalPath}`
@@ -574,8 +540,6 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
     // and both sides would agree on a truncated file.
     let tailWork: Promise<void> = Promise.resolve();
 
-    // Race p against a bounded timer, clearing the timer in BOTH cases so a
-    // pending rejection cannot linger after success.
     const withTimeout = <T>(p: Promise<T>, ms: number, label: string) => {
         return new Promise<T>((resolve, reject) => {
             const timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
@@ -603,8 +567,6 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
     // Keep ack state in sync for acks that arrive between chunk sends
     subSystemSocket.on("ack", () => { ackPending = false; });
 
-    // Sub cannot receive (disk full, bad destination, write error) — abort the
-    // push; destroying both streams makes pipelineAsync reject cleanly.
     const onSubFileError = (data: { message: string }) => {
         console.error(`[Transfer] Sub-system reported file error: ${data.message}`);
         failed = true;
@@ -638,9 +600,6 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
 
                 if (!readStream.destroyed) readStream.resume();
             } catch {
-                // Abort cleanly instead of throwing out of the 'data' handler
-                // (that would surface as an uncaughtException). Destroying both
-                // streams makes pipelineAsync reject with a clean error.
                 failed = true;
                 readStream.destroy();
                 throttle.destroy();
@@ -662,9 +621,6 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
         throttle.destroy();
     });
 
-    // Bound scales with payload: 3× the ideal transfer time at the negotiated
-    // bandwidth, floored at 60s so small files still get a reasonable window.
-    // (bandwidth is validated > 0 above, so no division by zero.)
     const transferTimeoutMs = Math.max(60_000, Math.ceil((fileSize / bandwidth) * 1000 * 3));
 
     const onTransferAbortDisconnect = () => {
@@ -685,7 +641,7 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
 
         // Hard byte-count guarantee: never finalize a short transmission.
         if (bytesSent !== fileSize) {
-            throw new Error(`Push byte count mismatch — sent ${bytesSent} of ${fileSize} bytes`);
+            throw new Error(`Push byte count mismatch — sent ${bytesSent} of ${fileSize} bytes mismatch by ${fileSize - bytesSent} bytes`);
         }
     } catch (error) {
         // Timeout fired or a stream failed — make sure NO zombie transfer keeps

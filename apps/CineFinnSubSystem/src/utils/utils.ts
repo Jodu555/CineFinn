@@ -30,7 +30,7 @@ export function getPtoken() {
  * `..` segments / symlink escapes. Every remote-triggered file access (video
  * streaming routes, video-range, pull_request) MUST run through this before
  * touching the file system — otherwise a compromised main server could read
- * `/etc/passwd` and friends off the sub system.
+ * Arbitrary files on the sub-system.
  *
  * Symlink policy: the check compares the REAL filesystem identity of the
  * target against the REAL identity of the entry root, so a symlinked

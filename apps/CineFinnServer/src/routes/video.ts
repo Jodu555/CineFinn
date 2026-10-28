@@ -28,9 +28,7 @@ const router = new Hono()
             const filePath = watchableEntity.filePath;
             debug && console.log('Got filePath', filePath);
 
-            // Video URLs carry auth tokens in the query and files can be
-            // replaced or moved without the UUID changing — this content must
-            // never be cached anywhere.
+            // Video URLs carry auth tokens in the query and files and could be replaced or moved for now never cache anything
             const CACHE_CONTROL = 'no-store';
 
             // Only `.size` is consumed downstream for every sub-system flavor.
@@ -73,9 +71,6 @@ const router = new Hono()
                             resolve({ size: info.size });
                             return;
                         }
-                        // Legacy path for a mid rolling update: an older sub
-                        // answered with a plain fs.Stats object instead of the
-                        // new ok/size envelope.
                         const legacySize = (info as unknown as { size?: unknown }).size;
                         if (typeof legacySize === 'number' && Number.isFinite(legacySize)) {
                             resolve({ size: legacySize });
@@ -89,9 +84,6 @@ const router = new Hono()
             const fileSize = stat.size;
             const range = c.req.header('Range');
 
-            // Decode range BEFORE the HEAD handling so HEAD mirrors GET exactly:
-            // unfulfillable -> 416 for both methods, an applied range -> 206 and
-            // Content-Range for both, no/unsupported range -> plain 200.
             const parsedRange = parseHttpRange(range || undefined, fileSize);
             if (parsedRange.state === 'invalid') {
                 debug && console.log('Unfulfillable Range header:', range);
@@ -104,7 +96,6 @@ const router = new Hono()
             const rangeApplied = parsedRange.state === 'applied';
             debug && console.log('Range:', { start, end, contentLength, fileSize, rangeApplied });
 
-            // Handle HEAD with the same range semantics as GET
             if (c.req.method === 'HEAD') {
                 c.header('Accept-Ranges', 'bytes');
                 c.header('Content-Length', contentLength.toString());
@@ -118,8 +109,6 @@ const router = new Hono()
             }
 
             if (fileSize <= 0) {
-                // An empty file has a degenerate range; serving an empty 200 is
-                // safer than letting createReadStream(end:-1) throw a 500.
                 c.header('Content-Type', 'video/mp4');
                 c.header('Accept-Ranges', 'bytes');
                 c.header('Content-Length', '0');
@@ -192,8 +181,8 @@ async function createVideoStreamOverSocket(
     c.header('Accept-Ranges', 'bytes');
     c.header('Content-Length', contentLength.toString());
     c.header('Content-Range', `bytes ${opts.start}-${opts.end}/${fileSize}`);
-    // Video URLs carry auth tokens in the query and files can be replaced or
-    // moved without the UUID changing — this content must never be cached.
+
+    // Video URLs carry auth tokens in the query and files and could be replaced or moved for now never cache anything
     c.header('Cache-Control', 'no-store');
 
     return stream(c, async (stream) => {
@@ -212,6 +201,7 @@ async function createVideoStreamOverSocket(
             subSocket.off('video-chunk-end', handleEnd);
             subSocket.off('video-chunk-error', handleError);
             subSocket.off('disconnect', onSubDisconnect);
+
             // Always tell the sub the stream is gone. Without this the idle
             // watchdog path would leave the sub paused at its in-flight window
             // with an open read stream forever.
@@ -229,10 +219,7 @@ async function createVideoStreamOverSocket(
 
         const handleData = async (payload: { chunk: string | Buffer; requestId: string; }, ack?: () => void) => {
             if (payload.requestId !== requestId) {
-                // This chunk belongs to a different HTTP stream sharing the
-                // same socket. Never ack a foreign chunk here — that would
-                // inflate the other stream's in-flight window from the wrong
-                // handler and defeat its backpressure entirely.
+                //Somehow the requestID's got mixed up since both use the same socket and callback ignore.
                 return;
             }
             if (finished) {
@@ -247,15 +234,11 @@ async function createVideoStreamOverSocket(
                 // fires once this write has drained into the HTTP response.
                 const buf = typeof payload.chunk === 'string' ? new TextEncoder().encode(payload.chunk) : new Uint8Array(payload.chunk);
                 await stream.write(buf);
-                // Activity is a *completed* write, not chunk arrival: while a
-                // write is backpressured (paused client with a full buffer) the
-                // stream is alive and must not have its response closed by the
-                // idle watchdog.
                 resetIdle();
                 ack?.();
             } catch (error: any) {
                 console.error(`[VideoStream] Write failed (${requestIdShort}):`, error?.message ?? error);
-                finish(); // also emits video-cancel to the sub
+                finish();
                 ack?.();
             }
         };
@@ -267,7 +250,7 @@ async function createVideoStreamOverSocket(
         const handleError = ({ error, requestId: reqID }: { error: any; requestId: string; }) => {
             console.error(`[VideoStream] Sub reported error for ${requestIdShort}: ${error}`);
             if (requestId === reqID) {
-                finish(); // also emits video-cancel to the sub
+                finish();
             }
         };
 
@@ -285,8 +268,6 @@ async function createVideoStreamOverSocket(
 
         stream.onAbort(() => {
             finish();
-            // finish() already emitted video-cancel — the sub stops reading the
-            // file as part of its own teardown.
         });
 
         subSocket.emit('video-range', { ...opts, filePath, requestId });

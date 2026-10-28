@@ -255,7 +255,6 @@ socket.on('video-range', ({ filePath, start, end, requestId }: VideoRangeRequest
     });
 });
 
-// Main aborts the HTTP response (client seek / navigation) — tear the stream down
 socket.on('video-cancel', ({ requestId }) => {
     const mapObj = map.get(requestId);
     if (!mapObj) return;
@@ -268,7 +267,6 @@ socket.on('video-cancel', ({ requestId }) => {
     console.log('video-cancel destroyed stream for', requestId);
 });
 
-// If we lose the main server, any paused/reserved video streams are orphaned — release them
 socket.on('disconnect', () => {
     if (map.size === 0) return;
     for (const [requestId, mapObj] of map) {

@@ -356,35 +356,35 @@
 						</h2>
 						<div class="d-flex flex-column gap-3">
 							<NuxtLink
-								v-for="(item, idx) in dynamicPopulatedContent"
-								:key="item.UUID"
+								v-for="(dynPopuContItem, idx) in dynamicPopulatedContent"
+								:key="dynPopuContItem.UUID"
 								class="card cursor-pointer"
 								:class="{
-									'border-success': item.UUID === route.params.SID,
+									'border-success': dynPopuContItem.UUID === route.params.SID,
 								}"
-								:to="`/watch/${item.UUID}${route.query.playlist ? `?playlist=${route.query.playlist}` : ''}`"
+								:to="`/watch/${dynPopuContItem.UUID}${route.query.playlist ? `?playlist=${route.query.playlist}` : ''}`"
 								style="cursor: pointer; text-decoration: none"
 								prefetch-on="interaction"
-								@mouseover="indexStore.prefetchSeries(item.UUID)"
+								@mouseover="indexStore.prefetchSeries(dynPopuContItem.UUID)"
 							>
 								<div class="card-body p-3">
 									<div class="d-flex gap-3">
 										<img
-											:src="decideSeriesImage(item, randomNumbersSeriesCover.at(idx + 1))"
-											:alt="item.title"
+											:src="decideSeriesImage(dynPopuContItem, randomNumbersSeriesCover.at(idx + 1))"
+											:alt="dynPopuContItem.title"
 											class="rounded flex-shrink-0"
 											style="width: 48px; height: 72px; object-fit: cover"
 										/>
 										<div class="flex-grow-1 overflow-hidden">
-											<h3 class="h6 mb-1 text-truncate">{{ item.title }}</h3>
+											<h3 class="h6 mb-1 text-truncate">{{ dynPopuContItem.title }}</h3>
 											<p class="text-muted small mb-1">
 												<font-awesome-icon :icon="['far', 'calendar']" class="me-1" />
-												{{ item.infos.startDate }} • {{ item.tags[0] }}
+												{{ dynPopuContItem.infos.startDate }} • {{ dynPopuContItem.tags[0] }}
 											</p>
 											<div class="d-flex align-items-center small mt-2">
 												<!-- <font-awesome-icon :icon="['fas', 'star']" class="text-warning me-1" />
 												<span>{{ 5 }}</span> -->
-												<span class="badge bg-secondary me-2" v-for="(tag, idx) in (item.tags || []).slice(1, 5)" :key="idx">
+												<span class="badge bg-secondary me-2" v-for="(tag, idx) in (dynPopuContItem.tags || []).slice(1, 5)" :key="idx">
 													{{ idx == 0 ? tag.toLowerCase() : tag }}
 												</span>
 											</div>
@@ -469,11 +469,6 @@ if (authStore.loggedIn) {
 
 const series = computed(() => indexStore.seriesById.get(route.params.SID as string));
 
-// Unknown or failed-to-load SID — show the Nuxt error page instead of
-// crashing deeper down on `series.value!`.
-// NOTE: the store guarantees that every successfully loaded detailed series
-// also lands in seriesById (see loadDetailedSeasonInfo), so this guard no
-// longer 404s a valid second series for a logged-out visitor.
 if (!series.value) {
 	throw createError({ statusCode: 404, statusMessage: 'Series not found', fatal: true });
 }
@@ -502,8 +497,6 @@ const debouncedUpdateTime = debounce(
 const MAX_SOCKET_TRY_RECONNECT = 10;
 let triedReconnect = 0;
 
-// A successful (re)connect must reset the fallback counter, otherwise one
-// flaky connection window permanently locks out socket updates.
 const handleSocketConnect = () => {
 	if (triedReconnect > 0) {
 		triedReconnect = 0;
@@ -511,34 +504,28 @@ const handleSocketConnect = () => {
 	}
 };
 
-// Flush the current watch time when the tab is hidden. If the socket is gone
-// the flush triggers the existing REST fallback via sendVideoTimeUpdate.
-const handleVisibilityChange = () => {
-	if (document.visibilityState !== 'hidden') return;
+import { useDocumentVisibility } from '@vueuse/core'
+
+const visibility = useDocumentVisibility()
+
+watch(visibility, (newVisibility) => {
+	if (newVisibility !== 'hidden') return;
 	const video = document.querySelector('video');
 	const entity = indexStore.selectedWatchableEntity;
 	if (!video || !entity || video.currentTime === 0) return;
 
-	// A hidden tab must not rely on the socket emit or the debounced REST call
-	// of the normal path — neither is guaranteed to fire. keepalive lets this
-	// request survive tab hide / page close.
 	fetch(`${useAPIURL()}/watch/updateTime/${entity.UUID}/${video.currentTime}`, {
 		method: 'POST',
 		headers: { 'auth-token': authStore.authToken },
 		keepalive: true,
 	}).catch(() => { });
-};
+});
 
-// Both registrations live in onMounted — running them during setup would
-// create the module-global socket (and touch `document`) on the SERVER during
-// SSR and crash every request.
 onMounted(() => {
 	useSocket().on('connect', handleSocketConnect);
-	document.addEventListener('visibilitychange', handleVisibilityChange);
 });
 onUnmounted(() => {
 	useSocket().off('connect', handleSocketConnect);
-	document.removeEventListener('visibilitychange', handleVisibilityChange);
 });
 
 const sendVideoTimeUpdate = async (time: number) => {
@@ -632,9 +619,6 @@ const showVideo = computed(() => {
 const videoDebug = ref(false);
 
 const videoTitle = computed(() => {
-	// Null selection (series landing page — no ?episode/?movie yet): the cast
-	// in the else branch would dereference null and crash the mediaSession
-	// effect. An empty title simply hides the label (template checks it).
 	if (indexStore.selectedEntity == null) return '';
 	if (indexStore.selectedEntity.UUID.startsWith('MO-')) {
 		return (indexStore.selectedEntity as DetailedMovie).primaryName;
@@ -655,11 +639,6 @@ const videoSrc = computed(() => {
 	return url;
 });
 
-// Media session metadata is a side effect — writing it inside the videoSrc
-// computed caused re-entrance (computed that writes state). It belongs in an
-// effect that runs after the reactive deps change. The selectedEntity guard is
-// mandatory: with no ?episode/?movie the selection is null and the episode
-// branch of videoTitle would dereference it.
 watchEffect(() => {
 	if (series.value === undefined) return;
 	if (indexStore.selectedEntity == null) return;
@@ -859,24 +838,15 @@ const isCurrentMovie = (movieUUID: string) => {
 	return currentMovieUUID.value === movieUUID;
 };
 
-// Keep local selection state in sync when the route query changes WITHOUT
-// going through handleEpisodeClick/handleMovieClick (browser back/forward,
-// direct URL navigation, video-advance router pushes).
 watch(
 	() => route.query.episode,
 	(newUUID) => {
-		// Query values can be string[] — only a single (first) value is valid here.
 		const raw = Array.isArray(newUUID) ? newUUID[0] : newUUID;
 		const episodeUUID = raw || null;
 		if (episodeUUID === currentEpisodeUUID.value) return;
 		currentEpisodeUUID.value = episodeUUID;
-		// Only clear the OTHER field when this one is actually set — otherwise
-		// a toggle-off push would wipe a freshly selected movie.
 		if (episodeUUID) {
 			currentMovieUUID.value = null;
-			// Keep season + tab consistent with what is playing — otherwise
-			// back/forward across seasons lists the wrong season and
-			// "mark season watched" would mark the WRONG season.
 			const season = indexStore.detailedSeasons.find((s) => s.episodes.some((e) => e.UUID === episodeUUID));
 			if (season) selectedSeason.value = season.UUID;
 			activeTab.value = 'seasons';
