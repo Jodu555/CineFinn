@@ -503,6 +503,9 @@ interface TransferAttemptParams {
 
 async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemSocket }: TransferAttemptParams): Promise<string> {
 
+    //TODO: Somehow compute this on the fly.
+    subSystemSocket.setMaxListeners(5000); // Avoid MaxListenersExceededWarning for large files with many chunks
+
     const stats = fs.statSync(filePath);
     const fileSize = stats.size;
     const md5Hash = crypto.createHash('md5');
@@ -621,7 +624,7 @@ async function attemptFileTransfer({ movingItem, filePath, resultDir, subSystemS
         throttle.destroy();
     });
 
-    const transferTimeoutMs = Math.max(60_000, Math.ceil((fileSize / bandwidth) * 1000 * 3));
+    const transferTimeoutMs = Math.max(120_000, Math.ceil((fileSize / bandwidth) * 1000 * 3));
 
     const onTransferAbortDisconnect = () => {
         console.error(`[Transfer] Transfer aborted — sub-system ${movingItem.toSubID} disconnected`);

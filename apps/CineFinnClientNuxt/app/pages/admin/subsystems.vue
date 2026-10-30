@@ -57,7 +57,7 @@
 								Endpoint:
 								{{ subsystem.status == 'offline' ? 'Offline' : subsystem.endpoint ? subsystem.endpoint : '*Socket Transmit*' }}
 							</li>
-							<li v-if="subsystem.status == 'online'" class="list-group-item">bandwidth: {{ subsystem.bandwidth }} MB/s</li>
+							<li v-if="subsystem.status == 'online'" class="list-group-item">Bandwidth: {{ subsystem.bandwidth }} MB/s</li>
 							<li class="list-group-item">Series: {{ subsystem.status == 'offline' ? 'Offline' : subsystem.series.length }}</li>
 							<li v-if="subsystem.status == 'online' && subsystem.diskStats" class="list-group-item">
 								Disk Usage:
@@ -125,66 +125,62 @@
 				</div>
 				<!-- <h5>{{ item.fromSubID }} => p{{ item.toSubID }}</h5> -->
 				<div class="d-flex gap-3 mb-3">
-				<template v-if="item.meta.movingStarted == 0">
-					<!-- progress === -1 is the terminal failure marker the server
-					     sets for validation errors that never reached a transfer -->
-					<template v-if="item.meta.progress === -1">
-						<button
-							v-if="!enqueuedMovingItems.has(item.ID)"
-							@click="adminStore.moveMovingItem(item.ID)"
-							type="button"
-							class="btn btn-outline-warning"
-						>
-							Retry
-						</button>
-						<button v-else class="btn btn-outline-warning" type="button" disabled>
-							<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-							<span role="status">Moving...</span>
-						</button>
+					<template v-if="item.meta.movingStarted == 0">
+						<template v-if="item.meta.progress === -1">
+							<button
+								v-if="!enqueuedMovingItems.has(item.ID)"
+								@click="adminStore.moveMovingItem(item.ID)"
+								type="button"
+								class="btn btn-outline-warning"
+							>
+								Retry
+							</button>
+							<button v-else class="btn btn-outline-warning" type="button" disabled>
+								<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+								<span role="status">Moving...</span>
+							</button>
+						</template>
+						<template v-else>
+							<button
+								v-if="!enqueuedMovingItems.has(item.ID)"
+								@click="adminStore.moveMovingItem(item.ID)"
+								type="button"
+								class="btn btn-outline-warning"
+							>
+								Move
+							</button>
+							<button v-else class="btn btn-outline-warning" type="button" disabled>
+								<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+								<span role="status">Moving...</span>
+							</button>
+						</template>
 					</template>
-					<template v-else>
-						<button
-							v-if="!enqueuedMovingItems.has(item.ID)"
-							@click="adminStore.moveMovingItem(item.ID)"
-							type="button"
-							class="btn btn-outline-warning"
-						>
-							Move
-						</button>
-						<button v-else class="btn btn-outline-warning" type="button" disabled>
-							<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-							<span role="status">Moving...</span>
-						</button>
-					</template>
-				</template>
-			</div>
-			<!-- Failures are terminal (progress === -1) and can exist before OR
-			     after movingStarted is set — show the error block in both cases
-			     instead of hiding it behind movingStarted !== 0. -->
-			<div class="ms-5 mb-3" style="width: 95%" v-if="item.meta.progress === -1">
-				<div class="p-2 border border-danger rounded mb-2">
-					<h5 class="text-danger mb-1"><span class="me-2">&#9888;</span>Failed</h5>
-					<span class="text-warning">{{ item.meta.result || 'Transfer failed' }}</span>
 				</div>
-			</div>
-			<div class="ms-5 mb-3" style="width: 95%" v-else-if="item.meta.movingStarted !== 0">
-				<div class="progress mt-2 mb-2" style="height: 30px">
-					<div
-						class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
-						role="progressbar"
-						:style="{ width: `${Math.max(0, Math.min(100, item.meta.progress))}%` }"
-						:aria-valuenow="Math.max(0, Math.min(100, item.meta.progress))"
-						aria-valuemin="0"
-						aria-valuemax="100"
-					>
-						<span class="h5 mt-2">{{ item.meta.progress }}%</span>
+				<div class="ms-5 mb-3" style="width: 95%" v-if="item.meta.progress === -1">
+					<div class="p-2 border border-danger rounded mb-2">
+						<h5 class="text-danger mb-1"><span class="me-2">&#9888;</span>Failed</h5>
+						<span class="text-warning">{{ item.meta.result || 'Transfer failed' }}</span>
 					</div>
 				</div>
-				<div>
-					<span class="text-center text-warning h6">- {{ item.meta.result }}</span>
+				<div class="ms-5 mb-3" style="width: 95%" v-else-if="item.meta.movingStarted !== 0">
+					<div class="progress mt-2 mb-2" style="height: 30px">
+						<div
+							class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+							role="progressbar"
+							:style="{ width: `${Math.max(0, Math.min(100, item.meta.progress))}%` }"
+							:aria-valuenow="Math.max(0, Math.min(100, item.meta.progress))"
+							aria-valuemin="0"
+							aria-valuemax="100"
+						>
+							<span class="h5 mt-2">{{ item.meta.progress }}%</span>
+						</div>
+					</div>
+					<div>
+						<span class="text-center text-warning h6">- {{ item.meta.result }}</span>
+					</div>
 				</div>
+				<hr />
 			</div>
-			<hr />
 		</div>
 	</div>
 </template>
