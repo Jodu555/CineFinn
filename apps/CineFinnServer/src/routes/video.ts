@@ -35,17 +35,21 @@ const router = new Hono()
             let stat: { size: number } | null = null;
             if (watchableEntity.subID === 'main') {
                 if (!fs.existsSync(filePath)) {
+                    debug && console.log('Video file on main subID not found');
                     return c.json({ message: 'Video file not found' }, 404);
                 }
                 stat = fs.statSync(filePath);
             } else {
                 const { data: subSocket, error } = await tryCatch(() => getSubSocketByID(watchableEntity.subID));
                 if (error != null || subSocket == null) {
+                    debug && console.log('Sub-system socket not found for subID', watchableEntity.subID, 'error:', error);
                     return c.json({ message: 'SubSystem not found' }, 404);
                 }
 
                 if (subSocket.data.auth.endpoint !== false) {
-                    return proxy(`${subSocket.data.auth.endpoint}video?ptoken=${subSocket.data.auth.ptoken}&videoPath=${encodeURIComponent(filePath)}`, {
+                    const proxyPath = `${subSocket.data.auth.endpoint}video?ptoken=${subSocket.data.auth.ptoken}&videoPath=${encodeURIComponent(filePath)}`;
+                    debug && console.log('Proxying video request to sub-system', watchableEntity.subID, 'proxyPath:', proxyPath);
+                    return proxy(proxyPath, {
                         headers: {
                             'ptoken': subSocket.data.auth.ptoken,
                             'Range': c.req.header('Range') || '',
@@ -60,22 +64,27 @@ const router = new Hono()
                         clearTimeout(timeout);
                         debug && console.log('Recieved Socket Stats', info);
                         if (info == null) {
+                            debug && console.log('Sub-system sent an empty videoStats response');
                             reject(new Error('Sub-system sent an empty videoStats response'));
                             return;
                         }
                         if (info.ok === false) {
+                            debug && console.log('Sub-system sent a failed videoStats response');
                             reject(new Error(info.error ?? 'videoStats failed'));
                             return;
                         }
                         if (info.ok === true) {
+                            debug && console.log('Sub-system sent a valid videoStats response', info);
                             resolve({ size: info.size });
                             return;
                         }
                         const legacySize = (info as unknown as { size?: unknown }).size;
                         if (typeof legacySize === 'number' && Number.isFinite(legacySize)) {
+                            debug && console.log('Sub-system sent a legacy videoStats response', info);
                             resolve({ size: legacySize });
                             return;
                         }
+                        debug && console.log('Sub-system sent an invalid videoStats response', info);
                         reject(new Error('Sub-system sent an invalid videoStats response'));
                     });
                 });
@@ -113,6 +122,7 @@ const router = new Hono()
                 c.header('Accept-Ranges', 'bytes');
                 c.header('Content-Length', '0');
                 c.header('Cache-Control', CACHE_CONTROL);
+                debug && console.log('File size is 0, sending empty response');
                 return c.body(null, 200);
             }
 
