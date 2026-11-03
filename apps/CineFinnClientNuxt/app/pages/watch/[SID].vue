@@ -504,9 +504,9 @@ const handleSocketConnect = () => {
 	}
 };
 
-import { useDocumentVisibility } from '@vueuse/core'
+import { useDocumentVisibility } from '@vueuse/core';
 
-const visibility = useDocumentVisibility()
+const visibility = useDocumentVisibility();
 
 watch(visibility, (newVisibility) => {
 	if (newVisibility !== 'hidden') return;
@@ -518,7 +518,7 @@ watch(visibility, (newVisibility) => {
 		method: 'POST',
 		headers: { 'auth-token': authStore.authToken },
 		keepalive: true,
-	}).catch(() => { });
+	}).catch(() => {});
 });
 
 onMounted(() => {
@@ -642,6 +642,7 @@ const videoSrc = computed(() => {
 watchEffect(() => {
 	if (series.value === undefined) return;
 	if (indexStore.selectedEntity == null) return;
+	if (navigator === undefined || navigator === null) return;
 	if (!('mediaSession' in navigator)) return;
 	navigator.mediaSession.metadata = new MediaMetadata({
 		title: videoTitle.value.split(' - ')[1] || videoTitle.value,
@@ -651,17 +652,17 @@ watchEffect(() => {
 });
 
 onUnmounted(() => {
-	if ('mediaSession' in navigator) {
-		navigator.mediaSession.metadata = null;
-		navigator.mediaSession.setActionHandler('play', null);
-		navigator.mediaSession.setActionHandler('pause', null);
-		navigator.mediaSession.setActionHandler('stop', null);
-		navigator.mediaSession.setActionHandler('seekbackward', null);
-		navigator.mediaSession.setActionHandler('seekforward', null);
-		navigator.mediaSession.setActionHandler('seekto', null);
-		navigator.mediaSession.setActionHandler('previoustrack', null);
-		navigator.mediaSession.setActionHandler('nexttrack', null);
-	}
+	if (navigator === undefined || navigator === null) return;
+	if (!('mediaSession' in navigator)) return;
+	navigator.mediaSession.metadata = null;
+	navigator.mediaSession.setActionHandler('play', null);
+	navigator.mediaSession.setActionHandler('pause', null);
+	navigator.mediaSession.setActionHandler('stop', null);
+	navigator.mediaSession.setActionHandler('seekbackward', null);
+	navigator.mediaSession.setActionHandler('seekforward', null);
+	navigator.mediaSession.setActionHandler('seekto', null);
+	navigator.mediaSession.setActionHandler('previoustrack', null);
+	navigator.mediaSession.setActionHandler('nexttrack', null);
 });
 
 const forceHideLatestWatchButton = ref('');
@@ -931,8 +932,7 @@ const switchTo = async (vel: number, autoplay?: boolean) => {
 	} else {
 		const arr = indexStore.detailedSeasons.map((x) => x.episodes);
 		const seasonIndexPtr = arr.findIndex((x) => x.find((y) => y.UUID === currentEpisodeUUID.value));
-		const episodeIndexPtr =
-			seasonIndexPtr !== -1 ? arr[seasonIndexPtr]!.findIndex((x) => x.UUID === currentEpisodeUUID.value) : -1;
+		const episodeIndexPtr = seasonIndexPtr !== -1 ? arr[seasonIndexPtr]!.findIndex((x) => x.UUID === currentEpisodeUUID.value) : -1;
 		// A missing episode would crash the switcher on `arr[-1]!` — bail out.
 		if (seasonIndexPtr === -1 || episodeIndexPtr === -1) {
 			console.warn('switchTo — current episode not found in seasons:', currentEpisodeUUID.value);
