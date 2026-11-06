@@ -9,7 +9,8 @@
 		"generate": "nuxt generate",
 		"preview": "nuxt preview",
 		"postinstall": "nuxt prepare",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"start": "node .output/server/index.mjs"
 	},
 	"dependencies": {
 		"@artmizu/nuxt-prometheus": "^2.7.0",
