@@ -735,7 +735,7 @@ export async function fixSeasons(job: Job) {
     return fixes;
 }
 
-export async function insertMissingWatchableEntityRuntimes(job: Job) {
+export async function insertMissingWatchableEntityRuntimes(job: Job, invalidateCache: boolean = false) {
     job.log('Inserting Missing WatchableEntity runtimes');
 
     const sucessful = new Set<string>();
@@ -777,30 +777,18 @@ export async function insertMissingWatchableEntityRuntimes(job: Job) {
         });
     }))
 
-    // for await (const entity of entitys) {
-    //     job.log(`Processing entity ${++i}/${entitys.length}: ${entity.UUID}`);
-    //     if (entity.subID !== 'main' && await getSubSocketByID(entity.subID) == null) {
-    //         job.log(`Skipping entity ${i}/${entitys.length}: ${entity.UUID} because subID ${entity.subID} is not connected`);
-    //         failed.add(entity.UUID);
-    //         continue;
-    //     }
-    //     const { data: runtime, error } = await tryCatch(() => Promise.race([
-    //         geFileRuntime(entity.UUID),
-    //         new Promise<number>((resolve, reject) => {
-    //             setTimeout(() => {
-    //                 reject('Timeout');
-    //                 failed.add(entity.UUID);
-    //             }, 1000 * 60 * 1);
-    //         })
-    //     ]));
-    //     if (error) {
-    //         job.log('Error getting runtime for entity', entity.UUID, error);
-    //         failed.add(entity.UUID);
-    //         continue;
-    //     }
-    //     await watchableEntitysTable.update({ UUID: entity.UUID }, { runtime });
-    //     sucessful.add(entity.UUID);
-    // }
+    //If invalidateCache is explicitly set to true, or if the job is a dummy job (created_at == -1), we invalidate the cache storages. As it is not called inside a real job.
+    if (invalidateCache || job.created_at == -1) {
+        job.time('Invalidating Cache');
+        try { await indexStorage.clear(); } catch (e) {
+            job.log('Error clearing indexStorage', e);
+        }
+        try { await recommendationStorage.clear(); } catch (e) {
+            job.log('Error clearing recommendationStorage', e);
+        }
+        job.timeEnd('Invalidating Cache');
+    }
+
     await sendSeriesReloadToAll();
     job.log('Missing WatchableEntity runtimes inserted');
     return {

@@ -19,6 +19,9 @@ export class Job extends EventEmitter<EventMap> {
     result: any;
     failed_at: number;
     finished_at: number;
+    /**
+     * The timestamp when the job was created. If this is -1, the job is a dummy job and will not be saved to the database.
+     */
     created_at: number;
 
     timers: Map<string, number> = new Map();

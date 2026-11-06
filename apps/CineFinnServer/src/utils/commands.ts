@@ -378,7 +378,7 @@ function registerCommands() {
             'Inserts missing watchable entity runtimes',
             async (command, [...args], scope) => {
                 console.time('insertMissingWatchableEntityRuntimes');
-                await insertMissingWatchableEntityRuntimes(Job.fromDummy('crawl'));
+                await insertMissingWatchableEntityRuntimes(Job.fromDummy('crawl'), true);
                 console.timeEnd('insertMissingWatchableEntityRuntimes');
                 return 'Missing watchable entity runtimes inserted!';
             }
