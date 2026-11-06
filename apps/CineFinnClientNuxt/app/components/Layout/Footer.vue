@@ -6,8 +6,8 @@
 				{{ new Date().getFullYear() }}
 				by <a href="https://Jodu555.de" target="_blank">Jodu555</a> /
 				<!-- <a href="https://www.youtube.com/c/TRyFlow" target="_blank">TRyFlow</a> / -->
-				<a href="https://jodu555.de/imprint">Impressum</a> /
-				<a href="https://jodu555.de/privacy">Privacy Policy</a>
+				<a href="https://jodu555.de/imprint">Impressum</a> / <a href="https://jodu555.de/privacy">Privacy Policy</a> /
+				<a href="https://status.cinema.jodu555.de" class="text-success" target="_blank">Status</a>
 				<small @click="toggleDeveloperMode">&nbsp;&nbsp;&nbsp;@c{{ globalStore.clientVersion }} - @s{{ globalStore.serverVersion }} </small>
 			</p>
 		</footer>
