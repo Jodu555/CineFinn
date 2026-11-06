@@ -55,7 +55,13 @@ const fotgotPasswordSchemaStage3 = z.object({
     newPassword: z.string().min(PASSWORD_LENGTH[0]).max(PASSWORD_LENGTH[1]).trim(),
 });
 
+/**
+ * Holds the Storage from the auth-token to the account
+ */
 const authStorage = createStorage<Account & timestamped>();
+/**
+ * Holds the Storage from the account UUID to the last handshake timestamp
+ */
 const activityDetailsStorage = createStorage<number>();
 
 (async () => {
@@ -84,12 +90,22 @@ export async function touchActivityDetails(user: Account) {
         await activityDetailsStorage.setItem(key, now);
 
         try {
+            const newActivityDetails = {
+                lastHandshake: new Date().toLocaleString('de'),
+                lastLogin: user.activityDetails.lastLogin || new Date().toLocaleString('de'),
+            };
+            span.setAttribute('activity.new', JSON.stringify(newActivityDetails));
             await accountsTable.update({ UUID: user.UUID }, {
-                activityDetails: {
-                    lastHandshake: new Date().toLocaleString('de'),
-                    lastLogin: user.activityDetails.lastLogin || new Date().toLocaleString('de'),
-                },
+                activityDetails: newActivityDetails,
             });
+
+            for await (const key of await authStorage.getKeys()) {
+                const cachedUser = await authStorage.getItem<Account & timestamped>(key);
+                if (cachedUser?.UUID === user.UUID) {
+                    cachedUser.activityDetails = newActivityDetails;
+                    await authStorage.setItem(key, cachedUser);
+                }
+            }
         } catch (err) {
             // On failure, release the claim so the next request retries.
             await activityDetailsStorage.removeItem(key);
