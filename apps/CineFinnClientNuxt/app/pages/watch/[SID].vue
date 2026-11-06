@@ -642,7 +642,7 @@ const videoSrc = computed(() => {
 watchEffect(() => {
 	if (series.value === undefined) return;
 	if (indexStore.selectedEntity == null) return;
-	if (navigator === undefined || navigator === null) return;
+	if (navigator == undefined || navigator == null) return;
 	if (!('mediaSession' in navigator)) return;
 	navigator.mediaSession.metadata = new MediaMetadata({
 		title: videoTitle.value.split(' - ')[1] || videoTitle.value,
@@ -652,7 +652,7 @@ watchEffect(() => {
 });
 
 onUnmounted(() => {
-	if (navigator === undefined || navigator === null) return;
+	if (navigator == undefined || navigator == null) return;
 	if (!('mediaSession' in navigator)) return;
 	navigator.mediaSession.metadata = null;
 	navigator.mediaSession.setActionHandler('play', null);
