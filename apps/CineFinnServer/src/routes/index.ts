@@ -30,9 +30,19 @@ const languageSortIndex = {
     'EngSubC': 7,
     'JapDub': 8,
 } as Record<Langs, number>;
-
+/**
+ * The Overarching index storage for all Data that relates to series informations.
+ */
 const indexStorage = createStorage();
+/**
+ * The Storage for a detailed Series where on key `fullIndex` the list of all detailed series is stored. This is used for the `/all` route.
+ * But on `fullIndex-[Series-UUID]` the detailed series is stored for the `/:S-UUID` route.
+ */
+//TODO: The list of fullIndexStorage maybe irrelevant as the computation should not take that long. As we can expect to already have every S-UUID stored
 const fullIndexStorage = prefixStorage<DetailedSeries>(indexStorage, 'fullIndex');
+/**
+ * The Storage for the undetailed Series where on key `undetailedIndex` the list of all undetailed series is stored. This is used for the `/` route.
+ */
 const undetailedIndexStorage = prefixStorage<FrontendSeries[]>(indexStorage, 'undetailedIndex');
 
 export const seriesUpdateStorage = prefixStorage<any>(indexStorage, 'seriesUpdate');
@@ -515,6 +525,7 @@ const router = new Hono()
         await seriesTable.update({ UUID: seriesUUID }, updatable);
 
         await fullIndexStorage.removeItem(`fullIndex-${seriesUUID}`);
+        await fullIndexStorage.removeItem(`fullIndex`);
         await undetailedIndexStorage.removeItem('undetailedIndex');
 
 
@@ -544,6 +555,7 @@ const router = new Hono()
         console.log('Created new series', series);
         await seriesTable.create(series);
         await undetailedIndexStorage.removeItem('undetailedIndex');
+        await fullIndexStorage.removeItem('fullIndex');
         return c.json(series);
     })
     .post('/:S-UUID/cover', authFullMiddleware((user) => user.role >= Role.Admin), async (c) => {
@@ -576,6 +588,7 @@ const router = new Hono()
             },
         });
 
+        await fullIndexStorage.removeItem(`fullIndex`);
         await fullIndexStorage.removeItem(`fullIndex-${seriesUUID}`);
         await undetailedIndexStorage.removeItem('undetailedIndex');
 
