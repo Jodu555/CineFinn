@@ -15,6 +15,7 @@ import { tryCatch } from "@cinefinn/utilities/tryCatch";
 import { augmentFranchiseData } from "../routes/franchise.js";
 import type { RemoteSocket } from "socket.io";
 import crypto from "crypto";
+import { cacheRegistry } from "../routes/admin/cache.js";
 
 type LocalAuthData = SocketAuthDataClient<Account | Account & timestamped>;
 
@@ -136,10 +137,21 @@ async function connectionFunction(socket: definedSocket) {
 
     socket.on('updateSettings', async (data) => {
         // console.log('updateSettings', data);
-        await accountsTable.update({ UUID: socketAuth.user.UUID }, { settings: compareSettings(data) });
+        const newSettings = compareSettings(data);
+        await accountsTable.update({ UUID: socketAuth.user.UUID }, { settings: newSettings });
         (await getIO().fetchSockets()).filter(s => s.data.auth.type === 'client' && s.data.auth.user.UUID === socketAuth.user.UUID && s.id !== socket.id).forEach(async s => {
             s.emit('settingsUpdate', data);
         });
+        const authCache = cacheRegistry.get('auth');
+        if (authCache) {
+            for await (const key of await authCache.getKeys()) {
+                const cachedUser = await authCache.getItem<Account & timestamped>(key);
+                if (cachedUser?.UUID === socketAuth.user.UUID) {
+                    cachedUser.settings = newSettings;
+                    await authCache.setItem(key, cachedUser);
+                }
+            }
+        }
     });
 
     socket.on('rmvc-createSession', async (cb) => {
