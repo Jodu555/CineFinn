@@ -642,6 +642,8 @@ const videoSrc = computed(() => {
 watchEffect(() => {
 	if (series.value === undefined) return;
 	if (indexStore.selectedEntity == null) return;
+	//This Prevents the initial render on serverside to throw
+	// When to this page is navigated directly and not already through the othert pages then navigator is undefined and this will throw an error
 	if (navigator == undefined || navigator == null) return;
 	if (!('mediaSession' in navigator)) return;
 	navigator.mediaSession.metadata = new MediaMetadata({
@@ -652,6 +654,8 @@ watchEffect(() => {
 });
 
 onUnmounted(() => {
+	//This Prevents the initial render on serverside to throw
+	// When to this page is navigated directly and not already through the othert pages then navigator is undefined and this will throw an error
 	if (navigator == undefined || navigator == null) return;
 	if (!('mediaSession' in navigator)) return;
 	navigator.mediaSession.metadata = null;
