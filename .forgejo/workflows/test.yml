@@ -1,0 +1,8 @@
+on: [push, workflow_dispatch]
+jobs:
+  test:
+    runs-on: docker
+    steps:
+      - run: echo All good!
+      - uses: actions/checkout@v7
+      - run: ls -la
