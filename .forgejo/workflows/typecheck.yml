@@ -25,6 +25,10 @@ jobs:
           node --version
           pnpm --version
 
+      # Install TypeScript globally TODO: This is probably an antipattern and a workaround
+      - name: Install TypeScript Globally
+        run: pnpm i -g typescript
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
