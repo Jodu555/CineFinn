@@ -73,7 +73,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: Full Source Code
-          path: /
+          path: .
           archive: true
 
       - name: Upload Builded Packages artifact
