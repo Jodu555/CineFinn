@@ -76,14 +76,14 @@ jobs:
         run: ls -la
 
       - name: Upload Full Source artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: Full Source Code
           path: source-code.tar
           archive: false
 
       - name: Upload Builded Packages artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: Builded Packages
           path: |
