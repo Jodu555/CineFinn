@@ -36,6 +36,7 @@ jobs:
       - name: Run typecheck
         run: pnpm run typecheck
   build:
+    needs: [typecheck]
     runs-on: docker
 
     steps:
@@ -67,3 +68,21 @@ jobs:
 
       - name: Build apps packages
         run: pnpm run build
+
+      - name: Upload Full Source artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: Full Source Code
+          path: /
+          archive: true
+
+      - name: Upload Builded Packages artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: Builded Packages
+          path: |
+            apps/CineFinnServer/dist
+            apps/CineFinnScraper/dist
+            apps/CineFinnSubSystem/dist
+            apps/CineFinnPreviewImageGenerator/dist
+            apps/CineFinnClientNuxt/.output
