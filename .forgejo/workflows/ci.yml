@@ -69,23 +69,26 @@ jobs:
       - name: Build apps packages
         run: pnpm run build
 
+      - name: Archive files
+        run: tar -cf source-code.tar .
+
       - name: List Files
         run: ls -la
 
-      # - name: Upload Full Source artifact
-      #   uses: actions/upload-artifact@v7
-      #   with:
-      #     name: Full Source Code
-      #     path: .
-      #     archive: true
-
-      - name: Upload Builded Packages artifact
+      - name: Upload Full Source artifact
         uses: actions/upload-artifact@v7
         with:
-          name: Builded Packages
-          path: |
-            apps/CineFinnServer/dist
-            apps/CineFinnScraper/dist
-            apps/CineFinnSubSystem/dist
-            apps/CineFinnPreviewImageGenerator/dist
-            apps/CineFinnClientNuxt/.output
+          name: Full Source Code
+          path: source-code.tar
+          archive: false
+
+      # - name: Upload Builded Packages artifact
+      #   uses: actions/upload-artifact@v7
+      #   with:
+      #     name: Builded Packages
+      #     path: |
+      #       apps/CineFinnServer/dist
+      #       apps/CineFinnScraper/dist
+      #       apps/CineFinnSubSystem/dist
+      #       apps/CineFinnPreviewImageGenerator/dist
+      #       apps/CineFinnClientNuxt/.output
