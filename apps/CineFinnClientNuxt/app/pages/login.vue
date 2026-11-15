@@ -178,6 +178,11 @@
 </template>
 
 <script setup lang="ts">
+
+definePageMeta({
+	middleware: 'may-auth',
+});
+
 useSeoMeta({
 	title: 'Cinema | Login',
 });
