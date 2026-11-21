@@ -514,6 +514,9 @@ watch(visibility, (newVisibility) => {
 	const entity = indexStore.selectedWatchableEntity;
 	if (!video || !entity || video.currentTime === 0) return;
 
+	//If the recorded watchHistory already has the same time we do not send the time again
+	if(currentWatchHistorySegment.value && currentWatchHistorySegment.value.watchTime === video.currentTime) return;
+
 	fetch(`${useAPIURL()}/watch/updateTime/${entity.UUID}/${video.currentTime}`, {
 		method: 'POST',
 		headers: { 'auth-token': authStore.authToken },
@@ -671,17 +674,23 @@ onUnmounted(() => {
 
 const forceHideLatestWatchButton = ref('');
 
+const currentWatchHistorySegment = computed(() => {
+	if (authStore.loggedIn == false) return undefined;
+	if (indexStore.selectedWatchableEntity == null) return undefined;
+	return indexStore.watchHistory.find((w) => w.watchable_UUID === indexStore.selectedWatchableEntity?.watchable_UUID);
+});
+
 const showLatestWatchButton = computed(() => {
 	if (authStore.loggedIn == false) return false;
 	if (authStore.user.settings.showLatestWatchButton.value == false) return false;
 	if (forceHideLatestWatchButton.value == indexStore.selectedWatchableEntity?.watchable_UUID) return false;
 
-	const watchHistorySegment = indexStore.watchHistory.find((w) => w.watchable_UUID === indexStore.selectedWatchableEntity?.watchable_UUID);
+	const watchHistorySegment = currentWatchHistorySegment.value;
 	return watchHistorySegment !== undefined;
 });
 
 const skipToLatestTime = () => {
-	const watchHistorySegment = indexStore.watchHistory.find((w) => w.watchable_UUID === indexStore.selectedWatchableEntity?.watchable_UUID);
+	const watchHistorySegment = currentWatchHistorySegment.value;
 
 	const video = document.querySelector('video');
 	if (video && watchHistorySegment) {
