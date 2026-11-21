@@ -64,9 +64,7 @@ export const ownLogger = (
     checkIfShouldLogBefore: (c: Context<any, string, {}>) => boolean = () => true,
     checkIfShouldLogAfter: (c: Context<any, string, {}>) => boolean = () => true) =>
     createMiddleware(async (c, next) => {
-        const { method, url } = c.req;
-
-        const path = url.slice(url.indexOf('/', 8));
+        const { method, path } = c.req;
 
         let ignoreLog = false;
         for (const ignorePath of ignorePaths) {

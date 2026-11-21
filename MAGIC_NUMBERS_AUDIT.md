@@ -117,23 +117,12 @@ These are already named, so they are not counted as magic numbers:
 - `:29` **·** `if (delay > 10)` — 10 ms jitter threshold below which the throttle skips the timer.
 ### Utilities/src/index.ts
 - `:1` **⚠️** `debounce(cb, delay = 1000)` — default 1 s debounce.
-### HonoUtils/src/ownLogger.ts
-- `:69` **⚠️** `url.indexOf('/', 8)` — 8 assumes an 8-character scheme prefix (`https://`); breaks for
-  other schemes.
 ### ConfigurationManager/src/index.ts
 - `:13`, `:23` **·** `JSON.stringify(..., null, 3)` — 3-space config indent (cosmetic).
 
 ---
 
 ## apps/CineFinnServer
-
-### src/utils/translationV1WatchString.ts  (worst cluster)
-- `:63`, `:66` **🔥** `this.watched = this.time > 300` — "watched" threshold of 300 (seconds) appears twice
-  with no name or comment. It is also the only place the unit is implied.
-- `:95` **⚠️** `}, 10000 * 30)` — DB keepalive ping every 300 s, written as an odd product.
-- `:155`, `:162` **🔥** `301` — magic sentinel written into `segment.time` when force-marking a movie watched.
-- `:201` **🔥** `310` — a different sentinel for season marking. Two different "watched" sentinels
-  (301 vs 310) both just exceed the 300 threshold — inconsistent and unexplained.
 
 ### src/routes/watch.ts
 - `:26` **🔥** `return we.runtime === -1 ? 500 : we.runtime;` — `-1` means "unknown runtime"; `500`
@@ -142,23 +131,13 @@ These are already named, so they are not counted as magic numbers:
 - `:63`, `:236` **·** `}, 1000)` — 1 s delay before re-reading the DB.
 - `:302` **·** `let season_IDX = 0` — 0/1-based season index juggling across the file.
 
-### src/routes/managment.ts
-- `:22`, `:34` **🔥** `minimumRole: 2` and `:26`, `:30` **🔥** `minimumRole: 3` — raw role levels where the
-  `Role` enum (`Role.Mod = 2`, `Role.Admin = 3`, packages/Types/src/models/user.ts:1-5) already exists.
-
 ### src/routes/index.ts
 - `:25-31` **·** language-priority map (`GerSub: 1` … `JapDub: 8`) — ordering is implicit in the integers.
 - `:213` **·** `index % 50 == 0` — progress log cadence.
 - `:279` **⚠️** `pLimit(5)` — per-request fan-out.
 - `:351` **⚠️** `forEachNonBlockingAsync(rows, 20, ...)` — bulk concurrency 20.
 - `:433` **⚠️** `timeout(1000 * 60 * 10)` — 10-minute scraper check timeout.
-- `:473`, `:477` **⚠️** `count = c.req.query('count') ?? 2` and reset `count = 2` — default recommendation
-  count duplicated.
 
-### src/routes/image.ts
-- `:48` **⚠️** `Date.now() - imageData.lastFetched < CACHE_TIME - 1` — `-1` fudge on the cache TTL.
-- `:107`, `:133` **⚠️** `"Cache-Control": "public, max-age=3600"` — 1-hour browser cache hardcoded twice
-  while the server-side TTL is 7 days.
 
 ### src/routes/video.ts
 - `:62` **⚠️** `5_000` — fallback `videoStats` timeout (message repeats "5s").
@@ -253,23 +232,3 @@ All 52 `.vue` files contain raw `px`, `rgba()`, `rem`, `z-index` and timing valu
 (e.g. `index.vue` alone has dozens: `255,255,255,0.x` alphas, `306px` cards, `300px` min-height).
 They are magic numbers in the strict sense but are better solved with CSS custom properties/design tokens
 than per-line constants. They are called out here as a category instead of listed line-by-line.
-
----
-
-## Top 10 to fix first
-
-1. `apps/CineFinnScraper/src/utils/compare.ts:408` — Levenshtein match threshold `4`.
-2. `apps/CineFinnScraper/src/utils/compare.ts:75-80` — `'----------'` stat hack + 50-minute cache window
-   (branch is dead code; likely a bug).
-3. `apps/CineFinnServer/src/utils/translationV1WatchString.ts:63,66,155,162,201` — 300/301/310 watched
-   sentinels.
-4. `apps/CineFinnServer/src/routes/watch.ts:26,30` — `500` fallback runtime and `300` default runtime.
-5. `apps/CineFinnServer/src/routes/managment.ts:22-34` and `app/stores/managment.store.ts:17-20` — raw
-   role `2`/`3` where `Role.Mod`/`Role.Admin` exist.
-6. `apps/CineFinnPreviewImageGenerator/src/index.ts:284` — read-rate clamp `Math.min(50, Math.max(0.5, …))`.
-7. `apps/CineFinnPreviewImageGenerator/src/index.ts:280` — `8_000_000` bit/s conversion.
-8. `apps/CineFinnPreviewImageGenerator/src/index.ts:240` — 100-file upload chunk size.
-9. `apps/CineFinnServer/src/routes/image.ts:107,133` — hardcoded `max-age=3600` vs 7-day `CACHE_TIME`.
-10. `apps/CineFinnClientNuxt/app/pages/watch/[SID].vue:891,915` — duplicated `>= 500` finished threshold.
-
-Note: no code was changed — this file is the audit output only.

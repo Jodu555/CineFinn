@@ -17,6 +17,7 @@ type WatchHistoryWithDetails = WatchHistory & {
 
 /**
  * Calculates the average runtime of the watchableEntities array if the array is empty it returns 300
+ * If the runtime for a watchableEntity is -1 it will be counted as 500 as a sensible default value for the average calculation
  * @param watchableEntities Watchable Entitys on which the average needs to be calculated
  * @returns The Average number over the watchableEntities if the array is empty it returns 300
  */

@@ -1,6 +1,8 @@
 import { Database } from "@jodu555/mysqlapi";
 import { episodesTable } from "../database.js";
 
+const THRESHOLD_AFTER_WHICH_A_ENTITY_IS_CONSIDERED_WATCHED = 300;
+
 const generateStr = (segmentList: Segment[]): string => {
     let str = '';
     segmentList.forEach((segment) => {
@@ -60,10 +62,10 @@ class Segment {
         this.episode = Number(episode); // 1 based (number)
         this.movie = Number(movie);
         this.time = Number(time);
-        this.watched = this.time > 300;
+        this.watched = this.time > THRESHOLD_AFTER_WHICH_A_ENTITY_IS_CONSIDERED_WATCHED;
     }
     calc() {
-        this.watched = this.time > 300;
+        this.watched = this.time > THRESHOLD_AFTER_WHICH_A_ENTITY_IS_CONSIDERED_WATCHED;
     }
 }
 
@@ -92,7 +94,7 @@ async function getOldDB() {
                 console.log('Error keeping database connection alive:', error);
             }
         });
-    }, 10000 * 30);
+    }, 1000 * 30);
 
     return oldDB;
 }
@@ -152,14 +154,16 @@ async function markMovie(UUID: string, seriesID: string, movieID: number, bool: 
         let updated = false;
         segmentList = segmentList.map((segment) => {
             if (segment.ID == seriesID && segment.movie == movieID) {
-                segment.time = 301;
+                //The +1 is to ensure that the time is over the threshold and thus considered watched
+                segment.time = THRESHOLD_AFTER_WHICH_A_ENTITY_IS_CONSIDERED_WATCHED + 1;
                 segment.calc();
                 updated = true;
             }
             return segment;
         });
         if (!updated) {
-            segmentList.push(new Segment(seriesID, -1, -1, movieID, 301));
+            //The +1 is to ensure that the time is over the threshold and thus considered watched
+            segmentList.push(new Segment(seriesID, -1, -1, movieID, THRESHOLD_AFTER_WHICH_A_ENTITY_IS_CONSIDERED_WATCHED + 1));
         }
     } else {
         //Mark as unwatched
@@ -198,7 +202,13 @@ async function markSeason(UUID: string, seriesID: string, seasonID: number, bool
 
         segmentList.push(
             ...episodes.map((ep) => {
-                return new Segment(seriesID, seasonID, ep.episode_IDX, -1, 310);
+                //The +10 is to ensure that the time is over the threshold and thus considered watched Actuall +1 would suffice but +10 is to be sure
+                /**
+                 * NOTE: 
+                 * This is inconsistent with the markMovie function which is just icky. But to ensure backwards compatibility we will keep this for now.
+                 * Since this is just for the v2 to translate to the v1 watch string.
+                 */
+                return new Segment(seriesID, seasonID, ep.episode_IDX, -1, THRESHOLD_AFTER_WHICH_A_ENTITY_IS_CONSIDERED_WATCHED + 10);
             })
         );
     } else {

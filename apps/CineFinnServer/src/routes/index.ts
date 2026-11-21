@@ -468,13 +468,14 @@ const router = new Hono()
         return c.json(finalOutput);
     })
     .get('/:S-UUID/related', authMiddleware, async (c) => {
+        const DEFAULT_RELATED_SERIES_COUNT = 2;
         const user = c.get('credentials').user;
         const seriesUUID = c.req.param('S-UUID');
-        let count = c.req.query('count') ?? 2;
+        let count = c.req.query('count') ?? DEFAULT_RELATED_SERIES_COUNT;
         if (typeof count !== 'number') {
             count = Number(count);
             if (isNaN(count)) {
-                count = 2;
+                count = DEFAULT_RELATED_SERIES_COUNT;
             }
         }
 

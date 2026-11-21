@@ -33,7 +33,7 @@ cacheRegistry.set('imageCache', imageStorage);
 cacheRegistry.set('imageRewriteCache', imageRewriteStorage);
 cacheRegistry.set('imageTransformCache', imageTransformStorage);
 
-const CACHE_TIME = 1000 * 60 * 60 * 24 * 7;
+const CACHE_TIME_IN_MILLIS = 1000 * 60 * 60 * 24 * 7; // 7 days in milliseconds
 
 const router = new Hono()
     .get('/rewrite', async (c) => {
@@ -45,7 +45,7 @@ const router = new Hono()
             const imageData = await imageStorage.get(url);
             if (imageData == undefined) return; // This should never happen just for the typescript compiler
 
-            if (Date.now() - imageData.lastFetched < CACHE_TIME - 1) {
+            if (Date.now() - imageData.lastFetched < CACHE_TIME_IN_MILLIS) {
 
                 const data = imageData.data instanceof Uint8Array
                     ? imageData.data
@@ -54,7 +54,7 @@ const router = new Hono()
                 return new Response(data as any, {
                     headers: {
                         'Content-Type': imageData.contentType,
-                        'Cache-Control': `public, immutable, max-age=${CACHE_TIME}`,
+                        'Cache-Control': `public, immutable, max-age=${CACHE_TIME_IN_MILLIS / 1000}`,
                         'CACHE-AGE': `${Date.now() - imageData.lastFetched}`,
                     }
                 });
@@ -78,7 +78,7 @@ const router = new Hono()
         });
 
         c.header('Content-Type', contentType);
-        c.header('Cache-Control', `public, immutable, max-age=${CACHE_TIME}`);
+        c.header('Cache-Control', `public, immutable, max-age=${CACHE_TIME_IN_MILLIS / 1000}`);
 
         return c.body(response.data);
     })
@@ -104,14 +104,12 @@ const router = new Hono()
                     headers: {
                         "Content-Type": cachedItem.contentType,
                         "X-Cache": "HIT",
-                        "Cache-Control": "public, max-age=3600",
+                        "Cache-Control": `public, max-age=${CACHE_TIME_IN_MILLIS / 1000}`,
                     },
                 });
-
             }
         }
 
-        // ── Process image ─────────────────────────────────────────────────────────
         let result: { buffer: Buffer; contentType: string };
         try {
             result = await processImage(params);
@@ -123,14 +121,14 @@ const router = new Hono()
             data: result.buffer.toString('base64'),
             contentType: result.contentType,
             createdAt: Date.now(),
-            ttlMs: CACHE_TIME,
+            ttlMs: CACHE_TIME_IN_MILLIS,
         });
 
         return new Response(result.buffer as any, {
             headers: {
                 "Content-Type": result.contentType,
                 "X-Cache": "MISS",
-                "Cache-Control": "public, max-age=3600",
+                "Cache-Control": `public, max-age=${CACHE_TIME_IN_MILLIS / 1000}`,
             },
         });
     });

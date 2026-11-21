@@ -19,19 +19,19 @@ interface JobRegister {
 
 const jobRegistry: Record<JobType, JobRegister> = {
     crawl: {
-        minimumRole: 2,
+        minimumRole: Role.Mod,
         callFunction: crawl,
     },
     generatePreviewImages: {
-        minimumRole: 3,
+        minimumRole: Role.Admin,
         callFunction: generatePreviewImages,
     },
     'checkForUpdates-old': {
-        minimumRole: 3,
+        minimumRole: Role.Admin,
         callFunction: (job) => checkForUpdates(job, false),
     },
     'checkForUpdates-smart': {
-        minimumRole: 2,
+        minimumRole: Role.Mod,
         callFunction: (job) => checkForUpdates(job, true),
     },
 };
